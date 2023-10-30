@@ -1,0 +1,18 @@
+tokenizer -> parser -> generator
+
+
+
+syntax:
+
+
+@lua
+@json
+@arbitrary(asd=bsd, csd, dsd=asd)
+@arbitrary2(asd)
+struct MyType {
+    @noLua
+    s32 id;
+    @jsonAlias(Name)
+    @jsonAlias(NAME)
+    str name;
+}
