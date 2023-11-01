@@ -11,8 +11,11 @@ syntax:
 @arbitrary2(asd)
 struct MyType {
     @noLua
+    // comment
     s32 id;
     @jsonAlias(Name)
     @jsonAlias(NAME)
     str name;
+    // how to do functions?
+    MyType SetNameAndReturnThis(str newName);
 }

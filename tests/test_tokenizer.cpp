@@ -75,4 +75,13 @@ namespace {
     });
   }
 
+  TEST(TokenizerTest, Quotes) {
+    TestTokenizerResultNonWhitespace("a /*comment*/  = 'hello how are you';", {
+      Token{TokenType::String, "a"},
+      Token{TokenType::Equals, "="},
+      Token{TokenType::String, "hello how are you"},
+      Token{TokenType::SemiColon, ";"},
+      });
+  }
+
 }

@@ -57,7 +57,7 @@ namespace holgen {
     }
     if (IsWhitespace(c)) {
       ++mEndIndex;
-      while (IsWhitespace(mData[mEndIndex])) {
+      while (mEndIndex < mData.size() && IsWhitespace(mData[mEndIndex])) {
         ++mEndIndex;
       }
       tok.mType = TokenType::Whitespace;
@@ -69,6 +69,19 @@ namespace holgen {
       tok.mType = it->second;
       tok.mContents = mData.substr(mIndex, 1);
       mEndIndex = mIndex + 1;
+      return true;
+    }
+    if (c == '"' || c == '\'') {
+      ++mEndIndex;
+      // TODO: bounds check
+      while(mData[mEndIndex] != c)
+        ++mEndIndex;
+      ++mEndIndex;
+      tok.mType = TokenType::String;
+      // Comment tokens' contents include the comment special chars, but string literals don't, for ease of use
+      // Is that ok?
+      // If this becomes an issue, can have mContents and mActualContents
+      tok.mContents = mData.substr(mIndex + 1, mEndIndex - mIndex - 2);
       return true;
     }
     while (true) {

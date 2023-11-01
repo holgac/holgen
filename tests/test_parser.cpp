@@ -37,7 +37,7 @@ namespace {
   TEST(ParserTest, StructDecorators) {
     Tokenizer tokenizer(R"DELIM(
   @dec1()
-  @dec2(a1, a2=5, a3, a4=someStr)
+  @dec2(a1, a2=5, a3, a4='long string')
   struct a   {
     s32 f1;
     float f2;
@@ -62,7 +62,7 @@ namespace {
     EXPECT_EQ(dsa[2].mName, "a3");
     EXPECT_EQ(dsa[2].mValue, "");
     EXPECT_EQ(dsa[3].mName, "a4");
-    EXPECT_EQ(dsa[3].mValue, "someStr");
+    EXPECT_EQ(dsa[3].mValue, "long string");
   }
 
 }
