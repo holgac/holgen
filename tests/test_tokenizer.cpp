@@ -2,6 +2,7 @@
 #include "tokenizer/Tokenizer.h"
 
 using namespace holgen;
+// TODO: some failure caseS
 
 namespace {
   void TestTokenizerResult(const char *text, std::vector<Token> expectedTokens) {
@@ -32,6 +33,24 @@ namespace {
     TestTokenizerResult("", {});
   }
 
+  TEST(TokenizerTest, Comments) {
+    TestTokenizerResult("a   =//b+c;\nb / /*aaaaa*/ c;", {
+        Token{TokenType::String, "a"},
+        Token{TokenType::Whitespace, "   "},
+        Token{TokenType::Equals, "="},
+        Token{TokenType::Comment, "//b+c;"},
+        Token{TokenType::Whitespace, "\n"},
+        Token{TokenType::String, "b"},
+        Token{TokenType::Whitespace, " "},
+        Token{TokenType::Slash, "/"},
+        Token{TokenType::Whitespace, " "},
+        Token{TokenType::Comment, "/*aaaaa*/"},
+        Token{TokenType::Whitespace, " "},
+        Token{TokenType::String, "c"},
+        Token{TokenType::SemiColon, ";"},
+    });
+  }
+
   TEST(TokenizerTest, Equation) {
     TestTokenizerResult("a   =b+c;", {
         Token{TokenType::String, "a"},
@@ -45,13 +64,14 @@ namespace {
   }
 
   TEST(TokenizerTest, EquationNonWhitespace) {
-    TestTokenizerResultNonWhitespace("a   =\nb       +\t\t\t \n\t     \tc;", {
+    TestTokenizerResultNonWhitespace("a /*comment*/  =\nb       +\t\t\t \n\t     \tc;/", {
         Token{TokenType::String, "a"},
         Token{TokenType::Equals, "="},
         Token{TokenType::String, "b"},
         Token{TokenType::Plus, "+"},
         Token{TokenType::String, "c"},
         Token{TokenType::SemiColon, ";"},
+        Token{TokenType::Slash, "/"},
     });
   }
 

@@ -14,6 +14,8 @@ namespace holgen {
         {'{', TokenType::COpen},
         {'}', TokenType::CClose},
         {'+', TokenType::Plus},
+        {'/', TokenType::Slash},
+        {'@', TokenType::At},
     };
 
     bool IsWhitespace(char c) {
@@ -29,6 +31,30 @@ namespace holgen {
       return false;
     mIndex = mEndIndex;
     char c = mData[mIndex];
+    if (c == '/') {
+      if (mIndex + 1 < mData.size()) {
+        if (mData[mIndex + 1] == '/') {
+          // read line comment
+          mEndIndex = mIndex + 2;
+          while (mEndIndex < mData.size() && !(mData[mEndIndex] == '\n' && mData[mEndIndex - 1] != '\\')) {
+            ++mEndIndex;
+          }
+          tok.mType = TokenType::Comment;
+          tok.mContents = mData.substr(mIndex, mEndIndex - mIndex);
+          return true;
+        } else if (mData[mIndex + 1] == '*') {
+          // read block comment
+          mEndIndex = mIndex + 3;
+          while (mEndIndex < mData.size() && !(mData[mEndIndex] == '/' && mData[mEndIndex - 1] == '*')) {
+            ++mEndIndex;
+          }
+          ++mEndIndex;
+          tok.mType = TokenType::Comment;
+          tok.mContents = mData.substr(mIndex, mEndIndex - mIndex);
+          return true;
+        }
+      }
+    }
     if (IsWhitespace(c)) {
       ++mEndIndex;
       while (IsWhitespace(mData[mEndIndex])) {
@@ -60,7 +86,7 @@ namespace holgen {
     while (true) {
       if (!GetNext(tok))
         return false;
-      if (tok.mType != TokenType::Whitespace)
+      if (tok.mType != TokenType::Whitespace && tok.mType != TokenType::Comment)
         return true;
     }
   }

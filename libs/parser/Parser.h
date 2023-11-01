@@ -13,14 +13,22 @@ namespace holgen {
   class ParserException : std::exception {
     const char *mMsg;
   public:
-    ParserException(const char *msg) : mMsg(msg) {}
+    ParserException(const char *msg) : mMsg(msg) {
+
+    }
 
     const char *what() { return mMsg; }
   };
 
-  class DecoratorDefinition {
+  struct DecoratorAttributeDefinition {
     std::string mName;
     std::string mValue;
+  };
+
+  // TODO: This is not a decorator, find a better name
+  struct DecoratorDefinition {
+    std::string mName;
+    std::vector<DecoratorAttributeDefinition> mAttributes;
   };
 
   struct FieldDefinition {
@@ -43,12 +51,15 @@ namespace holgen {
   class Parser {
     Project mProject;
     Tokenizer *mCurTokenizer = nullptr;
+    void ParseStruct(StructDefinition &structDefinition);
+    void ParseDecorator(DecoratorDefinition &decoratorDefinition);
+    // FIXME: when using std::string, these will always construct/format the string
+    void GetAndExpectNext(Token& token, TokenType expectedType, const char* errorOnEOF, const char* errorOnTypeMismatch);
   public:
     Parser();
     void Parse(Tokenizer &tokenizer);
-    void ParseStruct(StructDefinition &structDefinition);
 
-    const Project& GetProject() const { return mProject; }
+    const Project &GetProject() const { return mProject; }
   };
 
 }

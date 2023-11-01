@@ -6,6 +6,7 @@ namespace holgen {
   enum class TokenType {
     Whitespace,
     String,
+    Comment,
     Period,
     Comma,
     Colon,
@@ -16,6 +17,8 @@ namespace holgen {
     PClose, // )
     COpen, // {
     CClose, // }
+    Slash, // /
+    At, // @
     /*
     BOpen, // [
     BClose, // ]
@@ -35,6 +38,7 @@ namespace holgen {
     size_t mEndIndex;
   public:
     Tokenizer(std::string_view sv);
+    bool GetCurrent(Token& tok);
     bool GetNext(Token& tok);
     bool GetNextNonWhitespace(Token& tok);
     // void Next();
