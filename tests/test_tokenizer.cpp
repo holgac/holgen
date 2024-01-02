@@ -2,7 +2,7 @@
 #include "tokenizer/Tokenizer.h"
 
 using namespace holgen;
-// TODO: some failure caseS
+// TODO: some failure cases
 
 namespace {
   void TestTokenizerResult(const char *text, std::vector<Token> expectedTokens) {

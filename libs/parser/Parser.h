@@ -11,13 +11,11 @@
 namespace holgen {
 
   class ParserException : std::exception {
-    const char *mMsg;
+    std::string mMsg;
   public:
-    ParserException(const char *msg) : mMsg(msg) {
+    explicit ParserException(std::string msg) : mMsg(std::move(msg)) {}
 
-    }
-
-    const char *what() { return mMsg; }
+    const char *what() { return mMsg.c_str(); }
   };
 
   struct DecoratorAttributeDefinition {
@@ -26,6 +24,7 @@ namespace holgen {
   };
 
   // TODO: This is not a decorator, find a better name
+  // TODO: Store supported decorator names and their attributes somewhere
   struct DecoratorDefinition {
     std::string mName;
     std::vector<DecoratorAttributeDefinition> mAttributes;
@@ -37,13 +36,13 @@ namespace holgen {
     std::vector<DecoratorDefinition> mDecorators;
   };
 
-  // check thrift for supported types?
   struct StructDefinition {
     std::string mName;
     std::vector<FieldDefinition> mFields;
     std::vector<DecoratorDefinition> mDecorators;
   };
 
+  // rename to ParsedProject or ProjectDefinition to match the other classes?
   struct Project {
     std::vector<StructDefinition> mStructs;
   };
@@ -53,8 +52,9 @@ namespace holgen {
     Tokenizer *mCurTokenizer = nullptr;
     void ParseStruct(StructDefinition &structDefinition);
     void ParseDecorator(DecoratorDefinition &decoratorDefinition);
-    // FIXME: when using std::string, these will always construct/format the string
-    void GetAndExpectNext(Token& token, TokenType expectedType, const char* errorOnEOF, const char* errorOnTypeMismatch);
+    // FIXME: when using std::string, these will always construct/format the string. maybe use a macro instead?
+    void
+    GetAndExpectNext(Token &token, TokenType expectedType, const char *errorOnEOF, const char *errorOnTypeMismatch);
   public:
     Parser();
     void Parse(Tokenizer &tokenizer);

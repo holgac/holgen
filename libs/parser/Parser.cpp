@@ -1,5 +1,5 @@
 #include "Parser.h"
-// #include <format>
+#include <format>
 #include <cstdint>
 
 namespace holgen {
@@ -23,8 +23,7 @@ namespace holgen {
           throw ParserException("Decorator definition without a matching type!");
       }
       if (curToken.mType != TokenType::String) {
-        // throw ParserException(std::format("Expected a string, received {0}!", curToken.mContents));
-        throw ParserException("Expected a string!");
+        throw ParserException(std::format("Expected a string, received \"{0}\"!", curToken.mContents));
       }
       if (curToken.mContents == "struct") {
         auto &structDefinition = mProject.mStructs.emplace_back();
@@ -52,7 +51,7 @@ namespace holgen {
         if (!mCurTokenizer->GetNextNonWhitespace(curToken))
           throw ParserException("Incomplete field definition!");
         if (curToken.mType != TokenType::String)
-          throw ParserException("Field name should be a string!");
+          throw ParserException(std::format("Field name should be a string, found \"{0}\"!", curToken.mContents));
         field.mName = curToken.mContents;
       }
     }
@@ -68,7 +67,7 @@ namespace holgen {
       throw ParserException("Incomplete decorator definition!");
     while (curToken.mType != TokenType::PClose) {
       if (curToken.mType != TokenType::String)
-        throw ParserException("Decorator attribute name should be a string!");
+        throw ParserException(std::format("Decorator attribute name should be a string, found \"{0}\"!", curToken.mContents));
       auto &decoratorAttributeDefinition = decoratorDefinition.mAttributes.emplace_back();
       decoratorAttributeDefinition.mName = curToken.mContents;
       if (!mCurTokenizer->GetNextNonWhitespace(curToken))
