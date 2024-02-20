@@ -1,6 +1,6 @@
 #include "Damage.h"
 
-namespace holgen_e2e_test {
+namespace holgen_blackbox_test {
 uint32_t Damage::GetMin() const {
   return mMin;
 }

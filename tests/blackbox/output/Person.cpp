@@ -1,6 +1,6 @@
 #include "Person.h"
 
-namespace holgen_e2e_test {
+namespace holgen_blackbox_test {
 uint32_t Person::GetAge() const {
   return mAge;
 }

@@ -1,0 +1,3 @@
+add_executable(tests test_weapon.cpp)
+add_dependencies(tests gtest gtest_main holgen_blackbox_test_lib)
+target_link_libraries(tests gtest gtest_main holgen_blackbox_test_lib)

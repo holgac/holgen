@@ -42,25 +42,13 @@ namespace {
     };
     Generator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
-    EXPECT_EQ(files.size(), 4);
+    EXPECT_EQ(files.size(), 3);
     ExpectGeneratedContent(
         files["CMakeLists.txt"],
         {
             FileType::CMakeFile,
             "CMakeLists.txt",
             "add_library(generator_test_cmake Person.cpp)"
-        }
-    );
-    ExpectGeneratedContent(
-        files["pch.h"],
-        {
-            FileType::CppHeader,
-            "pch.h",
-            R"DELIM(
-#pragma once
-
-#include <cstdlib>
-          )DELIM"
         }
     );
     ExpectGeneratedContent(
@@ -71,7 +59,7 @@ namespace {
             R"DELIM(
 #pragma once
 
-#include "pch.h"
+#include <cstdint>
 
 namespace generator_test_namespace {
 class Person {
@@ -84,7 +72,7 @@ protected:
 private:
   uint32_t mAge;
   float mGender;
-}
+};
 }
 )DELIM"
         }

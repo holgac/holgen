@@ -1,5 +1,6 @@
 #include "Generator.h"
 #include <sstream>
+#include <set>
 
 namespace holgen {
 
@@ -41,6 +42,16 @@ namespace holgen {
       }
       return out.str();
     }
+    std::set<std::string> CstdIntTypes = {
+        {"int8_t"},
+        {"int16_t"},
+        {"int32_t"},
+        {"int64_t"},
+        {"uint8_t"},
+        {"uint16_t"},
+        {"uint32_t"},
+        {"uint64_t"},
+          };
   }
 
   std::vector<GeneratedContent> Generator::Generate(const TranslatedProject &translatedProject) {
@@ -49,7 +60,6 @@ namespace holgen {
       GenerateClassHeader(contents.emplace_back(), cls);
       GenerateClassSource(contents.emplace_back(), cls);
     }
-    GeneratePCHHeader(contents.emplace_back());
     GenerateCMakeLists(contents.emplace_back(), translatedProject);
 
     return contents;
@@ -61,11 +71,14 @@ namespace holgen {
     CodeBlock codeBlock;
     codeBlock.Line() << "#pragma once";
     codeBlock.Line();
-    codeBlock.Line() << "#include \"pch.h\"";
+    GenerateHeadersForHeader(codeBlock, cls);
     codeBlock.Line();
     // TODO: include headers
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
+
+    GenerateClassDeclarationsForHeader(codeBlock, cls);
+
     // TODO: struct-specific namespaces defined via decorators
     codeBlock.Line() << "class " << cls.mName << " {";
 
@@ -138,6 +151,7 @@ namespace holgen {
     CodeBlock codeBlock;
     codeBlock.Line() << "#include \"" << cls.mName << ".h\"";
     codeBlock.Line();
+    GenerateHeadersForSource(codeBlock, cls);
     // TODO: include headers
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
@@ -191,14 +205,29 @@ namespace holgen {
     cmake.mText = ToString(codeBlock);
   }
 
-  void Generator::GeneratePCHHeader(GeneratedContent &header) const {
-    header.mType = FileType::CppHeader;
-    header.mName = "pch.h";
-    CodeBlock codeBlock;
-    codeBlock.Line() << "#pragma once";
-    codeBlock.Line();
-    codeBlock.Line() << "#include <cstdint>";
-    header.mText = ToString(codeBlock);
+  void Generator::GenerateHeadersForHeader(CodeBlock &codeBlock, const Class &cls) const {
+    // First include standard libs
+    std::set<std::string> includedHeaders;
+    for(const auto& field: cls.mFields) {
+      std::string header;
+      if (CstdIntTypes.contains(field.mType.mName)) {
+        header = "<cstdint>";
+      } else {
+        continue;
+      }
+      if (!includedHeaders.contains(header)) {
+        codeBlock.Line() << "#include " << header;
+        includedHeaders.insert(header);
+      }
+    }
+
+    // Then include
+  }
+
+  void Generator::GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const {
+  }
+
+  void Generator::GenerateHeadersForSource(CodeBlock &codeBlock, const Class &cls) const {
   }
 
 }

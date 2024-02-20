@@ -1,6 +1,6 @@
 #include "Weapon.h"
 
-namespace holgen_e2e_test {
+namespace holgen_blackbox_test {
 uint32_t Weapon::GetDamageMin() const {
   return mDamageMin;
 }

@@ -30,11 +30,11 @@ namespace holgen {
   }
 
   TranslatedProject Translator::Translate(const Project &project) {
-    TranslatedProject generatedProject;
+    TranslatedProject translatedProject;
     for (auto &structDefinition: project.mStructs) {
-      GenerateClass(generatedProject.mClasses.emplace_back(), structDefinition);
+      GenerateClass(translatedProject.mClasses.emplace_back(), structDefinition);
     }
-    return generatedProject;
+    return translatedProject;
   }
 
   void Translator::GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) {

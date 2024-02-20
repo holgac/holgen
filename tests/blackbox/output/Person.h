@@ -1,8 +1,8 @@
 #pragma once
 
-#include "pch.h"
+#include <cstdint>
 
-namespace holgen_e2e_test {
+namespace holgen_blackbox_test {
 class Person {
 public:
   uint32_t GetAge() const;

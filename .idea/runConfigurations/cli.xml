@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="cli" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="tests/test_data/schemas tests/test_data/output holgen_e2e_test holgen_e2e_test_lib" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="holgen" TARGET_NAME="cli" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="holgen" RUN_TARGET_NAME="cli">
+  <configuration default="false" name="cli" type="CMakeRunConfiguration" factoryName="Application" PROGRAM_PARAMS="tests/blackbox/schemas tests/blackbox/output holgen_blackbox_test holgen_blackbox_test_lib" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" WORKING_DIR="file://$ProjectFileDir$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="holgen" TARGET_NAME="cli" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="holgen" RUN_TARGET_NAME="cli">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>
