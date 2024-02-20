@@ -38,5 +38,6 @@ namespace holgen {
     void GenerateMethodDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
     void GenerateMethodDefinitions(CodeBlock &codeBlock, const Class &cls) const;
     void GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
+    void GeneratePCHHeader(GeneratedContent& header) const;
   };
 }

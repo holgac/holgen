@@ -46,10 +46,10 @@ namespace holgen {
   std::vector<GeneratedContent> Generator::Generate(const TranslatedProject &translatedProject) {
     std::vector<GeneratedContent> contents;
     for (auto &cls: translatedProject.mClasses) {
-      auto &header = contents.emplace_back();
       GenerateClassHeader(contents.emplace_back(), cls);
       GenerateClassSource(contents.emplace_back(), cls);
     }
+    GeneratePCHHeader(contents.emplace_back());
     GenerateCMakeLists(contents.emplace_back(), translatedProject);
 
     return contents;
@@ -59,10 +59,13 @@ namespace holgen {
     header.mType = FileType::CppHeader;
     header.mName = cls.mName + ".h";
     CodeBlock codeBlock;
-    codeBlock.Line() << "#pragma once\n\n";
+    codeBlock.Line() << "#pragma once";
+    codeBlock.Line();
+    codeBlock.Line() << "#include \"pch.h\"";
+    codeBlock.Line();
     // TODO: include headers
     if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {\n";
+      codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
     // TODO: struct-specific namespaces defined via decorators
     codeBlock.Line() << "class " << cls.mName << " {";
 
@@ -70,7 +73,7 @@ namespace holgen {
     GenerateForVisibility(codeBlock, cls, Visibility::Protected);
     GenerateForVisibility(codeBlock, cls, Visibility::Private);
 
-    codeBlock.Line() << "}"; // class
+    codeBlock.Line() << "};"; // class
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "}"; // namespace
     header.mText = ToString(codeBlock);
@@ -79,13 +82,13 @@ namespace holgen {
   void Generator::GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
     switch (visibility) {
       case Visibility::Public:
-        codeBlock.Line() << "public:\n";
+        codeBlock.Line() << "public:";
         break;
       case Visibility::Protected:
-        codeBlock.Line() << "protected:\n";
+        codeBlock.Line() << "protected:";
         break;
       case Visibility::Private:
-        codeBlock.Line() << "private:\n";
+        codeBlock.Line() << "private:";
         break;
     }
     codeBlock.Indent(1);
@@ -133,10 +136,11 @@ namespace holgen {
     source.mType = FileType::CppSource;
     source.mName = cls.mName + ".cpp";
     CodeBlock codeBlock;
-    codeBlock.Line() << "#include \"" << cls.mName << ".h\"\n\n";
+    codeBlock.Line() << "#include \"" << cls.mName << ".h\"";
+    codeBlock.Line();
     // TODO: include headers
     if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {\n";
+      codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
     // TODO: struct-specific namespaces defined via decorators
     GenerateMethodDefinitions(codeBlock, cls);
     if (!mGeneratorSettings.mNamespace.empty())
@@ -186,4 +190,15 @@ namespace holgen {
     }
     cmake.mText = ToString(codeBlock);
   }
+
+  void Generator::GeneratePCHHeader(GeneratedContent &header) const {
+    header.mType = FileType::CppHeader;
+    header.mName = "pch.h";
+    CodeBlock codeBlock;
+    codeBlock.Line() << "#pragma once";
+    codeBlock.Line();
+    codeBlock.Line() << "#include <cstdint>";
+    header.mText = ToString(codeBlock);
+  }
+
 }
