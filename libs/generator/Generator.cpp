@@ -129,7 +129,8 @@ namespace holgen {
     }
   }
 
-  void Generator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const {
+  void Generator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
+                                           bool isInsideClass) const {
     for (auto &method: cls.mMethods) {
       if (method.mVisibility != visibility)
         continue;
@@ -148,7 +149,7 @@ namespace holgen {
           } else {
             templateLine << ", ";
           }
-          templateLine << templateParameter;
+          templateLine << templateParameter.mType << " " << templateParameter.mName;
         }
         templateLine << ">";
       }
@@ -261,19 +262,18 @@ namespace holgen {
   void Generator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
     HeaderContainer headers;
     for (const auto &field: cls.mFields) {
-      headers.AddForType(field.mType, isHeader);
+      headers.IncludeClassField(field, isHeader);
     }
     for (const auto &method: cls.mMethods) {
-      headers.AddForType(method.mType, isHeader);
-      for (const auto &arg: method.mArguments) {
-        headers.AddForType(arg.mType, isHeader);
-      }
+      headers.IncludeClassMethod(method, isHeader);
+
       // TODO: don't hardcode these
       if (!isHeader && method.mName == "ParseJson") {
         // TODO: don't hardcode these
         headers.AddLocalHeader("JsonHelper.h");
       }
     }
+
     headers.Write(codeBlock);
   }
 

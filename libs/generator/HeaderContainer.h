@@ -13,6 +13,9 @@ namespace holgen {
     std::vector <std::string> mStandardHeaders;
     std::vector <std::string> mLibHeaders;
     std::vector <std::string> mLocalHeaders;
+    void IncludeClassField(const ClassField &classField, const Type& type, bool isHeader);
+    void IncludeClassMethod(const ClassMethod &classMethod, const Type& type, bool isHeader);
+    void IncludeType(const Type &type, bool isHeader);
   public:
     void AddStandardHeader(const std::string &header);
 
@@ -22,6 +25,7 @@ namespace holgen {
 
     void Write(CodeBlock &codeBlock);
 
-    void AddForType(const Type &type, bool isHeader);
+    void IncludeClassField(const ClassField &classField, bool isHeader);
+    void IncludeClassMethod(const ClassMethod &classMethod, bool isHeader);
   };
 }

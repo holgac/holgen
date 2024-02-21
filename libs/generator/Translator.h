@@ -89,12 +89,16 @@ namespace holgen {
     std::vector<ClassMethodArgument> mArguments;
   };
 
+  struct TemplateParameter {
+    std::string mType;
+    std::string mName;
+  };
   struct ClassMethod : ClassMethodBase {
     std::string mName;
     Type mType;
     bool mIsConst = true;
     bool mIsStatic = false;
-    std::vector<std::string> mTemplateParameters;
+    std::vector<TemplateParameter> mTemplateParameters;
     bool mIsTemplateSpecialization = false;
   };
 

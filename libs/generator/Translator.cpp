@@ -195,7 +195,9 @@ namespace holgen {
     baseParse.mName = "Parse";
     baseParse.mIsConst = false;
     baseParse.mIsStatic = true;
-    baseParse.mTemplateParameters.emplace_back("typename T");
+    auto& baseTemplateArg = baseParse.mTemplateParameters.emplace_back();
+    baseTemplateArg.mType = "typename";
+    baseTemplateArg.mName = "T";
     baseParse.mType.mName = "bool";
 
     {
@@ -251,7 +253,9 @@ namespace holgen {
       parse.mName = "Parse";
       parse.mIsConst = false;
       parse.mIsStatic = true;
-      parse.mTemplateParameters.emplace_back("typename T");
+      auto& templateArg = parse.mTemplateParameters.emplace_back();
+      templateArg.mType = "typename";
+      templateArg.mName = "T";
       parse.mType.mName = "bool";
 
       {
@@ -294,8 +298,12 @@ namespace holgen {
       parse.mName = "Parse";
       parse.mIsConst = false;
       parse.mIsStatic = true;
-      parse.mTemplateParameters.emplace_back("typename K");
-      parse.mTemplateParameters.emplace_back("typename V");
+      auto& keyTemplateArg = parse.mTemplateParameters.emplace_back();
+      keyTemplateArg.mType = "typename";
+      keyTemplateArg.mName = "K";
+      auto& valueTemplateArg = parse.mTemplateParameters.emplace_back();
+      valueTemplateArg.mType = "typename";
+      valueTemplateArg.mName = "V";
       parse.mType.mName = "bool";
 
       {

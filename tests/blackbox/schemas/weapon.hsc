@@ -1,10 +1,11 @@
-struct Damage {
-    u32 min;
-    u32 max;
+struct DamageMultiplier {
+    string when;
+    float value;
 }
+
 struct Weapon {
-    // Damage damage;
     u32 damageMin;
     u32 damageMax;
+    vector<DamageMultiplier> damageMultipliers;
     vector<string> modifiers;
 }

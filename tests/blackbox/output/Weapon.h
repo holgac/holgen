@@ -2,7 +2,9 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 #include <rapidjson/document.h>
+#include "DamageMultiplier.h"
 
 namespace holgen_blackbox_test {
 class Weapon {
@@ -11,6 +13,9 @@ public:
   void SetDamageMin(uint32_t val);
   uint32_t GetDamageMax() const;
   void SetDamageMax(uint32_t val);
+  const std::vector<DamageMultiplier>& GetDamageMultipliers() const;
+  std::vector<DamageMultiplier>& GetDamageMultipliers();
+  void SetDamageMultipliers(const std::vector<DamageMultiplier>& val);
   const std::vector<std::string>& GetModifiers() const;
   std::vector<std::string>& GetModifiers();
   void SetModifiers(const std::vector<std::string>& val);
@@ -19,6 +24,7 @@ protected:
 private:
   uint32_t mDamageMin;
   uint32_t mDamageMax;
+  std::vector<DamageMultiplier> mDamageMultipliers;
   std::vector<std::string> mModifiers;
 };
 }
