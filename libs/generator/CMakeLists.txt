@@ -1,1 +1,1 @@
-add_library(generator Generator.cpp Translator.cpp)
+add_library(generator Generator.cpp Translator.cpp HeaderContainer.cpp)

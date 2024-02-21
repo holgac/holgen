@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(x_googletest)
 include_directories(x_googletest/googletest/include)
+add_subdirectory(x_rapidjson)
+include_directories(x_rapidjson/include)
 add_subdirectory(output)
 include_directories(output)
 add_subdirectory(tests)

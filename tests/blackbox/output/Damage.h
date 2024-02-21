@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+
 namespace holgen_blackbox_test {
 class Damage {
 public:

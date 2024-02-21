@@ -18,6 +18,7 @@ namespace holgen {
     const char *what() { return mMsg.c_str(); }
   };
 
+  // @decorator(attribute=5)
   struct DecoratorAttributeDefinition {
     std::string mName;
     std::string mValue;
@@ -30,8 +31,13 @@ namespace holgen {
     std::vector<DecoratorAttributeDefinition> mAttributes;
   };
 
+  struct TypeDefinition {
+    std::string mName;
+    std::vector<TypeDefinition> mTemplateParameters;
+  };
+
   struct FieldDefinition {
-    std::string mType;
+    TypeDefinition mType;
     std::string mName;
     std::vector<DecoratorDefinition> mDecorators;
   };
@@ -43,15 +49,17 @@ namespace holgen {
   };
 
   // rename to ParsedProject or ProjectDefinition to match the other classes?
-  struct Project {
+  struct ProjectDefinition {
     std::vector<StructDefinition> mStructs;
   };
 
   class Parser {
-    Project mProject;
+    ProjectDefinition mProject;
     Tokenizer *mCurTokenizer = nullptr;
     void ParseStruct(StructDefinition &structDefinition);
     void ParseDecorator(DecoratorDefinition &decoratorDefinition);
+    void ParseField(Token &curToken, FieldDefinition &fieldDefinition);
+    void ParseType(Token &curToken, TypeDefinition &typeDefinition);
     // FIXME: when using std::string, these will always construct/format the string. maybe use a macro instead?
     void
     GetAndExpectNext(Token &token, TokenType expectedType, const char *errorOnEOF, const char *errorOnTypeMismatch);
@@ -59,7 +67,7 @@ namespace holgen {
     Parser();
     void Parse(Tokenizer &tokenizer);
 
-    const Project &GetProject() const { return mProject; }
+    const ProjectDefinition &GetProject() const { return mProject; }
   };
 
 }

@@ -1,3 +1,6 @@
 [submodule "external/x_googletest"]
 	path = external/x_googletest
 	url = https://github.com/google/googletest.git
+[submodule "external/x_rapidjson"]
+	path = external/x_rapidjson
+	url = https://github.com/Tencent/rapidjson.git

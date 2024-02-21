@@ -83,5 +83,20 @@ namespace {
       Token{TokenType::SemiColon, ";"},
       });
   }
+  TEST(TokenizerTest, AngleBrackets) {
+    TestTokenizerResultNonWhitespace("map<int, vector<string>> myMap;", {
+        Token{TokenType::String, "map"},
+        Token{TokenType::AOpen, "<"},
+        Token{TokenType::String, "int"},
+        Token{TokenType::Comma, ","},
+        Token{TokenType::String, "vector"},
+        Token{TokenType::AOpen, "<"},
+        Token{TokenType::String, "string"},
+        Token{TokenType::AClose, ">"},
+        Token{TokenType::AClose, ">"},
+        Token{TokenType::String, "myMap"},
+        Token{TokenType::SemiColon, ";"},
+    });
+  }
 
 }

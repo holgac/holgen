@@ -46,13 +46,8 @@ namespace holgen {
       if (curToken.mType == TokenType::CClose)
         break;
       if (curToken.mType == TokenType::String) {
-        auto &field = structDefinition.mFields.emplace_back();
-        field.mType = curToken.mContents;
-        if (!mCurTokenizer->GetNextNonWhitespace(curToken))
-          throw ParserException("Incomplete field definition!");
-        if (curToken.mType != TokenType::String)
-          throw ParserException(std::format("Field name should be a string, found \"{0}\"!", curToken.mContents));
-        field.mName = curToken.mContents;
+        // TODO: check if curToken.mContents == "func"
+        ParseField(curToken, structDefinition.mFields.emplace_back());
       }
     }
   }
@@ -67,7 +62,8 @@ namespace holgen {
       throw ParserException("Incomplete decorator definition!");
     while (curToken.mType != TokenType::PClose) {
       if (curToken.mType != TokenType::String)
-        throw ParserException(std::format("Decorator attribute name should be a string, found \"{0}\"!", curToken.mContents));
+        throw ParserException(
+            std::format("Decorator attribute name should be a string, found \"{0}\"!", curToken.mContents));
       auto &decoratorAttributeDefinition = decoratorDefinition.mAttributes.emplace_back();
       decoratorAttributeDefinition.mName = curToken.mContents;
       if (!mCurTokenizer->GetNextNonWhitespace(curToken))
@@ -93,5 +89,32 @@ namespace holgen {
       throw ParserException(errorOnEOF);
     if (token.mType != expectedType)
       throw ParserException(errorOnTypeMismatch);
+  }
+
+  void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {
+    ParseType(curToken, fieldDefinition.mType);
+    if (curToken.mType != TokenType::String)
+      throw ParserException(std::format("Field name should be a string, found \"{0}\"!", curToken.mContents));
+    fieldDefinition.mName = curToken.mContents;
+    GetAndExpectNext(curToken, TokenType::SemiColon, "Incomplete field definition!",
+                     "Field definition should be terminated with a ';'");
+  }
+
+  void Parser::ParseType(Token &curToken, TypeDefinition &typeDefinition) {
+    typeDefinition.mName = curToken.mContents;
+    if (!mCurTokenizer->GetNextNonWhitespace(curToken))
+      throw ParserException("Incomplete type definition!");
+    if (curToken.mType != TokenType::AOpen)
+      return;
+    do {
+      GetAndExpectNext(curToken, TokenType::String, "Malformed type definition!",
+                       "Type definitions should start with a string");
+      ParseType(curToken, typeDefinition.mTemplateParameters.emplace_back());
+    } while (curToken.mType == TokenType::Comma);
+    if (curToken.mType != TokenType::AClose)
+      throw ParserException("Templated type definition should be terminated with a '>'");
+
+    if (!mCurTokenizer->GetNextNonWhitespace(curToken))
+      throw ParserException("Incomplete field definition!");
   }
 }

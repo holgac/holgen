@@ -67,9 +67,10 @@ namespace holgen {
 
   // This name is too generic...
   struct Type {
-    std::string mName;
+    std::string mName = "void";
     bool mIsConst = false;
     TypeType mType = TypeType::Value;
+    std::vector<Type> mTemplateParameters;
 
     // structs are used only as data storage here - having a function defeats this
     // Can put this in anon namespace if only Translator uses it
@@ -129,9 +130,12 @@ namespace holgen {
 
   // This is more like a translator
   class Translator {
-    void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition);
+    void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
     void ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
+    void ProcessType(Type &type, const TypeDefinition &typeDefinition) const;
+    void GenerateParseJson(Class &generatedClass, const StructDefinition &structDefinition) const;
+    void GenerateJsonHelper(Class &generatedClass) const;
   public:
-    TranslatedProject Translate(const Project &project);
+    TranslatedProject Translate(const ProjectDefinition &project) const;
   };
 }

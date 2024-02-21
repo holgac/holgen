@@ -13,6 +13,8 @@ namespace holgen {
         {')', TokenType::PClose},
         {'{', TokenType::COpen},
         {'}', TokenType::CClose},
+        {'<', TokenType::AOpen},
+        {'>', TokenType::AClose},
         {'+', TokenType::Plus},
         {'/', TokenType::Slash},
         {'@', TokenType::At},

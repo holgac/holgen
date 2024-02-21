@@ -12,4 +12,14 @@ namespace {
     EXPECT_EQ(weapon.GetDamageMax(), 30);
   }
 
+
+  TEST(WeaponTest, ParseJson) {
+    rapidjson::Document doc;
+    Weapon weapon;
+    JsonHelper::Parse(weapon, doc);
+    // weapon.ParseJson(doc);
+    EXPECT_EQ(weapon.GetDamageMin(), 15);
+    EXPECT_EQ(weapon.GetDamageMax(), 30);
+  }
+
 }

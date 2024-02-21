@@ -17,6 +17,8 @@ namespace holgen {
     PClose, // )
     COpen, // {
     CClose, // }
+    AOpen, // <
+    AClose, // >
     Slash, // /
     At, // @
     /*

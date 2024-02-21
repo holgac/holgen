@@ -20,10 +20,10 @@ namespace {
     return std::string_view(str.data() + startIdx, endIdx - startIdx);
   }
 
-  void ExpectGeneratedContent(const GeneratedContent &lhs, const GeneratedContent &rhs) {
-    EXPECT_EQ(lhs.mType, rhs.mType);
-    EXPECT_EQ(lhs.mName, rhs.mName);
-    EXPECT_EQ(Trim(lhs.mText), Trim(rhs.mText));
+  void ExpectGeneratedContent(const GeneratedContent &actual, const GeneratedContent &expected) {
+    EXPECT_EQ(actual.mType, expected.mType);
+    EXPECT_EQ(actual.mName, expected.mName);
+    EXPECT_EQ(Trim(actual.mText), Trim(expected.mText));
   }
 
   TEST(GeneratorTest, ClassWithGetters) {
@@ -103,4 +103,93 @@ void Person::SetGender(float val) {
         }
     );
   }
+
+  TEST(GeneratorTest, ClassWithContainers) {
+    Tokenizer tokenizer(R"DELIM(
+  struct Market {
+    vector<string> instruments;
+    map<string, double> prices;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto translatedProject = Translator().Translate(parser.GetProject());
+    GeneratorSettings generatorSettings{
+      .mNamespace = "generator_test_namespace",
+      .mCMakeTarget = "generator_test_cmake",
+      };
+    Generator generator(generatorSettings);
+    auto files = MapByName(generator.Generate(translatedProject));
+    EXPECT_EQ(files.size(), 3);
+    ExpectGeneratedContent(
+        files["CMakeLists.txt"],
+        {
+          FileType::CMakeFile,
+          "CMakeLists.txt",
+          "add_library(generator_test_cmake Market.cpp)"
+        }
+        );
+    ExpectGeneratedContent(
+        files["Market.h"],
+        {
+          FileType::CppHeader,
+          "Market.h",
+          R"DELIM(
+#pragma once
+
+#include <vector>
+#include <map>
+
+namespace generator_test_namespace {
+class Market {
+public:
+  const std::vector<std::string>& GetInstruments() const;
+  std::vector<std::string>& GetInstruments();
+  void SetInstruments(const std::vector<std::string>& val);
+  const std::map<std::string, double>& GetPrices() const;
+  std::map<std::string, double>& GetPrices();
+  void SetPrices(const std::map<std::string, double>& val);
+protected:
+private:
+  std::vector<std::string> mInstruments;
+  std::map<std::string, double> mPrices;
+};
+}
+          )DELIM"
+        }
+        );
+    ExpectGeneratedContent(
+        files["Market.cpp"],
+        {
+          FileType::CppSource,
+          "Market.cpp",
+          R"DELIM(
+#include "Market.h"
+
+namespace generator_test_namespace {
+const std::vector<std::string>& Market::GetInstruments() const {
+  return mInstruments;
+}
+std::vector<std::string>& Market::GetInstruments() {
+  return mInstruments;
+}
+void Market::SetInstruments(const std::vector<std::string>& val) {
+  mInstruments = val;
+}
+const std::map<std::string, double>& Market::GetPrices() const {
+  return mPrices;
+}
+std::map<std::string, double>& Market::GetPrices() {
+  return mPrices;
+}
+void Market::SetPrices(const std::map<std::string, double>& val) {
+  mPrices = val;
+}
+}
+          )DELIM"
+        }
+        );
+  }
+
+
 }

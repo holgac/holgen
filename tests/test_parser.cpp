@@ -28,9 +28,9 @@ namespace {
     auto& s = proj.mStructs[0];
     EXPECT_EQ(s.mName, "a");
     EXPECT_EQ(s.mFields.size(), 2);
-    EXPECT_EQ(s.mFields[0].mType, "s32");
+    EXPECT_EQ(s.mFields[0].mType.mName, "s32");
     EXPECT_EQ(s.mFields[0].mName, "f1");
-    EXPECT_EQ(s.mFields[1].mType, "float");
+    EXPECT_EQ(s.mFields[1].mType.mName, "float");
     EXPECT_EQ(s.mFields[1].mName, "f2");
   }
 
@@ -63,6 +63,35 @@ namespace {
     EXPECT_EQ(dsa[2].mValue, "");
     EXPECT_EQ(dsa[3].mName, "a4");
     EXPECT_EQ(dsa[3].mValue, "long string");
+  }
+
+  TEST(ParserTest, Templates) {
+    Tokenizer tokenizer(R"DELIM(
+  struct a   {
+    map<u32, map<string, vector<float>>> myMap;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto &proj = parser.GetProject();
+    EXPECT_EQ(proj.mStructs.size(), 1);
+    auto& s = proj.mStructs[0];
+    EXPECT_EQ(s.mName, "a");
+    EXPECT_EQ(s.mFields.size(), 1);
+    EXPECT_EQ(s.mFields[0].mName, "myMap");
+    auto& t = s.mFields[0].mType;
+    EXPECT_EQ(t.mName, "map");
+    EXPECT_EQ(t.mTemplateParameters.size(), 2);
+    EXPECT_EQ(t.mTemplateParameters[0].mName, "u32");
+    EXPECT_EQ(t.mTemplateParameters[0].mTemplateParameters.size(), 0);
+    EXPECT_EQ(t.mTemplateParameters[1].mName, "map");
+    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters.size(), 2);
+    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[0].mName, "string");
+    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[0].mTemplateParameters.size(), 0);
+    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mName, "vector");
+    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters.size(), 1);
+    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mName, "float");
+    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mTemplateParameters.size(), 0);
   }
 
 }

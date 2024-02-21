@@ -2,6 +2,8 @@
 #include <sstream>
 #include <set>
 
+#include "HeaderContainer.h"
+
 namespace holgen {
 
   namespace {
@@ -11,6 +13,19 @@ namespace holgen {
       if (type.mIsConst)
         ss << "const ";
       ss << type.mName;
+      if (!type.mTemplateParameters.empty()) {
+        ss << "<";
+        bool isFirst = true;
+        for(const auto& templateParameter: type.mTemplateParameters) {
+          if (isFirst) {
+            isFirst = false;
+          } else {
+            ss << ", ";
+          }
+          Stringify(ss, templateParameter);
+        }
+        ss << ">";
+      }
       if (type.mType == TypeType::Reference)
         ss << "&";
       else if (type.mType == TypeType::Pointer)
@@ -42,16 +57,6 @@ namespace holgen {
       }
       return out.str();
     }
-    std::set<std::string> CstdIntTypes = {
-        {"int8_t"},
-        {"int16_t"},
-        {"int32_t"},
-        {"int64_t"},
-        {"uint8_t"},
-        {"uint16_t"},
-        {"uint32_t"},
-        {"uint64_t"},
-          };
   }
 
   std::vector<GeneratedContent> Generator::Generate(const TranslatedProject &translatedProject) {
@@ -71,8 +76,7 @@ namespace holgen {
     CodeBlock codeBlock;
     codeBlock.Line() << "#pragma once";
     codeBlock.Line();
-    GenerateHeadersForHeader(codeBlock, cls);
-    codeBlock.Line();
+    GenerateIncludes(codeBlock, cls, true);
     // TODO: include headers
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
@@ -151,7 +155,7 @@ namespace holgen {
     CodeBlock codeBlock;
     codeBlock.Line() << "#include \"" << cls.mName << ".h\"";
     codeBlock.Line();
-    GenerateHeadersForSource(codeBlock, cls);
+    GenerateIncludes(codeBlock, cls, false);
     // TODO: include headers
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
@@ -168,7 +172,7 @@ namespace holgen {
       {
         auto line = codeBlock.Line();
         Stringify(line, method.mType);
-        line << " " <<  cls.mName << "::" << method.mName << "(";
+        line << " " << cls.mName << "::" << method.mName << "(";
         bool isFirst = true;
         for (auto &arg: method.mArguments) {
           if (!isFirst)
@@ -197,7 +201,7 @@ namespace holgen {
     {
       auto line = codeBlock.Line();
       line << "add_library(" << mGeneratorSettings.mCMakeTarget;
-      for(auto& cls: translatedProject.mClasses) {
+      for (auto &cls: translatedProject.mClasses) {
         line << " " << cls.mName << ".cpp";
       }
       line << ")";
@@ -205,29 +209,28 @@ namespace holgen {
     cmake.mText = ToString(codeBlock);
   }
 
-  void Generator::GenerateHeadersForHeader(CodeBlock &codeBlock, const Class &cls) const {
+  void Generator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
+    HeaderContainer headers;
     // First include standard libs
     std::set<std::string> includedHeaders;
-    for(const auto& field: cls.mFields) {
-      std::string header;
-      if (CstdIntTypes.contains(field.mType.mName)) {
-        header = "<cstdint>";
-      } else {
-        continue;
+    for (const auto &field: cls.mFields) {
+      headers.AddForType(field.mType, isHeader);
+    }
+    for (const auto &method: cls.mMethods) {
+      headers.AddForType(method.mType, isHeader);
+      for (const auto &arg: method.mArguments) {
+        headers.AddForType(arg.mType, isHeader);
       }
-      if (!includedHeaders.contains(header)) {
-        codeBlock.Line() << "#include " << header;
-        includedHeaders.insert(header);
+      // TODO: don't hardcode these
+      if (method.mName == "ParseJson") {
+        // TODO: don't hardcode these
+        headers.AddLocalHeader("JsonHelper.h");
       }
     }
-
-    // Then include
+    headers.Write(codeBlock);
   }
 
   void Generator::GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const {
-  }
-
-  void Generator::GenerateHeadersForSource(CodeBlock &codeBlock, const Class &cls) const {
   }
 
 }
