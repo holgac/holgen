@@ -5,7 +5,6 @@
 #include <vector>
 #include <map>
 #include <rapidjson/document.h>
-#include "JsonHelper.h"
 
 namespace holgen_blackbox_test {
 class Race {

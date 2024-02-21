@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "Race.h"
+#include "JsonHelper.h"
 
 using namespace holgen_blackbox_test;
 

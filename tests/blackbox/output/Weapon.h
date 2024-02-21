@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <vector>
 #include <rapidjson/document.h>
-#include "JsonHelper.h"
 
 namespace holgen_blackbox_test {
 class Weapon {

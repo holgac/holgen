@@ -42,13 +42,13 @@ namespace {
     };
     Generator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
-    EXPECT_EQ(files.size(), 3);
+    EXPECT_EQ(files.size(), 5);
     ExpectGeneratedContent(
         files["CMakeLists.txt"],
         {
             FileType::CMakeFile,
             "CMakeLists.txt",
-            "add_library(generator_test_cmake Person.cpp)"
+            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp)"
         }
     );
     ExpectGeneratedContent(
@@ -60,6 +60,7 @@ namespace {
 #pragma once
 
 #include <cstdint>
+#include <rapidjson/document.h>
 
 namespace generator_test_namespace {
 class Person {
@@ -68,6 +69,7 @@ public:
   void SetAge(uint32_t val);
   float GetGender() const;
   void SetGender(float val);
+  bool ParseJson(const rapidjson::Value& json);
 protected:
 private:
   uint32_t mAge;
@@ -85,6 +87,8 @@ private:
             R"DELIM(
 #include "Person.h"
 
+#include "JsonHelper.h"
+
 namespace generator_test_namespace {
 uint32_t Person::GetAge() const {
   return mAge;
@@ -97,6 +101,21 @@ float Person::GetGender() const {
 }
 void Person::SetGender(float val) {
   mGender = val;
+}
+bool Person::ParseJson(const rapidjson::Value& json) {
+  for(const auto& data: json.GetObject()) {
+    const auto& name = data.name.GetString();
+    if (0 == strcmp(name, "age")) {
+      auto res = JsonHelper::Parse(mAge, data.value);
+      if (!res)
+        return false;
+    } else if (0 == strcmp(name, "gender")) {
+      auto res = JsonHelper::Parse(mGender, data.value);
+      if (!res)
+        return false;
+    }
+  }
+  return true;
 }
 }
           )DELIM"
@@ -120,13 +139,13 @@ void Person::SetGender(float val) {
       };
     Generator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
-    EXPECT_EQ(files.size(), 3);
+    EXPECT_EQ(files.size(), 5);
     ExpectGeneratedContent(
         files["CMakeLists.txt"],
         {
           FileType::CMakeFile,
           "CMakeLists.txt",
-          "add_library(generator_test_cmake Market.cpp)"
+          "add_library(generator_test_cmake Market.cpp JsonHelper.cpp)"
         }
         );
     ExpectGeneratedContent(
@@ -139,6 +158,7 @@ void Person::SetGender(float val) {
 
 #include <vector>
 #include <map>
+#include <rapidjson/document.h>
 
 namespace generator_test_namespace {
 class Market {
@@ -149,6 +169,7 @@ public:
   const std::map<std::string, double>& GetPrices() const;
   std::map<std::string, double>& GetPrices();
   void SetPrices(const std::map<std::string, double>& val);
+  bool ParseJson(const rapidjson::Value& json);
 protected:
 private:
   std::vector<std::string> mInstruments;
@@ -165,6 +186,8 @@ private:
           "Market.cpp",
           R"DELIM(
 #include "Market.h"
+
+#include "JsonHelper.h"
 
 namespace generator_test_namespace {
 const std::vector<std::string>& Market::GetInstruments() const {
@@ -184,6 +207,21 @@ std::map<std::string, double>& Market::GetPrices() {
 }
 void Market::SetPrices(const std::map<std::string, double>& val) {
   mPrices = val;
+}
+bool Market::ParseJson(const rapidjson::Value& json) {
+  for(const auto& data: json.GetObject()) {
+    const auto& name = data.name.GetString();
+    if (0 == strcmp(name, "instruments")) {
+      auto res = JsonHelper::Parse(mInstruments, data.value);
+      if (!res)
+        return false;
+    } else if (0 == strcmp(name, "prices")) {
+      auto res = JsonHelper::Parse(mPrices, data.value);
+      if (!res)
+        return false;
+    }
+  }
+  return true;
 }
 }
           )DELIM"

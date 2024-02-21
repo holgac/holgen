@@ -269,7 +269,7 @@ namespace holgen {
         headers.AddForType(arg.mType, isHeader);
       }
       // TODO: don't hardcode these
-      if (method.mName == "ParseJson") {
+      if (!isHeader && method.mName == "ParseJson") {
         // TODO: don't hardcode these
         headers.AddLocalHeader("JsonHelper.h");
       }
