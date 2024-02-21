@@ -16,7 +16,7 @@ namespace holgen {
       if (!type.mTemplateParameters.empty()) {
         ss << "<";
         bool isFirst = true;
-        for(const auto& templateParameter: type.mTemplateParameters) {
+        for (const auto &templateParameter: type.mTemplateParameters) {
           if (isFirst) {
             isFirst = false;
           } else {
@@ -26,9 +26,9 @@ namespace holgen {
         }
         ss << ">";
       }
-      if (type.mType == TypeType::Reference)
+      if (type.mType == PassByType::Reference)
         ss << "&";
-      else if (type.mType == TypeType::Pointer)
+      else if (type.mType == PassByType::Pointer)
         ss << "*";
     }
 
@@ -91,6 +91,9 @@ namespace holgen {
     GenerateForVisibility(codeBlock, cls, Visibility::Private);
 
     codeBlock.Line() << "};"; // class
+    GenerateMethodsForHeader(codeBlock, cls, Visibility::Public, false);
+    GenerateMethodsForHeader(codeBlock, cls, Visibility::Protected, false);
+    GenerateMethodsForHeader(codeBlock, cls, Visibility::Private, false);
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "}"; // namespace
     header.mText = ToString(codeBlock);
@@ -109,7 +112,7 @@ namespace holgen {
         break;
     }
     codeBlock.Indent(1);
-    GenerateMethodDeclarations(codeBlock, cls, visibility);
+    GenerateMethodsForHeader(codeBlock, cls, visibility, true);
     GenerateFieldDeclarations(codeBlock, cls, visibility);
     codeBlock.Indent(-1);
   }
@@ -126,26 +129,65 @@ namespace holgen {
     }
   }
 
-  void Generator::GenerateMethodDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
+  void Generator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const {
     for (auto &method: cls.mMethods) {
       if (method.mVisibility != visibility)
         continue;
-      auto line = codeBlock.Line();
-      Stringify(line, method.mType);
-      line << " " << method.mName << "(";
-      bool isFirst = true;
-      for (auto &arg: method.mArguments) {
-        if (!isFirst)
-          line << ", ";
-        else
-          isFirst = false;
-        Stringify(line, arg.mType);
-        line << " " << arg.mName;
+      if (isInsideClass && method.mIsTemplateSpecialization)
+        continue;
+      if (!isInsideClass && !method.mIsTemplateSpecialization)
+        continue;
+
+      if (!method.mTemplateParameters.empty()) {
+        auto templateLine = codeBlock.Line();
+        templateLine << "template <";
+        bool isFirst = true;
+        for (const auto &templateParameter: method.mTemplateParameters) {
+          if (isFirst) {
+            isFirst = false;
+          } else {
+            templateLine << ", ";
+          }
+          templateLine << templateParameter;
+        }
+        templateLine << ">";
       }
-      line << ")";
-      if (method.mIsConst)
-        line << " const";
-      line << ";";
+      if (method.mIsTemplateSpecialization) {
+        codeBlock.Line() << "template <>";
+      }
+
+      {
+        auto line = codeBlock.Line();
+        if (method.mIsStatic && isInsideClass)
+          line << "static ";
+        Stringify(line, method.mType);
+        line << " ";
+        if (!isInsideClass)
+          line << cls.mName << "::";
+        line << method.mName << "(";
+        bool isFirst = true;
+        for (auto &arg: method.mArguments) {
+          if (!isFirst)
+            line << ", ";
+          else
+            isFirst = false;
+          Stringify(line, arg.mType);
+          line << " " << arg.mName;
+        }
+        line << ")";
+        if (method.mIsConst)
+          line << " const";
+        if (method.mTemplateParameters.empty()) {
+          line << ";";
+          continue;
+        } else {
+          line << " {";
+        }
+      }
+      codeBlock.Indent(1);
+      codeBlock.Add(method.mBody);
+      codeBlock.Indent(-1);
+      codeBlock.Line() << "}";
     }
   }
 
@@ -156,19 +198,26 @@ namespace holgen {
     codeBlock.Line() << "#include \"" << cls.mName << ".h\"";
     codeBlock.Line();
     GenerateIncludes(codeBlock, cls, false);
-    // TODO: include headers
+
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
     // TODO: struct-specific namespaces defined via decorators
-    GenerateMethodDefinitions(codeBlock, cls);
+    GenerateMethodsForSource(codeBlock, cls);
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "}"; // namespace
 
     source.mText = ToString(codeBlock);
   }
 
-  void Generator::GenerateMethodDefinitions(CodeBlock &codeBlock, const Class &cls) const {
+  void Generator::GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const {
     for (auto &method: cls.mMethods) {
+      if (!method.mTemplateParameters.empty()) {
+        // These are defined in the header
+        continue;
+      }
+      if (method.mIsTemplateSpecialization) {
+        codeBlock.Line() << "template <>";
+      }
       {
         auto line = codeBlock.Line();
         Stringify(line, method.mType);
@@ -211,8 +260,6 @@ namespace holgen {
 
   void Generator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
     HeaderContainer headers;
-    // First include standard libs
-    std::set<std::string> includedHeaders;
     for (const auto &field: cls.mFields) {
       headers.AddForType(field.mType, isHeader);
     }

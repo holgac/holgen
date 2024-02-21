@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdint>
-
+#include <rapidjson/document.h>
+#include "JsonHelper.h"
 
 namespace holgen_blackbox_test {
 class Person {
@@ -10,6 +11,7 @@ public:
   void SetAge(uint32_t val);
   float GetGender() const;
   void SetGender(float val);
+  bool ParseJson(const rapidjson::Value& json);
 protected:
 private:
   uint32_t mAge;

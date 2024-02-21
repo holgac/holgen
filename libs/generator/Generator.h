@@ -37,8 +37,8 @@ namespace holgen {
     void GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const;
     void GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const;
     void GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
-    void GenerateMethodDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
-    void GenerateMethodDefinitions(CodeBlock &codeBlock, const Class &cls) const;
+    void GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
+    void GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const;
     void GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
   };
 }

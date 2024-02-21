@@ -1,6 +1,8 @@
 struct Race {
     u32 id;
-    vector<string> names;
+    string name;
+    vector<string> hairColors;
+    map<string, vector<string>> names;
 }
 struct Person {
     // u32 raceId;

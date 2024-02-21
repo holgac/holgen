@@ -1,7 +1,8 @@
 #pragma once
 
 #include <cstdint>
-
+#include <rapidjson/document.h>
+#include "JsonHelper.h"
 
 namespace holgen_blackbox_test {
 class Damage {
@@ -10,6 +11,7 @@ public:
   void SetMin(uint32_t val);
   uint32_t GetMax() const;
   void SetMax(uint32_t val);
+  bool ParseJson(const rapidjson::Value& json);
 protected:
 private:
   uint32_t mMin;

@@ -56,8 +56,8 @@ namespace {
     auto &c = tp.mClasses[0];
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {
-        ClassField{Visibility::Private, Type{"int32_t", false, TypeType::Value}, "mAge"},
-        ClassField{Visibility::Private, Type{"float", false, TypeType::Value}, "mGender"},
+        ClassField{Visibility::Private, Type{"int32_t", false, PassByType::Value}, "mAge"},
+        ClassField{Visibility::Private, Type{"float", false, PassByType::Value}, "mGender"},
     });
   }
 }

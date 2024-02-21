@@ -15,11 +15,20 @@ namespace {
 
   TEST(WeaponTest, ParseJson) {
     rapidjson::Document doc;
+    doc.Parse(R"DELIM(
+{
+"damageMin": 25,
+"damageMax": 35,
+"modifiers": ["shining", "rusty"]
+}
+    )DELIM");
     Weapon weapon;
     JsonHelper::Parse(weapon, doc);
-    // weapon.ParseJson(doc);
-    EXPECT_EQ(weapon.GetDamageMin(), 15);
-    EXPECT_EQ(weapon.GetDamageMax(), 30);
+    EXPECT_EQ(weapon.GetDamageMin(), 25);
+    EXPECT_EQ(weapon.GetDamageMax(), 35);
+    EXPECT_EQ(weapon.GetModifiers().size(), 2);
+    EXPECT_EQ(weapon.GetModifiers()[0], "shining");
+    EXPECT_EQ(weapon.GetModifiers()[1], "rusty");
   }
 
 }

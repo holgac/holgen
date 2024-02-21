@@ -31,10 +31,6 @@ namespace holgen {
     Indentation,
   };
 
-  /*
-   * Should this store AST instead?
-   * Can generate in multiple languages
-   */
   struct CodeBlock {
     std::vector<CodeUnitType> mContents;
     std::vector<std::string> mLines;
@@ -58,8 +54,7 @@ namespace holgen {
     }
   };
 
-  // TODO: There is a better name for this...
-  enum class TypeType {
+  enum class PassByType {
     Value,
     Reference,
     Pointer,
@@ -69,7 +64,7 @@ namespace holgen {
   struct Type {
     std::string mName = "void";
     bool mIsConst = false;
-    TypeType mType = TypeType::Value;
+    PassByType mType = PassByType::Value;
     std::vector<Type> mTemplateParameters;
 
     // structs are used only as data storage here - having a function defeats this
@@ -98,7 +93,9 @@ namespace holgen {
     std::string mName;
     Type mType;
     bool mIsConst = true;
-    // bool isStatic = false;
+    bool mIsStatic = false;
+    std::vector<std::string> mTemplateParameters;
+    bool mIsTemplateSpecialization = false;
   };
 
   struct ClassConstructorInitializer {

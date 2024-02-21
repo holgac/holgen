@@ -6,4 +6,5 @@ struct Weapon {
     // Damage damage;
     u32 damageMin;
     u32 damageMax;
+    vector<string> modifiers;
 }
