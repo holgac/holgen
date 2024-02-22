@@ -1,5 +1,6 @@
 #include "Tokenizer.h"
 #include <map>
+#include "core/Exception.h"
 
 namespace holgen {
   namespace {
@@ -75,9 +76,9 @@ namespace holgen {
     }
     if (c == '"' || c == '\'') {
       ++mEndIndex;
-      // TODO: bounds check
-      while(mData[mEndIndex] != c)
+      while (mEndIndex < mData.size() && mData[mEndIndex] != c)
         ++mEndIndex;
+      THROW_IF(mEndIndex == mData.size(), "Malformed string: {}", mData.substr(mIndex + 1))
       ++mEndIndex;
       tok.mType = TokenType::String;
       // Comment tokens' contents include the comment special chars, but string literals don't, for ease of use

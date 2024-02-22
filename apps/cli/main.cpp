@@ -1,15 +1,16 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
+#include "core/Exception.h"
 #include "tokenizer/Tokenizer.h"
 #include "parser/Parser.h"
 #include "generator/Translator.h"
 #include "generator/Generator.h"
 
-int main(int argc, char **argv) {
+int run(int argc, char **argv) {
   if (argc != 5) {
     std::cerr << "Usage: " << std::endl
-              << argv[0] << " [IN_DIRECTORY] [OUT_DIRECTORY] [NAMESPACE] [CMAKE_TARGET]";
+              << argv[0] << " [IN_DIRECTORY] [OUT_DIRECTORY] [NAMESPACE] [CMAKE_TARGET]" << std::endl;
     return -1;
   }
   holgen::Parser parser;
@@ -36,4 +37,13 @@ int main(int argc, char **argv) {
     fout.write(result.mText.data(), result.mText.size());
   }
   return 0;
+}
+
+int main(int argc, char **argv) {
+  try {
+    return run(argc, argv);
+  } catch (holgen::Exception &exc) {
+    std::cerr << exc.what() << std::endl;
+    return -1;
+  }
 }

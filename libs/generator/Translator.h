@@ -11,18 +11,6 @@
 
 namespace holgen {
 
-  class GeneratorException : std::exception {
-    // TODO: use string to allow std::format
-    const char *mMsg;
-  public:
-    explicit GeneratorException(const char *msg) : mMsg(msg) {
-
-    }
-
-    const char *what() { return mMsg; }
-  };
-
-
   enum class Visibility {
     Private,
     Protected,

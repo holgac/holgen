@@ -1,6 +1,6 @@
-#include <map>
-#include <format>
 #include "Translator.h"
+#include <map>
+#include "core/Exception.h"
 #include "GeneratorJson.h"
 #include "TypeInfo.h"
 
@@ -28,8 +28,7 @@ namespace holgen {
     std::map<std::string, size_t> classMap;
     for (auto &structDefinition: project.mStructs) {
       auto[it, res] = classMap.try_emplace(structDefinition.mName, translatedProject.mClasses.size());
-      if (!res)
-        throw GeneratorException("Duplicate class name!");
+      THROW_IF(!res, "Duplicate class: \"{}\"", structDefinition.mName)
       GenerateClass(translatedProject.mClasses.emplace_back(), structDefinition);
     }
 

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 #include <cstdint>
 #include <string>
@@ -13,9 +14,9 @@ namespace holgen {
   };
 
   struct CodeBlock {
-    std::vector <CodeUnitType> mContents;
-    std::vector <std::string> mLines;
-    std::vector <ssize_t> mIndentations;
+    std::vector<CodeUnitType> mContents;
+    std::vector<std::string> mLines;
+    std::vector<ssize_t> mIndentations;
 
     void Indent(ssize_t amount) {
       mContents.push_back(CodeUnitType::Indentation);

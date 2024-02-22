@@ -1,5 +1,5 @@
 #include "CodeBlock.h"
-#include "Translator.h"
+#include "core/Exception.h"
 
 namespace holgen {
   void CodeBlock::Add(const CodeBlock &cb) {
@@ -22,15 +22,13 @@ namespace holgen {
           indentation = std::string(currentIndentation * 2, ' ');
           ++indentIt;
           break;
-          case CodeUnitType::Code:
-            out << indentation << *lineIt << std::endl;
-            ++lineIt;
-            break;
+        case CodeUnitType::Code:
+          out << indentation << *lineIt << std::endl;
+          ++lineIt;
+          break;
       }
     }
-    if (currentIndentation != 0) {
-      throw GeneratorException("Inconsistent indentation!");
-    }
+    THROW_IF(currentIndentation != 0, "Inconsistent indentation!")
     return out.str();
   }
 }

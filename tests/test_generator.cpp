@@ -407,17 +407,17 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
     parser.Parse(tokenizer);
     auto translatedProject = Translator().Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
-      .mNamespace = "generator_test_namespace",
-      .mCMakeTarget = "generator_test_cmake",
-      };
+        .mNamespace = "generator_test_namespace",
+        .mCMakeTarget = "generator_test_cmake",
+    };
     Generator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
     ExpectGeneratedContent(
         files["Person.h"],
         {
-          FileType::CppHeader,
-          "Person.h",
-          R"DELIM(
+            FileType::CppHeader,
+            "Person.h",
+            R"DELIM(
 #pragma once
 
 #include <cstdint>
@@ -446,13 +446,13 @@ private:
 }
           )DELIM"
         }
-        );
+    );
     ExpectGeneratedContent(
         files["Person.cpp"],
         {
-          FileType::CppSource,
-          "Person.cpp",
-          R"DELIM(
+            FileType::CppSource,
+            "Person.cpp",
+            R"DELIM(
 #include "Person.h"
 
 #include "JsonHelper.h"
@@ -516,7 +516,7 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
 }
           )DELIM"
         }
-        );
+    );
     ExpectGeneratedContent(
         files["Country.h"],
         {

@@ -1,7 +1,7 @@
+#include "GeneratorJson.h"
 #include <vector>
 #include "TypeInfo.h"
-#include <format>
-#include "GeneratorJson.h"
+#include "core/Exception.h"
 #include "Decorators.h"
 
 namespace holgen {
@@ -52,18 +52,12 @@ namespace holgen {
 
     for (size_t i = 0; i < mProjectDefinition.mStructs.size(); ++i) {
       const auto &structDefinition = mProjectDefinition.mStructs[i];
-      auto[it, res] = mStructDefinitions.try_emplace(structDefinition.mName, i);
-      if (!res) {
-        throw GeneratorException("Duplicate class!");
-      }
+      mStructDefinitions.emplace(structDefinition.mName, i);
     }
 
     for (size_t i = 0; i < mTranslatedProject.mClasses.size(); ++i) {
       const auto &cls = mTranslatedProject.mClasses[i];
-      auto[it, res] = mClasses.try_emplace(cls.mName, i);
-      if (!res) {
-        throw GeneratorException("Duplicate class!");
-      }
+      mClasses.emplace(cls.mName, i);
     }
 
   }
@@ -326,8 +320,8 @@ namespace holgen {
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
-        if (jsonConvertFrom == nullptr || jsonConvertUsing == nullptr)
-          throw GeneratorException("Malformed jsonConvert!");
+        THROW_IF(jsonConvertFrom == nullptr || jsonConvertUsing == nullptr, "Malformed jsonConvert in {}::{}",
+                 cls.mName, fieldDefinition.mName)
         Type type;
         TypeInfo::Get().ConvertToType(type, jsonConvertFrom->mValue);
         parseFunc.mBody.Line() << type.ToString() << " temp;";
@@ -381,8 +375,11 @@ namespace holgen {
         auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
         auto[it, res] = processedConverters.try_emplace(jsonConvertUsing->mValue.mName, jsonConvertFrom->mValue.mName);
         if (!res) {
-          if (it->second != jsonConvertFrom->mValue.mName)
-            throw GeneratorException("Inconsistent jsonConvert usage, cannot convert from multiple types!");
+          THROW_IF(it->second != jsonConvertFrom->mValue.mName,
+                   "Converter {} has inconsistent from values! Previously used as {}, now {}",
+                   jsonConvertUsing->mName,
+                   it->second,
+                   jsonConvertFrom->mValue.mName);
         } else {
           auto &func = cls.mFields.emplace_back();
           func.mVisibility = Visibility::Public;
@@ -393,7 +390,6 @@ namespace holgen {
           TypeInfo::Get().ConvertToType(convertFromArg, fieldDefinition.mType);
 
           auto &retVal = func.mType.mFunctionalTemplateParameters.emplace_back();
-          // TODO: use attribute value directly once its type is Type
           TypeInfo::Get().ConvertToType(retVal, jsonConvertFrom->mValue);
           if (!TypeInfo::Get().CppPrimitives.contains(retVal.mName)) {
             retVal.mIsConst = true;
