@@ -5,11 +5,14 @@
 #include <core/LineWithAction.h>
 // Needed for Project (TODO: move to separate file and fwd declare)
 #include "parser/Parser.h"
+#include "CodeBlock.h"
+#include "TypeInfo.h"
 
 
 namespace holgen {
 
   class GeneratorException : std::exception {
+    // TODO: use string to allow std::format
     const char *mMsg;
   public:
     explicit GeneratorException(const char *msg) : mMsg(msg) {
@@ -24,52 +27,6 @@ namespace holgen {
     Private,
     Protected,
     Public,
-  };
-
-  enum class CodeUnitType {
-    Code,
-    Indentation,
-  };
-
-  struct CodeBlock {
-    std::vector<CodeUnitType> mContents;
-    std::vector<std::string> mLines;
-    std::vector<ssize_t> mIndentations;
-
-    void Indent(ssize_t amount) {
-      mContents.push_back(CodeUnitType::Indentation);
-      mIndentations.push_back(amount);
-    }
-
-    LineWithAction Line() {
-      return {[this](const auto &s) -> void { this->AddLine(s); }};
-    }
-
-    void Add(const CodeBlock& codeBlock);
-
-
-    void AddLine(const std::string &line) {
-      mContents.push_back(CodeUnitType::Code);
-      mLines.push_back(line);
-    }
-  };
-
-  enum class PassByType {
-    Value,
-    Reference,
-    Pointer,
-  };
-
-  // This name is too generic...
-  struct Type {
-    std::string mName = "void";
-    bool mIsConst = false;
-    PassByType mType = PassByType::Value;
-    std::vector<Type> mTemplateParameters;
-
-    // structs are used only as data storage here - having a function defeats this
-    // Can put this in anon namespace if only Translator uses it
-    bool IsPrimitive() const;
   };
 
   struct ClassField {
@@ -133,9 +90,6 @@ namespace holgen {
   class Translator {
     void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
     void ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
-    void ProcessType(Type &type, const TypeDefinition &typeDefinition) const;
-    void GenerateParseJson(Class &generatedClass, const StructDefinition &structDefinition) const;
-    void GenerateJsonHelper(Class &generatedClass) const;
   public:
     TranslatedProject Translate(const ProjectDefinition &project) const;
   };

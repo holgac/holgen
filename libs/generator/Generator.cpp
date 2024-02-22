@@ -1,63 +1,9 @@
 #include "Generator.h"
 #include <sstream>
-#include <set>
 
 #include "HeaderContainer.h"
 
 namespace holgen {
-
-  namespace {
-    // TODO: overload operator<< instead
-    template<typename T>
-    void Stringify(T &ss, const Type &type) {
-      if (type.mIsConst)
-        ss << "const ";
-      ss << type.mName;
-      if (!type.mTemplateParameters.empty()) {
-        ss << "<";
-        bool isFirst = true;
-        for (const auto &templateParameter: type.mTemplateParameters) {
-          if (isFirst) {
-            isFirst = false;
-          } else {
-            ss << ", ";
-          }
-          Stringify(ss, templateParameter);
-        }
-        ss << ">";
-      }
-      if (type.mType == PassByType::Reference)
-        ss << "&";
-      else if (type.mType == PassByType::Pointer)
-        ss << "*";
-    }
-
-    std::string ToString(const CodeBlock &codeBlock) {
-      ssize_t currentIndentation = 0;
-      auto contentIt = codeBlock.mContents.begin();
-      auto lineIt = codeBlock.mLines.begin();
-      auto indentIt = codeBlock.mIndentations.begin();
-      std::string indentation;
-      std::stringstream out;
-      for (; contentIt != codeBlock.mContents.end(); ++contentIt) {
-        switch (*contentIt) {
-          case CodeUnitType::Indentation:
-            currentIndentation += *indentIt;
-            indentation = std::string(currentIndentation * 2, ' ');
-            ++indentIt;
-            break;
-          case CodeUnitType::Code:
-            out << indentation << *lineIt << std::endl;
-            ++lineIt;
-            break;
-        }
-      }
-      if (currentIndentation != 0) {
-        throw GeneratorException("Inconsistent indentation!");
-      }
-      return out.str();
-    }
-  }
 
   std::vector<GeneratedContent> Generator::Generate(const TranslatedProject &translatedProject) {
     std::vector<GeneratedContent> contents;
@@ -96,7 +42,7 @@ namespace holgen {
     GenerateMethodsForHeader(codeBlock, cls, Visibility::Private, false);
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "}"; // namespace
-    header.mText = ToString(codeBlock);
+    header.mText = codeBlock.ToString();
   }
 
   void Generator::GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
@@ -122,9 +68,7 @@ namespace holgen {
       if (field.mVisibility != visibility)
         continue;
       {
-        auto line = codeBlock.Line();
-        Stringify(line, field.mType);
-        line << " " << field.mName << ";";
+        codeBlock.Line() << field.mType.ToString() << " " << field.mName << ";";
       }
     }
   }
@@ -161,8 +105,7 @@ namespace holgen {
         auto line = codeBlock.Line();
         if (method.mIsStatic && isInsideClass)
           line << "static ";
-        Stringify(line, method.mType);
-        line << " ";
+        line << method.mType.ToString() << " ";
         if (!isInsideClass)
           line << cls.mName << "::";
         line << method.mName << "(";
@@ -172,8 +115,7 @@ namespace holgen {
             line << ", ";
           else
             isFirst = false;
-          Stringify(line, arg.mType);
-          line << " " << arg.mName;
+          line << arg.mType.ToString() << " " << arg.mName;
         }
         line << ")";
         if (method.mIsConst)
@@ -207,7 +149,7 @@ namespace holgen {
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "}"; // namespace
 
-    source.mText = ToString(codeBlock);
+    source.mText = codeBlock.ToString();
   }
 
   void Generator::GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const {
@@ -221,16 +163,14 @@ namespace holgen {
       }
       {
         auto line = codeBlock.Line();
-        Stringify(line, method.mType);
-        line << " " << cls.mName << "::" << method.mName << "(";
+        line << method.mType.ToString() << " " << cls.mName << "::" << method.mName << "(";
         bool isFirst = true;
         for (auto &arg: method.mArguments) {
           if (!isFirst)
             line << ", ";
           else
             isFirst = false;
-          Stringify(line, arg.mType);
-          line << " " << arg.mName;
+          line << arg.mType.ToString() << " " << arg.mName;
         }
         line << ")";
         if (method.mIsConst)
@@ -256,7 +196,7 @@ namespace holgen {
       }
       line << ")";
     }
-    cmake.mText = ToString(codeBlock);
+    cmake.mText = codeBlock.ToString();
   }
 
   void Generator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {

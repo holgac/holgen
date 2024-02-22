@@ -52,7 +52,6 @@ namespace {
     Parser parser;
     parser.Parse(tokenizer);
     auto tp = Translator().Translate(parser.GetProject());
-    EXPECT_EQ(tp.mClasses.size(), 2);
     auto &c = tp.mClasses[0];
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {

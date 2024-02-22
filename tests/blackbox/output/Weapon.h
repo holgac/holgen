@@ -5,6 +5,7 @@
 #include <string>
 #include <rapidjson/document.h>
 #include "DamageMultiplier.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 class Weapon {
@@ -19,7 +20,7 @@ public:
   const std::vector<std::string>& GetModifiers() const;
   std::vector<std::string>& GetModifiers();
   void SetModifiers(const std::vector<std::string>& val);
-  bool ParseJson(const rapidjson::Value& json);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
   uint32_t mDamageMin;

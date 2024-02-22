@@ -34,6 +34,38 @@ namespace {
     EXPECT_EQ(s.mFields[1].mName, "f2");
   }
 
+  TEST(ParserTest, FieldDecorators) {
+    Tokenizer tokenizer(R"DELIM(
+  struct a   {
+    @dec1()
+    @dec2(a1, a2=5, a3, a4='long string')
+    s32 f1;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto &proj = parser.GetProject();
+    EXPECT_EQ(proj.mStructs.size(), 1);
+    auto &s = proj.mStructs[0];
+    EXPECT_EQ(s.mDecorators.size(), 0);
+    EXPECT_EQ(s.mFields.size(), 1);
+    auto& f = s.mFields[0];
+    auto &ds = f.mDecorators;
+    EXPECT_EQ(ds[0].mName, "dec1");
+    EXPECT_EQ(ds[0].mAttributes.size(), 0);
+    EXPECT_EQ(ds[1].mName, "dec2");
+    EXPECT_EQ(ds[1].mAttributes.size(), 4);
+    auto &dsa = ds[1].mAttributes;
+    EXPECT_EQ(dsa[0].mName, "a1");
+    EXPECT_EQ(dsa[0].mValue.mName, "");
+    EXPECT_EQ(dsa[1].mName, "a2");
+    EXPECT_EQ(dsa[1].mValue.mName, "5");
+    EXPECT_EQ(dsa[2].mName, "a3");
+    EXPECT_EQ(dsa[2].mValue.mName, "");
+    EXPECT_EQ(dsa[3].mName, "a4");
+    EXPECT_EQ(dsa[3].mValue.mName, "long string");
+  }
+
   TEST(ParserTest, StructDecorators) {
     Tokenizer tokenizer(R"DELIM(
   @dec1()
@@ -56,13 +88,13 @@ namespace {
     EXPECT_EQ(ds[1].mAttributes.size(), 4);
     auto &dsa = ds[1].mAttributes;
     EXPECT_EQ(dsa[0].mName, "a1");
-    EXPECT_EQ(dsa[0].mValue, "");
+    EXPECT_EQ(dsa[0].mValue.mName, "");
     EXPECT_EQ(dsa[1].mName, "a2");
-    EXPECT_EQ(dsa[1].mValue, "5");
+    EXPECT_EQ(dsa[1].mValue.mName, "5");
     EXPECT_EQ(dsa[2].mName, "a3");
-    EXPECT_EQ(dsa[2].mValue, "");
+    EXPECT_EQ(dsa[2].mValue.mName, "");
     EXPECT_EQ(dsa[3].mName, "a4");
-    EXPECT_EQ(dsa[3].mValue, "long string");
+    EXPECT_EQ(dsa[3].mValue.mName, "long string");
   }
 
   TEST(ParserTest, Templates) {

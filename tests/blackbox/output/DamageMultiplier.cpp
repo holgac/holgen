@@ -18,15 +18,15 @@ float DamageMultiplier::GetValue() const {
 void DamageMultiplier::SetValue(float val) {
   mValue = val;
 }
-bool DamageMultiplier::ParseJson(const rapidjson::Value& json) {
+bool DamageMultiplier::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "when")) {
-      auto res = JsonHelper::Parse(mWhen, data.value);
+      auto res = JsonHelper::Parse(mWhen, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "value")) {
-      auto res = JsonHelper::Parse(mValue, data.value);
+      auto res = JsonHelper::Parse(mValue, data.value, converter);
       if (!res)
         return false;
     }

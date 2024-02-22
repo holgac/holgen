@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <rapidjson/document.h>
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 class Race {
@@ -20,7 +21,7 @@ public:
   const std::map<std::string, std::vector<std::string>>& GetNames() const;
   std::map<std::string, std::vector<std::string>>& GetNames();
   void SetNames(const std::map<std::string, std::vector<std::string>>& val);
-  bool ParseJson(const rapidjson::Value& json);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
   uint32_t mId;

@@ -1,6 +1,5 @@
 #include "Parser.h"
 #include <format>
-#include <cstdint>
 
 namespace holgen {
 
@@ -40,6 +39,7 @@ namespace holgen {
     structDefinition.mName = curToken.mContents;
     GetAndExpectNext(curToken, TokenType::COpen, "Incomplete struct definition!",
                      "Struct name should be followed by a '{'");
+    std::vector<DecoratorDefinition> decorators;
     while (true) {
       if (!mCurTokenizer->GetNextNonWhitespace(curToken))
         throw ParserException("Incomplete struct definition!");
@@ -47,7 +47,14 @@ namespace holgen {
         break;
       if (curToken.mType == TokenType::String) {
         // TODO: check if curToken.mContents == "func"
-        ParseField(curToken, structDefinition.mFields.emplace_back());
+        auto& fieldDefinition = structDefinition.mFields.emplace_back();
+        fieldDefinition.mDecorators = std::move(decorators);
+        decorators.clear();
+        ParseField(curToken, fieldDefinition);
+      } else if (curToken.mType == TokenType::At) {
+        ParseDecorator(decorators.emplace_back());
+      } else {
+        throw ParserException(std::format("Unexpected token in parsing struct: \"{}\"!", curToken.mContents));
       }
     }
   }
@@ -71,10 +78,11 @@ namespace holgen {
       if (curToken.mType == TokenType::Equals) {
         GetAndExpectNext(curToken, TokenType::String, "Incomplete decorator attribute definition!",
                          "Malformed decorator attribute definition!");
-        decoratorAttributeDefinition.mValue = curToken.mContents;
+        ParseType(curToken, decoratorAttributeDefinition.mValue);
+      } else {
+        if (!mCurTokenizer->GetNextNonWhitespace(curToken))
+          throw ParserException("Incomplete decorator definition!");
       }
-      if (!mCurTokenizer->GetNextNonWhitespace(curToken))
-        throw ParserException("Incomplete decorator definition!");
       if (curToken.mType == TokenType::Comma) {
         if (!mCurTokenizer->GetNextNonWhitespace(curToken))
           throw ParserException("Incomplete decorator definition!");
@@ -116,5 +124,37 @@ namespace holgen {
 
     if (!mCurTokenizer->GetNextNonWhitespace(curToken))
       throw ParserException("Incomplete field definition!");
+  }
+
+  const DecoratorDefinition *FieldDefinition::GetDecorator(const std::string& name) const {
+    for(const auto& decorator: mDecorators) {
+      if (decorator.mName == name)
+        return &decorator;
+    }
+    return nullptr;
+  }
+
+  const DecoratorAttributeDefinition *DecoratorDefinition::GetAttribute(const std::string &name) const {
+    for (const auto& attribute: mAttributes) {
+      if (attribute.mName == name)
+        return &attribute;
+    }
+    return nullptr;
+  }
+
+  const DecoratorDefinition *StructDefinition::GetDecorator(const std::string &name) const {
+    for(const auto& decorator: mDecorators) {
+      if (decorator.mName == name)
+        return &decorator;
+    }
+    return nullptr;
+  }
+
+  const FieldDefinition *StructDefinition::GetField(const std::string &name) const {
+    for(const auto& field: mFields) {
+      if (field.mName == name)
+        return &field;
+    }
+    return nullptr;
   }
 }

@@ -33,23 +33,23 @@ std::vector<std::string>& Weapon::GetModifiers() {
 void Weapon::SetModifiers(const std::vector<std::string>& val) {
   mModifiers = val;
 }
-bool Weapon::ParseJson(const rapidjson::Value& json) {
+bool Weapon::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "damageMin")) {
-      auto res = JsonHelper::Parse(mDamageMin, data.value);
+      auto res = JsonHelper::Parse(mDamageMin, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "damageMax")) {
-      auto res = JsonHelper::Parse(mDamageMax, data.value);
+      auto res = JsonHelper::Parse(mDamageMax, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "damageMultipliers")) {
-      auto res = JsonHelper::Parse(mDamageMultipliers, data.value);
+      auto res = JsonHelper::Parse(mDamageMultipliers, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "modifiers")) {
-      auto res = JsonHelper::Parse(mModifiers, data.value);
+      auto res = JsonHelper::Parse(mModifiers, data.value, converter);
       if (!res)
         return false;
     }

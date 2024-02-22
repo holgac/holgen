@@ -13,11 +13,12 @@ namespace holgen {
         "uint32_t",
         "uint64_t",
     };
-    std::map<std::string, std::string> STLContainers = {
+    std::map<std::string, std::string> STDHeaders = {
         {"std::string",        "string"},
         {"std::vector",        "vector"},
         {"std::map",           "map"},
         {"std::unordered_map", "unordered_map"},
+        {"std::function",      "functional"},
     };
     std::set<std::string> NoHeaderTypes = {"float", "double", "void", "bool"};
   }
@@ -61,9 +62,9 @@ namespace holgen {
       if (isHeader) {
         AddStandardHeader("cstdint");
       }
-    } else if (STLContainers.contains(type.mName)) {
+    } else if (STDHeaders.contains(type.mName)) {
       if (isHeader) {
-        AddStandardHeader(STLContainers.at(type.mName));
+        AddStandardHeader(STDHeaders.at(type.mName));
       }
     } else if (type.mName.starts_with("rapidjson::")) {
       // it's better to fwd declare in header, but rapidjson uses templates making it complicated
@@ -87,6 +88,9 @@ namespace holgen {
     for (const auto &templateParameter: type.mTemplateParameters) {
       IncludeClassField(classField, templateParameter, isHeader);
     }
+    for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
+      IncludeClassField(classField, templateParameter, isHeader);
+    }
   }
 
   void HeaderContainer::IncludeClassMethod(const ClassMethod &classMethod, bool isHeader) {
@@ -107,6 +111,9 @@ namespace holgen {
     if (!isTemplateType)
       IncludeType(type, isHeader);
     for (const auto &templateParameter: type.mTemplateParameters) {
+      IncludeClassMethod(classMethod, templateParameter, isHeader);
+    }
+    for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
       IncludeClassMethod(classMethod, templateParameter, isHeader);
     }
   }

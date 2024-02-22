@@ -1,1 +1,1 @@
-add_library(generator Generator.cpp Translator.cpp HeaderContainer.cpp)
+add_library(generator Generator.cpp Translator.cpp HeaderContainer.cpp CodeBlock.cpp GeneratorJson.cpp TypeInfo.cpp)

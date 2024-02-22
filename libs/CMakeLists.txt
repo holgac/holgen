@@ -1,6 +1,5 @@
 include_directories(.)
 # add_subdirectory(core)
-# add_subdirectory(universe)
 add_subdirectory(tokenizer)
 add_subdirectory(parser)
 add_subdirectory(generator)

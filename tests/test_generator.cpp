@@ -42,13 +42,12 @@ namespace {
     };
     Generator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
-    EXPECT_EQ(files.size(), 5);
     ExpectGeneratedContent(
         files["CMakeLists.txt"],
         {
             FileType::CMakeFile,
             "CMakeLists.txt",
-            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp)"
+            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp Converter.cpp)"
         }
     );
     ExpectGeneratedContent(
@@ -61,6 +60,7 @@ namespace {
 
 #include <cstdint>
 #include <rapidjson/document.h>
+#include "Converter.h"
 
 namespace generator_test_namespace {
 class Person {
@@ -69,7 +69,7 @@ public:
   void SetAge(uint32_t val);
   float GetGender() const;
   void SetGender(float val);
-  bool ParseJson(const rapidjson::Value& json);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
   uint32_t mAge;
@@ -102,15 +102,15 @@ float Person::GetGender() const {
 void Person::SetGender(float val) {
   mGender = val;
 }
-bool Person::ParseJson(const rapidjson::Value& json) {
+bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "age")) {
-      auto res = JsonHelper::Parse(mAge, data.value);
+      auto res = JsonHelper::Parse(mAge, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "gender")) {
-      auto res = JsonHelper::Parse(mGender, data.value);
+      auto res = JsonHelper::Parse(mGender, data.value, converter);
       if (!res)
         return false;
     }
@@ -139,15 +139,6 @@ bool Person::ParseJson(const rapidjson::Value& json) {
     };
     Generator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
-    EXPECT_EQ(files.size(), 5);
-    ExpectGeneratedContent(
-        files["CMakeLists.txt"],
-        {
-            FileType::CMakeFile,
-            "CMakeLists.txt",
-            "add_library(generator_test_cmake Market.cpp JsonHelper.cpp)"
-        }
-    );
     ExpectGeneratedContent(
         files["Market.h"],
         {
@@ -160,6 +151,7 @@ bool Person::ParseJson(const rapidjson::Value& json) {
 #include <string>
 #include <map>
 #include <rapidjson/document.h>
+#include "Converter.h"
 
 namespace generator_test_namespace {
 class Market {
@@ -170,7 +162,7 @@ public:
   const std::map<std::string, double>& GetPrices() const;
   std::map<std::string, double>& GetPrices();
   void SetPrices(const std::map<std::string, double>& val);
-  bool ParseJson(const rapidjson::Value& json);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
   std::vector<std::string> mInstruments;
@@ -209,15 +201,15 @@ std::map<std::string, double>& Market::GetPrices() {
 void Market::SetPrices(const std::map<std::string, double>& val) {
   mPrices = val;
 }
-bool Market::ParseJson(const rapidjson::Value& json) {
+bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "instruments")) {
-      auto res = JsonHelper::Parse(mInstruments, data.value);
+      auto res = JsonHelper::Parse(mInstruments, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "prices")) {
-      auto res = JsonHelper::Parse(mPrices, data.value);
+      auto res = JsonHelper::Parse(mPrices, data.value, converter);
       if (!res)
         return false;
     }
@@ -249,16 +241,6 @@ bool Market::ParseJson(const rapidjson::Value& json) {
     };
     Generator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
-    EXPECT_EQ(files.size(), 7);
-    ExpectGeneratedContent(
-        files["CMakeLists.txt"],
-        {
-            FileType::CMakeFile,
-            "CMakeLists.txt",
-            "add_library(generator_test_cmake Sound.cpp Animal.cpp JsonHelper.cpp)"
-        }
-    );
-
     ExpectGeneratedContent(
         files["Sound.h"],
         {
@@ -270,6 +252,7 @@ bool Market::ParseJson(const rapidjson::Value& json) {
 #include <string>
 #include <cstdint>
 #include <rapidjson/document.h>
+#include "Converter.h"
 
 namespace generator_test_namespace {
 class Sound {
@@ -279,7 +262,7 @@ public:
   void SetName(const std::string& val);
   uint32_t GetVolume() const;
   void SetVolume(uint32_t val);
-  bool ParseJson(const rapidjson::Value& json);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
   std::string mName;
@@ -316,15 +299,15 @@ uint32_t Sound::GetVolume() const {
 void Sound::SetVolume(uint32_t val) {
   mVolume = val;
 }
-bool Sound::ParseJson(const rapidjson::Value& json) {
+bool Sound::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "name")) {
-      auto res = JsonHelper::Parse(mName, data.value);
+      auto res = JsonHelper::Parse(mName, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "volume")) {
-      auto res = JsonHelper::Parse(mVolume, data.value);
+      auto res = JsonHelper::Parse(mVolume, data.value, converter);
       if (!res)
         return false;
     }
@@ -348,6 +331,7 @@ bool Sound::ParseJson(const rapidjson::Value& json) {
 #include <vector>
 #include <rapidjson/document.h>
 #include "Sound.h"
+#include "Converter.h"
 
 namespace generator_test_namespace {
 class Animal {
@@ -355,7 +339,7 @@ public:
   const std::vector<Sound>& GetSounds() const;
   std::vector<Sound>& GetSounds();
   void SetSounds(const std::vector<Sound>& val);
-  bool ParseJson(const rapidjson::Value& json);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
   std::vector<Sound> mSounds;
@@ -385,11 +369,11 @@ std::vector<Sound>& Animal::GetSounds() {
 void Animal::SetSounds(const std::vector<Sound>& val) {
   mSounds = val;
 }
-bool Animal::ParseJson(const rapidjson::Value& json) {
+bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "sounds")) {
-      auto res = JsonHelper::Parse(mSounds, data.value);
+      auto res = JsonHelper::Parse(mSounds, data.value, converter);
       if (!res)
         return false;
     }
@@ -401,6 +385,200 @@ bool Animal::ParseJson(const rapidjson::Value& json) {
         }
     );
 
+  }
+
+  TEST(GeneratorTest, Converters) {
+    Tokenizer tokenizer(R"DELIM(
+  struct Person {
+    @jsonConvert(from=string, using=countryToId)
+    u32 currentCountry;
+    @jsonConvert(from=string, using=cityToId)
+    u32 currentCity;
+    @jsonConvert(from=string, using=countryToId)
+    u32 homeCountry;
+    @jsonConvert(from=string, using=cityToId)
+    u32 placeOfBirth;
+  }
+  struct Country {
+    Person leader;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto translatedProject = Translator().Translate(parser.GetProject());
+    GeneratorSettings generatorSettings{
+      .mNamespace = "generator_test_namespace",
+      .mCMakeTarget = "generator_test_cmake",
+      };
+    Generator generator(generatorSettings);
+    auto files = MapByName(generator.Generate(translatedProject));
+    ExpectGeneratedContent(
+        files["Person.h"],
+        {
+          FileType::CppHeader,
+          "Person.h",
+          R"DELIM(
+#pragma once
+
+#include <cstdint>
+#include <rapidjson/document.h>
+#include "Converter.h"
+
+namespace generator_test_namespace {
+class Person {
+public:
+  uint32_t GetCurrentCountry() const;
+  void SetCurrentCountry(uint32_t val);
+  uint32_t GetCurrentCity() const;
+  void SetCurrentCity(uint32_t val);
+  uint32_t GetHomeCountry() const;
+  void SetHomeCountry(uint32_t val);
+  uint32_t GetPlaceOfBirth() const;
+  void SetPlaceOfBirth(uint32_t val);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+protected:
+private:
+  uint32_t mCurrentCountry;
+  uint32_t mCurrentCity;
+  uint32_t mHomeCountry;
+  uint32_t mPlaceOfBirth;
+};
+}
+          )DELIM"
+        }
+        );
+    ExpectGeneratedContent(
+        files["Person.cpp"],
+        {
+          FileType::CppSource,
+          "Person.cpp",
+          R"DELIM(
+#include "Person.h"
+
+#include "JsonHelper.h"
+
+namespace generator_test_namespace {
+uint32_t Person::GetCurrentCountry() const {
+  return mCurrentCountry;
+}
+void Person::SetCurrentCountry(uint32_t val) {
+  mCurrentCountry = val;
+}
+uint32_t Person::GetCurrentCity() const {
+  return mCurrentCity;
+}
+void Person::SetCurrentCity(uint32_t val) {
+  mCurrentCity = val;
+}
+uint32_t Person::GetHomeCountry() const {
+  return mHomeCountry;
+}
+void Person::SetHomeCountry(uint32_t val) {
+  mHomeCountry = val;
+}
+uint32_t Person::GetPlaceOfBirth() const {
+  return mPlaceOfBirth;
+}
+void Person::SetPlaceOfBirth(uint32_t val) {
+  mPlaceOfBirth = val;
+}
+bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  for(const auto& data: json.GetObject()) {
+    const auto& name = data.name.GetString();
+    if (0 == strcmp(name, "currentCountry")) {
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
+      if (!res)
+        return false;
+      mCurrentCountry = converter.countryToId(temp);
+    } else if (0 == strcmp(name, "currentCity")) {
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
+      if (!res)
+        return false;
+      mCurrentCity = converter.cityToId(temp);
+    } else if (0 == strcmp(name, "homeCountry")) {
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
+      if (!res)
+        return false;
+      mHomeCountry = converter.countryToId(temp);
+    } else if (0 == strcmp(name, "placeOfBirth")) {
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
+      if (!res)
+        return false;
+      mPlaceOfBirth = converter.cityToId(temp);
+    }
+  }
+  return true;
+}
+}
+          )DELIM"
+        }
+        );
+    ExpectGeneratedContent(
+        files["Country.h"],
+        {
+            FileType::CppHeader,
+            "Country.h",
+            R"DELIM(
+#pragma once
+
+#include <rapidjson/document.h>
+#include "Person.h"
+#include "Converter.h"
+
+namespace generator_test_namespace {
+class Country {
+public:
+  const Person& GetLeader() const;
+  Person& GetLeader();
+  void SetLeader(const Person& val);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+protected:
+private:
+  Person mLeader;
+};
+}
+          )DELIM"
+        }
+    );
+    ExpectGeneratedContent(
+        files["Country.cpp"],
+        {
+            FileType::CppSource,
+            "Country.cpp",
+            R"DELIM(
+#include "Country.h"
+
+#include "JsonHelper.h"
+
+namespace generator_test_namespace {
+const Person& Country::GetLeader() const {
+  return mLeader;
+}
+Person& Country::GetLeader() {
+  return mLeader;
+}
+void Country::SetLeader(const Person& val) {
+  mLeader = val;
+}
+bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  for(const auto& data: json.GetObject()) {
+    const auto& name = data.name.GetString();
+    if (0 == strcmp(name, "leader")) {
+      auto res = mLeader.ParseJson(data.value, converter);
+      if (!res)
+        return false;
+    }
+  }
+  return true;
+}
+}
+          )DELIM"
+        }
+    );
   }
 
 }

@@ -2,18 +2,28 @@
 
 #include <cstdint>
 #include <rapidjson/document.h>
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 class Person {
 public:
-  uint32_t GetAge() const;
-  void SetAge(uint32_t val);
-  float GetGender() const;
-  void SetGender(float val);
-  bool ParseJson(const rapidjson::Value& json);
+  uint32_t GetRace() const;
+  void SetRace(uint32_t val);
+  uint32_t GetCurrentCountry() const;
+  void SetCurrentCountry(uint32_t val);
+  uint32_t GetCurrentCity() const;
+  void SetCurrentCity(uint32_t val);
+  uint32_t GetHomeCountry() const;
+  void SetHomeCountry(uint32_t val);
+  uint32_t GetPlaceOfBirth() const;
+  void SetPlaceOfBirth(uint32_t val);
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
-  uint32_t mAge;
-  float mGender;
+  uint32_t mRace;
+  uint32_t mCurrentCountry;
+  uint32_t mCurrentCity;
+  uint32_t mHomeCountry;
+  uint32_t mPlaceOfBirth;
 };
 }

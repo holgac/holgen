@@ -18,10 +18,16 @@ namespace holgen {
     const char *what() { return mMsg.c_str(); }
   };
 
+  struct TypeDefinition {
+    std::string mName;
+    std::vector<TypeDefinition> mTemplateParameters;
+  };
+
   // @decorator(attribute=5)
   struct DecoratorAttributeDefinition {
     std::string mName;
-    std::string mValue;
+    // TODO: make it a TypeDefinition to support templating
+    TypeDefinition mValue;
   };
 
   // TODO: This is not a decorator, find a better name
@@ -29,23 +35,22 @@ namespace holgen {
   struct DecoratorDefinition {
     std::string mName;
     std::vector<DecoratorAttributeDefinition> mAttributes;
-  };
-
-  struct TypeDefinition {
-    std::string mName;
-    std::vector<TypeDefinition> mTemplateParameters;
+    const DecoratorAttributeDefinition* GetAttribute(const std::string& name) const;
   };
 
   struct FieldDefinition {
     TypeDefinition mType;
     std::string mName;
     std::vector<DecoratorDefinition> mDecorators;
+    const DecoratorDefinition* GetDecorator(const std::string& name) const;
   };
 
   struct StructDefinition {
     std::string mName;
     std::vector<FieldDefinition> mFields;
     std::vector<DecoratorDefinition> mDecorators;
+    const DecoratorDefinition* GetDecorator(const std::string& name) const;
+    const FieldDefinition* GetField(const std::string& name) const;
   };
 
   // rename to ParsedProject or ProjectDefinition to match the other classes?

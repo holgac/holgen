@@ -36,23 +36,23 @@ std::map<std::string, std::vector<std::string>>& Race::GetNames() {
 void Race::SetNames(const std::map<std::string, std::vector<std::string>>& val) {
   mNames = val;
 }
-bool Race::ParseJson(const rapidjson::Value& json) {
+bool Race::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "id")) {
-      auto res = JsonHelper::Parse(mId, data.value);
+      auto res = JsonHelper::Parse(mId, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "name")) {
-      auto res = JsonHelper::Parse(mName, data.value);
+      auto res = JsonHelper::Parse(mName, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "hairColors")) {
-      auto res = JsonHelper::Parse(mHairColors, data.value);
+      auto res = JsonHelper::Parse(mHairColors, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "names")) {
-      auto res = JsonHelper::Parse(mNames, data.value);
+      auto res = JsonHelper::Parse(mNames, data.value, converter);
       if (!res)
         return false;
     }
