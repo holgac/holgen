@@ -44,6 +44,9 @@ namespace holgen {
 
   void GeneratorJson::EnrichClasses() {
     for (auto &cls: mTranslatedProject.mClasses) {
+      const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
+      if (structDefinition.GetDecorator(Decorators::NoJson))
+        continue;
       // TODO: skip if noJson decorator exists
       GenerateParseJson(cls);
     }
@@ -75,6 +78,8 @@ namespace holgen {
     // parseFunc.mBody.Line() << "const auto& value = data.value;";
     bool isFirst = true;
     for (const auto &fieldDefinition: structDefinition.mFields) {
+      if (fieldDefinition.GetDecorator(Decorators::NoJson))
+        continue;
       if (isFirst) {
         parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
         isFirst = false;

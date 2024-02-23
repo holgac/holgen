@@ -19,6 +19,7 @@ namespace holgen {
     inline static const std::string JsonConvert = "jsonConvert";
     inline static const std::string JsonConvert_From = "from";
     inline static const std::string JsonConvert_Using = "using";
+
     /*
      * Disables lua integration for the specified data type.
      *
@@ -32,5 +33,19 @@ namespace holgen {
      * }
      */
     inline static const std::string NoLua = "noLua";
+
+    /*
+     * Disables json integration for the specified data type.
+     *
+     * Example:
+     * @noJson
+     * struct Something { ... }
+     *
+     * struct Something {
+     *  @noJson()
+     *  i8 field;
+     * }
+     */
+    inline static const std::string NoJson = "noJson";
   };
 }

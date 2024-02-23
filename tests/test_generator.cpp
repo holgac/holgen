@@ -56,6 +56,7 @@ namespace {
   TEST(GeneratorTest, ClassWithGetters) {
     Tokenizer tokenizer(R"DELIM(
   @noLua()
+  @noJson()
   struct Person   {
     u32 age;
     float gender;
@@ -79,8 +80,6 @@ namespace {
 #pragma once
 
 #include <cstdint>
-#include <rapidjson/document.h>
-#include "Converter.h"
 
 namespace generator_test_namespace {
 class Person {
@@ -89,7 +88,6 @@ public:
   void SetAge(uint32_t val);
   float GetGender() const;
   void SetGender(float val);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
   uint32_t mAge;
@@ -107,8 +105,6 @@ private:
             R"DELIM(
 #include "Person.h"
 
-#include "JsonHelper.h"
-
 namespace generator_test_namespace {
 uint32_t Person::GetAge() const {
   return mAge;
@@ -121,21 +117,6 @@ float Person::GetGender() const {
 }
 void Person::SetGender(float val) {
   mGender = val;
-}
-bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter) {
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "age")) {
-      auto res = JsonHelper::Parse(mAge, data.value, converter);
-      if (!res)
-        return false;
-    } else if (0 == strcmp(name, "gender")) {
-      auto res = JsonHelper::Parse(mGender, data.value, converter);
-      if (!res)
-        return false;
-    }
-  }
-  return true;
 }
 }
           )DELIM"
@@ -425,6 +406,8 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
   }
   @noLua()
   struct Country {
+    @noJson()
+    string name;
     Person leader;
   }
     )DELIM");
@@ -550,6 +533,7 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
             R"DELIM(
 #pragma once
 
+#include <string>
 #include <rapidjson/document.h>
 #include "Person.h"
 #include "Converter.h"
@@ -557,12 +541,16 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
 namespace generator_test_namespace {
 class Country {
 public:
+  const std::string& GetName() const;
+  std::string& GetName();
+  void SetName(const std::string& val);
   const Person& GetLeader() const;
   Person& GetLeader();
   void SetLeader(const Person& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
 private:
+  std::string mName;
   Person mLeader;
 };
 }
@@ -580,6 +568,15 @@ private:
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
+const std::string& Country::GetName() const {
+  return mName;
+}
+std::string& Country::GetName() {
+  return mName;
+}
+void Country::SetName(const std::string& val) {
+  mName = val;
+}
 const Person& Country::GetLeader() const {
   return mLeader;
 }
