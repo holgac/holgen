@@ -1,6 +1,7 @@
 #include "Weapon.h"
 
 #include "JsonHelper.h"
+#include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
 uint32_t Weapon::GetDamageMin() const {
@@ -55,5 +56,55 @@ bool Weapon::ParseJson(const rapidjson::Value& json, const Converter& converter)
     }
   }
   return true;
+}
+void Weapon::PushToLua(lua_State* luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "p");
+  lua_pushlightuserdata(luaState, (void*)this);
+  lua_settable(luaState, -3);
+  lua_getglobal(luaState, "WeaponMeta");
+  lua_setmetatable(luaState, -2);
+}
+void Weapon::CreateLuaMetatable(lua_State* luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, [](lua_State* ls) {
+    lua_pushstring(ls, "p");
+    lua_gettable(ls, -3);
+    auto instance = (Weapon*)lua_touserdata(ls, -1);
+    const char* key = lua_tostring(ls, -2);
+    if (0 == strcmp("damageMin", key)) {
+      LuaHelper::Push(instance->mDamageMin, ls);
+    } else if (0 == strcmp("damageMax", key)) {
+      LuaHelper::Push(instance->mDamageMax, ls);
+    } else if (0 == strcmp("damageMultipliers", key)) {
+      LuaHelper::Push(instance->mDamageMultipliers, ls);
+    } else if (0 == strcmp("modifiers", key)) {
+      LuaHelper::Push(instance->mModifiers, ls);
+    } else {
+      return 0;
+    }
+    return 1;
+  });
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, [](lua_State* ls) {
+    lua_pushstring(ls, "p");
+    lua_gettable(ls, -4);
+    auto instance = (Weapon*)lua_touserdata(ls, -1);
+    const char* key = lua_tostring(ls, -3);
+    if (0 == strcmp("damageMin", key)) {
+      LuaHelper::Read(instance->mDamageMin, ls, -2);
+    } else if (0 == strcmp("damageMax", key)) {
+      LuaHelper::Read(instance->mDamageMax, ls, -2);
+    } else if (0 == strcmp("damageMultipliers", key)) {
+      LuaHelper::Read(instance->mDamageMultipliers, ls, -2);
+    } else if (0 == strcmp("modifiers", key)) {
+      LuaHelper::Read(instance->mModifiers, ls, -2);
+    }
+    return 0;
+  });
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "WeaponMeta");
 }
 }

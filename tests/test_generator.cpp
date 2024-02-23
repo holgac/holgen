@@ -26,8 +26,9 @@ namespace {
     EXPECT_EQ(Trim(actual.mText), Trim(expected.mText));
   }
 
-  TEST(GeneratorTest, ClassWithGetters) {
+  TEST(GeneratorTest, Helpers) {
     Tokenizer tokenizer(R"DELIM(
+  @noLua()
   struct Person   {
     u32 age;
     float gender;
@@ -47,9 +48,28 @@ namespace {
         {
             FileType::CMakeFile,
             "CMakeLists.txt",
-            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp Converter.cpp)"
+            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp Converter.cpp LuaHelper.cpp)"
         }
     );
+  }
+
+  TEST(GeneratorTest, ClassWithGetters) {
+    Tokenizer tokenizer(R"DELIM(
+  @noLua()
+  struct Person   {
+    u32 age;
+    float gender;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto translatedProject = Translator().Translate(parser.GetProject());
+    GeneratorSettings generatorSettings{
+        .mNamespace = "generator_test_namespace",
+        .mCMakeTarget = "generator_test_cmake",
+    };
+    Generator generator(generatorSettings);
+    auto files = MapByName(generator.Generate(translatedProject));
     ExpectGeneratedContent(
         files["Person.h"],
         {
@@ -125,6 +145,7 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
 
   TEST(GeneratorTest, ClassWithContainers) {
     Tokenizer tokenizer(R"DELIM(
+  @noLua()
   struct Market {
     vector<string> instruments;
     map<string, double> prices;
@@ -224,10 +245,12 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
 
   TEST(GeneratorTest, NestedClasses) {
     Tokenizer tokenizer(R"DELIM(
+  @noLua()
   struct Sound {
     string name;
     u32 volume;
   }
+  @noLua()
   struct Animal {
     vector<Sound> sounds;
   }
@@ -389,6 +412,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
 
   TEST(GeneratorTest, Converters) {
     Tokenizer tokenizer(R"DELIM(
+  @noLua()
   struct Person {
     @jsonConvert(from=string, using=countryToId)
     u32 currentCountry;
@@ -399,6 +423,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
     @jsonConvert(from=string, using=cityToId)
     u32 placeOfBirth;
   }
+  @noLua()
   struct Country {
     Person leader;
   }

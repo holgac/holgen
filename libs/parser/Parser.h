@@ -33,6 +33,8 @@ namespace holgen {
     std::string mName;
     std::vector<DecoratorDefinition> mDecorators;
     const DecoratorDefinition *GetDecorator(const std::string &name) const;
+    std::string GetCapitalizedName() const;
+    std::string GetNameInCpp() const;
   };
 
   struct StructDefinition {
@@ -46,6 +48,7 @@ namespace holgen {
   // rename to ParsedProject or ProjectDefinition to match the other classes?
   struct ProjectDefinition {
     std::vector<StructDefinition> mStructs;
+    const StructDefinition* GetStruct(const std::string& name) const;
   };
 
   class Parser {

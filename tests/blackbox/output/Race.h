@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include <rapidjson/document.h>
+#include <lua.hpp>
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
@@ -22,6 +23,8 @@ public:
   std::map<std::string, std::vector<std::string>>& GetNames();
   void SetNames(const std::map<std::string, std::vector<std::string>>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  void PushToLua(lua_State* luaState) const;
+  static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
   uint32_t mId;

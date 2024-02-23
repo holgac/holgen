@@ -122,6 +122,19 @@ namespace holgen {
     return nullptr;
   }
 
+  std::string FieldDefinition::GetCapitalizedName() const {
+    auto capitalizedName = mName;
+
+    if (capitalizedName[0] >= 'a' && capitalizedName[0] <= 'z') {
+      capitalizedName[0] -= 'a' - 'A';
+    }
+    return capitalizedName;
+  }
+
+  std::string FieldDefinition::GetNameInCpp() const {
+    return "m" + GetCapitalizedName();
+  }
+
   const DecoratorAttributeDefinition *DecoratorDefinition::GetAttribute(const std::string &name) const {
     for (const auto &attribute: mAttributes) {
       if (attribute.mName == name)
@@ -142,6 +155,14 @@ namespace holgen {
     for (const auto &field: mFields) {
       if (field.mName == name)
         return &field;
+    }
+    return nullptr;
+  }
+
+  const StructDefinition *ProjectDefinition::GetStruct(const std::string &name) const {
+    for (const auto &structDefinition: mStructs) {
+      if (structDefinition.mName == name)
+        return &structDefinition;
     }
     return nullptr;
   }

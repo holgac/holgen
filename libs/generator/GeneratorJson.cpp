@@ -6,21 +6,6 @@
 
 namespace holgen {
   namespace {
-    // TODO: duplicate code! Move to somewhere else
-
-    std::string GetCapitalizedName(const std::string &name) {
-      auto capitalizedName = name;
-
-      if (capitalizedName[0] >= 'a' && capitalizedName[0] <= 'z') {
-        capitalizedName[0] -= 'a' - 'A';
-      }
-      return capitalizedName;
-    }
-
-    std::string GetFieldName(const FieldDefinition &fieldDefinition) {
-      return "m" + GetCapitalizedName(fieldDefinition.mName);
-    }
-
     struct RapidJsonTypeUsage {
       std::string mValidator;
       std::string mGetter;
@@ -50,11 +35,6 @@ namespace holgen {
       TranslatedProject &translatedProject
   ) : mProjectDefinition(projectDefinition), mTranslatedProject(translatedProject) {
 
-    for (size_t i = 0; i < mProjectDefinition.mStructs.size(); ++i) {
-      const auto &structDefinition = mProjectDefinition.mStructs[i];
-      mStructDefinitions.emplace(structDefinition.mName, i);
-    }
-
     for (size_t i = 0; i < mTranslatedProject.mClasses.size(); ++i) {
       const auto &cls = mTranslatedProject.mClasses[i];
       mClasses.emplace(cls.mName, i);
@@ -70,7 +50,7 @@ namespace holgen {
   }
 
   void GeneratorJson::GenerateParseJson(Class &cls) {
-    auto &structDefinition = mProjectDefinition.mStructs[mStructDefinitions[cls.mName]];
+    const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = "ParseJson";
     parseFunc.mIsConst = false;
@@ -110,8 +90,61 @@ namespace holgen {
     parseFunc.mBody.Indent(-1);
     parseFunc.mBody.Line() << "}"; // range based for on json.GetObject()
     parseFunc.mBody.Line() << "return true;";
+  }
 
+  void GeneratorJson::GenerateParseJsonForField(
+      Class &cls,
+      ClassMethod &parseFunc,
+      const StructDefinition &structDefinition,
+      const FieldDefinition &fieldDefinition
+  ) {
+    parseFunc.mBody.Indent(1);
+    auto fieldClassIt = mClasses.find(fieldDefinition.mType.mName);
+    if (fieldClassIt == mClasses.end()) {
+      auto jsonConvert = fieldDefinition.GetDecorator(Decorators::JsonConvert);
+      if (jsonConvert != nullptr) {
+        auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
+        auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
+        THROW_IF(jsonConvertFrom == nullptr || jsonConvertUsing == nullptr, "Malformed jsonConvert in {}::{}",
+                 cls.mName, fieldDefinition.mName)
+        Type type;
+        TypeInfo::Get().ConvertToType(type, jsonConvertFrom->mValue);
+        parseFunc.mBody.Line() << type.ToString() << " temp;";
+        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(temp, data.value, converter);";
+        parseFunc.mBody.Line() << "if (!res)";
+        parseFunc.mBody.Indent(1);
+        parseFunc.mBody.Line() << "return false;";
+        parseFunc.mBody.Indent(-1); // if !res
+        Type fieldType;
+        TypeInfo::Get().ConvertToType(fieldType, fieldDefinition.mType);
+        if (TypeInfo::Get().CppPrimitives.contains(fieldType.mName))
+          parseFunc.mBody.Line() << fieldDefinition.GetNameInCpp() << " = converter." << jsonConvertUsing->mValue.mName
+                                 << "(temp);";
+        else
+          parseFunc.mBody.Line() << fieldDefinition.GetNameInCpp() << " = std::move(converter."
+                                 << jsonConvertUsing->mValue.mName
+                                 << "(temp));";
+      } else {
+        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(" << fieldDefinition.GetNameInCpp()
+                               << ", data.value, converter);";
+        parseFunc.mBody.Line() << "if (!res)";
+        parseFunc.mBody.Indent(1);
+        parseFunc.mBody.Line() << "return false;";
+        parseFunc.mBody.Indent(-1); // if !res
+      }
+    } else {
+      parseFunc.mBody.Line() << "auto res = " << fieldDefinition.GetNameInCpp() << ".ParseJson(data.value, converter);";
 
+      parseFunc.mBody.Line() << "if (!res)";
+      parseFunc.mBody.Indent(1);
+      parseFunc.mBody.Line() << "return false;";
+      parseFunc.mBody.Indent(-1); // if !res
+    }
+  }
+
+  void GeneratorJson::GenerateHelpers() {
+    GenerateJsonHelper(mTranslatedProject.mClasses.emplace_back());
+    GenerateConverter(mTranslatedProject.mClasses.emplace_back());
   }
 
   void GeneratorJson::GenerateJsonHelper(Class &generatedClass) {
@@ -305,62 +338,6 @@ namespace holgen {
       parse.mBody.Line() << "}"; // range based for on json.GetArray()
       parse.mBody.Line() << "return true;";
     }
-  }
-
-  void GeneratorJson::GenerateParseJsonForField(
-      Class &cls,
-      ClassMethod &parseFunc,
-      const StructDefinition &structDefinition,
-      const FieldDefinition &fieldDefinition
-  ) {
-    parseFunc.mBody.Indent(1);
-    auto fieldClassIt = mClasses.find(fieldDefinition.mType.mName);
-    if (fieldClassIt == mClasses.end()) {
-      auto jsonConvert = fieldDefinition.GetDecorator(Decorators::JsonConvert);
-      if (jsonConvert != nullptr) {
-        auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
-        auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
-        THROW_IF(jsonConvertFrom == nullptr || jsonConvertUsing == nullptr, "Malformed jsonConvert in {}::{}",
-                 cls.mName, fieldDefinition.mName)
-        Type type;
-        TypeInfo::Get().ConvertToType(type, jsonConvertFrom->mValue);
-        parseFunc.mBody.Line() << type.ToString() << " temp;";
-        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(temp, data.value, converter);";
-        parseFunc.mBody.Line() << "if (!res)";
-        parseFunc.mBody.Indent(1);
-        parseFunc.mBody.Line() << "return false;";
-        parseFunc.mBody.Indent(-1); // if !res
-        Type fieldType;
-        TypeInfo::Get().ConvertToType(fieldType, fieldDefinition.mType);
-        if (TypeInfo::Get().CppPrimitives.contains(fieldType.mName))
-          parseFunc.mBody.Line() << GetFieldName(fieldDefinition) << " = converter." << jsonConvertUsing->mValue.mName
-                                 << "(temp);";
-        else
-          parseFunc.mBody.Line() << GetFieldName(fieldDefinition) << " = std::move(converter."
-                                 << jsonConvertUsing->mValue.mName
-                                 << "(temp));";
-      } else {
-        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(" << GetFieldName(fieldDefinition)
-                               << ", data.value, converter);";
-        parseFunc.mBody.Line() << "if (!res)";
-        parseFunc.mBody.Indent(1);
-        parseFunc.mBody.Line() << "return false;";
-        parseFunc.mBody.Indent(-1); // if !res
-      }
-    } else {
-      parseFunc.mBody.Line() << "auto res = " << GetFieldName(fieldDefinition) << ".ParseJson(data.value, converter);";
-
-      parseFunc.mBody.Line() << "if (!res)";
-      parseFunc.mBody.Indent(1);
-      parseFunc.mBody.Line() << "return false;";
-      parseFunc.mBody.Indent(-1); // if !res
-    }
-
-  }
-
-  void GeneratorJson::GenerateHelpers() {
-    GenerateJsonHelper(mTranslatedProject.mClasses.emplace_back());
-    GenerateConverter(mTranslatedProject.mClasses.emplace_back());
   }
 
   void GeneratorJson::GenerateConverter(Class &cls) {

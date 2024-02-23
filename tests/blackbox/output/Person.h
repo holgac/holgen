@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <rapidjson/document.h>
+#include <lua.hpp>
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
@@ -18,6 +19,8 @@ public:
   uint32_t GetPlaceOfBirth() const;
   void SetPlaceOfBirth(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  void PushToLua(lua_State* luaState) const;
+  static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
   uint32_t mRace;

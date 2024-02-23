@@ -66,6 +66,7 @@ namespace holgen {
     std::vector<ClassMethod> mMethods;
     std::vector<ClassConstructor> mConstructors;
     std::vector<ClassField> mFields;
+    ClassField* GetField(const std::string& name);
   };
 
   // This is the unit that will actually be generated into multiple files

@@ -71,6 +71,11 @@ namespace holgen {
       if (isHeader) {
         AddLibHeader("rapidjson/document.h");
       }
+    } else if (type.mName.starts_with("lua_State")) {
+      if (isHeader) {
+        // TODO: implement fwd declaring
+        AddLibHeader("lua.hpp");
+      }
     } else {
       // TODO: This will change when we implement fwd declarations
       if (isHeader) {

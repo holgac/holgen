@@ -4,6 +4,7 @@
 #include <map>
 #include <cstdint>
 #include <rapidjson/document.h>
+#include <lua.hpp>
 #include "Person.h"
 #include "Converter.h"
 
@@ -20,6 +21,8 @@ public:
   std::map<uint32_t, uint32_t>& GetPopulation();
   void SetPopulation(const std::map<uint32_t, uint32_t>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  void PushToLua(lua_State* luaState) const;
+  static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
   Person mLeader;

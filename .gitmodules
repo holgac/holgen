@@ -4,3 +4,6 @@
 [submodule "external/x_rapidjson"]
 	path = external/x_rapidjson
 	url = https://github.com/Tencent/rapidjson.git
+[submodule "external/x_lua/src"]
+	path = external/x_lua/src
+	url = https://github.com/lua/lua.git

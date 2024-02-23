@@ -212,6 +212,10 @@ namespace holgen {
         // TODO: don't hardcode these
         headers.AddLocalHeader("JsonHelper.h");
       }
+      if (!isHeader && method.mName == "PushToLua") {
+        // TODO: don't hardcode these
+        headers.AddLocalHeader("LuaHelper.h");
+      }
     }
 
     headers.Write(codeBlock);

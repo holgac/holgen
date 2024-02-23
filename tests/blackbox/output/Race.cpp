@@ -1,6 +1,7 @@
 #include "Race.h"
 
 #include "JsonHelper.h"
+#include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
 uint32_t Race::GetId() const {
@@ -58,5 +59,55 @@ bool Race::ParseJson(const rapidjson::Value& json, const Converter& converter) {
     }
   }
   return true;
+}
+void Race::PushToLua(lua_State* luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "p");
+  lua_pushlightuserdata(luaState, (void*)this);
+  lua_settable(luaState, -3);
+  lua_getglobal(luaState, "RaceMeta");
+  lua_setmetatable(luaState, -2);
+}
+void Race::CreateLuaMetatable(lua_State* luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, [](lua_State* ls) {
+    lua_pushstring(ls, "p");
+    lua_gettable(ls, -3);
+    auto instance = (Race*)lua_touserdata(ls, -1);
+    const char* key = lua_tostring(ls, -2);
+    if (0 == strcmp("id", key)) {
+      LuaHelper::Push(instance->mId, ls);
+    } else if (0 == strcmp("name", key)) {
+      LuaHelper::Push(instance->mName, ls);
+    } else if (0 == strcmp("hairColors", key)) {
+      LuaHelper::Push(instance->mHairColors, ls);
+    } else if (0 == strcmp("names", key)) {
+      LuaHelper::Push(instance->mNames, ls);
+    } else {
+      return 0;
+    }
+    return 1;
+  });
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, [](lua_State* ls) {
+    lua_pushstring(ls, "p");
+    lua_gettable(ls, -4);
+    auto instance = (Race*)lua_touserdata(ls, -1);
+    const char* key = lua_tostring(ls, -3);
+    if (0 == strcmp("id", key)) {
+      LuaHelper::Read(instance->mId, ls, -2);
+    } else if (0 == strcmp("name", key)) {
+      LuaHelper::Read(instance->mName, ls, -2);
+    } else if (0 == strcmp("hairColors", key)) {
+      LuaHelper::Read(instance->mHairColors, ls, -2);
+    } else if (0 == strcmp("names", key)) {
+      LuaHelper::Read(instance->mNames, ls, -2);
+    }
+    return 0;
+  });
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "RaceMeta");
 }
 }

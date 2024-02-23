@@ -3,6 +3,7 @@
 #include "core/Exception.h"
 #include "GeneratorJson.h"
 #include "TypeInfo.h"
+#include "GeneratorLua.h"
 
 namespace holgen {
 
@@ -32,11 +33,15 @@ namespace holgen {
       GenerateClass(translatedProject.mClasses.emplace_back(), structDefinition);
     }
 
+    // Enrichment should not create new classes or add new fields.
     GeneratorJson generatorJson(project, translatedProject);
     generatorJson.EnrichClasses();
+    GeneratorLua generatorLua(project, translatedProject);
+    generatorLua.EnrichClasses();
 
     // After all integrations processed all real structs, create helpers
     generatorJson.GenerateHelpers();
+    generatorLua.GenerateHelpers();
 
     return translatedProject;
   }
@@ -60,7 +65,6 @@ namespace holgen {
       auto &getter = generatedClass.mMethods.emplace_back();
       getter.mName = "Get" + capitalizedFieldName;
       getter.mBody.Line() << "return " << generatedField.mName << ";";
-      // TODO: non-primitives will return const ref
       getter.mType = generatedField.mType;
       getter.mIsConst = true;
       if (!isPrimitive) {
@@ -93,5 +97,13 @@ namespace holgen {
       setter.mBody.Line() << generatedField.mName << " = val;";
       setter.mType.mName = "void";
     }
+  }
+
+  ClassField *Class::GetField(const std::string &name) {
+    for(auto& field: mFields) {
+      if (field.mName == name)
+        return &field;
+    }
+    return nullptr;
   }
 }

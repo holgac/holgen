@@ -1,6 +1,7 @@
 #include "Person.h"
 
 #include "JsonHelper.h"
+#include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
 uint32_t Person::GetRace() const {
@@ -69,5 +70,59 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
     }
   }
   return true;
+}
+void Person::PushToLua(lua_State* luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "p");
+  lua_pushlightuserdata(luaState, (void*)this);
+  lua_settable(luaState, -3);
+  lua_getglobal(luaState, "PersonMeta");
+  lua_setmetatable(luaState, -2);
+}
+void Person::CreateLuaMetatable(lua_State* luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, [](lua_State* ls) {
+    lua_pushstring(ls, "p");
+    lua_gettable(ls, -3);
+    auto instance = (Person*)lua_touserdata(ls, -1);
+    const char* key = lua_tostring(ls, -2);
+    if (0 == strcmp("race", key)) {
+      LuaHelper::Push(instance->mRace, ls);
+    } else if (0 == strcmp("currentCountry", key)) {
+      LuaHelper::Push(instance->mCurrentCountry, ls);
+    } else if (0 == strcmp("currentCity", key)) {
+      LuaHelper::Push(instance->mCurrentCity, ls);
+    } else if (0 == strcmp("homeCountry", key)) {
+      LuaHelper::Push(instance->mHomeCountry, ls);
+    } else if (0 == strcmp("placeOfBirth", key)) {
+      LuaHelper::Push(instance->mPlaceOfBirth, ls);
+    } else {
+      return 0;
+    }
+    return 1;
+  });
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, [](lua_State* ls) {
+    lua_pushstring(ls, "p");
+    lua_gettable(ls, -4);
+    auto instance = (Person*)lua_touserdata(ls, -1);
+    const char* key = lua_tostring(ls, -3);
+    if (0 == strcmp("race", key)) {
+      LuaHelper::Read(instance->mRace, ls, -2);
+    } else if (0 == strcmp("currentCountry", key)) {
+      LuaHelper::Read(instance->mCurrentCountry, ls, -2);
+    } else if (0 == strcmp("currentCity", key)) {
+      LuaHelper::Read(instance->mCurrentCity, ls, -2);
+    } else if (0 == strcmp("homeCountry", key)) {
+      LuaHelper::Read(instance->mHomeCountry, ls, -2);
+    } else if (0 == strcmp("placeOfBirth", key)) {
+      LuaHelper::Read(instance->mPlaceOfBirth, ls, -2);
+    }
+    return 0;
+  });
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "PersonMeta");
 }
 }

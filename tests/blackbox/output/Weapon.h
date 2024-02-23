@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <rapidjson/document.h>
+#include <lua.hpp>
 #include "DamageMultiplier.h"
 #include "Converter.h"
 
@@ -21,6 +22,8 @@ public:
   std::vector<std::string>& GetModifiers();
   void SetModifiers(const std::vector<std::string>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  void PushToLua(lua_State* luaState) const;
+  static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
   uint32_t mDamageMin;
