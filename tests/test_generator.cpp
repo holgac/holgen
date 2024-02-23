@@ -30,6 +30,7 @@ namespace {
     Tokenizer tokenizer(R"DELIM(
   @noLua()
   struct Person   {
+    @jsonConvert(from=string, using=stringToU32Converter)
     u32 age;
     float gender;
   }
@@ -51,6 +52,7 @@ namespace {
             "add_library(generator_test_cmake Person.cpp JsonHelper.cpp Converter.cpp LuaHelper.cpp)"
         }
     );
+    // TODO: test helpers
   }
 
   TEST(GeneratorTest, ClassWithGetters) {

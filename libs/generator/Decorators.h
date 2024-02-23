@@ -47,5 +47,24 @@ namespace holgen {
      * }
      */
     inline static const std::string NoJson = "noJson";
+
+    /*
+     * Indicates that the field is a container that should be exposed
+     *
+     * Example:
+     * @container(elemName=country)
+     * vector<Country> countries;
+     */
+    inline static const std::string Container = "container";
+    inline static const std::string Container_ElemName = "elemName";
+
+    /**
+     * Defines the field as an id. Can only exist once per struct.
+     * The field needs to be an integral type.
+     *
+     * Example:
+     * @id
+     */
+    inline static const std::string Id = "id";
   };
 }

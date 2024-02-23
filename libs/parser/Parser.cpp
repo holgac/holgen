@@ -1,5 +1,7 @@
 #include "Parser.h"
 #include "core/Exception.h"
+#include "core/St.h"
+#include "generator/Decorators.h"
 
 namespace holgen {
 
@@ -79,8 +81,6 @@ namespace holgen {
         THROW_IF(curToken.mType != TokenType::String, "Decorator attribute should be a string, found \"{}\"",
                  curToken.mContents)
         ParseType(curToken, decoratorAttributeDefinition.mValue);
-      } else {
-        THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete decorator definition!")
       }
       if (curToken.mType == TokenType::Comma) {
         THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete decorator definition!")
@@ -122,17 +122,8 @@ namespace holgen {
     return nullptr;
   }
 
-  std::string FieldDefinition::GetCapitalizedName() const {
-    auto capitalizedName = mName;
-
-    if (capitalizedName[0] >= 'a' && capitalizedName[0] <= 'z') {
-      capitalizedName[0] -= 'a' - 'A';
-    }
-    return capitalizedName;
-  }
-
   std::string FieldDefinition::GetNameInCpp() const {
-    return "m" + GetCapitalizedName();
+    return "m" + St::Capitalize(mName);
   }
 
   const DecoratorAttributeDefinition *DecoratorDefinition::GetAttribute(const std::string &name) const {
@@ -154,6 +145,14 @@ namespace holgen {
   const FieldDefinition *StructDefinition::GetField(const std::string &name) const {
     for (const auto &field: mFields) {
       if (field.mName == name)
+        return &field;
+    }
+    return nullptr;
+  }
+
+  const FieldDefinition *StructDefinition::GetIdField() const {
+    for (const auto &field: mFields) {
+      if (field.GetDecorator(Decorators::Id))
         return &field;
     }
     return nullptr;

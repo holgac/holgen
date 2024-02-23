@@ -33,7 +33,6 @@ namespace holgen {
     std::string mName;
     std::vector<DecoratorDefinition> mDecorators;
     const DecoratorDefinition *GetDecorator(const std::string &name) const;
-    std::string GetCapitalizedName() const;
     std::string GetNameInCpp() const;
   };
 
@@ -43,6 +42,7 @@ namespace holgen {
     std::vector<DecoratorDefinition> mDecorators;
     const DecoratorDefinition *GetDecorator(const std::string &name) const;
     const FieldDefinition *GetField(const std::string &name) const;
+    const FieldDefinition *GetIdField() const;
   };
 
   // rename to ParsedProject or ProjectDefinition to match the other classes?
@@ -62,6 +62,7 @@ namespace holgen {
     Parser();
     void Parse(Tokenizer &tokenizer);
 
+    // TODO: validate project
     const ProjectDefinition &GetProject() const { return mProject; }
   };
 

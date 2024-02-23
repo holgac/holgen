@@ -41,7 +41,9 @@ namespace holgen {
     );
     std::map<std::string, std::string> TypeToCppType;
     std::set<std::string> CppPrimitives;
-    std::set<std::string> CppContainers;
+    // Containers that allow random access
+    std::set<std::string> CppIndexedContainers;
+    // Map-like containers
     std::set<std::string> CppKeyedContainers;
 
   };

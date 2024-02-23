@@ -227,7 +227,7 @@ namespace holgen {
       parse.mBody.Line() << "return true;";
     }
 
-    for (const auto &container: TypeInfo::Get().CppContainers) {
+    for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
       auto &parse = generatedClass.mMethods.emplace_back();
       parse.mName = "Parse";
       parse.mIsConst = false;

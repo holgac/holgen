@@ -66,7 +66,7 @@ namespace holgen {
     std::vector<ClassMethod> mMethods;
     std::vector<ClassConstructor> mConstructors;
     std::vector<ClassField> mFields;
-    ClassField* GetField(const std::string& name);
+    ClassField *GetField(const std::string &name);
   };
 
   // This is the unit that will actually be generated into multiple files
@@ -79,7 +79,9 @@ namespace holgen {
   class Translator {
     void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
     void ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
+    void ProcessContainerField(Class &generatedClass, const ClassField &generatedField, const FieldDefinition &fieldDefinition) const;
+    const ProjectDefinition* mProject = nullptr;
   public:
-    TranslatedProject Translate(const ProjectDefinition &project) const;
+    TranslatedProject Translate(const ProjectDefinition &project);
   };
 }

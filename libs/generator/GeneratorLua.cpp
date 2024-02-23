@@ -224,7 +224,7 @@ namespace holgen {
       func.mBody.Line() << usage.mPusher << "(luaState, data" << usage.mFieldExtra << ");";
     }
 
-    for (const auto &container: TypeInfo::Get().CppContainers) {
+    for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
       func.mIsConst = false;
@@ -361,7 +361,7 @@ namespace holgen {
     }
 
     /*
-    for (const auto &container: TypeInfo::Get().CppContainers) {
+    for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
       func.mIsConst = false;

@@ -34,7 +34,7 @@ namespace holgen {
         "double",
         "bool",
     };
-    CppContainers = {
+    CppIndexedContainers = {
         "std::vector",
     };
     CppKeyedContainers = {

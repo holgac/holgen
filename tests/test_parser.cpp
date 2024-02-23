@@ -40,6 +40,8 @@ namespace {
     @dec1()
     @dec2(a1, a2=5, a3, a4='long string')
     s32 f1;
+    @dec3(a)
+    u32 f2;
   }
     )DELIM");
     Parser parser;
@@ -48,7 +50,7 @@ namespace {
     EXPECT_EQ(proj.mStructs.size(), 1);
     auto &s = proj.mStructs[0];
     EXPECT_EQ(s.mDecorators.size(), 0);
-    EXPECT_EQ(s.mFields.size(), 1);
+    EXPECT_EQ(s.mFields.size(), 2);
     auto& f = s.mFields[0];
     auto &ds = f.mDecorators;
     EXPECT_EQ(ds[0].mName, "dec1");
@@ -64,6 +66,13 @@ namespace {
     EXPECT_EQ(dsa[2].mValue.mName, "");
     EXPECT_EQ(dsa[3].mName, "a4");
     EXPECT_EQ(dsa[3].mValue.mName, "long string");
+    auto& f2 = s.mFields[1];
+    auto& ds2 = f2.mDecorators;
+    EXPECT_EQ(ds2.size(), 1);
+    EXPECT_EQ(ds2[0].mName, "dec3");
+    EXPECT_EQ(ds2[0].mAttributes.size(), 1);
+    EXPECT_EQ(ds2[0].mAttributes[0].mName, "a");
+    EXPECT_EQ(ds2[0].mAttributes[0].mValue.mName, "");
   }
 
   TEST(ParserTest, StructDecorators) {
