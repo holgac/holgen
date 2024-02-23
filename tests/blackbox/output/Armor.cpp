@@ -19,6 +19,15 @@ std::string& Armor::GetName() {
 void Armor::SetName(const std::string& val) {
   mName = val;
 }
+const std::string& Armor::GetAlternativeName() const {
+  return mAlternativeName;
+}
+std::string& Armor::GetAlternativeName() {
+  return mAlternativeName;
+}
+void Armor::SetAlternativeName(const std::string& val) {
+  mAlternativeName = val;
+}
 int8_t Armor::GetArmorClass() const {
   return mArmorClass;
 }
@@ -34,6 +43,10 @@ bool Armor::ParseJson(const rapidjson::Value& json, const Converter& converter) 
         return false;
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
+      if (!res)
+        return false;
+    } else if (0 == strcmp(name, "alternativeName")) {
+      auto res = JsonHelper::Parse(mAlternativeName, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "armorClass")) {
@@ -64,6 +77,8 @@ void Armor::CreateLuaMetatable(lua_State* luaState) {
       LuaHelper::Push(instance->mId, ls);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Push(instance->mName, ls);
+    } else if (0 == strcmp("alternativeName", key)) {
+      LuaHelper::Push(instance->mAlternativeName, ls);
     } else if (0 == strcmp("armorClass", key)) {
       LuaHelper::Push(instance->mArmorClass, ls);
     } else {
@@ -82,6 +97,8 @@ void Armor::CreateLuaMetatable(lua_State* luaState) {
       LuaHelper::Read(instance->mId, ls, -2);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Read(instance->mName, ls, -2);
+    } else if (0 == strcmp("alternativeName", key)) {
+      LuaHelper::Read(instance->mAlternativeName, ls, -2);
     } else if (0 == strcmp("armorClass", key)) {
       LuaHelper::Read(instance->mArmorClass, ls, -2);
     }

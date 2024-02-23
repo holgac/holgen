@@ -18,7 +18,7 @@ namespace holgen {
         {"string",  "std::string"},
         {"vector",  "std::vector"},
         {"map",     "std::map"},
-        {"hashmap", "std::unordered_map"},
+        {"unordered_map", "std::unordered_map"},
     };
 
     CppPrimitives = {

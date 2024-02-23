@@ -11,6 +11,7 @@ struct Armor {
     @id()
     u32 id;
     string name;
+    string alternativeName;
     s8 armorClass;
 }
 
@@ -39,18 +40,19 @@ struct GameData {
     // using=map by default
     // creates an extra map<fieldType, idType>, adds GetBootByName(string) function
     // only applies to @container
-    @extraIndex(name, using=unordered_map)
+    @index(on=name, using=unordered_map)
     // containers can only be indexed containers. After pushing, assigns id.
     // adds AddBoot, GetBoot(u32) functions
     // There should be one container per type
     @container(elemName=boot)
     vector<Boot> boots;
 
-    @extraIndex(name)
     @container(elemName=armor)
+    @index(on=name)
+    @index(on=alternativeName)
     vector<Armor> armors;
 
-    @extraIndex(name)
+    @index(on=name)
     @container(elemName=character)
     vector<Character> characters;
 }

@@ -1,7 +1,10 @@
 #pragma once
 
 #include <vector>
+#include <unordered_map>
+#include <string>
 #include <cstdint>
+#include <map>
 #include <rapidjson/document.h>
 #include <lua.hpp>
 #include "Boot.h"
@@ -15,19 +18,27 @@ public:
   const std::vector<Boot>& GetBoots() const;
   std::vector<Boot>& GetBoots();
   void SetBoots(const std::vector<Boot>& val);
-  void AddBoot(Boot&& elem);
+  const Boot* GetBootFromName(const std::string& key) const;
+  Boot* GetBootFromName(const std::string& key);
+  bool AddBoot(Boot&& elem);
   const Boot& GetBoot(uint32_t idx) const;
   Boot& GetBoot(uint32_t idx);
   const std::vector<Armor>& GetArmors() const;
   std::vector<Armor>& GetArmors();
   void SetArmors(const std::vector<Armor>& val);
-  void AddArmor(Armor&& elem);
+  const Armor* GetArmorFromName(const std::string& key) const;
+  Armor* GetArmorFromName(const std::string& key);
+  const Armor* GetArmorFromAlternativeName(const std::string& key) const;
+  Armor* GetArmorFromAlternativeName(const std::string& key);
+  bool AddArmor(Armor&& elem);
   const Armor& GetArmor(uint32_t idx) const;
   Armor& GetArmor(uint32_t idx);
   const std::vector<Character>& GetCharacters() const;
   std::vector<Character>& GetCharacters();
   void SetCharacters(const std::vector<Character>& val);
-  void AddCharacter(Character&& elem);
+  const Character* GetCharacterFromName(const std::string& key) const;
+  Character* GetCharacterFromName(const std::string& key);
+  bool AddCharacter(Character&& elem);
   const Character& GetCharacter(uint32_t idx) const;
   Character& GetCharacter(uint32_t idx);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
@@ -36,7 +47,11 @@ public:
 protected:
 private:
   std::vector<Boot> mBoots;
+  std::unordered_map<std::string, uint32_t> mBootsNameIndex;
   std::vector<Armor> mArmors;
+  std::map<std::string, uint32_t> mArmorsNameIndex;
+  std::map<std::string, uint32_t> mArmorsAlternativeNameIndex;
   std::vector<Character> mCharacters;
+  std::map<std::string, uint32_t> mCharactersNameIndex;
 };
 }

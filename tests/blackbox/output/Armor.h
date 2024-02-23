@@ -14,6 +14,9 @@ public:
   const std::string& GetName() const;
   std::string& GetName();
   void SetName(const std::string& val);
+  const std::string& GetAlternativeName() const;
+  std::string& GetAlternativeName();
+  void SetAlternativeName(const std::string& val);
   int8_t GetArmorClass() const;
   void SetArmorClass(int8_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
@@ -23,6 +26,7 @@ protected:
 private:
   uint32_t mId;
   std::string mName;
+  std::string mAlternativeName;
   int8_t mArmorClass;
 };
 }

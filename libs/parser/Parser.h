@@ -33,6 +33,7 @@ namespace holgen {
     std::string mName;
     std::vector<DecoratorDefinition> mDecorators;
     const DecoratorDefinition *GetDecorator(const std::string &name) const;
+    // TODO: use St::GetFieldNameInCpp
     std::string GetNameInCpp() const;
   };
 

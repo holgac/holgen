@@ -86,11 +86,10 @@ namespace holgen {
       setter.mType.mName = "void";
     }
 
-    ProcessContainerField(generatedClass, generatedField, fieldDefinition);
+    ProcessContainerField(generatedClass, fieldDefinition);
   }
 
-  void Translator::ProcessContainerField(Class &generatedClass, const ClassField &generatedField,
-                                         const FieldDefinition &fieldDefinition) const {
+  void Translator::ProcessContainerField(Class &generatedClass, const FieldDefinition &fieldDefinition) const {
     auto container = fieldDefinition.GetDecorator(Decorators::Container);
     if (!container)
       return;
@@ -99,9 +98,11 @@ namespace holgen {
         elemName == nullptr,
         "{}.{} has incomplete container definition: Containers should have an {} defined",
         generatedClass.mName, fieldDefinition.mName, Decorators::Container_ElemName)
-    THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(generatedField.mType.mName),
-             "{}.{} is not a valid indexed container!",
-             generatedClass.mName, fieldDefinition.mName)
+    THROW_IF(
+        !TypeInfo::Get().CppIndexedContainers.contains(
+            generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName))->mType.mName),
+        "{}.{} is not a valid indexed container!",
+        generatedClass.mName, fieldDefinition.mName)
     THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1,
              "{}.{} should have a single template parameter!",
              generatedClass.mName, fieldDefinition.mName)
@@ -114,18 +115,92 @@ namespace holgen {
     THROW_IF(underlyingIdField == nullptr,
              "{}.{} is a container of {} which does not have an id field!",
              generatedClass.mName, fieldDefinition.mName, underlyingType.mName)
+
+    for (auto &dec: fieldDefinition.mDecorators) {
+      if (dec.mName != Decorators::Index)
+        continue;
+      auto indexOn = dec.GetAttribute(Decorators::ExtraIndex_On);
+      THROW_IF(indexOn == nullptr, "Specify the field to index on in {}.{}!", generatedClass.mName,
+               fieldDefinition.mName)
+      auto fieldIndexedOn = underlyingStructDefinition->GetField(indexOn->mValue.mName);
+      THROW_IF(fieldIndexedOn == nullptr, "{}.{} indexes on field {}.{} which doesnt exist!", generatedClass.mName,
+               fieldDefinition.mName, underlyingType.mName, indexOn->mValue.mName)
+
+      auto &indexField = generatedClass.mFields.emplace_back();
+      indexField.mName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
+      auto indexType = dec.GetAttribute(Decorators::ExtraIndex_Using);
+      if (indexType != nullptr) {
+        TypeInfo::Get().ConvertToType(indexField.mType, indexType->mValue);
+      } else {
+        indexField.mType.mName = "std::map";
+      }
+
+      auto &indexKey = indexField.mType.mTemplateParameters.emplace_back();
+      TypeInfo::Get().ConvertToType(indexKey, fieldIndexedOn->mType);
+      auto &indexValue = indexField.mType.mTemplateParameters.emplace_back();
+      TypeInfo::Get().ConvertToType(indexValue, underlyingIdField->mType);
+
+      for (int i = 0; i < 2; ++i) {
+        bool isConst = i == 0;
+        auto &func = generatedClass.mMethods.emplace_back();
+        func.mName = St::GetIndexGetterName(elemName->mValue.mName, indexOn->mValue.mName);
+        func.mIsConst = isConst;
+        TypeInfo::Get().ConvertToType(func.mType, underlyingType);
+        func.mType.mIsConst = isConst;
+        func.mType.mType = PassByType::Pointer;
+        auto &arg = func.mArguments.emplace_back();
+        arg.mName = "key";
+        TypeInfo::Get().ConvertToType(arg.mType, fieldIndexedOn->mType);
+        if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
+          arg.mType.mIsConst = true;
+          arg.mType.mType = PassByType::Reference;
+        }
+
+        func.mBody.Add("auto it = {}.find(key);", indexField.mName);
+        func.mBody.Add("if (it == {}.end())", indexField.mName);
+        func.mBody.Indent(1);
+        func.mBody.Add("return nullptr;");
+        func.mBody.Indent(-1);
+        func.mBody.Add("return &{}[it->second];", St::GetFieldNameInCpp(fieldDefinition.mName));
+
+      }
+    }
+
+    // Getting generatedField here because we added a new field above which would've invalidated it
+    auto &generatedField = *generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName));
     {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = St::GetAdderMethodName(elemName->mValue.mName);
       func.mIsConst = false;
+      func.mType.mName = "bool";
       auto &arg = func.mArguments.emplace_back();
       TypeInfo::Get().ConvertToType(arg.mType, underlyingType);
       arg.mType.mIsConst = false;
       arg.mType.mType = PassByType::MoveReference;
       arg.mName = "elem";
-      func.mBody.Line() << generatedField.mName << ".emplace_back(std::forward<" << arg.mType.mName << ">(elem));";
-      func.mBody.Line() << generatedField.mName << ".back()." << St::GetSetterMethodName(underlyingIdField->mName)
-                        << "(" << generatedField.mName << ".size() - 1);";
+
+      func.mBody.Line() << "auto newId = " << generatedField.mName << ".size();";
+      CodeBlock validators;
+      CodeBlock inserters;
+      for (auto &dec: fieldDefinition.mDecorators) {
+        if (dec.mName != Decorators::Index)
+          continue;
+        auto indexOn = dec.GetAttribute(Decorators::ExtraIndex_On);
+        auto fieldIndexedOn = underlyingStructDefinition->GetField(indexOn->mValue.mName);
+        auto indexFieldName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
+        auto getterMethodName = St::GetGetterMethodName(fieldIndexedOn->mName);
+        validators.Add("if({}.contains(elem.{}()))", indexFieldName, getterMethodName);
+        // TODO: some logging mechanism for all these failures?
+        validators.Indent(1);
+        validators.Add("return false;");
+        validators.Indent(-1);
+        inserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
+      }
+      func.mBody.Add(validators);
+      func.mBody.Add(inserters);
+      func.mBody.Add("{}.emplace_back(std::forward<{}>(elem));", generatedField.mName, arg.mType.mName);
+      func.mBody.Add("{}.back().{}(newId);", generatedField.mName, St::GetSetterMethodName(underlyingIdField->mName));
+      func.mBody.Line() << "return true;";
     }
 
     for (int i = 0; i < 2; ++i) {
@@ -142,6 +217,7 @@ namespace holgen {
       arg.mName = "idx";
       func.mBody.Line() << "return " << generatedField.mName << "[idx];";
     }
+
   }
 
   ClassField *Class::GetField(const std::string &name) {

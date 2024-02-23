@@ -63,8 +63,30 @@ namespace holgen {
      * The field needs to be an integral type.
      *
      * Example:
-     * @id
+     * @id()
+     * u32 id;
      */
     inline static const std::string Id = "id";
+
+    /**
+     * Defines an extra unique index for a container field.
+     * TODO: how to prevent index field modifications? Can remove setter method for lua only. trust cpp?
+     *
+     * Example:
+     * struct Person {
+     * @id()
+     * u32 id;
+     *
+     * u32 ssn;
+     * }
+     * struct House {
+     *   @container(elemName=person)
+     *   @index(on=ssn)
+     *   vector<Person> people;
+     * }
+     */
+    inline static const std::string Index = "index";
+    inline static const std::string ExtraIndex_On = "on";
+    inline static const std::string ExtraIndex_Using = "using";
   };
 }

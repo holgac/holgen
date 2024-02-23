@@ -16,6 +16,9 @@ namespace holgen {
     static std::string GetAdderMethodName(const std::string& fieldName);
     static std::string GetGetterMethodName(const std::string& fieldName);
     static std::string GetSetterMethodName(const std::string& fieldName);
+    static std::string GetFieldNameInCpp(const std::string& fieldName);
+    static std::string GetIndexFieldName(const std::string& fieldName, const std::string& indexedFieldName);
+    static std::string GetIndexGetterName(const std::string& fieldName, const std::string& indexedFieldName);
   };
 
 }
