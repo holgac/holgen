@@ -86,7 +86,7 @@ namespace holgen {
      * }
      */
     inline static const std::string Index = "index";
-    inline static const std::string ExtraIndex_On = "on";
-    inline static const std::string ExtraIndex_Using = "using";
+    inline static const std::string Index_On = "on";
+    inline static const std::string Index_Using = "using";
   };
 }

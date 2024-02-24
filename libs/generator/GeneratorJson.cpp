@@ -110,8 +110,6 @@ namespace holgen {
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
-        THROW_IF(jsonConvertFrom == nullptr || jsonConvertUsing == nullptr, "Malformed jsonConvert in {}::{}",
-                 cls.mName, fieldDefinition.mName)
         Type type;
         TypeInfo::Get().ConvertToType(type, jsonConvertFrom->mValue);
         parseFunc.mBody.Line() << type.ToString() << " temp;";
@@ -347,7 +345,7 @@ namespace holgen {
 
   void GeneratorJson::GenerateConverter(Class &cls) {
     cls.mName = "Converter";
-    std::map<std::string, std::string> processedConverters;
+    std::set<std::string> processedConverters;
     for (const auto &structDefinition: mProjectDefinition.mStructs) {
       for (const auto &fieldDefinition: structDefinition.mFields) {
         auto jsonConvert = fieldDefinition.GetDecorator(Decorators::JsonConvert);
@@ -355,30 +353,24 @@ namespace holgen {
           continue;
         auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
-        auto[it, res] = processedConverters.try_emplace(jsonConvertUsing->mValue.mName, jsonConvertFrom->mValue.mName);
-        if (!res) {
-          THROW_IF(it->second != jsonConvertFrom->mValue.mName,
-                   "Converter {} has inconsistent from values! Previously used as {}, now {}",
-                   jsonConvertUsing->mName,
-                   it->second,
-                   jsonConvertFrom->mValue.mName);
-        } else {
-          auto &func = cls.mFields.emplace_back();
-          func.mVisibility = Visibility::Public;
-          func.mName = jsonConvertUsing->mValue.mName;
-          func.mType.mName = "std::function";
+        if (processedConverters.contains(jsonConvertUsing->mValue.mName))
+          continue;
+        processedConverters.insert(jsonConvertUsing->mValue.mName);
+        auto &func = cls.mFields.emplace_back();
+        func.mVisibility = Visibility::Public;
+        func.mName = jsonConvertUsing->mValue.mName;
+        func.mType.mName = "std::function";
 
-          auto &convertFromArg = func.mType.mFunctionalTemplateParameters.emplace_back();
-          TypeInfo::Get().ConvertToType(convertFromArg, fieldDefinition.mType);
+        auto &convertFromArg = func.mType.mFunctionalTemplateParameters.emplace_back();
+        TypeInfo::Get().ConvertToType(convertFromArg, fieldDefinition.mType);
 
-          auto &retVal = func.mType.mFunctionalTemplateParameters.emplace_back();
-          TypeInfo::Get().ConvertToType(retVal, jsonConvertFrom->mValue);
-          if (!TypeInfo::Get().CppPrimitives.contains(retVal.mName)) {
-            retVal.mIsConst = true;
-            retVal.mType = PassByType::Reference;
-          }
-
+        auto &retVal = func.mType.mFunctionalTemplateParameters.emplace_back();
+        TypeInfo::Get().ConvertToType(retVal, jsonConvertFrom->mValue);
+        if (!TypeInfo::Get().CppPrimitives.contains(retVal.mName)) {
+          retVal.mIsConst = true;
+          retVal.mType = PassByType::Reference;
         }
+
       }
     }
 

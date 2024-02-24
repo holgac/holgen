@@ -38,7 +38,7 @@ struct Character {
 @dataManager()
 struct GameData {
     // using=map by default
-    // creates an extra map<fieldType, idType>, adds GetBootByName(string) function
+    // creates an extra map<fieldType, idType>, adds GetBootFromName(string) function
     // only applies to @container
     @index(on=name, using=unordered_map)
     // containers can only be indexed containers. After pushing, assigns id.

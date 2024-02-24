@@ -6,17 +6,18 @@
 #include "TypeInfo.h"
 #include "GeneratorLua.h"
 #include "Decorators.h"
+#include "parser/Validator.h"
 
 namespace holgen {
 
   TranslatedProject Translator::Translate(const ProjectDefinition &project) {
     THROW_IF(mProject != nullptr, "Translator didnt terminate gracefully last time...");
     mProject = &project;
+    Validator(project).Validate();
     TranslatedProject translatedProject;
     std::map<std::string, size_t> classMap;
     for (auto &structDefinition: project.mStructs) {
       auto[it, res] = classMap.try_emplace(structDefinition.mName, translatedProject.mClasses.size());
-      THROW_IF(!res, "Duplicate class: \"{}\"", structDefinition.mName)
       GenerateClass(translatedProject.mClasses.emplace_back(), structDefinition);
     }
 
@@ -94,41 +95,18 @@ namespace holgen {
     if (!container)
       return;
     auto elemName = container->GetAttribute(Decorators::Container_ElemName);
-    THROW_IF(
-        elemName == nullptr,
-        "{}.{} has incomplete container definition: Containers should have an {} defined",
-        generatedClass.mName, fieldDefinition.mName, Decorators::Container_ElemName)
-    THROW_IF(
-        !TypeInfo::Get().CppIndexedContainers.contains(
-            generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName))->mType.mName),
-        "{}.{} is not a valid indexed container!",
-        generatedClass.mName, fieldDefinition.mName)
-    THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1,
-             "{}.{} should have a single template parameter!",
-             generatedClass.mName, fieldDefinition.mName)
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters[0];
     auto underlyingStructDefinition = mProject->GetStruct(underlyingType.mName);
-    THROW_IF(underlyingStructDefinition == nullptr,
-             "{}.{} is a container of {} which is not a user type!",
-             generatedClass.mName, fieldDefinition.mName, underlyingType.mName)
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
-    THROW_IF(underlyingIdField == nullptr,
-             "{}.{} is a container of {} which does not have an id field!",
-             generatedClass.mName, fieldDefinition.mName, underlyingType.mName)
 
     for (auto &dec: fieldDefinition.mDecorators) {
       if (dec.mName != Decorators::Index)
         continue;
-      auto indexOn = dec.GetAttribute(Decorators::ExtraIndex_On);
-      THROW_IF(indexOn == nullptr, "Specify the field to index on in {}.{}!", generatedClass.mName,
-               fieldDefinition.mName)
-      auto fieldIndexedOn = underlyingStructDefinition->GetField(indexOn->mValue.mName);
-      THROW_IF(fieldIndexedOn == nullptr, "{}.{} indexes on field {}.{} which doesnt exist!", generatedClass.mName,
-               fieldDefinition.mName, underlyingType.mName, indexOn->mValue.mName)
-
+      auto indexOn = dec.GetAttribute(Decorators::Index_On);
+      auto& fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
       auto &indexField = generatedClass.mFields.emplace_back();
       indexField.mName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
-      auto indexType = dec.GetAttribute(Decorators::ExtraIndex_Using);
+      auto indexType = dec.GetAttribute(Decorators::Index_Using);
       if (indexType != nullptr) {
         TypeInfo::Get().ConvertToType(indexField.mType, indexType->mValue);
       } else {
@@ -136,7 +114,7 @@ namespace holgen {
       }
 
       auto &indexKey = indexField.mType.mTemplateParameters.emplace_back();
-      TypeInfo::Get().ConvertToType(indexKey, fieldIndexedOn->mType);
+      TypeInfo::Get().ConvertToType(indexKey, fieldIndexedOn.mType);
       auto &indexValue = indexField.mType.mTemplateParameters.emplace_back();
       TypeInfo::Get().ConvertToType(indexValue, underlyingIdField->mType);
 
@@ -150,7 +128,7 @@ namespace holgen {
         func.mType.mType = PassByType::Pointer;
         auto &arg = func.mArguments.emplace_back();
         arg.mName = "key";
-        TypeInfo::Get().ConvertToType(arg.mType, fieldIndexedOn->mType);
+        TypeInfo::Get().ConvertToType(arg.mType, fieldIndexedOn.mType);
         if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
           arg.mType.mIsConst = true;
           arg.mType.mType = PassByType::Reference;
@@ -185,10 +163,10 @@ namespace holgen {
       for (auto &dec: fieldDefinition.mDecorators) {
         if (dec.mName != Decorators::Index)
           continue;
-        auto indexOn = dec.GetAttribute(Decorators::ExtraIndex_On);
-        auto fieldIndexedOn = underlyingStructDefinition->GetField(indexOn->mValue.mName);
+        auto indexOn = dec.GetAttribute(Decorators::Index_On);
+        auto& fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
         auto indexFieldName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
-        auto getterMethodName = St::GetGetterMethodName(fieldIndexedOn->mName);
+        auto getterMethodName = St::GetGetterMethodName(fieldIndexedOn.mName);
         validators.Add("if({}.contains(elem.{}()))", indexFieldName, getterMethodName);
         // TODO: some logging mechanism for all these failures?
         validators.Indent(1);

@@ -1,1 +1,1 @@
-add_library(parser Parser.cpp)
+add_library(parser Parser.cpp Validator.cpp)

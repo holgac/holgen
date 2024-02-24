@@ -13,6 +13,7 @@ namespace holgen {
   struct TypeDefinition {
     std::string mName;
     std::vector<TypeDefinition> mTemplateParameters;
+    bool operator==(const TypeDefinition& rhs) const;
   };
 
   // @decorator(attribute=5)
@@ -46,7 +47,6 @@ namespace holgen {
     const FieldDefinition *GetIdField() const;
   };
 
-  // rename to ParsedProject or ProjectDefinition to match the other classes?
   struct ProjectDefinition {
     std::vector<StructDefinition> mStructs;
     const StructDefinition* GetStruct(const std::string& name) const;

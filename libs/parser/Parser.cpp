@@ -165,4 +165,16 @@ namespace holgen {
     }
     return nullptr;
   }
+
+  bool TypeDefinition::operator==(const TypeDefinition &rhs) const {
+    if (mName != rhs.mName)
+      return false;
+    if (mTemplateParameters.size() != rhs.mTemplateParameters.size())
+      return false;
+    for (size_t i = 0; i < mTemplateParameters.size(); ++i) {
+      if (mTemplateParameters[i] != rhs.mTemplateParameters[i])
+        return false;
+    }
+    return true;
+  }
 }

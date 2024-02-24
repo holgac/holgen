@@ -5,19 +5,20 @@
 namespace holgen {
   TypeInfo::TypeInfo() {
     TypeToCppType = {
-        {"s8",      "int8_t"},
-        {"s16",     "int16_t"},
-        {"s32",     "int32_t"},
-        {"s64",     "int64_t"},
-        {"u8",      "uint8_t"},
-        {"u16",     "uint16_t"},
-        {"u32",     "uint32_t"},
-        {"u64",     "uint64_t"},
-        {"float",   "float"},
-        {"double",  "double"},
-        {"string",  "std::string"},
-        {"vector",  "std::vector"},
-        {"map",     "std::map"},
+        {"s8",            "int8_t"},
+        {"s16",           "int16_t"},
+        {"s32",           "int32_t"},
+        {"s64",           "int64_t"},
+        {"u8",            "uint8_t"},
+        {"u16",           "uint16_t"},
+        {"u32",           "uint32_t"},
+        {"u64",           "uint64_t"},
+        {"float",         "float"},
+        {"double",        "double"},
+        {"bool",          "bool"},
+        {"string",        "std::string"},
+        {"vector",        "std::vector"},
+        {"map",           "std::map"},
         {"unordered_map", "std::unordered_map"},
     };
 
@@ -41,6 +42,12 @@ namespace holgen {
         "std::map",
         "std::unordered_map",
     };
+    CppContainers = CppIndexedContainers;
+    CppContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
+    KeyableTypes = CppPrimitives;
+    KeyableTypes.insert("std::string");
+    for(auto& [_, cppType] : TypeToCppType)
+      CppTypes.insert(cppType);
   }
 
   TypeInfo &TypeInfo::Get() {
@@ -86,7 +93,7 @@ namespace holgen {
     }
     if (!mFunctionalTemplateParameters.empty()) {
       ss << "<";
-      for(size_t i =0; i<mFunctionalTemplateParameters.size(); ++i) {
+      for (size_t i = 0; i < mFunctionalTemplateParameters.size(); ++i) {
         if (i == 0) {
           // nothing special
         } else if (i == 1) {

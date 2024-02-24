@@ -45,6 +45,10 @@ namespace holgen {
     std::set<std::string> CppIndexedContainers;
     // Map-like containers
     std::set<std::string> CppKeyedContainers;
+    // All containers
+    std::set<std::string> CppContainers;
+    std::set<std::string> KeyableTypes;
+    std::set<std::string> CppTypes;
 
   };
 

@@ -1,3 +1,3 @@
-add_executable(tests test_tokenizer.cpp test_parser.cpp test_translator.cpp test_generator.cpp)
-add_dependencies(tests gtest gtest_main tokenizer parser generator core)
-target_link_libraries(tests gtest gtest_main tokenizer parser generator core)
+add_executable(tests test_tokenizer.cpp test_parser.cpp test_translator.cpp test_generator.cpp test_validator.cpp)
+add_dependencies(tests gtest gtest_main generator parser tokenizer core)
+target_link_libraries(tests gtest gtest_main generator parser tokenizer core)
