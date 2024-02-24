@@ -37,13 +37,7 @@ struct Character {
 // needs to be a singleton for lua to work
 @dataManager()
 struct GameData {
-    // using=map by default
-    // creates an extra map<fieldType, idType>, adds GetBootFromName(string) function
-    // only applies to @container
     @index(on=name, using=unordered_map)
-    // containers can only be indexed containers. After pushing, assigns id.
-    // adds AddBoot, GetBoot(u32) functions
-    // There should be one container per type
     @container(elemName=boot)
     vector<Boot> boots;
 

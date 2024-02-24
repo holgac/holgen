@@ -1,8 +1,8 @@
 #include "GeneratorJson.h"
 #include <vector>
 #include "TypeInfo.h"
-#include "core/Exception.h"
-#include "Decorators.h"
+#include "core/Decorators.h"
+#include "core/St.h"
 
 namespace holgen {
   namespace {
@@ -26,7 +26,6 @@ namespace holgen {
         {"std::string", {"IsString", "GetString"}},
     };
 
-
     std::string ConverterName = "Converter";
   }
 
@@ -34,12 +33,10 @@ namespace holgen {
       const ProjectDefinition &projectDefinition,
       TranslatedProject &translatedProject
   ) : mProjectDefinition(projectDefinition), mTranslatedProject(translatedProject) {
-
     for (size_t i = 0; i < mTranslatedProject.mClasses.size(); ++i) {
       const auto &cls = mTranslatedProject.mClasses[i];
       mClasses.emplace(cls.mName, i);
     }
-
   }
 
   void GeneratorJson::EnrichClasses() {
@@ -47,7 +44,6 @@ namespace holgen {
       const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
       if (structDefinition.GetDecorator(Decorators::NoJson))
         continue;
-      // TODO: skip if noJson decorator exists
       GenerateParseJson(cls);
     }
   }
@@ -121,14 +117,13 @@ namespace holgen {
         Type fieldType;
         TypeInfo::Get().ConvertToType(fieldType, fieldDefinition.mType);
         if (TypeInfo::Get().CppPrimitives.contains(fieldType.mName))
-          parseFunc.mBody.Line() << fieldDefinition.GetNameInCpp() << " = converter." << jsonConvertUsing->mValue.mName
-                                 << "(temp);";
+          parseFunc.mBody.Add("{} = converter.{}(temp);", St::GetFieldNameInCpp(fieldDefinition.mName),
+                              jsonConvertUsing->mValue.mName);
         else
-          parseFunc.mBody.Line() << fieldDefinition.GetNameInCpp() << " = std::move(converter."
-                                 << jsonConvertUsing->mValue.mName
-                                 << "(temp));";
+          parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", St::GetFieldNameInCpp(fieldDefinition.mName),
+                              jsonConvertUsing->mValue.mName);
       } else {
-        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(" << fieldDefinition.GetNameInCpp()
+        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(" << St::GetFieldNameInCpp(fieldDefinition.mName)
                                << ", data.value, converter);";
         parseFunc.mBody.Line() << "if (!res)";
         parseFunc.mBody.Indent(1);
@@ -136,7 +131,8 @@ namespace holgen {
         parseFunc.mBody.Indent(-1); // if !res
       }
     } else {
-      parseFunc.mBody.Line() << "auto res = " << fieldDefinition.GetNameInCpp() << ".ParseJson(data.value, converter);";
+      parseFunc.mBody.Line() << "auto res = " << St::GetFieldNameInCpp(fieldDefinition.mName)
+                             << ".ParseJson(data.value, converter);";
 
       parseFunc.mBody.Line() << "if (!res)";
       parseFunc.mBody.Indent(1);

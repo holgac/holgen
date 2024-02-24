@@ -5,7 +5,7 @@
 #include "GeneratorJson.h"
 #include "TypeInfo.h"
 #include "GeneratorLua.h"
-#include "Decorators.h"
+#include "core/Decorators.h"
 #include "parser/Validator.h"
 
 namespace holgen {
@@ -46,7 +46,7 @@ namespace holgen {
   void Translator::ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const {
     auto &generatedField = generatedClass.mFields.emplace_back();
 
-    generatedField.mName = fieldDefinition.GetNameInCpp();
+    generatedField.mName = St::GetFieldNameInCpp(fieldDefinition.mName);
     TypeInfo::Get().ConvertToType(generatedField.mType, fieldDefinition.mType);
     bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(generatedField.mType.mName);
 
@@ -103,7 +103,7 @@ namespace holgen {
       if (dec.mName != Decorators::Index)
         continue;
       auto indexOn = dec.GetAttribute(Decorators::Index_On);
-      auto& fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
+      auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
       auto &indexField = generatedClass.mFields.emplace_back();
       indexField.mName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
       auto indexType = dec.GetAttribute(Decorators::Index_Using);
@@ -164,7 +164,7 @@ namespace holgen {
         if (dec.mName != Decorators::Index)
           continue;
         auto indexOn = dec.GetAttribute(Decorators::Index_On);
-        auto& fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
+        auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
         auto indexFieldName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
         auto getterMethodName = St::GetGetterMethodName(fieldIndexedOn.mName);
         validators.Add("if({}.contains(elem.{}()))", indexFieldName, getterMethodName);

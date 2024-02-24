@@ -101,7 +101,7 @@ struct B {
 TEST_F(ValidatorTest, JsonConvert) {
   ExpectErrorMessage(R"DELIM(
 struct A {
-  @jsonConvert()
+  @jsonConvert(using=aaa)
   u32 field;
 }
   )DELIM", "Field A.field has decorator jsonConvert with missing attribute: from");

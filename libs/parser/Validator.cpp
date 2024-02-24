@@ -2,10 +2,9 @@
 #include <set>
 #include <string>
 #include "generator/TypeInfo.h"
-#include "generator/Decorators.h"
+#include "core/Decorators.h"
 #include "Parser.h"
 #include "core/Exception.h"
-#include "core/St.h"
 
 namespace holgen {
   namespace {

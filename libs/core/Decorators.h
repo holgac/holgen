@@ -6,7 +6,8 @@ namespace holgen {
   class Decorators {
   public:
     /*
-     * Usage: Only with fields
+     * When reading from json, convert the field data using a converter.
+     * Only for fields.
      *
      * Example:
      *  @jsonConvert(from=string, using=countryConverter) // func(string) -> u8 function added to Converter class
@@ -69,8 +70,12 @@ namespace holgen {
     inline static const std::string Id = "id";
 
     /**
-     * Defines an extra unique index for a container field.
+     * Defines an extra unique index for a container field by creating a map<indexedFieldType, idFieldType> field.
      * TODO: how to prevent index field modifications? Can remove setter method for lua only. trust cpp?
+     *
+     * Parameters:
+     *  On: Field to index on (determines map's key)
+     *  Using: Map type to use (defaults to map, can use unordered_map etc.)
      *
      * Example:
      * struct Person {
@@ -81,7 +86,7 @@ namespace holgen {
      * }
      * struct House {
      *   @container(elemName=person)
-     *   @index(on=ssn)
+     *   @index(on=ssn,using=unordered_map)
      *   vector<Person> people;
      * }
      */

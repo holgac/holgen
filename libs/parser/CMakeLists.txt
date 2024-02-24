@@ -1,1 +1,1 @@
-add_library(parser Parser.cpp Validator.cpp)
+add_library(parser Parser.cpp Validator.cpp ProjectDefinition.cpp ProjectDefinition.h)

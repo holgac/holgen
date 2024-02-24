@@ -1,5 +1,6 @@
 #include "GeneratorLua.h"
-#include "Decorators.h"
+#include "core/Decorators.h"
+#include "core/St.h"
 
 namespace holgen {
 
@@ -109,7 +110,7 @@ namespace holgen {
         codeBlock.Line() << "} else if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";
       }
       codeBlock.Indent(1);
-      codeBlock.Line() << "LuaHelper::Push(instance->" << fieldDefinition.GetNameInCpp() << ", ls);";
+      codeBlock.Line() << "LuaHelper::Push(instance->" << St::GetFieldNameInCpp(fieldDefinition.mName) << ", ls);";
       codeBlock.Indent(-1);
     }
     codeBlock.Line() << "} else {";
@@ -147,7 +148,7 @@ namespace holgen {
       }
       codeBlock.Indent(1);
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
-      codeBlock.Line() << "LuaHelper::Read(instance->" << fieldDefinition.GetNameInCpp() << ", ls, -2);";
+      codeBlock.Line() << "LuaHelper::Read(instance->" << St::GetFieldNameInCpp(fieldDefinition.mName) << ", ls, -2);";
       codeBlock.Indent(-1);
     }
     codeBlock.Line() << "}";
