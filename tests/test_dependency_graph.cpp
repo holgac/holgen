@@ -1,0 +1,79 @@
+#include <gtest/gtest.h>
+#include "tokenizer/Tokenizer.h"
+#include "parser/Parser.h"
+#include "parser/DependencyGraph.h"
+#include "core/Exception.h"
+
+using namespace holgen;
+
+namespace {
+}
+
+class DependencyGraphTest : public ::testing::Test {
+protected:
+  void SetUp() override {
+  }
+
+  void TearDown() override {
+  }
+
+  void ExpectProcessOrder(const std::string &schema, const std::vector<std::string> &expectedProcessOrder) {
+    Tokenizer tokenizer(schema);
+    Parser parser;
+    parser.Parse(tokenizer);
+    DependencyGraph dg(parser.GetProject());
+    dg.Calculate();
+    auto &processOrder = dg.GetProcessOrder();
+    ASSERT_EQ(processOrder.size(), expectedProcessOrder.size());
+    for (size_t i = 0; i < processOrder.size(); ++i) {
+      EXPECT_EQ(processOrder[i], expectedProcessOrder[i]);
+    }
+  }
+
+  void ExpectErrorMessage(const std::string &schema, const std::string &expectedError) {
+    Tokenizer tokenizer(schema);
+    Parser parser;
+    parser.Parse(tokenizer);
+    DependencyGraph dg(parser.GetProject());
+    EXPECT_THROW({
+                   try {
+                     dg.Calculate();
+                   } catch (Exception &exc) {
+                     std::string actualError = exc.what();
+                     actualError = actualError.substr(actualError.find(" ") + 1);
+                     EXPECT_EQ(actualError, expectedError);
+                     throw;
+                   }
+                 }, Exception);
+  }
+};
+
+TEST_F(DependencyGraphTest, CircularDependency) {
+  ExpectErrorMessage(R"DELIM(
+struct A {
+  B b;
+}
+struct B {
+  A a;
+}
+  )DELIM", "Circular dependency detected between B and A");
+}
+
+TEST_F(DependencyGraphTest, LoadOrder) {
+  ExpectProcessOrder(R"DELIM(
+struct A {
+  B b;
+}
+struct B {
+  C c;
+  D d;
+}
+struct C {
+  u8 f;
+}
+struct D {
+  C c;
+}
+  )DELIM", {"C", "D", "B", "A"});
+}
+
