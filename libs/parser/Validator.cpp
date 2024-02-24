@@ -136,6 +136,11 @@ namespace holgen {
                structDefinition.mName, fieldDefinition.mName,
                underlyingStruct->mName, indexOn->mName
       )
+      auto indexForConverter = decoratorDefinition.GetAttribute(Decorators::Index_ForConverter);
+      THROW_IF(
+          indexForConverter != nullptr && structDefinition.GetDecorator(Decorators::DataManager) == nullptr,
+          "{} attribute can only be used when the struct is decorated with {}",
+          indexForConverter->mName, Decorators::DataManager);
     } else if (decoratorDefinition.mName == Decorators::Id) {
       auto idField = structDefinition.GetIdField();
       THROW_IF(&fieldDefinition != idField, "struct {} has multiple id fields: {} and {}",
@@ -148,28 +153,28 @@ namespace holgen {
   }
 
   void Validator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                             const TypeDefinition &typeDefinition) {
-      Type type;
-      TypeInfo::Get().ConvertToType(type, typeDefinition);
-      THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && mProject.GetStruct(type.mName) == nullptr,
-               "Field {}.{} uses an unknown type: {}", structDefinition.mName, fieldDefinition.mName,
-               typeDefinition.mName);
-      for (const auto &templateParameter : typeDefinition.mTemplateParameters) {
-        Validate(structDefinition, fieldDefinition, templateParameter);
-      }
-    }
-
-    void Validator::Validate(
-        const StructDefinition &structDefinition,
-        const DecoratorDefinition &decoratorDefinition
-    ) {
-
-    }
-
-    void Validator::Validate() {
-      for (const auto &structDefinition: mProject.mStructs) {
-        Validate(structDefinition);
-      }
-
+                           const TypeDefinition &typeDefinition) {
+    Type type;
+    TypeInfo::Get().ConvertToType(type, typeDefinition);
+    THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && mProject.GetStruct(type.mName) == nullptr,
+             "Field {}.{} uses an unknown type: {}", structDefinition.mName, fieldDefinition.mName,
+             typeDefinition.mName);
+    for (const auto &templateParameter : typeDefinition.mTemplateParameters) {
+      Validate(structDefinition, fieldDefinition, templateParameter);
     }
   }
+
+  void Validator::Validate(
+      const StructDefinition &structDefinition,
+      const DecoratorDefinition &decoratorDefinition
+  ) {
+
+  }
+
+  void Validator::Validate() {
+    for (const auto &structDefinition: mProject.mStructs) {
+      Validate(structDefinition);
+    }
+
+  }
+}

@@ -5,7 +5,6 @@
 #include <string>
 #include <cstdint>
 #include <map>
-#include <rapidjson/document.h>
 #include <lua.hpp>
 #include "Boot.h"
 #include "Armor.h"
@@ -41,7 +40,7 @@ public:
   bool AddCharacter(Character&& elem);
   const Character& GetCharacter(uint32_t idx) const;
   Character& GetCharacter(uint32_t idx);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
   void PushToLua(lua_State* luaState) const;
   static void CreateLuaMetatable(lua_State* luaState);
 protected:

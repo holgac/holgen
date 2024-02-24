@@ -19,22 +19,16 @@ std::string& Character::GetName() {
 void Character::SetName(const std::string& val) {
   mName = val;
 }
-const Boot& Character::GetBoot() const {
+uint32_t Character::GetBoot() const {
   return mBoot;
 }
-Boot& Character::GetBoot() {
-  return mBoot;
-}
-void Character::SetBoot(const Boot& val) {
+void Character::SetBoot(uint32_t val) {
   mBoot = val;
 }
-const Armor& Character::GetArmor() const {
+uint32_t Character::GetArmor() const {
   return mArmor;
 }
-Armor& Character::GetArmor() {
-  return mArmor;
-}
-void Character::SetArmor(const Armor& val) {
+void Character::SetArmor(uint32_t val) {
   mArmor = val;
 }
 bool Character::ParseJson(const rapidjson::Value& json, const Converter& converter) {
@@ -49,13 +43,17 @@ bool Character::ParseJson(const rapidjson::Value& json, const Converter& convert
       if (!res)
         return false;
     } else if (0 == strcmp(name, "boot")) {
-      auto res = mBoot.ParseJson(data.value, converter);
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
       if (!res)
         return false;
+      mBoot = converter.bootNameToId(temp);
     } else if (0 == strcmp(name, "armor")) {
-      auto res = mArmor.ParseJson(data.value, converter);
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
       if (!res)
         return false;
+      mArmor = converter.armorNameToId(temp);
     }
   }
   return true;

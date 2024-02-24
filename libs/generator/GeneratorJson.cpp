@@ -44,8 +44,171 @@ namespace holgen {
       const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
       if (structDefinition.GetDecorator(Decorators::NoJson))
         continue;
-      GenerateParseJson(cls);
+      if (structDefinition.GetDecorator(Decorators::DataManager))
+        GenerateParseFiles(cls);
+      else
+        // TODO: currently we iterate over the json obj when deserializing, but this wouldn't work with
+        // dependencies. For DataManager we should have something custom so that a single file can define
+        // everything too. But for now ParseFiles is good enough.
+        GenerateParseJson(cls);
     }
+  }
+
+  void GeneratorJson::GenerateParseFiles(Class &cls) {
+    const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
+    auto &parseFunc = cls.mMethods.emplace_back();
+    parseFunc.mName = "ParseFiles";
+    parseFunc.mIsConst = false;
+    parseFunc.mType.mName = "bool";
+    {
+      auto &arg = parseFunc.mArguments.emplace_back();
+      arg.mType.mName = "std::string";
+      arg.mType.mType = PassByType::Reference;
+      arg.mType.mIsConst = true;
+      arg.mName = "rootPath";
+    }
+    {
+      auto &arg = parseFunc.mArguments.emplace_back();
+      arg.mType.mName = ConverterName;
+      arg.mType.mType = PassByType::Reference;
+      arg.mType.mIsConst = true;
+      arg.mName = "converterArg";
+    }
+    parseFunc.mBody.Add("auto converter = converterArg;");
+    for (const auto &fieldDefinition: structDefinition.mFields) {
+      auto containerDecorator = fieldDefinition.GetDecorator(Decorators::Container);
+      if (containerDecorator == nullptr)
+        continue;
+      for (const auto &decoratorDefinition: fieldDefinition.mDecorators) {
+        if (decoratorDefinition.mName != Decorators::Index)
+          continue;
+        auto &underlyingStruct = *mProjectDefinition.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+        auto indexedOnField = underlyingStruct.GetField(
+            decoratorDefinition.GetAttribute(Decorators::Index_On)->mValue.mName);
+        auto forConverter = decoratorDefinition.GetAttribute(Decorators::Index_ForConverter);
+        if (forConverter == nullptr)
+          continue;
+        parseFunc.mBody.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
+        parseFunc.mBody.Indent(1);
+
+        Type fromType;
+        TypeInfo::Get().ConvertToType(fromType, indexedOnField->mType);
+        if (!TypeInfo::Get().CppPrimitives.contains(fromType.mName)) {
+          // This is done so many times, maybe Type::AdjustForFunctionArgument?
+          fromType.mIsConst = true;
+          fromType.mType = PassByType::Reference;
+        }
+        auto idField = underlyingStruct.GetIdField();
+        Type toType;
+        TypeInfo::Get().ConvertToType(toType, idField->mType);
+        parseFunc.mBody.Add("converter.{} = [this]({} key) -> {} {{", forConverter->mValue.mName, fromType.ToString(),
+                            toType.ToString());
+        parseFunc.mBody.Indent(1);
+
+        auto &elementName = *containerDecorator->GetAttribute(Decorators::Container_ElemName);
+        parseFunc.mBody.Add("auto elem = {}(key);", St::GetIndexGetterName(elementName.mValue.mName, indexedOnField->mName));
+        parseFunc.mBody.Add("return elem->{}();", St::GetGetterMethodName(idField->mName));
+
+        parseFunc.mBody.Indent(-1);
+        parseFunc.mBody.Add("}};"); // converter =
+
+        parseFunc.mBody.Indent(-1);
+        parseFunc.mBody.Add("}}"); // if (converter == nullptr)
+
+      }
+    }
+
+    parseFunc.mBody.Add("std::map<std::string, std::vector<std::filesystem::path>> filesByName;");
+    parseFunc.mBody.Add("std::queue<std::filesystem::path> pathsQueue;");
+    parseFunc.mBody.Add("pathsQueue.push(std::filesystem::path(rootPath));");
+    parseFunc.mBody.Add("while(!pathsQueue.empty()) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("auto& curPath = pathsQueue.front();");
+    parseFunc.mBody.Add("for (auto &entry: std::filesystem::directory_iterator(curPath)) {{");
+    parseFunc.mBody.Indent(1);
+
+    parseFunc.mBody.Add("if (std::filesystem::is_directory(entry)) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("pathsQueue.push(entry.path());");
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}} else if (std::filesystem::is_regular_file(entry)) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("std::string filename = entry.path().filename();");
+    parseFunc.mBody.Add("auto dotPosition = filename.rfind('.');");
+    parseFunc.mBody.Add("if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == \"json\") {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("filesByName[filename.substr(0, dotPosition)].push_back(entry.path());");
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // if (json)
+
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // if (regular file)
+
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // for entry : curPath
+    parseFunc.mBody.Add("pathsQueue.pop();");
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // while(!paths.empty())
+
+    bool isFirst = true;
+    for (const auto &structToProcess : mTranslatedProject.mDependencyGraph.GetProcessOrder()) {
+      for (const auto &fieldDefinition: structDefinition.mFields) {
+        if (!fieldDefinition.GetDecorator(Decorators::Container))
+          continue;
+        auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
+        if (templateParameter.mName == structToProcess) {
+          {
+            auto line = parseFunc.mBody.Line();
+            if (isFirst) {
+              line << "auto it";
+              isFirst = false;
+            } else {
+              line << "it";
+            }
+            line << " = filesByName.find(\"" << fieldDefinition.mName << "\");";
+          }
+          parseFunc.mBody.Add("if (it != filesByName.end()) {{");
+          parseFunc.mBody.Indent(1);
+
+          parseFunc.mBody.Add("for (const auto& filePath: it->second) {{");
+          parseFunc.mBody.Indent(1);
+          parseFunc.mBody.Add("std::ifstream fin(filePath, std::ios_base::binary);");
+          parseFunc.mBody.Add("fin.seekg(0, std::ios_base::end);");
+          parseFunc.mBody.Add("std::string contents(fin.tellg(), 0);");
+          parseFunc.mBody.Add("fin.seekg(0, std::ios_base::beg);");
+          parseFunc.mBody.Add("fin.read(contents.data(), contents.size());");
+          parseFunc.mBody.Add("rapidjson::Document doc;");
+          parseFunc.mBody.Add("doc.Parse(contents.c_str());");
+          parseFunc.mBody.Add("if (!doc.IsArray()) {{");
+          parseFunc.mBody.Indent(1);
+          // TODO: should use a ON_FAILURE(msg, ...) macro (and CHECK(cond, msg, ...)) and define ifndef.
+          // Can make it a GeneratorSettings parameter to include a special user file at each header,
+          // and also have own header that every header includes and #define's (ifndef) such macros
+          parseFunc.mBody.Add("return false;");
+          parseFunc.mBody.Indent(-1);
+          parseFunc.mBody.Add("}}"); // if (!doc.IsArray())
+
+          parseFunc.mBody.Add("for (auto& jsonElem: doc.GetArray()) {{"); // if (!doc.IsArray())
+          parseFunc.mBody.Indent(1);
+          Type type;
+          TypeInfo::Get().ConvertToType(type, templateParameter);
+          parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
+          parseFunc.mBody.Add("elem.ParseJson(jsonElem, converter);", type.ToString()); // if (!doc.IsArray())
+          auto elemName = fieldDefinition.GetDecorator(Decorators::Container)->GetAttribute(
+              Decorators::Container_ElemName);
+          parseFunc.mBody.Add("{}(std::move(elem));", St::GetAdderMethodName(elemName->mValue.mName));
+          parseFunc.mBody.Indent(-1);
+          parseFunc.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
+
+          parseFunc.mBody.Indent(-1);
+          parseFunc.mBody.Add("}}"); // for(path: filesByName[field])
+
+          parseFunc.mBody.Indent(-1);
+          parseFunc.mBody.Add("}}"); // if (it != filesByName.end())
+        }
+      }
+    }
+    parseFunc.mBody.Add("return true;");
   }
 
   void GeneratorJson::GenerateParseJson(Class &cls) {
@@ -61,6 +224,7 @@ namespace holgen {
       arg.mType.mIsConst = true;
       arg.mName = "json";
     }
+
     {
       auto &arg = parseFunc.mArguments.emplace_back();
       arg.mType.mName = ConverterName;
@@ -371,4 +535,5 @@ namespace holgen {
     }
 
   }
+
 }

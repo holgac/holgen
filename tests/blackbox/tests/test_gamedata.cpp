@@ -44,3 +44,16 @@ TEST(GameDataTest, ElementGettersAndAdders) {
   auto a2 = gd.GetArmorFromName("chain mail2");
   EXPECT_EQ(a2, nullptr);
 }
+
+TEST(GameDataTest, ParseFiles) {
+  GameData gd;
+  gd.ParseFiles("gamedata", {});
+  auto plateMail = gd.GetArmorFromName("Plate Mail");
+  ASSERT_NE(plateMail, nullptr);
+  EXPECT_EQ(plateMail->GetArmorClass(), 3);;
+  auto wizardRobe = gd.GetArmorFromName("Wizard Robe");
+  ASSERT_NE(wizardRobe, nullptr);
+  auto gorion = gd.GetCharacterFromName("Gorion");
+  ASSERT_NE(gorion, nullptr);
+  EXPECT_EQ(gorion->GetArmor(), wizardRobe->GetId());
+}

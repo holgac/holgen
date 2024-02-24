@@ -19,6 +19,15 @@ std::string& Boot::GetName() {
 void Boot::SetName(const std::string& val) {
   mName = val;
 }
+const std::string& Boot::GetColor() const {
+  return mColor;
+}
+std::string& Boot::GetColor() {
+  return mColor;
+}
+void Boot::SetColor(const std::string& val) {
+  mColor = val;
+}
 bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
@@ -28,6 +37,10 @@ bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
         return false;
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
+      if (!res)
+        return false;
+    } else if (0 == strcmp(name, "color")) {
+      auto res = JsonHelper::Parse(mColor, data.value, converter);
       if (!res)
         return false;
     }
@@ -54,6 +67,8 @@ void Boot::CreateLuaMetatable(lua_State* luaState) {
       LuaHelper::Push(instance->mId, ls);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Push(instance->mName, ls);
+    } else if (0 == strcmp("color", key)) {
+      LuaHelper::Push(instance->mColor, ls);
     } else {
       return 0;
     }
@@ -70,6 +85,8 @@ void Boot::CreateLuaMetatable(lua_State* luaState) {
       LuaHelper::Read(instance->mId, ls, -2);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Read(instance->mName, ls, -2);
+    } else if (0 == strcmp("color", key)) {
+      LuaHelper::Read(instance->mColor, ls, -2);
     }
     return 0;
   });

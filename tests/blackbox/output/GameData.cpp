@@ -1,6 +1,10 @@
 #include "GameData.h"
 
-#include "JsonHelper.h"
+#include <filesystem>
+#include <queue>
+#include <vector>
+#include <fstream>
+#include <rapidjson/document.h>
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
@@ -127,21 +131,96 @@ const Character& GameData::GetCharacter(uint32_t idx) const {
 Character& GameData::GetCharacter(uint32_t idx) {
   return mCharacters[idx];
 }
-bool GameData::ParseJson(const rapidjson::Value& json, const Converter& converter) {
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "boots")) {
-      auto res = JsonHelper::Parse(mBoots, data.value, converter);
-      if (!res)
+bool GameData::ParseFiles(const std::string& rootPath, const Converter& converterArg) {
+  auto converter = converterArg;
+  if (converter.bootNameToId == nullptr) {
+    converter.bootNameToId = [this](const std::string& key) -> uint32_t {
+      auto elem = GetBootFromName(key);
+      return elem->GetId();
+    };
+  }
+  if (converter.armorNameToId == nullptr) {
+    converter.armorNameToId = [this](const std::string& key) -> uint32_t {
+      auto elem = GetArmorFromName(key);
+      return elem->GetId();
+    };
+  }
+  std::map<std::string, std::vector<std::filesystem::path>> filesByName;
+  std::queue<std::filesystem::path> pathsQueue;
+  pathsQueue.push(std::filesystem::path(rootPath));
+  while(!pathsQueue.empty()) {
+    auto& curPath = pathsQueue.front();
+    for (auto &entry: std::filesystem::directory_iterator(curPath)) {
+      if (std::filesystem::is_directory(entry)) {
+        pathsQueue.push(entry.path());
+      } else if (std::filesystem::is_regular_file(entry)) {
+        std::string filename = entry.path().filename();
+        auto dotPosition = filename.rfind('.');
+        if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == "json") {
+          filesByName[filename.substr(0, dotPosition)].push_back(entry.path());
+        }
+      }
+    }
+    pathsQueue.pop();
+  }
+  auto it = filesByName.find("boots");
+  if (it != filesByName.end()) {
+    for (const auto& filePath: it->second) {
+      std::ifstream fin(filePath, std::ios_base::binary);
+      fin.seekg(0, std::ios_base::end);
+      std::string contents(fin.tellg(), 0);
+      fin.seekg(0, std::ios_base::beg);
+      fin.read(contents.data(), contents.size());
+      rapidjson::Document doc;
+      doc.Parse(contents.c_str());
+      if (!doc.IsArray()) {
         return false;
-    } else if (0 == strcmp(name, "armors")) {
-      auto res = JsonHelper::Parse(mArmors, data.value, converter);
-      if (!res)
+      }
+      for (auto& jsonElem: doc.GetArray()) {
+        Boot elem;
+        elem.ParseJson(jsonElem, converter);
+        AddBoot(std::move(elem));
+      }
+    }
+  }
+  it = filesByName.find("armors");
+  if (it != filesByName.end()) {
+    for (const auto& filePath: it->second) {
+      std::ifstream fin(filePath, std::ios_base::binary);
+      fin.seekg(0, std::ios_base::end);
+      std::string contents(fin.tellg(), 0);
+      fin.seekg(0, std::ios_base::beg);
+      fin.read(contents.data(), contents.size());
+      rapidjson::Document doc;
+      doc.Parse(contents.c_str());
+      if (!doc.IsArray()) {
         return false;
-    } else if (0 == strcmp(name, "characters")) {
-      auto res = JsonHelper::Parse(mCharacters, data.value, converter);
-      if (!res)
+      }
+      for (auto& jsonElem: doc.GetArray()) {
+        Armor elem;
+        elem.ParseJson(jsonElem, converter);
+        AddArmor(std::move(elem));
+      }
+    }
+  }
+  it = filesByName.find("characters");
+  if (it != filesByName.end()) {
+    for (const auto& filePath: it->second) {
+      std::ifstream fin(filePath, std::ios_base::binary);
+      fin.seekg(0, std::ios_base::end);
+      std::string contents(fin.tellg(), 0);
+      fin.seekg(0, std::ios_base::beg);
+      fin.read(contents.data(), contents.size());
+      rapidjson::Document doc;
+      doc.Parse(contents.c_str());
+      if (!doc.IsArray()) {
         return false;
+      }
+      for (auto& jsonElem: doc.GetArray()) {
+        Character elem;
+        elem.ParseJson(jsonElem, converter);
+        AddCharacter(std::move(elem));
+      }
     }
   }
   return true;

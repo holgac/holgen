@@ -19,6 +19,7 @@ namespace holgen {
       switch (*contentIt) {
         case CodeUnitType::Indentation:
           currentIndentation += *indentIt;
+          THROW_IF(currentIndentation < 0, "Negative indentation!")
           indentation = std::string(currentIndentation * 2, ' ');
           ++indentIt;
           break;

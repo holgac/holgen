@@ -16,11 +16,13 @@ namespace holgen {
 
   private:
     void GenerateParseJson(Class &cls);
+    void GenerateParseFiles(Class &cls);
     void GenerateConverter(Class& cls);
     void GenerateParseJsonForField(Class& cls, ClassMethod& parseFunc, const StructDefinition& structDefinition, const FieldDefinition& fieldDefinition);
     void GenerateJsonHelper(Class &generatedClass);
     const ProjectDefinition &mProjectDefinition;
     TranslatedProject &mTranslatedProject;
+    // TODO: remove this
     std::map<std::string, size_t> mClasses;
   };
 }

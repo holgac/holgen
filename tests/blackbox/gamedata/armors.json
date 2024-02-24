@@ -1,0 +1,17 @@
+[
+  {
+    "name": "Leather Armor",
+    "alternativeName": "Cool Armor",
+    "armorClass": 7
+  },
+  {
+    "name": "Plate Mail",
+    "alternativeName": "Platy",
+    "armorClass": 3
+  },
+  {
+    "name": "Wizard Robe",
+    "alternativeName": "Roby",
+    "armorClass": 10
+  }
+]

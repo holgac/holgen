@@ -213,8 +213,14 @@ namespace holgen {
         headers.AddLocalHeader("JsonHelper.h");
       }
       if (!isHeader && method.mName == "PushToLua") {
-        // TODO: don't hardcode these
         headers.AddLocalHeader("LuaHelper.h");
+      }
+      if (!isHeader && method.mName == "ParseFiles") {
+        headers.AddStandardHeader("filesystem");
+        headers.AddStandardHeader("queue");
+        headers.AddStandardHeader("vector");
+        headers.AddStandardHeader("fstream");
+        headers.AddLibHeader("rapidjson/document.h");
       }
     }
 

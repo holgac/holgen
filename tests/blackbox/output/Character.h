@@ -4,8 +4,6 @@
 #include <string>
 #include <rapidjson/document.h>
 #include <lua.hpp>
-#include "Boot.h"
-#include "Armor.h"
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
@@ -16,12 +14,10 @@ public:
   const std::string& GetName() const;
   std::string& GetName();
   void SetName(const std::string& val);
-  const Boot& GetBoot() const;
-  Boot& GetBoot();
-  void SetBoot(const Boot& val);
-  const Armor& GetArmor() const;
-  Armor& GetArmor();
-  void SetArmor(const Armor& val);
+  uint32_t GetBoot() const;
+  void SetBoot(uint32_t val);
+  uint32_t GetArmor() const;
+  void SetArmor(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   static void CreateLuaMetatable(lua_State* luaState);
@@ -29,7 +25,7 @@ protected:
 private:
   uint32_t mId;
   std::string mName;
-  Boot mBoot;
-  Armor mArmor;
+  uint32_t mBoot;
+  uint32_t mArmor;
 };
 }

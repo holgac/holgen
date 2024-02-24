@@ -12,6 +12,8 @@ public:
   std::function<uint32_t(const std::string&)> countryNameToId;
   std::function<uint32_t(const std::string&)> cityNameToId;
   std::function<std::map<uint32_t, uint32_t>(const std::map<std::string, uint32_t>&)> raceU32Map;
+  std::function<uint32_t(const std::string&)> bootNameToId;
+  std::function<uint32_t(const std::string&)> armorNameToId;
 protected:
 private:
 };

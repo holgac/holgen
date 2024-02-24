@@ -4,6 +4,8 @@ struct Boot {
     @id()
     u32 id;
     string name;
+    // TODO: enums and auto conversion from string to integral
+    string color;
 }
 
 @containedBy(GameData)
@@ -23,29 +25,28 @@ struct Character {
 
     string name;
 
-    // uses u32 (Boot.id) instead
-    // what's the benefit? less duplicated code
-    @reference()
-    // @jsonConvert(from=string, using=bootNameToBootId)
-    Boot boot;
-    Armor armor;
+    // adds GetBoot() that uses GameData singleton
+    @reference(Boot)
+    @jsonConvert(from=string, using=bootNameToId)
+    u32 boot;
+
+    @jsonConvert(from=string, using=armorNameToId)
+    u32 armor;
 }
 
-// generate a single loader that scans the filesystem for jsons.
-// it should populate converters
-// Needs to be aware of dependency graph (Character has Boot/Armor converters, so it should be loaded after)
 // needs to be a singleton for lua to work
 @dataManager()
 struct GameData {
-    @index(on=name, using=unordered_map)
+    @index(on=name, using=unordered_map, forConverter=bootNameToId)
     @container(elemName=boot)
     vector<Boot> boots;
 
     @container(elemName=armor)
-    @index(on=name)
+    @index(on=name, forConverter=armorNameToId)
     @index(on=alternativeName)
     vector<Armor> armors;
 
+    // @index(on=name, forConverter=characterNameToId)
     @index(on=name)
     @container(elemName=character)
     vector<Character> characters;

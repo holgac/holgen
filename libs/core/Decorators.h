@@ -50,7 +50,7 @@ namespace holgen {
     inline static const std::string NoJson = "noJson";
 
     /*
-     * Indicates that the field is a container that should be exposed
+     * Indicates that the field is a container that should be exposed.
      *
      * Example:
      * @container(elemName=country)
@@ -89,9 +89,43 @@ namespace holgen {
      *   @index(on=ssn,using=unordered_map)
      *   vector<Person> people;
      * }
+     *
+     * Data managers can use an index as a converter for the data they load
+     * struct House {
+     *   @container(elemName=person)
+     *   @index(on=ssn,forConverter=ssnToPerson)
+     *   vector<Person> people;
+     * }
      */
     inline static const std::string Index = "index";
     inline static const std::string Index_On = "on";
     inline static const std::string Index_Using = "using";
+    inline static const std::string Index_ForConverter = "forConverter";
+
+    /**
+     * Marks the struct as a data manager that has a special method for loading the types from the FS it contains.
+     *
+     * All fields marked with @container should be indexed containers with a field marked with @id decorator.
+     *
+     * Example:
+     * struct Plant {
+     *  @id()
+     *  u32 id;
+     *  string name;
+     * }
+     * struct Animal {
+     *  @jsonConvert(from=string, using=plantNameToPlant)
+     *  Plant favPlant;
+     * }
+     * @dataManager()
+     * struct DataManager {
+     *  @index(on=name, forConverter=plantNameToPlant)
+     *  @container(elementName=plant)
+     *  vector<Plant> plants;
+     *  @container(elementName=animal)
+     *  vector<Animal> animals;
+     * }
+     */
+    inline static const std::string DataManager = "dataManager";
   };
 }

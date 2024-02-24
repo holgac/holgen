@@ -18,9 +18,8 @@ int run(int argc, char **argv) {
     if (!std::filesystem::is_regular_file(entry)) {
       continue;
     }
-    std::ifstream fin(entry.path());
+    std::ifstream fin(entry.path(), std::ios_base::binary);
     fin.seekg(0, std::ios_base::end);
-    auto r = fin.tellg();
     std::string contents(fin.tellg(), 0);
     fin.seekg(0, std::ios_base::beg);
     fin.read(contents.data(), contents.size());
@@ -33,6 +32,7 @@ int run(int argc, char **argv) {
   auto results = generator.Generate(project);
   std::filesystem::path outDir(argv[2]);
   for (auto &result: results) {
+    // TODO: Write only if modified to avoid recompilation
     std::ofstream fout(outDir / result.mName);
     fout.write(result.mText.data(), result.mText.size());
   }
