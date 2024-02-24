@@ -22,7 +22,6 @@ protected:
     Parser parser;
     parser.Parse(tokenizer);
     DependencyGraph dg(parser.GetProject());
-    dg.Calculate();
     auto &processOrder = dg.GetProcessOrder();
     ASSERT_EQ(processOrder.size(), expectedProcessOrder.size());
     for (size_t i = 0; i < processOrder.size(); ++i) {
@@ -34,10 +33,9 @@ protected:
     Tokenizer tokenizer(schema);
     Parser parser;
     parser.Parse(tokenizer);
-    DependencyGraph dg(parser.GetProject());
     EXPECT_THROW({
                    try {
-                     dg.Calculate();
+                     DependencyGraph dg(parser.GetProject());
                    } catch (Exception &exc) {
                      std::string actualError = exc.what();
                      actualError = actualError.substr(actualError.find(" ") + 1);

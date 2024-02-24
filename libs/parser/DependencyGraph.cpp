@@ -3,7 +3,9 @@
 #include "core/Exception.h"
 
 namespace holgen {
-  DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(project) {}
+  DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(project) {
+    Calculate();
+  }
 
 
   void DependencyGraph::Calculate() {

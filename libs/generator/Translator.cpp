@@ -14,7 +14,7 @@ namespace holgen {
     THROW_IF(mProject != nullptr, "Translator didnt terminate gracefully last time...");
     mProject = &project;
     Validator(project).Validate();
-    TranslatedProject translatedProject;
+    TranslatedProject translatedProject(*mProject);
     std::map<std::string, size_t> classMap;
     for (auto &structDefinition: project.mStructs) {
       auto[it, res] = classMap.try_emplace(structDefinition.mName, translatedProject.mClasses.size());
@@ -198,11 +198,4 @@ namespace holgen {
 
   }
 
-  ClassField *Class::GetField(const std::string &name) {
-    for (auto &field: mFields) {
-      if (field.mName == name)
-        return &field;
-    }
-    return nullptr;
-  }
 }

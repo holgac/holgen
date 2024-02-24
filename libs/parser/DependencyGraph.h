@@ -10,9 +10,9 @@ namespace holgen {
   class DependencyGraph {
   public:
     explicit DependencyGraph(const ProjectDefinition &project);
-    void Calculate();
     const std::vector<std::string>& GetProcessOrder() const;;
   private:
+    void Calculate();
     void Calculate(const StructDefinition& structDefinition, const TypeDefinition& typeDefinition);
     void Calculate(const StructDefinition& structDefinition);
     const ProjectDefinition &mProject;
