@@ -1,5 +1,6 @@
 #pragma once
 
+#include "holgen.h"
 namespace holgen_blackbox_test {
 template <typename T>
 class GlobalPointer {

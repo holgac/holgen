@@ -207,11 +207,13 @@ namespace holgen {
         auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
         auto indexFieldName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
         auto getterMethodName = St::GetGetterMethodName(fieldIndexedOn.mName);
-        validators.Add("if({}.contains(elem.{}()))", indexFieldName, getterMethodName);
-        // TODO: some logging mechanism for all these failures?
+        validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
         validators.Indent(1);
+        validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists!", elem.{}());)",
+                       underlyingStructDefinition->mName, indexOn->mValue.mName, getterMethodName);
         validators.Add("return false;");
         validators.Indent(-1);
+        validators.Add("}}");
         inserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
       }
       func.mBody.Add(validators);

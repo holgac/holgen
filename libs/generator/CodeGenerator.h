@@ -21,6 +21,7 @@ namespace holgen {
   struct GeneratorSettings {
     std::string mNamespace;
     std::string mCMakeTarget;
+    std::string mConfigHeader;
   };
 
   class CodeGenerator {
@@ -33,6 +34,7 @@ namespace holgen {
 
   private:
     void GenerateCMakeLists(GeneratedContent &cmake, const TranslatedProject &translatedProject) const;
+    void GenerateHolgenHeader(GeneratedContent &header) const;
     void GenerateClassHeader(GeneratedContent &header, const Class &cls) const;
     void GenerateClassSource(GeneratedContent &source, const Class &cls) const;
     void GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const;

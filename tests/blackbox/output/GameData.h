@@ -1,5 +1,6 @@
 #pragma once
 
+#include "holgen.h"
 #include <vector>
 #include <unordered_map>
 #include <string>

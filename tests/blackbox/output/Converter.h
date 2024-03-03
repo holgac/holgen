@@ -1,5 +1,6 @@
 #pragma once
 
+#include "holgen.h"
 #include <functional>
 #include <cstdint>
 #include <string>

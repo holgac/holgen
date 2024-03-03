@@ -15,6 +15,7 @@ namespace {
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
+        .mConfigHeader = "",
     };
     CodeGenerator generator(generatorSettings);
     auto files = helpers::MapByName(generator.Generate(tp));
@@ -26,6 +27,7 @@ namespace {
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 namespace generator_test_namespace {
 template <typename T>
 class GlobalPointer {

@@ -22,6 +22,7 @@ namespace {
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
+        .mConfigHeader = "",
     };
     CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
@@ -51,6 +52,7 @@ namespace {
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
+        .mConfigHeader = "",
     };
     CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
@@ -62,6 +64,7 @@ namespace {
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 #include <cstdint>
 
 namespace generator_test_namespace {
@@ -121,6 +124,7 @@ void Person::SetGender(float val) {
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
+        .mConfigHeader = "",
     };
     CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
@@ -132,6 +136,7 @@ void Person::SetGender(float val) {
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -226,6 +231,7 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
+        .mConfigHeader = "",
     };
     CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
@@ -237,6 +243,7 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 #include <string>
 #include <cstdint>
 #include <rapidjson/fwd.h>
@@ -317,6 +324,7 @@ bool Sound::ParseJson(const rapidjson::Value& json, const Converter& converter) 
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 #include <vector>
 #include <rapidjson/fwd.h>
 #include "Sound.h"
@@ -403,6 +411,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
+        .mConfigHeader = "",
     };
     CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
@@ -414,6 +423,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "Converter.h"
@@ -520,6 +530,7 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 #include <string>
 #include <rapidjson/fwd.h>
 #include "Person.h"
@@ -613,6 +624,7 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
+        .mConfigHeader = "",
     };
     CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
@@ -625,6 +637,7 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
             R"DELIM(
 #pragma once
 
+#include "holgen.h"
 #include <cstdint>
 #include <string>
 

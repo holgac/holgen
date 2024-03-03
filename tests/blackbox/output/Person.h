@@ -1,5 +1,6 @@
 #pragma once
 
+#include "holgen.h"
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "Converter.h"

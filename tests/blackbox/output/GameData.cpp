@@ -33,8 +33,10 @@ Boot* GameData::GetBootFromName(const std::string& key) {
 }
 bool GameData::AddBoot(Boot&& elem) {
   auto newId = mBoots.size();
-  if(mBootsNameIndex.contains(elem.GetName()))
+  if (mBootsNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("Boot with name={} already exists!", elem.GetName());
     return false;
+  }
   mBootsNameIndex.emplace(elem.GetName(), newId);
   mBoots.emplace_back(std::forward<Boot>(elem));
   mBoots.back().SetId(newId);
@@ -80,10 +82,14 @@ Armor* GameData::GetArmorFromAlternativeName(const std::string& key) {
 }
 bool GameData::AddArmor(Armor&& elem) {
   auto newId = mArmors.size();
-  if(mArmorsNameIndex.contains(elem.GetName()))
+  if (mArmorsNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("Armor with name={} already exists!", elem.GetName());
     return false;
-  if(mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName()))
+  }
+  if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
+    HOLGEN_WARN("Armor with alternativeName={} already exists!", elem.GetAlternativeName());
     return false;
+  }
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
   mArmors.emplace_back(std::forward<Armor>(elem));
@@ -123,8 +129,10 @@ Character* GameData::GetCharacterFromName(const std::string& key) {
 }
 bool GameData::AddCharacter(Character&& elem) {
   auto newId = mCharacters.size();
-  if(mCharactersNameIndex.contains(elem.GetName()))
+  if (mCharactersNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("Character with name={} already exists!", elem.GetName());
     return false;
+  }
   mCharactersNameIndex.emplace(elem.GetName(), newId);
   mCharacters.emplace_back(std::forward<Character>(elem));
   mCharacters.back().SetId(newId);

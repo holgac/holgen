@@ -31,6 +31,7 @@ namespace holgen {
       GenerateClassHeader(contents.emplace_back(), cls);
       GenerateClassSource(contents.emplace_back(), cls);
     }
+    GenerateHolgenHeader(contents.emplace_back());
     GenerateCMakeLists(contents.emplace_back(), translatedProject);
 
     mTranslatedProject = nullptr;
@@ -44,6 +45,7 @@ namespace holgen {
     CodeBlock codeBlock;
     codeBlock.Line() << "#pragma once";
     codeBlock.Line();
+    codeBlock.Add("#include \"holgen.h\"");
     GenerateIncludes(codeBlock, cls, true);
     codeBlock.Add(cls.mGlobalForwardDeclarations);
     if (!mGeneratorSettings.mNamespace.empty())
@@ -241,6 +243,47 @@ namespace holgen {
 
   void CodeGenerator::GenerateClassDeclarationsForHeader(CodeBlock &_codeBlock __attribute__((unused)),
                                                          const Class &_cls __attribute__((unused))) const {
+  }
+
+  void CodeGenerator::GenerateHolgenHeader(GeneratedContent &header) const {
+    header.mType = FileType::CppHeader;
+    header.mName = "holgen.h";
+    CodeBlock codeBlock;
+    codeBlock.Add("#pragma once");
+    codeBlock.Line();
+    codeBlock.Add("#include <iostream>");
+    codeBlock.Add("#include <format>");
+    if (!mGeneratorSettings.mConfigHeader.empty()) {
+      codeBlock.Add("#include \"{}\"", mGeneratorSettings.mConfigHeader);
+    }
+
+    codeBlock.Line();
+    codeBlock.Add("#ifndef HOLGEN_FAIL");
+    codeBlock.Add(
+        R"(#define HOLGEN_FAIL(msg, ...) throw std::runtime_error(std::format("{{}}:{{}} " msg, __FILE__, __LINE__, ## __VA_ARGS__)))");
+    codeBlock.Add("#endif // ifndef HOLGEN_FAIL");
+
+    codeBlock.Line();
+    codeBlock.Add("#ifndef HOLGEN_FAIL_IF");
+    codeBlock.Add("#define HOLGEN_FAIL_IF(cond, msg, ...) if (cond) {{ \\");
+    codeBlock.Add("HOLGEN_FAIL(msg, ## __VA_ARGS__); \\");
+    codeBlock.Add("}}");
+    codeBlock.Add("#endif // ifndef HOLGEN_FAIL_IF");
+
+    codeBlock.Line();
+    codeBlock.Add("#ifndef HOLGEN_WARN");
+    codeBlock.Add(
+        R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}}" msg, __FILE__, __LINE__, ## __VA_ARGS__))");
+    codeBlock.Add("#endif // ifndef HOLGEN_WARN");
+
+    codeBlock.Line();
+    codeBlock.Add("#ifndef HOLGEN_WARN_IF");
+    codeBlock.Add("#define HOLGEN_WARN_IF(cond, msg, ...) if (cond) {{ \\");
+    codeBlock.Add("HOLGEN_WARN(msg, ## __VA_ARGS__); \\");
+    codeBlock.Add("}}");
+    codeBlock.Add("#endif // ifndef HOLGEN_WARN_IF");
+
+    header.mText = codeBlock.ToString();
   }
 
 }
