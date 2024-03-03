@@ -3,11 +3,11 @@
 #include <cstdint>
 #include <vector>
 #include <string>
-#include <rapidjson/document.h>
-#include <lua.hpp>
+#include <rapidjson/fwd.h>
 #include "DamageMultiplier.h"
 #include "Converter.h"
 
+struct lua_State;
 namespace holgen_blackbox_test {
 class Weapon {
 public:

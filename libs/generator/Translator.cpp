@@ -69,6 +69,8 @@ namespace holgen {
       getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                        St::GlobalPointerName, manager->mName,
                        St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
+      generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointerName + ".h");
+      generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
     }
   }
 

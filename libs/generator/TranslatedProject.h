@@ -3,6 +3,7 @@
 #include "parser/DependencyGraph.h"
 #include "TypeInfo.h"
 #include "CodeBlock.h"
+#include "HeaderContainer.h"
 
 namespace holgen {
 
@@ -66,6 +67,10 @@ namespace holgen {
     std::vector<ClassConstructor> mConstructors;
     std::vector<ClassField> mFields;
     std::vector<TemplateParameter> mTemplateParameters;
+    HeaderContainer mHeaderIncludes;
+    HeaderContainer mSourceIncludes;
+    CodeBlock mGlobalForwardDeclarations;
+    // CodeBlock mNamespaceForwardDeclarations;
     ClassField *GetField(const std::string &name);
     ClassMethod *GetMethod(const std::string &name, bool isConst);
   };
@@ -77,6 +82,7 @@ namespace holgen {
     const DependencyGraph mDependencyGraph;
     std::vector<Class> mClasses;
     Class *GetClass(const std::string &name);
+    const Class *GetClass(const std::string &name) const;
   };
 
 }

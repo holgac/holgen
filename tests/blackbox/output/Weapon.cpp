@@ -1,5 +1,7 @@
 #include "Weapon.h"
 
+#include <rapidjson/document.h>
+#include <lua.hpp>
 #include "JsonHelper.h"
 #include "LuaHelper.h"
 

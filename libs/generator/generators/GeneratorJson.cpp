@@ -34,6 +34,10 @@ namespace holgen {
       const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
       if (structDefinition.GetDecorator(Decorators::NoJson))
         continue;
+      cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
+      cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
+      // TODO: don't hard-code JsonHelper
+      cls.mSourceIncludes.AddLocalHeader("JsonHelper.h");
       if (structDefinition.GetDecorator(Decorators::DataManager))
         GenerateParseFiles(cls);
       else
@@ -45,6 +49,10 @@ namespace holgen {
   }
 
   void GeneratorJson::GenerateParseFiles(Class &cls) {
+    cls.mSourceIncludes.AddStandardHeader("filesystem");
+    cls.mSourceIncludes.AddStandardHeader("queue");
+    cls.mSourceIncludes.AddStandardHeader("vector");
+    cls.mSourceIncludes.AddStandardHeader("fstream");
     const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = "ParseFiles";
@@ -304,6 +312,7 @@ namespace holgen {
   // TODO: move to GeneratorJsonHelpers class
   void GeneratorJson::GenerateJsonHelper(Class &generatedClass) {
     generatedClass.mName = "JsonHelper";
+    generatedClass.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
     auto &baseParse = generatedClass.mMethods.emplace_back();
     baseParse.mName = "Parse";
     baseParse.mIsConst = false;

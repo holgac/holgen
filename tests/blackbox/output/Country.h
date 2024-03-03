@@ -3,11 +3,11 @@
 #include <vector>
 #include <map>
 #include <cstdint>
-#include <rapidjson/document.h>
-#include <lua.hpp>
+#include <rapidjson/fwd.h>
 #include "Person.h"
 #include "Converter.h"
 
+struct lua_State;
 namespace holgen_blackbox_test {
 class Country {
 public:

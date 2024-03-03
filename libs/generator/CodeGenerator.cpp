@@ -45,7 +45,7 @@ namespace holgen {
     codeBlock.Line() << "#pragma once";
     codeBlock.Line();
     GenerateIncludes(codeBlock, cls, true);
-    // TODO: include headers
+    codeBlock.Add(cls.mGlobalForwardDeclarations);
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
 
@@ -224,44 +224,16 @@ namespace holgen {
   }
 
   void CodeGenerator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
-    // TODO: this should be part of GeneratedClass. Otherwise CodeGenerator or HeaderContainer needs to know about
-    // all types of enrichments and their dependencies
     HeaderContainer headers;
+    if (isHeader)
+      headers = cls.mHeaderIncludes;
+    else
+      headers = cls.mSourceIncludes;
     for (const auto &field: cls.mFields) {
-      headers.IncludeClassField(cls, field, isHeader);
+      headers.IncludeClassField(*mTranslatedProject, cls, field, isHeader);
     }
     for (const auto &method: cls.mMethods) {
-      headers.IncludeClassMethod(cls, method, isHeader);
-
-      // TODO: don't hardcode these
-      if (!isHeader && method.mName == "ParseJson") {
-        // TODO: don't hardcode these
-        headers.AddLocalHeader("JsonHelper.h");
-      }
-      if (!isHeader && method.mName == "PushToLua") {
-        headers.AddLocalHeader("LuaHelper.h");
-      }
-      if (!isHeader && method.mName == "Get") {
-        headers.AddLocalHeader("GlobalPointer.h");
-      }
-      if (!isHeader && method.mName == "ParseFiles") {
-        headers.AddStandardHeader("filesystem");
-        headers.AddStandardHeader("queue");
-        headers.AddStandardHeader("vector");
-        headers.AddStandardHeader("fstream");
-        headers.AddLibHeader("rapidjson/document.h");
-      }
-    }
-
-    if (!isHeader) {
-      auto structDefinition = mTranslatedProject->mProject.GetStruct(cls.mName);
-      if (structDefinition) {
-        auto managedDecorator = structDefinition->GetDecorator(Decorators::Managed);
-        if (managedDecorator) {
-          auto manager = managedDecorator->GetAttribute(Decorators::Managed_By);
-          headers.AddLocalHeader(manager->mValue.mName + ".h");
-        }
-      }
+      headers.IncludeClassMethod(*mTranslatedProject, cls, method, isHeader);
     }
 
     headers.Write(codeBlock);

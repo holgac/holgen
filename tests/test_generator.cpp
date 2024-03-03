@@ -135,7 +135,7 @@ void Person::SetGender(float val) {
 #include <vector>
 #include <string>
 #include <map>
-#include <rapidjson/document.h>
+#include <rapidjson/fwd.h>
 #include "Converter.h"
 
 namespace generator_test_namespace {
@@ -165,6 +165,7 @@ private:
             R"DELIM(
 #include "Market.h"
 
+#include <rapidjson/document.h>
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
@@ -238,7 +239,7 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
 
 #include <string>
 #include <cstdint>
-#include <rapidjson/document.h>
+#include <rapidjson/fwd.h>
 #include "Converter.h"
 
 namespace generator_test_namespace {
@@ -268,6 +269,7 @@ private:
             R"DELIM(
 #include "Sound.h"
 
+#include <rapidjson/document.h>
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
@@ -316,7 +318,7 @@ bool Sound::ParseJson(const rapidjson::Value& json, const Converter& converter) 
 #pragma once
 
 #include <vector>
-#include <rapidjson/document.h>
+#include <rapidjson/fwd.h>
 #include "Sound.h"
 #include "Converter.h"
 
@@ -344,6 +346,7 @@ private:
             R"DELIM(
 #include "Animal.h"
 
+#include <rapidjson/document.h>
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
@@ -412,7 +415,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
 #pragma once
 
 #include <cstdint>
-#include <rapidjson/document.h>
+#include <rapidjson/fwd.h>
 #include "Converter.h"
 
 namespace generator_test_namespace {
@@ -446,6 +449,7 @@ private:
             R"DELIM(
 #include "Person.h"
 
+#include <rapidjson/document.h>
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
@@ -517,7 +521,7 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
 #pragma once
 
 #include <string>
-#include <rapidjson/document.h>
+#include <rapidjson/fwd.h>
 #include "Person.h"
 #include "Converter.h"
 
@@ -548,6 +552,7 @@ private:
             R"DELIM(
 #include "Country.h"
 
+#include <rapidjson/document.h>
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {

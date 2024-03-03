@@ -14,6 +14,14 @@ namespace holgen {
     return nullptr;
   }
 
+  const Class *TranslatedProject::GetClass(const std::string &name) const {
+    for (auto &cls: mClasses) {
+      if (cls.mName == name)
+        return &cls;
+    }
+    return nullptr;
+  }
+
   ClassField *Class::GetField(const std::string &name) {
     for (auto &field: mFields) {
       if (field.mName == name)

@@ -1,5 +1,6 @@
 #include "HeaderContainer.h"
 #include <map>
+#include "Translator.h"
 
 namespace holgen {
   namespace {
@@ -16,7 +17,7 @@ namespace holgen {
     std::map<std::string, std::string> STDHeaders = {
         {"std::string",        "string"},
         {"std::vector",        "vector"},
-        {"std::deque",        "deque"},
+        {"std::deque",         "deque"},
         {"std::map",           "map"},
         {"std::unordered_map", "unordered_map"},
         {"std::function",      "functional"},
@@ -56,7 +57,7 @@ namespace holgen {
       codeBlock.Line();
   }
 
-  void HeaderContainer::IncludeType(const Type &type, bool isHeader) {
+  void HeaderContainer::IncludeType(const TranslatedProject &project, const Type &type, bool isHeader) {
     if (NoHeaderTypes.contains(type.mName)) {
       return;
     } else if (CstdIntTypes.contains(type.mName)) {
@@ -67,30 +68,22 @@ namespace holgen {
       if (isHeader) {
         AddStandardHeader(STDHeaders.at(type.mName));
       }
-    } else if (type.mName.starts_with("rapidjson::")) {
-      // it's better to fwd declare in header, but rapidjson uses templates making it complicated
-      if (isHeader) {
-        AddLibHeader("rapidjson/document.h");
-      }
-    } else if (type.mName.starts_with("lua_State")) {
-      if (isHeader) {
-        // TODO: implement fwd declaring
-        AddLibHeader("lua.hpp");
-      }
-    } else {
-      // TODO: This will change when we implement fwd declarations
+    } else if (project.GetClass(type.mName) != nullptr) {
       if (isHeader) {
         AddLocalHeader(type.mName + ".h");
       }
     }
   }
 
-  void HeaderContainer::IncludeClassField(const Class &cls, const ClassField &classField, bool isHeader) {
-    IncludeClassField(cls, classField, classField.mType, isHeader);
+  void HeaderContainer::IncludeClassField(
+      const TranslatedProject &project, const Class &cls, const ClassField &classField, bool isHeader
+  ) {
+    IncludeClassField(project, cls, classField, classField.mType, isHeader);
   }
 
-  void HeaderContainer::IncludeClassField(
-      const Class &cls, const ClassField &classField, const Type &type, bool isHeader
+  void HeaderContainer::IncludeClassField(const TranslatedProject &project,
+                                          const Class &cls, const ClassField &classField, const Type &type,
+                                          bool isHeader
   ) {
     bool isTemplateType = false;
     for (const auto &templateParameter: cls.mTemplateParameters) {
@@ -100,23 +93,25 @@ namespace holgen {
       }
     }
     if (!isTemplateType)
-      IncludeType(type, isHeader);
+      IncludeType(project, type, isHeader);
     for (const auto &templateParameter: type.mTemplateParameters) {
-      IncludeClassField(cls, classField, templateParameter, isHeader);
+      IncludeClassField(project, cls, classField, templateParameter, isHeader);
     }
     for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
-      IncludeClassField(cls, classField, templateParameter, isHeader);
+      IncludeClassField(project, cls, classField, templateParameter, isHeader);
     }
   }
 
-  void HeaderContainer::IncludeClassMethod(const Class &cls, const ClassMethod &classMethod, bool isHeader) {
-    IncludeClassMethod(cls, classMethod, classMethod.mReturnType, isHeader);
+  void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls,
+                                           const ClassMethod &classMethod, bool isHeader) {
+    IncludeClassMethod(project, cls, classMethod, classMethod.mReturnType, isHeader);
     for (const auto &argument: classMethod.mArguments) {
-      IncludeClassMethod(cls, classMethod, argument.mType, isHeader);
+      IncludeClassMethod(project, cls, classMethod, argument.mType, isHeader);
     }
   }
 
-  void HeaderContainer::IncludeClassMethod(const Class &cls, const ClassMethod &classMethod, const Type &type,
+  void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls,
+                                           const ClassMethod &classMethod, const Type &type,
                                            bool isHeader) {
     bool isTemplateType = false;
     for (const auto &templateParameter: cls.mTemplateParameters) {
@@ -132,12 +127,12 @@ namespace holgen {
       }
     }
     if (!isTemplateType && type.mName != cls.mName)
-      IncludeType(type, isHeader);
+      IncludeType(project, type, isHeader);
     for (const auto &templateParameter: type.mTemplateParameters) {
-      IncludeClassMethod(cls, classMethod, templateParameter, isHeader);
+      IncludeClassMethod(project, cls, classMethod, templateParameter, isHeader);
     }
     for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
-      IncludeClassMethod(cls, classMethod, templateParameter, isHeader);
+      IncludeClassMethod(project, cls, classMethod, templateParameter, isHeader);
     }
   }
 }

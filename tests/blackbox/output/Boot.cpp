@@ -1,9 +1,11 @@
 #include "Boot.h"
 
+#include <rapidjson/document.h>
+#include <lua.hpp>
 #include "GlobalPointer.h"
+#include "GameData.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
-#include "GameData.h"
 
 namespace holgen_blackbox_test {
 uint32_t Boot::GetId() const {

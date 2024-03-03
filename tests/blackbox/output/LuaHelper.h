@@ -6,8 +6,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
-#include <lua.hpp>
 
+struct lua_State;
 namespace holgen_blackbox_test {
 class LuaHelper {
 public:

@@ -4,10 +4,10 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <rapidjson/document.h>
-#include <lua.hpp>
+#include <rapidjson/fwd.h>
 #include "Converter.h"
 
+struct lua_State;
 namespace holgen_blackbox_test {
 class Race {
 public:

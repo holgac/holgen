@@ -5,6 +5,8 @@
 #include <vector>
 #include <fstream>
 #include <rapidjson/document.h>
+#include <lua.hpp>
+#include "JsonHelper.h"
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {

@@ -5,12 +5,13 @@
 #include <string>
 #include <cstdint>
 #include <map>
-#include <lua.hpp>
+#include <rapidjson/fwd.h>
 #include "Boot.h"
 #include "Armor.h"
 #include "Character.h"
 #include "Converter.h"
 
+struct lua_State;
 namespace holgen_blackbox_test {
 class GameData {
 public:

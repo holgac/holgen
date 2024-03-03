@@ -36,6 +36,10 @@ namespace holgen {
       if (structDefinition.GetDecorator(Decorators::NoLua))
         continue;
 
+      cls.mGlobalForwardDeclarations.Add("struct lua_State;");
+      cls.mSourceIncludes.AddLibHeader("lua.hpp");
+      cls.mSourceIncludes.AddLocalHeader("LuaHelper.h");
+
       auto &pushToLua = cls.mMethods.emplace_back();
       pushToLua.mName = "PushToLua";
       pushToLua.mReturnType.mName = "void";
@@ -184,6 +188,8 @@ namespace holgen {
 
   void GeneratorLua::GenerateLuaHelper(Class &generatedClass) {
     generatedClass.mName = "LuaHelper";
+    generatedClass.mGlobalForwardDeclarations.Add("struct lua_State;");
+    generatedClass.mSourceIncludes.AddLibHeader("lua.hpp");
     GenerateLuaHelperPush(generatedClass);
     GenerateLuaHelperRead(generatedClass);
   }
