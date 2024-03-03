@@ -10,7 +10,7 @@ namespace holgen {
     ProjectDefinition mProject;
     Tokenizer *mCurTokenizer = nullptr;
     void ParseStruct(StructDefinition &structDefinition);
-    void ParseDecorator(DecoratorDefinition &decoratorDefinition);
+    void ParseDecorator(Token &curToken, DecoratorDefinition &decoratorDefinition);
     void ParseField(Token &curToken, FieldDefinition &fieldDefinition);
     void ParseType(Token &curToken, TypeDefinition &typeDefinition);
   public:

@@ -4,15 +4,14 @@
 #include <map>
 #include <set>
 #include <string>
-#include "parser/Parser.h"
-#include "Translator.h"
+#include "Generator.h"
 
 namespace holgen {
-  class GeneratorJson {
+  class GeneratorJson : public Generator {
   public:
-    GeneratorJson(const ProjectDefinition &projectDefinition, TranslatedProject &translatedProject);
-    void EnrichClasses();
-    void GenerateHelpers();
+    using Generator::Generator;
+    void EnrichClasses() override;
+    void GenerateHelpers() override;
 
   private:
     void GenerateParseJson(Class &cls);
@@ -20,9 +19,5 @@ namespace holgen {
     void GenerateConverter(Class& cls);
     void GenerateParseJsonForField(Class& cls, ClassMethod& parseFunc, const StructDefinition& structDefinition, const FieldDefinition& fieldDefinition);
     void GenerateJsonHelper(Class &generatedClass);
-    const ProjectDefinition &mProjectDefinition;
-    TranslatedProject &mTranslatedProject;
-    // TODO: remove this
-    std::map<std::string, size_t> mClasses;
   };
 }

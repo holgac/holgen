@@ -2,9 +2,10 @@
 #include <map>
 #include "core/St.h"
 #include "core/Exception.h"
-#include "GeneratorJson.h"
+#include "generator/generators/GeneratorJson.h"
+#include "generator/generators/GeneratorLua.h"
+#include "generator/generators/GeneratorGlobalPointer.h"
 #include "TypeInfo.h"
-#include "GeneratorLua.h"
 #include "core/Decorators.h"
 #include "parser/Validator.h"
 
@@ -15,9 +16,7 @@ namespace holgen {
     mProject = &project;
     Validator(project).Validate();
     TranslatedProject translatedProject(*mProject);
-    std::map<std::string, size_t> classMap;
     for (auto &structDefinition: project.mStructs) {
-      auto[it, res] = classMap.try_emplace(structDefinition.mName, translatedProject.mClasses.size());
       GenerateClass(translatedProject.mClasses.emplace_back(), structDefinition);
     }
 
@@ -27,10 +26,13 @@ namespace holgen {
     generatorJson.EnrichClasses();
     GeneratorLua generatorLua(project, translatedProject);
     generatorLua.EnrichClasses();
+    GeneratorGlobalPointer generatorGlobalPointer(project, translatedProject);
+    generatorGlobalPointer.EnrichClasses();
 
     // After all integrations processed all real structs, create helpers
     generatorJson.GenerateHelpers();
     generatorLua.GenerateHelpers();
+    generatorGlobalPointer.GenerateHelpers();
 
     mProject = nullptr;
     return translatedProject;
@@ -40,6 +42,33 @@ namespace holgen {
     generatedClass.mName = structDefinition.mName;
     for (auto &fieldDefinition: structDefinition.mFields) {
       ProcessField(generatedClass, fieldDefinition);
+    }
+    auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
+    if (managedDecorator != nullptr) {
+      auto managedByAttribute = managedDecorator->GetAttribute(Decorators::Managed_By);
+      auto managedFieldAttribute = managedDecorator->GetAttribute(Decorators::Managed_Field);
+      auto manager = mProject->GetStruct(managedByAttribute->mValue.mName);
+      auto managerField = manager->GetField(managedFieldAttribute->mValue.mName);
+      auto managerFieldContainerDecorator = managerField->GetDecorator(Decorators::Container);
+      auto managerFieldContainerElemNameAttribute = managerFieldContainerDecorator->GetAttribute(
+          Decorators::Container_ElemName);
+      auto managerFieldContainerConstAttribute = managerFieldContainerDecorator->GetAttribute(
+          Decorators::Container_Const);
+      auto idField = structDefinition.GetIdField();
+
+      auto &getter = generatedClass.mMethods.emplace_back();
+      getter.mName = "Get";
+      getter.mIsStatic = true;
+      getter.mIsConst = false;
+      getter.mReturnType.mName = structDefinition.mName;
+      getter.mReturnType.mType = PassByType::Pointer;
+      getter.mReturnType.mIsConst = managerFieldContainerConstAttribute != nullptr;
+      auto &idArg = getter.mArguments.emplace_back();
+      TypeInfo::Get().ConvertToType(idArg.mType, idField->mType);
+      idArg.mName = "id";
+      getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
+                       St::GlobalPointerName, manager->mName,
+                       St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
     }
   }
 
@@ -54,22 +83,24 @@ namespace holgen {
       auto &getter = generatedClass.mMethods.emplace_back();
       getter.mName = St::GetGetterMethodName(fieldDefinition.mName);
       getter.mBody.Line() << "return " << generatedField.mName << ";";
-      getter.mType = generatedField.mType;
+      getter.mReturnType = generatedField.mType;
       getter.mIsConst = true;
       if (!isPrimitive) {
-        getter.mType.mIsConst = true;
-        getter.mType.mType = PassByType::Reference;
+        getter.mReturnType.mIsConst = true;
+        getter.mReturnType.mType = PassByType::Reference;
       }
     }
 
     // non-const getter for non-primitives only
+    // TODO: have methods like ShouldFieldHaveSetter and ShouldFieldHaveNonConstGetter
+    // Will be useful for AddElem methods too
     if (!isPrimitive) {
       auto &getter = generatedClass.mMethods.emplace_back();
       getter.mName = St::GetGetterMethodName(fieldDefinition.mName);
       getter.mBody.Line() << "return " << generatedField.mName << ";";
-      getter.mType = generatedField.mType;
+      getter.mReturnType = generatedField.mType;
       getter.mIsConst = false;
-      getter.mType.mType = PassByType::Reference;
+      getter.mReturnType.mType = PassByType::Reference;
     }
 
     {
@@ -84,7 +115,7 @@ namespace holgen {
       }
       arg.mName = "val";
       setter.mBody.Line() << generatedField.mName << " = val;";
-      setter.mType.mName = "void";
+      setter.mReturnType.mName = "void";
     }
 
     ProcessContainerField(generatedClass, fieldDefinition);
@@ -94,6 +125,7 @@ namespace holgen {
     auto container = fieldDefinition.GetDecorator(Decorators::Container);
     if (!container)
       return;
+    bool isConstContainer = container->GetAttribute(Decorators::Container_Const) != nullptr;
     auto elemName = container->GetAttribute(Decorators::Container_ElemName);
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters[0];
     auto underlyingStructDefinition = mProject->GetStruct(underlyingType.mName);
@@ -123,9 +155,9 @@ namespace holgen {
         auto &func = generatedClass.mMethods.emplace_back();
         func.mName = St::GetIndexGetterName(elemName->mValue.mName, indexOn->mValue.mName);
         func.mIsConst = isConst;
-        TypeInfo::Get().ConvertToType(func.mType, underlyingType);
-        func.mType.mIsConst = isConst;
-        func.mType.mType = PassByType::Pointer;
+        TypeInfo::Get().ConvertToType(func.mReturnType, underlyingType);
+        func.mReturnType.mIsConst = isConst;
+        func.mReturnType.mType = PassByType::Pointer;
         auto &arg = func.mArguments.emplace_back();
         arg.mName = "key";
         TypeInfo::Get().ConvertToType(arg.mType, fieldIndexedOn.mType);
@@ -146,11 +178,17 @@ namespace holgen {
 
     // Getting generatedField here because we added a new field above which would've invalidated it
     auto &generatedField = *generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName));
+
     {
+      // Generate AddElem
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = St::GetAdderMethodName(elemName->mValue.mName);
       func.mIsConst = false;
-      func.mType.mName = "bool";
+      func.mReturnType.mName = "bool";
+      if (isConstContainer)
+        func.mVisibility = Visibility::Private;
+      else
+        func.mVisibility = Visibility::Public;
       auto &arg = func.mArguments.emplace_back();
       TypeInfo::Get().ConvertToType(arg.mType, underlyingType);
       arg.mType.mIsConst = false;
@@ -183,17 +221,30 @@ namespace holgen {
 
     for (int i = 0; i < 2; ++i) {
       bool isConst = i == 0;
+      if (isConstContainer && !isConst)
+        continue;
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = St::GetGetterMethodName(elemName->mValue.mName);
       func.mIsConst = isConst;
-      TypeInfo::Get().ConvertToType(func.mType, underlyingType);
-      func.mType.mType = PassByType::Reference;
-      func.mType.mIsConst = isConst;
+      TypeInfo::Get().ConvertToType(func.mReturnType, underlyingType);
+      func.mReturnType.mType = PassByType::Pointer;
+      func.mReturnType.mIsConst = isConst;
       auto &arg = func.mArguments.emplace_back();
       TypeInfo::Get().ConvertToType(arg.mType, underlyingIdField->mType);
       arg.mType.mIsConst = false;
       arg.mName = "idx";
-      func.mBody.Line() << "return " << generatedField.mName << "[idx];";
+      {
+        auto line = func.mBody.Line();
+        line << "if (idx >= " << generatedField.mName << ".size()";
+        if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName)) {
+          line << "|| idx < 0";
+        }
+        line << ")";
+      }
+      func.mBody.Indent(1);
+      func.mBody.Line() << "return nullptr;";
+      func.mBody.Indent(-1);
+      func.mBody.Line() << "return &" << generatedField.mName << "[idx];";
     }
 
   }

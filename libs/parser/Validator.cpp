@@ -30,12 +30,20 @@ namespace holgen {
                fieldDefinition.mName, decoratorName);
     }
 
-    void EnforceUniqueAttribute(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
+    void EnforceAttributeExists(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                                 const DecoratorDefinition &decoratorDefinition, const std::string &attributeName) {
       auto attribute = decoratorDefinition.GetAttribute(attributeName);
       THROW_IF(attribute == nullptr,
                "Field {}.{} has decorator {} with missing attribute: {}", structDefinition.mName,
                fieldDefinition.mName,
+               decoratorDefinition.mName, attributeName);
+    }
+
+    void EnforceAttributeExists(const StructDefinition &structDefinition,
+                                const DecoratorDefinition &decoratorDefinition, const std::string &attributeName) {
+      auto attribute = decoratorDefinition.GetAttribute(attributeName);
+      THROW_IF(attribute == nullptr,
+               "Struct {} has decorator {} with missing attribute: {}", structDefinition.mName,
                decoratorDefinition.mName, attributeName);
     }
   }
@@ -77,8 +85,8 @@ namespace holgen {
                            const DecoratorDefinition &decoratorDefinition) {
     if (decoratorDefinition.mName == Decorators::JsonConvert) {
       EnforceUnique(structDefinition, fieldDefinition, decoratorDefinition);
-      EnforceUniqueAttribute(structDefinition, fieldDefinition, decoratorDefinition, Decorators::JsonConvert_From);
-      EnforceUniqueAttribute(structDefinition, fieldDefinition, decoratorDefinition, Decorators::JsonConvert_Using);
+      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::JsonConvert_From);
+      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::JsonConvert_Using);
       auto converterName = decoratorDefinition.GetAttribute(Decorators::JsonConvert_Using);
       auto convertFrom = decoratorDefinition.GetAttribute(Decorators::JsonConvert_From);
       auto convertTo = fieldDefinition.mType;
@@ -93,7 +101,7 @@ namespace holgen {
       }
     } else if (decoratorDefinition.mName == Decorators::Container) {
       EnforceUnique(structDefinition, fieldDefinition, decoratorDefinition);
-      EnforceUniqueAttribute(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Container_ElemName);
+      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Container_ElemName);
       Type type;
       TypeInfo::Get().ConvertToType(type, fieldDefinition.mType);
       THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
@@ -107,15 +115,20 @@ namespace holgen {
       auto underlyingIdField = underlyingStruct->GetIdField();
       THROW_IF(underlyingIdField == nullptr,
                "{}.{} is a container of {} which does not have an id field",
-               structDefinition.mName, fieldDefinition.mName, underlyingType.mName)
+               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
+      auto underlyingManagedDecorator = underlyingStruct->GetDecorator(Decorators::Managed);
+      auto underlyingNoLuaDecorator = underlyingStruct->GetDecorator(Decorators::Managed);
+      THROW_IF(underlyingManagedDecorator == nullptr && underlyingNoLuaDecorator == nullptr && !TypeInfo::Get().CppStableContainers.contains(type.mName),
+               "{}.{} should either be a stable container like deque, or {} should be managed",
+               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
     } else if (decoratorDefinition.mName == Decorators::Index) {
       EnforceDecoratorExists(structDefinition, fieldDefinition, Decorators::Container);
       // double validate to avoid order problems, this validator piece depends on Container being valid.
       Validate(structDefinition, fieldDefinition, *fieldDefinition.GetDecorator(Decorators::Container));
-      EnforceUniqueAttribute(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Index_On);
+      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Index_On);
       auto indexUsing = decoratorDefinition.GetAttribute(Decorators::Index_Using);
       if (indexUsing) {
-        EnforceUniqueAttribute(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Index_Using);
+        EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Index_Using);
         Type type;
         TypeInfo::Get().ConvertToType(type, indexUsing->mValue);
         THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
@@ -168,7 +181,25 @@ namespace holgen {
       const StructDefinition &structDefinition,
       const DecoratorDefinition &decoratorDefinition
   ) {
-
+    if (decoratorDefinition.mName == Decorators::Managed) {
+      EnforceAttributeExists(structDefinition, decoratorDefinition, Decorators::Managed_By);
+      EnforceAttributeExists(structDefinition, decoratorDefinition, Decorators::Managed_Field);
+      auto dataManagerAttribute = decoratorDefinition.GetAttribute(Decorators::Managed_By);
+      auto dataManager = mProject.GetStruct(dataManagerAttribute->mValue.mName);
+      THROW_IF(dataManager == nullptr, "Struct {} references a DataManager {} that does not exist",
+               structDefinition.mName, dataManagerAttribute->mValue.mName);
+      auto dataManagerDecorator = dataManager->GetDecorator(Decorators::DataManager);
+      THROW_IF(dataManagerDecorator == nullptr,
+               "Struct {} references a DataManager {} that does not have the {} decorator!",
+               structDefinition.mName, dataManager->mName, Decorators::DataManager);
+      auto fieldAttribute = decoratorDefinition.GetAttribute(Decorators::Managed_Field);
+      auto field = dataManager->GetField(fieldAttribute->mValue.mName);
+      THROW_IF(field == nullptr, "Struct {} references DataManager field {}.{} that does not exist",
+               structDefinition.mName, dataManager->mName, fieldAttribute->mValue.mName);
+      auto fieldDecorator = field->GetDecorator(Decorators::Container);
+      THROW_IF(fieldDecorator == nullptr, "Struct {} references DataManager field {}.{} that is not a container",
+               structDefinition.mName, dataManager->mName, fieldAttribute->mValue.mName);
+    }
   }
 
   void Validator::Validate() {

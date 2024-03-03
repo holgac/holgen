@@ -1,30 +1,11 @@
 #include <gtest/gtest.h>
-#include "generator/Generator.h"
+#include "generator/CodeGenerator.h"
+#include "Helpers.h"
 
 using namespace holgen;
+using namespace holgen::helpers;
 
 namespace {
-
-  std::map<std::string, GeneratedContent> MapByName(const std::vector<GeneratedContent> &contents) {
-    std::map<std::string, GeneratedContent> result;
-    for (const auto &gc: contents) {
-      auto[it, res] = result.emplace(gc.mName, gc);
-      EXPECT_TRUE(res);
-    }
-    return result;
-  }
-
-  auto Trim(const std::string &str) {
-    auto startIdx = str.find_first_not_of(" \n");
-    auto endIdx = str.find_last_not_of(" \n");
-    return std::string_view(str.data() + startIdx, endIdx - startIdx);
-  }
-
-  void ExpectGeneratedContent(const GeneratedContent &actual, const GeneratedContent &expected) {
-    EXPECT_EQ(actual.mType, expected.mType);
-    EXPECT_EQ(actual.mName, expected.mName);
-    EXPECT_EQ(Trim(actual.mText), Trim(expected.mText));
-  }
 
   TEST(GeneratorTest, Helpers) {
     Tokenizer tokenizer(R"DELIM(
@@ -42,14 +23,14 @@ namespace {
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
     };
-    Generator generator(generatorSettings);
+    CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
     ExpectGeneratedContent(
         files["CMakeLists.txt"],
         {
             FileType::CMakeFile,
             "CMakeLists.txt",
-            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp Converter.cpp LuaHelper.cpp)"
+            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp Converter.cpp LuaHelper.cpp GlobalPointer.cpp)"
         }
     );
     // TODO: test helpers
@@ -71,7 +52,7 @@ namespace {
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
     };
-    Generator generator(generatorSettings);
+    CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
     ExpectGeneratedContent(
         files["Person.h"],
@@ -141,7 +122,7 @@ void Person::SetGender(float val) {
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
     };
-    Generator generator(generatorSettings);
+    CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
     ExpectGeneratedContent(
         files["Market.h"],
@@ -245,7 +226,7 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
     };
-    Generator generator(generatorSettings);
+    CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
     ExpectGeneratedContent(
         files["Sound.h"],
@@ -420,7 +401,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
     };
-    Generator generator(generatorSettings);
+    CodeGenerator generator(generatorSettings);
     auto files = MapByName(generator.Generate(translatedProject));
     ExpectGeneratedContent(
         files["Person.h"],
@@ -598,6 +579,98 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
     }
   }
   return true;
+}
+}
+          )DELIM"
+        }
+    );
+  }
+
+  TEST(GeneratorTest, DataManager) {
+    Tokenizer tokenizer(R"DELIM(
+  @managed(by=Country, field=people)
+  @noJson
+  @noLua
+  struct Person {
+    @id
+    u32 id;
+    string name;
+  }
+  @dataManager
+  struct Country {
+    @container(elemName=person)
+    vector<Person> people;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto translatedProject = Translator().Translate(parser.GetProject());
+    GeneratorSettings generatorSettings{
+        .mNamespace = "generator_test_namespace",
+        .mCMakeTarget = "generator_test_cmake",
+    };
+    CodeGenerator generator(generatorSettings);
+    auto files = MapByName(generator.Generate(translatedProject));
+
+    ExpectGeneratedContent(
+        files["Person.h"],
+        {
+            FileType::CppHeader,
+            "Person.h",
+            R"DELIM(
+#pragma once
+
+#include <cstdint>
+#include <string>
+
+namespace generator_test_namespace {
+class Person {
+public:
+  uint32_t GetId() const;
+  void SetId(uint32_t val);
+  const std::string& GetName() const;
+  std::string& GetName();
+  void SetName(const std::string& val);
+  static Person* Get(uint32_t id);
+protected:
+private:
+  uint32_t mId;
+  std::string mName;
+};
+}
+          )DELIM"
+        }
+    );
+
+    ExpectGeneratedContent(
+        files["Person.cpp"],
+        {
+            FileType::CppSource,
+            "Person.cpp",
+            R"DELIM(
+#include "Person.h"
+
+#include "GlobalPointer.h"
+#include "Country.h"
+
+namespace generator_test_namespace {
+uint32_t Person::GetId() const {
+  return mId;
+}
+void Person::SetId(uint32_t val) {
+  mId = val;
+}
+const std::string& Person::GetName() const {
+  return mName;
+}
+std::string& Person::GetName() {
+  return mName;
+}
+void Person::SetName(const std::string& val) {
+  mName = val;
+}
+Person* Person::Get(uint32_t id) {
+  return GlobalPointer<Country>::GetInstance()->GetPerson(id);
 }
 }
           )DELIM"

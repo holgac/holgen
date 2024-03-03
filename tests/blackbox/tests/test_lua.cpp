@@ -3,6 +3,8 @@
 #include <sstream>
 #include <lua.hpp>
 #include "Weapon.h"
+#include "GameData.h"
+#include "GlobalPointer.h"
 
 using namespace holgen_blackbox_test;
 
@@ -146,10 +148,10 @@ TEST_F(LuaTest, Getters) {
 }
 
 TEST_F(LuaTest, Setters) {
+  Weapon::CreateLuaMetatable(mState);
   Weapon weapon;
   weapon.SetDamageMin(10);
   weapon.SetDamageMax(20);
-  weapon.CreateLuaMetatable(mState);
   weapon.PushToLua(mState);
   lua_setglobal(mState, "wp");
   luaL_dostring(mState, "wp.damageMax = 100");
@@ -160,4 +162,21 @@ TEST_F(LuaTest, Setters) {
   luaL_dostring(mState, "return wp.damageMax");
   ExpectStack({"30"});
   lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, DataManager) {
+  Armor::CreateLuaMetatable(mState);
+  GameData::CreateLuaMetatable(mState);
+  GameData gd;
+  GlobalPointer<GameData>::SetInstance(&gd);
+  gd.ParseFiles("gamedata", {});
+  gd.GetArmorFromName("Plate Mail")->PushToLua(mState);
+  lua_setglobal(mState, "pm");
+  luaL_dostring(mState, "return pm");
+  ExpectStack({"{i:lightuserdata}"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return pm.alternativeName");
+  ExpectStack({"Platy"});
+  lua_pop(mState, 1);
+
 }

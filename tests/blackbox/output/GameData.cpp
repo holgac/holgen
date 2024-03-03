@@ -38,11 +38,10 @@ bool GameData::AddBoot(Boot&& elem) {
   mBoots.back().SetId(newId);
   return true;
 }
-const Boot& GameData::GetBoot(uint32_t idx) const {
-  return mBoots[idx];
-}
-Boot& GameData::GetBoot(uint32_t idx) {
-  return mBoots[idx];
+const Boot* GameData::GetBoot(uint32_t idx) const {
+  if (idx >= mBoots.size())
+    return nullptr;
+  return &mBoots[idx];
 }
 const std::vector<Armor>& GameData::GetArmors() const {
   return mArmors;
@@ -89,11 +88,15 @@ bool GameData::AddArmor(Armor&& elem) {
   mArmors.back().SetId(newId);
   return true;
 }
-const Armor& GameData::GetArmor(uint32_t idx) const {
-  return mArmors[idx];
+const Armor* GameData::GetArmor(uint32_t idx) const {
+  if (idx >= mArmors.size())
+    return nullptr;
+  return &mArmors[idx];
 }
-Armor& GameData::GetArmor(uint32_t idx) {
-  return mArmors[idx];
+Armor* GameData::GetArmor(uint32_t idx) {
+  if (idx >= mArmors.size())
+    return nullptr;
+  return &mArmors[idx];
 }
 const std::vector<Character>& GameData::GetCharacters() const {
   return mCharacters;
@@ -125,11 +128,15 @@ bool GameData::AddCharacter(Character&& elem) {
   mCharacters.back().SetId(newId);
   return true;
 }
-const Character& GameData::GetCharacter(uint32_t idx) const {
-  return mCharacters[idx];
+const Character* GameData::GetCharacter(uint32_t idx) const {
+  if (idx >= mCharacters.size())
+    return nullptr;
+  return &mCharacters[idx];
 }
-Character& GameData::GetCharacter(uint32_t idx) {
-  return mCharacters[idx];
+Character* GameData::GetCharacter(uint32_t idx) {
+  if (idx >= mCharacters.size())
+    return nullptr;
+  return &mCharacters[idx];
 }
 bool GameData::ParseFiles(const std::string& rootPath, const Converter& converterArg) {
   auto converter = converterArg;

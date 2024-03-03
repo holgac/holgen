@@ -6,10 +6,26 @@ namespace holgen {
       const ProjectDefinition &projectDefinition
   ) : mProject(projectDefinition), mDependencyGraph(mProject) {}
 
+  Class *TranslatedProject::GetClass(const std::string &name) {
+    for (auto &cls: mClasses) {
+      if (cls.mName == name)
+        return &cls;
+    }
+    return nullptr;
+  }
+
   ClassField *Class::GetField(const std::string &name) {
     for (auto &field: mFields) {
       if (field.mName == name)
         return &field;
+    }
+    return nullptr;
+  }
+
+  ClassMethod *Class::GetMethod(const std::string &name, bool isConst) {
+    for (auto &method: mMethods) {
+      if (method.mName == name && method.mIsConst == isConst)
+        return &method;
     }
     return nullptr;
   }

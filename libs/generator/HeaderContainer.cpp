@@ -16,6 +16,7 @@ namespace holgen {
     std::map<std::string, std::string> STDHeaders = {
         {"std::string",        "string"},
         {"std::vector",        "vector"},
+        {"std::deque",        "deque"},
         {"std::map",           "map"},
         {"std::unordered_map", "unordered_map"},
         {"std::function",      "functional"},
@@ -84,30 +85,15 @@ namespace holgen {
     }
   }
 
-  void HeaderContainer::IncludeClassField(const ClassField &classField, bool isHeader) {
-    IncludeClassField(classField, classField.mType, isHeader);
+  void HeaderContainer::IncludeClassField(const Class &cls, const ClassField &classField, bool isHeader) {
+    IncludeClassField(cls, classField, classField.mType, isHeader);
   }
 
-  void HeaderContainer::IncludeClassField(const ClassField &classField, const Type &type, bool isHeader) {
-    IncludeType(type, isHeader);
-    for (const auto &templateParameter: type.mTemplateParameters) {
-      IncludeClassField(classField, templateParameter, isHeader);
-    }
-    for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
-      IncludeClassField(classField, templateParameter, isHeader);
-    }
-  }
-
-  void HeaderContainer::IncludeClassMethod(const ClassMethod &classMethod, bool isHeader) {
-    IncludeClassMethod(classMethod, classMethod.mType, isHeader);
-    for (const auto &argument: classMethod.mArguments) {
-      IncludeClassMethod(classMethod, argument.mType, isHeader);
-    }
-  }
-
-  void HeaderContainer::IncludeClassMethod(const ClassMethod &classMethod, const Type &type, bool isHeader) {
+  void HeaderContainer::IncludeClassField(
+      const Class &cls, const ClassField &classField, const Type &type, bool isHeader
+  ) {
     bool isTemplateType = false;
-    for (const auto &templateParameter: classMethod.mTemplateParameters) {
+    for (const auto &templateParameter: cls.mTemplateParameters) {
       if (templateParameter.mName == type.mName) {
         isTemplateType = true;
         break;
@@ -116,10 +102,42 @@ namespace holgen {
     if (!isTemplateType)
       IncludeType(type, isHeader);
     for (const auto &templateParameter: type.mTemplateParameters) {
-      IncludeClassMethod(classMethod, templateParameter, isHeader);
+      IncludeClassField(cls, classField, templateParameter, isHeader);
     }
     for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
-      IncludeClassMethod(classMethod, templateParameter, isHeader);
+      IncludeClassField(cls, classField, templateParameter, isHeader);
+    }
+  }
+
+  void HeaderContainer::IncludeClassMethod(const Class &cls, const ClassMethod &classMethod, bool isHeader) {
+    IncludeClassMethod(cls, classMethod, classMethod.mReturnType, isHeader);
+    for (const auto &argument: classMethod.mArguments) {
+      IncludeClassMethod(cls, classMethod, argument.mType, isHeader);
+    }
+  }
+
+  void HeaderContainer::IncludeClassMethod(const Class &cls, const ClassMethod &classMethod, const Type &type,
+                                           bool isHeader) {
+    bool isTemplateType = false;
+    for (const auto &templateParameter: cls.mTemplateParameters) {
+      if (templateParameter.mName == type.mName) {
+        isTemplateType = true;
+        break;
+      }
+    }
+    for (const auto &templateParameter: classMethod.mTemplateParameters) {
+      if (templateParameter.mName == type.mName) {
+        isTemplateType = true;
+        break;
+      }
+    }
+    if (!isTemplateType && type.mName != cls.mName)
+      IncludeType(type, isHeader);
+    for (const auto &templateParameter: type.mTemplateParameters) {
+      IncludeClassMethod(cls, classMethod, templateParameter, isHeader);
+    }
+    for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
+      IncludeClassMethod(cls, classMethod, templateParameter, isHeader);
     }
   }
 }

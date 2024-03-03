@@ -1,26 +1,26 @@
-@containedBy(GameData)
+@managed(by=GameData, field=boots)
 struct Boot {
     // assigned by container
-    @id()
+    @id
     u32 id;
     string name;
     // TODO: enums and auto conversion from string to integral
     string color;
 }
 
-@containedBy(GameData)
+@managed(by=GameData, field=armors)
 struct Armor {
-    @id()
+    @id
     u32 id;
     string name;
     string alternativeName;
     s8 armorClass;
 }
 
-@containedBy(GameData)
+@managed(by=GameData, field=characters)
 struct Character {
     // id should be an integral field
-    @id()
+    @id
     u32 id;
 
     string name;
@@ -34,11 +34,10 @@ struct Character {
     u32 armor;
 }
 
-// needs to be a singleton for lua to work
-@dataManager()
+@dataManager
 struct GameData {
     @index(on=name, using=unordered_map, forConverter=bootNameToId)
-    @container(elemName=boot)
+    @container(elemName=boot, const)
     vector<Boot> boots;
 
     @container(elemName=armor)

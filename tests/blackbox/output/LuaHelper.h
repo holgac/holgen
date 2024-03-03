@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <deque>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -26,6 +27,9 @@ public:
   static void Push(uint32_t data, lua_State* luaState);
   static void Push(uint64_t data, lua_State* luaState);
   static void Push(uint8_t data, lua_State* luaState);
+  template <typename T>
+  static void Push(std::deque<T>& data, lua_State* luaState) {
+  }
   template <typename T>
   static void Push(std::vector<T>& data, lua_State* luaState) {
   }

@@ -51,6 +51,11 @@ namespace holgen {
 
     /*
      * Indicates that the field is a container that should be exposed.
+     * Cpp adds an AddElemName function.
+     *
+     * Use const for objects loaded at startup and never changed (for static game data like armors etc.)
+     * If const, AddElemName function is private and isn't exposed to lua.
+     * TODO: This is a const *container*, also implement const fields
      *
      * Example:
      * @container(elemName=country)
@@ -58,6 +63,30 @@ namespace holgen {
      */
     inline static const std::string Container = "container";
     inline static const std::string Container_ElemName = "elemName";
+    inline static const std::string Container_Const = "const";
+
+    /**
+     * Indicates that the struct is managed by the given DataManager. This is necessary for using Ref.
+     *
+     * Lua instances and Refs use an index (determined by @id field) instead of pointer.
+     * This must be used for containers that invalidate elements after pushing unless the container is constant.
+     *
+     * Example:
+     * @managed(by=Country, field=people)
+     * struct Person {
+     *  @id
+     *  u32 id;
+     * }
+     *
+     * struct Country {
+     *  @container(elemName=person)
+     *  vector<Person> people;
+     *
+     * }
+     */
+    inline static const std::string Managed = "managed";
+    inline static const std::string Managed_By = "by";
+    inline static const std::string Managed_Field = "field";
 
     /**
      * Defines the field as an id. Can only exist once per struct.
@@ -76,6 +105,7 @@ namespace holgen {
      * Parameters:
      *  On: Field to index on (determines map's key)
      *  Using: Map type to use (defaults to map, can use unordered_map etc.)
+     *  ForConverter: Use the index map for the given converter
      *
      * Example:
      * struct Person {

@@ -75,6 +75,30 @@ namespace {
     EXPECT_EQ(ds2[0].mAttributes[0].mValue.mName, "");
   }
 
+  TEST(ParserTest, EmptyDecorator) {
+    Tokenizer tokenizer(R"DELIM(
+  @dec1
+  struct a   {
+    @dec2
+    s32 f1;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto &proj = parser.GetProject();
+    ASSERT_EQ(proj.mStructs.size(), 1);
+    auto &s = proj.mStructs[0];
+    EXPECT_EQ(s.mDecorators.size(), 1);
+    auto &ds = s.mDecorators;
+    EXPECT_EQ(ds[0].mName, "dec1");
+    EXPECT_EQ(ds[0].mAttributes.size(), 0);
+    auto f1 = s.GetField("f1");
+    ASSERT_NE(f1, nullptr);
+    auto &df = f1->mDecorators;
+    EXPECT_EQ(df[0].mName, "dec2");
+    EXPECT_EQ(df[0].mAttributes.size(), 0);
+  }
+
   TEST(ParserTest, StructDecorators) {
     Tokenizer tokenizer(R"DELIM(
   @dec1()

@@ -16,6 +16,8 @@ namespace holgen {
     Visibility mVisibility = Visibility::Private;
     Type mType;
     std::string mName;
+    bool mIsStatic;
+    std::string mDefaultValue;
   };
 
   struct ClassMethodArgument {
@@ -33,9 +35,11 @@ namespace holgen {
     std::string mType;
     std::string mName;
   };
+
   struct ClassMethod : ClassMethodBase {
     std::string mName;
-    Type mType;
+    Type mReturnType;
+    // TODO: use Constness and Staticness enums
     bool mIsConst = true;
     bool mIsStatic = false;
     std::vector<TemplateParameter> mTemplateParameters;
@@ -61,7 +65,9 @@ namespace holgen {
     std::vector<ClassMethod> mMethods;
     std::vector<ClassConstructor> mConstructors;
     std::vector<ClassField> mFields;
+    std::vector<TemplateParameter> mTemplateParameters;
     ClassField *GetField(const std::string &name);
+    ClassMethod *GetMethod(const std::string &name, bool isConst);
   };
 
   struct TranslatedProject {
@@ -70,6 +76,7 @@ namespace holgen {
     const ProjectDefinition &mProject;
     const DependencyGraph mDependencyGraph;
     std::vector<Class> mClasses;
+    Class *GetClass(const std::string &name);
   };
 
 }

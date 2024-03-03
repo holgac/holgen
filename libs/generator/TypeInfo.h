@@ -40,6 +40,9 @@ namespace holgen {
         const TypeDefinition &typeDefinition
     );
     std::map<std::string, std::string> TypeToCppType;
+    std::set<std::string> IntegralTypes;
+    std::set<std::string> SignedIntegralTypes;
+    std::set<std::string> UnsignedIntegralTypes;
     std::set<std::string> CppPrimitives;
     // Containers that allow random access
     std::set<std::string> CppIndexedContainers;
@@ -47,6 +50,7 @@ namespace holgen {
     std::set<std::string> CppKeyedContainers;
     // All containers
     std::set<std::string> CppContainers;
+    std::set<std::string> CppStableContainers;
     std::set<std::string> KeyableTypes;
     std::set<std::string> CppTypes;
 

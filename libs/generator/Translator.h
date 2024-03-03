@@ -6,6 +6,8 @@
 // Needed for Project (TODO: move to separate file and fwd declare)
 #include "parser/Parser.h"
 #include "TranslatedProject.h"
+// TODO: register custom generators
+// #include "generators/Generator.h"
 
 
 namespace holgen {

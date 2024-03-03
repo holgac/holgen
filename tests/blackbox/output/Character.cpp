@@ -1,7 +1,9 @@
 #include "Character.h"
 
+#include "GlobalPointer.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "GameData.h"
 
 namespace holgen_blackbox_test {
 uint32_t Character::GetId() const {
@@ -30,6 +32,9 @@ uint32_t Character::GetArmor() const {
 }
 void Character::SetArmor(uint32_t val) {
   mArmor = val;
+}
+Character* Character::Get(uint32_t id) {
+  return GlobalPointer<GameData>::GetInstance()->GetCharacter(id);
 }
 bool Character::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
@@ -60,8 +65,9 @@ bool Character::ParseJson(const rapidjson::Value& json, const Converter& convert
 }
 void Character::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
-  lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  uint64_t id = mId;
+  lua_pushstring(luaState, "i");
+  lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "CharacterMeta");
   lua_setmetatable(luaState, -2);
@@ -70,9 +76,10 @@ void Character::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
+    lua_pushstring(ls, "i");
     lua_gettable(ls, -3);
-    auto instance = (Character*)lua_touserdata(ls, -1);
+    uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
+    auto instance = GlobalPointer<GameData>::GetInstance()->GetCharacter(id);
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("id", key)) {
       LuaHelper::Push(instance->mId, ls);

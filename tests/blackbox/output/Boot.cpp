@@ -1,7 +1,9 @@
 #include "Boot.h"
 
+#include "GlobalPointer.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "GameData.h"
 
 namespace holgen_blackbox_test {
 uint32_t Boot::GetId() const {
@@ -28,6 +30,9 @@ std::string& Boot::GetColor() {
 void Boot::SetColor(const std::string& val) {
   mColor = val;
 }
+const Boot* Boot::Get(uint32_t id) {
+  return GlobalPointer<GameData>::GetInstance()->GetBoot(id);
+}
 bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
@@ -49,8 +54,9 @@ bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
 }
 void Boot::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
-  lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  uint64_t id = mId;
+  lua_pushstring(luaState, "i");
+  lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "BootMeta");
   lua_setmetatable(luaState, -2);
@@ -59,9 +65,10 @@ void Boot::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
+    lua_pushstring(ls, "i");
     lua_gettable(ls, -3);
-    auto instance = (Boot*)lua_touserdata(ls, -1);
+    uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
+    auto instance = GlobalPointer<GameData>::GetInstance()->GetBoot(id);
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("id", key)) {
       LuaHelper::Push(instance->mId, ls);

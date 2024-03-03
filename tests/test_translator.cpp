@@ -17,22 +17,6 @@ namespace {
     ExpectTypeEqual(expected.mType, actual.mType);
   }
 
-  void ExpectClassMethodArgumentEqual(const ClassMethodArgument &expected, const ClassMethodArgument &actual) {
-    EXPECT_EQ(actual.mName, expected.mName);
-    ExpectTypeEqual(expected.mType, actual.mType);
-  }
-
-  void ExpectClassMethodEqual(const ClassMethod &expected, const ClassMethod &actual) {
-    EXPECT_EQ(actual.mVisibility, expected.mVisibility);
-    EXPECT_EQ(actual.mName, expected.mName);
-    EXPECT_EQ(actual.mIsConst, expected.mIsConst);
-    ExpectTypeEqual(expected.mType, actual.mType);
-    for (size_t i = 0; i < expected.mArguments.size(); ++i) {
-      ExpectClassMethodArgumentEqual(expected.mArguments[i], actual.mArguments[i]);
-    }
-    EXPECT_EQ(expected.mArguments.size(), actual.mArguments.size());
-  }
-
   void ExpectFields(const Class &c, const std::vector<ClassField> &fields) {
     EXPECT_EQ(c.mFields.size(), fields.size());
     // This makes assumptions about the order
@@ -55,8 +39,60 @@ namespace {
     auto &c = tp.mClasses[0];
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {
-        ClassField{Visibility::Private, Type{"int32_t", false, PassByType::Value}, "mAge"},
-        ClassField{Visibility::Private, Type{"float", false, PassByType::Value}, "mGender"},
+        ClassField{Visibility::Private, Type{"int32_t", false, PassByType::Value, {}, {}}, "mAge", false, ""},
+        ClassField{Visibility::Private, Type{"float", false, PassByType::Value, {}, {}}, "mGender", false, ""},
     });
+  }
+
+  TEST(TranslatorTest, Containers) {
+    Tokenizer tokenizer(R"DELIM(
+  struct City {
+    @id
+    u32 id;
+    string name;
+  }
+  struct Country {
+    @container(elemName=city)
+    deque<City> cities;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto tp = Translator().Translate(parser.GetProject());
+    auto country = tp.GetClass("Country");
+    ASSERT_NE(country, nullptr);
+    EXPECT_NE(country->GetMethod("GetCities", false), nullptr);
+    EXPECT_NE(country->GetMethod("GetCities", true), nullptr);
+    auto method = country->GetMethod("GetCities", false);
+    ASSERT_NE(method, nullptr);
+    EXPECT_EQ(method->mArguments.size(), 0);
+    method = country->GetMethod("GetCity", true);
+    ASSERT_NE(method, nullptr);
+    EXPECT_EQ(method->mArguments.size(), 1);
+    EXPECT_EQ(method->mArguments[0].mType.mName, "uint32_t");
+  }
+
+  TEST(TranslatorTest, ContainerIndex) {
+    Tokenizer tokenizer(R"DELIM(
+  struct City {
+    @id
+    u32 id;
+    string name;
+  }
+  struct Country {
+    @container(elemName=city)
+    @index(on=name)
+    deque<City> cities;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto tp = Translator().Translate(parser.GetProject());
+    auto country = tp.GetClass("Country");
+    ASSERT_NE(country, nullptr);
+    auto method = country->GetMethod("GetCityFromName", true);
+    ASSERT_NE(method, nullptr);
+    EXPECT_EQ(method->mArguments.size(), 1);
+    EXPECT_EQ(method->mArguments[0].mType.mName, "std::string");
   }
 }

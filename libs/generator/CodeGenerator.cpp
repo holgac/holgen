@@ -1,11 +1,31 @@
-#include "Generator.h"
+#include "CodeGenerator.h"
 #include <sstream>
+#include <core/Decorators.h>
 
 #include "HeaderContainer.h"
 
 namespace holgen {
 
-  std::vector<GeneratedContent> Generator::Generate(const TranslatedProject &translatedProject) {
+  namespace {
+    std::string StringifyTemplateParameters(const std::vector<TemplateParameter> &templateParameters) {
+      std::stringstream ss;
+      ss << "template <";
+      bool isFirst = true;
+      for (const auto &templateParameter: templateParameters) {
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          ss << ", ";
+        }
+        ss << templateParameter.mType << " " << templateParameter.mName;
+      }
+      ss << ">";
+      return ss.str();
+    }
+  }
+
+  std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &translatedProject) {
+    mTranslatedProject = &translatedProject;
     std::vector<GeneratedContent> contents;
     for (auto &cls: translatedProject.mClasses) {
       GenerateClassHeader(contents.emplace_back(), cls);
@@ -13,10 +33,12 @@ namespace holgen {
     }
     GenerateCMakeLists(contents.emplace_back(), translatedProject);
 
+    mTranslatedProject = nullptr;
+
     return contents;
   }
 
-  void Generator::GenerateClassHeader(GeneratedContent &header, const Class &cls) const {
+  void CodeGenerator::GenerateClassHeader(GeneratedContent &header, const Class &cls) const {
     header.mType = FileType::CppHeader;
     header.mName = cls.mName + ".h";
     CodeBlock codeBlock;
@@ -28,6 +50,9 @@ namespace holgen {
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
 
     GenerateClassDeclarationsForHeader(codeBlock, cls);
+
+    if (!cls.mTemplateParameters.empty())
+      codeBlock.AddLine(StringifyTemplateParameters(cls.mTemplateParameters));
 
     // TODO: struct-specific namespaces defined via decorators
     codeBlock.Line() << "class " << cls.mName << " {";
@@ -45,7 +70,7 @@ namespace holgen {
     header.mText = codeBlock.ToString();
   }
 
-  void Generator::GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
+  void CodeGenerator::GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
     switch (visibility) {
       case Visibility::Public:
         codeBlock.Line() << "public:";
@@ -63,18 +88,25 @@ namespace holgen {
     codeBlock.Indent(-1);
   }
 
-  void Generator::GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
+  void CodeGenerator::GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
     for (auto &field: cls.mFields) {
       if (field.mVisibility != visibility)
         continue;
       {
-        codeBlock.Line() << field.mType.ToString() << " " << field.mName << ";";
+        auto line = codeBlock.Line();
+        if (field.mIsStatic)
+          line << "inline static ";
+        line << field.mType.ToString() << " " << field.mName;
+
+        if (!field.mDefaultValue.empty())
+          line << " = " << field.mDefaultValue;
+        line << ";";
       }
     }
   }
 
-  void Generator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
-                                           bool isInsideClass) const {
+  void CodeGenerator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
+                                               bool isInsideClass) const {
     for (auto &method: cls.mMethods) {
       if (method.mVisibility != visibility)
         continue;
@@ -83,29 +115,18 @@ namespace holgen {
       if (!isInsideClass && !method.mIsTemplateSpecialization)
         continue;
 
-      if (!method.mTemplateParameters.empty()) {
-        auto templateLine = codeBlock.Line();
-        templateLine << "template <";
-        bool isFirst = true;
-        for (const auto &templateParameter: method.mTemplateParameters) {
-          if (isFirst) {
-            isFirst = false;
-          } else {
-            templateLine << ", ";
-          }
-          templateLine << templateParameter.mType << " " << templateParameter.mName;
-        }
-        templateLine << ">";
-      }
-      if (method.mIsTemplateSpecialization) {
+      if (!method.mTemplateParameters.empty())
+        codeBlock.AddLine(StringifyTemplateParameters(method.mTemplateParameters));
+      if (method.mIsTemplateSpecialization)
         codeBlock.Line() << "template <>";
-      }
+
+      bool willDefine = !method.mTemplateParameters.empty() || !cls.mTemplateParameters.empty();
 
       {
         auto line = codeBlock.Line();
         if (method.mIsStatic && isInsideClass)
           line << "static ";
-        line << method.mType.ToString() << " ";
+        line << method.mReturnType.ToString() << " ";
         if (!isInsideClass)
           line << cls.mName << "::";
         line << method.mName << "(";
@@ -120,7 +141,7 @@ namespace holgen {
         line << ")";
         if (method.mIsConst)
           line << " const";
-        if (method.mTemplateParameters.empty()) {
+        if (!willDefine) {
           line << ";";
           continue;
         } else {
@@ -134,7 +155,7 @@ namespace holgen {
     }
   }
 
-  void Generator::GenerateClassSource(GeneratedContent &source, const Class &cls) const {
+  void CodeGenerator::GenerateClassSource(GeneratedContent &source, const Class &cls) const {
     source.mType = FileType::CppSource;
     source.mName = cls.mName + ".cpp";
     CodeBlock codeBlock;
@@ -152,7 +173,10 @@ namespace holgen {
     source.mText = codeBlock.ToString();
   }
 
-  void Generator::GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const {
+  void CodeGenerator::GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const {
+    if (!cls.mTemplateParameters.empty())
+      return;
+
     for (auto &method: cls.mMethods) {
       if (!method.mTemplateParameters.empty()) {
         // These are defined in the header
@@ -163,7 +187,7 @@ namespace holgen {
       }
       {
         auto line = codeBlock.Line();
-        line << method.mType.ToString() << " " << cls.mName << "::" << method.mName << "(";
+        line << method.mReturnType.ToString() << " " << cls.mName << "::" << method.mName << "(";
         bool isFirst = true;
         for (auto &arg: method.mArguments) {
           if (!isFirst)
@@ -184,7 +208,7 @@ namespace holgen {
     }
   }
 
-  void Generator::GenerateCMakeLists(GeneratedContent &cmake, const TranslatedProject &translatedProject) const {
+  void CodeGenerator::GenerateCMakeLists(GeneratedContent &cmake, const TranslatedProject &translatedProject) const {
     cmake.mType = FileType::CMakeFile;
     cmake.mName = "CMakeLists.txt";
     CodeBlock codeBlock;
@@ -199,13 +223,15 @@ namespace holgen {
     cmake.mText = codeBlock.ToString();
   }
 
-  void Generator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
+  void CodeGenerator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
+    // TODO: this should be part of GeneratedClass. Otherwise CodeGenerator or HeaderContainer needs to know about
+    // all types of enrichments and their dependencies
     HeaderContainer headers;
     for (const auto &field: cls.mFields) {
-      headers.IncludeClassField(field, isHeader);
+      headers.IncludeClassField(cls, field, isHeader);
     }
     for (const auto &method: cls.mMethods) {
-      headers.IncludeClassMethod(method, isHeader);
+      headers.IncludeClassMethod(cls, method, isHeader);
 
       // TODO: don't hardcode these
       if (!isHeader && method.mName == "ParseJson") {
@@ -214,6 +240,9 @@ namespace holgen {
       }
       if (!isHeader && method.mName == "PushToLua") {
         headers.AddLocalHeader("LuaHelper.h");
+      }
+      if (!isHeader && method.mName == "Get") {
+        headers.AddLocalHeader("GlobalPointer.h");
       }
       if (!isHeader && method.mName == "ParseFiles") {
         headers.AddStandardHeader("filesystem");
@@ -224,10 +253,22 @@ namespace holgen {
       }
     }
 
+    if (!isHeader) {
+      auto structDefinition = mTranslatedProject->mProject.GetStruct(cls.mName);
+      if (structDefinition) {
+        auto managedDecorator = structDefinition->GetDecorator(Decorators::Managed);
+        if (managedDecorator) {
+          auto manager = managedDecorator->GetAttribute(Decorators::Managed_By);
+          headers.AddLocalHeader(manager->mValue.mName + ".h");
+        }
+      }
+    }
+
     headers.Write(codeBlock);
   }
 
-  void Generator::GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const {
+  void CodeGenerator::GenerateClassDeclarationsForHeader(CodeBlock &_codeBlock __attribute__((unused)),
+                                                         const Class &_cls __attribute__((unused))) const {
   }
 
 }

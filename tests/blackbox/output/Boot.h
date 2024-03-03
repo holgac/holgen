@@ -17,6 +17,7 @@ public:
   const std::string& GetColor() const;
   std::string& GetColor();
   void SetColor(const std::string& val);
+  static const Boot* Get(uint32_t id);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   static void CreateLuaMetatable(lua_State* luaState);

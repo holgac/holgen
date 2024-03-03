@@ -1,6 +1,6 @@
 #include "GeneratorJson.h"
 #include <vector>
-#include "TypeInfo.h"
+#include "generator/TypeInfo.h"
 #include "core/Decorators.h"
 #include "core/St.h"
 
@@ -29,16 +29,6 @@ namespace holgen {
     std::string ConverterName = "Converter";
   }
 
-  GeneratorJson::GeneratorJson(
-      const ProjectDefinition &projectDefinition,
-      TranslatedProject &translatedProject
-  ) : mProjectDefinition(projectDefinition), mTranslatedProject(translatedProject) {
-    for (size_t i = 0; i < mTranslatedProject.mClasses.size(); ++i) {
-      const auto &cls = mTranslatedProject.mClasses[i];
-      mClasses.emplace(cls.mName, i);
-    }
-  }
-
   void GeneratorJson::EnrichClasses() {
     for (auto &cls: mTranslatedProject.mClasses) {
       const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
@@ -59,7 +49,7 @@ namespace holgen {
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = "ParseFiles";
     parseFunc.mIsConst = false;
-    parseFunc.mType.mName = "bool";
+    parseFunc.mReturnType.mName = "bool";
     {
       auto &arg = parseFunc.mArguments.emplace_back();
       arg.mType.mName = "std::string";
@@ -106,7 +96,8 @@ namespace holgen {
         parseFunc.mBody.Indent(1);
 
         auto &elementName = *containerDecorator->GetAttribute(Decorators::Container_ElemName);
-        parseFunc.mBody.Add("auto elem = {}(key);", St::GetIndexGetterName(elementName.mValue.mName, indexedOnField->mName));
+        parseFunc.mBody.Add("auto elem = {}(key);",
+                            St::GetIndexGetterName(elementName.mValue.mName, indexedOnField->mName));
         parseFunc.mBody.Add("return elem->{}();", St::GetGetterMethodName(idField->mName));
 
         parseFunc.mBody.Indent(-1);
@@ -216,7 +207,7 @@ namespace holgen {
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = "ParseJson";
     parseFunc.mIsConst = false;
-    parseFunc.mType.mName = "bool";
+    parseFunc.mReturnType.mName = "bool";
     {
       auto &arg = parseFunc.mArguments.emplace_back();
       arg.mType.mName = "rapidjson::Value";
@@ -258,14 +249,14 @@ namespace holgen {
   }
 
   void GeneratorJson::GenerateParseJsonForField(
-      Class &cls,
+      Class &cls __attribute__((unused)),
       ClassMethod &parseFunc,
-      const StructDefinition &structDefinition,
+      const StructDefinition &structDefinition __attribute__((unused)),
       const FieldDefinition &fieldDefinition
   ) {
     parseFunc.mBody.Indent(1);
-    auto fieldClassIt = mClasses.find(fieldDefinition.mType.mName);
-    if (fieldClassIt == mClasses.end()) {
+
+    if (mProjectDefinition.GetStruct(fieldDefinition.mType.mName) == nullptr) {
       auto jsonConvert = fieldDefinition.GetDecorator(Decorators::JsonConvert);
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
@@ -310,13 +301,14 @@ namespace holgen {
     GenerateConverter(mTranslatedProject.mClasses.emplace_back());
   }
 
+  // TODO: move to GeneratorJsonHelpers class
   void GeneratorJson::GenerateJsonHelper(Class &generatedClass) {
     generatedClass.mName = "JsonHelper";
     auto &baseParse = generatedClass.mMethods.emplace_back();
     baseParse.mName = "Parse";
     baseParse.mIsConst = false;
     baseParse.mIsStatic = true;
-    baseParse.mType.mName = "bool";
+    baseParse.mReturnType.mName = "bool";
     auto &baseTemplateArg = baseParse.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
@@ -352,7 +344,7 @@ namespace holgen {
       parse.mIsConst = false;
       parse.mIsStatic = true;
       parse.mIsTemplateSpecialization = true;
-      parse.mType.mName = "bool";
+      parse.mReturnType.mName = "bool";
 
       {
         auto &out = parse.mArguments.emplace_back();
@@ -393,7 +385,7 @@ namespace holgen {
       auto &templateArg = parse.mTemplateParameters.emplace_back();
       templateArg.mType = "typename";
       templateArg.mName = "T";
-      parse.mType.mName = "bool";
+      parse.mReturnType.mName = "bool";
 
       {
         auto &out = parse.mArguments.emplace_back();
@@ -449,7 +441,7 @@ namespace holgen {
       auto &valueTemplateArg = parse.mTemplateParameters.emplace_back();
       valueTemplateArg.mType = "typename";
       valueTemplateArg.mName = "V";
-      parse.mType.mName = "bool";
+      parse.mReturnType.mName = "bool";
 
       {
         auto &out = parse.mArguments.emplace_back();

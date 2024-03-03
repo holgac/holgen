@@ -18,25 +18,34 @@ namespace holgen {
         {"bool",          "bool"},
         {"string",        "std::string"},
         {"vector",        "std::vector"},
+        {"deque",        "std::deque"},
         {"map",           "std::map"},
         {"unordered_map", "std::unordered_map"},
     };
 
-    CppPrimitives = {
+    SignedIntegralTypes = {
         "int8_t",
         "int16_t",
         "int32_t",
         "int64_t",
+    };
+    UnsignedIntegralTypes = {
         "uint8_t",
         "uint16_t",
         "uint32_t",
         "uint64_t",
-        "float",
-        "double",
-        "bool",
     };
+    IntegralTypes = SignedIntegralTypes;
+    IntegralTypes.insert(UnsignedIntegralTypes.begin(), UnsignedIntegralTypes.end());
+
+    CppPrimitives = IntegralTypes;
+    CppPrimitives.insert("float");
+    CppPrimitives.insert("double");
+    CppPrimitives.insert("bool");
+
     CppIndexedContainers = {
         "std::vector",
+        "std::deque",
     };
     CppKeyedContainers = {
         "std::map",
@@ -44,7 +53,10 @@ namespace holgen {
     };
     CppContainers = CppIndexedContainers;
     CppContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
-    KeyableTypes = CppPrimitives;
+    CppStableContainers = {
+        "std::deque",
+    };
+    KeyableTypes = IntegralTypes;
     KeyableTypes.insert("std::string");
     for(auto& [_, cppType] : TypeToCppType)
       CppTypes.insert(cppType);
@@ -55,6 +67,7 @@ namespace holgen {
     return instance;
   }
 
+  // TODO: Move this to Type
   void TypeInfo::ConvertToType(
       Type &type,
       const TypeDefinition &typeDefinition

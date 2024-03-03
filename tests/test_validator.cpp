@@ -150,6 +150,17 @@ struct B {
   vector<Person> people;
 }
   )DELIM", "Field B.people has decorator container with missing attribute: elemName");
+
+  ExpectErrorMessage(R"DELIM(
+struct Person {
+  @id
+  u32 field;
+}
+struct B {
+  @container(elemName=person)
+  vector<Person> people;
+}
+  )DELIM", "B.people should either be a stable container like deque, or Person should be managed");
 }
 
 TEST_F(ValidatorTest, Id) {
@@ -180,4 +191,51 @@ struct Person {
 }
 
   )DELIM", "Field Person.attributes uses an invalid type for an id: Attributes");
+}
+
+TEST_F(ValidatorTest, DataManager) {
+  ExpectErrorMessage(R"DELIM(
+@managed(by=DataMan, field=people)
+struct Person {
+  @id()
+  u32 id;
+}
+  )DELIM", "Struct Person references a DataManager DataMan that does not exist");
+
+  ExpectErrorMessage(R"DELIM(
+@managed(by=DataMan, field=people)
+struct Person {
+  @id()
+  u32 id;
+}
+struct DataMan {
+}
+  )DELIM", "Struct Person references a DataManager DataMan that does not have the dataManager decorator!");
+
+  ExpectErrorMessage(R"DELIM(
+@managed(by=DataMan, field=people)
+struct Person {
+  @id()
+  u32 id;
+}
+
+@dataManager
+struct DataMan {
+}
+  )DELIM", "Struct Person references DataManager field DataMan.people that does not exist");
+
+  ExpectErrorMessage(R"DELIM(
+@managed(by=DataMan, field=people)
+struct Person {
+  @id()
+  u32 id;
+}
+
+@dataManager
+struct DataMan {
+  vector<Person> people;
+}
+  )DELIM", "Struct Person references DataManager field DataMan.people that is not a container");
+  return;
+
 }

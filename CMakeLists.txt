@@ -3,6 +3,10 @@ project(holgen)
 
 set(CMAKE_CXX_STANDARD 20)
 
+# TODO: probably not xplatform
+add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+
+
 add_subdirectory(external)
 add_subdirectory(libs)
 include_directories(libs)

@@ -5,7 +5,7 @@
 #include "tokenizer/Tokenizer.h"
 #include "parser/Parser.h"
 #include "generator/Translator.h"
-#include "generator/Generator.h"
+#include "generator/CodeGenerator.h"
 
 int run(int argc, char **argv) {
   if (argc != 5) {
@@ -27,8 +27,8 @@ int run(int argc, char **argv) {
     parser.Parse(tokenizer);
   }
   holgen::Translator translator;
-  auto project = std::move(translator.Translate(parser.GetProject()));
-  auto generator = holgen::Generator({argv[3], argv[4]});
+  auto project = translator.Translate(parser.GetProject());
+  auto generator = holgen::CodeGenerator({argv[3], argv[4]});
   auto results = generator.Generate(project);
   std::filesystem::path outDir(argv[2]);
   for (auto &result: results) {

@@ -18,8 +18,7 @@ namespace holgen {
       if (!tokenizer.GetNextNonWhitespace(curToken))
         break;
       while (curToken.mType == TokenType::At) {
-        ParseDecorator(decorators.emplace_back());
-        THROW_IF(!tokenizer.GetNextNonWhitespace(curToken), "Decorator definition without a matching type!")
+        ParseDecorator(curToken, decorators.emplace_back());
       }
       THROW_IF(curToken.mType != TokenType::String, "Expected a string, received \"{}\"!", curToken.mContents)
       if (curToken.mContents == "struct") {
@@ -46,29 +45,29 @@ namespace holgen {
       THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete struct definition!")
       if (curToken.mType == TokenType::CClose)
         break;
+      while (curToken.mType == TokenType::At) {
+        ParseDecorator(curToken, decorators.emplace_back());
+      }
       if (curToken.mType == TokenType::String) {
         // TODO: check if curToken.mContents == "func"
         auto &fieldDefinition = structDefinition.mFields.emplace_back();
         fieldDefinition.mDecorators = std::move(decorators);
         decorators.clear();
         ParseField(curToken, fieldDefinition);
-      } else if (curToken.mType == TokenType::At) {
-        ParseDecorator(decorators.emplace_back());
       } else {
         THROW("Unexpected token in parsing struct: \"{}\"!", curToken.mContents)
       }
     }
   }
 
-  void Parser::ParseDecorator(DecoratorDefinition &decoratorDefinition) {
-    Token curToken;
+  void Parser::ParseDecorator(Token &curToken, DecoratorDefinition &decoratorDefinition) {
     THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete decorator definition!")
     THROW_IF(curToken.mType != TokenType::String, "Decorator name should be a string, found \"{}\"", curToken.mContents)
     decoratorDefinition.mName = curToken.mContents;
 
     THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete decorator definition!")
-    THROW_IF(curToken.mType != TokenType::POpen, "Decorator name should be followed by a '(', found \"{}\"",
-             curToken.mContents)
+    if (curToken.mType != TokenType::POpen)
+      return;
     THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete decorator definition!")
     while (curToken.mType != TokenType::PClose) {
       THROW_IF(curToken.mType != TokenType::String, "Decorator attribute name should be a string, found \"{}\"!",
@@ -86,6 +85,7 @@ namespace holgen {
         THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete decorator definition!")
       }
     }
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete decorator definition!")
   }
 
   void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {

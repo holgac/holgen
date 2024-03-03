@@ -14,26 +14,19 @@ namespace holgen {
     };
 
     std::map<std::string, LuaTypeUsage> LuaUsage = {
-        {"int8_t",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"int16_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"int32_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"int64_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"uint8_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"uint16_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"uint32_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"uint64_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"float",       {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"double",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber"}},
-        {"bool",        {"lua_isboolean", "lua_toboolean", "lua_pushboolean"}},
-        {"std::string", {"lua_isstring",  "lua_tostring",  "lua_pushstring", ".c_str()"}},
+        {"int8_t",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"int16_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"int32_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"int64_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"uint8_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"uint16_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"uint32_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"uint64_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"float",       {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"double",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
+        {"bool",        {"lua_isboolean", "lua_toboolean", "lua_pushboolean", ""}},
+        {"std::string", {"lua_isstring",  "lua_tostring",  "lua_pushstring",  ".c_str()"}},
     };
-
-  }
-
-  GeneratorLua::GeneratorLua(
-      const ProjectDefinition &projectDefinition,
-      TranslatedProject &translatedProject
-  ) : mProjectDefinition(projectDefinition), mTranslatedProject(translatedProject) {
 
   }
 
@@ -45,7 +38,7 @@ namespace holgen {
 
       auto &pushToLua = cls.mMethods.emplace_back();
       pushToLua.mName = "PushToLua";
-      pushToLua.mType.mName = "void";
+      pushToLua.mReturnType.mName = "void";
       pushToLua.mIsConst = true;
       pushToLua.mVisibility = Visibility::Public;
       {
@@ -55,16 +48,23 @@ namespace holgen {
         arg.mType.mType = PassByType::Pointer;
       }
       pushToLua.mBody.Line() << "lua_newtable(luaState);";
-      // TODO: debug generator? Or generate extra debug stuff that's gated behind a macro?
-      // Specifying object type would help here
-      pushToLua.mBody.Line() << "lua_pushstring(luaState, \"p\");";
-      // TODO: this is brittle if *this is in a vector. It's ok as a default behaviour, but add decorators
-      // like @luaContainer(source=SomeStruct, field=containerField) and it'll use the container idx here
-      // Cannot have multiple PushToLua implementations - other functions need to know how the object was sent to lua.
-      // These containers need to be somewhat special (singleton)
-      // But parse methods can be added for them so that they parse a directory full of different object types
-      // and populate accordingly. Can even have indices (like a base vector<Race> and map<string, size_t> name index)
-      pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, (void*)this);";
+      auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
+      if (managedDecorator == nullptr) {
+        // TODO: debug generator? Or generate extra debug stuff that's gated behind a macro?
+        // Specifying object type would help here
+        pushToLua.mBody.Line() << "lua_pushstring(luaState, \"p\");";
+        pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, (void*)this);";
+      } else {
+        auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
+        std::string tempType = "uint64_t";
+        if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
+          tempType = "int64_t";
+        }
+        pushToLua.mBody.Line() << tempType << " id = " << idField->mName << ";";
+        // TODO: "p" for ptr, "i" for id. Use consts instead of hard-coding them.
+        pushToLua.mBody.Line() << "lua_pushstring(luaState, \"i\");";
+        pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));";
+      }
       pushToLua.mBody.Line() << "lua_settable(luaState, -3);";
       // Do this last so that metamethods don't get called during object construction
       pushToLua.mBody.Line() << "lua_getglobal(luaState, \"" << cls.mName << "Meta\");";
@@ -72,7 +72,7 @@ namespace holgen {
 
       auto &createLuaMetatable = cls.mMethods.emplace_back();
       createLuaMetatable.mName = "CreateLuaMetatable";
-      createLuaMetatable.mType.mName = "void";
+      createLuaMetatable.mReturnType.mName = "void";
       createLuaMetatable.mIsStatic = true;
       createLuaMetatable.mIsConst = false;
       createLuaMetatable.mVisibility = Visibility::Public;
@@ -95,9 +95,27 @@ namespace holgen {
     codeBlock.Line() << "lua_pushstring(luaState, \"__index\");";
     codeBlock.Line() << "lua_pushcfunction(luaState, [](lua_State* ls) {";
     codeBlock.Indent(1);
-    codeBlock.Line() << "lua_pushstring(ls, \"p\");";
-    codeBlock.Line() << "lua_gettable(ls, -3);";
-    codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
+    auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
+    if (managedDecorator == nullptr) {
+      codeBlock.Line() << "lua_pushstring(ls, \"p\");";
+      codeBlock.Line() << "lua_gettable(ls, -3);";
+      codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
+    } else {
+      auto manager = mProjectDefinition.GetStruct(managedDecorator->GetAttribute(Decorators::Managed_By)->mValue.mName);
+      codeBlock.Line() << "lua_pushstring(ls, \"i\");";
+      codeBlock.Line() << "lua_gettable(ls, -3);";
+      auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
+      std::string tempType = "uint64_t";
+      if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
+        tempType = "int64_t";
+      }
+      codeBlock.Add("{} id = reinterpret_cast<{}>(lua_touserdata(ls, -1));", idField->mType.mName, tempType);
+      auto managerField = manager->GetField(managedDecorator->GetAttribute(Decorators::Managed_Field)->mValue.mName);
+      codeBlock.Add(
+          "auto instance = {}<{}>::GetInstance()->{}(id);",
+          St::GlobalPointerName, manager->mName,
+          St::GetGetterMethodName(managerField->GetDecorator(Decorators::Container)->GetAttribute(Decorators::Container_ElemName)->mValue.mName));
+    }
     codeBlock.Line() << "const char* key = lua_tostring(ls, -2);";
     bool isFirst = true;
     for (auto &fieldDefinition: structDefinition.mFields) {
@@ -175,7 +193,7 @@ namespace holgen {
     baseFunc.mName = "Push";
     baseFunc.mIsConst = false;
     baseFunc.mIsStatic = true;
-    baseFunc.mType.mName = "void";
+    baseFunc.mReturnType.mName = "void";
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
@@ -202,7 +220,7 @@ namespace holgen {
       func.mName = "Push";
       func.mIsConst = false;
       func.mIsStatic = true;
-      func.mType.mName = "void";
+      func.mReturnType.mName = "void";
 
       {
         auto &data = func.mArguments.emplace_back();
@@ -233,7 +251,7 @@ namespace holgen {
       auto &templateArg = func.mTemplateParameters.emplace_back();
       templateArg.mType = "typename";
       templateArg.mName = "T";
-      func.mType.mName = "void";
+      func.mReturnType.mName = "void";
 
       {
         auto &data = func.mArguments.emplace_back();
@@ -266,7 +284,7 @@ namespace holgen {
       auto &valueTemplateArg = func.mTemplateParameters.emplace_back();
       valueTemplateArg.mType = "typename";
       valueTemplateArg.mName = "V";
-      func.mType.mName = "void";
+      func.mReturnType.mName = "void";
 
       {
         auto &data = func.mArguments.emplace_back();
@@ -295,7 +313,7 @@ namespace holgen {
     baseFunc.mName = "Read";
     baseFunc.mIsConst = false;
     baseFunc.mIsStatic = true;
-    baseFunc.mType.mName = "bool";
+    baseFunc.mReturnType.mName = "bool";
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
@@ -330,7 +348,7 @@ namespace holgen {
       func.mName = "Read";
       func.mIsConst = false;
       func.mIsStatic = true;
-      func.mType.mName = "bool";
+      func.mReturnType.mName = "bool";
 
       {
         auto &data = func.mArguments.emplace_back();
@@ -368,24 +386,24 @@ namespace holgen {
       func.mIsConst = false;
       func.mIsStatic = true;
       auto &templateArg = func.mTemplateParameters.emplace_back();
-      templateArg.mType = "typename";
+      templateArg.mReturnType = "typename";
       templateArg.mName = "T";
-      func.mType.mName = "void";
+      func.mReturnType.mName = "void";
 
       {
         auto &luaState = func.mArguments.emplace_back();
         luaState.mName = "luaState";
-        luaState.mType.mName = "lua_State";
-        luaState.mType.mType = PassByType::Pointer;
+        luaState.mReturnType.mName = "lua_State";
+        luaState.mReturnType.mReturnType = PassByType::Pointer;
       }
 
       {
         auto &data = func.mArguments.emplace_back();
         data.mName = "data";
-        data.mType.mName = container;
-        auto &outTemplate = data.mType.mTemplateParameters.emplace_back();
+        data.mReturnType.mName = container;
+        auto &outTemplate = data.mReturnType.mTemplateParameters.emplace_back();
         outTemplate.mName = "T";
-        data.mType.mType = PassByType::Reference;
+        data.mReturnType.mReturnType = PassByType::Reference;
       }
 
       // TOOD: implement with rawseti
@@ -398,29 +416,29 @@ namespace holgen {
       func.mIsConst = false;
       func.mIsStatic = true;
       auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
-      keyTemplateArg.mType = "typename";
+      keyTemplateArg.mReturnType = "typename";
       keyTemplateArg.mName = "K";
       auto &valueTemplateArg = func.mTemplateParameters.emplace_back();
-      valueTemplateArg.mType = "typename";
+      valueTemplateArg.mReturnType = "typename";
       valueTemplateArg.mName = "V";
-      func.mType.mName = "void";
+      func.mReturnType.mName = "void";
 
       {
         auto &luaState = func.mArguments.emplace_back();
         luaState.mName = "luaState";
-        luaState.mType.mName = "lua_State";
-        luaState.mType.mType = PassByType::Pointer;
+        luaState.mReturnType.mName = "lua_State";
+        luaState.mReturnType.mReturnType = PassByType::Pointer;
       }
 
       {
         auto &data = func.mArguments.emplace_back();
         data.mName = "data";
-        data.mType.mName = container;
-        auto &keyTemplate = data.mType.mTemplateParameters.emplace_back();
+        data.mReturnType.mName = container;
+        auto &keyTemplate = data.mReturnType.mTemplateParameters.emplace_back();
         keyTemplate.mName = "K";
-        auto &valueTemplate = data.mType.mTemplateParameters.emplace_back();
+        auto &valueTemplate = data.mReturnType.mTemplateParameters.emplace_back();
         valueTemplate.mName = "V";
-        data.mType.mType = PassByType::Reference;
+        data.mReturnType.mReturnType = PassByType::Reference;
       }
       // TODO: implement
 

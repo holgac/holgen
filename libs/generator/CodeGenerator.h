@@ -23,10 +23,11 @@ namespace holgen {
     std::string mCMakeTarget;
   };
 
-  class Generator {
+  class CodeGenerator {
     GeneratorSettings mGeneratorSettings;
+    const TranslatedProject* mTranslatedProject = nullptr;
   public:
-    Generator(const GeneratorSettings &generatorSettings) : mGeneratorSettings(generatorSettings) {}
+    CodeGenerator(const GeneratorSettings &generatorSettings) : mGeneratorSettings(generatorSettings) {}
 
     std::vector<GeneratedContent> Generate(const TranslatedProject &translatedProject);
 

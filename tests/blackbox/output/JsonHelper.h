@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <string>
+#include <deque>
 #include <vector>
 #include <map>
 #include <unordered_map>
@@ -14,6 +15,17 @@ public:
   template <typename T>
   static bool Parse(T& out, const rapidjson::Value& json, const Converter& converter) {
     return out.ParseJson(json, converter);
+  }
+  template <typename T>
+  static bool Parse(std::deque<T>& out, const rapidjson::Value& json, const Converter& converter) {
+    if (!json.IsArray())
+      return false;
+    for (const auto& data: json.GetArray()) {
+      auto res = Parse(out.emplace_back(), data, converter);
+      if (!res)
+        return false;
+    }
+    return true;
   }
   template <typename T>
   static bool Parse(std::vector<T>& out, const rapidjson::Value& json, const Converter& converter) {

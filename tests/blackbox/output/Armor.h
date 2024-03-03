@@ -19,6 +19,7 @@ public:
   void SetAlternativeName(const std::string& val);
   int8_t GetArmorClass() const;
   void SetArmorClass(int8_t val);
+  static Armor* Get(uint32_t id);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   static void CreateLuaMetatable(lua_State* luaState);

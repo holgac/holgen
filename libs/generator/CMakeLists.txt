@@ -1,1 +1,1 @@
-add_library(generator Generator.cpp Translator.cpp HeaderContainer.cpp CodeBlock.cpp GeneratorJson.cpp TypeInfo.cpp GeneratorLua.cpp TranslatedProject.cpp TranslatedProject.h)
+add_library(generator CodeGenerator.cpp Translator.cpp HeaderContainer.cpp CodeBlock.cpp generators/GeneratorJson.cpp TypeInfo.cpp generators/GeneratorLua.cpp TranslatedProject.cpp TranslatedProject.h generators/Generator.cpp generators/GeneratorGlobalPointer.cpp)

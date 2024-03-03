@@ -18,6 +18,7 @@ public:
   void SetBoot(uint32_t val);
   uint32_t GetArmor() const;
   void SetArmor(uint32_t val);
+  static Character* Get(uint32_t id);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   static void CreateLuaMetatable(lua_State* luaState);
