@@ -1,1 +1,1 @@
-add_library(holgen_blackbox_test_lib Race.cpp Person.cpp RaceId.cpp Country.cpp Boot.cpp Armor.cpp Character.cpp GameData.cpp DamageMultiplier.cpp Weapon.cpp JsonHelper.cpp Converter.cpp LuaHelper.cpp GlobalPointer.cpp)
+add_library(holgen_blackbox_test_lib Race.cpp Person.cpp RaceId.cpp Country.cpp Boot.cpp Armor.cpp Character.cpp GameData.cpp DamageMultiplier.cpp Weapon.cpp JsonHelper.cpp Converter.cpp LuaHelper.cpp GlobalPointer.cpp FilesystemHelper.cpp)

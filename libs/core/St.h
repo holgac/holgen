@@ -19,7 +19,9 @@ namespace holgen {
     static std::string GetFieldNameInCpp(const std::string& fieldName);
     static std::string GetIndexFieldName(const std::string& fieldName, const std::string& indexedFieldName);
     static std::string GetIndexGetterName(const std::string& fieldName, const std::string& indexedFieldName);
-    inline static const std::string GlobalPointerName = "GlobalPointer";
+    inline static const std::string GlobalPointer = "GlobalPointer";
+    inline static const std::string FilesystemHelper = "FilesystemHelper";
+    inline static const std::string FilesystemHelper_ReadFile = "ReadFile";
   };
 
 }

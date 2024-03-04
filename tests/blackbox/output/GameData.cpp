@@ -3,10 +3,10 @@
 #include <filesystem>
 #include <queue>
 #include <vector>
-#include <fstream>
 #include <rapidjson/document.h>
 #include <lua.hpp>
 #include "JsonHelper.h"
+#include "FilesystemHelper.h"
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
@@ -183,11 +183,7 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
   auto it = filesByName.find("boots");
   if (it != filesByName.end()) {
     for (const auto& filePath: it->second) {
-      std::ifstream fin(filePath, std::ios_base::binary);
-      fin.seekg(0, std::ios_base::end);
-      std::string contents(fin.tellg(), 0);
-      fin.seekg(0, std::ios_base::beg);
-      fin.read(contents.data(), contents.size());
+      auto contents = FilesystemHelper::ReadFile(filePath);
       rapidjson::Document doc;
       doc.Parse(contents.c_str());
       if (!doc.IsArray()) {
@@ -203,11 +199,7 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
   it = filesByName.find("armors");
   if (it != filesByName.end()) {
     for (const auto& filePath: it->second) {
-      std::ifstream fin(filePath, std::ios_base::binary);
-      fin.seekg(0, std::ios_base::end);
-      std::string contents(fin.tellg(), 0);
-      fin.seekg(0, std::ios_base::beg);
-      fin.read(contents.data(), contents.size());
+      auto contents = FilesystemHelper::ReadFile(filePath);
       rapidjson::Document doc;
       doc.Parse(contents.c_str());
       if (!doc.IsArray()) {
@@ -223,11 +215,7 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
   it = filesByName.find("characters");
   if (it != filesByName.end()) {
     for (const auto& filePath: it->second) {
-      std::ifstream fin(filePath, std::ios_base::binary);
-      fin.seekg(0, std::ios_base::end);
-      std::string contents(fin.tellg(), 0);
-      fin.seekg(0, std::ios_base::beg);
-      fin.read(contents.data(), contents.size());
+      auto contents = FilesystemHelper::ReadFile(filePath);
       rapidjson::Document doc;
       doc.Parse(contents.c_str());
       if (!doc.IsArray()) {

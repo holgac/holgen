@@ -222,6 +222,8 @@ namespace holgen {
       }
       line << ")";
     }
+    // TODO: complete lua generator, fix unused parameters and enable this
+    // codeBlock.Line() << "target_compile_options(" << mGeneratorSettings.mCMakeTarget << " PRIVATE -Wall -Wextra -Wpedantic -Werror)";
     cmake.mText = codeBlock.ToString();
   }
 
@@ -273,7 +275,7 @@ namespace holgen {
     codeBlock.Line();
     codeBlock.Add("#ifndef HOLGEN_WARN");
     codeBlock.Add(
-        R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}}" msg, __FILE__, __LINE__, ## __VA_ARGS__))");
+        R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}} " msg, __FILE__, __LINE__, ## __VA_ARGS__))");
     codeBlock.Add("#endif // ifndef HOLGEN_WARN");
 
     codeBlock.Line();

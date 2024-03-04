@@ -52,7 +52,7 @@ namespace holgen {
     cls.mSourceIncludes.AddStandardHeader("filesystem");
     cls.mSourceIncludes.AddStandardHeader("queue");
     cls.mSourceIncludes.AddStandardHeader("vector");
-    cls.mSourceIncludes.AddStandardHeader("fstream");
+    cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
     const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = "ParseFiles";
@@ -171,11 +171,7 @@ namespace holgen {
 
           parseFunc.mBody.Add("for (const auto& filePath: it->second) {{");
           parseFunc.mBody.Indent(1);
-          parseFunc.mBody.Add("std::ifstream fin(filePath, std::ios_base::binary);");
-          parseFunc.mBody.Add("fin.seekg(0, std::ios_base::end);");
-          parseFunc.mBody.Add("std::string contents(fin.tellg(), 0);");
-          parseFunc.mBody.Add("fin.seekg(0, std::ios_base::beg);");
-          parseFunc.mBody.Add("fin.read(contents.data(), contents.size());");
+          parseFunc.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper, St::FilesystemHelper_ReadFile);
           parseFunc.mBody.Add("rapidjson::Document doc;");
           parseFunc.mBody.Add("doc.Parse(contents.c_str());");
           parseFunc.mBody.Add("if (!doc.IsArray()) {{");

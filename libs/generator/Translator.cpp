@@ -5,6 +5,7 @@
 #include "generator/generators/GeneratorJson.h"
 #include "generator/generators/GeneratorLua.h"
 #include "generator/generators/GeneratorGlobalPointer.h"
+#include "generator/generators/GeneratorFilesystemHelper.h"
 #include "TypeInfo.h"
 #include "core/Decorators.h"
 #include "parser/Validator.h"
@@ -28,11 +29,15 @@ namespace holgen {
     generatorLua.EnrichClasses();
     GeneratorGlobalPointer generatorGlobalPointer(project, translatedProject);
     generatorGlobalPointer.EnrichClasses();
+    GeneratorFilesystemHelper generatorFilesystemHelper(project, translatedProject);
+    generatorFilesystemHelper.EnrichClasses();
+
 
     // After all integrations processed all real structs, create helpers
     generatorJson.GenerateHelpers();
     generatorLua.GenerateHelpers();
     generatorGlobalPointer.GenerateHelpers();
+    generatorFilesystemHelper.GenerateHelpers();
 
     mProject = nullptr;
     return translatedProject;
@@ -67,9 +72,9 @@ namespace holgen {
       TypeInfo::Get().ConvertToType(idArg.mType, idField->mType);
       idArg.mName = "id";
       getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
-                       St::GlobalPointerName, manager->mName,
+                       St::GlobalPointer, manager->mName,
                        St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
-      generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointerName + ".h");
+      generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
       generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
     }
   }

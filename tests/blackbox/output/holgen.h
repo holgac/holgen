@@ -5,7 +5,7 @@
 #include "../config.h"
 
 #ifndef HOLGEN_FAIL
-#define HOLGEN_FAIL(msg, ...) throw std::runtime_error(std::format("{}:{}" msg, __FILE__, __LINE__, ## __VA_ARGS__))
+#define HOLGEN_FAIL(msg, ...) throw std::runtime_error(std::format("{}:{} " msg, __FILE__, __LINE__, ## __VA_ARGS__))
 #endif // ifndef HOLGEN_FAIL
 
 #ifndef HOLGEN_FAIL_IF
@@ -15,7 +15,7 @@ HOLGEN_FAIL(msg, ## __VA_ARGS__); \
 #endif // ifndef HOLGEN_FAIL_IF
 
 #ifndef HOLGEN_WARN
-#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{}:{}" msg, __FILE__, __LINE__, ## __VA_ARGS__)
+#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{}:{} " msg, __FILE__, __LINE__, ## __VA_ARGS__)
 #endif // ifndef HOLGEN_WARN
 
 #ifndef HOLGEN_WARN_IF

@@ -117,7 +117,7 @@ namespace holgen {
       auto managerField = manager->GetField(managedDecorator->GetAttribute(Decorators::Managed_Field)->mValue.mName);
       codeBlock.Add(
           "auto instance = {}<{}>::GetInstance()->{}(id);",
-          St::GlobalPointerName, manager->mName,
+          St::GlobalPointer, manager->mName,
           St::GetGetterMethodName(managerField->GetDecorator(Decorators::Container)->GetAttribute(Decorators::Container_ElemName)->mValue.mName));
     }
     codeBlock.Line() << "const char* key = lua_tostring(ls, -2);";

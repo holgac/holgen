@@ -5,6 +5,7 @@
 #include "core/Decorators.h"
 #include "Parser.h"
 #include "core/Exception.h"
+#include "core/St.h"
 
 namespace holgen {
   namespace {
@@ -12,7 +13,14 @@ namespace holgen {
         "struct",
         "class",
         "namespace",
-        "template"
+        "template",
+    };
+    // TODO: don't hard-code these
+    std::set<std::string> ReservedClassNames{
+      "JsonHelper",
+      "LuaHelper",
+      St::GlobalPointer,
+      St::FilesystemHelper,
     };
 
     void EnforceUnique(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
@@ -54,6 +62,8 @@ namespace holgen {
 
   void Validator::Validate(const StructDefinition &structDefinition) {
     THROW_IF(ReservedKeywords.contains(structDefinition.mName), "Struct {} uses a reserved keyword.",
+             structDefinition.mName);
+    THROW_IF(ReservedClassNames.contains(structDefinition.mName), "Struct {} uses a reserved class name.",
              structDefinition.mName);
     THROW_IF(TypeInfo::Get().CppPrimitives.contains(structDefinition.mName), "Struct {} uses a reserved keyword.",
              structDefinition.mName);
@@ -118,7 +128,8 @@ namespace holgen {
                structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
       auto underlyingManagedDecorator = underlyingStruct->GetDecorator(Decorators::Managed);
       auto underlyingNoLuaDecorator = underlyingStruct->GetDecorator(Decorators::Managed);
-      THROW_IF(underlyingManagedDecorator == nullptr && underlyingNoLuaDecorator == nullptr && !TypeInfo::Get().CppStableContainers.contains(type.mName),
+      THROW_IF(underlyingManagedDecorator == nullptr && underlyingNoLuaDecorator == nullptr &&
+               !TypeInfo::Get().CppStableContainers.contains(type.mName),
                "{}.{} should either be a stable container like deque, or {} should be managed",
                structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
     } else if (decoratorDefinition.mName == Decorators::Index) {
