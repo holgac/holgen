@@ -22,6 +22,8 @@ namespace holgen {
     inline static const std::string GlobalPointer = "GlobalPointer";
     inline static const std::string FilesystemHelper = "FilesystemHelper";
     inline static const std::string FilesystemHelper_ReadFile = "ReadFile";
+    inline static const std::string JsonHelper = "JsonHelper";
+    inline static const std::string JsonHelper_Parse = "Parse";
   };
 
 }

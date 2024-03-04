@@ -27,6 +27,8 @@ namespace holgen {
     };
 
     std::string ConverterName = "Converter";
+    std::string ParseJson = "ParseJson";
+    std::string ParseFiles = "ParseFiles";
   }
 
   void GeneratorJson::EnrichClasses() {
@@ -36,8 +38,7 @@ namespace holgen {
         continue;
       cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
       cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
-      // TODO: don't hard-code JsonHelper
-      cls.mSourceIncludes.AddLocalHeader("JsonHelper.h");
+      cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
       if (structDefinition.GetDecorator(Decorators::DataManager))
         GenerateParseFiles(cls);
       else
@@ -55,7 +56,7 @@ namespace holgen {
     cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
     const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
-    parseFunc.mName = "ParseFiles";
+    parseFunc.mName = ParseFiles;
     parseFunc.mIsConst = false;
     parseFunc.mReturnType.mName = "bool";
     {
@@ -174,21 +175,17 @@ namespace holgen {
           parseFunc.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper, St::FilesystemHelper_ReadFile);
           parseFunc.mBody.Add("rapidjson::Document doc;");
           parseFunc.mBody.Add("doc.Parse(contents.c_str());");
-          parseFunc.mBody.Add("if (!doc.IsArray()) {{");
-          parseFunc.mBody.Indent(1);
-          // TODO: should use a ON_FAILURE(msg, ...) macro (and CHECK(cond, msg, ...)) and define ifndef.
-          // Can make it a GeneratorSettings parameter to include a special user file at each header,
-          // and also have own header that every header includes and #define's (ifndef) such macros
-          parseFunc.mBody.Add("return false;");
-          parseFunc.mBody.Indent(-1);
-          parseFunc.mBody.Add("}}"); // if (!doc.IsArray())
-
+          parseFunc.mBody.Add(
+              R"(HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {{}}: It is supposed to contain a list of {} entries", filePath);)",
+              structToProcess);
           parseFunc.mBody.Add("for (auto& jsonElem: doc.GetArray()) {{"); // if (!doc.IsArray())
           parseFunc.mBody.Indent(1);
+          parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath);)");
           Type type;
           TypeInfo::Get().ConvertToType(type, templateParameter);
           parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
-          parseFunc.mBody.Add("elem.ParseJson(jsonElem, converter);", type.ToString()); // if (!doc.IsArray())
+          parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
+          parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath);)");
           auto elemName = fieldDefinition.GetDecorator(Decorators::Container)->GetAttribute(
               Decorators::Container_ElemName);
           parseFunc.mBody.Add("{}(std::move(elem));", St::GetAdderMethodName(elemName->mValue.mName));
@@ -209,7 +206,7 @@ namespace holgen {
   void GeneratorJson::GenerateParseJson(Class &cls) {
     const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
-    parseFunc.mName = "ParseJson";
+    parseFunc.mName = ParseJson;
     parseFunc.mIsConst = false;
     parseFunc.mReturnType.mName = "bool";
     {
@@ -268,7 +265,7 @@ namespace holgen {
         Type type;
         TypeInfo::Get().ConvertToType(type, jsonConvertFrom->mValue);
         parseFunc.mBody.Line() << type.ToString() << " temp;";
-        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(temp, data.value, converter);";
+        parseFunc.mBody.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
         parseFunc.mBody.Line() << "if (!res)";
         parseFunc.mBody.Indent(1);
         parseFunc.mBody.Line() << "return false;";
@@ -282,16 +279,16 @@ namespace holgen {
           parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", St::GetFieldNameInCpp(fieldDefinition.mName),
                               jsonConvertUsing->mValue.mName);
       } else {
-        parseFunc.mBody.Line() << "auto res = JsonHelper::Parse(" << St::GetFieldNameInCpp(fieldDefinition.mName)
-                               << ", data.value, converter);";
+        parseFunc.mBody.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                            St::GetFieldNameInCpp(fieldDefinition.mName));
         parseFunc.mBody.Line() << "if (!res)";
         parseFunc.mBody.Indent(1);
         parseFunc.mBody.Line() << "return false;";
         parseFunc.mBody.Indent(-1); // if !res
       }
     } else {
-      parseFunc.mBody.Line() << "auto res = " << St::GetFieldNameInCpp(fieldDefinition.mName)
-                             << ".ParseJson(data.value, converter);";
+      parseFunc.mBody.Add("auto res = {}.{}(data.value, converter);",
+                          St::GetFieldNameInCpp(fieldDefinition.mName), ParseJson);
 
       parseFunc.mBody.Line() << "if (!res)";
       parseFunc.mBody.Indent(1);
@@ -307,10 +304,10 @@ namespace holgen {
 
   // TODO: move to GeneratorJsonHelpers class
   void GeneratorJson::GenerateJsonHelper(Class &generatedClass) {
-    generatedClass.mName = "JsonHelper";
+    generatedClass.mName = St::JsonHelper;
     generatedClass.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
     auto &baseParse = generatedClass.mMethods.emplace_back();
-    baseParse.mName = "Parse";
+    baseParse.mName = St::JsonHelper_Parse;
     baseParse.mIsConst = false;
     baseParse.mIsStatic = true;
     baseParse.mReturnType.mName = "bool";
@@ -341,11 +338,11 @@ namespace holgen {
       converter.mType.mType = PassByType::Reference;
     }
 
-    baseParse.mBody.Line() << "return out.ParseJson(json, converter);";
+    baseParse.mBody.Add("return out.{}(json, converter);", ParseJson);
 
     for (const auto &[type, usage]: RapidJsonUsage) {
       auto &parse = generatedClass.mMethods.emplace_back();
-      parse.mName = "Parse";
+      parse.mName = St::JsonHelper_Parse;
       parse.mIsConst = false;
       parse.mIsStatic = true;
       parse.mIsTemplateSpecialization = true;
@@ -384,7 +381,7 @@ namespace holgen {
 
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
       auto &parse = generatedClass.mMethods.emplace_back();
-      parse.mName = "Parse";
+      parse.mName = St::JsonHelper_Parse;
       parse.mIsConst = false;
       parse.mIsStatic = true;
       auto &templateArg = parse.mTemplateParameters.emplace_back();
@@ -424,7 +421,7 @@ namespace holgen {
 
       parse.mBody.Line() << "for (const auto& data: json.GetArray()) {";
       parse.mBody.Indent(1);
-      parse.mBody.Line() << "auto res = Parse(out.emplace_back(), data, converter);";
+      parse.mBody.Add("auto res = {}(out.emplace_back(), data, converter);", St::JsonHelper_Parse);
       parse.mBody.Line() << "if (!res)";
       parse.mBody.Indent(1);
       parse.mBody.Line() << "return false;";
@@ -437,7 +434,7 @@ namespace holgen {
 
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
       auto &parse = generatedClass.mMethods.emplace_back();
-      parse.mName = "Parse";
+      parse.mName = St::JsonHelper_Parse;
       parse.mIsConst = false;
       parse.mIsStatic = true;
       auto &keyTemplateArg = parse.mTemplateParameters.emplace_back();
@@ -483,13 +480,13 @@ namespace holgen {
       parse.mBody.Line() << "for (const auto& data: json.GetObject()) {";
       parse.mBody.Indent(1);
       parse.mBody.Line() << "K key;";
-      parse.mBody.Line() << "Parse(key, data.name, converter);";
+      parse.mBody.Add("{}(key, data.name, converter);", St::JsonHelper_Parse);
       parse.mBody.Line() << "auto [it, res] = out.try_emplace(key, V());";
       parse.mBody.Line() << "if (!res)";
       parse.mBody.Indent(1);
       parse.mBody.Line() << "return false;";
       parse.mBody.Indent(-1); // if !res
-      parse.mBody.Line() << "res = Parse(it->second, data.value, converter);";
+      parse.mBody.Add("{}(it->second, data.value, converter);", St::JsonHelper_Parse);
       parse.mBody.Line() << "if (!res)";
       parse.mBody.Indent(1);
       parse.mBody.Line() << "return false;";

@@ -49,7 +49,7 @@ public:
       auto [it, res] = out.try_emplace(key, V());
       if (!res)
         return false;
-      res = Parse(it->second, data.value, converter);
+      Parse(it->second, data.value, converter);
       if (!res)
         return false;
     }
@@ -65,7 +65,7 @@ public:
       auto [it, res] = out.try_emplace(key, V());
       if (!res)
         return false;
-      res = Parse(it->second, data.value, converter);
+      Parse(it->second, data.value, converter);
       if (!res)
         return false;
     }

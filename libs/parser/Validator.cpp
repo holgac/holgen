@@ -17,7 +17,7 @@ namespace holgen {
     };
     // TODO: don't hard-code these
     std::set<std::string> ReservedClassNames{
-      "JsonHelper",
+      St::JsonHelper,
       "LuaHelper",
       St::GlobalPointer,
       St::FilesystemHelper,

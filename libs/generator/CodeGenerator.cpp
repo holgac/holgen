@@ -285,6 +285,22 @@ namespace holgen {
     codeBlock.Add("}}");
     codeBlock.Add("#endif // ifndef HOLGEN_WARN_IF");
 
+    codeBlock.Line();
+    codeBlock.Add("#ifndef HOLGEN_WARN_AND_RETURN_IF");
+    codeBlock.Add("#define HOLGEN_WARN_AND_RETURN_IF(cond, retVal, msg, ...) if (cond) {{ \\");
+    codeBlock.Add("HOLGEN_WARN(msg, ## __VA_ARGS__); \\");
+    codeBlock.Add("return retVal; \\");
+    codeBlock.Add("}}");
+    codeBlock.Add("#endif // ifndef HOLGEN_WARN_AND_RETURN_IF");
+
+    codeBlock.Line();
+    codeBlock.Add("#ifndef HOLGEN_WARN_AND_CONTINUE_IF");
+    codeBlock.Add("#define HOLGEN_WARN_AND_CONTINUE_IF(cond, msg, ...) if (cond) {{ \\");
+    codeBlock.Add("HOLGEN_WARN(msg, ## __VA_ARGS__); \\");
+    codeBlock.Add("continue; \\");
+    codeBlock.Add("}}");
+    codeBlock.Add("#endif // ifndef HOLGEN_WARN_AND_CONTINUE_IF");
+
     header.mText = codeBlock.ToString();
   }
 

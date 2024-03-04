@@ -23,3 +23,17 @@ HOLGEN_FAIL(msg, ## __VA_ARGS__); \
 HOLGEN_WARN(msg, ## __VA_ARGS__); \
 }
 #endif // ifndef HOLGEN_WARN_IF
+
+#ifndef HOLGEN_WARN_AND_RETURN_IF
+#define HOLGEN_WARN_AND_RETURN_IF(cond, retVal, msg, ...) if (cond) { \
+HOLGEN_WARN(msg, ## __VA_ARGS__); \
+return retVal; \
+}
+#endif // ifndef HOLGEN_WARN_AND_RETURN_IF
+
+#ifndef HOLGEN_WARN_AND_CONTINUE_IF
+#define HOLGEN_WARN_AND_CONTINUE_IF(cond, msg, ...) if (cond) { \
+HOLGEN_WARN(msg, ## __VA_ARGS__); \
+continue; \
+}
+#endif // ifndef HOLGEN_WARN_AND_CONTINUE_IF

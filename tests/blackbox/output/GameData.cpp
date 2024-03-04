@@ -186,12 +186,12 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
       auto contents = FilesystemHelper::ReadFile(filePath);
       rapidjson::Document doc;
       doc.Parse(contents.c_str());
-      if (!doc.IsArray()) {
-        return false;
-      }
+      HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {}: It is supposed to contain a list of Boot entries", filePath);
       for (auto& jsonElem: doc.GetArray()) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath);
         Boot elem;
-        elem.ParseJson(jsonElem, converter);
+        auto res = elem.ParseJson(jsonElem, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath);
         AddBoot(std::move(elem));
       }
     }
@@ -202,12 +202,12 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
       auto contents = FilesystemHelper::ReadFile(filePath);
       rapidjson::Document doc;
       doc.Parse(contents.c_str());
-      if (!doc.IsArray()) {
-        return false;
-      }
+      HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {}: It is supposed to contain a list of Armor entries", filePath);
       for (auto& jsonElem: doc.GetArray()) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath);
         Armor elem;
-        elem.ParseJson(jsonElem, converter);
+        auto res = elem.ParseJson(jsonElem, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath);
         AddArmor(std::move(elem));
       }
     }
@@ -218,12 +218,12 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
       auto contents = FilesystemHelper::ReadFile(filePath);
       rapidjson::Document doc;
       doc.Parse(contents.c_str());
-      if (!doc.IsArray()) {
-        return false;
-      }
+      HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {}: It is supposed to contain a list of Character entries", filePath);
       for (auto& jsonElem: doc.GetArray()) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath);
         Character elem;
-        elem.ParseJson(jsonElem, converter);
+        auto res = elem.ParseJson(jsonElem, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath);
         AddCharacter(std::move(elem));
       }
     }
