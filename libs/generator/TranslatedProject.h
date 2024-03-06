@@ -45,7 +45,6 @@ namespace holgen {
   struct ClassMethod : ClassMethodBase {
     std::string mName;
     Type mReturnType;
-    // TODO: use Constness and Staticness enums
     Constness mConstness = Constness::Const;
     Staticness mStaticness = Staticness::NotStatic;
     std::vector<TemplateParameter> mTemplateParameters;

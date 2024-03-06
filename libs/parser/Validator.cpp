@@ -15,12 +15,12 @@ namespace holgen {
         "namespace",
         "template",
     };
-    // TODO: don't hard-code these
+
     std::set<std::string> ReservedClassNames{
-      St::JsonHelper,
-      "LuaHelper",
-      St::GlobalPointer,
-      St::FilesystemHelper,
+        St::JsonHelper,
+        St::LuaHelper,
+        St::GlobalPointer,
+        St::FilesystemHelper,
     };
 
     void EnforceUnique(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,

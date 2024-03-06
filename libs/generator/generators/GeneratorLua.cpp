@@ -28,6 +28,9 @@ namespace holgen {
         {"std::string", {"lua_isstring",  "lua_tostring",  "lua_pushstring",  ".c_str()"}},
     };
 
+    std::string LuaTableField_Pointer = "p";
+    std::string LuaTableField_Index = "i";
+
   }
 
   void GeneratorLua::EnrichClasses() {
@@ -38,7 +41,7 @@ namespace holgen {
 
       cls.mGlobalForwardDeclarations.Add("struct lua_State;");
       cls.mSourceIncludes.AddLibHeader("lua.hpp");
-      cls.mSourceIncludes.AddLocalHeader("LuaHelper.h");
+      cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
 
       auto &pushToLua = cls.mMethods.emplace_back();
       pushToLua.mName = "PushToLua";
@@ -56,7 +59,7 @@ namespace holgen {
       if (managedDecorator == nullptr) {
         // TODO: debug generator? Or generate extra debug stuff that's gated behind a macro?
         // Specifying object type would help here
-        pushToLua.mBody.Line() << "lua_pushstring(luaState, \"p\");";
+        pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
         pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, (void*)this);";
       } else {
         auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
@@ -66,7 +69,7 @@ namespace holgen {
         }
         pushToLua.mBody.Line() << tempType << " id = " << idField->mName << ";";
         // TODO: "p" for ptr, "i" for id. Use consts instead of hard-coding them.
-        pushToLua.mBody.Line() << "lua_pushstring(luaState, \"i\");";
+        pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
         pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));";
       }
       pushToLua.mBody.Line() << "lua_settable(luaState, -3);";
@@ -101,12 +104,12 @@ namespace holgen {
     codeBlock.Indent(1);
     auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
     if (managedDecorator == nullptr) {
-      codeBlock.Line() << "lua_pushstring(ls, \"p\");";
+      codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Pointer);
       codeBlock.Line() << "lua_gettable(ls, -3);";
       codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
     } else {
       auto manager = mProjectDefinition.GetStruct(managedDecorator->GetAttribute(Decorators::Managed_By)->mValue.mName);
-      codeBlock.Line() << "lua_pushstring(ls, \"i\");";
+      codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Index);
       codeBlock.Line() << "lua_gettable(ls, -3);";
       auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
       std::string tempType = "uint64_t";
@@ -118,7 +121,8 @@ namespace holgen {
       codeBlock.Add(
           "auto instance = {}<{}>::GetInstance()->{}(id);",
           St::GlobalPointer, manager->mName,
-          St::GetGetterMethodName(managerField->GetDecorator(Decorators::Container)->GetAttribute(Decorators::Container_ElemName)->mValue.mName));
+          St::GetGetterMethodName(managerField->GetDecorator(Decorators::Container)->GetAttribute(
+              Decorators::Container_ElemName)->mValue.mName));
     }
     codeBlock.Line() << "const char* key = lua_tostring(ls, -2);";
     bool isFirst = true;
@@ -132,7 +136,8 @@ namespace holgen {
         codeBlock.Line() << "} else if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";
       }
       codeBlock.Indent(1);
-      codeBlock.Line() << "LuaHelper::Push(instance->" << St::GetFieldNameInCpp(fieldDefinition.mName) << ", ls);";
+      codeBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push,
+                    St::GetFieldNameInCpp(fieldDefinition.mName));
       codeBlock.Indent(-1);
     }
     codeBlock.Line() << "} else {";
@@ -170,7 +175,8 @@ namespace holgen {
       }
       codeBlock.Indent(1);
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
-      codeBlock.Line() << "LuaHelper::Read(instance->" << St::GetFieldNameInCpp(fieldDefinition.mName) << ", ls, -2);";
+      codeBlock.Add("{}::{}(instance->{}, ls, -2);", St::LuaHelper, St::LuaHelper_Read,
+                    St::GetFieldNameInCpp(fieldDefinition.mName));
       codeBlock.Indent(-1);
     }
     codeBlock.Line() << "}";
@@ -187,7 +193,7 @@ namespace holgen {
   }
 
   void GeneratorLua::GenerateLuaHelper(Class &generatedClass) {
-    generatedClass.mName = "LuaHelper";
+    generatedClass.mName = St::LuaHelper;
     generatedClass.mGlobalForwardDeclarations.Add("struct lua_State;");
     generatedClass.mSourceIncludes.AddLibHeader("lua.hpp");
     GenerateLuaHelperPush(generatedClass);
