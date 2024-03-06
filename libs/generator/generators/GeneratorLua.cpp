@@ -68,7 +68,6 @@ namespace holgen {
           tempType = "int64_t";
         }
         pushToLua.mBody.Line() << tempType << " id = " << idField->mName << ";";
-        // TODO: "p" for ptr, "i" for id. Use consts instead of hard-coding them.
         pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
         pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));";
       }

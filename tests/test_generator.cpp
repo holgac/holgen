@@ -42,7 +42,7 @@ namespace {
   @noLua()
   @noJson()
   struct Person   {
-    u32 age;
+    u32 age = 0;
     float gender;
   }
     )DELIM");
@@ -76,7 +76,7 @@ public:
   void SetGender(float val);
 protected:
 private:
-  uint32_t mAge;
+  uint32_t mAge = 0;
   float mGender;
 };
 }

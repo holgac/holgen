@@ -86,6 +86,7 @@ namespace holgen {
     auto &generatedField = generatedClass.mFields.emplace_back();
 
     generatedField.mName = St::GetFieldNameInCpp(fieldDefinition.mName);
+    generatedField.mDefaultValue = fieldDefinition.mDefaultValue;
     TypeInfo::Get().ConvertToType(generatedField.mType, fieldDefinition.mType);
     bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(generatedField.mType.mName);
 

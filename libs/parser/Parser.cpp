@@ -24,6 +24,8 @@ namespace holgen {
         auto &structDefinition = mProject.mStructs.emplace_back();
         structDefinition.mAnnotations = std::move(annotations);
         ParseStruct(structDefinition);
+      } else {
+        THROW("Unexpected token: {}", curToken.mContents);
       }
     }
     mCurTokenizer = nullptr;
@@ -89,11 +91,17 @@ namespace holgen {
 
   void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {
     ParseType(curToken, fieldDefinition.mType);
-    THROW_IF(curToken.mType != TokenType::String, "Field name should be a string, found \"{}\"!", curToken.mContents)
+    THROW_IF(curToken.mType != TokenType::String, "Field name should be a string, found \"{}\"!", curToken.mContents);
     fieldDefinition.mName = curToken.mContents;
-    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+    if (curToken.mType == TokenType::Equals) {
+      THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      THROW_IF(curToken.mType != TokenType::String, "Default value should be a string, found \"{}\"", curToken.mContents);
+      fieldDefinition.mDefaultValue = curToken.mContents;
+      THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+    }
     THROW_IF(curToken.mType != TokenType::SemiColon, "Field definition should be terminated with a ';', found \"{}\"",
-             curToken.mContents)
+             curToken.mContents);
   }
 
   void Parser::ParseType(Token &curToken, TypeDefinition &typeDefinition) {

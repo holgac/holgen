@@ -27,6 +27,7 @@ namespace holgen {
     TypeDefinition mType;
     std::string mName;
     std::vector<AnnotationDefinition> mAnnotations;
+    std::string mDefaultValue;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   };
 
@@ -34,14 +35,14 @@ namespace holgen {
     std::string mName;
     std::vector<FieldDefinition> mFields;
     std::vector<AnnotationDefinition> mAnnotations;
-    const AnnotationDefinition *GetAnnotation(const std::string &name) const;
-    const FieldDefinition *GetField(const std::string &name) const;
-    const FieldDefinition *GetIdField() const;
+    [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
+    [[nodiscard]] const FieldDefinition *GetField(const std::string &name) const;
+    [[nodiscard]] const FieldDefinition *GetIdField() const;
   };
 
   struct ProjectDefinition {
     std::vector<StructDefinition> mStructs;
-    const StructDefinition *GetStruct(const std::string &name) const;
+    [[nodiscard]] const StructDefinition *GetStruct(const std::string &name) const;
   };
 
 
