@@ -3,7 +3,7 @@
 
 namespace holgen {
   // This kinda serves as documentation
-  class Decorators {
+  class Annotations {
   public:
     /*
      * When reading from json, convert the field data using a converter.
@@ -135,7 +135,7 @@ namespace holgen {
     /**
      * Marks the struct as a data manager that has a special method for loading the types from the FS it contains.
      *
-     * All fields marked with @container should be indexed containers with a field marked with @id decorator.
+     * All fields marked with @container should be indexed containers with a field marked with @id annotation.
      *
      * Example:
      * struct Plant {

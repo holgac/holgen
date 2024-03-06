@@ -11,31 +11,30 @@ namespace holgen {
     bool operator==(const TypeDefinition &rhs) const;
   };
 
-  // @decorator(attribute=5)
-  struct DecoratorAttributeDefinition {
+  // @annotation(attribute=5)
+  struct AnnotationAttributeDefinition {
     std::string mName;
     TypeDefinition mValue;
   };
 
-  // TODO: This is not a decorator, find a better name
-  struct DecoratorDefinition {
+  struct AnnotationDefinition {
     std::string mName;
-    std::vector<DecoratorAttributeDefinition> mAttributes;
-    const DecoratorAttributeDefinition *GetAttribute(const std::string &name) const;
+    std::vector<AnnotationAttributeDefinition> mAttributes;
+    [[nodiscard]] const AnnotationAttributeDefinition *GetAttribute(const std::string &name) const;
   };
 
   struct FieldDefinition {
     TypeDefinition mType;
     std::string mName;
-    std::vector<DecoratorDefinition> mDecorators;
-    const DecoratorDefinition *GetDecorator(const std::string &name) const;
+    std::vector<AnnotationDefinition> mAnnotations;
+    [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   };
 
   struct StructDefinition {
     std::string mName;
     std::vector<FieldDefinition> mFields;
-    std::vector<DecoratorDefinition> mDecorators;
-    const DecoratorDefinition *GetDecorator(const std::string &name) const;
+    std::vector<AnnotationDefinition> mAnnotations;
+    const AnnotationDefinition *GetAnnotation(const std::string &name) const;
     const FieldDefinition *GetField(const std::string &name) const;
     const FieldDefinition *GetIdField() const;
   };

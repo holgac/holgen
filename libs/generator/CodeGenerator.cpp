@@ -1,7 +1,5 @@
 #include "CodeGenerator.h"
 #include <sstream>
-#include <core/Decorators.h>
-
 #include "HeaderContainer.h"
 
 namespace holgen {
@@ -56,7 +54,7 @@ namespace holgen {
     if (!cls.mTemplateParameters.empty())
       codeBlock.AddLine(StringifyTemplateParameters(cls.mTemplateParameters));
 
-    // TODO: struct-specific namespaces defined via decorators
+    // TODO: struct-specific namespaces defined via annotations
     codeBlock.Line() << "class " << cls.mName << " {";
 
     GenerateForVisibility(codeBlock, cls, Visibility::Public);
@@ -167,7 +165,7 @@ namespace holgen {
 
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
-    // TODO: struct-specific namespaces defined via decorators
+    // TODO: struct-specific namespaces defined via annotations
     GenerateMethodsForSource(codeBlock, cls);
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "}"; // namespace

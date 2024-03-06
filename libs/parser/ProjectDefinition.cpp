@@ -1,18 +1,18 @@
 #include "ProjectDefinition.h"
-#include "core/Decorators.h"
+#include "core/Annotations.h"
 #include "core/St.h"
 
 namespace holgen {
 
-  const DecoratorDefinition *FieldDefinition::GetDecorator(const std::string &name) const {
-    for (const auto &decorator: mDecorators) {
-      if (decorator.mName == name)
-        return &decorator;
+  const AnnotationDefinition *FieldDefinition::GetAnnotation(const std::string &name) const {
+    for (const auto &annotation: mAnnotations) {
+      if (annotation.mName == name)
+        return &annotation;
     }
     return nullptr;
   }
 
-  const DecoratorAttributeDefinition *DecoratorDefinition::GetAttribute(const std::string &name) const {
+  const AnnotationAttributeDefinition *AnnotationDefinition::GetAttribute(const std::string &name) const {
     for (const auto &attribute: mAttributes) {
       if (attribute.mName == name)
         return &attribute;
@@ -20,10 +20,10 @@ namespace holgen {
     return nullptr;
   }
 
-  const DecoratorDefinition *StructDefinition::GetDecorator(const std::string &name) const {
-    for (const auto &decorator: mDecorators) {
-      if (decorator.mName == name)
-        return &decorator;
+  const AnnotationDefinition *StructDefinition::GetAnnotation(const std::string &name) const {
+    for (const auto &annotation: mAnnotations) {
+      if (annotation.mName == name)
+        return &annotation;
     }
     return nullptr;
   }
@@ -38,7 +38,7 @@ namespace holgen {
 
   const FieldDefinition *StructDefinition::GetIdField() const {
     for (const auto &field: mFields) {
-      if (field.GetDecorator(Decorators::Id))
+      if (field.GetAnnotation(Annotations::Id))
         return &field;
     }
     return nullptr;

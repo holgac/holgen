@@ -2,7 +2,7 @@
 #include <set>
 #include <string>
 #include "generator/TypeInfo.h"
-#include "core/Decorators.h"
+#include "core/Annotations.h"
 #include "Parser.h"
 #include "core/Exception.h"
 #include "core/St.h"
@@ -24,35 +24,35 @@ namespace holgen {
     };
 
     void EnforceUnique(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                       const DecoratorDefinition &decoratorDefinition) {
-      THROW_IF(&decoratorDefinition != fieldDefinition.GetDecorator(decoratorDefinition.mName),
-               "Field {}.{} has multiple {} decorators", structDefinition.mName, fieldDefinition.mName,
-               decoratorDefinition.mName);
+                       const AnnotationDefinition &annotationDefinition) {
+      THROW_IF(&annotationDefinition != fieldDefinition.GetAnnotation(annotationDefinition.mName),
+               "Field {}.{} has multiple {} annotations", structDefinition.mName, fieldDefinition.mName,
+               annotationDefinition.mName);
     }
 
-    void EnforceDecoratorExists(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                                const std::string &decoratorName) {
-      auto decorator = fieldDefinition.GetDecorator(decoratorName);
-      THROW_IF(decorator == nullptr,
-               "Field {}.{} does not have a decorator {}", structDefinition.mName,
-               fieldDefinition.mName, decoratorName);
+    void EnforceAnnotationExists(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
+                                const std::string &annotationName) {
+      auto annotation = fieldDefinition.GetAnnotation(annotationName);
+      THROW_IF(annotation == nullptr,
+               "Field {}.{} does not have a annotation {}", structDefinition.mName,
+               fieldDefinition.mName, annotationName);
     }
 
     void EnforceAttributeExists(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                                const DecoratorDefinition &decoratorDefinition, const std::string &attributeName) {
-      auto attribute = decoratorDefinition.GetAttribute(attributeName);
+                                const AnnotationDefinition &annotationDefinition, const std::string &attributeName) {
+      auto attribute = annotationDefinition.GetAttribute(attributeName);
       THROW_IF(attribute == nullptr,
-               "Field {}.{} has decorator {} with missing attribute: {}", structDefinition.mName,
+               "Field {}.{} has annotation {} with missing attribute: {}", structDefinition.mName,
                fieldDefinition.mName,
-               decoratorDefinition.mName, attributeName);
+               annotationDefinition.mName, attributeName);
     }
 
     void EnforceAttributeExists(const StructDefinition &structDefinition,
-                                const DecoratorDefinition &decoratorDefinition, const std::string &attributeName) {
-      auto attribute = decoratorDefinition.GetAttribute(attributeName);
+                                const AnnotationDefinition &annotationDefinition, const std::string &attributeName) {
+      auto attribute = annotationDefinition.GetAttribute(attributeName);
       THROW_IF(attribute == nullptr,
-               "Struct {} has decorator {} with missing attribute: {}", structDefinition.mName,
-               decoratorDefinition.mName, attributeName);
+               "Struct {} has annotation {} with missing attribute: {}", structDefinition.mName,
+               annotationDefinition.mName, attributeName);
     }
   }
 
@@ -73,8 +73,8 @@ namespace holgen {
       Validate(structDefinition, fieldDefinition);
     }
 
-    for (auto &decoratorDefinition: structDefinition.mDecorators) {
-      Validate(structDefinition, decoratorDefinition);
+    for (auto &annotationDefinition: structDefinition.mAnnotations) {
+      Validate(structDefinition, annotationDefinition);
     }
   }
 
@@ -86,19 +86,19 @@ namespace holgen {
     THROW_IF(&fieldDefinition != structDefinition.GetField(fieldDefinition.mName), "Duplicate field name: {}.{}",
              structDefinition.mName, fieldDefinition.mName)
     Validate(structDefinition, fieldDefinition, fieldDefinition.mType);
-    for (auto &decoratorDefinition: fieldDefinition.mDecorators) {
-      Validate(structDefinition, fieldDefinition, decoratorDefinition);
+    for (auto &annotationDefinition: fieldDefinition.mAnnotations) {
+      Validate(structDefinition, fieldDefinition, annotationDefinition);
     }
   }
 
   void Validator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                           const DecoratorDefinition &decoratorDefinition) {
-    if (decoratorDefinition.mName == Decorators::JsonConvert) {
-      EnforceUnique(structDefinition, fieldDefinition, decoratorDefinition);
-      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::JsonConvert_From);
-      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::JsonConvert_Using);
-      auto converterName = decoratorDefinition.GetAttribute(Decorators::JsonConvert_Using);
-      auto convertFrom = decoratorDefinition.GetAttribute(Decorators::JsonConvert_From);
+                           const AnnotationDefinition &annotationDefinition) {
+    if (annotationDefinition.mName == Annotations::JsonConvert) {
+      EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
+      EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::JsonConvert_From);
+      EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::JsonConvert_Using);
+      auto converterName = annotationDefinition.GetAttribute(Annotations::JsonConvert_Using);
+      auto convertFrom = annotationDefinition.GetAttribute(Annotations::JsonConvert_From);
       auto convertTo = fieldDefinition.mType;
       auto it = mJsonConverters.find(converterName->mValue.mName);
       if (it == mJsonConverters.end()) {
@@ -109,9 +109,9 @@ namespace holgen {
         THROW_IF(it->second.second != convertTo, "Converter {} cannot convert to multiple types: {} and {}",
                  converterName->mValue.mName, it->second.second.mName, convertTo.mName);
       }
-    } else if (decoratorDefinition.mName == Decorators::Container) {
-      EnforceUnique(structDefinition, fieldDefinition, decoratorDefinition);
-      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Container_ElemName);
+    } else if (annotationDefinition.mName == Annotations::Container) {
+      EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
+      EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Container_ElemName);
       Type type;
       TypeInfo::Get().ConvertToType(type, fieldDefinition.mType);
       THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
@@ -126,27 +126,27 @@ namespace holgen {
       THROW_IF(underlyingIdField == nullptr,
                "{}.{} is a container of {} which does not have an id field",
                structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-      auto underlyingManagedDecorator = underlyingStruct->GetDecorator(Decorators::Managed);
-      auto underlyingNoLuaDecorator = underlyingStruct->GetDecorator(Decorators::Managed);
-      THROW_IF(underlyingManagedDecorator == nullptr && underlyingNoLuaDecorator == nullptr &&
+      auto underlyingManagedAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
+      auto underlyingNoLuaAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
+      THROW_IF(underlyingManagedAnnotation == nullptr && underlyingNoLuaAnnotation == nullptr &&
                !TypeInfo::Get().CppStableContainers.contains(type.mName),
                "{}.{} should either be a stable container like deque, or {} should be managed",
                structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-    } else if (decoratorDefinition.mName == Decorators::Index) {
-      EnforceDecoratorExists(structDefinition, fieldDefinition, Decorators::Container);
+    } else if (annotationDefinition.mName == Annotations::Index) {
+      EnforceAnnotationExists(structDefinition, fieldDefinition, Annotations::Container);
       // double validate to avoid order problems, this validator piece depends on Container being valid.
-      Validate(structDefinition, fieldDefinition, *fieldDefinition.GetDecorator(Decorators::Container));
-      EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Index_On);
-      auto indexUsing = decoratorDefinition.GetAttribute(Decorators::Index_Using);
+      Validate(structDefinition, fieldDefinition, *fieldDefinition.GetAnnotation(Annotations::Container));
+      EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Index_On);
+      auto indexUsing = annotationDefinition.GetAttribute(Annotations::Index_Using);
       if (indexUsing) {
-        EnforceAttributeExists(structDefinition, fieldDefinition, decoratorDefinition, Decorators::Index_Using);
+        EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Index_Using);
         Type type;
         TypeInfo::Get().ConvertToType(type, indexUsing->mValue);
         THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
                  "{}.{} uses invalid index type: {}",
                  structDefinition.mName, fieldDefinition.mName, indexUsing->mValue.mName)
       }
-      auto indexOn = decoratorDefinition.GetAttribute(Decorators::Index_On);
+      auto indexOn = annotationDefinition.GetAttribute(Annotations::Index_On);
       auto underlyingStruct = mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
       auto underlyingField = underlyingStruct->GetField(indexOn->mValue.mName);
       THROW_IF(underlyingField == nullptr, "{}.{} indexes on {}.{} which doesn't exist",
@@ -160,12 +160,12 @@ namespace holgen {
                structDefinition.mName, fieldDefinition.mName,
                underlyingStruct->mName, indexOn->mName
       )
-      auto indexForConverter = decoratorDefinition.GetAttribute(Decorators::Index_ForConverter);
+      auto indexForConverter = annotationDefinition.GetAttribute(Annotations::Index_ForConverter);
       THROW_IF(
-          indexForConverter != nullptr && structDefinition.GetDecorator(Decorators::DataManager) == nullptr,
+          indexForConverter != nullptr && structDefinition.GetAnnotation(Annotations::DataManager) == nullptr,
           "{} attribute can only be used when the struct is decorated with {}",
-          indexForConverter->mName, Decorators::DataManager);
-    } else if (decoratorDefinition.mName == Decorators::Id) {
+          indexForConverter->mName, Annotations::DataManager);
+    } else if (annotationDefinition.mName == Annotations::Id) {
       auto idField = structDefinition.GetIdField();
       THROW_IF(&fieldDefinition != idField, "struct {} has multiple id fields: {} and {}",
                structDefinition.mName, idField->mName, fieldDefinition.mName);
@@ -190,25 +190,25 @@ namespace holgen {
 
   void Validator::Validate(
       const StructDefinition &structDefinition,
-      const DecoratorDefinition &decoratorDefinition
+      const AnnotationDefinition &annotationDefinition
   ) {
-    if (decoratorDefinition.mName == Decorators::Managed) {
-      EnforceAttributeExists(structDefinition, decoratorDefinition, Decorators::Managed_By);
-      EnforceAttributeExists(structDefinition, decoratorDefinition, Decorators::Managed_Field);
-      auto dataManagerAttribute = decoratorDefinition.GetAttribute(Decorators::Managed_By);
+    if (annotationDefinition.mName == Annotations::Managed) {
+      EnforceAttributeExists(structDefinition, annotationDefinition, Annotations::Managed_By);
+      EnforceAttributeExists(structDefinition, annotationDefinition, Annotations::Managed_Field);
+      auto dataManagerAttribute = annotationDefinition.GetAttribute(Annotations::Managed_By);
       auto dataManager = mProject.GetStruct(dataManagerAttribute->mValue.mName);
       THROW_IF(dataManager == nullptr, "Struct {} references a DataManager {} that does not exist",
                structDefinition.mName, dataManagerAttribute->mValue.mName);
-      auto dataManagerDecorator = dataManager->GetDecorator(Decorators::DataManager);
-      THROW_IF(dataManagerDecorator == nullptr,
-               "Struct {} references a DataManager {} that does not have the {} decorator!",
-               structDefinition.mName, dataManager->mName, Decorators::DataManager);
-      auto fieldAttribute = decoratorDefinition.GetAttribute(Decorators::Managed_Field);
+      auto dataManagerAnnotation = dataManager->GetAnnotation(Annotations::DataManager);
+      THROW_IF(dataManagerAnnotation == nullptr,
+               "Struct {} references a DataManager {} that does not have the {} annotation!",
+               structDefinition.mName, dataManager->mName, Annotations::DataManager);
+      auto fieldAttribute = annotationDefinition.GetAttribute(Annotations::Managed_Field);
       auto field = dataManager->GetField(fieldAttribute->mValue.mName);
       THROW_IF(field == nullptr, "Struct {} references DataManager field {}.{} that does not exist",
                structDefinition.mName, dataManager->mName, fieldAttribute->mValue.mName);
-      auto fieldDecorator = field->GetDecorator(Decorators::Container);
-      THROW_IF(fieldDecorator == nullptr, "Struct {} references DataManager field {}.{} that is not a container",
+      auto fieldAnnotation = field->GetAnnotation(Annotations::Container);
+      THROW_IF(fieldAnnotation == nullptr, "Struct {} references DataManager field {}.{} that is not a container",
                structDefinition.mName, dataManager->mName, fieldAttribute->mValue.mName);
     }
   }

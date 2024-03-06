@@ -104,20 +104,20 @@ struct A {
   @jsonConvert(using=aaa)
   u32 field;
 }
-  )DELIM", "Field A.field has decorator jsonConvert with missing attribute: from");
+  )DELIM", "Field A.field has annotation jsonConvert with missing attribute: from");
   ExpectErrorMessage(R"DELIM(
 struct A {
   @jsonConvert(from=string)
   u32 field;
 }
-  )DELIM", "Field A.field has decorator jsonConvert with missing attribute: using");
+  )DELIM", "Field A.field has annotation jsonConvert with missing attribute: using");
   ExpectErrorMessage(R"DELIM(
 struct A {
   @jsonConvert(from=string,using=myFunc)
   @jsonConvert(from=u8,using=myFunc2)
   u32 field;
 }
-  )DELIM", "Field A.field has multiple jsonConvert decorators");
+  )DELIM", "Field A.field has multiple jsonConvert annotations");
   ExpectErrorMessage(R"DELIM(
 struct A {
   @jsonConvert(from=string,using=myFunc)
@@ -149,7 +149,7 @@ struct B {
   @container()
   vector<Person> people;
 }
-  )DELIM", "Field B.people has decorator container with missing attribute: elemName");
+  )DELIM", "Field B.people has annotation container with missing attribute: elemName");
 
   ExpectErrorMessage(R"DELIM(
 struct Person {
@@ -210,7 +210,7 @@ struct Person {
 }
 struct DataMan {
 }
-  )DELIM", "Struct Person references a DataManager DataMan that does not have the dataManager decorator!");
+  )DELIM", "Struct Person references a DataManager DataMan that does not have the dataManager annotation!");
 
   ExpectErrorMessage(R"DELIM(
 @managed(by=DataMan, field=people)

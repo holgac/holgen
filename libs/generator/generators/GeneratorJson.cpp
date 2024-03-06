@@ -1,7 +1,7 @@
 #include "GeneratorJson.h"
 #include <vector>
 #include "generator/TypeInfo.h"
-#include "core/Decorators.h"
+#include "core/Annotations.h"
 #include "core/St.h"
 
 namespace holgen {
@@ -34,12 +34,12 @@ namespace holgen {
   void GeneratorJson::EnrichClasses() {
     for (auto &cls: mTranslatedProject.mClasses) {
       const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
-      if (structDefinition.GetDecorator(Decorators::NoJson))
+      if (structDefinition.GetAnnotation(Annotations::NoJson))
         continue;
       cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
       cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
       cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-      if (structDefinition.GetDecorator(Decorators::DataManager))
+      if (structDefinition.GetAnnotation(Annotations::DataManager))
         GenerateParseFiles(cls);
       else
         // TODO: currently we iterate over the json obj when deserializing, but this wouldn't work with
@@ -75,16 +75,16 @@ namespace holgen {
     }
     parseFunc.mBody.Add("auto converter = converterArg;");
     for (const auto &fieldDefinition: structDefinition.mFields) {
-      auto containerDecorator = fieldDefinition.GetDecorator(Decorators::Container);
-      if (containerDecorator == nullptr)
+      auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
+      if (containerAnnotation == nullptr)
         continue;
-      for (const auto &decoratorDefinition: fieldDefinition.mDecorators) {
-        if (decoratorDefinition.mName != Decorators::Index)
+      for (const auto &annotationDefinition: fieldDefinition.mAnnotations) {
+        if (annotationDefinition.mName != Annotations::Index)
           continue;
         auto &underlyingStruct = *mProjectDefinition.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
         auto indexedOnField = underlyingStruct.GetField(
-            decoratorDefinition.GetAttribute(Decorators::Index_On)->mValue.mName);
-        auto forConverter = decoratorDefinition.GetAttribute(Decorators::Index_ForConverter);
+            annotationDefinition.GetAttribute(Annotations::Index_On)->mValue.mName);
+        auto forConverter = annotationDefinition.GetAttribute(Annotations::Index_ForConverter);
         if (forConverter == nullptr)
           continue;
         parseFunc.mBody.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
@@ -104,7 +104,7 @@ namespace holgen {
                             toType.ToString());
         parseFunc.mBody.Indent(1);
 
-        auto &elementName = *containerDecorator->GetAttribute(Decorators::Container_ElemName);
+        auto &elementName = *containerAnnotation->GetAttribute(Annotations::Container_ElemName);
         parseFunc.mBody.Add("auto elem = {}(key);",
                             St::GetIndexGetterName(elementName.mValue.mName, indexedOnField->mName));
         parseFunc.mBody.Add("return elem->{}();", St::GetGetterMethodName(idField->mName));
@@ -153,7 +153,7 @@ namespace holgen {
     bool isFirst = true;
     for (const auto &structToProcess : mTranslatedProject.mDependencyGraph.GetProcessOrder()) {
       for (const auto &fieldDefinition: structDefinition.mFields) {
-        if (!fieldDefinition.GetDecorator(Decorators::Container))
+        if (!fieldDefinition.GetAnnotation(Annotations::Container))
           continue;
         auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
         if (templateParameter.mName == structToProcess) {
@@ -187,8 +187,8 @@ namespace holgen {
           parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
           parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
           parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath);)");
-          auto elemName = fieldDefinition.GetDecorator(Decorators::Container)->GetAttribute(
-              Decorators::Container_ElemName);
+          auto elemName = fieldDefinition.GetAnnotation(Annotations::Container)->GetAttribute(
+              Annotations::Container_ElemName);
           parseFunc.mBody.Add("{}(std::move(elem));", St::GetAdderMethodName(elemName->mValue.mName));
           parseFunc.mBody.Indent(-1);
           parseFunc.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
@@ -231,7 +231,7 @@ namespace holgen {
     // parseFunc.mBody.Line() << "const auto& value = data.value;";
     bool isFirst = true;
     for (const auto &fieldDefinition: structDefinition.mFields) {
-      if (fieldDefinition.GetDecorator(Decorators::NoJson))
+      if (fieldDefinition.GetAnnotation(Annotations::NoJson))
         continue;
       if (isFirst) {
         parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
@@ -259,10 +259,10 @@ namespace holgen {
     parseFunc.mBody.Indent(1);
 
     if (mProjectDefinition.GetStruct(fieldDefinition.mType.mName) == nullptr) {
-      auto jsonConvert = fieldDefinition.GetDecorator(Decorators::JsonConvert);
+      auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {
-        auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
-        auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
+        auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
+        auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
         Type type;
         TypeInfo::Get().ConvertToType(type, jsonConvertFrom->mValue);
         parseFunc.mBody.Line() << type.ToString() << " temp;";
@@ -503,11 +503,11 @@ namespace holgen {
     std::set<std::string> processedConverters;
     for (const auto &structDefinition: mProjectDefinition.mStructs) {
       for (const auto &fieldDefinition: structDefinition.mFields) {
-        auto jsonConvert = fieldDefinition.GetDecorator(Decorators::JsonConvert);
+        auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
         if (jsonConvert == nullptr)
           continue;
-        auto jsonConvertFrom = jsonConvert->GetAttribute(Decorators::JsonConvert_From);
-        auto jsonConvertUsing = jsonConvert->GetAttribute(Decorators::JsonConvert_Using);
+        auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
+        auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
         if (processedConverters.contains(jsonConvertUsing->mValue.mName))
           continue;
         processedConverters.insert(jsonConvertUsing->mValue.mName);

@@ -1,5 +1,5 @@
 #include "GeneratorLua.h"
-#include "core/Decorators.h"
+#include "core/Annotations.h"
 #include "core/St.h"
 
 namespace holgen {
@@ -36,7 +36,7 @@ namespace holgen {
   void GeneratorLua::EnrichClasses() {
     for (auto &cls: mTranslatedProject.mClasses) {
       const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
-      if (structDefinition.GetDecorator(Decorators::NoLua))
+      if (structDefinition.GetAnnotation(Annotations::NoLua))
         continue;
 
       cls.mGlobalForwardDeclarations.Add("struct lua_State;");
@@ -55,8 +55,8 @@ namespace holgen {
         arg.mType.mType = PassByType::Pointer;
       }
       pushToLua.mBody.Line() << "lua_newtable(luaState);";
-      auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
-      if (managedDecorator == nullptr) {
+      auto managedAnnotation = structDefinition.GetAnnotation(Annotations::Managed);
+      if (managedAnnotation == nullptr) {
         // TODO: debug generator? Or generate extra debug stuff that's gated behind a macro?
         // Specifying object type would help here
         pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
@@ -102,13 +102,13 @@ namespace holgen {
     codeBlock.Line() << "lua_pushstring(luaState, \"__index\");";
     codeBlock.Line() << "lua_pushcfunction(luaState, [](lua_State* ls) {";
     codeBlock.Indent(1);
-    auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
-    if (managedDecorator == nullptr) {
+    auto managedAnnotation = structDefinition.GetAnnotation(Annotations::Managed);
+    if (managedAnnotation == nullptr) {
       codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Pointer);
       codeBlock.Line() << "lua_gettable(ls, -3);";
       codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
     } else {
-      auto manager = mProjectDefinition.GetStruct(managedDecorator->GetAttribute(Decorators::Managed_By)->mValue.mName);
+      auto manager = mProjectDefinition.GetStruct(managedAnnotation->GetAttribute(Annotations::Managed_By)->mValue.mName);
       codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Index);
       codeBlock.Line() << "lua_gettable(ls, -3);";
       auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
@@ -117,17 +117,17 @@ namespace holgen {
         tempType = "int64_t";
       }
       codeBlock.Add("{} id = reinterpret_cast<{}>(lua_touserdata(ls, -1));", idField->mType.mName, tempType);
-      auto managerField = manager->GetField(managedDecorator->GetAttribute(Decorators::Managed_Field)->mValue.mName);
+      auto managerField = manager->GetField(managedAnnotation->GetAttribute(Annotations::Managed_Field)->mValue.mName);
       codeBlock.Add(
           "auto instance = {}<{}>::GetInstance()->{}(id);",
           St::GlobalPointer, manager->mName,
-          St::GetGetterMethodName(managerField->GetDecorator(Decorators::Container)->GetAttribute(
-              Decorators::Container_ElemName)->mValue.mName));
+          St::GetGetterMethodName(managerField->GetAnnotation(Annotations::Container)->GetAttribute(
+              Annotations::Container_ElemName)->mValue.mName));
     }
     codeBlock.Line() << "const char* key = lua_tostring(ls, -2);";
     bool isFirst = true;
     for (auto &fieldDefinition: structDefinition.mFields) {
-      if (fieldDefinition.GetDecorator(Decorators::NoLua))
+      if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
       if (isFirst) {
         codeBlock.Line() << "if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";
@@ -165,7 +165,7 @@ namespace holgen {
     bool isFirst = true;
     for (auto &fieldDefinition: structDefinition.mFields) {
       // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
-      if (fieldDefinition.GetDecorator(Decorators::NoLua))
+      if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
       if (isFirst) {
         codeBlock.Line() << "if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";

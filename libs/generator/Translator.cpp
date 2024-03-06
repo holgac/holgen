@@ -7,7 +7,7 @@
 #include "generator/generators/GeneratorGlobalPointer.h"
 #include "generator/generators/GeneratorFilesystemHelper.h"
 #include "TypeInfo.h"
-#include "core/Decorators.h"
+#include "core/Annotations.h"
 #include "parser/Validator.h"
 
 namespace holgen {
@@ -50,17 +50,17 @@ namespace holgen {
     }
 
     // TODO: separate generator or at least fn?
-    auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
-    if (managedDecorator != nullptr) {
-      auto managedByAttribute = managedDecorator->GetAttribute(Decorators::Managed_By);
-      auto managedFieldAttribute = managedDecorator->GetAttribute(Decorators::Managed_Field);
+    auto managedAnnotation = structDefinition.GetAnnotation(Annotations::Managed);
+    if (managedAnnotation != nullptr) {
+      auto managedByAttribute = managedAnnotation->GetAttribute(Annotations::Managed_By);
+      auto managedFieldAttribute = managedAnnotation->GetAttribute(Annotations::Managed_Field);
       auto manager = mProject->GetStruct(managedByAttribute->mValue.mName);
       auto managerField = manager->GetField(managedFieldAttribute->mValue.mName);
-      auto managerFieldContainerDecorator = managerField->GetDecorator(Decorators::Container);
-      auto managerFieldContainerElemNameAttribute = managerFieldContainerDecorator->GetAttribute(
-          Decorators::Container_ElemName);
-      auto managerFieldContainerConstAttribute = managerFieldContainerDecorator->GetAttribute(
-          Decorators::Container_Const);
+      auto managerFieldContainerAnnotation = managerField->GetAnnotation(Annotations::Container);
+      auto managerFieldContainerElemNameAttribute = managerFieldContainerAnnotation->GetAttribute(
+          Annotations::Container_ElemName);
+      auto managerFieldContainerConstAttribute = managerFieldContainerAnnotation->GetAttribute(
+          Annotations::Container_Const);
       auto idField = structDefinition.GetIdField();
 
       auto &getter = generatedClass.mMethods.emplace_back();
@@ -132,23 +132,23 @@ namespace holgen {
   }
 
   void Translator::ProcessContainerField(Class &generatedClass, const FieldDefinition &fieldDefinition) const {
-    auto container = fieldDefinition.GetDecorator(Decorators::Container);
+    auto container = fieldDefinition.GetAnnotation(Annotations::Container);
     if (!container)
       return;
-    bool isConstContainer = container->GetAttribute(Decorators::Container_Const) != nullptr;
-    auto elemName = container->GetAttribute(Decorators::Container_ElemName);
+    bool isConstContainer = container->GetAttribute(Annotations::Container_Const) != nullptr;
+    auto elemName = container->GetAttribute(Annotations::Container_ElemName);
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters[0];
     auto underlyingStructDefinition = mProject->GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
 
-    for (auto &dec: fieldDefinition.mDecorators) {
-      if (dec.mName != Decorators::Index)
+    for (auto &dec: fieldDefinition.mAnnotations) {
+      if (dec.mName != Annotations::Index)
         continue;
-      auto indexOn = dec.GetAttribute(Decorators::Index_On);
+      auto indexOn = dec.GetAttribute(Annotations::Index_On);
       auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
       auto &indexField = generatedClass.mFields.emplace_back();
       indexField.mName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
-      auto indexType = dec.GetAttribute(Decorators::Index_Using);
+      auto indexType = dec.GetAttribute(Annotations::Index_Using);
       if (indexType != nullptr) {
         TypeInfo::Get().ConvertToType(indexField.mType, indexType->mValue);
       } else {
@@ -208,10 +208,10 @@ namespace holgen {
       func.mBody.Line() << "auto newId = " << generatedField.mName << ".size();";
       CodeBlock validators;
       CodeBlock inserters;
-      for (auto &dec: fieldDefinition.mDecorators) {
-        if (dec.mName != Decorators::Index)
+      for (auto &dec: fieldDefinition.mAnnotations) {
+        if (dec.mName != Annotations::Index)
           continue;
-        auto indexOn = dec.GetAttribute(Decorators::Index_On);
+        auto indexOn = dec.GetAttribute(Annotations::Index_On);
         auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
         auto indexFieldName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
         auto getterMethodName = St::GetGetterMethodName(fieldIndexedOn.mName);

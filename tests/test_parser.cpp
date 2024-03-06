@@ -34,7 +34,7 @@ namespace {
     EXPECT_EQ(s.mFields[1].mName, "f2");
   }
 
-  TEST(ParserTest, FieldDecorators) {
+  TEST(ParserTest, FieldAnnotations) {
     Tokenizer tokenizer(R"DELIM(
   struct a   {
     @dec1()
@@ -49,10 +49,10 @@ namespace {
     auto &proj = parser.GetProject();
     EXPECT_EQ(proj.mStructs.size(), 1);
     auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mDecorators.size(), 0);
+    EXPECT_EQ(s.mAnnotations.size(), 0);
     EXPECT_EQ(s.mFields.size(), 2);
     auto& f = s.mFields[0];
-    auto &ds = f.mDecorators;
+    auto &ds = f.mAnnotations;
     EXPECT_EQ(ds[0].mName, "dec1");
     EXPECT_EQ(ds[0].mAttributes.size(), 0);
     EXPECT_EQ(ds[1].mName, "dec2");
@@ -67,7 +67,7 @@ namespace {
     EXPECT_EQ(dsa[3].mName, "a4");
     EXPECT_EQ(dsa[3].mValue.mName, "long string");
     auto& f2 = s.mFields[1];
-    auto& ds2 = f2.mDecorators;
+    auto& ds2 = f2.mAnnotations;
     EXPECT_EQ(ds2.size(), 1);
     EXPECT_EQ(ds2[0].mName, "dec3");
     EXPECT_EQ(ds2[0].mAttributes.size(), 1);
@@ -75,7 +75,7 @@ namespace {
     EXPECT_EQ(ds2[0].mAttributes[0].mValue.mName, "");
   }
 
-  TEST(ParserTest, EmptyDecorator) {
+  TEST(ParserTest, EmptyAnnotation) {
     Tokenizer tokenizer(R"DELIM(
   @dec1
   struct a   {
@@ -88,18 +88,18 @@ namespace {
     auto &proj = parser.GetProject();
     ASSERT_EQ(proj.mStructs.size(), 1);
     auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mDecorators.size(), 1);
-    auto &ds = s.mDecorators;
+    EXPECT_EQ(s.mAnnotations.size(), 1);
+    auto &ds = s.mAnnotations;
     EXPECT_EQ(ds[0].mName, "dec1");
     EXPECT_EQ(ds[0].mAttributes.size(), 0);
     auto f1 = s.GetField("f1");
     ASSERT_NE(f1, nullptr);
-    auto &df = f1->mDecorators;
+    auto &df = f1->mAnnotations;
     EXPECT_EQ(df[0].mName, "dec2");
     EXPECT_EQ(df[0].mAttributes.size(), 0);
   }
 
-  TEST(ParserTest, StructDecorators) {
+  TEST(ParserTest, StructAnnotations) {
     Tokenizer tokenizer(R"DELIM(
   @dec1()
   @dec2(a1, a2=5, a3, a4='long string')
@@ -113,8 +113,8 @@ namespace {
     auto &proj = parser.GetProject();
     EXPECT_EQ(proj.mStructs.size(), 1);
     auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mDecorators.size(), 2);
-    auto &ds = s.mDecorators;
+    EXPECT_EQ(s.mAnnotations.size(), 2);
+    auto &ds = s.mAnnotations;
     EXPECT_EQ(ds[0].mName, "dec1");
     EXPECT_EQ(ds[0].mAttributes.size(), 0);
     EXPECT_EQ(ds[1].mName, "dec2");

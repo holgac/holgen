@@ -15,9 +15,9 @@ namespace holgen {
     void Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition);
     void Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                   const TypeDefinition &typeDefinition);
-    void Validate(const StructDefinition &structDefinition, const DecoratorDefinition &decoratorDefinition);
+    void Validate(const StructDefinition &structDefinition, const AnnotationDefinition &annotationDefinition);
     void Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                  const DecoratorDefinition &decoratorDefinition);
+                  const AnnotationDefinition &annotationDefinition);
     std::map<std::string, std::pair<TypeDefinition, TypeDefinition>> mJsonConverters;
   };
 
