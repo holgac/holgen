@@ -23,7 +23,7 @@ namespace holgen {
       auto &func = cls.mMethods.emplace_back();
       func.mName = "GetInstance";
       func.mIsStatic = true;
-      func.mIsConst = false;
+      func.mConstness = Constness::NotConst;
       func.mReturnType.mName = "T";
       func.mReturnType.mType = PassByType::Pointer;
       func.mBody.Add("return mInstance;");
@@ -33,8 +33,7 @@ namespace holgen {
       auto &func = cls.mMethods.emplace_back();
       func.mName = "SetInstance";
       func.mIsStatic = true;
-      func.mIsConst = false;
-      func.mIsConst = false;
+      func.mConstness = Constness::NotConst;
       auto &arg = func.mArguments.emplace_back();
       arg.mType.mName = "T";
       arg.mType.mType = PassByType::Pointer;

@@ -141,7 +141,7 @@ namespace holgen {
           line << arg.mType.ToString() << " " << arg.mName;
         }
         line << ")";
-        if (method.mIsConst)
+        if (method.mConstness == Constness::Const)
           line << " const";
         if (!willDefine) {
           line << ";";
@@ -199,7 +199,7 @@ namespace holgen {
           line << arg.mType.ToString() << " " << arg.mName;
         }
         line << ")";
-        if (method.mIsConst)
+        if (method.mConstness == Constness::Const)
           line << " const";
         line << " {";
       }

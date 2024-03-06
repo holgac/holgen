@@ -88,7 +88,7 @@ namespace holgen {
   std::string Type::ToString() const {
     std::stringstream ss;
 
-    if (mIsConst)
+    if (mConstness == Constness::Const)
       ss << "const ";
     ss << mName;
     if (!mTemplateParameters.empty()) {

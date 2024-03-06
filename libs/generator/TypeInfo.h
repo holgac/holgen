@@ -15,10 +15,15 @@ namespace holgen {
     MoveReference,
   };
 
+  enum class Constness {
+    Const,
+    NotConst,
+  };
+
   // This name is too generic...
   struct Type {
     std::string mName = "void";
-    bool mIsConst = false;
+    Constness mConstness = Constness::NotConst;
     PassByType mType = PassByType::Value;
     std::vector<Type> mTemplateParameters;
     // This is for std::function which uses a different syntax

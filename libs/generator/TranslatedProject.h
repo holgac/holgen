@@ -41,7 +41,7 @@ namespace holgen {
     std::string mName;
     Type mReturnType;
     // TODO: use Constness and Staticness enums
-    bool mIsConst = true;
+    Constness mConstness = Constness::Const;
     bool mIsStatic = false;
     std::vector<TemplateParameter> mTemplateParameters;
     bool mIsTemplateSpecialization = false;

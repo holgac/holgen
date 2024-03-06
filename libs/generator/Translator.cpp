@@ -64,10 +64,11 @@ namespace holgen {
       auto &getter = generatedClass.mMethods.emplace_back();
       getter.mName = "Get";
       getter.mIsStatic = true;
-      getter.mIsConst = false;
+      getter.mConstness = Constness::NotConst;
       getter.mReturnType.mName = structDefinition.mName;
       getter.mReturnType.mType = PassByType::Pointer;
-      getter.mReturnType.mIsConst = managerFieldContainerConstAttribute != nullptr;
+      getter.mReturnType.mConstness =
+          managerFieldContainerConstAttribute != nullptr ? Constness::Const : Constness::NotConst;
       auto &idArg = getter.mArguments.emplace_back();
       TypeInfo::Get().ConvertToType(idArg.mType, idField->mType);
       idArg.mName = "id";
@@ -91,9 +92,9 @@ namespace holgen {
       getter.mName = St::GetGetterMethodName(fieldDefinition.mName);
       getter.mBody.Line() << "return " << generatedField.mName << ";";
       getter.mReturnType = generatedField.mType;
-      getter.mIsConst = true;
+      getter.mConstness = Constness::Const;
       if (!isPrimitive) {
-        getter.mReturnType.mIsConst = true;
+        getter.mReturnType.mConstness = Constness::Const;
         getter.mReturnType.mType = PassByType::Reference;
       }
     }
@@ -106,18 +107,18 @@ namespace holgen {
       getter.mName = St::GetGetterMethodName(fieldDefinition.mName);
       getter.mBody.Line() << "return " << generatedField.mName << ";";
       getter.mReturnType = generatedField.mType;
-      getter.mIsConst = false;
+      getter.mConstness = Constness::NotConst;
       getter.mReturnType.mType = PassByType::Reference;
     }
 
     {
       auto &setter = generatedClass.mMethods.emplace_back();
       setter.mName = St::GetSetterMethodName(fieldDefinition.mName);
-      setter.mIsConst = false;
+      setter.mConstness = Constness::NotConst;
       auto &arg = setter.mArguments.emplace_back();
       arg.mType = generatedField.mType;
       if (!isPrimitive) {
-        arg.mType.mIsConst = true;
+        arg.mType.mConstness = Constness::Const;
         arg.mType.mType = PassByType::Reference;
       }
       arg.mName = "val";
@@ -161,15 +162,15 @@ namespace holgen {
         bool isConst = i == 0;
         auto &func = generatedClass.mMethods.emplace_back();
         func.mName = St::GetIndexGetterName(elemName->mValue.mName, indexOn->mValue.mName);
-        func.mIsConst = isConst;
+        func.mConstness = isConst ? Constness::Const : Constness::NotConst;
         TypeInfo::Get().ConvertToType(func.mReturnType, underlyingType);
-        func.mReturnType.mIsConst = isConst;
+        func.mReturnType.mConstness = isConst ? Constness::Const : Constness::NotConst;
         func.mReturnType.mType = PassByType::Pointer;
         auto &arg = func.mArguments.emplace_back();
         arg.mName = "key";
         TypeInfo::Get().ConvertToType(arg.mType, fieldIndexedOn.mType);
         if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
-          arg.mType.mIsConst = true;
+          arg.mType.mConstness = Constness::Const;
           arg.mType.mType = PassByType::Reference;
         }
 
@@ -190,7 +191,7 @@ namespace holgen {
       // Generate AddElem
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = St::GetAdderMethodName(elemName->mValue.mName);
-      func.mIsConst = false;
+      func.mConstness = Constness::NotConst;
       func.mReturnType.mName = "bool";
       if (isConstContainer)
         func.mVisibility = Visibility::Private;
@@ -198,7 +199,7 @@ namespace holgen {
         func.mVisibility = Visibility::Public;
       auto &arg = func.mArguments.emplace_back();
       TypeInfo::Get().ConvertToType(arg.mType, underlyingType);
-      arg.mType.mIsConst = false;
+      arg.mType.mConstness = Constness::NotConst;
       arg.mType.mType = PassByType::MoveReference;
       arg.mName = "elem";
 
@@ -234,13 +235,13 @@ namespace holgen {
         continue;
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = St::GetGetterMethodName(elemName->mValue.mName);
-      func.mIsConst = isConst;
+      func.mConstness = isConst ? Constness::Const : Constness::NotConst;
       TypeInfo::Get().ConvertToType(func.mReturnType, underlyingType);
       func.mReturnType.mType = PassByType::Pointer;
-      func.mReturnType.mIsConst = isConst;
+      func.mReturnType.mConstness = isConst ? Constness::Const : Constness::NotConst;
       auto &arg = func.mArguments.emplace_back();
       TypeInfo::Get().ConvertToType(arg.mType, underlyingIdField->mType);
-      arg.mType.mIsConst = false;
+      arg.mType.mConstness = Constness::NotConst;
       arg.mName = "idx";
       {
         auto line = func.mBody.Line();

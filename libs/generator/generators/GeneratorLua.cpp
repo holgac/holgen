@@ -43,7 +43,7 @@ namespace holgen {
       auto &pushToLua = cls.mMethods.emplace_back();
       pushToLua.mName = "PushToLua";
       pushToLua.mReturnType.mName = "void";
-      pushToLua.mIsConst = true;
+      pushToLua.mConstness = Constness::Const;
       pushToLua.mVisibility = Visibility::Public;
       {
         auto &arg = pushToLua.mArguments.emplace_back();
@@ -78,7 +78,7 @@ namespace holgen {
       createLuaMetatable.mName = "CreateLuaMetatable";
       createLuaMetatable.mReturnType.mName = "void";
       createLuaMetatable.mIsStatic = true;
-      createLuaMetatable.mIsConst = false;
+      createLuaMetatable.mConstness = Constness::NotConst;
       createLuaMetatable.mVisibility = Visibility::Public;
       {
         auto &arg = createLuaMetatable.mArguments.emplace_back();
@@ -197,7 +197,7 @@ namespace holgen {
   void GeneratorLua::GenerateLuaHelperPush(Class &generatedClass) {
     auto &baseFunc = generatedClass.mMethods.emplace_back();
     baseFunc.mName = "Push";
-    baseFunc.mIsConst = false;
+    baseFunc.mConstness = Constness::NotConst;
     baseFunc.mIsStatic = true;
     baseFunc.mReturnType.mName = "void";
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
@@ -208,7 +208,7 @@ namespace holgen {
       auto &data = baseFunc.mArguments.emplace_back();
       data.mName = "data";
       data.mType.mName = "T";
-      data.mType.mIsConst = true;
+      data.mType.mConstness = Constness::Const;
       data.mType.mType = PassByType::Reference;
     }
 
@@ -224,7 +224,7 @@ namespace holgen {
     for (const auto &[type, usage]: LuaUsage) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
-      func.mIsConst = false;
+      func.mConstness = Constness::NotConst;
       func.mIsStatic = true;
       func.mReturnType.mName = "void";
 
@@ -233,7 +233,7 @@ namespace holgen {
         data.mName = "data";
         data.mType.mName = type;
         if (!TypeInfo::Get().CppPrimitives.contains(type)) {
-          data.mType.mIsConst = true;
+          data.mType.mConstness = Constness::Const;
           // func.mIsTemplateSpecialization = true;
           data.mType.mType = PassByType::Reference;
         }
@@ -252,7 +252,7 @@ namespace holgen {
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
-      func.mIsConst = false;
+      func.mConstness = Constness::NotConst;
       func.mIsStatic = true;
       auto &templateArg = func.mTemplateParameters.emplace_back();
       templateArg.mType = "typename";
@@ -282,7 +282,7 @@ namespace holgen {
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
-      func.mIsConst = false;
+      func.mConstness = Constness::NotConst;
       func.mIsStatic = true;
       auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
       keyTemplateArg.mType = "typename";
@@ -317,7 +317,7 @@ namespace holgen {
   void GeneratorLua::GenerateLuaHelperRead(Class &generatedClass) {
     auto &baseFunc = generatedClass.mMethods.emplace_back();
     baseFunc.mName = "Read";
-    baseFunc.mIsConst = false;
+    baseFunc.mConstness = Constness::NotConst;
     baseFunc.mIsStatic = true;
     baseFunc.mReturnType.mName = "bool";
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
@@ -328,7 +328,7 @@ namespace holgen {
       auto &data = baseFunc.mArguments.emplace_back();
       data.mName = "data";
       data.mType.mName = "T";
-      data.mType.mIsConst = false;
+      data.mType.mConstness = Constness::NotConst;
       data.mType.mType = PassByType::Reference;
     }
 
@@ -352,7 +352,7 @@ namespace holgen {
     for (const auto &[type, usage]: LuaUsage) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Read";
-      func.mIsConst = false;
+      func.mConstness = Constness::NotConst;
       func.mIsStatic = true;
       func.mReturnType.mName = "bool";
 
@@ -389,7 +389,7 @@ namespace holgen {
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
-      func.mIsConst = false;
+      func.mConstness = false;
       func.mIsStatic = true;
       auto &templateArg = func.mTemplateParameters.emplace_back();
       templateArg.mReturnType = "typename";
@@ -419,7 +419,7 @@ namespace holgen {
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
-      func.mIsConst = false;
+      func.mConstness = false;
       func.mIsStatic = true;
       auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
       keyTemplateArg.mReturnType = "typename";

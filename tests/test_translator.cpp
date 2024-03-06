@@ -8,7 +8,7 @@ namespace {
   void ExpectTypeEqual(const Type &expected, const Type &actual) {
     EXPECT_EQ(actual.mName, expected.mName);
     EXPECT_EQ(actual.mType, expected.mType);
-    EXPECT_EQ(actual.mIsConst, expected.mIsConst);
+    EXPECT_EQ(actual.mConstness, expected.mConstness);
   }
 
   void ExpectClassFieldEqual(const ClassField &expected, const ClassField &actual) {
@@ -39,8 +39,10 @@ namespace {
     auto &c = tp.mClasses[0];
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {
-        ClassField{Visibility::Private, Type{"int32_t", false, PassByType::Value, {}, {}}, "mAge", false, ""},
-        ClassField{Visibility::Private, Type{"float", false, PassByType::Value, {}, {}}, "mGender", false, ""},
+        ClassField{Visibility::Private, Type{"int32_t", Constness::NotConst, PassByType::Value, {}, {}}, "mAge", false,
+                   ""},
+        ClassField{Visibility::Private, Type{"float", Constness::NotConst, PassByType::Value, {}, {}}, "mGender", false,
+                   ""},
     });
   }
 

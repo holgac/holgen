@@ -31,8 +31,9 @@ namespace holgen {
   }
 
   ClassMethod *Class::GetMethod(const std::string &name, bool isConst) {
+    Constness constness = isConst ? Constness::Const : Constness::NotConst;
     for (auto &method: mMethods) {
-      if (method.mName == name && method.mIsConst == isConst)
+      if (method.mName == name && method.mConstness == constness)
         return &method;
     }
     return nullptr;

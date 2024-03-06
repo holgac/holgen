@@ -10,13 +10,13 @@ namespace holgen {
     auto &readFile = cls.mMethods.emplace_back();
     readFile.mName = St::FilesystemHelper_ReadFile;
     readFile.mIsStatic = true;
-    readFile.mIsConst = false;
+    readFile.mConstness = Constness::NotConst;
     readFile.mReturnType.mName = "std::string";
     auto& arg = readFile.mArguments.emplace_back();
     arg.mName = "filePath";
     arg.mType.mName = "std::string";
     arg.mType.mType = PassByType::Reference;
-    arg.mType.mIsConst = true;
+    arg.mType.mConstness = Constness::Const;
     readFile.mBody.Add("std::ifstream fin(filePath, std::ios_base::binary);");
     readFile.mBody.Add("fin.seekg(0, std::ios_base::end);");
     readFile.mBody.Add("auto bufferSize = fin.tellg();");
