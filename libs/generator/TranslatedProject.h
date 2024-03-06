@@ -13,11 +13,16 @@ namespace holgen {
     Public,
   };
 
+  enum class Staticness {
+    Static,
+    NotStatic,
+  };
+
   struct ClassField {
     Visibility mVisibility = Visibility::Private;
     Type mType;
     std::string mName;
-    bool mIsStatic;
+    Staticness mStaticness = Staticness::NotStatic;
     std::string mDefaultValue;
   };
 
@@ -42,7 +47,7 @@ namespace holgen {
     Type mReturnType;
     // TODO: use Constness and Staticness enums
     Constness mConstness = Constness::Const;
-    bool mIsStatic = false;
+    Staticness mStaticness = Staticness::NotStatic;
     std::vector<TemplateParameter> mTemplateParameters;
     bool mIsTemplateSpecialization = false;
   };

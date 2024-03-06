@@ -48,6 +48,8 @@ namespace holgen {
     for (auto &fieldDefinition: structDefinition.mFields) {
       ProcessField(generatedClass, fieldDefinition);
     }
+
+    // TODO: separate generator or at least fn?
     auto managedDecorator = structDefinition.GetDecorator(Decorators::Managed);
     if (managedDecorator != nullptr) {
       auto managedByAttribute = managedDecorator->GetAttribute(Decorators::Managed_By);
@@ -63,7 +65,7 @@ namespace holgen {
 
       auto &getter = generatedClass.mMethods.emplace_back();
       getter.mName = "Get";
-      getter.mIsStatic = true;
+      getter.mStaticness = Staticness::Static;
       getter.mConstness = Constness::NotConst;
       getter.mReturnType.mName = structDefinition.mName;
       getter.mReturnType.mType = PassByType::Pointer;

@@ -9,7 +9,7 @@ namespace holgen {
     cls.mSourceIncludes.AddStandardHeader("fstream");
     auto &readFile = cls.mMethods.emplace_back();
     readFile.mName = St::FilesystemHelper_ReadFile;
-    readFile.mIsStatic = true;
+    readFile.mStaticness = Staticness::Static;
     readFile.mConstness = Constness::NotConst;
     readFile.mReturnType.mName = "std::string";
     auto& arg = readFile.mArguments.emplace_back();

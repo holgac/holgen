@@ -310,7 +310,7 @@ namespace holgen {
     auto &baseParse = generatedClass.mMethods.emplace_back();
     baseParse.mName = St::JsonHelper_Parse;
     baseParse.mConstness = Constness::NotConst;
-    baseParse.mIsStatic = true;
+    baseParse.mStaticness = Staticness::Static;
     baseParse.mReturnType.mName = "bool";
     auto &baseTemplateArg = baseParse.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
@@ -345,7 +345,7 @@ namespace holgen {
       auto &parse = generatedClass.mMethods.emplace_back();
       parse.mName = St::JsonHelper_Parse;
       parse.mConstness = Constness::NotConst;
-      parse.mIsStatic = true;
+      parse.mStaticness = Staticness::Static;
       parse.mIsTemplateSpecialization = true;
       parse.mReturnType.mName = "bool";
 
@@ -384,7 +384,7 @@ namespace holgen {
       auto &parse = generatedClass.mMethods.emplace_back();
       parse.mName = St::JsonHelper_Parse;
       parse.mConstness = Constness::NotConst;
-      parse.mIsStatic = true;
+      parse.mStaticness = Staticness::Static;
       auto &templateArg = parse.mTemplateParameters.emplace_back();
       templateArg.mType = "typename";
       templateArg.mName = "T";
@@ -437,7 +437,7 @@ namespace holgen {
       auto &parse = generatedClass.mMethods.emplace_back();
       parse.mName = St::JsonHelper_Parse;
       parse.mConstness = Constness::NotConst;
-      parse.mIsStatic = true;
+      parse.mStaticness = Staticness::Static;
       auto &keyTemplateArg = parse.mTemplateParameters.emplace_back();
       keyTemplateArg.mType = "typename";
       keyTemplateArg.mName = "K";

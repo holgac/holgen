@@ -77,7 +77,7 @@ namespace holgen {
       auto &createLuaMetatable = cls.mMethods.emplace_back();
       createLuaMetatable.mName = "CreateLuaMetatable";
       createLuaMetatable.mReturnType.mName = "void";
-      createLuaMetatable.mIsStatic = true;
+      createLuaMetatable.mStaticness = Staticness::Static;
       createLuaMetatable.mConstness = Constness::NotConst;
       createLuaMetatable.mVisibility = Visibility::Public;
       {
@@ -198,7 +198,7 @@ namespace holgen {
     auto &baseFunc = generatedClass.mMethods.emplace_back();
     baseFunc.mName = "Push";
     baseFunc.mConstness = Constness::NotConst;
-    baseFunc.mIsStatic = true;
+    baseFunc.mStaticness = Staticness::Static;
     baseFunc.mReturnType.mName = "void";
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
@@ -225,7 +225,7 @@ namespace holgen {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
       func.mConstness = Constness::NotConst;
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       func.mReturnType.mName = "void";
 
       {
@@ -253,7 +253,7 @@ namespace holgen {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
       func.mConstness = Constness::NotConst;
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       auto &templateArg = func.mTemplateParameters.emplace_back();
       templateArg.mType = "typename";
       templateArg.mName = "T";
@@ -283,7 +283,7 @@ namespace holgen {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
       func.mConstness = Constness::NotConst;
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
       keyTemplateArg.mType = "typename";
       keyTemplateArg.mName = "K";
@@ -318,7 +318,7 @@ namespace holgen {
     auto &baseFunc = generatedClass.mMethods.emplace_back();
     baseFunc.mName = "Read";
     baseFunc.mConstness = Constness::NotConst;
-    baseFunc.mIsStatic = true;
+    baseFunc.mStaticness = Staticness::Static;
     baseFunc.mReturnType.mName = "bool";
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
@@ -353,7 +353,7 @@ namespace holgen {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Read";
       func.mConstness = Constness::NotConst;
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       func.mReturnType.mName = "bool";
 
       {
@@ -390,7 +390,7 @@ namespace holgen {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
       func.mConstness = false;
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       auto &templateArg = func.mTemplateParameters.emplace_back();
       templateArg.mReturnType = "typename";
       templateArg.mName = "T";
@@ -420,7 +420,7 @@ namespace holgen {
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = "Push";
       func.mConstness = false;
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
       keyTemplateArg.mReturnType = "typename";
       keyTemplateArg.mName = "K";

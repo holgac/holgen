@@ -15,14 +15,14 @@ namespace holgen {
       field.mType.mType = PassByType::Pointer;
       field.mName = "mInstance";
       field.mVisibility = Visibility::Private;
-      field.mIsStatic = true;
+      field.mStaticness = Staticness::Static;
       field.mDefaultValue = "nullptr";
     }
 
     {
       auto &func = cls.mMethods.emplace_back();
       func.mName = "GetInstance";
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       func.mConstness = Constness::NotConst;
       func.mReturnType.mName = "T";
       func.mReturnType.mType = PassByType::Pointer;
@@ -32,7 +32,7 @@ namespace holgen {
     {
       auto &func = cls.mMethods.emplace_back();
       func.mName = "SetInstance";
-      func.mIsStatic = true;
+      func.mStaticness = Staticness::Static;
       func.mConstness = Constness::NotConst;
       auto &arg = func.mArguments.emplace_back();
       arg.mType.mName = "T";

@@ -39,10 +39,12 @@ namespace {
     auto &c = tp.mClasses[0];
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {
-        ClassField{Visibility::Private, Type{"int32_t", Constness::NotConst, PassByType::Value, {}, {}}, "mAge", false,
-                   ""},
-        ClassField{Visibility::Private, Type{"float", Constness::NotConst, PassByType::Value, {}, {}}, "mGender", false,
-                   ""},
+        ClassField{Visibility::Private,
+                   Type{"int32_t", Constness::NotConst, PassByType::Value, {}, {}},
+                   "mAge", Staticness::NotStatic, ""},
+        ClassField{Visibility::Private,
+                   Type{"float", Constness::NotConst, PassByType::Value, {}, {}},
+                   "mGender", Staticness::NotStatic, ""},
     });
   }
 

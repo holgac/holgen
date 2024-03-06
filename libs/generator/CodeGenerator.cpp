@@ -96,7 +96,7 @@ namespace holgen {
         continue;
       {
         auto line = codeBlock.Line();
-        if (field.mIsStatic)
+        if (field.mStaticness == Staticness::Static)
           line << "inline static ";
         line << field.mType.ToString() << " " << field.mName;
 
@@ -126,7 +126,7 @@ namespace holgen {
 
       {
         auto line = codeBlock.Line();
-        if (method.mIsStatic && isInsideClass)
+        if (method.mStaticness == Staticness::Static && isInsideClass)
           line << "static ";
         line << method.mReturnType.ToString() << " ";
         if (!isInsideClass)
