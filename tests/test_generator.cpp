@@ -611,6 +611,7 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
     @id
     u32 id;
     string name;
+    Ref<Person> partner;
   }
   @dataManager
   struct Country {
@@ -649,11 +650,16 @@ public:
   const std::string& GetName() const;
   std::string& GetName();
   void SetName(const std::string& val);
+  const Person* GetPartner() const;
+  Person* GetPartner();
+  uint32_t GetPartnerId() const;
+  void SetPartnerId(uint32_t val);
   static Person* Get(uint32_t id);
 protected:
 private:
   uint32_t mId;
   std::string mName;
+  uint32_t mPartnerId = -1;
 };
 }
           )DELIM"
@@ -686,6 +692,18 @@ std::string& Person::GetName() {
 }
 void Person::SetName(const std::string& val) {
   mName = val;
+}
+const Person* Person::GetPartner() const {
+  return Person::Get(mPartnerId);
+}
+Person* Person::GetPartner() {
+  return Person::Get(mPartnerId);
+}
+uint32_t Person::GetPartnerId() const {
+  return mPartnerId;
+}
+void Person::SetPartnerId(uint32_t val) {
+  mPartnerId = val;
 }
 Person* Person::Get(uint32_t id) {
   return GlobalPointer<Country>::GetInstance()->GetPerson(id);

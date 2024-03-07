@@ -22,6 +22,7 @@ public:
   const Boot* GetBootFromName(const std::string& key) const;
   Boot* GetBootFromName(const std::string& key);
   const Boot* GetBoot(uint32_t idx) const;
+  Boot* GetBoot(uint32_t idx);
   const std::vector<Armor>& GetArmors() const;
   std::vector<Armor>& GetArmors();
   void SetArmors(const std::vector<Armor>& val);

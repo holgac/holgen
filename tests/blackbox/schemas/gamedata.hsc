@@ -26,12 +26,11 @@ struct Character {
     string name;
 
     // adds GetBoot() that uses GameData singleton
-    @reference(Boot)
     @jsonConvert(from=string, using=bootNameToId)
-    u32 boot;
+    Ref<Boot> boot;
 
     @jsonConvert(from=string, using=armorNameToId)
-    u32 armor;
+    Ref<Armor> armor;
 }
 
 @dataManager

@@ -271,14 +271,12 @@ namespace holgen {
         parseFunc.mBody.Indent(1);
         parseFunc.mBody.Line() << "return false;";
         parseFunc.mBody.Indent(-1); // if !res
-        Type fieldType;
-        TypeInfo::Get().ConvertToType(fieldType, fieldDefinition.mType);
-        if (TypeInfo::Get().CppPrimitives.contains(fieldType.mName))
-          parseFunc.mBody.Add("{} = converter.{}(temp);", St::GetFieldNameInCpp(fieldDefinition.mName),
-                              jsonConvertUsing->mValue.mName);
+
+        auto field = cls.GetField(St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
+        if (TypeInfo::Get().CppPrimitives.contains(field->mType.mName))
+          parseFunc.mBody.Add("{} = converter.{}(temp);", field->mName, jsonConvertUsing->mValue.mName);
         else
-          parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", St::GetFieldNameInCpp(fieldDefinition.mName),
-                              jsonConvertUsing->mValue.mName);
+          parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", field->mName, jsonConvertUsing->mValue.mName);
       } else {
         parseFunc.mBody.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
                             St::GetFieldNameInCpp(fieldDefinition.mName));
@@ -517,7 +515,12 @@ namespace holgen {
         func.mType.mName = "std::function";
 
         auto &convertFromArg = func.mType.mFunctionalTemplateParameters.emplace_back();
-        TypeInfo::Get().ConvertToType(convertFromArg, fieldDefinition.mType);
+
+        auto fieldNameInCpp = St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref");
+        auto referencedClass = mTranslatedProject.GetClass(structDefinition.mName);
+
+        convertFromArg = referencedClass->GetField(fieldNameInCpp)->mType;
+        // TypeInfo::Get().ConvertToType(convertFromArg, fieldDefinition.mType);
 
         auto &retVal = func.mType.mFunctionalTemplateParameters.emplace_back();
         TypeInfo::Get().ConvertToType(retVal, jsonConvertFrom->mValue);

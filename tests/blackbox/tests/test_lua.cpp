@@ -178,5 +178,35 @@ TEST_F(LuaTest, DataManager) {
   luaL_dostring(mState, "return pm.alternativeName");
   ExpectStack({"Platy"});
   lua_pop(mState, 1);
+}
 
+TEST_F(LuaTest, Ref) {
+  Boot::CreateLuaMetatable(mState);
+  Character::CreateLuaMetatable(mState);
+  GameData::CreateLuaMetatable(mState);
+  GameData gd;
+  GlobalPointer<GameData>::SetInstance(&gd);
+  gd.ParseFiles("gamedata", {});
+  auto gorion = Character::GetFromName("Gorion");
+  ASSERT_NE(gorion, nullptr);
+  auto boot = gorion->GetBoot();
+  ASSERT_NE(boot, nullptr);
+  gorion->PushToLua(mState);
+  lua_setglobal(mState, "gorion");
+  luaL_dostring(mState, "return gorion.bootId");
+  ExpectStack({std::format("{}", boot->GetId())});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return gorion.boot");
+  ExpectStack({"{i:lightuserdata}"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return gorion.boot.name");
+  ExpectStack({"Boots of Speed"});
+  lua_pop(mState, 1);
+  auto otherBoot = Boot::GetFromName("Leather Shoes");
+  ASSERT_NE(otherBoot, nullptr);
+  auto cmd = std::format("gorion.bootId = {}", otherBoot->GetId());
+  luaL_dostring(mState, cmd.c_str());
+  luaL_dostring(mState, "return gorion.boot.name");
+  ExpectStack({otherBoot->GetName()});
+  lua_pop(mState, 1);
 }

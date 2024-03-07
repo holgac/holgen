@@ -16,6 +16,7 @@ public:
   static void Push(const T& data, lua_State* luaState) {
     data.PushToLua(luaState);
   }
+  static void Push(nullptr_t , lua_State* luaState);
   static void Push(bool data, lua_State* luaState);
   static void Push(double data, lua_State* luaState);
   static void Push(float data, lua_State* luaState);

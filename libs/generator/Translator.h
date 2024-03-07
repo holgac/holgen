@@ -12,11 +12,15 @@
 
 namespace holgen {
   class Translator {
-    void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
-    void ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
-    void ProcessContainerField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
-    const ProjectDefinition* mProject = nullptr;
   public:
     TranslatedProject Translate(const ProjectDefinition &project);
+  private:
+    void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
+    void ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
+    void ProcessManagedClass(Class &generatedClass) const;
+    void ProcessRefField(Class &generatedClass, ClassField &generatedField,
+                         const FieldDefinition &fieldDefinition) const;
+    void ProcessContainerField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
+    const ProjectDefinition *mProject = nullptr;
   };
 }

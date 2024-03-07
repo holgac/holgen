@@ -47,6 +47,11 @@ const Boot* GameData::GetBoot(uint32_t idx) const {
     return nullptr;
   return &mBoots[idx];
 }
+Boot* GameData::GetBoot(uint32_t idx) {
+  if (idx >= mBoots.size())
+    return nullptr;
+  return &mBoots[idx];
+}
 const std::vector<Armor>& GameData::GetArmors() const {
   return mArmors;
 }

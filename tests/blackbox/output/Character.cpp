@@ -23,20 +23,35 @@ std::string& Character::GetName() {
 void Character::SetName(const std::string& val) {
   mName = val;
 }
-uint32_t Character::GetBoot() const {
-  return mBoot;
+const Boot* Character::GetBoot() const {
+  return Boot::Get(mBootId);
 }
-void Character::SetBoot(uint32_t val) {
-  mBoot = val;
+Boot* Character::GetBoot() {
+  return Boot::Get(mBootId);
 }
-uint32_t Character::GetArmor() const {
-  return mArmor;
+uint32_t Character::GetBootId() const {
+  return mBootId;
 }
-void Character::SetArmor(uint32_t val) {
-  mArmor = val;
+void Character::SetBootId(uint32_t val) {
+  mBootId = val;
+}
+const Armor* Character::GetArmor() const {
+  return Armor::Get(mArmorId);
+}
+Armor* Character::GetArmor() {
+  return Armor::Get(mArmorId);
+}
+uint32_t Character::GetArmorId() const {
+  return mArmorId;
+}
+void Character::SetArmorId(uint32_t val) {
+  mArmorId = val;
 }
 Character* Character::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetCharacter(id);
+}
+Character* Character::GetFromName(const std::string& val) {
+  return GlobalPointer<GameData>::GetInstance()->GetCharacterFromName(val);
 }
 bool Character::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
@@ -54,13 +69,13 @@ bool Character::ParseJson(const rapidjson::Value& json, const Converter& convert
       auto res = JsonHelper::Parse(temp, data.value, converter);
       if (!res)
         return false;
-      mBoot = converter.bootNameToId(temp);
+      mBootId = converter.bootNameToId(temp);
     } else if (0 == strcmp(name, "armor")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
       if (!res)
         return false;
-      mArmor = converter.armorNameToId(temp);
+      mArmorId = converter.armorNameToId(temp);
     }
   }
   return true;
@@ -81,16 +96,30 @@ void Character::CreateLuaMetatable(lua_State* luaState) {
     lua_pushstring(ls, "i");
     lua_gettable(ls, -3);
     uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
-    auto instance = GlobalPointer<GameData>::GetInstance()->GetCharacter(id);
+    auto instance = Character::Get(id);
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("id", key)) {
       LuaHelper::Push(instance->mId, ls);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Push(instance->mName, ls);
+    } else if (0 == strcmp("bootId", key)) {
+      LuaHelper::Push(instance->mBootId, ls);
     } else if (0 == strcmp("boot", key)) {
-      LuaHelper::Push(instance->mBoot, ls);
+      auto ptr = Boot::Get(instance->mBootId);
+      if (ptr) {
+        LuaHelper::Push(*ptr, ls);
+      } else {
+        LuaHelper::Push(nullptr, ls);
+      }
+    } else if (0 == strcmp("armorId", key)) {
+      LuaHelper::Push(instance->mArmorId, ls);
     } else if (0 == strcmp("armor", key)) {
-      LuaHelper::Push(instance->mArmor, ls);
+      auto ptr = Armor::Get(instance->mArmorId);
+      if (ptr) {
+        LuaHelper::Push(*ptr, ls);
+      } else {
+        LuaHelper::Push(nullptr, ls);
+      }
     } else {
       return 0;
     }
@@ -99,18 +128,19 @@ void Character::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
+    lua_pushstring(ls, "i");
     lua_gettable(ls, -4);
-    auto instance = (Character*)lua_touserdata(ls, -1);
+    uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
+    auto instance = Character::Get(id);
     const char* key = lua_tostring(ls, -3);
     if (0 == strcmp("id", key)) {
       LuaHelper::Read(instance->mId, ls, -2);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Read(instance->mName, ls, -2);
-    } else if (0 == strcmp("boot", key)) {
-      LuaHelper::Read(instance->mBoot, ls, -2);
-    } else if (0 == strcmp("armor", key)) {
-      LuaHelper::Read(instance->mArmor, ls, -2);
+    } else if (0 == strcmp("bootId", key)) {
+      LuaHelper::Read(instance->mBootId, ls, -2);
+    } else if (0 == strcmp("armorId", key)) {
+      LuaHelper::Read(instance->mArmorId, ls, -2);
     }
     return 0;
   });

@@ -239,3 +239,26 @@ struct DataMan {
   return;
 
 }
+TEST_F(ValidatorTest, Ref) {
+  ExpectErrorMessage(R"DELIM(
+struct Person {
+  @id
+  u64 id;
+  Ref partner;
+}
+  )DELIM", "Ref field Person.partner should have a single template parameter");
+  ExpectErrorMessage(R"DELIM(
+struct Person {
+  @id
+  u64 id;
+  Ref<Person, Person> partner;
+}
+  )DELIM", "Ref field Person.partner should have a single template parameter");
+  ExpectErrorMessage(R"DELIM(
+struct Person {
+  @id
+  u64 id;
+  Ref<Person> partner;
+}
+  )DELIM", "Ref field Person.partner references Person which is not managed");
+}

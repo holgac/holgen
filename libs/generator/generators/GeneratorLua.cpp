@@ -101,43 +101,43 @@ namespace holgen {
     codeBlock.Line() << "lua_pushstring(luaState, \"__index\");";
     codeBlock.Line() << "lua_pushcfunction(luaState, [](lua_State* ls) {";
     codeBlock.Indent(1);
-    auto managedAnnotation = structDefinition.GetAnnotation(Annotations::Managed);
-    if (managedAnnotation == nullptr) {
-      codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Pointer);
-      codeBlock.Line() << "lua_gettable(ls, -3);";
-      codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
-    } else {
-      auto manager = mProjectDefinition.GetStruct(managedAnnotation->GetAttribute(Annotations::Managed_By)->mValue.mName);
-      codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Index);
-      codeBlock.Line() << "lua_gettable(ls, -3);";
-      auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
-      std::string tempType = "uint64_t";
-      if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
-        tempType = "int64_t";
-      }
-      codeBlock.Add("{} id = reinterpret_cast<{}>(lua_touserdata(ls, -1));", idField->mType.mName, tempType);
-      auto managerField = manager->GetField(managedAnnotation->GetAttribute(Annotations::Managed_Field)->mValue.mName);
-      codeBlock.Add(
-          "auto instance = {}<{}>::GetInstance()->{}(id);",
-          St::GlobalPointer, manager->mName,
-          St::GetGetterMethodName(managerField->GetAnnotation(Annotations::Container)->GetAttribute(
-              Annotations::Container_ElemName)->mValue.mName));
-    }
+    AddLuaInstanceGetter(codeBlock, cls, -3);
     codeBlock.Line() << "const char* key = lua_tostring(ls, -2);";
     bool isFirst = true;
     for (auto &fieldDefinition: structDefinition.mFields) {
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
+      bool isRef = fieldDefinition.mType.mName == "Ref";
+      std::string rawFieldName = fieldDefinition.mName;
       if (isFirst) {
-        codeBlock.Line() << "if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";
+        codeBlock.Line() << "if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
+                         << "\", key)) {";
         isFirst = false;
       } else {
-        codeBlock.Line() << "} else if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";
+        codeBlock.Line() << "} else if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
+                         << "\", key)) {";
       }
       codeBlock.Indent(1);
       codeBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push,
-                    St::GetFieldNameInCpp(fieldDefinition.mName));
+                    St::GetFieldNameInCpp(fieldDefinition.mName, isRef));
       codeBlock.Indent(-1);
+      if (isRef) {
+        codeBlock.Line() << "} else if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, false)
+                         << "\", key)) {";
+        codeBlock.Indent(1);
+        codeBlock.Add("auto ptr = {}::{}(instance->{});", fieldDefinition.mType.mTemplateParameters[0].mName,
+                      St::ManagedObject_Getter, St::GetFieldNameInCpp(fieldDefinition.mName, isRef));
+        codeBlock.Add("if (ptr) {{");
+        codeBlock.Indent(1);
+        codeBlock.Add("{}::{}(*ptr, ls);", St::LuaHelper, St::LuaHelper_Push);
+        codeBlock.Indent(-1);
+        codeBlock.Add("}} else {{");
+        codeBlock.Indent(1);
+        codeBlock.Add("{}::{}(nullptr, ls);", St::LuaHelper, St::LuaHelper_Push);
+        codeBlock.Indent(-1);
+        codeBlock.Add("}}");
+        codeBlock.Indent(-1);
+      }
     }
     codeBlock.Line() << "} else {";
     codeBlock.Indent(1);
@@ -152,30 +152,51 @@ namespace holgen {
 
   }
 
+  void GeneratorLua::AddLuaInstanceGetter(CodeBlock& codeBlock, Class& cls, int idx) {
+    auto managedAnnotation = cls.mStruct->GetAnnotation(Annotations::Managed);
+    if (managedAnnotation == nullptr) {
+      codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Pointer);
+      codeBlock.Add("lua_gettable(ls, {});", idx);
+      codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
+    } else {
+      codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Index);
+      codeBlock.Add("lua_gettable(ls, {});", idx);
+      auto idField = cls.GetField(St::GetFieldNameInCpp(cls.mStruct->GetIdField()->mName));
+      std::string tempType = "uint64_t";
+      if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
+        tempType = "int64_t";
+      }
+      codeBlock.Add("{} id = reinterpret_cast<{}>(lua_touserdata(ls, -1));", idField->mType.mName, tempType);
+      codeBlock.Add("auto instance = {}::{}(id);", cls.mName, St::ManagedObject_Getter);
+    }
+  }
+
   void GeneratorLua::CreateNewIndexMetaMethod(CodeBlock &codeBlock, Class &cls) {
     const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
     codeBlock.Line() << "lua_pushstring(luaState, \"__newindex\");";
     codeBlock.Line() << "lua_pushcfunction(luaState, [](lua_State* ls) {";
     codeBlock.Indent(1);
-    codeBlock.Line() << "lua_pushstring(ls, \"p\");";
-    codeBlock.Line() << "lua_gettable(ls, -4);";
-    codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
+
+    AddLuaInstanceGetter(codeBlock, cls, -4);
     codeBlock.Line() << "const char* key = lua_tostring(ls, -3);";
     bool isFirst = true;
     for (auto &fieldDefinition: structDefinition.mFields) {
       // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
+      bool isRef = fieldDefinition.mType.mName == "Ref";
       if (isFirst) {
-        codeBlock.Line() << "if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";
+        codeBlock.Line() << "if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
+                         << "\", key)) {";
         isFirst = false;
       } else {
-        codeBlock.Line() << "} else if (0 == strcmp(\"" << fieldDefinition.mName << "\", key)) {";
+        codeBlock.Line() << "} else if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
+                         << "\", key)) {";
       }
       codeBlock.Indent(1);
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
       codeBlock.Add("{}::{}(instance->{}, ls, -2);", St::LuaHelper, St::LuaHelper_Read,
-                    St::GetFieldNameInCpp(fieldDefinition.mName));
+                    St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
       codeBlock.Indent(-1);
     }
     codeBlock.Line() << "}";
@@ -225,6 +246,29 @@ namespace holgen {
     }
 
     baseFunc.mBody.Line() << "data.PushToLua(luaState);";
+
+    {
+      auto &func = generatedClass.mMethods.emplace_back();
+      func.mName = "Push";
+      func.mConstness = Constness::NotConst;
+      func.mStaticness = Staticness::Static;
+      func.mReturnType.mName = "void";
+
+      {
+        auto &data = func.mArguments.emplace_back();
+        data.mName = "";
+        data.mType.mName = "nullptr_t";
+      }
+
+      {
+        auto &luaState = func.mArguments.emplace_back();
+        luaState.mName = "luaState";
+        luaState.mType.mName = "lua_State";
+        luaState.mType.mType = PassByType::Pointer;
+      }
+
+      func.mBody.Line() << "lua_pushnil(luaState);";
+    }
 
     for (const auto &[type, usage]: LuaUsage) {
       auto &func = generatedClass.mMethods.emplace_back();

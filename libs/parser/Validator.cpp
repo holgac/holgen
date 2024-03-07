@@ -23,6 +23,10 @@ namespace holgen {
         St::FilesystemHelper,
     };
 
+    std::set<std::string> CustomTypes{
+        "Ref",
+    };
+
     void EnforceUnique(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                        const AnnotationDefinition &annotationDefinition) {
       THROW_IF(&annotationDefinition != fieldDefinition.GetAnnotation(annotationDefinition.mName),
@@ -31,7 +35,7 @@ namespace holgen {
     }
 
     void EnforceAnnotationExists(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                                const std::string &annotationName) {
+                                 const std::string &annotationName) {
       auto annotation = fieldDefinition.GetAnnotation(annotationName);
       THROW_IF(annotation == nullptr,
                "Field {}.{} does not have a annotation {}", structDefinition.mName,
@@ -84,8 +88,22 @@ namespace holgen {
     THROW_IF(TypeInfo::Get().CppPrimitives.contains(fieldDefinition.mName), "Field {}.{} uses a reserved keyword.",
              structDefinition.mName, fieldDefinition.mName);
     THROW_IF(&fieldDefinition != structDefinition.GetField(fieldDefinition.mName), "Duplicate field name: {}.{}",
-             structDefinition.mName, fieldDefinition.mName)
+             structDefinition.mName, fieldDefinition.mName);
     Validate(structDefinition, fieldDefinition, fieldDefinition.mType);
+    if (fieldDefinition.mType.mName == "Ref") {
+      THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1,
+               "Ref field {}.{} should have a single template parameter",
+               structDefinition.mName, fieldDefinition.mName);
+      auto referencedType = mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+      THROW_IF(referencedType == nullptr,
+               "Ref field {}.{} references {} which is not a struct defined in this project",
+               structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mTemplateParameters[0].mName);
+      auto managedAnnotation = referencedType->GetAnnotation(Annotations::Managed);
+      THROW_IF(managedAnnotation == nullptr,
+               "Ref field {}.{} references {} which is not managed",
+               structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mTemplateParameters[0].mName);
+    }
+
     for (auto &annotationDefinition: fieldDefinition.mAnnotations) {
       Validate(structDefinition, fieldDefinition, annotationDefinition);
     }
@@ -180,7 +198,8 @@ namespace holgen {
                            const TypeDefinition &typeDefinition) {
     Type type;
     TypeInfo::Get().ConvertToType(type, typeDefinition);
-    THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && mProject.GetStruct(type.mName) == nullptr,
+    THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && !CustomTypes.contains(type.mName)
+             && mProject.GetStruct(type.mName) == nullptr,
              "Field {}.{} uses an unknown type: {}", structDefinition.mName, fieldDefinition.mName,
              typeDefinition.mName);
     for (const auto &templateParameter : typeDefinition.mTemplateParameters) {

@@ -5,6 +5,8 @@
 
 
 namespace holgen {
+  struct ProjectDefinition;
+
   struct TypeDefinition {
     std::string mName;
     std::vector<TypeDefinition> mTemplateParameters;

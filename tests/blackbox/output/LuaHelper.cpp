@@ -3,6 +3,9 @@
 #include <lua.hpp>
 
 namespace holgen_blackbox_test {
+void LuaHelper::Push(nullptr_t , lua_State* luaState) {
+  lua_pushnil(luaState);
+}
 void LuaHelper::Push(bool data, lua_State* luaState) {
   lua_pushboolean(luaState, data);
 }

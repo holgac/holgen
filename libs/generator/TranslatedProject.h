@@ -24,6 +24,7 @@ namespace holgen {
     std::string mName;
     Staticness mStaticness = Staticness::NotStatic;
     std::string mDefaultValue;
+    const FieldDefinition* mField = nullptr;
   };
 
   struct ClassMethodArgument {
@@ -66,6 +67,7 @@ namespace holgen {
   // CRTP was useful for these when calling derived static methods from the base (when defining lua metaclass)
   // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
   struct Class {
+    const StructDefinition* mStruct;
     std::string mName;
     std::vector<ClassMethod> mMethods;
     std::vector<ClassConstructor> mConstructors;

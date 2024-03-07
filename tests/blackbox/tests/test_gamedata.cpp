@@ -66,7 +66,7 @@ TEST_F(GameDataTest, ParseFiles) {
   ASSERT_NE(wizardRobe, nullptr);
   auto gorion = gd.GetCharacterFromName("Gorion");
   ASSERT_NE(gorion, nullptr);
-  EXPECT_EQ(gorion->GetArmor(), wizardRobe->GetId());
+  EXPECT_EQ(gorion->GetArmorId(), wizardRobe->GetId());
 }
 
 TEST_F(GameDataTest, GlobalPointer) {
@@ -77,4 +77,19 @@ TEST_F(GameDataTest, GlobalPointer) {
   ASSERT_NE(plateMail, nullptr);
   auto plateMailFromGlobalPointer = Armor::Get(plateMail->GetId());
   ASSERT_EQ(plateMail, plateMailFromGlobalPointer);
+}
+
+TEST_F(GameDataTest, Ref) {
+  // TODO: move to fixture
+  GameData gd;
+  GlobalPointer<GameData>::SetInstance(&gd);
+  gd.ParseFiles("gamedata", {});
+  auto gorion = gd.GetCharacterFromName("Gorion");
+  auto robe = gd.GetArmorFromName("Wizard Robe");
+  ASSERT_NE(gorion, nullptr);
+  ASSERT_NE(robe, nullptr);
+  EXPECT_EQ(gorion->GetArmorId(), robe->GetId());
+  EXPECT_EQ(gorion->GetArmor(), robe);
+  EXPECT_EQ(robe, Armor::Get(robe->GetId()));
+
 }

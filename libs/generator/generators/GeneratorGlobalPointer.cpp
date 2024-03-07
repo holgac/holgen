@@ -21,7 +21,7 @@ namespace holgen {
 
     {
       auto &func = cls.mMethods.emplace_back();
-      func.mName = "GetInstance";
+      func.mName = St::GlobalPointer_GetInstance;
       func.mStaticness = Staticness::Static;
       func.mConstness = Constness::NotConst;
       func.mReturnType.mName = "T";
@@ -31,7 +31,7 @@ namespace holgen {
 
     {
       auto &func = cls.mMethods.emplace_back();
-      func.mName = "SetInstance";
+      func.mName = St::GlobalPointer_SetInstance;
       func.mStaticness = Staticness::Static;
       func.mConstness = Constness::NotConst;
       auto &arg = func.mArguments.emplace_back();

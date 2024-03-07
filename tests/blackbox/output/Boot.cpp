@@ -32,8 +32,11 @@ std::string& Boot::GetColor() {
 void Boot::SetColor(const std::string& val) {
   mColor = val;
 }
-const Boot* Boot::Get(uint32_t id) {
+Boot* Boot::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetBoot(id);
+}
+Boot* Boot::GetFromName(const std::string& val) {
+  return GlobalPointer<GameData>::GetInstance()->GetBootFromName(val);
 }
 bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
@@ -70,7 +73,7 @@ void Boot::CreateLuaMetatable(lua_State* luaState) {
     lua_pushstring(ls, "i");
     lua_gettable(ls, -3);
     uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
-    auto instance = GlobalPointer<GameData>::GetInstance()->GetBoot(id);
+    auto instance = Boot::Get(id);
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("id", key)) {
       LuaHelper::Push(instance->mId, ls);
@@ -86,9 +89,10 @@ void Boot::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
+    lua_pushstring(ls, "i");
     lua_gettable(ls, -4);
-    auto instance = (Boot*)lua_touserdata(ls, -1);
+    uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
+    auto instance = Boot::Get(id);
     const char* key = lua_tostring(ls, -3);
     if (0 == strcmp("id", key)) {
       LuaHelper::Read(instance->mId, ls, -2);

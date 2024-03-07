@@ -45,54 +45,54 @@ namespace holgen {
 
   void Translator::GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const {
     generatedClass.mName = structDefinition.mName;
+    generatedClass.mStruct = &structDefinition;
     for (auto &fieldDefinition: structDefinition.mFields) {
       ProcessField(generatedClass, fieldDefinition);
     }
 
-    // TODO: separate generator or at least fn?
-    auto managedAnnotation = structDefinition.GetAnnotation(Annotations::Managed);
-    if (managedAnnotation != nullptr) {
-      auto managedByAttribute = managedAnnotation->GetAttribute(Annotations::Managed_By);
-      auto managedFieldAttribute = managedAnnotation->GetAttribute(Annotations::Managed_Field);
-      auto manager = mProject->GetStruct(managedByAttribute->mValue.mName);
-      auto managerField = manager->GetField(managedFieldAttribute->mValue.mName);
-      auto managerFieldContainerAnnotation = managerField->GetAnnotation(Annotations::Container);
-      auto managerFieldContainerElemNameAttribute = managerFieldContainerAnnotation->GetAttribute(
-          Annotations::Container_ElemName);
-      auto managerFieldContainerConstAttribute = managerFieldContainerAnnotation->GetAttribute(
-          Annotations::Container_Const);
-      auto idField = structDefinition.GetIdField();
+    ProcessManagedClass(generatedClass);
+  }
 
+  void Translator::ProcessRefField(Class &generatedClass, ClassField &generatedField,
+                                   const FieldDefinition &fieldDefinition) const {
+    if (!fieldDefinition.mDefaultValue.empty())
+      generatedField.mDefaultValue = fieldDefinition.mDefaultValue;
+    else
+      generatedField.mDefaultValue = "-1";
+    auto refStruct = mProject->GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+    auto refStructId = refStruct->GetIdField();
+    TypeInfo::Get().ConvertToType(generatedField.mType, refStructId->mType);
+    for (int i = 0; i < 2; ++i) {
+      Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &getter = generatedClass.mMethods.emplace_back();
-      getter.mName = "Get";
-      getter.mStaticness = Staticness::Static;
-      getter.mConstness = Constness::NotConst;
-      getter.mReturnType.mName = structDefinition.mName;
+      getter.mName = St::GetGetterMethodName(fieldDefinition.mName);
+      getter.mBody.Add("return {}::{}({});", refStruct->mName, St::ManagedObject_Getter,
+                       generatedField.mName);
+
+      TypeInfo::Get().ConvertToType(getter.mReturnType, fieldDefinition.mType.mTemplateParameters[0]);
+      getter.mConstness = constness;
+      getter.mReturnType.mConstness = constness;
       getter.mReturnType.mType = PassByType::Pointer;
-      getter.mReturnType.mConstness =
-          managerFieldContainerConstAttribute != nullptr ? Constness::Const : Constness::NotConst;
-      auto &idArg = getter.mArguments.emplace_back();
-      TypeInfo::Get().ConvertToType(idArg.mType, idField->mType);
-      idArg.mName = "id";
-      getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
-                       St::GlobalPointer, manager->mName,
-                       St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
-      generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
-      generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
     }
   }
 
   void Translator::ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const {
     auto &generatedField = generatedClass.mFields.emplace_back();
+    generatedField.mField = &fieldDefinition;
 
-    generatedField.mName = St::GetFieldNameInCpp(fieldDefinition.mName);
-    generatedField.mDefaultValue = fieldDefinition.mDefaultValue;
-    TypeInfo::Get().ConvertToType(generatedField.mType, fieldDefinition.mType);
+    bool isRef = fieldDefinition.mType.mName == "Ref";
+    generatedField.mName = St::GetFieldNameInCpp(fieldDefinition.mName, isRef);
+    if (isRef) {
+      ProcessRefField(generatedClass, generatedField, fieldDefinition);
+    } else {
+      generatedField.mDefaultValue = fieldDefinition.mDefaultValue;
+      TypeInfo::Get().ConvertToType(generatedField.mType, fieldDefinition.mType);
+    }
+
     bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(generatedField.mType.mName);
-
     {
       auto &getter = generatedClass.mMethods.emplace_back();
-      getter.mName = St::GetGetterMethodName(fieldDefinition.mName);
+      getter.mName = St::GetGetterMethodName(fieldDefinition.mName, isRef);
       getter.mBody.Line() << "return " << generatedField.mName << ";";
       getter.mReturnType = generatedField.mType;
       getter.mConstness = Constness::Const;
@@ -103,11 +103,9 @@ namespace holgen {
     }
 
     // non-const getter for non-primitives only
-    // TODO: have methods like ShouldFieldHaveSetter and ShouldFieldHaveNonConstGetter
-    // Will be useful for AddElem methods too
     if (!isPrimitive) {
       auto &getter = generatedClass.mMethods.emplace_back();
-      getter.mName = St::GetGetterMethodName(fieldDefinition.mName);
+      getter.mName = St::GetGetterMethodName(fieldDefinition.mName, isRef);
       getter.mBody.Line() << "return " << generatedField.mName << ";";
       getter.mReturnType = generatedField.mType;
       getter.mConstness = Constness::NotConst;
@@ -116,7 +114,7 @@ namespace holgen {
 
     {
       auto &setter = generatedClass.mMethods.emplace_back();
-      setter.mName = St::GetSetterMethodName(fieldDefinition.mName);
+      setter.mName = St::GetSetterMethodName(fieldDefinition.mName, isRef);
       setter.mConstness = Constness::NotConst;
       auto &arg = setter.mArguments.emplace_back();
       arg.mType = generatedField.mType;
@@ -162,12 +160,12 @@ namespace holgen {
       TypeInfo::Get().ConvertToType(indexValue, underlyingIdField->mType);
 
       for (int i = 0; i < 2; ++i) {
-        bool isConst = i == 0;
+        Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
         auto &func = generatedClass.mMethods.emplace_back();
         func.mName = St::GetIndexGetterName(elemName->mValue.mName, indexOn->mValue.mName);
-        func.mConstness = isConst ? Constness::Const : Constness::NotConst;
+        func.mConstness = constness;
         TypeInfo::Get().ConvertToType(func.mReturnType, underlyingType);
-        func.mReturnType.mConstness = isConst ? Constness::Const : Constness::NotConst;
+        func.mReturnType.mConstness = constness;
         func.mReturnType.mType = PassByType::Pointer;
         auto &arg = func.mArguments.emplace_back();
         arg.mName = "key";
@@ -234,8 +232,6 @@ namespace holgen {
 
     for (int i = 0; i < 2; ++i) {
       bool isConst = i == 0;
-      if (isConstContainer && !isConst)
-        continue;
       auto &func = generatedClass.mMethods.emplace_back();
       func.mName = St::GetGetterMethodName(elemName->mValue.mName);
       func.mConstness = isConst ? Constness::Const : Constness::NotConst;
@@ -260,6 +256,64 @@ namespace holgen {
       func.mBody.Line() << "return &" << generatedField.mName << "[idx];";
     }
 
+  }
+
+  void Translator::ProcessManagedClass(Class &generatedClass) const {
+    auto managedAnnotation = generatedClass.mStruct->GetAnnotation(Annotations::Managed);
+    if (managedAnnotation == nullptr)
+      return;
+    auto managedByAttribute = managedAnnotation->GetAttribute(Annotations::Managed_By);
+    auto managedFieldAttribute = managedAnnotation->GetAttribute(Annotations::Managed_Field);
+    auto manager = mProject->GetStruct(managedByAttribute->mValue.mName);
+    auto managerField = manager->GetField(managedFieldAttribute->mValue.mName);
+    auto managerFieldContainerAnnotation = managerField->GetAnnotation(Annotations::Container);
+    auto managerFieldContainerElemNameAttribute = managerFieldContainerAnnotation->GetAttribute(
+        Annotations::Container_ElemName);
+    // auto managerFieldContainerConstAttribute = managerFieldContainerAnnotation->GetAttribute( Annotations::Container_Const);
+    auto idField = generatedClass.mStruct->GetIdField();
+
+    auto &getter = generatedClass.mMethods.emplace_back();
+    getter.mName = St::ManagedObject_Getter;
+    getter.mStaticness = Staticness::Static;
+    getter.mConstness = Constness::NotConst;
+    getter.mReturnType.mName = generatedClass.mStruct->mName;
+    getter.mReturnType.mType = PassByType::Pointer;
+    getter.mReturnType.mConstness = Constness::NotConst;
+    auto &idArg = getter.mArguments.emplace_back();
+    TypeInfo::Get().ConvertToType(idArg.mType, idField->mType);
+    idArg.mName = "id";
+    getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
+                     St::GlobalPointer, manager->mName,
+                     St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
+    generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
+    generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
+
+    for (auto &annotation: managerField->mAnnotations) {
+      if (annotation.mName != Annotations::Index)
+        continue;
+
+      auto &getter = generatedClass.mMethods.emplace_back();
+      auto indexOn = annotation.GetAttribute(Annotations::Index_On);
+      getter.mName = St::GetIndexGetterName("", indexOn->mValue.mName);
+      getter.mStaticness = Staticness::Static;
+      getter.mConstness = Constness::NotConst;
+      getter.mReturnType.mName = generatedClass.mStruct->mName;
+      getter.mReturnType.mType = PassByType::Pointer;
+      getter.mReturnType.mConstness = Constness::NotConst;
+      ClassMethodArgument &valArg = getter.mArguments.emplace_back();
+      auto indexedOnField = generatedClass.mStruct->GetField(indexOn->mValue.mName);
+      TypeInfo::Get().ConvertToType(valArg.mType, indexedOnField->mType);
+      if (!TypeInfo::Get().CppPrimitives.contains(valArg.mType.mName)) {
+        valArg.mType.mType = PassByType::Reference;
+        valArg.mType.mConstness = Constness::Const;
+      }
+      valArg.mName = "val";
+      getter.mBody.Add(
+          "return {}<{}>::GetInstance()->{}(val);",
+          St::GlobalPointer, manager->mName,
+          St::GetIndexGetterName(managerFieldContainerElemNameAttribute->mValue.mName, indexOn->mValue.mName));
+
+    }
   }
 
 }
