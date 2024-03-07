@@ -51,7 +51,7 @@ namespace {
     auto &s = proj.mStructs[0];
     EXPECT_EQ(s.mAnnotations.size(), 0);
     EXPECT_EQ(s.mFields.size(), 2);
-    auto& f = s.mFields[0];
+    auto &f = s.mFields[0];
     auto &ds = f.mAnnotations;
     EXPECT_EQ(ds[0].mName, "dec1");
     EXPECT_EQ(ds[0].mAttributes.size(), 0);
@@ -66,8 +66,8 @@ namespace {
     EXPECT_EQ(dsa[2].mValue.mName, "");
     EXPECT_EQ(dsa[3].mName, "a4");
     EXPECT_EQ(dsa[3].mValue.mName, "long string");
-    auto& f2 = s.mFields[1];
-    auto& ds2 = f2.mAnnotations;
+    auto &f2 = s.mFields[1];
+    auto &ds2 = f2.mAnnotations;
     EXPECT_EQ(ds2.size(), 1);
     EXPECT_EQ(ds2[0].mName, "dec3");
     EXPECT_EQ(ds2[0].mAttributes.size(), 1);
@@ -194,4 +194,29 @@ namespace {
 
   }
 
+  TEST(ParserTest, Enums) {
+    Tokenizer tokenizer(R"DELIM(
+  enum LandscapeType {
+    Land = 1;
+    Sea;
+    River;
+    Mountain;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto &proj = parser.GetProject();
+    EXPECT_EQ(proj.mEnums.size(), 1);
+    auto e = proj.GetEnum("LandscapeType");
+    ASSERT_NE(e, nullptr);
+    EXPECT_EQ(e->mEntries.size(), 4);
+    ASSERT_NE(e->GetEnumEntry("Land"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("Land")->mValue, "1");
+    ASSERT_NE(e->GetEnumEntry("Sea"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("Sea")->mValue, "0");
+    ASSERT_NE(e->GetEnumEntry("River"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("River")->mValue, "2");
+    ASSERT_NE(e->GetEnumEntry("Mountain"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("Mountain")->mValue, "3");
+  }
 }

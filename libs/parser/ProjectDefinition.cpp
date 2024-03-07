@@ -44,6 +44,14 @@ namespace holgen {
     return nullptr;
   }
 
+  const EnumDefinition *ProjectDefinition::GetEnum(const std::string &name) const {
+    for (const auto &enumDefinition: mEnums) {
+      if (enumDefinition.mName == name)
+        return &enumDefinition;
+    }
+    return nullptr;
+  }
+
   const StructDefinition *ProjectDefinition::GetStruct(const std::string &name) const {
     for (const auto &structDefinition: mStructs) {
       if (structDefinition.mName == name)
@@ -64,4 +72,11 @@ namespace holgen {
     return true;
   }
 
+  const EnumEntryDefinition *EnumDefinition::GetEnumEntry(const std::string &name) const {
+    for (const auto &entry: mEntries) {
+      if (entry.mName == name)
+        return &entry;
+    }
+    return nullptr;
+  }
 }

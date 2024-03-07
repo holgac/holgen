@@ -10,6 +10,8 @@ namespace holgen {
     ProjectDefinition mProject;
     Tokenizer *mCurTokenizer = nullptr;
     void ParseStruct(StructDefinition &structDefinition);
+    void ParseEnum(EnumDefinition &enumDefinition);
+    void ParseEnumEntry(Token &curToken, EnumEntryDefinition &enumEntryDefinition);
     void ParseAnnotation(Token &curToken, AnnotationDefinition &annotationDefinition);
     void ParseField(Token &curToken, FieldDefinition &fieldDefinition);
     void ParseType(Token &curToken, TypeDefinition &typeDefinition);

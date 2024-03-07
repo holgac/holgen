@@ -42,9 +42,23 @@ namespace holgen {
     [[nodiscard]] const FieldDefinition *GetIdField() const;
   };
 
+  struct EnumEntryDefinition {
+    std::string mName;
+    std::string mValue;
+    std::vector<AnnotationDefinition> mAnnotations;
+  };
+  struct EnumDefinition {
+    std::string mName;
+    std::vector<EnumEntryDefinition> mEntries;
+    std::vector<AnnotationDefinition> mAnnotations;
+    [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
+  };
+
   struct ProjectDefinition {
     std::vector<StructDefinition> mStructs;
+    std::vector<EnumDefinition> mEnums;
     [[nodiscard]] const StructDefinition *GetStruct(const std::string &name) const;
+    [[nodiscard]] const EnumDefinition *GetEnum(const std::string &name) const;
   };
 
 
