@@ -2,38 +2,37 @@
 #include <map>
 #include "core/St.h"
 #include "core/Exception.h"
-#include "generator/generators/GeneratorJson.h"
-#include "generator/generators/GeneratorLua.h"
-#include "generator/generators/GeneratorGlobalPointer.h"
-#include "generator/generators/GeneratorFilesystemHelper.h"
+#include "generator/translator_plugins/GeneratorJson.h"
+#include "generator/translator_plugins/GeneratorLua.h"
+#include "generator/translator_plugins/GeneratorGlobalPointer.h"
+#include "generator/translator_plugins/GeneratorFilesystemHelper.h"
 #include "TypeInfo.h"
 #include "core/Annotations.h"
 #include "parser/Validator.h"
 
 namespace holgen {
 
-  TranslatedProject Translator::Translate(const ProjectDefinition &project) {
-    // TODO: why not a ctor arg and store a ref?
-    THROW_IF(mProject != nullptr, "Translator didnt terminate gracefully last time...");
-    mProject = &project;
+  Translator::Translator(const ProjectDefinition &project) : mProject(project) {
     Validator(project).Validate();
-    TranslatedProject translatedProject(*mProject);
-    for (auto &structDefinition: project.mStructs) {
-      GenerateClass(translatedProject.mClasses.emplace_back(), structDefinition);
+  }
+
+  TranslatedProject Translator::Translate() {
+    for (auto &structDefinition: mProject.mProject.mStructs) {
+      GenerateClass(mProject.mClasses.emplace_back(), structDefinition);
     }
-    for (auto &enumDefinition: project.mEnums) {
-      GenerateEnum(translatedProject.mClasses.emplace_back(), enumDefinition);
+    for (auto &enumDefinition: mProject.mProject.mEnums) {
+      GenerateEnum(mProject.mClasses.emplace_back(), enumDefinition);
     }
 
     // Enrichment should not create new classes. It can add new fields though.
     // Enrichers should check StructDefinition for user fields, the ones in Class may be created by enrichment
-    GeneratorJson generatorJson(project, translatedProject);
+    GeneratorJson generatorJson(mProject);
     generatorJson.EnrichClasses();
-    GeneratorLua generatorLua(project, translatedProject);
+    GeneratorLua generatorLua(mProject);
     generatorLua.EnrichClasses();
-    GeneratorGlobalPointer generatorGlobalPointer(project, translatedProject);
+    GeneratorGlobalPointer generatorGlobalPointer(mProject);
     generatorGlobalPointer.EnrichClasses();
-    GeneratorFilesystemHelper generatorFilesystemHelper(project, translatedProject);
+    GeneratorFilesystemHelper generatorFilesystemHelper(mProject);
     generatorFilesystemHelper.EnrichClasses();
 
 
@@ -43,8 +42,7 @@ namespace holgen {
     generatorGlobalPointer.GenerateHelpers();
     generatorFilesystemHelper.GenerateHelpers();
 
-    mProject = nullptr;
-    return translatedProject;
+    return mProject;
   }
 
   void Translator::GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const {
@@ -63,7 +61,7 @@ namespace holgen {
       generatedField.mDefaultValue = fieldDefinition.mDefaultValue;
     else
       generatedField.mDefaultValue = "-1";
-    auto refStruct = mProject->GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+    auto refStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
     auto refStructId = refStruct->GetIdField();
     TypeInfo::Get().ConvertToType(generatedField.mType, refStructId->mType);
     for (int i = 0; i < 2; ++i) {
@@ -141,7 +139,7 @@ namespace holgen {
     bool isConstContainer = container->GetAttribute(Annotations::Container_Const) != nullptr;
     auto elemName = container->GetAttribute(Annotations::Container_ElemName);
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters[0];
-    auto underlyingStructDefinition = mProject->GetStruct(underlyingType.mName);
+    auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
 
     for (auto &dec: fieldDefinition.mAnnotations) {
@@ -270,7 +268,7 @@ namespace holgen {
       return;
     auto managedByAttribute = managedAnnotation->GetAttribute(Annotations::Managed_By);
     auto managedFieldAttribute = managedAnnotation->GetAttribute(Annotations::Managed_Field);
-    auto manager = mProject->GetStruct(managedByAttribute->mValue.mName);
+    auto manager = mProject.mProject.GetStruct(managedByAttribute->mValue.mName);
     auto managerField = manager->GetField(managedFieldAttribute->mValue.mName);
     auto managerFieldContainerAnnotation = managerField->GetAnnotation(Annotations::Container);
     auto managerFieldContainerElemNameAttribute = managerFieldContainerAnnotation->GetAttribute(
@@ -425,9 +423,9 @@ namespace holgen {
     }
 
     std::vector<std::pair<std::string, std::pair<bool, bool>>> operations = {
-        {"=", {false, false}},
-        {"==", {true, true}},
-        {"!=", {true, true}}
+        {"=",  {false, false}},
+        {"==", {true,  true}},
+        {"!=", {true,  true}}
     };
     for (int i = 0; i < 2; ++i) {
       bool isForIntegral = i == 0;

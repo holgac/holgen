@@ -34,8 +34,8 @@ int run(int argc, char **argv) {
     holgen::Tokenizer tokenizer(contents);
     parser.Parse(tokenizer);
   }
-  holgen::Translator translator;
-  auto project = translator.Translate(parser.GetProject());
+  holgen::Translator translator(parser.GetProject());
+  auto project = translator.Translate();
   auto generator = holgen::CodeGenerator({argv[3], argv[4], argv[5]});
   auto results = generator.Generate(project);
   std::filesystem::path outDir(argv[2]);

@@ -34,7 +34,7 @@ namespace holgen {
   }
 
   void GeneratorLua::EnrichClasses() {
-    for (auto &cls: mTranslatedProject.mClasses) {
+    for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
         EnrichClass(cls, *cls.mStruct);
       else if (cls.mEnum)
@@ -159,7 +159,7 @@ namespace holgen {
   }
 
   void GeneratorLua::GenerateHelpers() {
-    GenerateLuaHelper(mTranslatedProject.mClasses.emplace_back());
+    GenerateLuaHelper(mProject.mClasses.emplace_back());
   }
 
   void GeneratorLua::GenerateLuaHelper(Class &generatedClass) {

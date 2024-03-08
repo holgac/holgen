@@ -2,10 +2,12 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 #include "core/LineWithAction.h"
 // Needed for Project (TODO: move to separate file and fwd declare)
 #include "parser/Parser.h"
 #include "TranslatedProject.h"
+#include "translator_plugins/TranslatorPlugin.h"
 // TODO: register custom generators
 // #include "generators/Generator.h"
 
@@ -13,7 +15,15 @@
 namespace holgen {
   class Translator {
   public:
-    TranslatedProject Translate(const ProjectDefinition &project);
+
+    Translator(const ProjectDefinition &project);
+
+    template<typename Plugin, typename ...Args>
+    void AddPlugin(Args &&... args) {
+      mPlugins.emplace_back(std::move(std::make_unique<Plugin>(mProject, std::forward<Args>(args)...)));
+    }
+
+    TranslatedProject Translate();
   private:
     void GenerateEnum(Class &generatedClass, const EnumDefinition &enumDefinition) const;
     void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
@@ -22,6 +32,7 @@ namespace holgen {
     void ProcessRefField(Class &generatedClass, ClassField &generatedField,
                          const FieldDefinition &fieldDefinition) const;
     void ProcessContainerField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
-    const ProjectDefinition *mProject = nullptr;
+    TranslatedProject mProject;
+    std::vector<std::unique_ptr<TranslatorPlugin>> mPlugins;
   };
 }

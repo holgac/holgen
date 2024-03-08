@@ -4,7 +4,7 @@
 namespace holgen {
 
   void GeneratorFilesystemHelper::GenerateHelpers() {
-    auto &cls = mTranslatedProject.mClasses.emplace_back();
+    auto &cls = mProject.mClasses.emplace_back();
     cls.mName = St::FilesystemHelper;
     cls.mSourceIncludes.AddStandardHeader("fstream");
     auto &readFile = cls.mMethods.emplace_back();

@@ -18,7 +18,7 @@ namespace {
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator().Translate(parser.GetProject());
+    auto translatedProject = Translator(parser.GetProject()).Translate();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -48,7 +48,7 @@ namespace {
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator().Translate(parser.GetProject());
+    auto translatedProject = Translator(parser.GetProject()).Translate();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -120,7 +120,7 @@ void Person::SetGender(float val) {
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator().Translate(parser.GetProject());
+    auto translatedProject = Translator(parser.GetProject()).Translate();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -227,7 +227,7 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator().Translate(parser.GetProject());
+    auto translatedProject = Translator(parser.GetProject()).Translate();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -407,7 +407,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator().Translate(parser.GetProject());
+    auto translatedProject = Translator(parser.GetProject()).Translate();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -621,7 +621,7 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator().Translate(parser.GetProject());
+    auto translatedProject = Translator(parser.GetProject()).Translate();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",

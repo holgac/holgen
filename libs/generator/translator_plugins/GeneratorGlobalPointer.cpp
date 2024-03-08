@@ -3,7 +3,7 @@
 
 namespace holgen {
   void GeneratorGlobalPointer::GenerateHelpers() {
-    auto &cls = mTranslatedProject.mClasses.emplace_back();
+    auto &cls = mProject.mClasses.emplace_back();
     cls.mName = St::GlobalPointer;
     auto &clsTemplate = cls.mTemplateParameters.emplace_back();
     clsTemplate.mType = "typename";

@@ -4,12 +4,12 @@
 #include <map>
 #include <set>
 #include <string>
-#include "Generator.h"
+#include "TranslatorPlugin.h"
 
 namespace holgen {
-  class GeneratorJson : public Generator {
+  class GeneratorJson : public TranslatorPlugin {
   public:
-    using Generator::Generator;
+    using TranslatorPlugin::TranslatorPlugin;
     void EnrichClasses() override;
     void GenerateHelpers() override;
 

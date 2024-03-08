@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Generator.h"
+#include "TranslatorPlugin.h"
 
 namespace holgen {
 
-class GeneratorLua : public Generator {
+class GeneratorLua : public TranslatorPlugin {
 public:
-  using Generator::Generator;
+  using TranslatorPlugin::TranslatorPlugin;
   void EnrichClasses() override;
   void GenerateHelpers() override;
 private:

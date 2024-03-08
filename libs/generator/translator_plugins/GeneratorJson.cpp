@@ -32,7 +32,7 @@ namespace holgen {
   }
 
   void GeneratorJson::EnrichClasses() {
-    for (auto &cls: mTranslatedProject.mClasses) {
+    for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
         EnrichClass(cls, *cls.mStruct);
       else if (cls.mEnum)
@@ -45,7 +45,7 @@ namespace holgen {
     cls.mSourceIncludes.AddStandardHeader("queue");
     cls.mSourceIncludes.AddStandardHeader("vector");
     cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
-    const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
+    const auto &structDefinition = *mProject.mProject.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = ParseFiles;
     parseFunc.mConstness = Constness::NotConst;
@@ -72,7 +72,7 @@ namespace holgen {
       for (const auto &annotationDefinition: fieldDefinition.mAnnotations) {
         if (annotationDefinition.mName != Annotations::Index)
           continue;
-        auto &underlyingStruct = *mProjectDefinition.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+        auto &underlyingStruct = *mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
         auto indexedOnField = underlyingStruct.GetField(
             annotationDefinition.GetAttribute(Annotations::Index_On)->mValue.mName);
         auto forConverter = annotationDefinition.GetAttribute(Annotations::Index_ForConverter);
@@ -142,7 +142,7 @@ namespace holgen {
     parseFunc.mBody.Add("}}"); // while(!paths.empty())
 
     bool isFirst = true;
-    for (const auto &structToProcess : mTranslatedProject.mDependencyGraph.GetProcessOrder()) {
+    for (const auto &structToProcess : mProject.mDependencyGraph.GetProcessOrder()) {
       for (const auto &fieldDefinition: structDefinition.mFields) {
         if (!fieldDefinition.GetAnnotation(Annotations::Container))
           continue;
@@ -197,7 +197,7 @@ namespace holgen {
   }
 
   void GeneratorJson::GenerateParseJson(Class &cls) {
-    const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
+    const auto &structDefinition = *mProject.mProject.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = ParseJson;
     parseFunc.mConstness = Constness::NotConst;
@@ -250,7 +250,7 @@ namespace holgen {
   ) {
     parseFunc.mBody.Indent(1);
 
-    if (mProjectDefinition.GetStruct(fieldDefinition.mType.mName) == nullptr) {
+    if (mProject.mProject.GetStruct(fieldDefinition.mType.mName) == nullptr) {
       auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
@@ -289,8 +289,8 @@ namespace holgen {
   }
 
   void GeneratorJson::GenerateHelpers() {
-    GenerateJsonHelper(mTranslatedProject.mClasses.emplace_back());
-    GenerateConverter(mTranslatedProject.mClasses.emplace_back());
+    GenerateJsonHelper(mProject.mClasses.emplace_back());
+    GenerateConverter(mProject.mClasses.emplace_back());
   }
 
   // TODO: move to GeneratorJsonHelpers class
@@ -491,7 +491,7 @@ namespace holgen {
   void GeneratorJson::GenerateConverter(Class &cls) {
     cls.mName = "Converter";
     std::set<std::string> processedConverters;
-    for (const auto &structDefinition: mProjectDefinition.mStructs) {
+    for (const auto &structDefinition: mProject.mProject.mStructs) {
       for (const auto &fieldDefinition: structDefinition.mFields) {
         auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
         if (jsonConvert == nullptr)
@@ -509,7 +509,7 @@ namespace holgen {
         auto &convertFromArg = func.mType.mFunctionalTemplateParameters.emplace_back();
 
         auto fieldNameInCpp = St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref");
-        auto referencedClass = mTranslatedProject.GetClass(structDefinition.mName);
+        auto referencedClass = mProject.GetClass(structDefinition.mName);
 
         convertFromArg = referencedClass->GetField(fieldNameInCpp)->mType;
         // TypeInfo::Get().ConvertToType(convertFromArg, fieldDefinition.mType);

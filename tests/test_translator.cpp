@@ -35,16 +35,16 @@ namespace {
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto tp = Translator().Translate(parser.GetProject());
+    auto tp = Translator(parser.GetProject()).Translate();
     auto &c = tp.mClasses[0];
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {
         ClassField{Visibility::Private,
-                   Type{"int32_t", Constness::NotConst, PassByType::Value, {}, {}},
-                   "mAge", Staticness::NotStatic, ""},
+                   Type{"int32_t", Constness::NotConst, Constexprness::NotConstexpr, PassByType::Value, {}, {}},
+                   "mAge", Staticness::NotStatic, "", {}},
         ClassField{Visibility::Private,
-                   Type{"float", Constness::NotConst, PassByType::Value, {}, {}},
-                   "mGender", Staticness::NotStatic, ""},
+                   Type{"float", Constness::NotConst, Constexprness::NotConstexpr, PassByType::Value, {}, {}},
+                   "mGender", Staticness::NotStatic, "", {}},
     });
   }
 
@@ -62,7 +62,7 @@ namespace {
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto tp = Translator().Translate(parser.GetProject());
+    auto tp = Translator(parser.GetProject()).Translate();
     auto country = tp.GetClass("Country");
     ASSERT_NE(country, nullptr);
     EXPECT_NE(country->GetMethod("GetCities", false), nullptr);
@@ -91,7 +91,7 @@ namespace {
     )DELIM");
     Parser parser;
     parser.Parse(tokenizer);
-    auto tp = Translator().Translate(parser.GetProject());
+    auto tp = Translator(parser.GetProject()).Translate();
     auto country = tp.GetClass("Country");
     ASSERT_NE(country, nullptr);
     auto method = country->GetMethod("GetCityFromName", true);

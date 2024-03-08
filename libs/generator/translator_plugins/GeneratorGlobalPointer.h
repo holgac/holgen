@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Generator.h"
+#include "TranslatorPlugin.h"
 
 namespace holgen {
   // This is like a singleton, but the user is expected to handle object deletion
-  class GeneratorGlobalPointer : public Generator {
+  class GeneratorGlobalPointer : public TranslatorPlugin {
   public:
-    using Generator::Generator;
+    using TranslatorPlugin::TranslatorPlugin;
 
     void GenerateHelpers() override;
 
