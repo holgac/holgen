@@ -20,6 +20,25 @@ namespace holgen {
       ss << ">";
       return ss.str();
     }
+
+    std::string StringifyFieldDefinition(const ClassField &field) {
+      std::stringstream ss;
+      if (!field.mDefaultConstructorArguments.empty()) {
+        ss << "(";
+        bool isFirst = true;
+        for (auto &ctorArg: field.mDefaultConstructorArguments) {
+          if (isFirst)
+            isFirst = false;
+          else
+            ss << ", ";
+          ss << ctorArg;
+        }
+        ss << ")";
+      } else if (!field.mDefaultValue.empty()) {
+        ss << " = " << field.mDefaultValue;
+      }
+      return ss.str();
+    }
   }
 
   std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &translatedProject) {
@@ -57,6 +76,9 @@ namespace holgen {
     // TODO: struct-specific namespaces defined via annotations
     codeBlock.Line() << "class " << cls.mName << " {";
 
+
+    GenerateTypedefsForHeader(codeBlock, cls);
+
     GenerateForVisibility(codeBlock, cls, Visibility::Public);
     GenerateForVisibility(codeBlock, cls, Visibility::Protected);
     GenerateForVisibility(codeBlock, cls, Visibility::Private);
@@ -83,6 +105,7 @@ namespace holgen {
         break;
     }
     codeBlock.Indent(1);
+    GenerateConstructorsForHeader(codeBlock, cls, visibility, true);
     GenerateMethodsForHeader(codeBlock, cls, visibility, true);
     GenerateFieldDeclarations(codeBlock, cls, visibility);
     codeBlock.Indent(-1);
@@ -93,26 +116,87 @@ namespace holgen {
       if (field.mVisibility != visibility)
         continue;
       {
+        bool canDefineInline = true;
+        if (field.mType.mName == cls.mName && field.mStaticness == Staticness::Static)
+          canDefineInline = false;
         auto line = codeBlock.Line();
-        if (field.mStaticness == Staticness::Static)
-          line << "inline static ";
+        if (field.mStaticness == Staticness::Static) {
+          if (canDefineInline)
+            line << "inline static ";
+          else
+            line << "static ";
+        }
         line << field.mType.ToString() << " " << field.mName;
-
-        if (!field.mDefaultValue.empty())
-          line << " = " << field.mDefaultValue;
+        if (canDefineInline)
+          line << StringifyFieldDefinition(field);
         line << ";";
       }
     }
   }
 
+  namespace {
+    bool ShouldGenerateMethod(const ClassMethodBase &method, Visibility visibility, bool isInsideClass) {
+      if (method.mVisibility != visibility)
+        return false;
+      if (isInsideClass && method.mIsTemplateSpecialization)
+        return false;
+      if (!isInsideClass && !method.mIsTemplateSpecialization)
+        return false;
+      return true;
+    }
+  }
+
+  void CodeGenerator::GenerateConstructorsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
+                                                    bool isInsideClass) const {
+    for (auto &ctor: cls.mConstructors) {
+      if (!ShouldGenerateMethod(ctor, visibility, isInsideClass))
+        continue;
+
+      if (!ctor.mTemplateParameters.empty())
+        codeBlock.AddLine(StringifyTemplateParameters(ctor.mTemplateParameters));
+      if (ctor.mIsTemplateSpecialization)
+        codeBlock.Line() << "template <>";
+
+      bool willDefine = !ctor.mTemplateParameters.empty() || !cls.mTemplateParameters.empty();
+
+      {
+        auto line = codeBlock.Line();
+        if (ctor.mExplicitness == Explicitness::Explicit)
+          line << "explicit ";
+        if (!isInsideClass)
+          line << cls.mName << "::";
+        line << cls.mName << "(";
+        bool isFirst = true;
+        for (auto &arg: ctor.mArguments) {
+          if (!isFirst)
+            line << ", ";
+          else
+            isFirst = false;
+          line << arg.mType.ToString() << " " << arg.mName;
+          if (!arg.mDefaultValue.empty()) {
+            line << " = " << arg.mDefaultValue;
+          }
+        }
+        line << ")";
+        if (!willDefine) {
+          line << ";";
+          continue;
+        } else {
+          line << " {";
+        }
+      }
+      codeBlock.Indent(1);
+      codeBlock.Add(ctor.mBody);
+      codeBlock.Indent(-1);
+      codeBlock.Line() << "}";
+    }
+
+  }
+
   void CodeGenerator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
                                                bool isInsideClass) const {
     for (auto &method: cls.mMethods) {
-      if (method.mVisibility != visibility)
-        continue;
-      if (isInsideClass && method.mIsTemplateSpecialization)
-        continue;
-      if (!isInsideClass && !method.mIsTemplateSpecialization)
+      if (!ShouldGenerateMethod(method, visibility, isInsideClass))
         continue;
 
       if (!method.mTemplateParameters.empty())
@@ -137,6 +221,9 @@ namespace holgen {
           else
             isFirst = false;
           line << arg.mType.ToString() << " " << arg.mName;
+          if (!arg.mDefaultValue.empty()) {
+            line << " = " << arg.mDefaultValue;
+          }
         }
         line << ")";
         if (method.mConstness == Constness::Const)
@@ -165,12 +252,24 @@ namespace holgen {
 
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
-    // TODO: struct-specific namespaces defined via annotations
+
+    GenerateFieldsForSource(codeBlock, cls);
+    GenerateConstructorsForSource(codeBlock, cls);
     GenerateMethodsForSource(codeBlock, cls);
+
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "}"; // namespace
 
     source.mText = codeBlock.ToString();
+  }
+
+  void CodeGenerator::GenerateFieldsForSource(CodeBlock &codeBlock, const Class &cls) const {
+    for (auto &field: cls.mFields) {
+      if (field.mStaticness == Staticness::Static && field.mType.mName == cls.mName) {
+        codeBlock.Line() << field.mType.ToString() << " " << cls.mName << "::" << field.mName
+                         << StringifyFieldDefinition(field) << ";";
+      }
+    }
   }
 
   void CodeGenerator::GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const {
@@ -237,6 +336,9 @@ namespace holgen {
     for (const auto &method: cls.mMethods) {
       headers.IncludeClassMethod(*mTranslatedProject, cls, method, isHeader);
     }
+    for (const auto &typdef: cls.mTypedefs) {
+      headers.IncludeTypedef(*mTranslatedProject, cls, typdef, isHeader);
+    }
 
     headers.Write(codeBlock);
   }
@@ -301,5 +403,98 @@ namespace holgen {
 
     header.mText = codeBlock.ToString();
   }
+
+  void CodeGenerator::GenerateTypedefsForHeader(CodeBlock &codeBlock, const Class &cls) const {
+    for (auto &typdef: cls.mTypedefs) {
+      codeBlock.Add("typedef {} {};", typdef.mSourceType.ToString(), typdef.mTargetType);
+    }
+  }
+
+  void CodeGenerator::GenerateConstructorsForSource(CodeBlock &codeBlock, const Class &cls) const {
+    if (!cls.mTemplateParameters.empty())
+      return;
+
+    for (auto &ctor: cls.mConstructors) {
+      if (!ctor.mTemplateParameters.empty()) {
+        // These are defined in the header
+        continue;
+      }
+      if (ctor.mIsTemplateSpecialization) {
+        codeBlock.Line() << "template <>";
+      }
+      {
+        auto line = codeBlock.Line();
+        line << cls.mName << "::" << cls.mName << "(";
+        bool isFirst = true;
+        for (auto &arg: ctor.mArguments) {
+          if (!isFirst)
+            line << ", ";
+          else
+            isFirst = false;
+          line << arg.mType.ToString() << " " << arg.mName;
+        }
+        line << ")";
+        if (ctor.mInitializerList.empty())
+          line << " {";
+        else
+          line << " :";
+      }
+      if (!ctor.mInitializerList.empty()) {
+        codeBlock.Indent(1);
+        {
+          auto line = codeBlock.Line();
+          bool isFirst = true;
+          for (auto &iElem: ctor.mInitializerList) {
+            if (isFirst)
+              isFirst = false;
+            else
+              line << ", ";
+            line << iElem.mDestination << "(" << iElem.mValue << ")";
+          }
+        }
+        codeBlock.Indent(-1);
+        codeBlock.Add("{{");
+      }
+      codeBlock.Indent(1);
+      codeBlock.Add(ctor.mBody);
+      codeBlock.Indent(-1);
+      codeBlock.Line() << "}";
+    }
+  }
+
+  /*
+  void Generator::GenerateEnum(GeneratedContent &content, const Enum &e) const {
+    content.mName = e.mEnum->mName + ".h";
+    content.mType = FileType::CppHeader;
+    CodeBlock codeBlock;
+    codeBlock.Line() << "#pragma once";
+    codeBlock.Line();
+    codeBlock.Add("#include \"holgen.h\"");
+    codeBlock.Add("#include <cstdint>");
+    codeBlock.Line();
+    if (!mGeneratorSettings.mNamespace.empty())
+      codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
+    codeBlock.Add("class {} {{", e.mEnum->mName);
+    codeBlock.Indent(1);
+    // TODO: signed? unsigned?
+    codeBlock.Add("using UnderlyingType = int64_t;");
+    codeBlock.Indent(-1);
+    codeBlock.Add("public:");
+    codeBlock.Indent(1);
+    for (auto &entry: e.mEnum->mEntries) {
+      codeBlock.Add("constexpr inline static const UnderlyingType {}Value = {};", entry.mName, entry.mValue);
+      codeBlock.Add("constexpr inline static const {} {}({}Value);", e.mEnum->mName, entry.mName, entry.mName);
+    }
+    codeBlock.Line();
+    // ctors
+    codeBlock.Add("")
+    codeBlock.Indent(-1);
+    codeBlock.Add("}}"); // enum class
+    if (!mGeneratorSettings.mNamespace.empty())
+      codeBlock.Line() << "}"; // namespace
+
+    content.mText = codeBlock.ToString();
+  }
+  */
 
 }

@@ -35,76 +35,24 @@ namespace holgen {
 
   void GeneratorLua::EnrichClasses() {
     for (auto &cls: mTranslatedProject.mClasses) {
-      const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
-      if (structDefinition.GetAnnotation(Annotations::NoLua))
-        continue;
-
-      cls.mGlobalForwardDeclarations.Add("struct lua_State;");
-      cls.mSourceIncludes.AddLibHeader("lua.hpp");
-      cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
-
-      auto &pushToLua = cls.mMethods.emplace_back();
-      pushToLua.mName = "PushToLua";
-      pushToLua.mReturnType.mName = "void";
-      pushToLua.mConstness = Constness::Const;
-      pushToLua.mVisibility = Visibility::Public;
-      {
-        auto &arg = pushToLua.mArguments.emplace_back();
-        arg.mType.mName = "lua_State";
-        arg.mName = "luaState";
-        arg.mType.mType = PassByType::Pointer;
-      }
-      pushToLua.mBody.Line() << "lua_newtable(luaState);";
-      auto managedAnnotation = structDefinition.GetAnnotation(Annotations::Managed);
-      if (managedAnnotation == nullptr) {
-        // TODO: debug generator? Or generate extra debug stuff that's gated behind a macro?
-        // Specifying object type would help here
-        pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
-        pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, (void*)this);";
-      } else {
-        auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
-        std::string tempType = "uint64_t";
-        if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
-          tempType = "int64_t";
-        }
-        pushToLua.mBody.Line() << tempType << " id = " << idField->mName << ";";
-        pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
-        pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));";
-      }
-      pushToLua.mBody.Line() << "lua_settable(luaState, -3);";
-      // Do this last so that metamethods don't get called during object construction
-      pushToLua.mBody.Line() << "lua_getglobal(luaState, \"" << cls.mName << "Meta\");";
-      pushToLua.mBody.Line() << "lua_setmetatable(luaState, -2);";
-
-      auto &createLuaMetatable = cls.mMethods.emplace_back();
-      createLuaMetatable.mName = "CreateLuaMetatable";
-      createLuaMetatable.mReturnType.mName = "void";
-      createLuaMetatable.mStaticness = Staticness::Static;
-      createLuaMetatable.mConstness = Constness::NotConst;
-      createLuaMetatable.mVisibility = Visibility::Public;
-      {
-        auto &arg = createLuaMetatable.mArguments.emplace_back();
-        arg.mType.mName = "lua_State";
-        arg.mName = "luaState";
-        arg.mType.mType = PassByType::Pointer;
-      }
-      createLuaMetatable.mBody.Line() << "lua_newtable(luaState);";
-      CreateIndexMetaMethod(createLuaMetatable.mBody, cls);
-      CreateNewIndexMetaMethod(createLuaMetatable.mBody, cls);
-
-      createLuaMetatable.mBody.Line() << "lua_setglobal(luaState, \"" << cls.mName << "Meta\");";
+      if (cls.mStruct)
+        EnrichClass(cls, *cls.mStruct);
+      else if (cls.mEnum)
+        EnrichClass(cls, *cls.mEnum);
     }
   }
 
   void GeneratorLua::CreateIndexMetaMethod(CodeBlock &codeBlock, Class &cls) {
-    const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
+    auto structDefinition = cls.mStruct;
+    if (structDefinition == nullptr)
+      return;
     codeBlock.Line() << "lua_pushstring(luaState, \"__index\");";
     codeBlock.Line() << "lua_pushcfunction(luaState, [](lua_State* ls) {";
     codeBlock.Indent(1);
     AddLuaInstanceGetter(codeBlock, cls, -3);
     codeBlock.Line() << "const char* key = lua_tostring(ls, -2);";
     bool isFirst = true;
-    for (auto &fieldDefinition: structDefinition.mFields) {
+    for (auto &fieldDefinition: structDefinition->mFields) {
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
       bool isRef = fieldDefinition.mType.mName == "Ref";
@@ -152,9 +100,9 @@ namespace holgen {
 
   }
 
-  void GeneratorLua::AddLuaInstanceGetter(CodeBlock& codeBlock, Class& cls, int idx) {
-    auto managedAnnotation = cls.mStruct->GetAnnotation(Annotations::Managed);
-    if (managedAnnotation == nullptr) {
+  void GeneratorLua::AddLuaInstanceGetter(CodeBlock &codeBlock, Class &cls, int idx) {
+    bool isManaged = cls.mStruct != nullptr && cls.mStruct->GetAnnotation(Annotations::Managed) != nullptr;
+    if (!isManaged) {
       codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Pointer);
       codeBlock.Add("lua_gettable(ls, {});", idx);
       codeBlock.Line() << "auto instance = (" << cls.mName << "*)lua_touserdata(ls, -1);";
@@ -172,7 +120,9 @@ namespace holgen {
   }
 
   void GeneratorLua::CreateNewIndexMetaMethod(CodeBlock &codeBlock, Class &cls) {
-    const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
+    auto structDefinition = cls.mStruct;
+    if (structDefinition == nullptr)
+      return;
     codeBlock.Line() << "lua_pushstring(luaState, \"__newindex\");";
     codeBlock.Line() << "lua_pushcfunction(luaState, [](lua_State* ls) {";
     codeBlock.Indent(1);
@@ -180,7 +130,7 @@ namespace holgen {
     AddLuaInstanceGetter(codeBlock, cls, -4);
     codeBlock.Line() << "const char* key = lua_tostring(ls, -3);";
     bool isFirst = true;
-    for (auto &fieldDefinition: structDefinition.mFields) {
+    for (auto &fieldDefinition: structDefinition->mFields) {
       // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
@@ -499,6 +449,87 @@ namespace holgen {
 
     }
      */
+  }
+
+  void GeneratorLua::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
+    if (structDefinition.GetAnnotation(Annotations::NoLua))
+      return;
+    cls.mGlobalForwardDeclarations.Add("struct lua_State;");
+    cls.mSourceIncludes.AddLibHeader("lua.hpp");
+    cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
+
+    auto &pushToLua = cls.mMethods.emplace_back();
+    pushToLua.mName = "PushToLua";
+    pushToLua.mReturnType.mName = "void";
+    pushToLua.mConstness = Constness::Const;
+    pushToLua.mVisibility = Visibility::Public;
+    {
+      auto &arg = pushToLua.mArguments.emplace_back();
+      arg.mType.mName = "lua_State";
+      arg.mName = "luaState";
+      arg.mType.mType = PassByType::Pointer;
+    }
+    pushToLua.mBody.Line() << "lua_newtable(luaState);";
+    bool isManaged = structDefinition.GetAnnotation(Annotations::Managed);
+    if (!isManaged) {
+      // TODO: debug generator? Or generate extra debug stuff that's gated behind a macro?
+      // Specifying object type would help here
+      pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
+      pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, (void*)this);";
+    } else {
+      auto idField = cls.GetField(St::GetFieldNameInCpp(structDefinition.GetIdField()->mName));
+      std::string tempType = "uint64_t";
+      if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
+        tempType = "int64_t";
+      }
+      pushToLua.mBody.Line() << tempType << " id = " << idField->mName << ";";
+      pushToLua.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
+      pushToLua.mBody.Line() << "lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));";
+    }
+    pushToLua.mBody.Line() << "lua_settable(luaState, -3);";
+    // Do this last so that metamethods don't get called during object construction
+    pushToLua.mBody.Line() << "lua_getglobal(luaState, \"" << cls.mName << "Meta\");";
+    pushToLua.mBody.Line() << "lua_setmetatable(luaState, -2);";
+
+    auto &createLuaMetatable = cls.mMethods.emplace_back();
+    createLuaMetatable.mName = "CreateLuaMetatable";
+    createLuaMetatable.mReturnType.mName = "void";
+    createLuaMetatable.mStaticness = Staticness::Static;
+    createLuaMetatable.mConstness = Constness::NotConst;
+    createLuaMetatable.mVisibility = Visibility::Public;
+    {
+      auto &arg = createLuaMetatable.mArguments.emplace_back();
+      arg.mType.mName = "lua_State";
+      arg.mName = "luaState";
+      arg.mType.mType = PassByType::Pointer;
+    }
+    createLuaMetatable.mBody.Line() << "lua_newtable(luaState);";
+    CreateIndexMetaMethod(createLuaMetatable.mBody, cls);
+    CreateNewIndexMetaMethod(createLuaMetatable.mBody, cls);
+
+    createLuaMetatable.mBody.Line() << "lua_setglobal(luaState, \"" << cls.mName << "Meta\");";
+  }
+
+  void GeneratorLua::EnrichClass(Class &cls, const EnumDefinition &enumDefinition) {
+    if (enumDefinition.GetAnnotation(Annotations::NoLua))
+      return;
+
+    cls.mGlobalForwardDeclarations.Add("struct lua_State;");
+    cls.mSourceIncludes.AddLibHeader("lua.hpp");
+    cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
+
+    auto &pushToLua = cls.mMethods.emplace_back();
+    pushToLua.mName = "PushToLua";
+    pushToLua.mReturnType.mName = "void";
+    pushToLua.mConstness = Constness::Const;
+    pushToLua.mVisibility = Visibility::Public;
+    {
+      auto &arg = pushToLua.mArguments.emplace_back();
+      arg.mType.mName = "lua_State";
+      arg.mName = "luaState";
+      arg.mType.mType = PassByType::Pointer;
+    }
+    pushToLua.mBody.Add("{}::{}(mValue, luaState);", St::LuaHelper, St::LuaHelper_Push);
   }
 
 }

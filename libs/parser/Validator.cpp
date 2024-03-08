@@ -199,7 +199,8 @@ namespace holgen {
     Type type;
     TypeInfo::Get().ConvertToType(type, typeDefinition);
     THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && !CustomTypes.contains(type.mName)
-             && mProject.GetStruct(type.mName) == nullptr,
+             && mProject.GetStruct(type.mName) == nullptr
+             && mProject.GetEnum(type.mName) == nullptr,
              "Field {}.{} uses an unknown type: {}", structDefinition.mName, fieldDefinition.mName,
              typeDefinition.mName);
     for (const auto &templateParameter : typeDefinition.mTemplateParameters) {

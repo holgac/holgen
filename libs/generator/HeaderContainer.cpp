@@ -85,14 +85,20 @@ namespace holgen {
                                           const Class &cls, const ClassField &classField, const Type &type,
                                           bool isHeader
   ) {
-    bool isTemplateType = false;
+    bool isLocalType = false;
     for (const auto &templateParameter: cls.mTemplateParameters) {
       if (templateParameter.mName == type.mName) {
-        isTemplateType = true;
+        isLocalType = true;
         break;
       }
     }
-    if (!isTemplateType)
+    for (const auto &typdef : cls.mTypedefs) {
+      if (typdef.mTargetType == type.mName) {
+        isLocalType = true;
+        break;
+      }
+    }
+    if (!isLocalType)
       IncludeType(project, type, isHeader);
     for (const auto &templateParameter: type.mTemplateParameters) {
       IncludeClassField(project, cls, classField, templateParameter, isHeader);
@@ -113,20 +119,27 @@ namespace holgen {
   void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls,
                                            const ClassMethod &classMethod, const Type &type,
                                            bool isHeader) {
-    bool isTemplateType = false;
+    bool isLocalType = false;
     for (const auto &templateParameter: cls.mTemplateParameters) {
       if (templateParameter.mName == type.mName) {
-        isTemplateType = true;
+        isLocalType = true;
         break;
       }
     }
     for (const auto &templateParameter: classMethod.mTemplateParameters) {
       if (templateParameter.mName == type.mName) {
-        isTemplateType = true;
+        isLocalType = true;
         break;
       }
     }
-    if (!isTemplateType && type.mName != cls.mName)
+    for (const auto &typdef : cls.mTypedefs) {
+      if (typdef.mTargetType == type.mName) {
+        isLocalType = true;
+        break;
+      }
+    }
+    // TODO: is this necessary anymore?
+    if (!isLocalType && type.mName != cls.mName)
       IncludeType(project, type, isHeader);
     for (const auto &templateParameter: type.mTemplateParameters) {
       IncludeClassMethod(project, cls, classMethod, templateParameter, isHeader);
@@ -134,5 +147,10 @@ namespace holgen {
     for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
       IncludeClassMethod(project, cls, classMethod, templateParameter, isHeader);
     }
+  }
+
+  void HeaderContainer::IncludeTypedef(const TranslatedProject &project, const Class &cls __attribute__((unused)), const Typedef &typdef,
+                                       bool isHeader) {
+    IncludeType(project, typdef.mSourceType, isHeader);
   }
 }

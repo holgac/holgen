@@ -20,6 +20,14 @@ namespace holgen {
     return nullptr;
   }
 
+  const AnnotationDefinition *EnumDefinition::GetAnnotation(const std::string &name) const {
+    for (const auto &annotation: mAnnotations) {
+      if (annotation.mName == name)
+        return &annotation;
+    }
+    return nullptr;
+  }
+
   const AnnotationDefinition *StructDefinition::GetAnnotation(const std::string &name) const {
     for (const auto &annotation: mAnnotations) {
       if (annotation.mName == name)

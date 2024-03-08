@@ -18,24 +18,25 @@ namespace holgen {
     NotStatic,
   };
 
+  enum class Explicitness {
+    Explicit,
+    NotExplicit,
+  };
+
   struct ClassField {
     Visibility mVisibility = Visibility::Private;
     Type mType;
     std::string mName;
     Staticness mStaticness = Staticness::NotStatic;
     std::string mDefaultValue;
-    const FieldDefinition* mField = nullptr;
+    std::vector<std::string> mDefaultConstructorArguments;
+    const FieldDefinition *mField = nullptr;
   };
 
   struct ClassMethodArgument {
     Type mType;
     std::string mName;
-  };
-
-  struct ClassMethodBase {
-    Visibility mVisibility = Visibility::Public;
-    CodeBlock mBody;
-    std::vector<ClassMethodArgument> mArguments;
+    std::string mDefaultValue;
   };
 
   struct TemplateParameter {
@@ -43,13 +44,25 @@ namespace holgen {
     std::string mName;
   };
 
+  struct ClassMethodBase {
+    Visibility mVisibility = Visibility::Public;
+    CodeBlock mBody;
+    std::vector<ClassMethodArgument> mArguments;
+    std::vector<TemplateParameter> mTemplateParameters;
+    bool mIsTemplateSpecialization = false;
+  };
+
+  struct Typedef {
+    Type mSourceType;
+    std::string mTargetType;
+  };
+
   struct ClassMethod : ClassMethodBase {
+    // TODO: ctor (name required, others optional)
     std::string mName;
     Type mReturnType;
     Constness mConstness = Constness::Const;
     Staticness mStaticness = Staticness::NotStatic;
-    std::vector<TemplateParameter> mTemplateParameters;
-    bool mIsTemplateSpecialization = false;
   };
 
   struct ClassConstructorInitializer {
@@ -59,6 +72,7 @@ namespace holgen {
 
   struct ClassConstructor : ClassMethodBase {
     std::vector<ClassConstructorInitializer> mInitializerList;
+    Explicitness mExplicitness = Explicitness::NotExplicit;
     // empty body and empty initializer list means = default.
     // bool isDeleted = false;
   };
@@ -67,12 +81,14 @@ namespace holgen {
   // CRTP was useful for these when calling derived static methods from the base (when defining lua metaclass)
   // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
   struct Class {
-    const StructDefinition* mStruct;
+    const StructDefinition *mStruct = nullptr;
+    const EnumDefinition *mEnum = nullptr;
     std::string mName;
     std::vector<ClassMethod> mMethods;
     std::vector<ClassConstructor> mConstructors;
     std::vector<ClassField> mFields;
     std::vector<TemplateParameter> mTemplateParameters;
+    std::vector<Typedef> mTypedefs;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
     CodeBlock mGlobalForwardDeclarations;
@@ -87,8 +103,8 @@ namespace holgen {
     const ProjectDefinition &mProject;
     const DependencyGraph mDependencyGraph;
     std::vector<Class> mClasses;
-    Class *GetClass(const std::string &name);
-    const Class *GetClass(const std::string &name) const;
+    [[nodiscard]] Class *GetClass(const std::string &name);
+    [[nodiscard]] const Class *GetClass(const std::string &name) const;
   };
 
 }

@@ -5,33 +5,11 @@
 #include "Weapon.h"
 #include "GameData.h"
 #include "GlobalPointer.h"
+#include "LuaTestHelper.h"
 
 using namespace holgen_blackbox_test;
 
 namespace {
-  class LuaState {
-  public:
-    lua_State *mState = nullptr;
-
-    LuaState() {
-    }
-
-    ~LuaState() {
-    }
-
-    void Init() {
-      mState = luaL_newstate();
-      luaL_openlibs(mState);
-    }
-
-    void Destroy() {
-      lua_close(mState);
-    }
-
-    operator lua_State *() {
-      return mState;
-    }
-  };
 }
 
 class LuaTest : public ::testing::Test {
@@ -46,85 +24,25 @@ protected:
     mState.Destroy();
   }
 
-  std::string ElemToString(int idx) {
-    auto luaType = lua_type(mState, idx);
-    switch (luaType) {
-      case LUA_TNIL:
-        return "null";
-      case LUA_TBOOLEAN:
-        return lua_toboolean(mState, idx) ? "true" : "false";
-      case LUA_TLIGHTUSERDATA:
-        return "lightuserdata";
-      case LUA_TNUMBER:
-        return std::format("{}", lua_tonumber(mState, idx));
-      case LUA_TSTRING:
-        return lua_tostring(mState, idx);
-      case LUA_TTABLE: {
-        // necessary if idx < 0 (because pushing changes negative indices)
-        lua_pushvalue(mState, idx);
-        lua_pushnil(mState);
-        std::stringstream ss;
-        ss << "{";
-        bool isFirst = true;
-        while (lua_next(mState, -2)) {
-          if (isFirst) {
-            isFirst = false;
-          } else {
-            ss << ",";
-          }
-          auto value = ElemToString(-1);
-          lua_pop(mState, 1);
-          auto key = ElemToString(-1);
-          ss << key << ":" << value;
-        }
-        // Pop the table we reinserted
-        lua_pop(mState, 1);
-        ss << "}";
-        return ss.str();
-      }
-      case LUA_TFUNCTION:
-        return "function";
-      case LUA_TUSERDATA:
-        return "userdata";
-      case LUA_TTHREAD:
-        return "thread";
-      default:
-        return std::format("unknown: {}", luaType);
-    }
-  }
-
-  void ExpectStack(const std::vector<std::string> &expected) {
-    std::vector<std::string> stack;
-    for (int i = 0; i < lua_gettop(mState.mState); ++i) {
-      stack.push_back(ElemToString(i + 1));
-    }
-    ASSERT_EQ(lua_gettop(mState.mState), expected.size());
-    for (int i = 0; i < expected.size(); ++i) {
-      EXPECT_EQ(ElemToString(i + 1), expected[i]);
-    }
-
-  }
-
   LuaState mState;
 };
 
 TEST_F(LuaTest, TestMethods) {
-  ExpectStack({});
+  LuaTestHelper::ExpectStack(mState, {});
   lua_pushnumber(mState, 10);
   std::string test = "testString";
   lua_pushstring(mState, test.c_str());
-  ExpectStack({"10", "testString"});
+  LuaTestHelper::ExpectStack(mState, {"10", "testString"});
   lua_pop(mState, 2);
-  ExpectStack({});
+  LuaTestHelper::ExpectStack(mState, {});
   lua_newtable(mState);
   lua_pushstring(mState, "key");
-  lua_pushstring(mState,"value");
+  lua_pushstring(mState, "value");
   lua_settable(mState, -3);
-  ExpectStack({"{key:value}"});
-  ExpectStack({"{key:value}"});
+  LuaTestHelper::ExpectStack(mState, {"{key:value}"});
   lua_pop(mState, 1);
   luaL_dostring(mState, "return 5 + 5");
-  ExpectStack({"10"});
+  LuaTestHelper::ExpectStack(mState, {"10"});
   lua_pop(mState, 1);
 }
 
@@ -133,17 +51,17 @@ TEST_F(LuaTest, Getters) {
   weapon.SetDamageMin(10);
   weapon.SetDamageMax(20);
   weapon.CreateLuaMetatable(mState);
-  ExpectStack({});
+  LuaTestHelper::ExpectStack(mState, {});
   weapon.PushToLua(mState);
-  ExpectStack({"{p:lightuserdata}"});
+  LuaTestHelper::ExpectStack(mState, {"{p:lightuserdata}"});
   lua_setglobal(mState, "wp");
-  ExpectStack({});
+  LuaTestHelper::ExpectStack(mState, {});
   luaL_dostring(mState, "return wp.damageMin + wp.damageMax");
-  ExpectStack({"30"});
+  LuaTestHelper::ExpectStack(mState, {"30"});
   lua_pop(mState, 1);
   weapon.SetDamageMax(100);
   luaL_dostring(mState, "return wp.damageMin + wp.damageMax");
-  ExpectStack({"110"});
+  LuaTestHelper::ExpectStack(mState, {"110"});
   lua_pop(mState, 1);
 }
 
@@ -155,12 +73,12 @@ TEST_F(LuaTest, Setters) {
   weapon.PushToLua(mState);
   lua_setglobal(mState, "wp");
   luaL_dostring(mState, "wp.damageMax = 100");
-  ExpectStack({});
+  LuaTestHelper::ExpectStack(mState, {});
   EXPECT_EQ(weapon.GetDamageMax(), 100);
   luaL_dostring(mState, "wp.damageMax = wp.damageMin * 3");
   EXPECT_EQ(weapon.GetDamageMax(), 30);
   luaL_dostring(mState, "return wp.damageMax");
-  ExpectStack({"30"});
+  LuaTestHelper::ExpectStack(mState, {"30"});
   lua_pop(mState, 1);
 }
 
@@ -173,10 +91,10 @@ TEST_F(LuaTest, DataManager) {
   gd.GetArmorFromName("Plate Mail")->PushToLua(mState);
   lua_setglobal(mState, "pm");
   luaL_dostring(mState, "return pm");
-  ExpectStack({"{i:lightuserdata}"});
+  LuaTestHelper::ExpectStack(mState, {"{i:lightuserdata}"});
   lua_pop(mState, 1);
   luaL_dostring(mState, "return pm.alternativeName");
-  ExpectStack({"Platy"});
+  LuaTestHelper::ExpectStack(mState, {"Platy"});
   lua_pop(mState, 1);
 }
 
@@ -194,19 +112,19 @@ TEST_F(LuaTest, Ref) {
   gorion->PushToLua(mState);
   lua_setglobal(mState, "gorion");
   luaL_dostring(mState, "return gorion.bootId");
-  ExpectStack({std::format("{}", boot->GetId())});
+  LuaTestHelper::ExpectStack(mState, {std::format("{}", boot->GetId())});
   lua_pop(mState, 1);
   luaL_dostring(mState, "return gorion.boot");
-  ExpectStack({"{i:lightuserdata}"});
+  LuaTestHelper::ExpectStack(mState, {"{i:lightuserdata}"});
   lua_pop(mState, 1);
   luaL_dostring(mState, "return gorion.boot.name");
-  ExpectStack({"Boots of Speed"});
+  LuaTestHelper::ExpectStack(mState, {"Boots of Speed"});
   lua_pop(mState, 1);
   auto otherBoot = Boot::GetFromName("Leather Shoes");
   ASSERT_NE(otherBoot, nullptr);
   auto cmd = std::format("gorion.bootId = {}", otherBoot->GetId());
   luaL_dostring(mState, cmd.c_str());
   luaL_dostring(mState, "return gorion.boot.name");
-  ExpectStack({otherBoot->GetName()});
+  LuaTestHelper::ExpectStack(mState, {otherBoot->GetName()});
   lua_pop(mState, 1);
 }

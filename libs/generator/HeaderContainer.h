@@ -12,6 +12,7 @@ namespace holgen {
   struct ClassMethod;
   struct ClassField;
   struct Type;
+  struct Typedef;
   struct CodeBlock;
 
   class HeaderContainer {
@@ -32,6 +33,9 @@ namespace holgen {
     void AddLocalHeader(const std::string &header);
 
     void Write(CodeBlock &codeBlock);
+
+
+    void IncludeTypedef(const TranslatedProject &project, const Class &cls, const Typedef& typdef, bool isHeader);
 
     void
     IncludeClassField(const TranslatedProject &project, const Class &cls, const ClassField &classField, bool isHeader);

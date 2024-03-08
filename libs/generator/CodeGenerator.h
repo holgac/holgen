@@ -38,10 +38,14 @@ namespace holgen {
     void GenerateClassHeader(GeneratedContent &header, const Class &cls) const;
     void GenerateClassSource(GeneratedContent &source, const Class &cls) const;
     void GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const;
+    void GenerateTypedefsForHeader(CodeBlock &codeBlock, const Class &cls) const;
     void GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const;
     void GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
+    void GenerateConstructorsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
     void GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
     void GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const;
+    void GenerateFieldsForSource(CodeBlock &codeBlock, const Class &cls) const;
+    void GenerateConstructorsForSource(CodeBlock &codeBlock, const Class &cls) const;
     void GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
   };
 }

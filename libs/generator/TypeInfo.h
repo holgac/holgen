@@ -20,10 +20,16 @@ namespace holgen {
     NotConst,
   };
 
+  enum class Constexprness {
+    Constexpr,
+    NotConstexpr,
+  };
+
   // This name is too generic...
   struct Type {
     std::string mName = "void";
     Constness mConstness = Constness::NotConst;
+    Constexprness mConstexprness = Constexprness::NotConstexpr;
     PassByType mType = PassByType::Value;
     std::vector<Type> mTemplateParameters;
     // This is for std::function which uses a different syntax

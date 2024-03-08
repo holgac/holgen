@@ -49,9 +49,11 @@ namespace holgen {
   };
   struct EnumDefinition {
     std::string mName;
+    std::string mInvalidValue;
     std::vector<EnumEntryDefinition> mEntries;
     std::vector<AnnotationDefinition> mAnnotations;
     [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
+    [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   };
 
   struct ProjectDefinition {

@@ -33,19 +33,10 @@ namespace holgen {
 
   void GeneratorJson::EnrichClasses() {
     for (auto &cls: mTranslatedProject.mClasses) {
-      const auto &structDefinition = *mProjectDefinition.GetStruct(cls.mName);
-      if (structDefinition.GetAnnotation(Annotations::NoJson))
-        continue;
-      cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
-      cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
-      cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-      if (structDefinition.GetAnnotation(Annotations::DataManager))
-        GenerateParseFiles(cls);
-      else
-        // TODO: currently we iterate over the json obj when deserializing, but this wouldn't work with
-        // dependencies. For DataManager we should have something custom so that a single file can define
-        // everything too. But for now ParseFiles is good enough.
-        GenerateParseJson(cls);
+      if (cls.mStruct)
+        EnrichClass(cls, *cls.mStruct);
+      else if (cls.mEnum)
+        EnrichClass(cls, *cls.mEnum);
     }
   }
 
@@ -172,7 +163,8 @@ namespace holgen {
 
           parseFunc.mBody.Add("for (const auto& filePath: it->second) {{");
           parseFunc.mBody.Indent(1);
-          parseFunc.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper, St::FilesystemHelper_ReadFile);
+          parseFunc.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
+                              St::FilesystemHelper_ReadFile);
           parseFunc.mBody.Add("rapidjson::Document doc;");
           parseFunc.mBody.Add("doc.Parse(contents.c_str());");
           parseFunc.mBody.Add(
@@ -534,4 +526,63 @@ namespace holgen {
 
   }
 
+  void GeneratorJson::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
+    if (structDefinition.GetAnnotation(Annotations::NoJson))
+      return;
+    cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
+    cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
+    cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
+    if (structDefinition.GetAnnotation(Annotations::DataManager))
+      GenerateParseFiles(cls);
+    else
+      // TODO: currently we iterate over the json obj when deserializing, but this wouldn't work with
+      // dependencies. For DataManager we should have something custom so that a single file can define
+      // everything too. But for now ParseFiles is good enough.
+      GenerateParseJson(cls);
+  }
+
+
+  void GeneratorJson::EnrichClass(Class &cls, const EnumDefinition &enumDefinition) {
+    if (enumDefinition.GetAnnotation(Annotations::NoJson))
+      return;
+    cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
+    cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
+    cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
+    auto &parseFunc = cls.mMethods.emplace_back();
+    parseFunc.mName = ParseJson;
+    parseFunc.mConstness = Constness::NotConst;
+    parseFunc.mReturnType.mName = "bool";
+    {
+      auto &arg = parseFunc.mArguments.emplace_back();
+      arg.mType.mName = "rapidjson::Value";
+      arg.mType.mType = PassByType::Reference;
+      arg.mType.mConstness = Constness::Const;
+      arg.mName = "json";
+    }
+
+    {
+      auto &arg = parseFunc.mArguments.emplace_back();
+      arg.mType.mName = ConverterName;
+      arg.mType.mType = PassByType::Reference;
+      arg.mType.mConstness = Constness::Const;
+      arg.mName = "converter";
+    }
+    parseFunc.mBody.Add("if (json.IsString()) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("*this = {}::FromString(std::string_view(json.GetString(), json.GetStringLength()));",
+                        cls.mName);
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}} else if (json.IsInt64()) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("*this = {}(json.GetInt64());", cls.mName);
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}} else {{");
+    parseFunc.mBody.Indent(1);
+    // TODO: logging?
+    parseFunc.mBody.Add("*this = {}({}::Invalid);", cls.mName, cls.mName);
+    parseFunc.mBody.Add("return false;");
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}");
+    parseFunc.mBody.Add("return true;");
+  }
 }

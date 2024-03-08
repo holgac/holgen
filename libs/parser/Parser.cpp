@@ -154,8 +154,8 @@ namespace holgen {
     }
     // TODO: bitset?
     // sanitize enum
-    std::set<uint64_t> takenValues;
-    uint64_t nextValue = 0;
+    std::set<int64_t> takenValues;
+    int64_t nextValue = 0;
     for (auto &entry: enumDefinition.mEntries) {
       if (!entry.mValue.empty()) {
         // TODO: St::FromString<int>()
@@ -164,15 +164,16 @@ namespace holgen {
       }
     }
     for (auto &entry: enumDefinition.mEntries) {
-      if (!entry.mValue.empty()) {
+      if (!entry.mValue.empty())
         continue;
-      }
-      while (takenValues.contains(nextValue)) {
-        ++nextValue;
-      }
+      while (takenValues.contains(nextValue)) ++nextValue;
       entry.mValue = std::format("{}", nextValue);
       ++nextValue;
     }
+    nextValue = -1;
+    while (takenValues.contains(nextValue)) --nextValue;
+    enumDefinition.mInvalidValue = std::format("{}", nextValue);
+
   }
 
   void Parser::ParseEnumEntry(Token &curToken, EnumEntryDefinition &enumEntryDefinition) {

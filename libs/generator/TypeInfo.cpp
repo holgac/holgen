@@ -18,7 +18,7 @@ namespace holgen {
         {"bool",          "bool"},
         {"string",        "std::string"},
         {"vector",        "std::vector"},
-        {"deque",        "std::deque"},
+        {"deque",         "std::deque"},
         {"map",           "std::map"},
         {"unordered_map", "std::unordered_map"},
     };
@@ -58,7 +58,7 @@ namespace holgen {
     };
     KeyableTypes = IntegralTypes;
     KeyableTypes.insert("std::string");
-    for(auto& [_, cppType] : TypeToCppType)
+    for (auto&[_, cppType] : TypeToCppType)
       CppTypes.insert(cppType);
   }
 
@@ -88,6 +88,8 @@ namespace holgen {
   std::string Type::ToString() const {
     std::stringstream ss;
 
+    if (mConstexprness == Constexprness::Constexpr)
+      ss << "constexpr ";
     if (mConstness == Constness::Const)
       ss << "const ";
     ss << mName;

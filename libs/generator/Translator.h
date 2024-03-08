@@ -15,6 +15,7 @@ namespace holgen {
   public:
     TranslatedProject Translate(const ProjectDefinition &project);
   private:
+    void GenerateEnum(Class &generatedClass, const EnumDefinition &enumDefinition) const;
     void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
     void ProcessField(Class &generatedClass, const FieldDefinition &fieldDefinition) const;
     void ProcessManagedClass(Class &generatedClass) const;
