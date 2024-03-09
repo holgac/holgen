@@ -1,8 +1,8 @@
-#include "GeneratorGlobalPointer.h"
+#include "GlobalPointerPlugin.h"
 #include "core/St.h"
 
 namespace holgen {
-  void GeneratorGlobalPointer::GenerateHelpers() {
+  void GlobalPointerPlugin::GenerateHelpers() {
     auto &cls = mProject.mClasses.emplace_back();
     cls.mName = St::GlobalPointer;
     auto &clsTemplate = cls.mTemplateParameters.emplace_back();

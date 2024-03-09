@@ -25,9 +25,6 @@ namespace holgen {
 
     TranslatedProject Translate();
   private:
-    void GenerateEnum(Class &generatedClass, const EnumDefinition &enumDefinition) const;
-    void GenerateClass(Class &generatedClass, const StructDefinition &structDefinition) const;
-    void ProcessManagedClass(Class &generatedClass) const;
     TranslatedProject mProject;
     std::vector<std::unique_ptr<TranslatorPlugin>> mPlugins;
   };

@@ -1,4 +1,4 @@
-#include "GeneratorJson.h"
+#include "JsonPlugin.h"
 #include <vector>
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
@@ -31,7 +31,7 @@ namespace holgen {
     std::string ParseFiles = "ParseFiles";
   }
 
-  void GeneratorJson::EnrichClasses() {
+  void JsonPlugin::EnrichClasses() {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
         EnrichClass(cls, *cls.mStruct);
@@ -40,7 +40,7 @@ namespace holgen {
     }
   }
 
-  void GeneratorJson::GenerateParseFiles(Class &cls) {
+  void JsonPlugin::GenerateParseFiles(Class &cls) {
     cls.mSourceIncludes.AddStandardHeader("filesystem");
     cls.mSourceIncludes.AddStandardHeader("queue");
     cls.mSourceIncludes.AddStandardHeader("vector");
@@ -196,7 +196,7 @@ namespace holgen {
     parseFunc.mBody.Add("return true;");
   }
 
-  void GeneratorJson::GenerateParseJson(Class &cls) {
+  void JsonPlugin::GenerateParseJson(Class &cls) {
     const auto &structDefinition = *mProject.mProject.GetStruct(cls.mName);
     auto &parseFunc = cls.mMethods.emplace_back();
     parseFunc.mName = ParseJson;
@@ -242,7 +242,7 @@ namespace holgen {
     parseFunc.mBody.Line() << "return true;";
   }
 
-  void GeneratorJson::GenerateParseJsonForField(
+  void JsonPlugin::GenerateParseJsonForField(
       Class &cls __attribute__((unused)),
       ClassMethod &parseFunc,
       const StructDefinition &structDefinition __attribute__((unused)),
@@ -288,13 +288,13 @@ namespace holgen {
     }
   }
 
-  void GeneratorJson::GenerateHelpers() {
+  void JsonPlugin::GenerateHelpers() {
     GenerateJsonHelper(mProject.mClasses.emplace_back());
     GenerateConverter(mProject.mClasses.emplace_back());
   }
 
   // TODO: move to GeneratorJsonHelpers class
-  void GeneratorJson::GenerateJsonHelper(Class &generatedClass) {
+  void JsonPlugin::GenerateJsonHelper(Class &generatedClass) {
     generatedClass.mName = St::JsonHelper;
     generatedClass.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
     auto &baseParse = generatedClass.mMethods.emplace_back();
@@ -488,7 +488,7 @@ namespace holgen {
     }
   }
 
-  void GeneratorJson::GenerateConverter(Class &cls) {
+  void JsonPlugin::GenerateConverter(Class &cls) {
     cls.mName = "Converter";
     std::set<std::string> processedConverters;
     for (const auto &structDefinition: mProject.mProject.mStructs) {
@@ -526,7 +526,7 @@ namespace holgen {
 
   }
 
-  void GeneratorJson::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
+  void JsonPlugin::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
     if (structDefinition.GetAnnotation(Annotations::NoJson))
       return;
     cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
@@ -542,7 +542,7 @@ namespace holgen {
   }
 
 
-  void GeneratorJson::EnrichClass(Class &cls, const EnumDefinition &enumDefinition) {
+  void JsonPlugin::EnrichClass(Class &cls, const EnumDefinition &enumDefinition) {
     if (enumDefinition.GetAnnotation(Annotations::NoJson))
       return;
     cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");

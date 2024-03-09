@@ -1,9 +1,9 @@
-#include "GeneratorFilesystemHelper.h"
+#include "FilesystemHelperPlugin.h"
 #include "core/St.h"
 
 namespace holgen {
 
-  void GeneratorFilesystemHelper::GenerateHelpers() {
+  void FilesystemHelperPlugin::GenerateHelpers() {
     auto &cls = mProject.mClasses.emplace_back();
     cls.mName = St::FilesystemHelper;
     cls.mSourceIncludes.AddStandardHeader("fstream");

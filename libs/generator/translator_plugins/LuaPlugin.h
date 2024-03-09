@@ -4,7 +4,7 @@
 
 namespace holgen {
 
-class GeneratorLua : public TranslatorPlugin {
+class LuaPlugin : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
   void EnrichClasses() override;

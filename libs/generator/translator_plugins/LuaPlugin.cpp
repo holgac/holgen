@@ -1,4 +1,4 @@
-#include "GeneratorLua.h"
+#include "LuaPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
 
@@ -33,7 +33,7 @@ namespace holgen {
 
   }
 
-  void GeneratorLua::EnrichClasses() {
+  void LuaPlugin::EnrichClasses() {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
         EnrichClass(cls, *cls.mStruct);
@@ -42,7 +42,7 @@ namespace holgen {
     }
   }
 
-  void GeneratorLua::CreateIndexMetaMethod(CodeBlock &codeBlock, Class &cls) {
+  void LuaPlugin::CreateIndexMetaMethod(CodeBlock &codeBlock, Class &cls) {
     auto structDefinition = cls.mStruct;
     if (structDefinition == nullptr)
       return;
@@ -100,7 +100,7 @@ namespace holgen {
 
   }
 
-  void GeneratorLua::AddLuaInstanceGetter(CodeBlock &codeBlock, Class &cls, int idx) {
+  void LuaPlugin::AddLuaInstanceGetter(CodeBlock &codeBlock, Class &cls, int idx) {
     bool isManaged = cls.mStruct != nullptr && cls.mStruct->GetAnnotation(Annotations::Managed) != nullptr;
     if (!isManaged) {
       codeBlock.Add("lua_pushstring(ls, \"{}\");", LuaTableField_Pointer);
@@ -119,7 +119,7 @@ namespace holgen {
     }
   }
 
-  void GeneratorLua::CreateNewIndexMetaMethod(CodeBlock &codeBlock, Class &cls) {
+  void LuaPlugin::CreateNewIndexMetaMethod(CodeBlock &codeBlock, Class &cls) {
     auto structDefinition = cls.mStruct;
     if (structDefinition == nullptr)
       return;
@@ -158,11 +158,11 @@ namespace holgen {
 
   }
 
-  void GeneratorLua::GenerateHelpers() {
+  void LuaPlugin::GenerateHelpers() {
     GenerateLuaHelper(mProject.mClasses.emplace_back());
   }
 
-  void GeneratorLua::GenerateLuaHelper(Class &generatedClass) {
+  void LuaPlugin::GenerateLuaHelper(Class &generatedClass) {
     generatedClass.mName = St::LuaHelper;
     generatedClass.mGlobalForwardDeclarations.Add("struct lua_State;");
     generatedClass.mSourceIncludes.AddLibHeader("lua.hpp");
@@ -170,7 +170,7 @@ namespace holgen {
     GenerateLuaHelperRead(generatedClass);
   }
 
-  void GeneratorLua::GenerateLuaHelperPush(Class &generatedClass) {
+  void LuaPlugin::GenerateLuaHelperPush(Class &generatedClass) {
     auto &baseFunc = generatedClass.mMethods.emplace_back();
     baseFunc.mName = "Push";
     baseFunc.mConstness = Constness::NotConst;
@@ -313,7 +313,7 @@ namespace holgen {
     }
   }
 
-  void GeneratorLua::GenerateLuaHelperRead(Class &generatedClass) {
+  void LuaPlugin::GenerateLuaHelperRead(Class &generatedClass) {
     auto &baseFunc = generatedClass.mMethods.emplace_back();
     baseFunc.mName = "Read";
     baseFunc.mConstness = Constness::NotConst;
@@ -451,7 +451,7 @@ namespace holgen {
      */
   }
 
-  void GeneratorLua::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
+  void LuaPlugin::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
     if (structDefinition.GetAnnotation(Annotations::NoLua))
       return;
     cls.mGlobalForwardDeclarations.Add("struct lua_State;");
@@ -510,7 +510,7 @@ namespace holgen {
     createLuaMetatable.mBody.Line() << "lua_setglobal(luaState, \"" << cls.mName << "Meta\");";
   }
 
-  void GeneratorLua::EnrichClass(Class &cls, const EnumDefinition &enumDefinition) {
+  void LuaPlugin::EnrichClass(Class &cls, const EnumDefinition &enumDefinition) {
     if (enumDefinition.GetAnnotation(Annotations::NoLua))
       return;
 

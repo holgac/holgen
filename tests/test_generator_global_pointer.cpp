@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "generator/translator_plugins/GeneratorGlobalPointer.h"
+#include "generator/translator_plugins/GlobalPointerPlugin.h"
 #include "generator/CodeGenerator.h"
 #include "Helpers.h"
 
@@ -10,7 +10,7 @@ namespace {
   TEST(GeneratorGlobalPointerTest, HeaderAndSource) {
     ProjectDefinition pd;
     TranslatedProject tp(pd);
-    GeneratorGlobalPointer ggp(tp);
+    GlobalPointerPlugin ggp(tp);
     ggp.GenerateHelpers();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",

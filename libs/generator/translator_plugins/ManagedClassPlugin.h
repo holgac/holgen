@@ -3,11 +3,9 @@
 #include "TranslatorPlugin.h"
 
 namespace holgen {
-
-  class GeneratorFilesystemHelper : public TranslatorPlugin {
+  class ManagedClassPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-    void GenerateHelpers() override;
+     void EnrichClasses() override;
   };
-
 }
