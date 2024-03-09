@@ -1,13 +1,4 @@
 #include "Translator.h"
-#include <map>
-#include "core/St.h"
-#include "core/Exception.h"
-#include "generator/translator_plugins/JsonPlugin.h"
-#include "generator/translator_plugins/LuaPlugin.h"
-#include "generator/translator_plugins/GlobalPointerPlugin.h"
-#include "generator/translator_plugins/FilesystemHelperPlugin.h"
-#include "TypeInfo.h"
-#include "core/Annotations.h"
 #include "parser/Validator.h"
 #include "generator/translator_plugins/ClassPlugin.h"
 #include "generator/translator_plugins/ClassFieldPlugin.h"
@@ -16,6 +7,11 @@
 #include "generator/translator_plugins/ContainerFieldPlugin.h"
 #include "generator/translator_plugins/ManagedClassPlugin.h"
 #include "generator/translator_plugins/EnumPlugin.h"
+#include "generator/translator_plugins/JsonPlugin.h"
+#include "generator/translator_plugins/JsonParseFilesPlugin.h"
+#include "generator/translator_plugins/LuaPlugin.h"
+#include "generator/translator_plugins/GlobalPointerPlugin.h"
+#include "generator/translator_plugins/FilesystemHelperPlugin.h"
 
 namespace holgen {
 
@@ -29,14 +25,13 @@ namespace holgen {
     AddPlugin<ManagedClassPlugin>();
     AddPlugin<EnumPlugin>();
     AddPlugin<JsonPlugin>();
+    AddPlugin<JsonParseFilesPlugin>();
     AddPlugin<LuaPlugin>();
     AddPlugin<GlobalPointerPlugin>();
     AddPlugin<FilesystemHelperPlugin>();
   }
 
   TranslatedProject Translator::Translate() {
-
-
     for (const auto &plugin: mPlugins) {
       plugin->EnrichClasses();
     }

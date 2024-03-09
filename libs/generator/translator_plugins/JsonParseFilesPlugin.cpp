@@ -1,0 +1,184 @@
+#include "JsonParseFilesPlugin.h"
+#include <vector>
+#include "generator/TypeInfo.h"
+#include "core/Annotations.h"
+#include "core/St.h"
+
+namespace holgen {
+  namespace {
+    std::string ConverterName = "Converter";
+    std::string ParseJson = "ParseJson";
+    std::string ParseFiles = "ParseFiles";
+  }
+
+  void JsonParseFilesPlugin::EnrichClasses() {
+    for (auto &cls: mProject.mClasses) {
+      if (cls.mStruct == nullptr)
+        continue;
+      if (cls.mStruct->GetAnnotation(Annotations::NoJson) ||
+          cls.mStruct->GetAnnotation(Annotations::DataManager) == nullptr)
+        continue;
+      GenerateParseFiles(cls);
+    }
+  }
+
+  void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
+    cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
+    cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
+    cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
+
+    cls.mSourceIncludes.AddStandardHeader("filesystem");
+    cls.mSourceIncludes.AddStandardHeader("queue");
+    cls.mSourceIncludes.AddStandardHeader("vector");
+    cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
+    const auto &structDefinition = *mProject.mProject.GetStruct(cls.mName);
+    auto &parseFunc = cls.mMethods.emplace_back();
+    parseFunc.mName = ParseFiles;
+    parseFunc.mConstness = Constness::NotConst;
+    parseFunc.mReturnType.mName = "bool";
+    {
+      auto &arg = parseFunc.mArguments.emplace_back();
+      arg.mType.mName = "std::string";
+      arg.mType.mType = PassByType::Reference;
+      arg.mType.mConstness = Constness::Const;
+      arg.mName = "rootPath";
+    }
+    {
+      auto &arg = parseFunc.mArguments.emplace_back();
+      arg.mType.mName = ConverterName;
+      arg.mType.mType = PassByType::Reference;
+      arg.mType.mConstness = Constness::Const;
+      arg.mName = "converterArg";
+    }
+    parseFunc.mBody.Add("auto converter = converterArg;");
+    for (const auto &fieldDefinition: structDefinition.mFields) {
+      auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
+      if (containerAnnotation == nullptr)
+        continue;
+      for (const auto &annotationDefinition: fieldDefinition.mAnnotations) {
+        if (annotationDefinition.mName != Annotations::Index)
+          continue;
+        auto &underlyingStruct = *mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+        auto indexedOnField = underlyingStruct.GetField(
+            annotationDefinition.GetAttribute(Annotations::Index_On)->mValue.mName);
+        auto forConverter = annotationDefinition.GetAttribute(Annotations::Index_ForConverter);
+        if (forConverter == nullptr)
+          continue;
+        parseFunc.mBody.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
+        parseFunc.mBody.Indent(1);
+
+        Type fromType;
+        TypeInfo::Get().ConvertToType(fromType, indexedOnField->mType);
+        if (!TypeInfo::Get().CppPrimitives.contains(fromType.mName)) {
+          // This is done so many times, maybe Type::AdjustForFunctionArgument?
+          fromType.mConstness = Constness::Const;
+          fromType.mType = PassByType::Reference;
+        }
+        auto idField = underlyingStruct.GetIdField();
+        Type toType;
+        TypeInfo::Get().ConvertToType(toType, idField->mType);
+        parseFunc.mBody.Add("converter.{} = [this]({} key) -> {} {{", forConverter->mValue.mName, fromType.ToString(),
+                            toType.ToString());
+        parseFunc.mBody.Indent(1);
+
+        auto &elementName = *containerAnnotation->GetAttribute(Annotations::Container_ElemName);
+        parseFunc.mBody.Add("auto elem = {}(key);",
+                            St::GetIndexGetterName(elementName.mValue.mName, indexedOnField->mName));
+        parseFunc.mBody.Add("return elem->{}();", St::GetGetterMethodName(idField->mName));
+
+        parseFunc.mBody.Indent(-1);
+        parseFunc.mBody.Add("}};"); // converter =
+
+        parseFunc.mBody.Indent(-1);
+        parseFunc.mBody.Add("}}"); // if (converter == nullptr)
+
+      }
+    }
+
+    parseFunc.mBody.Add("std::map<std::string, std::vector<std::filesystem::path>> filesByName;");
+    parseFunc.mBody.Add("std::queue<std::filesystem::path> pathsQueue;");
+    parseFunc.mBody.Add("pathsQueue.push(std::filesystem::path(rootPath));");
+    parseFunc.mBody.Add("while(!pathsQueue.empty()) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("auto& curPath = pathsQueue.front();");
+    parseFunc.mBody.Add("for (auto &entry: std::filesystem::directory_iterator(curPath)) {{");
+    parseFunc.mBody.Indent(1);
+
+    parseFunc.mBody.Add("if (std::filesystem::is_directory(entry)) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("pathsQueue.push(entry.path());");
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}} else if (std::filesystem::is_regular_file(entry)) {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("std::string filename = entry.path().filename();");
+    parseFunc.mBody.Add("auto dotPosition = filename.rfind('.');");
+    parseFunc.mBody.Add("if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == \"json\") {{");
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Add("filesByName[filename.substr(0, dotPosition)].push_back(entry.path());");
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // if (json)
+
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // if (regular file)
+
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // for entry : curPath
+    parseFunc.mBody.Add("pathsQueue.pop();");
+    parseFunc.mBody.Indent(-1);
+    parseFunc.mBody.Add("}}"); // while(!paths.empty())
+
+    bool isFirst = true;
+    for (const auto &structToProcess : mProject.mDependencyGraph.GetProcessOrder()) {
+      for (const auto &fieldDefinition: structDefinition.mFields) {
+        if (!fieldDefinition.GetAnnotation(Annotations::Container))
+          continue;
+        auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
+        if (templateParameter.mName == structToProcess) {
+          {
+            auto line = parseFunc.mBody.Line();
+            if (isFirst) {
+              line << "auto it";
+              isFirst = false;
+            } else {
+              line << "it";
+            }
+            line << " = filesByName.find(\"" << fieldDefinition.mName << "\");";
+          }
+          parseFunc.mBody.Add("if (it != filesByName.end()) {{");
+          parseFunc.mBody.Indent(1);
+
+          parseFunc.mBody.Add("for (const auto& filePath: it->second) {{");
+          parseFunc.mBody.Indent(1);
+          parseFunc.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
+                              St::FilesystemHelper_ReadFile);
+          parseFunc.mBody.Add("rapidjson::Document doc;");
+          parseFunc.mBody.Add("doc.Parse(contents.c_str());");
+          parseFunc.mBody.Add(
+              R"(HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {{}}: It is supposed to contain a list of {} entries", filePath);)",
+              structToProcess);
+          parseFunc.mBody.Add("for (auto& jsonElem: doc.GetArray()) {{"); // if (!doc.IsArray())
+          parseFunc.mBody.Indent(1);
+          parseFunc.mBody.Add(
+              R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath);)");
+          Type type;
+          TypeInfo::Get().ConvertToType(type, templateParameter);
+          parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
+          parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
+          parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath);)");
+          auto elemName = fieldDefinition.GetAnnotation(Annotations::Container)->GetAttribute(
+              Annotations::Container_ElemName);
+          parseFunc.mBody.Add("{}(std::move(elem));", St::GetAdderMethodName(elemName->mValue.mName));
+          parseFunc.mBody.Indent(-1);
+          parseFunc.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
+
+          parseFunc.mBody.Indent(-1);
+          parseFunc.mBody.Add("}}"); // for(path: filesByName[field])
+
+          parseFunc.mBody.Indent(-1);
+          parseFunc.mBody.Add("}}"); // if (it != filesByName.end())
+        }
+      }
+    }
+    parseFunc.mBody.Add("return true;");
+  }
+}
