@@ -11,23 +11,23 @@ namespace holgen_blackbox_test {
 uint32_t Boot::GetId() const {
   return mId;
 }
-void Boot::SetId(uint32_t val) {
-  mId = val;
-}
 const std::string& Boot::GetName() const {
   return mName;
 }
 std::string& Boot::GetName() {
   return mName;
 }
-void Boot::SetName(const std::string& val) {
-  mName = val;
-}
 const std::string& Boot::GetColor() const {
   return mColor;
 }
 std::string& Boot::GetColor() {
   return mColor;
+}
+void Boot::SetId(uint32_t val) {
+  mId = val;
+}
+void Boot::SetName(const std::string& val) {
+  mName = val;
 }
 void Boot::SetColor(const std::string& val) {
   mColor = val;

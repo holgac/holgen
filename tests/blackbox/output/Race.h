@@ -13,15 +13,15 @@ namespace holgen_blackbox_test {
 class Race {
 public:
   uint32_t GetId() const;
-  void SetId(uint32_t val);
   const std::string& GetName() const;
   std::string& GetName();
-  void SetName(const std::string& val);
   const std::vector<std::string>& GetHairColors() const;
   std::vector<std::string>& GetHairColors();
-  void SetHairColors(const std::vector<std::string>& val);
   const std::map<std::string, std::vector<std::string>>& GetNames() const;
   std::map<std::string, std::vector<std::string>>& GetNames();
+  void SetId(uint32_t val);
+  void SetName(const std::string& val);
+  void SetHairColors(const std::vector<std::string>& val);
   void SetNames(const std::map<std::string, std::vector<std::string>>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;

@@ -9,17 +9,11 @@ namespace holgen_blackbox_test {
 uint32_t Race::GetId() const {
   return mId;
 }
-void Race::SetId(uint32_t val) {
-  mId = val;
-}
 const std::string& Race::GetName() const {
   return mName;
 }
 std::string& Race::GetName() {
   return mName;
-}
-void Race::SetName(const std::string& val) {
-  mName = val;
 }
 const std::vector<std::string>& Race::GetHairColors() const {
   return mHairColors;
@@ -27,14 +21,20 @@ const std::vector<std::string>& Race::GetHairColors() const {
 std::vector<std::string>& Race::GetHairColors() {
   return mHairColors;
 }
-void Race::SetHairColors(const std::vector<std::string>& val) {
-  mHairColors = val;
-}
 const std::map<std::string, std::vector<std::string>>& Race::GetNames() const {
   return mNames;
 }
 std::map<std::string, std::vector<std::string>>& Race::GetNames() {
   return mNames;
+}
+void Race::SetId(uint32_t val) {
+  mId = val;
+}
+void Race::SetName(const std::string& val) {
+  mName = val;
+}
+void Race::SetHairColors(const std::vector<std::string>& val) {
+  mHairColors = val;
 }
 void Race::SetNames(const std::map<std::string, std::vector<std::string>>& val) {
   mNames = val;

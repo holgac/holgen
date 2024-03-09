@@ -13,14 +13,14 @@ namespace holgen_blackbox_test {
 class Weapon {
 public:
   uint32_t GetDamageMin() const;
-  void SetDamageMin(uint32_t val);
   uint32_t GetDamageMax() const;
-  void SetDamageMax(uint32_t val);
   const std::vector<DamageMultiplier>& GetDamageMultipliers() const;
   std::vector<DamageMultiplier>& GetDamageMultipliers();
-  void SetDamageMultipliers(const std::vector<DamageMultiplier>& val);
   const std::vector<std::string>& GetModifiers() const;
   std::vector<std::string>& GetModifiers();
+  void SetDamageMin(uint32_t val);
+  void SetDamageMax(uint32_t val);
+  void SetDamageMultipliers(const std::vector<DamageMultiplier>& val);
   void SetModifiers(const std::vector<std::string>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;

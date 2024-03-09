@@ -11,12 +11,12 @@ namespace holgen_blackbox_test {
 class Boot {
 public:
   uint32_t GetId() const;
-  void SetId(uint32_t val);
   const std::string& GetName() const;
   std::string& GetName();
-  void SetName(const std::string& val);
   const std::string& GetColor() const;
   std::string& GetColor();
+  void SetId(uint32_t val);
+  void SetName(const std::string& val);
   void SetColor(const std::string& val);
   static Boot* Get(uint32_t id);
   static Boot* GetFromName(const std::string& val);

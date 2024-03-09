@@ -71,8 +71,8 @@ namespace generator_test_namespace {
 class Person {
 public:
   uint32_t GetAge() const;
-  void SetAge(uint32_t val);
   float GetGender() const;
+  void SetAge(uint32_t val);
   void SetGender(float val);
 protected:
 private:
@@ -95,11 +95,11 @@ namespace generator_test_namespace {
 uint32_t Person::GetAge() const {
   return mAge;
 }
-void Person::SetAge(uint32_t val) {
-  mAge = val;
-}
 float Person::GetGender() const {
   return mGender;
+}
+void Person::SetAge(uint32_t val) {
+  mAge = val;
 }
 void Person::SetGender(float val) {
   mGender = val;
@@ -148,9 +148,9 @@ class Market {
 public:
   const std::vector<std::string>& GetInstruments() const;
   std::vector<std::string>& GetInstruments();
-  void SetInstruments(const std::vector<std::string>& val);
   const std::map<std::string, double>& GetPrices() const;
   std::map<std::string, double>& GetPrices();
+  void SetInstruments(const std::vector<std::string>& val);
   void SetPrices(const std::map<std::string, double>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
@@ -180,14 +180,14 @@ const std::vector<std::string>& Market::GetInstruments() const {
 std::vector<std::string>& Market::GetInstruments() {
   return mInstruments;
 }
-void Market::SetInstruments(const std::vector<std::string>& val) {
-  mInstruments = val;
-}
 const std::map<std::string, double>& Market::GetPrices() const {
   return mPrices;
 }
 std::map<std::string, double>& Market::GetPrices() {
   return mPrices;
+}
+void Market::SetInstruments(const std::vector<std::string>& val) {
+  mInstruments = val;
 }
 void Market::SetPrices(const std::map<std::string, double>& val) {
   mPrices = val;
@@ -254,8 +254,8 @@ class Sound {
 public:
   const std::string& GetName() const;
   std::string& GetName();
-  void SetName(const std::string& val);
   uint32_t GetVolume() const;
+  void SetName(const std::string& val);
   void SetVolume(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
@@ -286,11 +286,11 @@ const std::string& Sound::GetName() const {
 std::string& Sound::GetName() {
   return mName;
 }
-void Sound::SetName(const std::string& val) {
-  mName = val;
-}
 uint32_t Sound::GetVolume() const {
   return mVolume;
+}
+void Sound::SetName(const std::string& val) {
+  mName = val;
 }
 void Sound::SetVolume(uint32_t val) {
   mVolume = val;
@@ -432,12 +432,12 @@ namespace generator_test_namespace {
 class Person {
 public:
   uint32_t GetCurrentCountry() const;
-  void SetCurrentCountry(uint32_t val);
   uint32_t GetCurrentCity() const;
-  void SetCurrentCity(uint32_t val);
   uint32_t GetHomeCountry() const;
-  void SetHomeCountry(uint32_t val);
   uint32_t GetPlaceOfBirth() const;
+  void SetCurrentCountry(uint32_t val);
+  void SetCurrentCity(uint32_t val);
+  void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
@@ -466,23 +466,23 @@ namespace generator_test_namespace {
 uint32_t Person::GetCurrentCountry() const {
   return mCurrentCountry;
 }
-void Person::SetCurrentCountry(uint32_t val) {
-  mCurrentCountry = val;
-}
 uint32_t Person::GetCurrentCity() const {
   return mCurrentCity;
-}
-void Person::SetCurrentCity(uint32_t val) {
-  mCurrentCity = val;
 }
 uint32_t Person::GetHomeCountry() const {
   return mHomeCountry;
 }
-void Person::SetHomeCountry(uint32_t val) {
-  mHomeCountry = val;
-}
 uint32_t Person::GetPlaceOfBirth() const {
   return mPlaceOfBirth;
+}
+void Person::SetCurrentCountry(uint32_t val) {
+  mCurrentCountry = val;
+}
+void Person::SetCurrentCity(uint32_t val) {
+  mCurrentCity = val;
+}
+void Person::SetHomeCountry(uint32_t val) {
+  mHomeCountry = val;
 }
 void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;
@@ -541,9 +541,9 @@ class Country {
 public:
   const std::string& GetName() const;
   std::string& GetName();
-  void SetName(const std::string& val);
   const Person& GetLeader() const;
   Person& GetLeader();
+  void SetName(const std::string& val);
   void SetLeader(const Person& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 protected:
@@ -573,14 +573,14 @@ const std::string& Country::GetName() const {
 std::string& Country::GetName() {
   return mName;
 }
-void Country::SetName(const std::string& val) {
-  mName = val;
-}
 const Person& Country::GetLeader() const {
   return mLeader;
 }
 Person& Country::GetLeader() {
   return mLeader;
+}
+void Country::SetName(const std::string& val) {
+  mName = val;
 }
 void Country::SetLeader(const Person& val) {
   mLeader = val;
@@ -645,14 +645,14 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
 namespace generator_test_namespace {
 class Person {
 public:
-  uint32_t GetId() const;
-  void SetId(uint32_t val);
-  const std::string& GetName() const;
-  std::string& GetName();
-  void SetName(const std::string& val);
   const Person* GetPartner() const;
   Person* GetPartner();
+  uint32_t GetId() const;
+  const std::string& GetName() const;
+  std::string& GetName();
   uint32_t GetPartnerId() const;
+  void SetId(uint32_t val);
+  void SetName(const std::string& val);
   void SetPartnerId(uint32_t val);
   static Person* Get(uint32_t id);
 protected:
@@ -678,11 +678,14 @@ private:
 #include "Country.h"
 
 namespace generator_test_namespace {
+const Person* Person::GetPartner() const {
+  return Person::Get(mPartnerId);
+}
+Person* Person::GetPartner() {
+  return Person::Get(mPartnerId);
+}
 uint32_t Person::GetId() const {
   return mId;
-}
-void Person::SetId(uint32_t val) {
-  mId = val;
 }
 const std::string& Person::GetName() const {
   return mName;
@@ -690,17 +693,14 @@ const std::string& Person::GetName() const {
 std::string& Person::GetName() {
   return mName;
 }
-void Person::SetName(const std::string& val) {
-  mName = val;
-}
-const Person* Person::GetPartner() const {
-  return Person::Get(mPartnerId);
-}
-Person* Person::GetPartner() {
-  return Person::Get(mPartnerId);
-}
 uint32_t Person::GetPartnerId() const {
   return mPartnerId;
+}
+void Person::SetId(uint32_t val) {
+  mId = val;
+}
+void Person::SetName(const std::string& val) {
+  mName = val;
 }
 void Person::SetPartnerId(uint32_t val) {
   mPartnerId = val;

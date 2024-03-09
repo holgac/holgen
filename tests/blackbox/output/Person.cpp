@@ -9,29 +9,29 @@ namespace holgen_blackbox_test {
 uint32_t Person::GetRace() const {
   return mRace;
 }
-void Person::SetRace(uint32_t val) {
-  mRace = val;
-}
 uint32_t Person::GetCurrentCountry() const {
   return mCurrentCountry;
-}
-void Person::SetCurrentCountry(uint32_t val) {
-  mCurrentCountry = val;
 }
 uint32_t Person::GetCurrentCity() const {
   return mCurrentCity;
 }
-void Person::SetCurrentCity(uint32_t val) {
-  mCurrentCity = val;
-}
 uint32_t Person::GetHomeCountry() const {
   return mHomeCountry;
 }
-void Person::SetHomeCountry(uint32_t val) {
-  mHomeCountry = val;
-}
 uint32_t Person::GetPlaceOfBirth() const {
   return mPlaceOfBirth;
+}
+void Person::SetRace(uint32_t val) {
+  mRace = val;
+}
+void Person::SetCurrentCountry(uint32_t val) {
+  mCurrentCountry = val;
+}
+void Person::SetCurrentCity(uint32_t val) {
+  mCurrentCity = val;
+}
+void Person::SetHomeCountry(uint32_t val) {
+  mHomeCountry = val;
 }
 void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;

@@ -11,17 +11,11 @@ namespace holgen_blackbox_test {
 uint32_t Armor::GetId() const {
   return mId;
 }
-void Armor::SetId(uint32_t val) {
-  mId = val;
-}
 const std::string& Armor::GetName() const {
   return mName;
 }
 std::string& Armor::GetName() {
   return mName;
-}
-void Armor::SetName(const std::string& val) {
-  mName = val;
 }
 const std::string& Armor::GetAlternativeName() const {
   return mAlternativeName;
@@ -29,11 +23,17 @@ const std::string& Armor::GetAlternativeName() const {
 std::string& Armor::GetAlternativeName() {
   return mAlternativeName;
 }
-void Armor::SetAlternativeName(const std::string& val) {
-  mAlternativeName = val;
-}
 int8_t Armor::GetArmorClass() const {
   return mArmorClass;
+}
+void Armor::SetId(uint32_t val) {
+  mId = val;
+}
+void Armor::SetName(const std::string& val) {
+  mName = val;
+}
+void Armor::SetAlternativeName(const std::string& val) {
+  mAlternativeName = val;
 }
 void Armor::SetArmorClass(int8_t val) {
   mArmorClass = val;

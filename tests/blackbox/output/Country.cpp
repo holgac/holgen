@@ -12,23 +12,23 @@ const Person& Country::GetLeader() const {
 Person& Country::GetLeader() {
   return mLeader;
 }
-void Country::SetLeader(const Person& val) {
-  mLeader = val;
-}
 const std::vector<Person>& Country::GetCitizens() const {
   return mCitizens;
 }
 std::vector<Person>& Country::GetCitizens() {
   return mCitizens;
 }
-void Country::SetCitizens(const std::vector<Person>& val) {
-  mCitizens = val;
-}
 const std::map<uint32_t, uint32_t>& Country::GetPopulation() const {
   return mPopulation;
 }
 std::map<uint32_t, uint32_t>& Country::GetPopulation() {
   return mPopulation;
+}
+void Country::SetLeader(const Person& val) {
+  mLeader = val;
+}
+void Country::SetCitizens(const std::vector<Person>& val) {
+  mCitizens = val;
 }
 void Country::SetPopulation(const std::map<uint32_t, uint32_t>& val) {
   mPopulation = val;

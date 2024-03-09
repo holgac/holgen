@@ -11,14 +11,14 @@ namespace holgen_blackbox_test {
 class Armor {
 public:
   uint32_t GetId() const;
-  void SetId(uint32_t val);
   const std::string& GetName() const;
   std::string& GetName();
-  void SetName(const std::string& val);
   const std::string& GetAlternativeName() const;
   std::string& GetAlternativeName();
-  void SetAlternativeName(const std::string& val);
   int8_t GetArmorClass() const;
+  void SetId(uint32_t val);
+  void SetName(const std::string& val);
+  void SetAlternativeName(const std::string& val);
   void SetArmorClass(int8_t val);
   static Armor* Get(uint32_t id);
   static Armor* GetFromName(const std::string& val);

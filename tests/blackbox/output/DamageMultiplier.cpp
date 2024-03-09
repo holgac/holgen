@@ -12,11 +12,11 @@ const std::string& DamageMultiplier::GetWhen() const {
 std::string& DamageMultiplier::GetWhen() {
   return mWhen;
 }
-void DamageMultiplier::SetWhen(const std::string& val) {
-  mWhen = val;
-}
 float DamageMultiplier::GetValue() const {
   return mValue;
+}
+void DamageMultiplier::SetWhen(const std::string& val) {
+  mWhen = val;
 }
 void DamageMultiplier::SetValue(float val) {
   mValue = val;

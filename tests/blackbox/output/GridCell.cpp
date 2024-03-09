@@ -9,20 +9,20 @@ namespace holgen_blackbox_test {
 int32_t GridCell::GetX() const {
   return mX;
 }
-void GridCell::SetX(int32_t val) {
-  mX = val;
-}
 int32_t GridCell::GetY() const {
   return mY;
-}
-void GridCell::SetY(int32_t val) {
-  mY = val;
 }
 const LandscapeType& GridCell::GetLandscape() const {
   return mLandscape;
 }
 LandscapeType& GridCell::GetLandscape() {
   return mLandscape;
+}
+void GridCell::SetX(int32_t val) {
+  mX = val;
+}
+void GridCell::SetY(int32_t val) {
+  mY = val;
 }
 void GridCell::SetLandscape(const LandscapeType& val) {
   mLandscape = val;

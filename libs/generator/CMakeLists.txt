@@ -1,1 +1,3 @@
-add_library(generator CodeGenerator.cpp Translator.cpp HeaderContainer.cpp CodeBlock.cpp translator_plugins/GeneratorJson.cpp TypeInfo.cpp translator_plugins/GeneratorLua.cpp TranslatedProject.cpp TranslatedProject.h translator_plugins/TranslatorPlugin.cpp translator_plugins/GeneratorGlobalPointer.cpp translator_plugins/GeneratorFilesystemHelper.cpp)
+set(gen_base CodeGenerator.cpp Translator.cpp HeaderContainer.cpp CodeBlock.cpp TypeInfo.cpp TranslatedProject.cpp)
+set(gen_plugins translator_plugins/GeneratorJson.cpp translator_plugins/GeneratorLua.cpp translator_plugins/TranslatorPlugin.cpp translator_plugins/GeneratorGlobalPointer.cpp translator_plugins/GeneratorFilesystemHelper.cpp translator_plugins/ClassFieldPlugin.cpp translator_plugins/ClassFieldGetterPlugin.cpp translator_plugins/ClassFieldSetterPlugin.cpp translator_plugins/ContainerFieldPlugin.cpp translator_plugins/ClassPlugin.cpp)
+add_library(generator ${gen_base} ${gen_plugins})

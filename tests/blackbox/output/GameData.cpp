@@ -16,8 +16,26 @@ const std::vector<Boot>& GameData::GetBoots() const {
 std::vector<Boot>& GameData::GetBoots() {
   return mBoots;
 }
+const std::vector<Armor>& GameData::GetArmors() const {
+  return mArmors;
+}
+std::vector<Armor>& GameData::GetArmors() {
+  return mArmors;
+}
+const std::vector<Character>& GameData::GetCharacters() const {
+  return mCharacters;
+}
+std::vector<Character>& GameData::GetCharacters() {
+  return mCharacters;
+}
 void GameData::SetBoots(const std::vector<Boot>& val) {
   mBoots = val;
+}
+void GameData::SetArmors(const std::vector<Armor>& val) {
+  mArmors = val;
+}
+void GameData::SetCharacters(const std::vector<Character>& val) {
+  mCharacters = val;
 }
 const Boot* GameData::GetBootFromName(const std::string& key) const {
   auto it = mBootsNameIndex.find(key);
@@ -51,15 +69,6 @@ Boot* GameData::GetBoot(uint32_t idx) {
   if (idx >= mBoots.size())
     return nullptr;
   return &mBoots[idx];
-}
-const std::vector<Armor>& GameData::GetArmors() const {
-  return mArmors;
-}
-std::vector<Armor>& GameData::GetArmors() {
-  return mArmors;
-}
-void GameData::SetArmors(const std::vector<Armor>& val) {
-  mArmors = val;
 }
 const Armor* GameData::GetArmorFromName(const std::string& key) const {
   auto it = mArmorsNameIndex.find(key);
@@ -110,15 +119,6 @@ Armor* GameData::GetArmor(uint32_t idx) {
   if (idx >= mArmors.size())
     return nullptr;
   return &mArmors[idx];
-}
-const std::vector<Character>& GameData::GetCharacters() const {
-  return mCharacters;
-}
-std::vector<Character>& GameData::GetCharacters() {
-  return mCharacters;
-}
-void GameData::SetCharacters(const std::vector<Character>& val) {
-  mCharacters = val;
 }
 const Character* GameData::GetCharacterFromName(const std::string& key) const {
   auto it = mCharactersNameIndex.find(key);

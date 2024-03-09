@@ -10,14 +10,14 @@ namespace holgen_blackbox_test {
 class Person {
 public:
   uint32_t GetRace() const;
-  void SetRace(uint32_t val);
   uint32_t GetCurrentCountry() const;
-  void SetCurrentCountry(uint32_t val);
   uint32_t GetCurrentCity() const;
-  void SetCurrentCity(uint32_t val);
   uint32_t GetHomeCountry() const;
-  void SetHomeCountry(uint32_t val);
   uint32_t GetPlaceOfBirth() const;
+  void SetRace(uint32_t val);
+  void SetCurrentCountry(uint32_t val);
+  void SetCurrentCity(uint32_t val);
+  void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;

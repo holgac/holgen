@@ -8,32 +8,11 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-uint32_t Character::GetId() const {
-  return mId;
-}
-void Character::SetId(uint32_t val) {
-  mId = val;
-}
-const std::string& Character::GetName() const {
-  return mName;
-}
-std::string& Character::GetName() {
-  return mName;
-}
-void Character::SetName(const std::string& val) {
-  mName = val;
-}
 const Boot* Character::GetBoot() const {
   return Boot::Get(mBootId);
 }
 Boot* Character::GetBoot() {
   return Boot::Get(mBootId);
-}
-uint32_t Character::GetBootId() const {
-  return mBootId;
-}
-void Character::SetBootId(uint32_t val) {
-  mBootId = val;
 }
 const Armor* Character::GetArmor() const {
   return Armor::Get(mArmorId);
@@ -41,8 +20,29 @@ const Armor* Character::GetArmor() const {
 Armor* Character::GetArmor() {
   return Armor::Get(mArmorId);
 }
+uint32_t Character::GetId() const {
+  return mId;
+}
+const std::string& Character::GetName() const {
+  return mName;
+}
+std::string& Character::GetName() {
+  return mName;
+}
+uint32_t Character::GetBootId() const {
+  return mBootId;
+}
 uint32_t Character::GetArmorId() const {
   return mArmorId;
+}
+void Character::SetId(uint32_t val) {
+  mId = val;
+}
+void Character::SetName(const std::string& val) {
+  mName = val;
+}
+void Character::SetBootId(uint32_t val) {
+  mBootId = val;
 }
 void Character::SetArmorId(uint32_t val) {
   mArmorId = val;

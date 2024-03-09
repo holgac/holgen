@@ -9,14 +9,8 @@ namespace holgen_blackbox_test {
 uint32_t Weapon::GetDamageMin() const {
   return mDamageMin;
 }
-void Weapon::SetDamageMin(uint32_t val) {
-  mDamageMin = val;
-}
 uint32_t Weapon::GetDamageMax() const {
   return mDamageMax;
-}
-void Weapon::SetDamageMax(uint32_t val) {
-  mDamageMax = val;
 }
 const std::vector<DamageMultiplier>& Weapon::GetDamageMultipliers() const {
   return mDamageMultipliers;
@@ -24,14 +18,20 @@ const std::vector<DamageMultiplier>& Weapon::GetDamageMultipliers() const {
 std::vector<DamageMultiplier>& Weapon::GetDamageMultipliers() {
   return mDamageMultipliers;
 }
-void Weapon::SetDamageMultipliers(const std::vector<DamageMultiplier>& val) {
-  mDamageMultipliers = val;
-}
 const std::vector<std::string>& Weapon::GetModifiers() const {
   return mModifiers;
 }
 std::vector<std::string>& Weapon::GetModifiers() {
   return mModifiers;
+}
+void Weapon::SetDamageMin(uint32_t val) {
+  mDamageMin = val;
+}
+void Weapon::SetDamageMax(uint32_t val) {
+  mDamageMax = val;
+}
+void Weapon::SetDamageMultipliers(const std::vector<DamageMultiplier>& val) {
+  mDamageMultipliers = val;
 }
 void Weapon::SetModifiers(const std::vector<std::string>& val) {
   mModifiers = val;

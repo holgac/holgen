@@ -14,12 +14,12 @@ class Country {
 public:
   const Person& GetLeader() const;
   Person& GetLeader();
-  void SetLeader(const Person& val);
   const std::vector<Person>& GetCitizens() const;
   std::vector<Person>& GetCitizens();
-  void SetCitizens(const std::vector<Person>& val);
   const std::map<uint32_t, uint32_t>& GetPopulation() const;
   std::map<uint32_t, uint32_t>& GetPopulation();
+  void SetLeader(const Person& val);
+  void SetCitizens(const std::vector<Person>& val);
   void SetPopulation(const std::map<uint32_t, uint32_t>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
