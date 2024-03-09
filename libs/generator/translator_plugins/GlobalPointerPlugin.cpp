@@ -3,8 +3,7 @@
 
 namespace holgen {
   void GlobalPointerPlugin::Run() {
-    auto &cls = mProject.mClasses.emplace_back();
-    cls.mName = St::GlobalPointer;
+    auto &cls = mProject.mClasses.emplace_back(St::GlobalPointer);
     auto &clsTemplate = cls.mTemplateParameters.emplace_back();
     clsTemplate.mType = "typename";
     clsTemplate.mName = "T";

@@ -31,11 +31,7 @@ namespace holgen {
   }
 
   void JsonHelperPlugin::Run() {
-    GenerateJsonHelper(mProject.mClasses.emplace_back());
-  }
-
-  void JsonHelperPlugin::GenerateJsonHelper(Class &generatedClass) {
-    generatedClass.mName = St::JsonHelper;
+    auto& generatedClass = mProject.mClasses.emplace_back(St::JsonHelper);
     generatedClass.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
     auto &baseParse = generatedClass.mMethods.emplace_back();
     baseParse.mName = St::JsonHelper_Parse;

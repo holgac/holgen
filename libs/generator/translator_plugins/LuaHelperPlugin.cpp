@@ -34,11 +34,7 @@ namespace holgen {
   }
 
   void LuaHelperPlugin::Run() {
-    GenerateLuaHelper(mProject.mClasses.emplace_back());
-  }
-
-  void LuaHelperPlugin::GenerateLuaHelper(Class &generatedClass) {
-    generatedClass.mName = St::LuaHelper;
+    auto& generatedClass = mProject.mClasses.emplace_back(St::LuaHelper);
     generatedClass.mGlobalForwardDeclarations.Add("struct lua_State;");
     generatedClass.mSourceIncludes.AddLibHeader("lua.hpp");
     GenerateLuaHelperPush(generatedClass);

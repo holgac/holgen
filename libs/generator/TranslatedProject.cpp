@@ -38,5 +38,8 @@ namespace holgen {
     }
     return nullptr;
   }
+
+  Class::Class(std::string name) : mName(std::move(name)) {}
+
 }
 

@@ -4,8 +4,7 @@
 namespace holgen {
 
   void FilesystemHelperPlugin::Run() {
-    auto &cls = mProject.mClasses.emplace_back();
-    cls.mName = St::FilesystemHelper;
+    auto &cls = mProject.mClasses.emplace_back(St::FilesystemHelper);
     cls.mSourceIncludes.AddStandardHeader("fstream");
     auto &readFile = cls.mMethods.emplace_back();
     readFile.mName = St::FilesystemHelper_ReadFile;

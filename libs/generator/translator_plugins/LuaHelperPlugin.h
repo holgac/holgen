@@ -9,7 +9,6 @@ public:
   using TranslatorPlugin::TranslatorPlugin;
   void Run() override;
 private:
-  void GenerateLuaHelper(Class &generatedClass);
   void GenerateLuaHelperPush(Class &generatedClass);
   void GenerateLuaHelperRead(Class &generatedClass);
   };

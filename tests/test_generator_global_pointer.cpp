@@ -11,7 +11,7 @@ namespace {
     ProjectDefinition pd;
     TranslatedProject tp(pd);
     GlobalPointerPlugin ggp(tp);
-    ggp.GenerateHelpers();
+    ggp.Run();
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",

@@ -8,7 +8,6 @@
 #include "parser/Parser.h"
 #include "TranslatedProject.h"
 #include "translator_plugins/TranslatorPlugin.h"
-// TODO: register custom generators
 // #include "generators/Generator.h"
 
 

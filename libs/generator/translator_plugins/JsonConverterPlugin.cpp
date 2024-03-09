@@ -10,11 +10,7 @@ namespace holgen {
   }
 
   void JsonConverterPlugin::Run() {
-    GenerateJsonConverter(mProject.mClasses.emplace_back());
-  }
-
-  void JsonConverterPlugin::GenerateJsonConverter(Class &generatedClass) {
-    generatedClass.mName = ConverterName;
+    auto &generatedClass = mProject.mClasses.emplace_back(ConverterName);
     std::set<std::string> processedConverters;
     for (const auto &structDefinition: mProject.mProject.mStructs) {
       for (const auto &fieldDefinition: structDefinition.mFields) {
