@@ -9,7 +9,7 @@ namespace holgen {
     std::string ConverterName = "Converter";
   }
 
-  void JsonConverterPlugin::GenerateHelpers() {
+  void JsonConverterPlugin::Run() {
     GenerateJsonConverter(mProject.mClasses.emplace_back());
   }
 

@@ -7,7 +7,7 @@ namespace holgen {
 class LuaPlugin : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
-  void EnrichClasses() override;
+  void Run() override;
 private:
   void EnrichClass(Class &generatedClass, const StructDefinition& structDefinition);
   void EnrichClass(Class &generatedClass, const EnumDefinition& enumDefinition);

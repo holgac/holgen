@@ -39,13 +39,8 @@ namespace holgen {
 
   TranslatedProject Translator::Translate() {
     for (const auto &plugin: mPlugins) {
-      plugin->EnrichClasses();
+      plugin->Run();
     }
-
-    for (const auto &plugin: mPlugins) {
-      plugin->GenerateHelpers();
-    }
-
     return mProject;
   }
 }

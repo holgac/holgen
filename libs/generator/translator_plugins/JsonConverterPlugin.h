@@ -10,7 +10,7 @@ namespace holgen {
   class JsonConverterPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-    void GenerateHelpers() override;
+    void Run() override;
 
   private:
     void GenerateJsonConverter(Class &generatedClass);

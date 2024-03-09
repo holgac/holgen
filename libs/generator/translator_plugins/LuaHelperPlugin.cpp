@@ -33,7 +33,7 @@ namespace holgen {
 
   }
 
-  void LuaHelperPlugin::GenerateHelpers() {
+  void LuaHelperPlugin::Run() {
     GenerateLuaHelper(mProject.mClasses.emplace_back());
   }
 

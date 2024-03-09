@@ -2,7 +2,7 @@
 #include "core/St.h"
 
 namespace holgen {
-  void EnumPlugin::EnrichClasses() {
+  void EnumPlugin::Run() {
 
     for (auto &generatedClass: mProject.mClasses) {
       if (generatedClass.mEnum == nullptr)

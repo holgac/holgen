@@ -2,7 +2,7 @@
 #include "core/St.h"
 
 namespace holgen {
-  void ClassPlugin::EnrichClasses() {
+  void ClassPlugin::Run() {
     for (auto &structDefinition: mProject.mProject.mStructs) {
       auto &cls = mProject.mClasses.emplace_back();
       cls.mName = structDefinition.mName;

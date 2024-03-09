@@ -8,9 +8,7 @@ namespace holgen {
   public:
     TranslatorPlugin(TranslatedProject &translatedProject);
     virtual ~TranslatorPlugin();
-    // TODO: just a Run function
-    virtual void EnrichClasses();
-    virtual void GenerateHelpers();
+    virtual void Run();
   protected:
     TranslatedProject &mProject;
   };

@@ -25,7 +25,7 @@ namespace holgen {
     }
   }
 
-  void ClassFieldPlugin::EnrichClasses() {
+  void ClassFieldPlugin::Run() {
     for (auto &generatedClass: mProject.mClasses) {
       if (generatedClass.mStruct == nullptr)
         continue;

@@ -6,6 +6,6 @@ namespace holgen {
   class ClassFieldSetterPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-     void EnrichClasses() override;
+     void Run() override;
   };
 }

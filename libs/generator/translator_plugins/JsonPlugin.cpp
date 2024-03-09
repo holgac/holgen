@@ -30,7 +30,7 @@ namespace holgen {
     std::string ParseJson = "ParseJson";
   }
 
-  void JsonPlugin::EnrichClasses() {
+  void JsonPlugin::Run() {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
         EnrichClass(cls, *cls.mStruct);

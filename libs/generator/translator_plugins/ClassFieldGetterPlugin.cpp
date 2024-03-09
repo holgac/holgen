@@ -2,7 +2,7 @@
 #include "core/St.h"
 
 namespace holgen {
-  void ClassFieldGetterPlugin::EnrichClasses() {
+  void ClassFieldGetterPlugin::Run() {
     for (auto &generatedClass: mProject.mClasses) {
       if (generatedClass.mStruct == nullptr)
         continue;

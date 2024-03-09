@@ -6,6 +6,6 @@ namespace holgen {
   class EnumPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-     void EnrichClasses() override;
+     void Run() override;
   };
 }

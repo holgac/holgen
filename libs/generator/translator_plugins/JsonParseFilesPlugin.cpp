@@ -11,7 +11,7 @@ namespace holgen {
     std::string ParseFiles = "ParseFiles";
   }
 
-  void JsonParseFilesPlugin::EnrichClasses() {
+  void JsonParseFilesPlugin::Run() {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct == nullptr)
         continue;

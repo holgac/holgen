@@ -30,7 +30,7 @@ namespace holgen {
     std::string ParseJson = "ParseJson";
   }
 
-  void JsonHelperPlugin::GenerateHelpers() {
+  void JsonHelperPlugin::Run() {
     GenerateJsonHelper(mProject.mClasses.emplace_back());
   }
 

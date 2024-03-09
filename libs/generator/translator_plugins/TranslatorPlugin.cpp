@@ -9,9 +9,6 @@ namespace holgen {
 
   TranslatorPlugin::~TranslatorPlugin() {}
 
-  void TranslatorPlugin::GenerateHelpers() {
-  }
-
-  void TranslatorPlugin::EnrichClasses() {
+  void TranslatorPlugin::Run() {
   }
 }

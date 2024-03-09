@@ -3,7 +3,7 @@
 
 namespace holgen {
 
-  void FilesystemHelperPlugin::GenerateHelpers() {
+  void FilesystemHelperPlugin::Run() {
     auto &cls = mProject.mClasses.emplace_back();
     cls.mName = St::FilesystemHelper;
     cls.mSourceIncludes.AddStandardHeader("fstream");

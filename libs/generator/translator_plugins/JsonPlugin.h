@@ -10,7 +10,7 @@ namespace holgen {
   class JsonPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-    void EnrichClasses() override;
+    void Run() override;
 
   private:
     void EnrichClass(Class &cls, const StructDefinition& structDefinition);

@@ -33,7 +33,7 @@ namespace holgen {
 
   }
 
-  void LuaPlugin::EnrichClasses() {
+  void LuaPlugin::Run() {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
         EnrichClass(cls, *cls.mStruct);

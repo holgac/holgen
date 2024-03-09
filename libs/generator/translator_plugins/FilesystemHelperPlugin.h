@@ -7,7 +7,7 @@ namespace holgen {
   class FilesystemHelperPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-    void GenerateHelpers() override;
+    void Run() override;
   };
 
 }

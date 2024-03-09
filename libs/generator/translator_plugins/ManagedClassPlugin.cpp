@@ -3,7 +3,7 @@
 #include "core/Annotations.h"
 
 namespace holgen {
-  void ManagedClassPlugin::EnrichClasses() {
+  void ManagedClassPlugin::Run() {
     for (auto &generatedClass: mProject.mClasses) {
       if (generatedClass.mStruct == nullptr)
         continue;
