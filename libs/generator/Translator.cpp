@@ -9,6 +9,8 @@
 #include "generator/translator_plugins/EnumPlugin.h"
 #include "generator/translator_plugins/JsonPlugin.h"
 #include "generator/translator_plugins/JsonParseFilesPlugin.h"
+#include "generator/translator_plugins/JsonHelperPlugin.h"
+#include "generator/translator_plugins/JsonConverterPlugin.h"
 #include "generator/translator_plugins/LuaPlugin.h"
 #include "generator/translator_plugins/GlobalPointerPlugin.h"
 #include "generator/translator_plugins/FilesystemHelperPlugin.h"
@@ -26,6 +28,8 @@ namespace holgen {
     AddPlugin<EnumPlugin>();
     AddPlugin<JsonPlugin>();
     AddPlugin<JsonParseFilesPlugin>();
+    AddPlugin<JsonHelperPlugin>();
+    AddPlugin<JsonConverterPlugin>();
     AddPlugin<LuaPlugin>();
     AddPlugin<GlobalPointerPlugin>();
     AddPlugin<FilesystemHelperPlugin>();
