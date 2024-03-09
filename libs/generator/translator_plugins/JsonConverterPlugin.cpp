@@ -6,28 +6,7 @@
 
 namespace holgen {
   namespace {
-    struct RapidJsonTypeUsage {
-      std::string mValidator;
-      std::string mGetter;
-    };
-
-    std::map<std::string, RapidJsonTypeUsage> RapidJsonUsage = {
-        {"int8_t",      {"IsInt",    "GetInt"}},
-        {"int16_t",     {"IsInt",    "GetInt"}},
-        {"int32_t",     {"IsInt",    "GetInt"}},
-        {"int64_t",     {"IsInt64",  "GetInt64"}},
-        {"uint8_t",     {"IsUint",   "GetUint"}},
-        {"uint16_t",    {"IsUint",   "GetUint"}},
-        {"uint32_t",    {"IsUint",   "GetUint"}},
-        {"uint64_t",    {"IsUint64", "GetUint64"}},
-        {"float",       {"IsFloat",  "GetFloat"}},
-        {"double",      {"IsDouble", "GetDouble"}},
-        {"bool",        {"IsBool",   "GetBool"}},
-        {"std::string", {"IsString", "GetString"}},
-    };
-
     std::string ConverterName = "Converter";
-    std::string ParseJson = "ParseJson";
   }
 
   void JsonConverterPlugin::GenerateHelpers() {

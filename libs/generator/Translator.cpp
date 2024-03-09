@@ -12,6 +12,7 @@
 #include "generator/translator_plugins/JsonHelperPlugin.h"
 #include "generator/translator_plugins/JsonConverterPlugin.h"
 #include "generator/translator_plugins/LuaPlugin.h"
+#include "generator/translator_plugins/LuaHelperPlugin.h"
 #include "generator/translator_plugins/GlobalPointerPlugin.h"
 #include "generator/translator_plugins/FilesystemHelperPlugin.h"
 
@@ -31,6 +32,7 @@ namespace holgen {
     AddPlugin<JsonHelperPlugin>();
     AddPlugin<JsonConverterPlugin>();
     AddPlugin<LuaPlugin>();
+    AddPlugin<LuaHelperPlugin>();
     AddPlugin<GlobalPointerPlugin>();
     AddPlugin<FilesystemHelperPlugin>();
   }
