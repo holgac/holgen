@@ -21,16 +21,14 @@ namespace holgen {
       auto idField = generatedClass.mStruct->GetIdField();
 
       {
-        auto &getter = generatedClass.mMethods.emplace_back();
-        getter.mName = St::ManagedObject_Getter;
-        getter.mStaticness = Staticness::Static;
-        getter.mConstness = Constness::NotConst;
-        getter.mReturnType.mName = generatedClass.mStruct->mName;
-        getter.mReturnType.mType = PassByType::Pointer;
-        getter.mReturnType.mConstness = Constness::NotConst;
-        auto &idArg = getter.mArguments.emplace_back();
-        TypeInfo::Get().ConvertToType(idArg.mType, idField->mType);
-        idArg.mName = "id";
+        auto &getter = generatedClass.mMethods.emplace_back(
+            St::ManagedObject_Getter,
+            Type{generatedClass.mStruct->mName, PassByType::Pointer, Constness::NotConst},
+            Visibility::Public,
+            Constness::NotConst,
+            Staticness::Static
+            );
+        getter.mArguments.emplace_back("id", Type{idField->mType});
         getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                          St::GlobalPointer, manager->mName,
                          St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
@@ -42,22 +40,20 @@ namespace holgen {
         if (annotation.mName != Annotations::Index)
           continue;
 
-        auto &getter = generatedClass.mMethods.emplace_back();
         auto indexOn = annotation.GetAttribute(Annotations::Index_On);
-        getter.mName = St::GetIndexGetterName("", indexOn->mValue.mName);
-        getter.mStaticness = Staticness::Static;
-        getter.mConstness = Constness::NotConst;
-        getter.mReturnType.mName = generatedClass.mStruct->mName;
-        getter.mReturnType.mType = PassByType::Pointer;
-        getter.mReturnType.mConstness = Constness::NotConst;
-        ClassMethodArgument &valArg = getter.mArguments.emplace_back();
+        auto &getter = generatedClass.mMethods.emplace_back(
+            St::GetIndexGetterName("", indexOn->mValue.mName),
+            Type{generatedClass.mStruct->mName, PassByType::Pointer, Constness::NotConst},
+            Visibility::Public,
+            Constness::NotConst,
+            Staticness::Static
+            );
         auto indexedOnField = generatedClass.mStruct->GetField(indexOn->mValue.mName);
-        TypeInfo::Get().ConvertToType(valArg.mType, indexedOnField->mType);
+        ClassMethodArgument &valArg = getter.mArguments.emplace_back("val", Type{indexedOnField->mType});
         if (!TypeInfo::Get().CppPrimitives.contains(valArg.mType.mName)) {
           valArg.mType.mType = PassByType::Reference;
           valArg.mType.mConstness = Constness::Const;
         }
-        valArg.mName = "val";
         getter.mBody.Add(
             "return {}<{}>::GetInstance()->{}(val);",
             St::GlobalPointer, manager->mName,

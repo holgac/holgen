@@ -32,24 +32,11 @@ namespace holgen {
     cls.mSourceIncludes.AddStandardHeader("vector");
     cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
     const auto &structDefinition = *mProject.mProject.GetStruct(cls.mName);
-    auto &parseFunc = cls.mMethods.emplace_back();
-    parseFunc.mName = ParseFiles;
-    parseFunc.mConstness = Constness::NotConst;
-    parseFunc.mReturnType.mName = "bool";
-    {
-      auto &arg = parseFunc.mArguments.emplace_back();
-      arg.mType.mName = "std::string";
-      arg.mType.mType = PassByType::Reference;
-      arg.mType.mConstness = Constness::Const;
-      arg.mName = "rootPath";
-    }
-    {
-      auto &arg = parseFunc.mArguments.emplace_back();
-      arg.mType.mName = ConverterName;
-      arg.mType.mType = PassByType::Reference;
-      arg.mType.mConstness = Constness::Const;
-      arg.mName = "converterArg";
-    }
+    auto &parseFunc = cls.mMethods.emplace_back(
+        ParseFiles, Type{"bool"},
+        Visibility::Public, Constness::NotConst);
+    parseFunc.mArguments.emplace_back("rootPath", Type{"std::string", PassByType::Reference, Constness::Const});
+    parseFunc.mArguments.emplace_back("converterArg", Type{ConverterName, PassByType::Reference, Constness::Const});
     parseFunc.mBody.Add("auto converter = converterArg;");
     for (const auto &fieldDefinition: structDefinition.mFields) {
       auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
@@ -67,16 +54,14 @@ namespace holgen {
         parseFunc.mBody.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
         parseFunc.mBody.Indent(1);
 
-        Type fromType;
-        TypeInfo::Get().ConvertToType(fromType, indexedOnField->mType);
+        Type fromType(indexedOnField->mType);
         if (!TypeInfo::Get().CppPrimitives.contains(fromType.mName)) {
           // This is done so many times, maybe Type::AdjustForFunctionArgument?
           fromType.mConstness = Constness::Const;
           fromType.mType = PassByType::Reference;
         }
         auto idField = underlyingStruct.GetIdField();
-        Type toType;
-        TypeInfo::Get().ConvertToType(toType, idField->mType);
+        Type toType(idField->mType);
         parseFunc.mBody.Add("converter.{} = [this]({} key) -> {} {{", forConverter->mValue.mName, fromType.ToString(),
                             toType.ToString());
         parseFunc.mBody.Indent(1);
@@ -160,8 +145,7 @@ namespace holgen {
           parseFunc.mBody.Indent(1);
           parseFunc.mBody.Add(
               R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath);)");
-          Type type;
-          TypeInfo::Get().ConvertToType(type, templateParameter);
+          Type type(templateParameter);
           parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
           parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
           parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath);)");

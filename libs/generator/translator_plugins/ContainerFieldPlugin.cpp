@@ -22,31 +22,25 @@ namespace holgen {
             continue;
           auto indexOn = dec.GetAttribute(Annotations::Index_On);
           auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
-          auto &indexField = generatedClass.mFields.emplace_back();
-          indexField.mName = St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName);
+          auto &indexField = generatedClass.mFields.emplace_back(
+              St::GetIndexFieldName(fieldDefinition.mName, indexOn->mValue.mName), Type{"std::map"});
           auto indexType = dec.GetAttribute(Annotations::Index_Using);
           if (indexType != nullptr) {
-            TypeInfo::Get().ConvertToType(indexField.mType, indexType->mValue);
-          } else {
-            indexField.mType.mName = "std::map";
+            indexField.mType = Type{indexType->mValue};
           }
 
-          auto &indexKey = indexField.mType.mTemplateParameters.emplace_back();
-          TypeInfo::Get().ConvertToType(indexKey, fieldIndexedOn.mType);
-          auto &indexValue = indexField.mType.mTemplateParameters.emplace_back();
-          TypeInfo::Get().ConvertToType(indexValue, underlyingIdField->mType);
+          indexField.mType.mTemplateParameters.emplace_back(fieldIndexedOn.mType);
+          indexField.mType.mTemplateParameters.emplace_back(underlyingIdField->mType);
 
           for (int i = 0; i < 2; ++i) {
             Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
-            auto &func = generatedClass.mMethods.emplace_back();
-            func.mName = St::GetIndexGetterName(elemName->mValue.mName, indexOn->mValue.mName);
-            func.mConstness = constness;
-            TypeInfo::Get().ConvertToType(func.mReturnType, underlyingType);
-            func.mReturnType.mConstness = constness;
-            func.mReturnType.mType = PassByType::Pointer;
-            auto &arg = func.mArguments.emplace_back();
-            arg.mName = "key";
-            TypeInfo::Get().ConvertToType(arg.mType, fieldIndexedOn.mType);
+            auto &func = generatedClass.mMethods.emplace_back(
+                St::GetIndexGetterName(elemName->mValue.mName, indexOn->mValue.mName),
+                Type{underlyingType, PassByType::Pointer, constness},
+                Visibility::Public,
+                constness);
+            auto &arg = func.mArguments.emplace_back(
+                "key", Type{fieldIndexedOn.mType});
             if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
               arg.mType.mConstness = Constness::Const;
               arg.mType.mType = PassByType::Reference;
@@ -66,19 +60,13 @@ namespace holgen {
         auto &generatedField = *generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName));
         {
           // Generate AddElem
-          auto &func = generatedClass.mMethods.emplace_back();
-          func.mName = St::GetAdderMethodName(elemName->mValue.mName);
-          func.mConstness = Constness::NotConst;
-          func.mReturnType.mName = "bool";
-          if (isConstContainer)
-            func.mVisibility = Visibility::Private;
-          else
-            func.mVisibility = Visibility::Public;
-          auto &arg = func.mArguments.emplace_back();
-          TypeInfo::Get().ConvertToType(arg.mType, underlyingType);
-          arg.mType.mConstness = Constness::NotConst;
-          arg.mType.mType = PassByType::MoveReference;
-          arg.mName = "elem";
+          auto &func = generatedClass.mMethods.emplace_back(
+              St::GetAdderMethodName(elemName->mValue.mName),
+              Type{"bool"},
+              isConstContainer ? Visibility::Private : Visibility::Public,
+              Constness::NotConst
+          );
+          auto &arg = func.mArguments.emplace_back("elem", Type{underlyingType, PassByType::MoveReference});
 
           func.mBody.Line() << "auto newId = " << generatedField.mName << ".size();";
           CodeBlock validators;
@@ -108,17 +96,14 @@ namespace holgen {
         }
 
         for (int i = 0; i < 2; ++i) {
-          bool isConst = i == 0;
-          auto &func = generatedClass.mMethods.emplace_back();
-          func.mName = St::GetGetterMethodName(elemName->mValue.mName);
-          func.mConstness = isConst ? Constness::Const : Constness::NotConst;
-          TypeInfo::Get().ConvertToType(func.mReturnType, underlyingType);
-          func.mReturnType.mType = PassByType::Pointer;
-          func.mReturnType.mConstness = isConst ? Constness::Const : Constness::NotConst;
-          auto &arg = func.mArguments.emplace_back();
-          TypeInfo::Get().ConvertToType(arg.mType, underlyingIdField->mType);
-          arg.mType.mConstness = Constness::NotConst;
-          arg.mName = "idx";
+          auto constness = i == 0 ? Constness::Const : Constness::NotConst;
+          auto &func = generatedClass.mMethods.emplace_back(
+              St::GetGetterMethodName(elemName->mValue.mName),
+              Type{underlyingType, PassByType::Pointer, constness},
+              Visibility::Public,
+              constness
+          );
+          auto &arg = func.mArguments.emplace_back("idx", Type{underlyingIdField->mType});
           {
             auto line = func.mBody.Line();
             line << "if (idx >= " << generatedField.mName << ".size()";

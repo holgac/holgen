@@ -4,12 +4,10 @@
 namespace holgen {
   void ClassPlugin::Run() {
     for (auto &structDefinition: mProject.mProject.mStructs) {
-      auto &cls = mProject.mClasses.emplace_back(structDefinition.mName);
-      cls.mStruct = &structDefinition;
+      mProject.mClasses.emplace_back(structDefinition.mName, &structDefinition);
     }
     for (auto &enumDefinition: mProject.mProject.mEnums) {
-      auto &cls = mProject.mClasses.emplace_back(enumDefinition.mName);
-      cls.mEnum = &enumDefinition;
+      mProject.mClasses.emplace_back(enumDefinition.mName, &enumDefinition);
     }
   }
 }

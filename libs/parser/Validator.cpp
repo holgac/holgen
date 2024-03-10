@@ -130,8 +130,7 @@ namespace holgen {
     } else if (annotationDefinition.mName == Annotations::Container) {
       EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
       EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Container_ElemName);
-      Type type;
-      TypeInfo::Get().ConvertToType(type, fieldDefinition.mType);
+      auto type = Type{fieldDefinition.mType};
       THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
                structDefinition.mName, fieldDefinition.mName);
       THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1, "{}.{} should have a single template parameter",
@@ -158,8 +157,7 @@ namespace holgen {
       auto indexUsing = annotationDefinition.GetAttribute(Annotations::Index_Using);
       if (indexUsing) {
         EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Index_Using);
-        Type type;
-        TypeInfo::Get().ConvertToType(type, indexUsing->mValue);
+        auto type = Type{indexUsing->mValue};
         THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
                  "{}.{} uses invalid index type: {}",
                  structDefinition.mName, fieldDefinition.mName, indexUsing->mValue.mName)
@@ -171,8 +169,7 @@ namespace holgen {
                structDefinition.mName, fieldDefinition.mName,
                underlyingStruct->mName, indexOn->mValue.mName
       )
-      Type indexType;
-      TypeInfo::Get().ConvertToType(indexType, underlyingField->mType);
+      Type indexType(underlyingField->mType);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(indexType.mName),
                "{}.{} indexes on {}.{} which is not a valid key",
                structDefinition.mName, fieldDefinition.mName,
@@ -187,8 +184,7 @@ namespace holgen {
       auto idField = structDefinition.GetIdField();
       THROW_IF(&fieldDefinition != idField, "struct {} has multiple id fields: {} and {}",
                structDefinition.mName, idField->mName, fieldDefinition.mName);
-      Type type;
-      TypeInfo::Get().ConvertToType(type, fieldDefinition.mType);
+      Type type(fieldDefinition.mType);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mName), "Field {}.{} uses an invalid type for an id: {}",
                structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mName);
     }
@@ -196,8 +192,7 @@ namespace holgen {
 
   void Validator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                            const TypeDefinition &typeDefinition) {
-    Type type;
-    TypeInfo::Get().ConvertToType(type, typeDefinition);
+    Type type(typeDefinition);
     THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && !CustomTypes.contains(type.mName)
              && mProject.GetStruct(type.mName) == nullptr
              && mProject.GetEnum(type.mName) == nullptr,

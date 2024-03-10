@@ -9,67 +9,54 @@ namespace holgen {
         continue;
       auto &enumDefinition = *generatedClass.mEnum;
 
-      {
-        auto &typdef = generatedClass.mTypedefs.emplace_back();
-        typdef.mTargetType = "UnderlyingType";
-        typdef.mSourceType.mName = "int64_t";
-      }
-      {
-        ClassField &valueField = generatedClass.mFields.emplace_back();
-        valueField.mName = "mValue";
-        valueField.mType.mName = "UnderlyingType";
-      }
+      generatedClass.mTypedefs.emplace_back(Type{"int64_t"}, "UnderlyingType");
+      generatedClass.mFields.emplace_back("mValue", Type{"UnderlyingType"});
       {
         ClassConstructor &ctor = generatedClass.mConstructors.emplace_back();
         ctor.mExplicitness = Explicitness::Explicit;
-        ClassMethodArgument &value = ctor.mArguments.emplace_back();
-        value.mName = "value";
-        value.mType.mName = "UnderlyingType";
-        value.mDefaultValue = "Invalid";
+        ctor.mArguments.emplace_back("value", Type{"UnderlyingType"}, "Invalid");
         ClassConstructorInitializer &initializer = ctor.mInitializerList.emplace_back();
         initializer.mDestination = "mValue";
         initializer.mValue = "value";
       }
 
       for (auto &entry: enumDefinition.mEntries) {
-        ClassField &valueField = generatedClass.mFields.emplace_back();
-        valueField.mType.mConstness = Constness::Const;
+        ClassField &valueField = generatedClass.mFields.emplace_back(
+            entry.mName + "Value",
+            Type{"UnderlyingType", PassByType::Value, Constness::Const},
+            Visibility::Public,
+            Staticness::Static,
+            entry.mValue
+        );
         valueField.mType.mConstexprness = Constexprness::Constexpr;
-        valueField.mStaticness = Staticness::Static;
-        valueField.mType.mName = "UnderlyingType";
-        valueField.mName = entry.mName + "Value";
-        valueField.mDefaultValue = entry.mValue;
-        valueField.mVisibility = Visibility::Public;
 
-        ClassField &entryField = generatedClass.mFields.emplace_back();
-        entryField.mType.mConstness = Constness::Const;
-        entryField.mStaticness = Staticness::Static;
-        entryField.mType.mName = generatedClass.mName;
-        entryField.mName = entry.mName;
+        ClassField &entryField = generatedClass.mFields.emplace_back(
+            entry.mName,
+            Type{generatedClass.mName, PassByType::Value, Constness::Const},
+            Visibility::Public,
+            Staticness::Static
+        );
         entryField.mDefaultConstructorArguments.push_back(entry.mValue);
-        entryField.mVisibility = Visibility::Public;
       }
 
       {
-        ClassField &invalidEntry = generatedClass.mFields.emplace_back();
-        invalidEntry.mType.mConstness = Constness::Const;
+        ClassField &invalidEntry = generatedClass.mFields.emplace_back(
+            "Invalid",
+            Type{"UnderlyingType", PassByType::Value, Constness::Const},
+            Visibility::Public,
+            Staticness::Static,
+            enumDefinition.mInvalidValue
+        );
         invalidEntry.mType.mConstexprness = Constexprness::Constexpr;
-        invalidEntry.mStaticness = Staticness::Static;
-        invalidEntry.mType.mName = "UnderlyingType";
-        invalidEntry.mName = "Invalid";
         invalidEntry.mDefaultValue = enumDefinition.mInvalidValue;
-        invalidEntry.mVisibility = Visibility::Public;
       }
 
       {
-        ClassMethod &fromString = generatedClass.mMethods.emplace_back();
-        fromString.mName = "FromString";
-        fromString.mStaticness = Staticness::Static;
-        fromString.mConstness = Constness::NotConst;
-        fromString.mReturnType.mName = generatedClass.mName;
-        ClassMethodArgument &strArg = fromString.mArguments.emplace_back();
-        strArg.mType.mName = "std::string_view";
-        strArg.mName = "str";
+        ClassMethod &fromString = generatedClass.mMethods.emplace_back(
+            "FromString", Type{generatedClass.mName},
+            Visibility::Public, Constness::NotConst, Staticness::Static
+        );
+        fromString.mArguments.emplace_back("str", Type{"std::string_view"});
         bool isFirst = true;
         for (auto &entry: enumDefinition.mEntries) {
           if (isFirst) {
@@ -94,10 +81,12 @@ namespace holgen {
       }
 
       {
-        ClassMethod &toString = generatedClass.mMethods.emplace_back();
-        toString.mName = "ToString";
-        toString.mConstness = Constness::Const;
-        toString.mReturnType.mName = "std::string";
+        ClassMethod &toString = generatedClass.mMethods.emplace_back(
+            "ToString",
+            Type{"std::string"},
+            Visibility::Public,
+            Constness::Const
+        );
         toString.mBody.Add("switch (mValue) {{");
         toString.mBody.Indent(1);
         for (auto &entry: enumDefinition.mEntries) {
@@ -117,19 +106,17 @@ namespace holgen {
         bool isForIntegral = i == 0;
         for (auto&[op, settings]: operations) {
           auto&[isConst, returnResult] = settings;
-          ClassMethod &opMethod = generatedClass.mMethods.emplace_back();
+          ClassMethod &opMethod = generatedClass.mMethods.emplace_back(
+              "operator " + op, Type{"bool"}
+          );
           opMethod.mName = "operator " + op;
-          if (returnResult)
-            opMethod.mReturnType.mName = "bool";
-          else {
+          if (!returnResult) {
             opMethod.mReturnType.mName = generatedClass.mName;
             opMethod.mReturnType.mType = PassByType::Reference;
           }
-          auto &rhs = opMethod.mArguments.emplace_back();
+          auto &rhs = opMethod.mArguments.emplace_back("rhs", Type{"UnderlyingType"});
           rhs.mName = "rhs";
-          if (isForIntegral) {
-            rhs.mType.mName = "UnderlyingType";
-          } else {
+          if (!isForIntegral) {
             rhs.mType.mConstness = Constness::Const;
             rhs.mType.mName = generatedClass.mName;
             rhs.mType.mType = PassByType::Reference;

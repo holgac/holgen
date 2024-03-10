@@ -7,8 +7,6 @@ namespace holgen {
   class GlobalPointerPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-
     void Run() override;
-
   };
 }

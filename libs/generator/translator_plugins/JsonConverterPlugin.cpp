@@ -22,21 +22,19 @@ namespace holgen {
         if (processedConverters.contains(jsonConvertUsing->mValue.mName))
           continue;
         processedConverters.insert(jsonConvertUsing->mValue.mName);
-        auto &func = generatedClass.mFields.emplace_back();
-        func.mVisibility = Visibility::Public;
-        func.mName = jsonConvertUsing->mValue.mName;
-        func.mType.mName = "std::function";
+        auto &func = generatedClass.mFields.emplace_back(
+            jsonConvertUsing->mValue.mName,
+            Type{"std::function"},
+            Visibility::Public
+        );
 
-        auto &convertFromArg = func.mType.mFunctionalTemplateParameters.emplace_back();
 
         auto fieldNameInCpp = St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref");
         auto referencedClass = mProject.GetClass(structDefinition.mName);
 
-        convertFromArg = referencedClass->GetField(fieldNameInCpp)->mType;
-        // TypeInfo::Get().ConvertToType(convertFromArg, fieldDefinition.mType);
+        func.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);
 
-        auto &retVal = func.mType.mFunctionalTemplateParameters.emplace_back();
-        TypeInfo::Get().ConvertToType(retVal, jsonConvertFrom->mValue);
+        auto &retVal = func.mType.mFunctionalTemplateParameters.emplace_back(jsonConvertFrom->mValue);
         if (!TypeInfo::Get().CppPrimitives.contains(retVal.mName)) {
           retVal.mConstness = Constness::Const;
           retVal.mType = PassByType::Reference;

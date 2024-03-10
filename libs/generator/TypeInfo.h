@@ -27,10 +27,16 @@ namespace holgen {
 
   // This name is too generic...
   struct Type {
+    explicit Type(std::string name, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst)
+    : mName(std::move(name)), mConstness(constness), mType(passByType) { }
+
+    explicit Type(const TypeDefinition& typeDefinition, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
+
+
     std::string mName = "void";
-    Constness mConstness = Constness::NotConst;
+    Constness mConstness;
+    PassByType mType;
     Constexprness mConstexprness = Constexprness::NotConstexpr;
-    PassByType mType = PassByType::Value;
     std::vector<Type> mTemplateParameters;
     // This is for std::function which uses a different syntax
     // It's converted to string as [0]([1],[2], ...)
@@ -46,10 +52,6 @@ namespace holgen {
     TypeInfo();
   public:
     static TypeInfo &Get();
-    void ConvertToType(
-        Type &type,
-        const TypeDefinition &typeDefinition
-    );
     std::map<std::string, std::string> TypeToCppType;
     std::set<std::string> IntegralTypes;
     std::set<std::string> SignedIntegralTypes;

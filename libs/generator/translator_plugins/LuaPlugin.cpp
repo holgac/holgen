@@ -165,17 +165,9 @@ namespace holgen {
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
 
-    auto &pushToLua = cls.mMethods.emplace_back();
-    pushToLua.mName = "PushToLua";
-    pushToLua.mReturnType.mName = "void";
-    pushToLua.mConstness = Constness::Const;
-    pushToLua.mVisibility = Visibility::Public;
-    {
-      auto &arg = pushToLua.mArguments.emplace_back();
-      arg.mType.mName = "lua_State";
-      arg.mName = "luaState";
-      arg.mType.mType = PassByType::Pointer;
-    }
+    auto &pushToLua = cls.mMethods.emplace_back("PushToLua", Type{"void"}, Visibility::Public, Constness::Const);
+    pushToLua.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+
     pushToLua.mBody.Line() << "lua_newtable(luaState);";
     bool isManaged = structDefinition.GetAnnotation(Annotations::Managed);
     if (!isManaged) {
@@ -198,18 +190,9 @@ namespace holgen {
     pushToLua.mBody.Line() << "lua_getglobal(luaState, \"" << cls.mName << "Meta\");";
     pushToLua.mBody.Line() << "lua_setmetatable(luaState, -2);";
 
-    auto &createLuaMetatable = cls.mMethods.emplace_back();
-    createLuaMetatable.mName = "CreateLuaMetatable";
-    createLuaMetatable.mReturnType.mName = "void";
-    createLuaMetatable.mStaticness = Staticness::Static;
-    createLuaMetatable.mConstness = Constness::NotConst;
-    createLuaMetatable.mVisibility = Visibility::Public;
-    {
-      auto &arg = createLuaMetatable.mArguments.emplace_back();
-      arg.mType.mName = "lua_State";
-      arg.mName = "luaState";
-      arg.mType.mType = PassByType::Pointer;
-    }
+    auto &createLuaMetatable = cls.mMethods.emplace_back(
+        "CreateLuaMetatable", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static);
+    createLuaMetatable.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     createLuaMetatable.mBody.Line() << "lua_newtable(luaState);";
     CreateIndexMetaMethod(createLuaMetatable.mBody, cls);
     CreateNewIndexMetaMethod(createLuaMetatable.mBody, cls);
@@ -225,17 +208,8 @@ namespace holgen {
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
 
-    auto &pushToLua = cls.mMethods.emplace_back();
-    pushToLua.mName = "PushToLua";
-    pushToLua.mReturnType.mName = "void";
-    pushToLua.mConstness = Constness::Const;
-    pushToLua.mVisibility = Visibility::Public;
-    {
-      auto &arg = pushToLua.mArguments.emplace_back();
-      arg.mType.mName = "lua_State";
-      arg.mName = "luaState";
-      arg.mType.mType = PassByType::Pointer;
-    }
+    auto &pushToLua = cls.mMethods.emplace_back("PushToLua", Type{"void"}, Visibility::Public, Constness::Const);
+    pushToLua.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     pushToLua.mBody.Add("{}::{}(mValue, luaState);", St::LuaHelper, St::LuaHelper_Push);
   }
 

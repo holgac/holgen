@@ -41,25 +41,10 @@ namespace holgen {
 
   void JsonPlugin::GenerateParseJson(Class &cls) {
     const auto &structDefinition = *mProject.mProject.GetStruct(cls.mName);
-    auto &parseFunc = cls.mMethods.emplace_back();
-    parseFunc.mName = ParseJson;
-    parseFunc.mConstness = Constness::NotConst;
-    parseFunc.mReturnType.mName = "bool";
-    {
-      auto &arg = parseFunc.mArguments.emplace_back();
-      arg.mType.mName = "rapidjson::Value";
-      arg.mType.mType = PassByType::Reference;
-      arg.mType.mConstness = Constness::Const;
-      arg.mName = "json";
-    }
+    auto &parseFunc = cls.mMethods.emplace_back(ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst);
+    parseFunc.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    parseFunc.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
 
-    {
-      auto &arg = parseFunc.mArguments.emplace_back();
-      arg.mType.mName = ConverterName;
-      arg.mType.mType = PassByType::Reference;
-      arg.mType.mConstness = Constness::Const;
-      arg.mName = "converter";
-    }
     parseFunc.mBody.Line() << "for(const auto& data: json.GetObject()) {";
     parseFunc.mBody.Indent(1);
     parseFunc.mBody.Line() << "const auto& name = data.name.GetString();";
@@ -98,8 +83,7 @@ namespace holgen {
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
-        Type type;
-        TypeInfo::Get().ConvertToType(type, jsonConvertFrom->mValue);
+        Type type(jsonConvertFrom->mValue);
         parseFunc.mBody.Line() << type.ToString() << " temp;";
         parseFunc.mBody.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
         parseFunc.mBody.Line() << "if (!res)";
@@ -151,25 +135,9 @@ namespace holgen {
     cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
     cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
     cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-    auto &parseFunc = cls.mMethods.emplace_back();
-    parseFunc.mName = ParseJson;
-    parseFunc.mConstness = Constness::NotConst;
-    parseFunc.mReturnType.mName = "bool";
-    {
-      auto &arg = parseFunc.mArguments.emplace_back();
-      arg.mType.mName = "rapidjson::Value";
-      arg.mType.mType = PassByType::Reference;
-      arg.mType.mConstness = Constness::Const;
-      arg.mName = "json";
-    }
-
-    {
-      auto &arg = parseFunc.mArguments.emplace_back();
-      arg.mType.mName = ConverterName;
-      arg.mType.mType = PassByType::Reference;
-      arg.mType.mConstness = Constness::Const;
-      arg.mName = "converter";
-    }
+    auto &parseFunc = cls.mMethods.emplace_back(ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst);
+    parseFunc.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    parseFunc.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
     parseFunc.mBody.Add("if (json.IsString()) {{");
     parseFunc.mBody.Indent(1);
     parseFunc.mBody.Add("*this = {}::FromString(std::string_view(json.GetString(), json.GetStringLength()));",

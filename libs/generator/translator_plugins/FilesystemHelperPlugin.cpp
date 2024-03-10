@@ -6,16 +6,11 @@ namespace holgen {
   void FilesystemHelperPlugin::Run() {
     auto &cls = mProject.mClasses.emplace_back(St::FilesystemHelper);
     cls.mSourceIncludes.AddStandardHeader("fstream");
-    auto &readFile = cls.mMethods.emplace_back();
-    readFile.mName = St::FilesystemHelper_ReadFile;
-    readFile.mStaticness = Staticness::Static;
-    readFile.mConstness = Constness::NotConst;
-    readFile.mReturnType.mName = "std::string";
-    auto& arg = readFile.mArguments.emplace_back();
-    arg.mName = "filePath";
-    arg.mType.mName = "std::string";
-    arg.mType.mType = PassByType::Reference;
-    arg.mType.mConstness = Constness::Const;
+    auto &readFile = cls.mMethods.emplace_back(St::FilesystemHelper_ReadFile, Type{"std::string"}, Visibility::Public,
+                                               Constness::NotConst,
+                                               Staticness::Static);
+    readFile.mArguments.emplace_back(
+        "filePath", Type{"std::string", PassByType::Reference, Constness::Const});
     readFile.mBody.Add("std::ifstream fin(filePath, std::ios_base::binary);");
     readFile.mBody.Add("fin.seekg(0, std::ios_base::end);");
     readFile.mBody.Add("auto bufferSize = fin.tellg();");

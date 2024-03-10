@@ -9,27 +9,30 @@ namespace holgen {
       for (auto &fieldDefinition: generatedClass.mStruct->mFields) {
         auto &generatedField = *generatedClass.GetField(
             St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
+        bool isRef = fieldDefinition.mType.mName == "Ref";
 
         bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(generatedField.mType.mName);
         {
-          auto &getter = generatedClass.mMethods.emplace_back();
-          getter.mName = St::GetGetterMethodName(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref");
-          getter.mBody.Line() << "return " << generatedField.mName << ";";
-          getter.mReturnType = generatedField.mType;
-          getter.mConstness = Constness::Const;
+          auto &getter = generatedClass.mMethods.emplace_back(
+              St::GetGetterMethodName(fieldDefinition.mName, isRef),
+              generatedField.mType,
+              Visibility::Public, Constness::Const
+          );
           if (!isPrimitive) {
             getter.mReturnType.mConstness = Constness::Const;
             getter.mReturnType.mType = PassByType::Reference;
           }
+          getter.mBody.Line() << "return " << generatedField.mName << ";";
         }
         // non-const getter for non-primitives only
         if (!isPrimitive) {
-          auto &getter = generatedClass.mMethods.emplace_back();
-          getter.mName = St::GetGetterMethodName(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref");
-          getter.mBody.Line() << "return " << generatedField.mName << ";";
-          getter.mReturnType = generatedField.mType;
-          getter.mConstness = Constness::NotConst;
+          auto &getter = generatedClass.mMethods.emplace_back(
+              St::GetGetterMethodName(fieldDefinition.mName, isRef),
+              generatedField.mType,
+              Visibility::Public, Constness::NotConst
+          );
           getter.mReturnType.mType = PassByType::Reference;
+          getter.mBody.Line() << "return " << generatedField.mName << ";";
         }
       }
     }

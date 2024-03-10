@@ -31,72 +31,30 @@ namespace holgen {
   }
 
   void JsonHelperPlugin::Run() {
-    auto& generatedClass = mProject.mClasses.emplace_back(St::JsonHelper);
+    auto &generatedClass = mProject.mClasses.emplace_back(St::JsonHelper);
     generatedClass.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
-    auto &baseParse = generatedClass.mMethods.emplace_back();
-    baseParse.mName = St::JsonHelper_Parse;
-    baseParse.mConstness = Constness::NotConst;
-    baseParse.mStaticness = Staticness::Static;
-    baseParse.mReturnType.mName = "bool";
+    auto &baseParse = generatedClass.mMethods.emplace_back(
+        St::JsonHelper_Parse, Type{"bool"},
+        Visibility::Public, Constness::NotConst, Staticness::Static);
     auto &baseTemplateArg = baseParse.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
+    baseParse.mArguments.emplace_back("out", Type{"T", PassByType::Reference});
 
-    {
-      auto &out = baseParse.mArguments.emplace_back();
-      out.mName = "out";
-      out.mType.mName = "T";
-      out.mType.mType = PassByType::Reference;
-    }
-
-    {
-      auto &json = baseParse.mArguments.emplace_back();
-      json.mName = "json";
-      json.mType.mName = "rapidjson::Value";
-      json.mType.mConstness = Constness::Const;
-      json.mType.mType = PassByType::Reference;
-    }
-
-    {
-      auto &converter = baseParse.mArguments.emplace_back();
-      converter.mName = "converter";
-      converter.mType.mName = ConverterName;
-      converter.mType.mConstness = Constness::Const;
-      converter.mType.mType = PassByType::Reference;
-    }
+    baseParse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    baseParse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
 
     baseParse.mBody.Add("return out.{}(json, converter);", ParseJson);
 
     for (const auto &[type, usage]: RapidJsonUsage) {
-      auto &parse = generatedClass.mMethods.emplace_back();
-      parse.mName = St::JsonHelper_Parse;
-      parse.mConstness = Constness::NotConst;
-      parse.mStaticness = Staticness::Static;
+      auto &parse = generatedClass.mMethods.emplace_back(
+          St::JsonHelper_Parse, Type{"bool"},
+          Visibility::Public, Constness::NotConst, Staticness::Static);
       parse.mIsTemplateSpecialization = true;
-      parse.mReturnType.mName = "bool";
 
-      {
-        auto &out = parse.mArguments.emplace_back();
-        out.mName = "out";
-        out.mType.mName = type;
-        out.mType.mType = PassByType::Reference;
-      }
-
-      {
-        auto &json = parse.mArguments.emplace_back();
-        json.mName = "json";
-        json.mType.mName = "rapidjson::Value";
-        json.mType.mConstness = Constness::Const;
-        json.mType.mType = PassByType::Reference;
-      }
-
-      {
-        auto &converter = parse.mArguments.emplace_back();
-        converter.mName = "converter";
-        converter.mType.mName = ConverterName;
-        converter.mType.mConstness = Constness::Const;
-        converter.mType.mType = PassByType::Reference;
-      }
+      parse.mArguments.emplace_back("out", Type{type, PassByType::Reference});
+      parse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+      parse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
 
       parse.mBody.Line() << "if (!json." << usage.mValidator << "())";
       parse.mBody.Indent(1);
@@ -107,39 +65,20 @@ namespace holgen {
     }
 
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      auto &parse = generatedClass.mMethods.emplace_back();
-      parse.mName = St::JsonHelper_Parse;
-      parse.mConstness = Constness::NotConst;
-      parse.mStaticness = Staticness::Static;
+      auto &parse = generatedClass.mMethods.emplace_back(
+          St::JsonHelper_Parse, Type{"bool"},
+          Visibility::Public, Constness::NotConst, Staticness::Static
+      );
       auto &templateArg = parse.mTemplateParameters.emplace_back();
       templateArg.mType = "typename";
       templateArg.mName = "T";
-      parse.mReturnType.mName = "bool";
 
       {
-        auto &out = parse.mArguments.emplace_back();
-        out.mName = "out";
-        out.mType.mName = container;
-        auto &outTemplate = out.mType.mTemplateParameters.emplace_back();
-        outTemplate.mName = "T";
-        out.mType.mType = PassByType::Reference;
+        auto &out = parse.mArguments.emplace_back("out", Type{container, PassByType::Reference});
+        out.mType.mTemplateParameters.emplace_back("T");
       }
-
-      {
-        auto &json = parse.mArguments.emplace_back();
-        json.mName = "json";
-        json.mType.mName = "rapidjson::Value";
-        json.mType.mConstness = Constness::Const;
-        json.mType.mType = PassByType::Reference;
-      }
-
-      {
-        auto &converter = parse.mArguments.emplace_back();
-        converter.mName = "converter";
-        converter.mType.mName = ConverterName;
-        converter.mType.mConstness = Constness::Const;
-        converter.mType.mType = PassByType::Reference;
-      }
+      parse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+      parse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
 
       parse.mBody.Line() << "if (!json.IsArray())";
       parse.mBody.Indent(1);
@@ -160,44 +99,24 @@ namespace holgen {
     }
 
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-      auto &parse = generatedClass.mMethods.emplace_back();
-      parse.mName = St::JsonHelper_Parse;
-      parse.mConstness = Constness::NotConst;
-      parse.mStaticness = Staticness::Static;
+      auto &parse = generatedClass.mMethods.emplace_back(
+          St::JsonHelper_Parse,
+          Type{"bool"},
+          Visibility::Public, Constness::NotConst, Staticness::Static);
       auto &keyTemplateArg = parse.mTemplateParameters.emplace_back();
       keyTemplateArg.mType = "typename";
       keyTemplateArg.mName = "K";
       auto &valueTemplateArg = parse.mTemplateParameters.emplace_back();
       valueTemplateArg.mType = "typename";
       valueTemplateArg.mName = "V";
-      parse.mReturnType.mName = "bool";
 
       {
-        auto &out = parse.mArguments.emplace_back();
-        out.mName = "out";
-        out.mType.mName = container;
-        auto &keyTemplate = out.mType.mTemplateParameters.emplace_back();
-        keyTemplate.mName = "K";
-        auto &valueTemplate = out.mType.mTemplateParameters.emplace_back();
-        valueTemplate.mName = "V";
-        out.mType.mType = PassByType::Reference;
+        auto &out = parse.mArguments.emplace_back("out", Type{container, PassByType::Reference});
+        out.mType.mTemplateParameters.emplace_back("K");
+        out.mType.mTemplateParameters.emplace_back("V");
       }
-
-      {
-        auto &json = parse.mArguments.emplace_back();
-        json.mName = "json";
-        json.mType.mName = "rapidjson::Value";
-        json.mType.mConstness = Constness::Const;
-        json.mType.mType = PassByType::Reference;
-      }
-
-      {
-        auto &converter = parse.mArguments.emplace_back();
-        converter.mName = "converter";
-        converter.mType.mName = ConverterName;
-        converter.mType.mConstness = Constness::Const;
-        converter.mType.mType = PassByType::Reference;
-      }
+      parse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+      parse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
 
       parse.mBody.Line() << "if (!json.IsObject())";
       parse.mBody.Indent(1);

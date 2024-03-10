@@ -8,36 +8,23 @@ namespace holgen {
     clsTemplate.mType = "typename";
     clsTemplate.mName = "T";
 
-    {
-      auto &field = cls.mFields.emplace_back();
-      field.mType.mName = "T";
-      field.mType.mType = PassByType::Pointer;
-      field.mName = "mInstance";
-      field.mVisibility = Visibility::Private;
-      field.mStaticness = Staticness::Static;
-      field.mDefaultValue = "nullptr";
-    }
+    cls.mFields.emplace_back(
+        "mInstance", Type{"T", PassByType::Pointer}, Visibility::Private,
+        Staticness::Static, "nullptr");
 
     {
-      auto &func = cls.mMethods.emplace_back();
-      func.mName = St::GlobalPointer_GetInstance;
-      func.mStaticness = Staticness::Static;
-      func.mConstness = Constness::NotConst;
-      func.mReturnType.mName = "T";
-      func.mReturnType.mType = PassByType::Pointer;
+      auto &func = cls.mMethods.emplace_back(
+          St::GlobalPointer_GetInstance, Type{"T", PassByType::Pointer}, Visibility::Public, Constness::NotConst,
+          Staticness::Static);
+      // TODO: move these strings to the plugins that generate them
       func.mBody.Add("return mInstance;");
     }
 
     {
-      auto &func = cls.mMethods.emplace_back();
-      func.mName = St::GlobalPointer_SetInstance;
-      func.mStaticness = Staticness::Static;
-      func.mConstness = Constness::NotConst;
-      auto &arg = func.mArguments.emplace_back();
-      arg.mType.mName = "T";
-      arg.mType.mType = PassByType::Pointer;
-      arg.mName = "ptr";
-      // the user handle storage and deletion?
+      auto &func = cls.mMethods.emplace_back(
+          St::GlobalPointer_SetInstance, Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static);
+      func.mArguments.emplace_back("ptr", Type{"T", PassByType::Pointer});
+      // the users handle storage and deletion?
       func.mBody.Add("mInstance = ptr;");
     }
   }

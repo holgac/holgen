@@ -34,7 +34,7 @@ namespace holgen {
   }
 
   void LuaHelperPlugin::Run() {
-    auto& generatedClass = mProject.mClasses.emplace_back(St::LuaHelper);
+    auto &generatedClass = mProject.mClasses.emplace_back(St::LuaHelper);
     generatedClass.mGlobalForwardDeclarations.Add("struct lua_State;");
     generatedClass.mSourceIncludes.AddLibHeader("lua.hpp");
     GenerateLuaHelperPush(generatedClass);
@@ -42,210 +42,116 @@ namespace holgen {
   }
 
   void LuaHelperPlugin::GenerateLuaHelperPush(Class &generatedClass) {
-    auto &baseFunc = generatedClass.mMethods.emplace_back();
-    baseFunc.mName = "Push";
-    baseFunc.mConstness = Constness::NotConst;
-    baseFunc.mStaticness = Staticness::Static;
-    baseFunc.mReturnType.mName = "void";
+    auto &baseFunc = generatedClass.mMethods.emplace_back(
+        "Push", Type{"void"},
+        Visibility::Public, Constness::NotConst, Staticness::Static);
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
 
-    {
-      auto &data = baseFunc.mArguments.emplace_back();
-      data.mName = "data";
-      data.mType.mName = "T";
-      data.mType.mConstness = Constness::Const;
-      data.mType.mType = PassByType::Reference;
-    }
-
-    {
-      auto &luaState = baseFunc.mArguments.emplace_back();
-      luaState.mName = "luaState";
-      luaState.mType.mName = "lua_State";
-      luaState.mType.mType = PassByType::Pointer;
-    }
+    baseFunc.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
+    baseFunc.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
     baseFunc.mBody.Line() << "data.PushToLua(luaState);";
 
     {
-      auto &func = generatedClass.mMethods.emplace_back();
-      func.mName = "Push";
-      func.mConstness = Constness::NotConst;
-      func.mStaticness = Staticness::Static;
-      func.mReturnType.mName = "void";
-
-      {
-        auto &data = func.mArguments.emplace_back();
-        data.mName = "";
-        data.mType.mName = "nullptr_t";
-      }
-
-      {
-        auto &luaState = func.mArguments.emplace_back();
-        luaState.mName = "luaState";
-        luaState.mType.mName = "lua_State";
-        luaState.mType.mType = PassByType::Pointer;
-      }
-
+      auto &func = generatedClass.mMethods.emplace_back(
+          "Push", Type{"void"},
+          Visibility::Public, Constness::NotConst, Staticness::Static
+      );
+      func.mArguments.emplace_back("", Type{"nullptr_t"});
+      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
       func.mBody.Line() << "lua_pushnil(luaState);";
     }
 
     for (const auto &[type, usage]: LuaUsage) {
-      auto &func = generatedClass.mMethods.emplace_back();
-      func.mName = "Push";
-      func.mConstness = Constness::NotConst;
-      func.mStaticness = Staticness::Static;
-      func.mReturnType.mName = "void";
+      auto &func = generatedClass.mMethods.emplace_back(
+          "Push", Type{"void"},
+          Visibility::Public, Constness::NotConst, Staticness::Static);
 
       {
-        auto &data = func.mArguments.emplace_back();
-        data.mName = "data";
+        auto &data = func.mArguments.emplace_back("data", Type{type});
         data.mType.mName = type;
-        if (!TypeInfo::Get().CppPrimitives.contains(type)) {
+        if (!TypeInfo::Get().CppPrimitives.contains(data.mType.mName)) {
           data.mType.mConstness = Constness::Const;
           // func.mIsTemplateSpecialization = true;
           data.mType.mType = PassByType::Reference;
         }
       }
-
-      {
-        auto &luaState = func.mArguments.emplace_back();
-        luaState.mName = "luaState";
-        luaState.mType.mName = "lua_State";
-        luaState.mType.mType = PassByType::Pointer;
-      }
+      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
       func.mBody.Line() << usage.mPusher << "(luaState, data" << usage.mFieldExtra << ");";
     }
 
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      auto &func = generatedClass.mMethods.emplace_back();
-      func.mName = "Push";
-      func.mConstness = Constness::NotConst;
-      func.mStaticness = Staticness::Static;
+      auto &func = generatedClass.mMethods.emplace_back(
+          "Push", Type{"void"},
+          Visibility::Public, Constness::NotConst, Staticness::Static
+      );
       auto &templateArg = func.mTemplateParameters.emplace_back();
       templateArg.mType = "typename";
       templateArg.mName = "T";
-      func.mReturnType.mName = "void";
 
       {
-        auto &data = func.mArguments.emplace_back();
-        data.mName = "data";
-        data.mType.mName = container;
-        auto &outTemplate = data.mType.mTemplateParameters.emplace_back();
-        outTemplate.mName = "T";
-        data.mType.mType = PassByType::Reference;
+        auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+        data.mType.mTemplateParameters.emplace_back("T");
       }
-
-      {
-        auto &luaState = func.mArguments.emplace_back();
-        luaState.mName = "luaState";
-        luaState.mType.mName = "lua_State";
-        luaState.mType.mType = PassByType::Pointer;
-      }
+      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
       // TOOD: implement with rawseti
 
     }
 
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-      auto &func = generatedClass.mMethods.emplace_back();
-      func.mName = "Push";
-      func.mConstness = Constness::NotConst;
-      func.mStaticness = Staticness::Static;
+      auto &func = generatedClass.mMethods.emplace_back(
+          "Push", Type{"void"},
+          Visibility::Public, Constness::NotConst, Staticness::Static
+      );
       auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
       keyTemplateArg.mType = "typename";
       keyTemplateArg.mName = "K";
       auto &valueTemplateArg = func.mTemplateParameters.emplace_back();
       valueTemplateArg.mType = "typename";
       valueTemplateArg.mName = "V";
-      func.mReturnType.mName = "void";
 
       {
-        auto &data = func.mArguments.emplace_back();
-        data.mName = "data";
-        data.mType.mName = container;
-        auto &keyTemplate = data.mType.mTemplateParameters.emplace_back();
-        keyTemplate.mName = "K";
-        auto &valueTemplate = data.mType.mTemplateParameters.emplace_back();
-        valueTemplate.mName = "V";
-        data.mType.mType = PassByType::Reference;
+        auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+        data.mType.mTemplateParameters.emplace_back("K");
+        data.mType.mTemplateParameters.emplace_back("V");
       }
+      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
-      {
-        auto &luaState = func.mArguments.emplace_back();
-        luaState.mName = "luaState";
-        luaState.mType.mName = "lua_State";
-        luaState.mType.mType = PassByType::Pointer;
-      }
       // TODO: implement
 
     }
   }
 
   void LuaHelperPlugin::GenerateLuaHelperRead(Class &generatedClass) {
-    auto &baseFunc = generatedClass.mMethods.emplace_back();
-    baseFunc.mName = "Read";
-    baseFunc.mConstness = Constness::NotConst;
-    baseFunc.mStaticness = Staticness::Static;
-    baseFunc.mReturnType.mName = "bool";
+    auto &baseFunc = generatedClass.mMethods.emplace_back(
+        "Read", Type{"bool"},
+        Visibility::Public, Constness::NotConst, Staticness::Static
+    );
     auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
 
-    {
-      auto &data = baseFunc.mArguments.emplace_back();
-      data.mName = "data";
-      data.mType.mName = "T";
-      data.mType.mConstness = Constness::NotConst;
-      data.mType.mType = PassByType::Reference;
-    }
-
-    {
-      auto &luaState = baseFunc.mArguments.emplace_back();
-      luaState.mName = "luaState";
-      luaState.mType.mName = "lua_State";
-      luaState.mType.mType = PassByType::Pointer;
-    }
-
-    {
-      auto &luaIdx = baseFunc.mArguments.emplace_back();
-      luaIdx.mName = "luaIndex";
-      luaIdx.mType.mName = "int32_t";
-    }
+    baseFunc.mArguments.emplace_back("data", Type{"T", PassByType::Reference});
+    baseFunc.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    baseFunc.mArguments.emplace_back("luaIndex", Type{"int32_t"});
 
     // TODO: implement reading objects from lua?
     baseFunc.mBody.Line() << "// return data.ReadFromLua(luaState, luaIndex);";
     baseFunc.mBody.Line() << "return false;";
 
     for (const auto &[type, usage]: LuaUsage) {
-      auto &func = generatedClass.mMethods.emplace_back();
-      func.mName = "Read";
-      func.mConstness = Constness::NotConst;
-      func.mStaticness = Staticness::Static;
-      func.mReturnType.mName = "bool";
+      auto &func = generatedClass.mMethods.emplace_back(
+          "Read", Type{"bool"},
+          Visibility::Public, Constness::NotConst, Staticness::Static
+      );
 
-      {
-        auto &data = func.mArguments.emplace_back();
-        data.mName = "data";
-        data.mType.mName = type;
-        data.mType.mType = PassByType::Reference;
-        // func.mIsTemplateSpecialization = true;
-      }
-
-      {
-        auto &luaState = func.mArguments.emplace_back();
-        luaState.mName = "luaState";
-        luaState.mType.mName = "lua_State";
-        luaState.mType.mType = PassByType::Pointer;
-      }
-
-      {
-        auto &luaIdx = func.mArguments.emplace_back();
-        luaIdx.mName = "luaIndex";
-        luaIdx.mType.mName = "int32_t";
-      }
+      func.mArguments.emplace_back("data", Type{type, PassByType::Reference});
+      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+      func.mArguments.emplace_back("luaIndex", Type{"int32_t"});
 
       func.mBody.Line() << "if (!" << usage.mValidator << "(luaState, luaIndex))";
       func.mBody.Indent(1);

@@ -67,24 +67,6 @@ namespace holgen {
     return instance;
   }
 
-  // TODO: Move this to Type
-  void TypeInfo::ConvertToType(
-      Type &type,
-      const TypeDefinition &typeDefinition
-  ) {
-    auto it = TypeInfo::Get().TypeToCppType.find(typeDefinition.mName);
-    if (it != TypeInfo::Get().TypeToCppType.end()) {
-      type.mName = it->second;
-    } else {
-      type.mName = typeDefinition.mName;
-    }
-
-    for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
-      ConvertToType(type.mTemplateParameters.emplace_back(), templateParameter);
-    }
-  }
-
-
   std::string Type::ToString() const {
     std::stringstream ss;
 
@@ -127,5 +109,20 @@ namespace holgen {
     else if (mType == PassByType::MoveReference)
       ss << "&&";
     return ss.str();
+  }
+
+  Type::Type(
+      const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
+  ) : mConstness(constness), mType(passByType) {
+    auto it = TypeInfo::Get().TypeToCppType.find(typeDefinition.mName);
+    if (it != TypeInfo::Get().TypeToCppType.end()) {
+      mName = it->second;
+    } else {
+      mName = typeDefinition.mName;
+    }
+
+    for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
+      mTemplateParameters.emplace_back(templateParameter);
+    }
   }
 }

@@ -24,22 +24,41 @@ namespace holgen {
   };
 
   struct ClassField {
-    Visibility mVisibility = Visibility::Private;
+    ClassField(
+        std::string name,
+        Type _type,
+        Visibility visibility = Visibility::Private,
+        Staticness staticness = Staticness::NotStatic,
+        std::string defaultValue = ""
+    ) : mType(std::move(_type)), mName(std::move(name)), mStaticness(staticness), mVisibility(visibility),
+        mDefaultValue(std::move(defaultValue)) {
+    }
+
     Type mType;
     std::string mName;
     Staticness mStaticness = Staticness::NotStatic;
+    Visibility mVisibility = Visibility::Private;
     std::string mDefaultValue;
     std::vector<std::string> mDefaultConstructorArguments;
     const FieldDefinition *mField = nullptr;
   };
 
   struct ClassMethodArgument {
+    ClassMethodArgument(
+        std::string name,
+        Type _type,
+        std::string defaultValue = ""
+    ) : mType(std::move(_type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {
+    }
+
     Type mType;
     std::string mName;
     std::string mDefaultValue;
   };
 
   struct TemplateParameter {
+    // TODO: ctor
+    // TODO: type here?
     std::string mType;
     std::string mName;
   };
@@ -53,16 +72,28 @@ namespace holgen {
   };
 
   struct Typedef {
+    Typedef(
+        Type sourceType,
+        std::string targetType
+    ) : mSourceType(sourceType), mTargetType(targetType) {}
+
     Type mSourceType;
     std::string mTargetType;
   };
 
   struct ClassMethod : ClassMethodBase {
-    // TODO: ctor (name required, others optional)
+    explicit ClassMethod(
+        std::string name, Type returnType,
+        Visibility visibility = Visibility::Public,
+        Constness constness = Constness::Const,
+        Staticness staticness = Staticness::NotStatic
+    ) : mName(std::move(name)), mReturnType(std::move(returnType)), mConstness(constness),
+        mStaticness(staticness) { mVisibility = visibility; }
+
     std::string mName;
     Type mReturnType;
-    Constness mConstness = Constness::Const;
-    Staticness mStaticness = Staticness::NotStatic;
+    Constness mConstness;
+    Staticness mStaticness;
   };
 
   struct ClassConstructorInitializer {
@@ -81,7 +112,11 @@ namespace holgen {
   // CRTP was useful for these when calling derived static methods from the base (when defining lua metaclass)
   // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
   struct Class {
-    explicit Class(std::string name);
+    explicit Class(std::string name, const StructDefinition *_struct) : mStruct(_struct), mName(std::move(name)) {}
+
+    explicit Class(std::string name, const EnumDefinition *_enum) : mEnum(_enum), mName(std::move(name)) {}
+
+    explicit Class(std::string name) : mName(std::move(name)) {}
 
     const StructDefinition *mStruct = nullptr;
     const EnumDefinition *mEnum = nullptr;
