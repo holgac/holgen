@@ -52,6 +52,14 @@ namespace holgen {
     return nullptr;
   }
 
+  const FunctionDefinition *StructDefinition::GetFunction(const std::string &name) const {
+    for (const auto &function: mFunctions) {
+      if (function.mName == name)
+        return &function;
+    }
+    return nullptr;
+  }
+
   const EnumDefinition *ProjectDefinition::GetEnum(const std::string &name) const {
     for (const auto &enumDefinition: mEnums) {
       if (enumDefinition.mName == name)

@@ -219,4 +219,42 @@ namespace {
     ASSERT_NE(e->GetEnumEntry("Mountain"), nullptr);
     EXPECT_EQ(e->GetEnumEntry("Mountain")->mValue, "3");
   }
+
+  TEST(ParserTest, Functions) {
+    Tokenizer tokenizer(R"DELIM(
+  struct Actor {
+    string name;
+  }
+  struct Action {
+    func perform(Actor actor);
+    func func2(s32 i1, vector<s32> i2);
+    func func3();
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto &proj = parser.GetProject();
+    auto action = proj.GetStruct("Action");
+    ASSERT_NE(action, nullptr);
+    EXPECT_EQ(action->mFunctions.size(), 3);
+    auto func = action->GetFunction("perform");
+    ASSERT_NE(func, nullptr);
+    ASSERT_EQ(func->mArguments.size(), 1);
+    ASSERT_EQ(func->mArguments[0].mType.mName, "Actor");
+    ASSERT_EQ(func->mArguments[0].mName, "actor");
+
+    func = action->GetFunction("func2");
+    ASSERT_NE(func, nullptr);
+    ASSERT_EQ(func->mArguments.size(), 2);
+    ASSERT_EQ(func->mArguments[0].mType.mName, "s32");
+    ASSERT_EQ(func->mArguments[0].mName, "i1");
+    ASSERT_EQ(func->mArguments[1].mType.mName, "vector");
+    ASSERT_EQ(func->mArguments[1].mType.mTemplateParameters[0].mName, "s32");
+    ASSERT_EQ(func->mArguments[1].mName, "i2");
+
+    func = action->GetFunction("func3");
+    ASSERT_NE(func, nullptr);
+    ASSERT_EQ(func->mArguments.size(), 0);
+  }
+
 }

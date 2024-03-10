@@ -33,12 +33,26 @@ namespace holgen {
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   };
 
+  struct FunctionArgumentDefinition {
+    TypeDefinition mType;
+    std::string mName;
+  };
+
+  struct FunctionDefinition {
+    FunctionDefinition (std::string name)
+    : mName(std::move(name)) {}
+    std::string mName;
+    std::vector<FunctionArgumentDefinition> mArguments;
+  };
+
   struct StructDefinition {
     std::string mName;
     std::vector<FieldDefinition> mFields;
     std::vector<AnnotationDefinition> mAnnotations;
+    std::vector<FunctionDefinition> mFunctions;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
     [[nodiscard]] const FieldDefinition *GetField(const std::string &name) const;
+    [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
     [[nodiscard]] const FieldDefinition *GetIdField() const;
   };
 
@@ -47,6 +61,7 @@ namespace holgen {
     std::string mValue;
     std::vector<AnnotationDefinition> mAnnotations;
   };
+
   struct EnumDefinition {
     std::string mName;
     std::string mInvalidValue;

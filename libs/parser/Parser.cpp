@@ -54,11 +54,14 @@ namespace holgen {
         ParseAnnotation(curToken, annotations.emplace_back());
       }
       if (curToken.mType == TokenType::String) {
-        // TODO: check if curToken.mContents == "func"
-        auto &fieldDefinition = structDefinition.mFields.emplace_back();
-        fieldDefinition.mAnnotations = std::move(annotations);
-        annotations.clear();
-        ParseField(curToken, fieldDefinition);
+        if (curToken.mContents == "func") {
+          ParseFunction(curToken, structDefinition);
+        } else {
+          auto &fieldDefinition = structDefinition.mFields.emplace_back();
+          fieldDefinition.mAnnotations = std::move(annotations);
+          annotations.clear();
+          ParseField(curToken, fieldDefinition);
+        }
       } else {
         THROW("Unexpected token in parsing struct: \"{}\"!", curToken.mContents)
       }
@@ -188,5 +191,33 @@ namespace holgen {
     }
     THROW_IF(curToken.mType != TokenType::SemiColon,
              "Enum entry definition should be terminated by a ';', found \"{}\"", curToken.mContents);
+  }
+
+  void Parser::ParseFunction(Token &curToken, StructDefinition &structDefinition) {
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+    THROW_IF(curToken.mType != TokenType::String,
+             "Function name should be a string, found \"{}\"", curToken.mContents);
+    FunctionDefinition& fd = structDefinition.mFunctions.emplace_back(std::string(curToken.mContents));
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+    if (curToken.mType == TokenType::SemiColon)
+      return;
+    THROW_IF(curToken.mType != TokenType::POpen,
+             "Function call should start with a '(', found \"{}\"", curToken.mContents);
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+    while (curToken.mType != TokenType::PClose) {
+      FunctionArgumentDefinition& arg = fd.mArguments.emplace_back();
+      ParseType(curToken, arg.mType);
+      THROW_IF(curToken.mType != TokenType::String,
+               "Function argument names should be strings, found \"{}\"", curToken.mContents);
+      arg.mName = curToken.mContents;
+      THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+      if (curToken.mType == TokenType::Comma) {
+        THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+      }
+    }
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+    THROW_IF(curToken.mType != TokenType::SemiColon,
+             "Function definition should be terminated by a ';', found \"{}\"", curToken.mContents);
+
   }
 }

@@ -9,6 +9,7 @@ namespace holgen {
   class Parser {
     ProjectDefinition mProject;
     Tokenizer *mCurTokenizer = nullptr;
+    void ParseFunction(Token &curToken, StructDefinition &structDefinition);
     void ParseStruct(StructDefinition &structDefinition);
     void ParseEnum(EnumDefinition &enumDefinition);
     void ParseEnumEntry(Token &curToken, EnumEntryDefinition &enumEntryDefinition);
