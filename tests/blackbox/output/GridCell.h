@@ -19,6 +19,7 @@ public:
   void SetLandscape(const LandscapeType& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
+  static GridCell* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:

@@ -44,14 +44,19 @@ void DamageMultiplier::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "DamageMultiplierMeta");
   lua_setmetatable(luaState, -2);
 }
+DamageMultiplier* DamageMultiplier::ReadFromLua(lua_State* luaState, int32_t idx) {
+  lua_pushstring(luaState, "p");
+  lua_gettable(luaState, idx - 1);
+  auto ptr = (DamageMultiplier*)lua_touserdata(luaState, -1);
+  lua_pop(luaState, 1);
+  return ptr;
+}
 void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -3);
-    auto instance = (DamageMultiplier*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -2);
+    auto instance = DamageMultiplier::ReadFromLua(ls, -2);
+    const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("when", key)) {
       LuaHelper::Push(instance->mWhen, ls);
     } else if (0 == strcmp("value", key)) {
@@ -64,14 +69,12 @@ void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -4);
-    auto instance = (DamageMultiplier*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -3);
+    auto instance = DamageMultiplier::ReadFromLua(ls, -3);
+    const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("when", key)) {
-      LuaHelper::Read(instance->mWhen, ls, -2);
+      LuaHelper::Read(instance->mWhen, ls, -1);
     } else if (0 == strcmp("value", key)) {
-      LuaHelper::Read(instance->mValue, ls, -2);
+      LuaHelper::Read(instance->mValue, ls, -1);
     }
     return 0;
   });

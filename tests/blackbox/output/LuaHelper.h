@@ -7,8 +7,8 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <lua.hpp>
 
-struct lua_State;
 namespace holgen_blackbox_test {
 class LuaHelper {
 public:
@@ -17,6 +17,14 @@ public:
     data.PushToLua(luaState);
   }
   static void Push(nullptr_t , lua_State* luaState);
+  template <typename T>
+  static void Push(const T* ptr, lua_State* luaState) {
+    if (ptr) {
+      ptr->PushToLua(luaState);
+    } else {
+      lua_pushnil(luaState);
+    }
+  }
   static void Push(bool data, lua_State* luaState);
   static void Push(double data, lua_State* luaState);
   static void Push(float data, lua_State* luaState);
@@ -43,8 +51,8 @@ public:
   }
   template <typename T>
   static bool Read(T& data, lua_State* luaState, int32_t luaIndex) {
-    // return data.ReadFromLua(luaState, luaIndex);
-    return false;
+    // *data = T::ReadFromLua(luaState, luaIndex);
+    return false; //*data != nullptr;
   }
   static bool Read(bool& data, lua_State* luaState, int32_t luaIndex);
   static bool Read(double& data, lua_State* luaState, int32_t luaIndex);
@@ -58,6 +66,22 @@ public:
   static bool Read(uint32_t& data, lua_State* luaState, int32_t luaIndex);
   static bool Read(uint64_t& data, lua_State* luaState, int32_t luaIndex);
   static bool Read(uint8_t& data, lua_State* luaState, int32_t luaIndex);
+  template <typename T>
+  static bool Read(const std::deque<T>& data, lua_State* luaState, int32_t luaIndex) {
+    return false;
+  }
+  template <typename T>
+  static bool Read(const std::vector<T>& data, lua_State* luaState, int32_t luaIndex) {
+    return false;
+  }
+  template <typename K, typename V>
+  static bool Read(const std::map<K, V>& data, lua_State* luaState, int32_t luaIndex) {
+    return false;
+  }
+  template <typename K, typename V>
+  static bool Read(const std::unordered_map<K, V>& data, lua_State* luaState, int32_t luaIndex) {
+    return false;
+  }
 protected:
 private:
 };

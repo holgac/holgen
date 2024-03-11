@@ -62,14 +62,19 @@ void Country::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "CountryMeta");
   lua_setmetatable(luaState, -2);
 }
+Country* Country::ReadFromLua(lua_State* luaState, int32_t idx) {
+  lua_pushstring(luaState, "p");
+  lua_gettable(luaState, idx - 1);
+  auto ptr = (Country*)lua_touserdata(luaState, -1);
+  lua_pop(luaState, 1);
+  return ptr;
+}
 void Country::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -3);
-    auto instance = (Country*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -2);
+    auto instance = Country::ReadFromLua(ls, -2);
+    const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("leader", key)) {
       LuaHelper::Push(instance->mLeader, ls);
     } else if (0 == strcmp("citizens", key)) {
@@ -84,16 +89,14 @@ void Country::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -4);
-    auto instance = (Country*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -3);
+    auto instance = Country::ReadFromLua(ls, -3);
+    const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("leader", key)) {
-      LuaHelper::Read(instance->mLeader, ls, -2);
+      LuaHelper::Read(instance->mLeader, ls, -1);
     } else if (0 == strcmp("citizens", key)) {
-      LuaHelper::Read(instance->mCitizens, ls, -2);
+      LuaHelper::Read(instance->mCitizens, ls, -1);
     } else if (0 == strcmp("population", key)) {
-      LuaHelper::Read(instance->mPopulation, ls, -2);
+      LuaHelper::Read(instance->mPopulation, ls, -1);
     }
     return 0;
   });

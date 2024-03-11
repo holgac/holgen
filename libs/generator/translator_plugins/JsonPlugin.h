@@ -17,5 +17,6 @@ namespace holgen {
     void EnrichClass(Class &cls,const EnumDefinition& enumDefinition);
     void GenerateParseJson(Class &cls);
     void GenerateParseJsonForField(Class& cls, ClassMethod& parseFunc, const StructDefinition& structDefinition, const FieldDefinition& fieldDefinition);
+    void GenerateParseJsonForFunction(ClassMethod& parseFunc, const FunctionDefinition& functionDefinition);
   };
 }

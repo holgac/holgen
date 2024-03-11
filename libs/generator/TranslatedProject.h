@@ -128,8 +128,7 @@ namespace holgen {
     std::vector<Typedef> mTypedefs;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
-    CodeBlock mGlobalForwardDeclarations;
-    // CodeBlock mNamespaceForwardDeclarations;
+    std::set<std::string> mGlobalForwardDeclarations;
     ClassField *GetField(const std::string &name);
     ClassMethod *GetMethod(const std::string &name, bool isConst);
   };

@@ -13,6 +13,7 @@ namespace holgen {
     SemiColon,
     Equals,
     Plus,
+    Minus,
     POpen, // (
     PClose, // )
     COpen, // {

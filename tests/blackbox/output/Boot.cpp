@@ -66,15 +66,20 @@ void Boot::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "BootMeta");
   lua_setmetatable(luaState, -2);
 }
+Boot* Boot::ReadFromLua(lua_State* luaState, int32_t idx) {
+  lua_pushstring(luaState, "i");
+  lua_gettable(luaState, idx - 1);
+  uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(luaState, -1));
+  auto ptr = Boot::Get(id);
+  lua_pop(luaState, 1);
+  return ptr;
+}
 void Boot::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "i");
-    lua_gettable(ls, -3);
-    uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
-    auto instance = Boot::Get(id);
-    const char* key = lua_tostring(ls, -2);
+    auto instance = Boot::ReadFromLua(ls, -2);
+    const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("id", key)) {
       LuaHelper::Push(instance->mId, ls);
     } else if (0 == strcmp("name", key)) {
@@ -89,17 +94,14 @@ void Boot::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "i");
-    lua_gettable(ls, -4);
-    uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(ls, -1));
-    auto instance = Boot::Get(id);
-    const char* key = lua_tostring(ls, -3);
+    auto instance = Boot::ReadFromLua(ls, -3);
+    const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("id", key)) {
-      LuaHelper::Read(instance->mId, ls, -2);
+      LuaHelper::Read(instance->mId, ls, -1);
     } else if (0 == strcmp("name", key)) {
-      LuaHelper::Read(instance->mName, ls, -2);
+      LuaHelper::Read(instance->mName, ls, -1);
     } else if (0 == strcmp("color", key)) {
-      LuaHelper::Read(instance->mColor, ls, -2);
+      LuaHelper::Read(instance->mColor, ls, -1);
     }
     return 0;
   });

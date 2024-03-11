@@ -10,10 +10,11 @@ public:
   void Run() override;
 private:
   void EnrichClass(Class &generatedClass, const StructDefinition& structDefinition);
+  void AddPushToLua(Class &generatedClass, const StructDefinition& structDefinition);
+  void AddReadFromLua(Class &generatedClass, const StructDefinition& structDefinition);
   void EnrichClass(Class &generatedClass, const EnumDefinition& enumDefinition);
   void CreateIndexMetaMethod(CodeBlock& codeBlock, Class& generatedClass);
   void CreateNewIndexMetaMethod(CodeBlock& codeBlock, Class& generatedClass);
-  void AddLuaInstanceGetter(CodeBlock& codeBlock, Class& cls, int idx);
   };
 
 }

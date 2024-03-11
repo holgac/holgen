@@ -67,14 +67,19 @@ void Weapon::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "WeaponMeta");
   lua_setmetatable(luaState, -2);
 }
+Weapon* Weapon::ReadFromLua(lua_State* luaState, int32_t idx) {
+  lua_pushstring(luaState, "p");
+  lua_gettable(luaState, idx - 1);
+  auto ptr = (Weapon*)lua_touserdata(luaState, -1);
+  lua_pop(luaState, 1);
+  return ptr;
+}
 void Weapon::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -3);
-    auto instance = (Weapon*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -2);
+    auto instance = Weapon::ReadFromLua(ls, -2);
+    const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("damageMin", key)) {
       LuaHelper::Push(instance->mDamageMin, ls);
     } else if (0 == strcmp("damageMax", key)) {
@@ -91,18 +96,16 @@ void Weapon::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -4);
-    auto instance = (Weapon*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -3);
+    auto instance = Weapon::ReadFromLua(ls, -3);
+    const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("damageMin", key)) {
-      LuaHelper::Read(instance->mDamageMin, ls, -2);
+      LuaHelper::Read(instance->mDamageMin, ls, -1);
     } else if (0 == strcmp("damageMax", key)) {
-      LuaHelper::Read(instance->mDamageMax, ls, -2);
+      LuaHelper::Read(instance->mDamageMax, ls, -1);
     } else if (0 == strcmp("damageMultipliers", key)) {
-      LuaHelper::Read(instance->mDamageMultipliers, ls, -2);
+      LuaHelper::Read(instance->mDamageMultipliers, ls, -1);
     } else if (0 == strcmp("modifiers", key)) {
-      LuaHelper::Read(instance->mModifiers, ls, -2);
+      LuaHelper::Read(instance->mModifiers, ls, -1);
     }
     return 0;
   });

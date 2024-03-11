@@ -39,10 +39,11 @@ namespace holgen {
   };
 
   struct FunctionDefinition {
-    FunctionDefinition (std::string name)
-    : mName(std::move(name)) {}
     std::string mName;
+    TypeDefinition mReturnType;
     std::vector<FunctionArgumentDefinition> mArguments;
+    std::vector<AnnotationDefinition> mAnnotations;
+    [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   };
 
   struct StructDefinition {

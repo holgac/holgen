@@ -55,7 +55,10 @@ namespace holgen {
       }
       if (curToken.mType == TokenType::String) {
         if (curToken.mContents == "func") {
-          ParseFunction(curToken, structDefinition);
+          FunctionDefinition& fd = structDefinition.mFunctions.emplace_back();
+          fd.mAnnotations = std::move(annotations);
+          annotations.clear();
+          ParseFunction(curToken, fd);
         } else {
           auto &fieldDefinition = structDefinition.mFields.emplace_back();
           fieldDefinition.mAnnotations = std::move(annotations);
@@ -193,11 +196,11 @@ namespace holgen {
              "Enum entry definition should be terminated by a ';', found \"{}\"", curToken.mContents);
   }
 
-  void Parser::ParseFunction(Token &curToken, StructDefinition &structDefinition) {
+  void Parser::ParseFunction(Token &curToken, FunctionDefinition &fd) {
     THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
     THROW_IF(curToken.mType != TokenType::String,
              "Function name should be a string, found \"{}\"", curToken.mContents);
-    FunctionDefinition& fd = structDefinition.mFunctions.emplace_back(std::string(curToken.mContents));
+    fd.mName = curToken.mContents;
     THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
     if (curToken.mType == TokenType::SemiColon)
       return;
@@ -216,6 +219,17 @@ namespace holgen {
       }
     }
     THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+    if (curToken.mType == TokenType::SemiColon) {
+      fd.mReturnType.mName = "void";
+      return;
+    }
+    THROW_IF(curToken.mType != TokenType::Minus,
+             "Missing '-' in function syntax, found \"{}\"", curToken.mContents);
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+    THROW_IF(curToken.mType != TokenType::AClose,
+             "Missing '>' in function syntax, found \"{}\"", curToken.mContents);
+    THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete function definition!");
+    ParseType(curToken, fd.mReturnType);
     THROW_IF(curToken.mType != TokenType::SemiColon,
              "Function definition should be terminated by a ';', found \"{}\"", curToken.mContents);
 

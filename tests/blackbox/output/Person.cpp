@@ -81,14 +81,19 @@ void Person::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "PersonMeta");
   lua_setmetatable(luaState, -2);
 }
+Person* Person::ReadFromLua(lua_State* luaState, int32_t idx) {
+  lua_pushstring(luaState, "p");
+  lua_gettable(luaState, idx - 1);
+  auto ptr = (Person*)lua_touserdata(luaState, -1);
+  lua_pop(luaState, 1);
+  return ptr;
+}
 void Person::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -3);
-    auto instance = (Person*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -2);
+    auto instance = Person::ReadFromLua(ls, -2);
+    const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("race", key)) {
       LuaHelper::Push(instance->mRace, ls);
     } else if (0 == strcmp("currentCountry", key)) {
@@ -107,20 +112,18 @@ void Person::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -4);
-    auto instance = (Person*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -3);
+    auto instance = Person::ReadFromLua(ls, -3);
+    const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("race", key)) {
-      LuaHelper::Read(instance->mRace, ls, -2);
+      LuaHelper::Read(instance->mRace, ls, -1);
     } else if (0 == strcmp("currentCountry", key)) {
-      LuaHelper::Read(instance->mCurrentCountry, ls, -2);
+      LuaHelper::Read(instance->mCurrentCountry, ls, -1);
     } else if (0 == strcmp("currentCity", key)) {
-      LuaHelper::Read(instance->mCurrentCity, ls, -2);
+      LuaHelper::Read(instance->mCurrentCity, ls, -1);
     } else if (0 == strcmp("homeCountry", key)) {
-      LuaHelper::Read(instance->mHomeCountry, ls, -2);
+      LuaHelper::Read(instance->mHomeCountry, ls, -1);
     } else if (0 == strcmp("placeOfBirth", key)) {
-      LuaHelper::Read(instance->mPlaceOfBirth, ls, -2);
+      LuaHelper::Read(instance->mPlaceOfBirth, ls, -1);
     }
     return 0;
   });

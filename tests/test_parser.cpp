@@ -226,9 +226,9 @@ namespace {
     string name;
   }
   struct Action {
-    func perform(Actor actor);
-    func func2(s32 i1, vector<s32> i2);
-    func func3();
+    func func1(Actor actor);
+    func func2(s32 i1, vector<s32> i2) -> void;
+    func func3() -> vector<s32>;
   }
     )DELIM");
     Parser parser;
@@ -237,14 +237,16 @@ namespace {
     auto action = proj.GetStruct("Action");
     ASSERT_NE(action, nullptr);
     EXPECT_EQ(action->mFunctions.size(), 3);
-    auto func = action->GetFunction("perform");
+    auto func = action->GetFunction("func1");
     ASSERT_NE(func, nullptr);
+    ASSERT_EQ(func->mReturnType.mName, "void");
     ASSERT_EQ(func->mArguments.size(), 1);
     ASSERT_EQ(func->mArguments[0].mType.mName, "Actor");
     ASSERT_EQ(func->mArguments[0].mName, "actor");
 
     func = action->GetFunction("func2");
     ASSERT_NE(func, nullptr);
+    ASSERT_EQ(func->mReturnType.mName, "void");
     ASSERT_EQ(func->mArguments.size(), 2);
     ASSERT_EQ(func->mArguments[0].mType.mName, "s32");
     ASSERT_EQ(func->mArguments[0].mName, "i1");
@@ -255,6 +257,8 @@ namespace {
     func = action->GetFunction("func3");
     ASSERT_NE(func, nullptr);
     ASSERT_EQ(func->mArguments.size(), 0);
+    ASSERT_EQ(func->mReturnType.mName, "vector");
+    ASSERT_EQ(func->mReturnType.mTemplateParameters[0].mName, "s32");
   }
 
 }

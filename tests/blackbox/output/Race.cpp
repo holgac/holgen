@@ -70,14 +70,19 @@ void Race::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "RaceMeta");
   lua_setmetatable(luaState, -2);
 }
+Race* Race::ReadFromLua(lua_State* luaState, int32_t idx) {
+  lua_pushstring(luaState, "p");
+  lua_gettable(luaState, idx - 1);
+  auto ptr = (Race*)lua_touserdata(luaState, -1);
+  lua_pop(luaState, 1);
+  return ptr;
+}
 void Race::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -3);
-    auto instance = (Race*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -2);
+    auto instance = Race::ReadFromLua(ls, -2);
+    const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("id", key)) {
       LuaHelper::Push(instance->mId, ls);
     } else if (0 == strcmp("name", key)) {
@@ -94,18 +99,16 @@ void Race::CreateLuaMetatable(lua_State* luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
-    lua_pushstring(ls, "p");
-    lua_gettable(ls, -4);
-    auto instance = (Race*)lua_touserdata(ls, -1);
-    const char* key = lua_tostring(ls, -3);
+    auto instance = Race::ReadFromLua(ls, -3);
+    const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("id", key)) {
-      LuaHelper::Read(instance->mId, ls, -2);
+      LuaHelper::Read(instance->mId, ls, -1);
     } else if (0 == strcmp("name", key)) {
-      LuaHelper::Read(instance->mName, ls, -2);
+      LuaHelper::Read(instance->mName, ls, -1);
     } else if (0 == strcmp("hairColors", key)) {
-      LuaHelper::Read(instance->mHairColors, ls, -2);
+      LuaHelper::Read(instance->mHairColors, ls, -1);
     } else if (0 == strcmp("names", key)) {
-      LuaHelper::Read(instance->mNames, ls, -2);
+      LuaHelper::Read(instance->mNames, ls, -1);
     }
     return 0;
   });

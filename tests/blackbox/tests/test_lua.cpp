@@ -6,6 +6,9 @@
 #include "GameData.h"
 #include "GlobalPointer.h"
 #include "LuaTestHelper.h"
+#include "Number.h"
+#include "Calculator.h"
+#include "LuaHelper.h"
 
 using namespace holgen_blackbox_test;
 
@@ -127,4 +130,52 @@ TEST_F(LuaTest, Ref) {
   luaL_dostring(mState, "return gorion.boot.name");
   LuaTestHelper::ExpectStack(mState, {otherBoot->GetName()});
   lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, Func) {
+  Number::CreateLuaMetatable(mState);
+  Calculator::CreateLuaMetatable(mState);
+  Calculator c;
+  lua_pushcfunction(mState, [](lua_State* ls) -> int {
+    auto calc = Calculator::ReadFromLua(ls, -2);
+    int32_t val;
+    LuaHelper::Read(val, ls, -1);
+    val += calc->GetCurVal().GetValue();
+    calc->GetCurVal().SetValue(val);
+    LuaHelper::Push(val, ls);
+    return 1;
+  });
+  lua_setglobal(mState, "calc_add");
+  c.GetCurVal().SetValue(0);
+  EXPECT_EQ(c.GetCurVal().GetValue(), 0);
+  c.SetAddLuaFunc("calc_add");
+  LuaTestHelper::ExpectStack(mState, {});
+  EXPECT_EQ(c.Add(mState, 5), 5);
+  EXPECT_EQ(c.GetCurVal().GetValue(), 5);
+  LuaTestHelper::ExpectStack(mState, {});
+  EXPECT_EQ(c.Add(mState, 7), 12);
+  EXPECT_EQ(c.GetCurVal().GetValue(), 12);
+  LuaTestHelper::ExpectStack(mState, {});
+  lua_newtable(mState);
+  lua_pushstring(mState, "calc_subtract");
+  lua_pushcfunction(mState, [](lua_State* ls) -> int {
+    auto calc = Calculator::ReadFromLua(ls, -2);
+    auto num = Number::ReadFromLua(ls, -1);
+    calc->GetCurVal().SetValue(calc->GetCurVal().GetValue() - num->GetValue());
+    LuaHelper::Push(calc->GetCurVal(), ls);
+    return 1;
+  });
+  lua_settable(mState, -3);
+  lua_setglobal(mState, "Ops");
+  c.SetSubtractLuaFunc("calc_subtract");
+
+  Number num2;
+  num2.SetValue(10);
+  LuaTestHelper::ExpectStack(mState, {});
+  auto res = c.Subtract(mState, &num2);
+  LuaTestHelper::ExpectStack(mState, {});
+  return;
+  ASSERT_NE(res, nullptr);
+  EXPECT_EQ(res->GetValue(), 2);
+  EXPECT_EQ(c.GetCurVal().GetValue(), 2);
 }

@@ -4,6 +4,7 @@
 #include "generator/translator_plugins/ClassFieldPlugin.h"
 #include "generator/translator_plugins/ClassFieldGetterPlugin.h"
 #include "generator/translator_plugins/ClassFieldSetterPlugin.h"
+#include "generator/translator_plugins/LuaFunctionPlugin.h"
 #include "generator/translator_plugins/ContainerFieldPlugin.h"
 #include "generator/translator_plugins/ManagedClassPlugin.h"
 #include "generator/translator_plugins/EnumPlugin.h"
@@ -24,6 +25,7 @@ namespace holgen {
     AddPlugin<ClassFieldPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();
     AddPlugin<ClassFieldSetterPlugin>();
+    AddPlugin<LuaFunctionPlugin>();
     AddPlugin<ContainerFieldPlugin>();
     AddPlugin<ManagedClassPlugin>();
     AddPlugin<EnumPlugin>();

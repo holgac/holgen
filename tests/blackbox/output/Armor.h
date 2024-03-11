@@ -25,6 +25,7 @@ public:
   static Armor* GetFromAlternativeName(const std::string& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
+  static Armor* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:

@@ -64,7 +64,8 @@ namespace holgen {
     codeBlock.Line();
     codeBlock.Add("#include \"holgen.h\"");
     GenerateIncludes(codeBlock, cls, true);
-    codeBlock.Add(cls.mGlobalForwardDeclarations);
+    for(auto& fwdDecl : cls.mGlobalForwardDeclarations)
+      codeBlock.Line() << fwdDecl;
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
 

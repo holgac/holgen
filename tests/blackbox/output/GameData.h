@@ -43,6 +43,7 @@ public:
   Character* GetCharacter(uint32_t idx);
   bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
   void PushToLua(lua_State* luaState) const;
+  static GameData* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:

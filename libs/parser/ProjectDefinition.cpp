@@ -2,6 +2,15 @@
 #include "core/Annotations.h"
 #include "core/St.h"
 
+#define GEN_GETTER_BY_NAME(cls_name, retval, getterName, field) \
+const retval *cls_name::getterName(const std::string &name) const { \
+  for (const auto &entry: field) { \
+    if (entry.mName == name) \
+      return &entry; \
+    } \
+  return nullptr; \
+}
+
 namespace holgen {
 
   const AnnotationDefinition *FieldDefinition::GetAnnotation(const std::string &name) const {
@@ -95,4 +104,6 @@ namespace holgen {
     }
     return nullptr;
   }
+
+  GEN_GETTER_BY_NAME(FunctionDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
 }

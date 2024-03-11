@@ -17,6 +17,7 @@ namespace holgen {
         {'<', TokenType::AOpen},
         {'>', TokenType::AClose},
         {'+', TokenType::Plus},
+        {'-', TokenType::Minus},
         {'/', TokenType::Slash},
         {'@', TokenType::At},
     };

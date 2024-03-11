@@ -23,6 +23,7 @@ public:
   void SetPopulation(const std::map<uint32_t, uint32_t>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
+  static Country* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:

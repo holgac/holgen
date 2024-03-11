@@ -59,7 +59,22 @@ namespace holgen {
       } else {
         parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
       }
+      parseFunc.mBody.Indent(1); // if name == fieldName
       GenerateParseJsonForField(cls, parseFunc, structDefinition, fieldDefinition);
+      parseFunc.mBody.Indent(-1); // if name == fieldName
+    }
+
+    for (const auto &fd: structDefinition.mFunctions) {
+      if (fd.GetAnnotation(Annotations::NoJson))
+        continue;
+      if (isFirst) {
+        parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fd.mName << "\")) {";
+        isFirst = false;
+      } else {
+        parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fd.mName << "\")) {";
+      }
+      parseFunc.mBody.Indent(1); // if name == fieldName
+      GenerateParseJsonForFunction(parseFunc, fd);
       parseFunc.mBody.Indent(-1); // if name == fieldName
     }
 
@@ -76,8 +91,6 @@ namespace holgen {
       const StructDefinition &structDefinition __attribute__((unused)),
       const FieldDefinition &fieldDefinition
   ) {
-    parseFunc.mBody.Indent(1);
-
     if (mProject.mProject.GetStruct(fieldDefinition.mType.mName) == nullptr) {
       auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {
@@ -155,5 +168,14 @@ namespace holgen {
     parseFunc.mBody.Indent(-1);
     parseFunc.mBody.Add("}}");
     parseFunc.mBody.Add("return true;");
+  }
+
+  void JsonPlugin::GenerateParseJsonForFunction(
+      ClassMethod &parseFunc, const FunctionDefinition &functionDefinition) {
+    parseFunc.mBody.Add("std::string val;");
+    parseFunc.mBody.Add("{}::{}(val, data.value, converter);",
+                        St::JsonHelper, St::JsonHelper_Parse);
+    parseFunc.mBody.Add("mFuncName_{} = std::move(val);", functionDefinition.mName);
+
   }
 }
