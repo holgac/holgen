@@ -96,7 +96,7 @@ namespace holgen {
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
-        Type type(jsonConvertFrom->mValue);
+        Type type(mProject.mProject, jsonConvertFrom->mValue);
         parseFunc.mBody.Line() << type.ToString() << " temp;";
         parseFunc.mBody.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
         parseFunc.mBody.Line() << "if (!res)";

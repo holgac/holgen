@@ -7,6 +7,7 @@
 
 namespace holgen {
   struct TypeDefinition;
+  struct ProjectDefinition;
 
   enum class PassByType {
     Value,
@@ -30,8 +31,7 @@ namespace holgen {
     explicit Type(std::string name, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst)
     : mName(std::move(name)), mConstness(constness), mType(passByType) { }
 
-    // TODO: add TranslatedProject arg and resolve Refs
-    explicit Type(const TypeDefinition& typeDefinition, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
+    explicit Type(const ProjectDefinition& project, const TypeDefinition& typeDefinition, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
 
 
     std::string mName = "void";

@@ -28,7 +28,7 @@ namespace holgen {
             Constness::NotConst,
             Staticness::Static
             );
-        getter.mArguments.emplace_back("id", Type{idField->mType});
+        getter.mArguments.emplace_back("id", Type{mProject.mProject, idField->mType});
         getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                          St::GlobalPointer, manager->mName,
                          St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
@@ -49,7 +49,7 @@ namespace holgen {
             Staticness::Static
             );
         auto indexedOnField = generatedClass.mStruct->GetField(indexOn->mValue.mName);
-        ClassMethodArgument &valArg = getter.mArguments.emplace_back("val", Type{indexedOnField->mType});
+        ClassMethodArgument &valArg = getter.mArguments.emplace_back("val", Type{mProject.mProject, indexedOnField->mType});
         if (!TypeInfo::Get().CppPrimitives.contains(valArg.mType.mName)) {
           valArg.mType.mType = PassByType::Reference;
           valArg.mType.mConstness = Constness::Const;

@@ -31,7 +31,7 @@ namespace holgen {
     }
     auto &method = cls.mMethods.emplace_back(
         St::Capitalize(func.mName),
-        Type{func.mReturnType}
+        Type{mProject.mProject, func.mReturnType}
     );
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mBody.Add(
@@ -94,7 +94,7 @@ namespace holgen {
   void LuaFunctionPlugin::AddLuaFunctionPushArgs(Class &cls __attribute__((unused)), ClassMethod &method,
                                                  const FunctionDefinition &func) {
     for (auto &funcArg: func.mArguments) {
-      auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{funcArg.mType});
+      auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject.mProject, funcArg.mType});
       if (mProject.GetClass(arg.mType.mName) != nullptr) {
         arg.mType.mType = PassByType::Pointer;
         arg.mType.mConstness = Constness::Const;

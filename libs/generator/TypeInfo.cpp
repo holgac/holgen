@@ -1,6 +1,7 @@
 #include "TypeInfo.h"
 #include <sstream>
 #include <parser/Parser.h>
+#include "TranslatedProject.h"
 
 namespace holgen {
   TypeInfo::TypeInfo() {
@@ -112,8 +113,13 @@ namespace holgen {
   }
 
   Type::Type(
-      const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
+      const ProjectDefinition& project, const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
   ) : mConstness(constness), mType(passByType) {
+    if (typeDefinition.mName == "Ref") {
+      auto refType = project.GetStruct(typeDefinition.mTemplateParameters[0].mName);
+      *this = Type{project, refType->GetIdField()->mType};
+      return;
+    }
     auto it = TypeInfo::Get().TypeToCppType.find(typeDefinition.mName);
     if (it != TypeInfo::Get().TypeToCppType.end()) {
       mName = it->second;
@@ -122,7 +128,7 @@ namespace holgen {
     }
 
     for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
-      mTemplateParameters.emplace_back(templateParameter);
+      mTemplateParameters.emplace_back(project, templateParameter);
     }
   }
 }

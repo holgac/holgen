@@ -7,13 +7,11 @@ namespace holgen {
     if (generatedField.mDefaultValue.empty())
       generatedField.mDefaultValue = "-1";
     auto refStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
-    auto refStructId = refStruct->GetIdField();
-    generatedField.mType = Type{refStructId->mType};
     for (int i = 0; i < 2; ++i) {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &getter = generatedClass.mMethods.emplace_back(
           St::GetGetterMethodName(fieldDefinition.mName),
-          Type{fieldDefinition.mType.mTemplateParameters[0], PassByType::Pointer, constness},
+          Type{mProject.mProject, fieldDefinition.mType.mTemplateParameters[0], PassByType::Pointer, constness},
           Visibility::Public,
           constness);
       getter.mBody.Add("return {}::{}({});", refStruct->mName, St::ManagedObject_Getter,
@@ -29,7 +27,7 @@ namespace holgen {
         bool isRef = fieldDefinition.mType.mName == "Ref";
 
         auto &generatedField = generatedClass.mFields.emplace_back(
-            St::GetFieldNameInCpp(fieldDefinition.mName, isRef), Type{fieldDefinition.mType},
+            St::GetFieldNameInCpp(fieldDefinition.mName, isRef), Type{mProject.mProject, fieldDefinition.mType},
             Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue);
         generatedField.mField = &fieldDefinition;
         if (isRef) {

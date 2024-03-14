@@ -54,14 +54,14 @@ namespace holgen {
         parseFunc.mBody.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
         parseFunc.mBody.Indent(1);
 
-        Type fromType(indexedOnField->mType);
+        Type fromType(mProject.mProject, indexedOnField->mType);
         if (!TypeInfo::Get().CppPrimitives.contains(fromType.mName)) {
           // This is done so many times, maybe Type::AdjustForFunctionArgument?
           fromType.mConstness = Constness::Const;
           fromType.mType = PassByType::Reference;
         }
         auto idField = underlyingStruct.GetIdField();
-        Type toType(idField->mType);
+        Type toType(mProject.mProject, idField->mType);
         parseFunc.mBody.Add("converter.{} = [this]({} key) -> {} {{", forConverter->mValue.mName, fromType.ToString(),
                             toType.ToString());
         parseFunc.mBody.Indent(1);
@@ -145,7 +145,7 @@ namespace holgen {
           parseFunc.mBody.Indent(1);
           parseFunc.mBody.Add(
               R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath);)");
-          Type type(templateParameter);
+          Type type(mProject.mProject, templateParameter);
           parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
           parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
           parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath);)");

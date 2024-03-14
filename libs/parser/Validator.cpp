@@ -89,7 +89,6 @@ namespace holgen {
              structDefinition.mName, fieldDefinition.mName);
     THROW_IF(&fieldDefinition != structDefinition.GetField(fieldDefinition.mName), "Duplicate field name: {}.{}",
              structDefinition.mName, fieldDefinition.mName);
-    Validate(structDefinition, fieldDefinition, fieldDefinition.mType);
     if (fieldDefinition.mType.mName == "Ref") {
       THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1,
                "Ref field {}.{} should have a single template parameter",
@@ -103,6 +102,8 @@ namespace holgen {
                "Ref field {}.{} references {} which is not managed",
                structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mTemplateParameters[0].mName);
     }
+
+    Validate(structDefinition, fieldDefinition, fieldDefinition.mType);
 
     for (auto &annotationDefinition: fieldDefinition.mAnnotations) {
       Validate(structDefinition, fieldDefinition, annotationDefinition);
@@ -137,7 +138,7 @@ namespace holgen {
       auto indexUsing = annotationDefinition.GetAttribute(Annotations::Index_Using);
       if (indexUsing) {
         EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Index_Using);
-        auto type = Type{indexUsing->mValue};
+        auto type = Type{mProject, indexUsing->mValue};
         THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
                  "{}.{} uses invalid index type: {}",
                  structDefinition.mName, fieldDefinition.mName, indexUsing->mValue.mName)
@@ -149,7 +150,7 @@ namespace holgen {
                structDefinition.mName, fieldDefinition.mName,
                underlyingStruct->mName, indexOn->mValue.mName
       )
-      Type indexType(underlyingField->mType);
+      Type indexType(mProject, underlyingField->mType);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(indexType.mName),
                "{}.{} indexes on {}.{} which is not a valid key",
                structDefinition.mName, fieldDefinition.mName,
@@ -164,7 +165,7 @@ namespace holgen {
       auto idField = structDefinition.GetIdField();
       THROW_IF(&fieldDefinition != idField, "struct {} has multiple id fields: {} and {}",
                structDefinition.mName, idField->mName, fieldDefinition.mName);
-      Type type(fieldDefinition.mType);
+      Type type(mProject, fieldDefinition.mType);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mName), "Field {}.{} uses an invalid type for an id: {}",
                structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mName);
     }
@@ -172,7 +173,7 @@ namespace holgen {
 
   void Validator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                            const TypeDefinition &typeDefinition) {
-    Type type(typeDefinition);
+    Type type(mProject, typeDefinition);
     THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && !CustomTypes.contains(type.mName)
              && mProject.GetStruct(type.mName) == nullptr
              && mProject.GetEnum(type.mName) == nullptr,
@@ -219,7 +220,7 @@ namespace holgen {
                                               const AnnotationDefinition &annotationDefinition) {
     EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
     EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Container_ElemName);
-    auto type = Type{fieldDefinition.mType};
+    auto type = Type{mProject, fieldDefinition.mType};
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     auto underlyingStruct = mProject.GetStruct(underlyingType.mName);
     THROW_IF(underlyingStruct == nullptr, "{}.{} is a container of {} which is not a user type",
@@ -246,8 +247,8 @@ namespace holgen {
                  "{}.{} uses a Ref key on an unrelated object",
                  structDefinition.mName, fieldDefinition.mName);
       } else {
-        THROW_IF(!TypeInfo::Get().IntegralTypes.contains(key.mName), "{}.{} has an unusual key type",
-            structDefinition.mName, fieldDefinition.mName);
+        THROW_IF(!TypeInfo::Get().KeyableTypes.contains(key.mName), "{}.{} has an unusual key type",
+                 structDefinition.mName, fieldDefinition.mName);
       }
     } else {
       THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
