@@ -6,7 +6,7 @@ namespace holgen {
                                          const FieldDefinition &fieldDefinition) const {
     if (generatedField.mDefaultValue.empty())
       generatedField.mDefaultValue = "-1";
-    auto refStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+    auto refStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
     auto refStructId = refStruct->GetIdField();
     generatedField.mType = Type{refStructId->mType};
     for (int i = 0; i < 2; ++i) {

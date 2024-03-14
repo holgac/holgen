@@ -131,6 +131,7 @@ namespace holgen {
     std::set<std::string> mGlobalForwardDeclarations;
     ClassField *GetField(const std::string &name);
     ClassMethod *GetMethod(const std::string &name, bool isConst);
+    const Typedef *GetTypedef(const std::string &name) const;
   };
 
   struct TranslatedProject {
@@ -139,6 +140,7 @@ namespace holgen {
     const ProjectDefinition &mProject;
     const DependencyGraph mDependencyGraph;
     std::vector<Class> mClasses;
+    // TODO: AddClass that checks name colls
     [[nodiscard]] Class *GetClass(const std::string &name);
     [[nodiscard]] const Class *GetClass(const std::string &name) const;
   };

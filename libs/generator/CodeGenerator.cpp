@@ -64,7 +64,7 @@ namespace holgen {
     codeBlock.Line();
     codeBlock.Add("#include \"holgen.h\"");
     GenerateIncludes(codeBlock, cls, true);
-    for(auto& fwdDecl : cls.mGlobalForwardDeclarations)
+    for (auto &fwdDecl : cls.mGlobalForwardDeclarations)
       codeBlock.Line() << fwdDecl;
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
@@ -287,6 +287,8 @@ namespace holgen {
       }
       {
         auto line = codeBlock.Line();
+        if (cls.GetTypedef(method.mReturnType.mName))
+          line << cls.mName << "::";
         line << method.mReturnType.ToString() << " " << cls.mName << "::" << method.mName << "(";
         bool isFirst = true;
         for (auto &arg: method.mArguments) {
@@ -294,6 +296,8 @@ namespace holgen {
             line << ", ";
           else
             isFirst = false;
+          if (cls.GetTypedef(arg.mType.mName))
+            line << cls.mName << "::";
           line << arg.mType.ToString() << " " << arg.mName;
         }
         line << ")";
@@ -432,6 +436,8 @@ namespace holgen {
             line << ", ";
           else
             isFirst = false;
+          if (cls.GetTypedef(arg.mType.mName))
+            line << cls.mName << "::";
           line << arg.mType.ToString() << " " << arg.mName;
         }
         line << ")";
@@ -462,40 +468,4 @@ namespace holgen {
       codeBlock.Line() << "}";
     }
   }
-
-  /*
-  void Generator::GenerateEnum(GeneratedContent &content, const Enum &e) const {
-    content.mName = e.mEnum->mName + ".h";
-    content.mType = FileType::CppHeader;
-    CodeBlock codeBlock;
-    codeBlock.Line() << "#pragma once";
-    codeBlock.Line();
-    codeBlock.Add("#include \"holgen.h\"");
-    codeBlock.Add("#include <cstdint>");
-    codeBlock.Line();
-    if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Line() << "namespace " << mGeneratorSettings.mNamespace << " {";
-    codeBlock.Add("class {} {{", e.mEnum->mName);
-    codeBlock.Indent(1);
-    // TODO: signed? unsigned?
-    codeBlock.Add("using UnderlyingType = int64_t;");
-    codeBlock.Indent(-1);
-    codeBlock.Add("public:");
-    codeBlock.Indent(1);
-    for (auto &entry: e.mEnum->mEntries) {
-      codeBlock.Add("constexpr inline static const UnderlyingType {}Value = {};", entry.mName, entry.mValue);
-      codeBlock.Add("constexpr inline static const {} {}({}Value);", e.mEnum->mName, entry.mName, entry.mName);
-    }
-    codeBlock.Line();
-    // ctors
-    codeBlock.Add("")
-    codeBlock.Indent(-1);
-    codeBlock.Add("}}"); // enum class
-    if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Line() << "}"; // namespace
-
-    content.mText = codeBlock.ToString();
-  }
-  */
-
 }

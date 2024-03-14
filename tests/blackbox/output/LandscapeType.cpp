@@ -10,9 +10,12 @@ const LandscapeType LandscapeType::Land(0);
 const LandscapeType LandscapeType::Sea(1);
 const LandscapeType LandscapeType::River(2);
 const LandscapeType LandscapeType::Mountain(3);
-LandscapeType::LandscapeType(UnderlyingType value) :
+LandscapeType::LandscapeType(LandscapeType::UnderlyingType value) :
   mValue(value)
 {
+}
+LandscapeType::UnderlyingType LandscapeType::Get() const {
+  return mValue;
 }
 LandscapeType LandscapeType::FromString(std::string_view str) {
   if (str == "Land") {
@@ -36,14 +39,14 @@ std::string LandscapeType::ToString() const {
     default: return "INVALID";
   }
 }
-LandscapeType& LandscapeType::operator =(UnderlyingType rhs) {
+LandscapeType& LandscapeType::operator =(LandscapeType::UnderlyingType rhs) {
   mValue = rhs;
   return *this;
 }
-bool LandscapeType::operator ==(UnderlyingType rhs) const {
+bool LandscapeType::operator ==(LandscapeType::UnderlyingType rhs) const {
   return mValue == rhs;
 }
-bool LandscapeType::operator !=(UnderlyingType rhs) const {
+bool LandscapeType::operator !=(LandscapeType::UnderlyingType rhs) const {
   return mValue != rhs;
 }
 LandscapeType& LandscapeType::operator =(const LandscapeType& rhs) {

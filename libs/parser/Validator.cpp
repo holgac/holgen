@@ -128,27 +128,7 @@ namespace holgen {
                  converterName->mValue.mName, it->second.second.mName, convertTo.mName);
       }
     } else if (annotationDefinition.mName == Annotations::Container) {
-      EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
-      EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Container_ElemName);
-      auto type = Type{fieldDefinition.mType};
-      THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
-               structDefinition.mName, fieldDefinition.mName);
-      THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1, "{}.{} should have a single template parameter",
-               structDefinition.mName, fieldDefinition.mName);
-      auto &underlyingType = fieldDefinition.mType.mTemplateParameters[0];
-      auto underlyingStruct = mProject.GetStruct(underlyingType.mName);
-      THROW_IF(underlyingStruct == nullptr, "{}.{} is a container of {} which is not a user type",
-               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-      auto underlyingIdField = underlyingStruct->GetIdField();
-      THROW_IF(underlyingIdField == nullptr,
-               "{}.{} is a container of {} which does not have an id field",
-               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-      auto underlyingManagedAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
-      auto underlyingNoLuaAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
-      THROW_IF(underlyingManagedAnnotation == nullptr && underlyingNoLuaAnnotation == nullptr &&
-               !TypeInfo::Get().CppStableContainers.contains(type.mName),
-               "{}.{} should either be a stable container like deque, or {} should be managed",
-               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
+      ValidateContainerAnnotation(structDefinition, fieldDefinition, annotationDefinition);
     } else if (annotationDefinition.mName == Annotations::Index) {
       EnforceAnnotationExists(structDefinition, fieldDefinition, Annotations::Container);
       // double validate to avoid order problems, this validator piece depends on Container being valid.
@@ -232,6 +212,48 @@ namespace holgen {
     for (const auto &structDefinition: mProject.mStructs) {
       Validate(structDefinition);
     }
+  }
 
+  void Validator::ValidateContainerAnnotation(const StructDefinition &structDefinition,
+                                              const FieldDefinition &fieldDefinition,
+                                              const AnnotationDefinition &annotationDefinition) {
+    EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
+    EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Container_ElemName);
+    auto type = Type{fieldDefinition.mType};
+    auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
+    auto underlyingStruct = mProject.GetStruct(underlyingType.mName);
+    THROW_IF(underlyingStruct == nullptr, "{}.{} is a container of {} which is not a user type",
+             structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
+    auto underlyingIdField = underlyingStruct->GetIdField();
+    THROW_IF(underlyingIdField == nullptr,
+             "{}.{} is a container of {} which does not have an id field",
+             structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
+    auto underlyingManagedAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
+    auto underlyingNoLuaAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
+    THROW_IF(underlyingManagedAnnotation == nullptr && underlyingNoLuaAnnotation == nullptr &&
+             !TypeInfo::Get().CppStableContainers.contains(type.mName),
+             "{}.{} should either be a stable container like deque, or {} should be managed",
+             structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
+
+    if (TypeInfo::Get().CppKeyedContainers.contains(type.mName)) {
+      THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 2, "{}.{} should have two template parameters",
+               structDefinition.mName, fieldDefinition.mName);
+      auto &key = fieldDefinition.mType.mTemplateParameters[0];
+      if (key.mName == "Ref") {
+        THROW_IF(key.mTemplateParameters.size() != 1, "{}.{} has an unusual ref key type",
+                 structDefinition.mName, fieldDefinition.mName);
+        THROW_IF(key.mTemplateParameters[0].mName != underlyingStruct->mName,
+                 "{}.{} uses a Ref key on an unrelated object",
+                 structDefinition.mName, fieldDefinition.mName);
+      } else {
+        THROW_IF(!TypeInfo::Get().IntegralTypes.contains(key.mName), "{}.{} has an unusual key type",
+            structDefinition.mName, fieldDefinition.mName);
+      }
+    } else {
+      THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
+               structDefinition.mName, fieldDefinition.mName);
+      THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1, "{}.{} should have a single template parameter",
+               structDefinition.mName, fieldDefinition.mName);
+    }
   }
 }

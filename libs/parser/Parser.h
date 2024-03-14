@@ -12,7 +12,7 @@ namespace holgen {
     void ParseFunction(Token &curToken, FunctionDefinition &functionDefinition);
     void ParseStruct(StructDefinition &structDefinition);
     void ParseEnum(EnumDefinition &enumDefinition);
-    void ParseEnumEntry(Token &curToken, EnumEntryDefinition &enumEntryDefinition);
+    void ParseEnumEntry(Token &curToken, EnumDefinition &enumDefinition, EnumEntryDefinition &enumEntryDefinition);
     void ParseAnnotation(Token &curToken, AnnotationDefinition &annotationDefinition);
     void ParseField(Token &curToken, FieldDefinition &fieldDefinition);
     void ParseType(Token &curToken, TypeDefinition &typeDefinition);

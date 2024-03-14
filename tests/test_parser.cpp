@@ -197,9 +197,9 @@ namespace {
   TEST(ParserTest, Enums) {
     Tokenizer tokenizer(R"DELIM(
   enum LandscapeType {
-    Land = 1;
+    Land;
+    River = 2;
     Sea;
-    River;
     Mountain;
   }
     )DELIM");
@@ -210,14 +210,42 @@ namespace {
     auto e = proj.GetEnum("LandscapeType");
     ASSERT_NE(e, nullptr);
     EXPECT_EQ(e->mEntries.size(), 4);
+    EXPECT_EQ(e->mInvalidValue, "4");
     ASSERT_NE(e->GetEnumEntry("Land"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Land")->mValue, "1");
+    EXPECT_EQ(e->GetEnumEntry("Land")->mValue, "0");
     ASSERT_NE(e->GetEnumEntry("Sea"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Sea")->mValue, "0");
+    EXPECT_EQ(e->GetEnumEntry("Sea")->mValue, "1");
     ASSERT_NE(e->GetEnumEntry("River"), nullptr);
     EXPECT_EQ(e->GetEnumEntry("River")->mValue, "2");
     ASSERT_NE(e->GetEnumEntry("Mountain"), nullptr);
     EXPECT_EQ(e->GetEnumEntry("Mountain")->mValue, "3");
+  }
+
+  TEST(ParserTest, EnumInvalidEntry) {
+    Tokenizer tokenizer(R"DELIM(
+  enum LandscapeType {
+    Land;
+    River = -1;
+    Sea;
+    Mountain = -2;
+  }
+    )DELIM");
+    Parser parser;
+    parser.Parse(tokenizer);
+    auto &proj = parser.GetProject();
+    EXPECT_EQ(proj.mEnums.size(), 1);
+    auto e = proj.GetEnum("LandscapeType");
+    ASSERT_NE(e, nullptr);
+    EXPECT_EQ(e->mEntries.size(), 4);
+    EXPECT_EQ(e->mInvalidValue, "2");
+    ASSERT_NE(e->GetEnumEntry("Land"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("Land")->mValue, "0");
+    ASSERT_NE(e->GetEnumEntry("Sea"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("Sea")->mValue, "1");
+    ASSERT_NE(e->GetEnumEntry("River"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("River")->mValue, "-1");
+    ASSERT_NE(e->GetEnumEntry("Mountain"), nullptr);
+    EXPECT_EQ(e->GetEnumEntry("Mountain")->mValue, "-2");
   }
 
   TEST(ParserTest, Functions) {

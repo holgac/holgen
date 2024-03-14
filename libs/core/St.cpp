@@ -49,4 +49,20 @@ namespace holgen {
       return fieldName + "Id";
     return fieldName;
   }
+
+  bool St::IsIntegral(const std::string_view& str) {
+    if (str.empty() || (str.size() == 1 && str[0] == '-'))
+      return false;
+    size_t idx = 0;
+    if (str[0] == '-') {
+      idx += 1;
+    }
+    while(idx < str.size()) {
+      auto c = str[idx];
+      if (c < '0' || c > '9')
+        return false;
+      ++idx;
+    }
+    return true;
+  }
 }

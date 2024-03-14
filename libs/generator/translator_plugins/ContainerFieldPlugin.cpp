@@ -13,7 +13,7 @@ namespace holgen {
           continue;
         bool isConstContainer = container->GetAttribute(Annotations::Container_Const) != nullptr;
         auto elemName = container->GetAttribute(Annotations::Container_ElemName);
-        auto &underlyingType = fieldDefinition.mType.mTemplateParameters[0];
+        auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
         auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
         auto underlyingIdField = underlyingStructDefinition->GetIdField();
 

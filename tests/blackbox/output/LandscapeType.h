@@ -13,6 +13,7 @@ class LandscapeType {
 typedef int64_t UnderlyingType;
 public:
   explicit LandscapeType(UnderlyingType value = Invalid);
+  UnderlyingType Get() const;
   static LandscapeType FromString(std::string_view str);
   std::string ToString() const;
   LandscapeType& operator =(UnderlyingType rhs);
@@ -31,7 +32,7 @@ public:
   static const LandscapeType River;
   inline static constexpr const UnderlyingType MountainValue = 3;
   static const LandscapeType Mountain;
-  inline static constexpr const UnderlyingType Invalid = -1;
+  inline static constexpr const UnderlyingType Invalid = 4;
 protected:
 private:
   UnderlyingType mValue;

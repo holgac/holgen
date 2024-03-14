@@ -7,5 +7,7 @@ namespace holgen {
   public:
     using TranslatorPlugin::TranslatorPlugin;
      void Run() override;
+  private:
+    void GenerateCommon(Class& generatedClass, const EnumDefinition& enumDefinition);
   };
 }

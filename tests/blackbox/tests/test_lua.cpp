@@ -174,7 +174,6 @@ TEST_F(LuaTest, Func) {
   LuaTestHelper::ExpectStack(mState, {});
   auto res = c.Subtract(mState, &num2);
   LuaTestHelper::ExpectStack(mState, {});
-  return;
   ASSERT_NE(res, nullptr);
   EXPECT_EQ(res->GetValue(), 2);
   EXPECT_EQ(c.GetCurVal().GetValue(), 2);

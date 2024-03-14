@@ -30,6 +30,7 @@ namespace holgen {
     explicit Type(std::string name, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst)
     : mName(std::move(name)), mConstness(constness), mType(passByType) { }
 
+    // TODO: add TranslatedProject arg and resolve Refs
     explicit Type(const TypeDefinition& typeDefinition, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
 
 
