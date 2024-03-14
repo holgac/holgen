@@ -144,7 +144,7 @@ namespace holgen {
                  structDefinition.mName, fieldDefinition.mName, indexUsing->mValue.mName)
       }
       auto indexOn = annotationDefinition.GetAttribute(Annotations::Index_On);
-      auto underlyingStruct = mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+      auto underlyingStruct = mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
       auto underlyingField = underlyingStruct->GetField(indexOn->mValue.mName);
       THROW_IF(underlyingField == nullptr, "{}.{} indexes on {}.{} which doesn't exist",
                structDefinition.mName, fieldDefinition.mName,

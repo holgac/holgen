@@ -41,13 +41,13 @@ const Boot* GameData::GetBootFromName(const std::string& key) const {
   auto it = mBootsNameIndex.find(key);
   if (it == mBootsNameIndex.end())
     return nullptr;
-  return &mBoots[it->second];
+  return &mBoots.at(it->second);
 }
 Boot* GameData::GetBootFromName(const std::string& key) {
   auto it = mBootsNameIndex.find(key);
   if (it == mBootsNameIndex.end())
     return nullptr;
-  return &mBoots[it->second];
+  return &mBoots.at(it->second);
 }
 bool GameData::AddBoot(Boot&& elem) {
   auto newId = mBoots.size();
@@ -56,8 +56,8 @@ bool GameData::AddBoot(Boot&& elem) {
     return false;
   }
   mBootsNameIndex.emplace(elem.GetName(), newId);
+  elem.SetId(newId);
   mBoots.emplace_back(std::forward<Boot>(elem));
-  mBoots.back().SetId(newId);
   return true;
 }
 const Boot* GameData::GetBoot(uint32_t idx) const {
@@ -74,25 +74,25 @@ const Armor* GameData::GetArmorFromName(const std::string& key) const {
   auto it = mArmorsNameIndex.find(key);
   if (it == mArmorsNameIndex.end())
     return nullptr;
-  return &mArmors[it->second];
+  return &mArmors.at(it->second);
 }
 Armor* GameData::GetArmorFromName(const std::string& key) {
   auto it = mArmorsNameIndex.find(key);
   if (it == mArmorsNameIndex.end())
     return nullptr;
-  return &mArmors[it->second];
+  return &mArmors.at(it->second);
 }
 const Armor* GameData::GetArmorFromAlternativeName(const std::string& key) const {
   auto it = mArmorsAlternativeNameIndex.find(key);
   if (it == mArmorsAlternativeNameIndex.end())
     return nullptr;
-  return &mArmors[it->second];
+  return &mArmors.at(it->second);
 }
 Armor* GameData::GetArmorFromAlternativeName(const std::string& key) {
   auto it = mArmorsAlternativeNameIndex.find(key);
   if (it == mArmorsAlternativeNameIndex.end())
     return nullptr;
-  return &mArmors[it->second];
+  return &mArmors.at(it->second);
 }
 bool GameData::AddArmor(Armor&& elem) {
   auto newId = mArmors.size();
@@ -106,8 +106,8 @@ bool GameData::AddArmor(Armor&& elem) {
   }
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
+  elem.SetId(newId);
   mArmors.emplace_back(std::forward<Armor>(elem));
-  mArmors.back().SetId(newId);
   return true;
 }
 const Armor* GameData::GetArmor(uint32_t idx) const {
@@ -124,13 +124,13 @@ const Character* GameData::GetCharacterFromName(const std::string& key) const {
   auto it = mCharactersNameIndex.find(key);
   if (it == mCharactersNameIndex.end())
     return nullptr;
-  return &mCharacters[it->second];
+  return &mCharacters.at(it->second);
 }
 Character* GameData::GetCharacterFromName(const std::string& key) {
   auto it = mCharactersNameIndex.find(key);
   if (it == mCharactersNameIndex.end())
     return nullptr;
-  return &mCharacters[it->second];
+  return &mCharacters.at(it->second);
 }
 bool GameData::AddCharacter(Character&& elem) {
   auto newId = mCharacters.size();
@@ -139,8 +139,8 @@ bool GameData::AddCharacter(Character&& elem) {
     return false;
   }
   mCharactersNameIndex.emplace(elem.GetName(), newId);
+  elem.SetId(newId);
   mCharacters.emplace_back(std::forward<Character>(elem));
-  mCharacters.back().SetId(newId);
   return true;
 }
 const Character* GameData::GetCharacter(uint32_t idx) const {

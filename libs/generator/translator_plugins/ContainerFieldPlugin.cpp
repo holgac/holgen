@@ -65,7 +65,7 @@ namespace holgen {
       func.mBody.Indent(1);
       func.mBody.Add("return nullptr;");
       func.mBody.Indent(-1);
-      func.mBody.Add("return &{}[it->second];", St::GetFieldNameInCpp(fieldDefinition.mName));
+      func.mBody.Add("return &{}.at(it->second);", St::GetFieldNameInCpp(fieldDefinition.mName));
     }
   }
 
@@ -76,7 +76,16 @@ namespace holgen {
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
-    auto &generatedField = *generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName));
+    auto generatedField = generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName));
+    bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField->mType.mName);
+
+    if (isKeyedContainer) {
+      auto &nextIdField = generatedClass.mFields.emplace_back(
+          generatedField->mName + "NextId",
+          Type{mProject.mProject, underlyingIdField->mType});
+      nextIdField.mDefaultValue = "1";
+      generatedField = generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName));
+    }
 
     auto &func = generatedClass.mMethods.emplace_back(
         St::GetAdderMethodName(elemName->mValue.mName),
@@ -87,7 +96,12 @@ namespace holgen {
     auto &arg = func.mArguments.emplace_back("elem",
                                              Type{mProject.mProject, underlyingType, PassByType::MoveReference});
 
-    func.mBody.Line() << "auto newId = " << generatedField.mName << ".size();";
+    if (isKeyedContainer) {
+      func.mBody.Add("auto newId = {}NextId;", generatedField->mName);
+      func.mBody.Add("++{}NextId;", generatedField->mName);
+    } else {
+      func.mBody.Line() << "auto newId = " << generatedField->mName << ".size();";
+    }
     CodeBlock validators;
     CodeBlock inserters;
     for (auto &dec: fieldDefinition.mAnnotations) {
@@ -109,9 +123,11 @@ namespace holgen {
     func.mBody.Add(validators);
     func.mBody.Add(inserters);
     func.mBody.Add("elem.{}(newId);", St::GetSetterMethodName(underlyingIdField->mName));
-    func.mBody.Add("{}.emplace_back(std::forward<{}>(elem));", generatedField.mName, arg.mType.mName);
-    func.mBody.Add("{}.back().{}(newId);", generatedField.mName,
-                   St::GetSetterMethodName(underlyingIdField->mName));
+    if (isKeyedContainer) {
+      func.mBody.Add("{}.emplace(newId, std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
+    } else{
+      func.mBody.Add("{}.emplace_back(std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
+    }
     func.mBody.Line() << "return true;";
   }
 
@@ -122,6 +138,7 @@ namespace holgen {
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
     auto &generatedField = *generatedClass.GetField(St::GetFieldNameInCpp(fieldDefinition.mName));
+    bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName);
     for (int i = 0; i < 2; ++i) {
       auto constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &func = generatedClass.mMethods.emplace_back(
@@ -131,7 +148,10 @@ namespace holgen {
           constness
       );
       auto &arg = func.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mType});
-      {
+      if (isKeyedContainer) {
+        func.mBody.Add("auto it = {}.find(idx);", generatedField.mName);
+        func.mBody.Add("if (it == {}.end())", generatedField.mName);
+      } else {
         auto line = func.mBody.Line();
         line << "if (idx >= " << generatedField.mName << ".size()";
         if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName)) {
@@ -142,7 +162,11 @@ namespace holgen {
       func.mBody.Indent(1);
       func.mBody.Line() << "return nullptr;";
       func.mBody.Indent(-1);
-      func.mBody.Line() << "return &" << generatedField.mName << "[idx];";
+      if (isKeyedContainer) {
+        func.mBody.Add("return &it->second;");
+      } else {
+        func.mBody.Line() << "return &" << generatedField.mName << "[idx];";
+      }
     }
   }
 }

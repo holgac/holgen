@@ -45,7 +45,7 @@ namespace holgen {
       for (const auto &annotationDefinition: fieldDefinition.mAnnotations) {
         if (annotationDefinition.mName != Annotations::Index)
           continue;
-        auto &underlyingStruct = *mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+        auto &underlyingStruct = *mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
         auto indexedOnField = underlyingStruct.GetField(
             annotationDefinition.GetAttribute(Annotations::Index_On)->mValue.mName);
         auto forConverter = annotationDefinition.GetAttribute(Annotations::Index_ForConverter);

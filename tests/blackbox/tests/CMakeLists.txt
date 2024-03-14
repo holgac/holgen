@@ -1,3 +1,3 @@
-add_executable(tests test_weapon.cpp test_race.cpp test_country.cpp test_lua.cpp test_gamedata.cpp test_enum.cpp)
-add_dependencies(tests gtest gtest_main holgen_blackbox_test_lib lua_lib )
+add_executable(tests test_weapon.cpp test_race.cpp test_country.cpp test_lua.cpp test_gamedata.cpp test_enum.cpp test_ref.cpp)
+add_dependencies(tests gtest gtest_main holgen_blackbox_test_lib lua_lib)
 target_link_libraries(tests gtest gtest_main holgen_blackbox_test_lib lua_lib)
