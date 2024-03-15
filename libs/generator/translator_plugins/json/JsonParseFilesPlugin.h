@@ -4,12 +4,15 @@
 #include <map>
 #include <set>
 #include <string>
-#include "TranslatorPlugin.h"
+#include "../TranslatorPlugin.h"
 
 namespace holgen {
-  class JsonConverterPlugin : public TranslatorPlugin {
+  class JsonParseFilesPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
     void Run() override;
+
+  private:
+    void GenerateParseFiles(Class &cls);
   };
 }
