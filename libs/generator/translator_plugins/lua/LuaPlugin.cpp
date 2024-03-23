@@ -130,6 +130,7 @@ namespace holgen {
                     St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
       codeBlock.Indent(-1);
     }
+    // TODO: expose functions
     codeBlock.Line() << "}";
     codeBlock.Line() << "return 0;";
     codeBlock.Indent(-1);

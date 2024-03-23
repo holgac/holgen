@@ -158,11 +158,17 @@ namespace holgen {
      */
     inline static const std::string DataManager = "dataManager";
     /**
-     * Marks the function below as a lua function implemented in lua
-     * and callable from cpp. table attribute determines the global lua table
+     * Marks the function below as a custom function implemented in lua
+     * and callable from cpp and lua. table attribute determines the global lua table
      * used to store and reference the function
      */
     inline static const std::string LuaFunc = "luaFunc";
     inline static const std::string LuaFuncTable = "table";
+
+    /**
+     * Marks the function below as a custom function implemented in cpp
+     * and callable from cpp and lua.
+     */
+    inline static const std::string CppFunc = "cppFunc";
   };
 }

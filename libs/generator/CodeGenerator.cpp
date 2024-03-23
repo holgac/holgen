@@ -206,6 +206,7 @@ namespace holgen {
         codeBlock.Line() << "template <>";
 
       bool willDefine = !method.mTemplateParameters.empty() || !cls.mTemplateParameters.empty();
+      willDefine = willDefine && !method.mUserDefined;
 
       {
         auto line = codeBlock.Line();
@@ -278,7 +279,7 @@ namespace holgen {
       return;
 
     for (auto &method: cls.mMethods) {
-      if (!method.mTemplateParameters.empty()) {
+      if (method.mUserDefined || !method.mTemplateParameters.empty()) {
         // These are defined in the header
         continue;
       }

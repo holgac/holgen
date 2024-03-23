@@ -94,6 +94,7 @@ namespace holgen {
     Type mReturnType;
     Constness mConstness;
     Staticness mStaticness;
+    bool mUserDefined = false;
   };
 
   struct ClassConstructorInitializer {

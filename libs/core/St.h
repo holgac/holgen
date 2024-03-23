@@ -31,6 +31,7 @@ namespace holgen {
     inline static const std::string LuaHelper = "LuaHelper";
     inline static const std::string LuaHelper_Push = "Push";
     inline static const std::string LuaHelper_Read = "Read";
+    inline static const std::string LuaFuncPrefix = "mFuncName_";
     inline static const std::string ManagedObject_Getter = "Get";
   };
 

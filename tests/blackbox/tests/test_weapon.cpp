@@ -4,6 +4,11 @@
 
 using namespace holgen_blackbox_test;
 
+namespace holgen_blackbox_test {
+  uint32_t Weapon::GetAverageDamage() const {
+    return (mDamageMin + mDamageMax) / 2;
+  }
+}
 namespace {
   TEST(WeaponTest, SettersAndGetters) {
     Weapon weapon;
@@ -41,6 +46,24 @@ namespace {
     EXPECT_FLOAT_EQ(mults[0].GetValue(), 0.1);
     EXPECT_EQ(mults[1].GetWhen(), "backstab");
     EXPECT_FLOAT_EQ(mults[1].GetValue(), 3.0);
+  }
+
+  TEST(WeaponTest, CppFunc) {
+    rapidjson::Document doc;
+    doc.Parse(R"DELIM(
+{
+"damageMin": 25,
+"damageMax": 35,
+"modifiers": ["shining", "rusty"],
+"damageMultipliers":[
+  {"when":"critical fail", "value": 0.1},
+  {"when":"backstab", "value": 3.0}
+]
+}
+    )DELIM");
+    Weapon weapon;
+    JsonHelper::Parse(weapon, doc, {});
+    EXPECT_EQ(weapon.GetAverageDamage(), 30);
   }
 
 }

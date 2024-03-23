@@ -65,7 +65,7 @@ namespace holgen {
     }
 
     for (const auto &fd: structDefinition.mFunctions) {
-      if (fd.GetAnnotation(Annotations::NoJson))
+      if (fd.GetAnnotation(Annotations::NoJson) || !fd.GetAnnotation(Annotations::LuaFunc))
         continue;
       if (isFirst) {
         parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fd.mName << "\")) {";
@@ -175,7 +175,7 @@ namespace holgen {
     parseFunc.mBody.Add("std::string val;");
     parseFunc.mBody.Add("{}::{}(val, data.value, converter);",
                         St::JsonHelper, St::JsonHelper_Parse);
-    parseFunc.mBody.Add("mFuncName_{} = std::move(val);", functionDefinition.mName);
+    parseFunc.mBody.Add("{}{} = std::move(val);", St::LuaFuncPrefix, functionDefinition.mName);
 
   }
 }

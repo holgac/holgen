@@ -20,7 +20,7 @@ namespace holgen {
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
     cls.mGlobalForwardDeclarations.insert("struct lua_State;");
-    auto &field = cls.mFields.emplace_back("mFuncName_" + func.mName, Type{"std::string"});
+    auto &field = cls.mFields.emplace_back(St::LuaFuncPrefix + func.mName, Type{"std::string"});
 
     {
       auto &setter = cls.mMethods.emplace_back(
