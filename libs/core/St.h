@@ -16,6 +16,7 @@ namespace holgen {
     // These should use FieldDefinition.mName. NOT ClassField.mName which is modified (mField)
     static std::string GetAdderMethodName(const std::string& fieldName);
     static std::string GetGetterMethodName(const std::string& fieldName, bool isRef = false);
+    static std::string GetCountMethodName(const std::string& fieldName);
     static std::string GetSetterMethodName(const std::string& fieldName, bool isRef = false);
     static std::string GetFieldNameInCpp(const std::string& fieldName, bool isRef = false);
     static std::string GetFieldNameInLua(const std::string& fieldName, bool isRef = false);

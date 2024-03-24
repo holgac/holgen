@@ -6,6 +6,7 @@ namespace holgen {
   void FilesystemHelperPlugin::Run() {
     auto &cls = mProject.mClasses.emplace_back(St::FilesystemHelper);
     cls.mSourceIncludes.AddStandardHeader("fstream");
+    // TODO: use std::filesystem::path instead of std::string
     auto &readFile = cls.mMethods.emplace_back(St::FilesystemHelper_ReadFile, Type{"std::string"}, Visibility::Public,
                                                Constness::NotConst,
                                                Staticness::Static);

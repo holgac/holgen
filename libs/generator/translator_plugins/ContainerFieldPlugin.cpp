@@ -25,6 +25,7 @@ namespace holgen {
     }
     GenerateContainerAddElem(generatedClass, fieldDefinition);
     GenerateContainerGetElem(generatedClass, fieldDefinition);
+    GenerateContainerGetCount(generatedClass, fieldDefinition);
   }
 
   void ContainerFieldPlugin::ProcessContainerIndex(Class &generatedClass, const FieldDefinition &fieldDefinition,
@@ -179,5 +180,16 @@ namespace holgen {
         func.mBody.Line() << "return &" << generatedField.mName << "[idx];";
       }
     }
+  }
+
+  void ContainerFieldPlugin::GenerateContainerGetCount(Class &generatedClass, const FieldDefinition &fieldDefinition) {
+    auto container = fieldDefinition.GetAnnotation(Annotations::Container);
+    auto elemName = container->GetAttribute(Annotations::Container_ElemName);
+    auto &func = generatedClass.mMethods.emplace_back(
+        St::GetCountMethodName(elemName->mValue.mName),
+        Type{"size_t"}
+    );
+    func.mExposeToLua = true;
+    func.mBody.Add("return {}.size();", St::GetFieldNameInCpp(fieldDefinition.mName));
   }
 }

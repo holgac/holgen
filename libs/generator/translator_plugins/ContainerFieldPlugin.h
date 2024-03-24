@@ -12,5 +12,6 @@ namespace holgen {
     void ProcessContainerIndex(Class& generatedClass, const FieldDefinition& fieldDefinition, const AnnotationDefinition& annotationDefinition);
     void GenerateContainerAddElem(Class& generatedClass, const FieldDefinition& fieldDefinition);
     void GenerateContainerGetElem(Class& generatedClass, const FieldDefinition& fieldDefinition);
+    void GenerateContainerGetCount(Class& generatedClass, const FieldDefinition& fieldDefinition);
   };
 }

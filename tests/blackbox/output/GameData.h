@@ -30,6 +30,7 @@ public:
   bool AddBoot(Boot&& elem);
   const Boot* GetBoot(uint32_t idx) const;
   Boot* GetBoot(uint32_t idx);
+  size_t GetBootCount() const;
   const Armor* GetArmorFromName(const std::string& key) const;
   Armor* GetArmorFromName(const std::string& key);
   const Armor* GetArmorFromAlternativeName(const std::string& key) const;
@@ -37,11 +38,13 @@ public:
   bool AddArmor(Armor&& elem);
   const Armor* GetArmor(uint32_t idx) const;
   Armor* GetArmor(uint32_t idx);
+  size_t GetArmorCount() const;
   const Character* GetCharacterFromName(const std::string& key) const;
   Character* GetCharacterFromName(const std::string& key);
   bool AddCharacter(Character&& elem);
   const Character* GetCharacter(uint32_t idx) const;
   Character* GetCharacter(uint32_t idx);
+  size_t GetCharacterCount() const;
   bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;

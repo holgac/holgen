@@ -65,4 +65,8 @@ namespace holgen {
     }
     return true;
   }
+
+  std::string St::GetCountMethodName(const std::string &fieldName) {
+    return "Get" + Capitalize(fieldName) + "Count";
+  }
 }

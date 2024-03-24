@@ -55,6 +55,9 @@ Human* HumanManager::GetHuman(uint32_t idx) {
     return nullptr;
   return &it->second;
 }
+size_t HumanManager::GetHumanCount() const {
+  return mHumans.size();
+}
 bool HumanManager::ParseFiles(const std::string& rootPath, const Converter& converterArg) {
   auto converter = converterArg;
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;
@@ -110,6 +113,13 @@ void HumanManager::CreateLuaMetatable(lua_State* luaState) {
         uint32_t arg0;
         LuaHelper::Read(arg0, lsInner, -1);
         auto result = instance->GetHuman(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
+    } else if (0 == strcmp("GetHumanCount", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = HumanManager::ReadFromLua(lsInner, -1);
+        auto result = instance->GetHumanCount();
         LuaHelper::Push(result, lsInner);
         return 1;
       });

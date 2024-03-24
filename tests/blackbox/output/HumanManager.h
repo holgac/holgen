@@ -21,6 +21,7 @@ public:
   bool AddHuman(Human&& elem);
   const Human* GetHuman(uint32_t idx) const;
   Human* GetHuman(uint32_t idx);
+  size_t GetHumanCount() const;
   bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;
