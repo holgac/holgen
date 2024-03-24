@@ -16,6 +16,8 @@ namespace holgen {
           constness);
       getter.mBody.Add("return {}::{}({});", refStruct->mName, St::ManagedObject_Getter,
                        generatedField.mName);
+      if (i == 0)
+        getter.mExposeToLua = true;
     }
   }
 
@@ -31,7 +33,7 @@ namespace holgen {
             Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue);
         generatedField.mField = &fieldDefinition;
         if (isRef) {
-          // TODO: separate ref plugin
+          // TODO: separate ref plugin, or move to getter
           ProcessRefField(generatedClass, generatedField, fieldDefinition);
         }
       }
