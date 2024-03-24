@@ -117,7 +117,12 @@ namespace holgen {
   ) : mConstness(constness), mType(passByType) {
     if (typeDefinition.mName == "Ref") {
       auto refType = project.GetStruct(typeDefinition.mTemplateParameters[0].mName);
-      *this = Type{project, refType->GetIdField()->mType};
+      auto idField = refType->GetIdField();
+      if (idField) {
+        *this = Type{project, refType->GetIdField()->mType};
+      } else {
+        *this = Type{refType->mName, PassByType::Pointer};
+      }
       return;
     }
     auto it = TypeInfo::Get().TypeToCppType.find(typeDefinition.mName);
