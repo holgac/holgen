@@ -85,6 +85,10 @@ void HumanManager::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "HumanManagerMeta");
   lua_setmetatable(luaState, -2);
 }
+void HumanManager::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 HumanManager* HumanManager::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);

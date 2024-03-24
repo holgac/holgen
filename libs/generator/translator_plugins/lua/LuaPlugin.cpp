@@ -202,6 +202,7 @@ namespace holgen {
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
     AddPushToLua(cls, structDefinition);
+    AddPushGlobalToLua(cls, structDefinition);
     AddReadFromLua(cls, structDefinition);
 
     auto &createLuaMetatable = cls.mMethods.emplace_back(
@@ -225,6 +226,14 @@ namespace holgen {
     auto &pushToLua = cls.mMethods.emplace_back("PushToLua", Type{"void"}, Visibility::Public, Constness::Const);
     pushToLua.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     pushToLua.mBody.Add("{}::{}(mValue, luaState);", St::LuaHelper, St::LuaHelper_Push);
+  }
+
+  void LuaPlugin::AddPushGlobalToLua(Class &cls, const StructDefinition &structDefinition __attribute__((unused))) {
+    auto& method = cls.mMethods.emplace_back("PushGlobalToLua", Type{"void"});
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    method.mArguments.emplace_back("name", Type{"char", PassByType::Pointer, Constness::Const});
+    method.mBody.Add("PushToLua(luaState);");
+    method.mBody.Add("lua_setglobal(luaState, name);");
   }
 
 }

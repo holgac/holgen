@@ -31,6 +31,10 @@ void Number::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "NumberMeta");
   lua_setmetatable(luaState, -2);
 }
+void Number::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 Number* Number::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);

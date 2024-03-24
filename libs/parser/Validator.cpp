@@ -225,18 +225,18 @@ namespace holgen {
     auto underlyingStruct = mProject.GetStruct(underlyingType.mName);
     THROW_IF(underlyingStruct == nullptr, "{}.{} is a container of {} which is not a user type",
              structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-    auto underlyingIdField = underlyingStruct->GetIdField();
-    THROW_IF(underlyingIdField == nullptr,
-             "{}.{} is a container of {} which does not have an id field",
-             structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
     auto underlyingManagedAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
     auto underlyingNoLuaAnnotation = underlyingStruct->GetAnnotation(Annotations::Managed);
+    bool isConstContainer = annotationDefinition.GetAttribute(Annotations::Container_Const) != nullptr;
     THROW_IF(underlyingManagedAnnotation == nullptr && underlyingNoLuaAnnotation == nullptr &&
-             !TypeInfo::Get().CppStableContainers.contains(type.mName),
-             "{}.{} should either be a stable container like deque, or {} should be managed",
+             !TypeInfo::Get().CppStableContainers.contains(type.mName) && !isConstContainer,
+             "{}.{} should either be const or a stable container like deque, or {} should be managed",
              structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
 
     if (TypeInfo::Get().CppKeyedContainers.contains(type.mName)) {
+      THROW_IF(underlyingStruct->GetIdField() == nullptr,
+               "{}.{} is a keyed container of {} which does not have an id field",
+               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
       THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 2, "{}.{} should have two template parameters",
                structDefinition.mName, fieldDefinition.mName);
       auto &key = fieldDefinition.mType.mTemplateParameters[0];
@@ -251,6 +251,9 @@ namespace holgen {
                  structDefinition.mName, fieldDefinition.mName);
       }
     } else {
+      THROW_IF(underlyingStruct->GetIdField() == nullptr && fieldDefinition.GetAnnotation(Annotations::Index) != nullptr,
+               "{}.{} has an index but does not have an id field",
+               structDefinition.mName, fieldDefinition.mName);
       THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
                structDefinition.mName, fieldDefinition.mName);
       THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1, "{}.{} should have a single template parameter",

@@ -160,7 +160,7 @@ struct B {
   @container(elemName=person)
   vector<Person> people;
 }
-  )DELIM", "B.people should either be a stable container like deque, or Person should be managed");
+  )DELIM", "B.people should either be const or a stable container like deque, or Person should be managed");
 }
 
 TEST_F(ValidatorTest, Id) {

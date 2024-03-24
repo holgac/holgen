@@ -72,7 +72,7 @@ namespace holgen {
   void ContainerFieldPlugin::GenerateContainerAddElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
     auto container = fieldDefinition.GetAnnotation(Annotations::Container);
     auto elemName = container->GetAttribute(Annotations::Container_ElemName);
-    bool isConstContainer = container->GetAttribute(Annotations::Container_Const) != nullptr;
+    // bool isConstContainer = container->GetAttribute(Annotations::Container_Const) != nullptr;
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
@@ -90,7 +90,8 @@ namespace holgen {
     auto &func = generatedClass.mMethods.emplace_back(
         St::GetAdderMethodName(elemName->mValue.mName),
         Type{"bool"},
-        isConstContainer ? Visibility::Private : Visibility::Public,
+        Visibility::Public,
+        // isConstContainer ? Visibility::Private : Visibility::Public,
         Constness::NotConst
     );
     auto &arg = func.mArguments.emplace_back("elem",
@@ -122,10 +123,11 @@ namespace holgen {
     }
     func.mBody.Add(validators);
     func.mBody.Add(inserters);
-    func.mBody.Add("elem.{}(newId);", St::GetSetterMethodName(underlyingIdField->mName));
+    if (underlyingIdField)
+      func.mBody.Add("elem.{}(newId);", St::GetSetterMethodName(underlyingIdField->mName));
     if (isKeyedContainer) {
       func.mBody.Add("{}.emplace(newId, std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
-    } else{
+    } else {
       func.mBody.Add("{}.emplace_back(std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
     }
     func.mBody.Line() << "return true;";
@@ -147,14 +149,21 @@ namespace holgen {
           Visibility::Public,
           constness
       );
-      auto &arg = func.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mType});
+      bool isSigned = false;
+      if (underlyingIdField) {
+        auto &arg = func.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mType});
+        if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName))
+          isSigned = true;
+      } else {
+        func.mArguments.emplace_back("idx", Type{"size_t"});
+      }
       if (isKeyedContainer) {
         func.mBody.Add("auto it = {}.find(idx);", generatedField.mName);
         func.mBody.Add("if (it == {}.end())", generatedField.mName);
       } else {
         auto line = func.mBody.Line();
         line << "if (idx >= " << generatedField.mName << ".size()";
-        if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName)) {
+        if (isSigned) {
           line << "|| idx < 0";
         }
         line << ")";

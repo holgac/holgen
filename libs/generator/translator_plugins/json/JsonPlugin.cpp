@@ -57,7 +57,7 @@ namespace holgen {
         parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
         isFirst = false;
       } else {
-        parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
+        parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fieldDefinition.mName<< "\")) {";
       }
       parseFunc.mBody.Indent(1); // if name == fieldName
       GenerateParseJsonForField(cls, parseFunc, structDefinition, fieldDefinition);
@@ -111,7 +111,7 @@ namespace holgen {
           parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", field->mName, jsonConvertUsing->mValue.mName);
       } else {
         parseFunc.mBody.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                            St::GetFieldNameInCpp(fieldDefinition.mName));
+                            St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
         parseFunc.mBody.Line() << "if (!res)";
         parseFunc.mBody.Indent(1);
         parseFunc.mBody.Line() << "return false;";

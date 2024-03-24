@@ -54,8 +54,9 @@ namespace holgen {
      * Cpp adds an AddElemName function.
      *
      * Use const for objects loaded at startup and never changed (for static game data like armors etc.)
-     * If const, AddElemName function is private and isn't exposed to lua.
+     * If const, AddElemName function should only be used in startup, it's disabled in lua afterwards
      * TODO: This is a const *container*, also implement const fields
+     * TODO: For data managers, implement locking const containers? Or just remove that restriction?
      *
      * Example:
      * @container(elemName=country)

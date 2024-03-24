@@ -89,6 +89,10 @@ void Character::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "CharacterMeta");
   lua_setmetatable(luaState, -2);
 }
+void Character::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 Character* Character::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);

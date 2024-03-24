@@ -53,6 +53,10 @@ void Human::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "HumanMeta");
   lua_setmetatable(luaState, -2);
 }
+void Human::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 Human* Human::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);

@@ -82,6 +82,7 @@ public:
   static bool Read(const std::unordered_map<K, V>& data, lua_State* luaState, int32_t luaIndex) {
     return false;
   }
+  static void CreateMetatables(lua_State* luaState);
 protected:
 private:
 };

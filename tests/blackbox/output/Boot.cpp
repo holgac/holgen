@@ -66,6 +66,10 @@ void Boot::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "BootMeta");
   lua_setmetatable(luaState, -2);
 }
+void Boot::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 Boot* Boot::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);

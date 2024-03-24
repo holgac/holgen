@@ -13,6 +13,7 @@ private:
   void GenerateLuaHelperRead(Class &generatedClass);
   void GenerateLuaHelperPushNil(Class &generatedClass);
   void GenerateLuaHelperPushPtr(Class &generatedClass);
+  void GenerateCreateMetatables(Class &generatedClass);
 };
 
 }

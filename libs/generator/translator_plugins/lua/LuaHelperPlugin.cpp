@@ -30,7 +30,6 @@ namespace holgen {
 
     std::string LuaTableField_Pointer = "p";
     std::string LuaTableField_Index = "i";
-
   }
 
   void LuaHelperPlugin::Run() {
@@ -38,6 +37,7 @@ namespace holgen {
     generatedClass.mHeaderIncludes.AddLibHeader("lua.hpp");
     GenerateLuaHelperPush(generatedClass);
     GenerateLuaHelperRead(generatedClass);
+    GenerateCreateMetatables(generatedClass);
   }
 
   void LuaHelperPlugin::GenerateLuaHelperPush(Class &generatedClass) {
@@ -228,5 +228,18 @@ namespace holgen {
     func.mBody.Line() << "lua_pushnil(luaState);";
     func.mBody.Indent(-1);
     func.mBody.Add("}}");
+  }
+
+  void LuaHelperPlugin::GenerateCreateMetatables(Class &generatedClass) {
+    auto& method = generatedClass.mMethods.emplace_back(
+        "CreateMetatables", Type{"void"}, Visibility::Public,
+        Constness::NotConst, Staticness::Static);
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    for (auto &cls: mProject.mClasses) {
+      if (cls.GetMethod("CreateLuaMetatable", false)) {
+        generatedClass.mSourceIncludes.AddLocalHeader(cls.mName + ".h");
+        method.mBody.Add("{}::CreateLuaMetatable(luaState);", cls.mName);
+      }
+    }
   }
 }

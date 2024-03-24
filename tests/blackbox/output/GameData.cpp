@@ -243,6 +243,10 @@ void GameData::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "GameDataMeta");
   lua_setmetatable(luaState, -2);
 }
+void GameData::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 GameData* GameData::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);

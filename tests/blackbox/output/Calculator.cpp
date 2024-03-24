@@ -82,6 +82,10 @@ void Calculator::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "CalculatorMeta");
   lua_setmetatable(luaState, -2);
 }
+void Calculator::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 Calculator* Calculator::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);

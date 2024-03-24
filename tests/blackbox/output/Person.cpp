@@ -81,6 +81,10 @@ void Person::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "PersonMeta");
   lua_setmetatable(luaState, -2);
 }
+void Person::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 Person* Person::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);

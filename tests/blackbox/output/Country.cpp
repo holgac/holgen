@@ -62,6 +62,10 @@ void Country::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "CountryMeta");
   lua_setmetatable(luaState, -2);
 }
+void Country::PushGlobalToLua(lua_State* luaState, const char* name) const {
+  PushToLua(luaState);
+  lua_setglobal(luaState, name);
+}
 Country* Country::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);

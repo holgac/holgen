@@ -29,6 +29,7 @@ public:
   static Character* GetFromName(const std::string& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
+  void PushGlobalToLua(lua_State* luaState, const char* name) const;
   static Character* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 protected:

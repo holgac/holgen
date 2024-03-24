@@ -1,5 +1,21 @@
 #include "LuaHelper.h"
 
+#include "Race.h"
+#include "Person.h"
+#include "RaceId.h"
+#include "Country.h"
+#include "Boot.h"
+#include "Armor.h"
+#include "Character.h"
+#include "GameData.h"
+#include "DamageMultiplier.h"
+#include "Weapon.h"
+#include "Number.h"
+#include "Calculator.h"
+#include "Human.h"
+#include "HumanManager.h"
+#include "GridCell.h"
+
 namespace holgen_blackbox_test {
 void LuaHelper::Push(nullptr_t , lua_State* luaState) {
   lua_pushnil(luaState);
@@ -111,5 +127,22 @@ bool LuaHelper::Read(uint8_t& data, lua_State* luaState, int32_t luaIndex) {
     return false;
   data = lua_tonumber(luaState, luaIndex);
   return true;
+}
+void LuaHelper::CreateMetatables(lua_State* luaState) {
+  Race::CreateLuaMetatable(luaState);
+  Person::CreateLuaMetatable(luaState);
+  RaceId::CreateLuaMetatable(luaState);
+  Country::CreateLuaMetatable(luaState);
+  Boot::CreateLuaMetatable(luaState);
+  Armor::CreateLuaMetatable(luaState);
+  Character::CreateLuaMetatable(luaState);
+  GameData::CreateLuaMetatable(luaState);
+  DamageMultiplier::CreateLuaMetatable(luaState);
+  Weapon::CreateLuaMetatable(luaState);
+  Number::CreateLuaMetatable(luaState);
+  Calculator::CreateLuaMetatable(luaState);
+  Human::CreateLuaMetatable(luaState);
+  HumanManager::CreateLuaMetatable(luaState);
+  GridCell::CreateLuaMetatable(luaState);
 }
 }

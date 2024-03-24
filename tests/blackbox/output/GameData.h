@@ -27,6 +27,7 @@ public:
   void SetCharacters(const std::vector<Character>& val);
   const Boot* GetBootFromName(const std::string& key) const;
   Boot* GetBootFromName(const std::string& key);
+  bool AddBoot(Boot&& elem);
   const Boot* GetBoot(uint32_t idx) const;
   Boot* GetBoot(uint32_t idx);
   const Armor* GetArmorFromName(const std::string& key) const;
@@ -43,11 +44,11 @@ public:
   Character* GetCharacter(uint32_t idx);
   bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
   void PushToLua(lua_State* luaState) const;
+  void PushGlobalToLua(lua_State* luaState, const char* name) const;
   static GameData* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
-  bool AddBoot(Boot&& elem);
   std::vector<Boot> mBoots;
   std::vector<Armor> mArmors;
   std::vector<Character> mCharacters;
