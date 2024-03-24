@@ -104,6 +104,15 @@ void HumanManager::CreateLuaMetatable(lua_State* luaState) {
     const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("humans", key)) {
       LuaHelper::Push(instance->mHumans, ls);
+    } else if (0 == strcmp("GetHuman", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = HumanManager::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->GetHuman(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
     } else {
       return 0;
     }

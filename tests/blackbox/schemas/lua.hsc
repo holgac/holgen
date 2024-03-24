@@ -6,8 +6,11 @@ struct Calculator {
     Number curVal;
 
     @luaFunc
-    func add(s64 val) -> s64;
+    func Add(s64 val) -> s64;
 
     @luaFunc(table=Ops)
-    func subtract(Number val) -> Number;
+    func Subtract(Number val) -> Number;
+
+    @cppFunc
+    func SubtractThenMultiply(s64 lhs, s64 rhs) -> s64;
 }

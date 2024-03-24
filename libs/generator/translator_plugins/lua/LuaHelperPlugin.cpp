@@ -51,10 +51,25 @@ namespace holgen {
     baseFunc.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
     baseFunc.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
+    baseFunc.mBody.Add("if constexpr(std::is_pointer_v<T>) {{");
+    baseFunc.mBody.Indent(1);
+    baseFunc.mBody.Add("if (data) {{");
+    baseFunc.mBody.Indent(1);
+    baseFunc.mBody.Add("data->PushToLua(luaState);");
+    baseFunc.mBody.Indent(-1);
+    baseFunc.mBody.Add("}} else {{");
+    baseFunc.mBody.Indent(1);
+    baseFunc.mBody.Line() << "lua_pushnil(luaState);";
+    baseFunc.mBody.Indent(-1);
+    baseFunc.mBody.Add("}}");
+    baseFunc.mBody.Indent(-1);
+    baseFunc.mBody.Add("}} else {{");
+    baseFunc.mBody.Indent(1);
     baseFunc.mBody.Line() << "data.PushToLua(luaState);";
+    baseFunc.mBody.Indent(-1);
+    baseFunc.mBody.Add("}}");
 
     GenerateLuaHelperPushNil(generatedClass);
-    GenerateLuaHelperPushPtr(generatedClass);
 
     for (const auto &[type, usage]: LuaUsage) {
       auto &func = generatedClass.mMethods.emplace_back(
@@ -207,27 +222,6 @@ namespace holgen {
     }
 
 
-  }
-
-  void LuaHelperPlugin::GenerateLuaHelperPushPtr(Class &generatedClass) {
-    auto &func = generatedClass.mMethods.emplace_back(
-        "Push", Type{"void"},
-        Visibility::Public, Constness::NotConst, Staticness::Static
-    );
-    auto &tp = func.mTemplateParameters.emplace_back();
-    tp.mName = "T";
-    tp.mType = "typename";
-    func.mArguments.emplace_back("ptr", Type{"T", PassByType::Pointer, Constness::Const});
-    func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    func.mBody.Add("if (ptr) {{");
-    func.mBody.Indent(1);
-    func.mBody.Add("ptr->PushToLua(luaState);");
-    func.mBody.Indent(-1);
-    func.mBody.Add("}} else {{");
-    func.mBody.Indent(1);
-    func.mBody.Line() << "lua_pushnil(luaState);";
-    func.mBody.Indent(-1);
-    func.mBody.Add("}}");
   }
 
   void LuaHelperPlugin::GenerateCreateMetatables(Class &generatedClass) {

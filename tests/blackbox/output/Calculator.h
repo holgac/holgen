@@ -18,6 +18,7 @@ public:
   int64_t Add(lua_State* luaState, int64_t val) const;
   void SetSubtractLuaFunc(std::string val);
   Number* Subtract(lua_State* luaState, const Number* val) const;
+  int64_t SubtractThenMultiply(int64_t lhs, int64_t rhs);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;
@@ -26,7 +27,7 @@ public:
 protected:
 private:
   Number mCurVal;
-  std::string mFuncName_add;
-  std::string mFuncName_subtract;
+  std::string mFuncName_Add;
+  std::string mFuncName_Subtract;
 };
 }

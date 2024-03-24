@@ -14,17 +14,17 @@ class LuaHelper {
 public:
   template <typename T>
   static void Push(const T& data, lua_State* luaState) {
-    data.PushToLua(luaState);
-  }
-  static void Push(nullptr_t , lua_State* luaState);
-  template <typename T>
-  static void Push(const T* ptr, lua_State* luaState) {
-    if (ptr) {
-      ptr->PushToLua(luaState);
+    if constexpr(std::is_pointer_v<T>) {
+      if (data) {
+        data->PushToLua(luaState);
+      } else {
+        lua_pushnil(luaState);
+      }
     } else {
-      lua_pushnil(luaState);
+      data.PushToLua(luaState);
     }
   }
+  static void Push(nullptr_t , lua_State* luaState);
   static void Push(bool data, lua_State* luaState);
   static void Push(double data, lua_State* luaState);
   static void Push(float data, lua_State* luaState);

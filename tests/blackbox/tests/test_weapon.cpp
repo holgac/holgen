@@ -5,7 +5,7 @@
 using namespace holgen_blackbox_test;
 
 namespace holgen_blackbox_test {
-  uint32_t Weapon::GetAverageDamage() const {
+  uint32_t Weapon::GetAverageDamage() {
     return (mDamageMin + mDamageMax) / 2;
   }
 }

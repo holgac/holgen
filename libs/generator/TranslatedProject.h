@@ -92,9 +92,11 @@ namespace holgen {
 
     std::string mName;
     Type mReturnType;
+    // TODO: bit flags?
     Constness mConstness;
     Staticness mStaticness;
     bool mUserDefined = false;
+    bool mExposeToLua = false;
   };
 
   struct ClassConstructorInitializer {

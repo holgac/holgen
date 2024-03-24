@@ -15,9 +15,14 @@ namespace holgen {
   }
 
   void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &func) {
-    auto& method = cls.mMethods.emplace_back(func.mName, Type{mProject.mProject, func.mReturnType});
+    // TODO: const decorator
+    auto &method = cls.mMethods.emplace_back(
+        func.mName,
+        Type{mProject.mProject, func.mReturnType},
+        Visibility::Public, Constness::NotConst);
     method.mUserDefined = true;
-    for(const auto& arg: func.mArguments) {
+    method.mExposeToLua = true;
+    for (const auto &arg: func.mArguments) {
       method.mArguments.emplace_back(arg.mName, Type{mProject.mProject, arg.mType});
     }
   }

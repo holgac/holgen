@@ -266,6 +266,33 @@ void GameData::CreateLuaMetatable(lua_State* luaState) {
       LuaHelper::Push(instance->mArmors, ls);
     } else if (0 == strcmp("characters", key)) {
       LuaHelper::Push(instance->mCharacters, ls);
+    } else if (0 == strcmp("GetBoot", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = GameData::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->GetBoot(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
+    } else if (0 == strcmp("GetArmor", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = GameData::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->GetArmor(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
+    } else if (0 == strcmp("GetCharacter", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = GameData::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->GetCharacter(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
     } else {
       return 0;
     }

@@ -22,7 +22,7 @@ public:
   void SetDamageMax(uint32_t val);
   void SetDamageMultipliers(const std::vector<DamageMultiplier>& val);
   void SetModifiers(const std::vector<std::string>& val);
-  uint32_t GetAverageDamage() const;
+  uint32_t GetAverageDamage();
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;

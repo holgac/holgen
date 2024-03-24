@@ -149,6 +149,8 @@ namespace holgen {
           Visibility::Public,
           constness
       );
+      if (i == 0)
+        func.mExposeToLua = true;
       bool isSigned = false;
       if (underlyingIdField) {
         auto &arg = func.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mType});

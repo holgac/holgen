@@ -15,6 +15,14 @@ using namespace holgen_blackbox_test;
 namespace {
 }
 
+namespace holgen_blackbox_test {
+  int64_t Calculator::SubtractThenMultiply(int64_t lhs, int64_t rhs) {
+    auto val = lhs - rhs;
+    mCurVal.SetValue(mCurVal.GetValue() * val);
+    return mCurVal.GetValue();
+  }
+}
+
 class LuaTest : public ::testing::Test {
 protected:
   void SetUp() override {
@@ -177,4 +185,16 @@ TEST_F(LuaTest, Func) {
   ASSERT_NE(res, nullptr);
   EXPECT_EQ(res->GetValue(), 2);
   EXPECT_EQ(c.GetCurVal().GetValue(), 2);
+}
+
+TEST_F(LuaTest, CppFunc) {
+  Number::CreateLuaMetatable(mState);
+  Calculator::CreateLuaMetatable(mState);
+  Calculator c;
+  c.GetCurVal().SetValue(2);
+  c.PushGlobalToLua(mState, "c");
+  luaL_dostring(mState, "return c:SubtractThenMultiply(15, 12)");
+  LuaTestHelper::ExpectStack(mState, {"6"});
+  EXPECT_EQ(c.GetCurVal().GetValue(), 6);
+  lua_pop(mState, 1);
 }

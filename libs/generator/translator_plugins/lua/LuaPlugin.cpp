@@ -56,7 +56,6 @@ namespace holgen {
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
       bool isRef = fieldDefinition.mType.mName == "Ref";
-      std::string rawFieldName = fieldDefinition.mName;
       if (isFirst) {
         codeBlock.Line() << "if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
                          << "\", key)) {";
@@ -86,6 +85,42 @@ namespace holgen {
         codeBlock.Add("}}");
         codeBlock.Indent(-1);
       }
+    }
+    for (auto &method: cls.mMethods) {
+      if (!method.mExposeToLua)
+        continue;
+      if (isFirst) {
+        codeBlock.Line() << "if (0 == strcmp(\"" << method.mName << "\", key)) {";
+        isFirst = false;
+      } else {
+        codeBlock.Line() << "} else if (0 == strcmp(\"" << method.mName << "\", key)) {";
+      }
+      codeBlock.Indent(1);
+      codeBlock.Add("lua_pushcfunction(ls, [](lua_State* lsInner) {{");
+      codeBlock.Indent(1);
+      codeBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName, -ssize_t(method.mArguments.size()) - 1);
+      std::stringstream funcArgs;
+      for (size_t i = 0; i < method.mArguments.size(); ++i) {
+        if (i != 0)
+          funcArgs << ", ";
+        funcArgs << "arg" << i;
+        codeBlock.Add("{} arg{};", method.mArguments[i].mType.ToString(), i);
+        codeBlock.Add(
+            "{}::{}(arg{}, lsInner, {});",
+            St::LuaHelper, St::LuaHelper_Read, i,
+            ssize_t(i) - ssize_t(method.mArguments.size()));
+      }
+      if (method.mReturnType.mName != "void") {
+        codeBlock.Add("auto result = instance->{}({});", method.mName, funcArgs.str());
+        codeBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
+        codeBlock.Add("return 1;");
+      } else {
+        codeBlock.Add("instance->{}({});", method.mName, funcArgs.str());
+        codeBlock.Add("return 0;");
+      }
+      codeBlock.Indent(-1);
+      codeBlock.Add("}});");
+      codeBlock.Indent(-1);
     }
     codeBlock.Line() << "} else {";
     codeBlock.Indent(1);
@@ -229,7 +264,7 @@ namespace holgen {
   }
 
   void LuaPlugin::AddPushGlobalToLua(Class &cls, const StructDefinition &structDefinition __attribute__((unused))) {
-    auto& method = cls.mMethods.emplace_back("PushGlobalToLua", Type{"void"});
+    auto &method = cls.mMethods.emplace_back("PushGlobalToLua", Type{"void"});
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("name", Type{"char", PassByType::Pointer, Constness::Const});
     method.mBody.Add("PushToLua(luaState);");

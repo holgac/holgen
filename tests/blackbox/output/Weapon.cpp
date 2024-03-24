@@ -92,6 +92,13 @@ void Weapon::CreateLuaMetatable(lua_State* luaState) {
       LuaHelper::Push(instance->mDamageMultipliers, ls);
     } else if (0 == strcmp("modifiers", key)) {
       LuaHelper::Push(instance->mModifiers, ls);
+    } else if (0 == strcmp("GetAverageDamage", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = Weapon::ReadFromLua(lsInner, -1);
+        auto result = instance->GetAverageDamage();
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
     } else {
       return 0;
     }

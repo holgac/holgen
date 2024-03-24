@@ -16,13 +16,13 @@ void Calculator::SetCurVal(const Number& val) {
   mCurVal = val;
 }
 void Calculator::SetAddLuaFunc(std::string val) {
-  mFuncName_add = val;
+  mFuncName_Add = val;
 }
 int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
-  HOLGEN_WARN_AND_RETURN_IF(mFuncName_add.empty(), {}, "Calling unset add function");
-  lua_getglobal(luaState, mFuncName_add.c_str());
+  HOLGEN_WARN_AND_RETURN_IF(mFuncName_Add.empty(), {}, "Calling unset Add function");
+  lua_getglobal(luaState, mFuncName_Add.c_str());
   if (lua_isnil(luaState, -1)) {
-    HOLGEN_WARN("Calling undefined add function {}", mFuncName_add);
+    HOLGEN_WARN("Calling undefined Add function {}", mFuncName_Add);
     lua_pop(luaState, 1);
     return {};
   }
@@ -35,15 +35,15 @@ int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
   return result;
 }
 void Calculator::SetSubtractLuaFunc(std::string val) {
-  mFuncName_subtract = val;
+  mFuncName_Subtract = val;
 }
 Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
-  HOLGEN_WARN_AND_RETURN_IF(mFuncName_subtract.empty(), {}, "Calling unset subtract function");
+  HOLGEN_WARN_AND_RETURN_IF(mFuncName_Subtract.empty(), {}, "Calling unset Subtract function");
   lua_getglobal(luaState, "Ops");
-  lua_pushstring(luaState, mFuncName_subtract.c_str());
+  lua_pushstring(luaState, mFuncName_Subtract.c_str());
   lua_gettable(luaState, -2);
   if (lua_isnil(luaState, -1)) {
-    HOLGEN_WARN("Calling undefined subtract function Ops.{}", mFuncName_subtract);
+    HOLGEN_WARN("Calling undefined Subtract function Ops.{}", mFuncName_Subtract);
     lua_pop(luaState, 1);
     return {};
   }
@@ -62,14 +62,14 @@ bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& conver
       auto res = mCurVal.ParseJson(data.value, converter);
       if (!res)
         return false;
-    } else if (0 == strcmp(name, "add")) {
+    } else if (0 == strcmp(name, "Add")) {
       std::string val;
       JsonHelper::Parse(val, data.value, converter);
-      mFuncName_add = std::move(val);
-    } else if (0 == strcmp(name, "subtract")) {
+      mFuncName_Add = std::move(val);
+    } else if (0 == strcmp(name, "Subtract")) {
       std::string val;
       JsonHelper::Parse(val, data.value, converter);
-      mFuncName_subtract = std::move(val);
+      mFuncName_Subtract = std::move(val);
     }
   }
   return true;
@@ -101,6 +101,17 @@ void Calculator::CreateLuaMetatable(lua_State* luaState) {
     const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("curVal", key)) {
       LuaHelper::Push(instance->mCurVal, ls);
+    } else if (0 == strcmp("SubtractThenMultiply", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = Calculator::ReadFromLua(lsInner, -3);
+        int64_t arg0;
+        LuaHelper::Read(arg0, lsInner, -2);
+        int64_t arg1;
+        LuaHelper::Read(arg1, lsInner, -1);
+        auto result = instance->SubtractThenMultiply(arg0, arg1);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
     } else {
       return 0;
     }
