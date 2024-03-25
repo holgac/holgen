@@ -3,6 +3,7 @@
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include "../../Naming.h"
 
 namespace holgen {
   namespace {
@@ -91,6 +92,7 @@ namespace holgen {
       const StructDefinition &structDefinition __attribute__((unused)),
       const FieldDefinition &fieldDefinition
   ) {
+    auto field = *cls.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
     if (mProject.mProject.GetStruct(fieldDefinition.mType.mName) == nullptr) {
       auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {
@@ -104,14 +106,13 @@ namespace holgen {
         parseFunc.mBody.Line() << "return false;";
         parseFunc.mBody.Indent(-1); // if !res
 
-        auto field = cls.GetField(St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
-        if (TypeInfo::Get().CppPrimitives.contains(field->mType.mName))
-          parseFunc.mBody.Add("{} = converter.{}(temp);", field->mName, jsonConvertUsing->mValue.mName);
+        if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName))
+          parseFunc.mBody.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
         else
-          parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", field->mName, jsonConvertUsing->mValue.mName);
+          parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);
       } else {
         parseFunc.mBody.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                            St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
+                            field.mName);
         parseFunc.mBody.Line() << "if (!res)";
         parseFunc.mBody.Indent(1);
         parseFunc.mBody.Line() << "return false;";
@@ -119,7 +120,7 @@ namespace holgen {
       }
     } else {
       parseFunc.mBody.Add("auto res = {}.{}(data.value, converter);",
-                          St::GetFieldNameInCpp(fieldDefinition.mName), ParseJson);
+                          field.mName, ParseJson);
 
       parseFunc.mBody.Line() << "if (!res)";
       parseFunc.mBody.Indent(1);

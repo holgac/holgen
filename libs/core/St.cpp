@@ -29,17 +29,6 @@ namespace holgen {
       return "Set" + Capitalize(fieldName);
   }
 
-  std::string St::GetIndexFieldName(const std::string &fieldName, const std::string &indexedFieldName) {
-    return GetFieldNameInCpp(fieldName) + Capitalize(indexedFieldName) + "Index";
-  }
-
-  std::string St::GetFieldNameInCpp(const std::string &fieldName, bool isRef) {
-    if (isRef)
-      return "m" + Capitalize(fieldName) + "Id";
-    else
-      return "m" + Capitalize(fieldName);
-  }
-
   std::string St::GetIndexGetterName(const std::string &fieldName, const std::string &indexedFieldName) {
     return std::format("Get{}From{}", Capitalize(fieldName), Capitalize(indexedFieldName));
   }

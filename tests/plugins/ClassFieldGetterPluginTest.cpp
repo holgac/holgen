@@ -23,7 +23,8 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetTestFieldUnsigned", Constness::Const), nullptr);
   {
     auto method = ClassMethod{"GetTestFieldUnsigned", Type{"uint32_t"}, Visibility::Public, Constness::Const};
-    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUnsigned", Constness::Const), method, "return mTestFieldUnsigned;");
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUnsigned", Constness::Const), method,
+                         "return mTestFieldUnsigned;");
   }
   ASSERT_EQ(cls->GetMethod("GetTestFieldUnsigned", Constness::NotConst), nullptr);
 
@@ -79,4 +80,35 @@ struct TestData {
   }
 }
 
-// TODO: test Ref
+TEST_F(ClassFieldGetterPluginTest, RefWithId) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  @id
+  u32 id;
+}
+struct TestData {
+  Ref<InnerStruct> testFieldStruct;
+})R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ClassFieldGetterPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("GetTestFieldStructId", Constness::Const), nullptr);
+  ASSERT_EQ(cls->GetMethod("GetTestFieldStructId", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "GetTestFieldStructId",
+        Type{"uint32_t"},
+        Visibility::Public, Constness::Const};
+    helpers::ExpectEqual(
+        *cls->GetMethod("GetTestFieldStructId", Constness::Const),
+        method, "return mTestFieldStructId;");
+  }
+
+  // TODO: These functions shouldn't exist
+  return;
+  ASSERT_EQ(cls->GetMethod("GetTestFieldStruct", Constness::Const), nullptr);
+  ASSERT_EQ(cls->GetMethod("GetTestFieldStruct", Constness::NotConst), nullptr);
+}

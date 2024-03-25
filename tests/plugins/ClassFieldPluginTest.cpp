@@ -88,3 +88,52 @@ struct TestData {
     helpers::ExpectEqual(*cls->GetField("mTestFieldMap"), field);
   }
 }
+
+TEST_F(ClassFieldPluginTest, RefNoId) {
+  auto project = Parse(R"R(
+struct InnerData {
+  u32 innerField;
+}
+struct TestData {
+  Ref<InnerData> testFieldRef;
+}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_EQ(cls->mFields.size(), 1);
+
+  ASSERT_NE(cls->GetField("mTestFieldRef"), nullptr);
+  {
+    auto field = ClassField{"mTestFieldRef", Type{"InnerData", PassByType::Pointer}};
+    field.mField = cls->mStruct->GetField("testFieldRef");
+    field.mDefaultValue = "nullptr";
+    helpers::ExpectEqual(*cls->GetField("mTestFieldRef"), field);
+  }
+}
+
+TEST_F(ClassFieldPluginTest, RefWithId) {
+  auto project = Parse(R"R(
+struct InnerData {
+  @id
+  u32 innerField;
+}
+struct TestData {
+  Ref<InnerData> testFieldRef;
+}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_EQ(cls->mFields.size(), 1);
+
+  ASSERT_NE(cls->GetField("mTestFieldRefId"), nullptr);
+  {
+    auto field = ClassField{"mTestFieldRefId", Type{"uint32_t"}};
+    field.mField = cls->mStruct->GetField("testFieldRef");
+    field.mDefaultValue = "-1";
+    helpers::ExpectEqual(*cls->GetField("mTestFieldRefId"), field);
+  }
+}

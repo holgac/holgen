@@ -1,8 +1,8 @@
 #include "JsonConverterPlugin.h"
-#include <vector>
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include "../../Naming.h"
 
 namespace holgen {
   namespace {
@@ -29,7 +29,7 @@ namespace holgen {
         );
 
 
-        auto fieldNameInCpp = St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref");
+        auto fieldNameInCpp = Naming(mProject).FieldNameInCpp(fieldDefinition);
         auto referencedClass = mProject.GetClass(structDefinition.mName);
 
         func.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);

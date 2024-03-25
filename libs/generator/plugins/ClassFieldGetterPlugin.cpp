@@ -1,5 +1,6 @@
 #include "ClassFieldGetterPlugin.h"
 #include "core/St.h"
+#include "../Naming.h"
 
 namespace holgen {
   void ClassFieldGetterPlugin::Run() {
@@ -7,8 +8,7 @@ namespace holgen {
       if (generatedClass.mStruct == nullptr)
         continue;
       for (auto &fieldDefinition: generatedClass.mStruct->mFields) {
-        auto &generatedField = *generatedClass.GetField(
-            St::GetFieldNameInCpp(fieldDefinition.mName, fieldDefinition.mType.mName == "Ref"));
+        auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
         bool isRef = fieldDefinition.mType.mName == "Ref";
 
         bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(generatedField.mType.mName);

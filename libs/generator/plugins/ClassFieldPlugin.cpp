@@ -1,5 +1,6 @@
 #include "ClassFieldPlugin.h"
 #include "core/St.h"
+#include "../Naming.h"
 
 namespace holgen {
   void ClassFieldPlugin::Run() {
@@ -7,14 +8,17 @@ namespace holgen {
       if (generatedClass.mStruct == nullptr)
         continue;
       for (auto &fieldDefinition: generatedClass.mStruct->mFields) {
-        bool isRef = fieldDefinition.mType.mName == "Ref";
-
         auto &generatedField = generatedClass.mFields.emplace_back(
-            St::GetFieldNameInCpp(fieldDefinition.mName, isRef), Type{mProject.mProject, fieldDefinition.mType},
+            Naming(mProject).FieldNameInCpp(fieldDefinition),
+            Type{mProject.mProject, fieldDefinition.mType},
             Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue);
         generatedField.mField = &fieldDefinition;
-        if (isRef && generatedField.mDefaultValue.empty())
-          generatedField.mDefaultValue = "-1";
+        if (fieldDefinition.mType.mName == "Ref" && generatedField.mDefaultValue.empty()) {
+          if (generatedField.mType.mType == PassByType::Pointer)
+            generatedField.mDefaultValue = "nullptr";
+          else
+            generatedField.mDefaultValue = "-1";
+        }
       }
     }
   }
