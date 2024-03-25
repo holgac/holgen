@@ -11,10 +11,6 @@ namespace holgen {
     return capitalizedName;
   }
 
-  std::string St::GetIndexGetterName(const std::string &fieldName, const std::string &indexedFieldName) {
-    return std::format("Get{}From{}", Capitalize(fieldName), Capitalize(indexedFieldName));
-  }
-
   std::string St::GetFieldNameInLua(const std::string &fieldName, bool isRef) {
     if (isRef)
       return fieldName + "Id";
@@ -35,9 +31,5 @@ namespace holgen {
       ++idx;
     }
     return true;
-  }
-
-  std::string St::GetCountMethodName(const std::string &fieldName) {
-    return "Get" + Capitalize(fieldName) + "Count";
   }
 }

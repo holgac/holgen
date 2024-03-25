@@ -31,8 +31,6 @@ namespace holgen {
 
   void ContainerFieldPlugin::ProcessContainerIndex(Class &generatedClass, const FieldDefinition &fieldDefinition,
                                                    const AnnotationDefinition &dec) {
-    auto elemName = fieldDefinition.GetAnnotation(Annotations::Container)->GetAttribute(
-        Annotations::Container_ElemName);
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto indexOn = dec.GetAttribute(Annotations::Index_On);
@@ -51,7 +49,7 @@ namespace holgen {
     for (int i = 0; i < 2; ++i) {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &func = generatedClass.mMethods.emplace_back(
-          St::GetIndexGetterName(elemName->mValue.mName, indexOn->mValue.mName),
+          Naming(mProject).ContainerIndexGetterNameInCpp(fieldDefinition, dec),
           Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
           Visibility::Public,
           constness);
@@ -185,10 +183,8 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateContainerGetCount(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto container = fieldDefinition.GetAnnotation(Annotations::Container);
-    auto elemName = container->GetAttribute(Annotations::Container_ElemName);
     auto &func = generatedClass.mMethods.emplace_back(
-        St::GetCountMethodName(elemName->mValue.mName),
+        Naming(mProject).ContainerElemCountNameInCpp(fieldDefinition),
         Type{"size_t"}
     );
     func.mExposeToLua = true;

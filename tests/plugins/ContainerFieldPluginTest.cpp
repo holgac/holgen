@@ -32,9 +32,9 @@ struct TestData {
   ASSERT_NE(cls->GetField("mInnerStructsUuidIndex"), nullptr);
   {
     auto field = ClassField{
-      "mInnerStructsUuidIndex",
-      Type{"std::map"},
-      };
+        "mInnerStructsUuidIndex",
+        Type{"std::map"},
+    };
     field.mType.mTemplateParameters.emplace_back("uint64_t");
     field.mType.mTemplateParameters.emplace_back("uint32_t");
     helpers::ExpectEqual(*cls->GetField("mInnerStructsUuidIndex"), field);
@@ -42,9 +42,9 @@ struct TestData {
   ASSERT_NE(cls->GetField("mInnerStructsGuidIndex"), nullptr);
   {
     auto field = ClassField{
-      "mInnerStructsGuidIndex",
-      Type{"std::unordered_map"},
-      };
+        "mInnerStructsGuidIndex",
+        Type{"std::unordered_map"},
+    };
     field.mType.mTemplateParameters.emplace_back("std::string");
     field.mType.mTemplateParameters.emplace_back("uint32_t");
     helpers::ExpectEqual(*cls->GetField("mInnerStructsGuidIndex"), field);
@@ -76,9 +76,9 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetInnerStructFromUuid", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
-      "GetInnerStructFromUuid",
-      Type{"InnerStruct", PassByType::Pointer, Constness::Const},
-      };
+        "GetInnerStructFromUuid",
+        Type{"InnerStruct", PassByType::Pointer, Constness::Const},
+    };
     method.mExposeToLua = true;
     const char *body = R"R(
 auto it = mInnerStructsUuidIndex.find(key);
@@ -98,9 +98,9 @@ return &mInnerStructs[it->second];
   ASSERT_NE(cls->GetMethod("GetInnerStructFromGuid", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
-      "GetInnerStructFromGuid",
-      Type{"InnerStruct", PassByType::Pointer, Constness::Const},
-      };
+        "GetInnerStructFromGuid",
+        Type{"InnerStruct", PassByType::Pointer, Constness::Const},
+    };
     method.mExposeToLua = true;
     const char *body = R"R(
 auto it = mInnerStructsGuidIndex.find(key);

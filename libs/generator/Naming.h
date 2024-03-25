@@ -18,6 +18,9 @@ namespace holgen {
     std::string FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef = false);
     std::string ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition);
     std::string ContainerElemAdderNameInCpp(const FieldDefinition &fieldDefinition);
+    std::string ContainerElemCountNameInCpp(const FieldDefinition &fieldDefinition);
+    std::string ContainerIndexGetterNameInCpp(const FieldDefinition &fieldDefinition, const AnnotationDefinition &indexAnnotation);
+    std::string ManagedClassIndexGetterNameInCpp(const AnnotationDefinition &indexAnnotation);
     std::string FieldSetterNameInCpp(const FieldDefinition &fieldDefinition);
     std::string LuaFunctionSetterNameInCpp(const FunctionDefinition& functionDefinition);
   private:

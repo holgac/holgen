@@ -40,8 +40,7 @@ namespace holgen {
     parseFunc.mArguments.emplace_back("converterArg", Type{ConverterName, PassByType::Reference, Constness::Const});
     parseFunc.mBody.Add("auto converter = converterArg;");
     for (const auto &fieldDefinition: structDefinition.mFields) {
-      auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
-      if (containerAnnotation == nullptr)
+      if (!fieldDefinition.GetAnnotation(Annotations::Container))
         continue;
       for (const auto &annotationDefinition: fieldDefinition.mAnnotations) {
         if (annotationDefinition.mName != Annotations::Index)
@@ -67,9 +66,8 @@ namespace holgen {
                             toType.ToString());
         parseFunc.mBody.Indent(1);
 
-        auto &elementName = *containerAnnotation->GetAttribute(Annotations::Container_ElemName);
         parseFunc.mBody.Add("auto elem = {}(key);",
-                            St::GetIndexGetterName(elementName.mValue.mName, indexedOnField->mName));
+                            Naming(mProject).ContainerIndexGetterNameInCpp(fieldDefinition, annotationDefinition));
         parseFunc.mBody.Add("return elem->{}();", Naming(mProject).FieldGetterNameInCpp(*idField));
 
         parseFunc.mBody.Indent(-1);
@@ -149,7 +147,8 @@ namespace holgen {
           Type type(mProject.mProject, templateParameter);
           parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
           parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
-          parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
+          parseFunc.mBody.Add(
+              R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
           parseFunc.mBody.Add("{}(std::move(elem));", Naming(mProject).ContainerElemAdderNameInCpp(fieldDefinition));
           parseFunc.mBody.Indent(-1);
           parseFunc.mBody.Add("}}"); // for (jsonElem: doc.GetArray())

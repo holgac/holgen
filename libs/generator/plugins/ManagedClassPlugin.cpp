@@ -16,9 +16,6 @@ namespace holgen {
       auto managedFieldAttribute = managedAnnotation->GetAttribute(Annotations::Managed_Field);
       auto manager = mProject.mProject.GetStruct(managedByAttribute->mValue.mName);
       auto managerField = manager->GetField(managedFieldAttribute->mValue.mName);
-      auto managerFieldContainerAnnotation = managerField->GetAnnotation(Annotations::Container);
-      auto managerFieldContainerElemNameAttribute = managerFieldContainerAnnotation->GetAttribute(
-          Annotations::Container_ElemName);
       auto idField = generatedClass.mStruct->GetIdField();
 
       {
@@ -28,7 +25,7 @@ namespace holgen {
             Visibility::Public,
             Constness::NotConst,
             Staticness::Static
-            );
+        );
         getter.mArguments.emplace_back("id", Type{mProject.mProject, idField->mType});
         getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                          St::GlobalPointer, manager->mName,
@@ -43,14 +40,15 @@ namespace holgen {
 
         auto indexOn = annotation.GetAttribute(Annotations::Index_On);
         auto &getter = generatedClass.mMethods.emplace_back(
-            St::GetIndexGetterName("", indexOn->mValue.mName),
+            Naming(mProject).ManagedClassIndexGetterNameInCpp(annotation),
             Type{generatedClass.mStruct->mName, PassByType::Pointer, Constness::NotConst},
             Visibility::Public,
             Constness::NotConst,
             Staticness::Static
-            );
+        );
         auto indexedOnField = generatedClass.mStruct->GetField(indexOn->mValue.mName);
-        ClassMethodArgument &valArg = getter.mArguments.emplace_back("val", Type{mProject.mProject, indexedOnField->mType});
+        ClassMethodArgument &valArg = getter.mArguments.emplace_back("val",
+                                                                     Type{mProject.mProject, indexedOnField->mType});
         if (!TypeInfo::Get().CppPrimitives.contains(valArg.mType.mName)) {
           valArg.mType.mType = PassByType::Reference;
           valArg.mType.mConstness = Constness::Const;
@@ -58,7 +56,7 @@ namespace holgen {
         getter.mBody.Add(
             "return {}<{}>::GetInstance()->{}(val);",
             St::GlobalPointer, manager->mName,
-            St::GetIndexGetterName(managerFieldContainerElemNameAttribute->mValue.mName, indexOn->mValue.mName));
+            Naming(mProject).ContainerIndexGetterNameInCpp(*managerField, annotation));
 
       }
 
