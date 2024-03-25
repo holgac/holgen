@@ -1,5 +1,5 @@
 #include "TranslatorPluginTest.h"
-#include "generator/translator_plugins/ClassPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 
 class ClassPluginTest : public TranslatorPluginTest {
 

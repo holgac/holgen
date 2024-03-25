@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "generator/translator_plugins/GlobalPointerPlugin.h"
+#include "generator/plugins/helpers/GlobalPointerPlugin.h"
 #include "generator/CodeGenerator.h"
 #include "Helpers.h"
 

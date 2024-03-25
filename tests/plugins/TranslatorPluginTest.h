@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "generator/translator_plugins/TranslatorPlugin.h"
+#include "generator/plugins/TranslatorPlugin.h"
 #include "tokenizer/Tokenizer.h"
 #include "parser/Parser.h"
 

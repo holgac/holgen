@@ -7,7 +7,7 @@
 // Needed for Project (TODO: move to separate file and fwd declare)
 #include "parser/Parser.h"
 #include "TranslatedProject.h"
-#include "translator_plugins/TranslatorPlugin.h"
+#include "plugins/TranslatorPlugin.h"
 // #include "generators/Generator.h"
 
 

@@ -4,7 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
-#include "generator/translator_plugins/TranslatorPlugin.h"
+#include "generator/plugins/TranslatorPlugin.h"
 
 namespace holgen {
   class JsonHelperPlugin : public TranslatorPlugin {

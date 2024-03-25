@@ -1,5 +1,5 @@
 set(gen_base CodeGenerator.cpp Translator.cpp HeaderContainer.cpp CodeBlock.cpp TypeInfo.cpp TranslatedProject.cpp)
-set(gen_json_plugins translator_plugins/json/JsonPlugin.cpp translator_plugins/json/JsonParseFilesPlugin.cpp translator_plugins/json/JsonHelperPlugin.cpp translator_plugins/json/JsonConverterPlugin.cpp)
-set(gen_lua_plugins translator_plugins/lua/LuaPlugin.cpp translator_plugins/lua/LuaHelperPlugin.cpp translator_plugins/lua/LuaFunctionPlugin.cpp)
-set(gen_plugins translator_plugins/TranslatorPlugin.cpp translator_plugins/GlobalPointerPlugin.cpp translator_plugins/FilesystemHelperPlugin.cpp translator_plugins/ClassFieldPlugin.cpp translator_plugins/ClassFieldGetterPlugin.cpp translator_plugins/ClassFieldSetterPlugin.cpp translator_plugins/ContainerFieldPlugin.cpp translator_plugins/ClassPlugin.cpp translator_plugins/ManagedClassPlugin.cpp translator_plugins/EnumPlugin.cpp translator_plugins/CppFunctionPlugin.cpp)
+set(gen_json_plugins plugins/json/JsonPlugin.cpp plugins/json/JsonParseFilesPlugin.cpp plugins/json/JsonHelperPlugin.cpp plugins/json/JsonConverterPlugin.cpp)
+set(gen_lua_plugins plugins/lua/LuaPlugin.cpp plugins/lua/LuaHelperPlugin.cpp plugins/lua/LuaFunctionPlugin.cpp)
+set(gen_plugins plugins/TranslatorPlugin.cpp plugins/helpers/GlobalPointerPlugin.cpp plugins/helpers/FilesystemHelperPlugin.cpp plugins/ClassFieldPlugin.cpp plugins/ClassFieldGetterPlugin.cpp plugins/ClassFieldSetterPlugin.cpp plugins/ContainerFieldPlugin.cpp plugins/ClassPlugin.cpp plugins/ManagedClassPlugin.cpp plugins/EnumPlugin.cpp plugins/CppFunctionPlugin.cpp)
 add_library(generator ${gen_base} ${gen_plugins} ${gen_json_plugins} ${gen_lua_plugins})

@@ -1,6 +1,6 @@
 #include "TranslatorPluginTest.h"
-#include "generator/translator_plugins/ClassPlugin.h"
-#include "generator/translator_plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
+#include "generator/plugins/ClassFieldPlugin.h"
 #include "../Helpers.h"
 
 class ClassFieldPluginTest : public TranslatorPluginTest {
