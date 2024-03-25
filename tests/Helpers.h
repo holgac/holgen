@@ -8,4 +8,6 @@ namespace holgen::helpers {
 
   void ExpectGeneratedContent(const GeneratedContent &actual, const GeneratedContent &expected);
 
+  void ExpectTypeEqual(const Type &expected, const Type &actual);
+
 }

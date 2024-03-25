@@ -1,20 +1,15 @@
 #include <gtest/gtest.h>
 #include "generator/Translator.h"
+#include "Helpers.h"
 
 using namespace holgen;
 
 namespace {
 
-  void ExpectTypeEqual(const Type &expected, const Type &actual) {
-    EXPECT_EQ(actual.mName, expected.mName);
-    EXPECT_EQ(actual.mType, expected.mType);
-    EXPECT_EQ(actual.mConstness, expected.mConstness);
-  }
-
   void ExpectClassFieldEqual(const ClassField &expected, const ClassField &actual) {
     EXPECT_EQ(actual.mVisibility, expected.mVisibility);
     EXPECT_EQ(actual.mName, expected.mName);
-    ExpectTypeEqual(expected.mType, actual.mType);
+    helpers::ExpectTypeEqual(expected.mType, actual.mType);
   }
 
   void ExpectFields(const Class &c, const std::vector<ClassField> &fields) {

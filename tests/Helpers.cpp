@@ -23,4 +23,19 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mName, expected.mName);
     EXPECT_EQ(Trim(actual.mText), Trim(expected.mText));
   }
+
+  void ExpectTypeEqual(const Type &expected, const Type &actual) {
+    EXPECT_EQ(actual.mName, expected.mName);
+    EXPECT_EQ(actual.mType, expected.mType);
+    EXPECT_EQ(actual.mConstness, expected.mConstness);
+    EXPECT_EQ(actual.mConstexprness, expected.mConstexprness);
+    EXPECT_EQ(actual.mTemplateParameters.size(), expected.mTemplateParameters.size());
+    for(size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
+      ExpectTypeEqual(expected.mTemplateParameters[i], actual.mTemplateParameters[i]);
+    }
+    EXPECT_EQ(actual.mFunctionalTemplateParameters.size(), expected.mFunctionalTemplateParameters.size());
+    for(size_t i = 0; i < actual.mFunctionalTemplateParameters.size(); ++i) {
+      ExpectTypeEqual(expected.mFunctionalTemplateParameters[i], actual.mFunctionalTemplateParameters[i]);
+    }
+  }
 }

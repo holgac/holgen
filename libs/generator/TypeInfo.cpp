@@ -3,6 +3,10 @@
 #include <parser/Parser.h>
 #include "TranslatedProject.h"
 
+/*
+ * TODO: array
+ * Either array<Elem, Enum> or array<Elem, count>
+ */
 namespace holgen {
   TypeInfo::TypeInfo() {
     TypeToCppType = {
