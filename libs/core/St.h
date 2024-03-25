@@ -14,7 +14,6 @@ namespace holgen {
     static bool IsIntegral(const std::string_view &str);
     static std::string Capitalize(const std::string &str);
     // These should use FieldDefinition.mName. NOT ClassField.mName which is modified (mField)
-    static std::string GetAdderMethodName(const std::string& fieldName);
     static std::string GetCountMethodName(const std::string& fieldName);
     static std::string GetFieldNameInLua(const std::string& fieldName, bool isRef = false);
     static std::string GetIndexGetterName(const std::string& fieldName, const std::string& indexedFieldName);

@@ -150,9 +150,7 @@ namespace holgen {
           parseFunc.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
           parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
           parseFunc.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
-          auto elemName = fieldDefinition.GetAnnotation(Annotations::Container)->GetAttribute(
-              Annotations::Container_ElemName);
-          parseFunc.mBody.Add("{}(std::move(elem));", St::GetAdderMethodName(elemName->mValue.mName));
+          parseFunc.mBody.Add("{}(std::move(elem));", Naming(mProject).ContainerElemAdderNameInCpp(fieldDefinition));
           parseFunc.mBody.Indent(-1);
           parseFunc.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
 

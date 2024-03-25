@@ -55,6 +55,8 @@ namespace holgen {
           Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
           Visibility::Public,
           constness);
+      if (i == 0)
+        func.mExposeToLua = true;
       auto &arg = func.mArguments.emplace_back(
           "key", Type{mProject.mProject, fieldIndexedOn.mType});
       if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
@@ -67,14 +69,15 @@ namespace holgen {
       func.mBody.Indent(1);
       func.mBody.Add("return nullptr;");
       func.mBody.Indent(-1);
-      func.mBody.Add("return &{}.at(it->second);", Naming(mProject).FieldNameInCpp(fieldDefinition));
+      auto generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+      if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName))
+        func.mBody.Add("return &{}.at(it->second);", generatedField.mName);
+      else
+        func.mBody.Add("return &{}[it->second];", generatedField.mName);
     }
   }
 
   void ContainerFieldPlugin::GenerateContainerAddElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto container = fieldDefinition.GetAnnotation(Annotations::Container);
-    auto elemName = container->GetAttribute(Annotations::Container_ElemName);
-    // bool isConstContainer = container->GetAttribute(Annotations::Container_Const) != nullptr;
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
@@ -90,21 +93,14 @@ namespace holgen {
     }
 
     auto &func = generatedClass.mMethods.emplace_back(
-        St::GetAdderMethodName(elemName->mValue.mName),
+        Naming(mProject).ContainerElemAdderNameInCpp(fieldDefinition),
         Type{"bool"},
         Visibility::Public,
-        // isConstContainer ? Visibility::Private : Visibility::Public,
         Constness::NotConst
     );
     auto &arg = func.mArguments.emplace_back("elem",
                                              Type{mProject.mProject, underlyingType, PassByType::MoveReference});
 
-    if (isKeyedContainer) {
-      func.mBody.Add("auto newId = {}NextId;", generatedField->mName);
-      func.mBody.Add("++{}NextId;", generatedField->mName);
-    } else {
-      func.mBody.Line() << "auto newId = " << generatedField->mName << ".size();";
-    }
     CodeBlock validators;
     CodeBlock inserters;
     for (auto &dec: fieldDefinition.mAnnotations) {
@@ -116,6 +112,7 @@ namespace holgen {
       auto getterMethodName = Naming(mProject).FieldGetterNameInCpp(fieldIndexedOn);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
+      // TODO: remove exclamation mark
       validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists!", elem.{}());)",
                      underlyingStructDefinition->mName, indexOn->mValue.mName, getterMethodName);
       validators.Add("return false;");
@@ -124,6 +121,12 @@ namespace holgen {
       inserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
     }
     func.mBody.Add(validators);
+    if (isKeyedContainer) {
+      func.mBody.Add("auto newId = {}NextId;", generatedField->mName);
+      func.mBody.Add("++{}NextId;", generatedField->mName);
+    } else if (!inserters.mContents.empty() || underlyingIdField) {
+      func.mBody.Line() << "auto newId = " << generatedField->mName << ".size();";
+    }
     func.mBody.Add(inserters);
     if (underlyingIdField)
       func.mBody.Add("elem.{}(newId);", Naming(mProject).FieldSetterNameInCpp(*underlyingIdField));
@@ -166,7 +169,7 @@ namespace holgen {
         auto line = func.mBody.Line();
         line << "if (idx >= " << generatedField.mName << ".size()";
         if (isSigned) {
-          line << "|| idx < 0";
+          line << " || idx < 0";
         }
         line << ")";
       }

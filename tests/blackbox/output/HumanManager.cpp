@@ -32,12 +32,12 @@ Human* HumanManager::GetHumanFromName(const std::string& key) {
   return &mHumans.at(it->second);
 }
 bool HumanManager::AddHuman(Human&& elem) {
-  auto newId = mHumansNextId;
-  ++mHumansNextId;
   if (mHumansNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Human with name={} already exists!", elem.GetName());
     return false;
   }
+  auto newId = mHumansNextId;
+  ++mHumansNextId;
   mHumansNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
   mHumans.emplace(newId, std::forward<Human>(elem));
@@ -107,6 +107,15 @@ void HumanManager::CreateLuaMetatable(lua_State* luaState) {
     const char* key = lua_tostring(ls, -1);
     if (0 == strcmp("humans", key)) {
       LuaHelper::Push(instance->mHumans, ls);
+    } else if (0 == strcmp("GetHumanFromName", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = HumanManager::ReadFromLua(lsInner, -2);
+        const std::string& arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->GetHumanFromName(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
     } else if (0 == strcmp("GetHuman", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {
         auto instance = HumanManager::ReadFromLua(lsInner, -2);
