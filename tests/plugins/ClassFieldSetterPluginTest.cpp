@@ -67,3 +67,98 @@ struct TestData {
   }
   ASSERT_EQ(cls->GetMethod("GetTestFieldStruct", Constness::Const), nullptr);
 }
+
+TEST_F(ClassFieldSetterPluginTest, RefWithId) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  @id
+  u32 id;
+}
+struct TestData {
+  Ref<InnerStruct> testFieldStruct;
+  })R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ClassFieldSetterPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("SetTestFieldStructId", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "SetTestFieldStructId",
+        Type{"void"},
+        Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("val", Type{"uint32_t"});
+    helpers::ExpectEqual(
+        *cls->GetMethod("SetTestFieldStructId", Constness::NotConst),
+        method, "mTestFieldStructId = val;");
+  }
+  ASSERT_EQ(cls->GetMethod("SetTestFieldStruct", Constness::Const), nullptr);
+  ASSERT_EQ(cls->GetMethod("SetTestFieldStruct", Constness::NotConst), nullptr);
+}
+
+TEST_F(ClassFieldSetterPluginTest, ManagedRefWithId) {
+  auto project = Parse(R"R(
+@managed(by=DM, field=innerStructs)
+struct InnerStruct {
+  @id
+  u32 id;
+}
+struct DM {
+  @container(elemName=innerStruct)
+  vector<InnerStruct> innerStructs;
+}
+struct TestData {
+  Ref<InnerStruct> testFieldStruct;
+  })R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ClassFieldSetterPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("SetTestFieldStructId", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "SetTestFieldStructId",
+        Type{"void"},
+        Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("val", Type{"uint32_t"});
+    helpers::ExpectEqual(
+        *cls->GetMethod("SetTestFieldStructId", Constness::NotConst),
+        method, "mTestFieldStructId = val;");
+  }
+
+  ASSERT_EQ(cls->GetMethod("SetTestFieldStruct", Constness::Const), nullptr);
+  ASSERT_EQ(cls->GetMethod("SetTestFieldStruct", Constness::NotConst), nullptr);
+}
+
+TEST_F(ClassFieldSetterPluginTest, RefNoId) {
+  auto project = Parse(R"R(
+struct InnerStruct {}
+struct TestData {
+  Ref<InnerStruct> testFieldStruct;
+  })R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ClassFieldSetterPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_EQ(cls->GetMethod("SetTestFieldStructId", Constness::Const), nullptr);
+  ASSERT_EQ(cls->GetMethod("SetTestFieldStructId", Constness::NotConst), nullptr);
+
+  ASSERT_EQ(cls->GetMethod("SetTestFieldStruct", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("SetTestFieldStruct", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "SetTestFieldStruct",
+        Type{"void"},
+        Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("val", Type{"InnerStruct", PassByType::Pointer, Constness::NotConst});
+    helpers::ExpectEqual(
+        *cls->GetMethod("SetTestFieldStruct", Constness::NotConst),
+        method, "mTestFieldStruct = val;");
+  }
+}

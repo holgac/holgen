@@ -74,7 +74,7 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mName, expected.mName);
     ExpectEqual(actual.mReturnType, expected.mReturnType);
     EXPECT_EQ(actual.mStaticness, expected.mStaticness);
-    EXPECT_EQ(actual.mConstness, expected.mConstness);
+    EXPECT_EQ(actual.mConstness, expected.mConstness) << " in method " << actual.mName;
     EXPECT_EQ(actual.mUserDefined, expected.mUserDefined);
     EXPECT_EQ(actual.mExposeToLua, expected.mExposeToLua);
   }

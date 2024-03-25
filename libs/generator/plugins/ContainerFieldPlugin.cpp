@@ -126,7 +126,7 @@ namespace holgen {
     func.mBody.Add(validators);
     func.mBody.Add(inserters);
     if (underlyingIdField)
-      func.mBody.Add("elem.{}(newId);", St::GetSetterMethodName(underlyingIdField->mName));
+      func.mBody.Add("elem.{}(newId);", Naming(mProject).FieldSetterNameInCpp(*underlyingIdField));
     if (isKeyedContainer) {
       func.mBody.Add("{}.emplace(newId, std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
     } else {

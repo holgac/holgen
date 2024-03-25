@@ -16,7 +16,6 @@ namespace holgen {
     // These should use FieldDefinition.mName. NOT ClassField.mName which is modified (mField)
     static std::string GetAdderMethodName(const std::string& fieldName);
     static std::string GetCountMethodName(const std::string& fieldName);
-    static std::string GetSetterMethodName(const std::string& fieldName, bool isRef = false);
     static std::string GetFieldNameInLua(const std::string& fieldName, bool isRef = false);
     static std::string GetIndexGetterName(const std::string& fieldName, const std::string& indexedFieldName);
     inline static const std::string GlobalPointer = "GlobalPointer";

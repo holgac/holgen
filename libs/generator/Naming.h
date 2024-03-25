@@ -6,6 +6,7 @@ namespace holgen {
   struct AnnotationDefinition;
   struct FieldDefinition;
   struct TranslatedProject;
+  struct FunctionDefinition;
 
   class Naming {
   public:
@@ -16,6 +17,8 @@ namespace holgen {
         const FieldDefinition &fieldDefinition, const AnnotationDefinition &indexAnnotation);
     std::string FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef = false);
     std::string ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition);
+    std::string FieldSetterNameInCpp(const FieldDefinition &fieldDefinition);
+    std::string LuaFunctionSetterNameInCpp(const FunctionDefinition& functionDefinition);
   private:
     TranslatedProject &mProject;
   };

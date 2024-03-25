@@ -8,18 +8,18 @@ namespace holgen {
       if (generatedClass.mStruct == nullptr)
         continue;
       for (auto &fieldDefinition: generatedClass.mStruct->mFields) {
-        bool isRef = fieldDefinition.mType.mName == "Ref";
         auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
-
         bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(generatedField.mType.mName);
 
         auto &setter = generatedClass.mMethods.emplace_back(
-            St::GetSetterMethodName(fieldDefinition.mName, isRef),
+            Naming(mProject).FieldSetterNameInCpp(fieldDefinition),
             Type{"void"},
             Visibility::Public,
             Constness::NotConst);
         auto &arg = setter.mArguments.emplace_back("val", generatedField.mType);
-        if (!isPrimitive) {
+        if (generatedField.mType.mType == PassByType::Pointer) {
+          arg.mType.mType = PassByType::Pointer;
+        } else if (!isPrimitive) {
           arg.mType.mConstness = Constness::Const;
           arg.mType.mType = PassByType::Reference;
         }

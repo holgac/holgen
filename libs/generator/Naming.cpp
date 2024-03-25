@@ -39,4 +39,18 @@ namespace holgen {
     return std::format("Get{}", St::Capitalize(elemName->mValue.mName));
   }
 
+  std::string Naming::FieldSetterNameInCpp(const FieldDefinition &fieldDefinition) {
+    if (fieldDefinition.mType.mName == "Ref") {
+      auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+      if (underlyingStruct->GetIdField() != nullptr) {
+        return std::format("Set{}Id", St::Capitalize(fieldDefinition.mName));
+      }
+    }
+    return std::format("Set{}", St::Capitalize(fieldDefinition.mName));
+  }
+
+  std::string Naming::LuaFunctionSetterNameInCpp(const FunctionDefinition &functionDefinition) {
+    return std::format("Set{}LuaFunc", functionDefinition.mName);
+  }
+
 }

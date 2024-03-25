@@ -15,13 +15,6 @@ namespace holgen {
     return "Add" + Capitalize(fieldName);
   }
 
-  std::string St::GetSetterMethodName(const std::string &fieldName, bool isRef) {
-    if (isRef)
-      return "Set" + Capitalize(fieldName) + "Id";
-    else
-      return "Set" + Capitalize(fieldName);
-  }
-
   std::string St::GetIndexGetterName(const std::string &fieldName, const std::string &indexedFieldName) {
     return std::format("Get{}From{}", Capitalize(fieldName), Capitalize(indexedFieldName));
   }
