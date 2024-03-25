@@ -43,8 +43,6 @@ namespace holgen {
 
   void ClassFieldGetterPlugin::ProcessRefField(Class &generatedClass, ClassField &generatedField,
                                                const FieldDefinition &fieldDefinition) const {
-    if (generatedField.mDefaultValue.empty())
-      generatedField.mDefaultValue = "-1";
     auto refStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
     for (int i = 0; i < 2; ++i) {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;

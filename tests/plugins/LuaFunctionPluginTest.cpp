@@ -18,6 +18,11 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
+  ASSERT_NE(cls->GetField("mFuncName_TestFunction"), nullptr);
+  helpers::ExpectEqual(
+      *cls->GetField("mFuncName_TestFunction"),
+      ClassField{"mFuncName_TestFunction", Type{"std::string"}});
+
   ASSERT_NE(cls->GetMethod("TestFunction", Constness::Const), nullptr);
   auto method = ClassMethod{"TestFunction", Type{"void"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});

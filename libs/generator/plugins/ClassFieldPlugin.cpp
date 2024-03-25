@@ -13,6 +13,8 @@ namespace holgen {
             St::GetFieldNameInCpp(fieldDefinition.mName, isRef), Type{mProject.mProject, fieldDefinition.mType},
             Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue);
         generatedField.mField = &fieldDefinition;
+        if (isRef && generatedField.mDefaultValue.empty())
+          generatedField.mDefaultValue = "-1";
       }
     }
   }
