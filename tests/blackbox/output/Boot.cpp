@@ -35,8 +35,8 @@ void Boot::SetColor(const std::string& val) {
 Boot* Boot::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetBoot(id);
 }
-Boot* Boot::GetFromName(const std::string& val) {
-  return GlobalPointer<GameData>::GetInstance()->GetBootFromName(val);
+Boot* Boot::GetFromName(const std::string& key) {
+  return GlobalPointer<GameData>::GetInstance()->GetBootFromName(key);
 }
 bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {

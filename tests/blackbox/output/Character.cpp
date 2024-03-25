@@ -50,8 +50,8 @@ void Character::SetArmorId(uint32_t val) {
 Character* Character::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetCharacter(id);
 }
-Character* Character::GetFromName(const std::string& val) {
-  return GlobalPointer<GameData>::GetInstance()->GetCharacterFromName(val);
+Character* Character::GetFromName(const std::string& key) {
+  return GlobalPointer<GameData>::GetInstance()->GetCharacterFromName(key);
 }
 bool Character::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {

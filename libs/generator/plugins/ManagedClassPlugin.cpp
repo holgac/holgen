@@ -47,14 +47,14 @@ namespace holgen {
             Staticness::Static
         );
         auto indexedOnField = generatedClass.mStruct->GetField(indexOn->mValue.mName);
-        ClassMethodArgument &valArg = getter.mArguments.emplace_back("val",
+        ClassMethodArgument &keyArg = getter.mArguments.emplace_back("key",
                                                                      Type{mProject.mProject, indexedOnField->mType});
-        if (!TypeInfo::Get().CppPrimitives.contains(valArg.mType.mName)) {
-          valArg.mType.mType = PassByType::Reference;
-          valArg.mType.mConstness = Constness::Const;
+        if (!TypeInfo::Get().CppPrimitives.contains(keyArg.mType.mName)) {
+          keyArg.mType.mType = PassByType::Reference;
+          keyArg.mType.mConstness = Constness::Const;
         }
         getter.mBody.Add(
-            "return {}<{}>::GetInstance()->{}(val);",
+            "return {}<{}>::GetInstance()->{}(key);",
             St::GlobalPointer, manager->mName,
             Naming(mProject).ContainerIndexGetterNameInCpp(*managerField, annotation));
 

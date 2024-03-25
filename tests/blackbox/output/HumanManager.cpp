@@ -110,7 +110,7 @@ void HumanManager::CreateLuaMetatable(lua_State* luaState) {
     } else if (0 == strcmp("GetHumanFromName", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {
         auto instance = HumanManager::ReadFromLua(lsInner, -2);
-        const std::string& arg0;
+        std::string arg0;
         LuaHelper::Read(arg0, lsInner, -1);
         auto result = instance->GetHumanFromName(arg0);
         LuaHelper::Push(result, lsInner);

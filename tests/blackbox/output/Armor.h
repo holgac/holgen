@@ -21,8 +21,8 @@ public:
   void SetAlternativeName(const std::string& val);
   void SetArmorClass(int8_t val);
   static Armor* Get(uint32_t id);
-  static Armor* GetFromName(const std::string& val);
-  static Armor* GetFromAlternativeName(const std::string& val);
+  static Armor* GetFromName(const std::string& key);
+  static Armor* GetFromAlternativeName(const std::string& key);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;

@@ -19,7 +19,7 @@ public:
   void SetName(const std::string& val);
   void SetColor(const std::string& val);
   static Boot* Get(uint32_t id);
-  static Boot* GetFromName(const std::string& val);
+  static Boot* GetFromName(const std::string& key);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;

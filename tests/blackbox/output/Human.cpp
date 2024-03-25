@@ -26,8 +26,8 @@ void Human::SetName(const std::string& val) {
 Human* Human::Get(uint32_t id) {
   return GlobalPointer<HumanManager>::GetInstance()->GetHuman(id);
 }
-Human* Human::GetFromName(const std::string& val) {
-  return GlobalPointer<HumanManager>::GetInstance()->GetHumanFromName(val);
+Human* Human::GetFromName(const std::string& key) {
+  return GlobalPointer<HumanManager>::GetInstance()->GetHumanFromName(key);
 }
 bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {

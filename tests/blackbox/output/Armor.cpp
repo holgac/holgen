@@ -41,11 +41,11 @@ void Armor::SetArmorClass(int8_t val) {
 Armor* Armor::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetArmor(id);
 }
-Armor* Armor::GetFromName(const std::string& val) {
-  return GlobalPointer<GameData>::GetInstance()->GetArmorFromName(val);
+Armor* Armor::GetFromName(const std::string& key) {
+  return GlobalPointer<GameData>::GetInstance()->GetArmorFromName(key);
 }
-Armor* Armor::GetFromAlternativeName(const std::string& val) {
-  return GlobalPointer<GameData>::GetInstance()->GetArmorFromAlternativeName(val);
+Armor* Armor::GetFromAlternativeName(const std::string& key) {
+  return GlobalPointer<GameData>::GetInstance()->GetArmorFromAlternativeName(key);
 }
 bool Armor::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {

@@ -16,7 +16,7 @@ public:
   void SetId(uint32_t val);
   void SetName(const std::string& val);
   static Human* Get(uint32_t id);
-  static Human* GetFromName(const std::string& val);
+  static Human* GetFromName(const std::string& key);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;

@@ -105,7 +105,10 @@ namespace holgen {
         if (i != 0)
           funcArgs << ", ";
         funcArgs << "arg" << i;
-        codeBlock.Add("{} arg{};", method.mArguments[i].mType.ToString(), i);
+        auto sanitizedType = method.mArguments[i].mType;
+        sanitizedType.mType = PassByType::Value;
+        sanitizedType.mConstness = Constness::NotConst;
+        codeBlock.Add("{} arg{};", sanitizedType.ToString(), i);
         codeBlock.Add(
             "{}::{}(arg{}, lsInner, {});",
             St::LuaHelper, St::LuaHelper_Read, i,

@@ -26,7 +26,7 @@ public:
   void SetBootId(uint32_t val);
   void SetArmorId(uint32_t val);
   static Character* Get(uint32_t id);
-  static Character* GetFromName(const std::string& val);
+  static Character* GetFromName(const std::string& key);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;
