@@ -23,16 +23,14 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetTestFieldUnsigned", Constness::Const), nullptr);
   {
     auto method = ClassMethod{"GetTestFieldUnsigned", Type{"uint32_t"}, Visibility::Public, Constness::Const};
-    method.mBody.Add("return mTestFieldUnsigned;");
-    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUnsigned", Constness::Const), method);
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUnsigned", Constness::Const), method, "return mTestFieldUnsigned;");
   }
   ASSERT_EQ(cls->GetMethod("GetTestFieldUnsigned", Constness::NotConst), nullptr);
 
   ASSERT_NE(cls->GetMethod("GetTestFieldDouble", Constness::Const), nullptr);
   {
     auto method = ClassMethod{"GetTestFieldDouble", Type{"double"}, Visibility::Public, Constness::Const};
-    method.mBody.Add("return mTestFieldDouble;");
-    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldDouble", Constness::Const), method);
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldDouble", Constness::Const), method, "return mTestFieldDouble;");
   }
   ASSERT_EQ(cls->GetMethod("GetTestFieldDouble", Constness::NotConst), nullptr);
 }
@@ -80,3 +78,5 @@ struct TestData {
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::NotConst), method);
   }
 }
+
+// TODO: test Ref

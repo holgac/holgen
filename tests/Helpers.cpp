@@ -26,7 +26,7 @@ namespace holgen::helpers {
 
   void ExpectEqual(const Type &expected, const Type &actual) {
     EXPECT_EQ(actual.mName, expected.mName);
-    EXPECT_EQ(actual.mType, expected.mType);
+    EXPECT_EQ(actual.mType, expected.mType) << expected.mName << " pass by type does not match";
     EXPECT_EQ(actual.mConstness, expected.mConstness);
     EXPECT_EQ(actual.mConstexprness, expected.mConstexprness);
     EXPECT_EQ(actual.mTemplateParameters.size(), expected.mTemplateParameters.size());
@@ -53,19 +53,12 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mField, expected.mField) << " in field " << actual.mName;
   }
 
-  void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected) {
-    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected);
-    EXPECT_EQ(actual.mName, expected.mName);
-    ExpectEqual(actual.mReturnType, expected.mReturnType);
-    EXPECT_EQ(actual.mStaticness, expected.mStaticness);
-    EXPECT_EQ(actual.mConstness, expected.mConstness);
-    EXPECT_EQ(actual.mUserDefined, expected.mUserDefined);
-    EXPECT_EQ(actual.mExposeToLua, expected.mExposeToLua);
-  }
-
-  void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected) {
+  void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected, const std::optional<std::string>& expectedBody) {
     EXPECT_EQ(actual.mVisibility, expected.mVisibility);
-    EXPECT_EQ(actual.mBody.ToString(), expected.mBody.ToString());
+    if (expectedBody)
+      EXPECT_EQ(Trim(actual.mBody.ToString()), Trim(*expectedBody));
+    else
+      EXPECT_EQ(actual.mBody.ToString(), expected.mBody.ToString());
     ASSERT_EQ(actual.mArguments.size(), expected.mArguments.size());
     for (size_t i = 0; i < actual.mArguments.size(); ++i) {
       ExpectEqual(actual.mArguments[i], expected.mArguments[i]);
@@ -74,6 +67,16 @@ namespace holgen::helpers {
     for (size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
       ExpectEqual(actual.mTemplateParameters[i], expected.mTemplateParameters[i]);
     }
+  }
+
+  void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected, const std::optional<std::string>& expectedBody) {
+    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody);
+    EXPECT_EQ(actual.mName, expected.mName);
+    ExpectEqual(actual.mReturnType, expected.mReturnType);
+    EXPECT_EQ(actual.mStaticness, expected.mStaticness);
+    EXPECT_EQ(actual.mConstness, expected.mConstness);
+    EXPECT_EQ(actual.mUserDefined, expected.mUserDefined);
+    EXPECT_EQ(actual.mExposeToLua, expected.mExposeToLua);
   }
 
   void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected) {
