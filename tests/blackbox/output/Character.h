@@ -12,15 +12,15 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Character {
 public:
-  const Boot* GetBoot() const;
-  Boot* GetBoot();
-  const Armor* GetArmor() const;
-  Armor* GetArmor();
   uint32_t GetId() const;
   const std::string& GetName() const;
   std::string& GetName();
   uint32_t GetBootId() const;
+  const Boot* GetBoot() const;
+  Boot* GetBoot();
   uint32_t GetArmorId() const;
+  const Armor* GetArmor() const;
+  Armor* GetArmor();
   void SetId(uint32_t val);
   void SetName(const std::string& val);
   void SetBootId(uint32_t val);

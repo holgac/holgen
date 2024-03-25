@@ -645,12 +645,12 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
 namespace generator_test_namespace {
 class Person {
 public:
-  const Person* GetPartner() const;
-  Person* GetPartner();
   uint32_t GetId() const;
   const std::string& GetName() const;
   std::string& GetName();
   uint32_t GetPartnerId() const;
+  const Person* GetPartner() const;
+  Person* GetPartner();
   void SetId(uint32_t val);
   void SetName(const std::string& val);
   void SetPartnerId(uint32_t val);
@@ -678,12 +678,6 @@ private:
 #include "Country.h"
 
 namespace generator_test_namespace {
-const Person* Person::GetPartner() const {
-  return Person::Get(mPartnerId);
-}
-Person* Person::GetPartner() {
-  return Person::Get(mPartnerId);
-}
 uint32_t Person::GetId() const {
   return mId;
 }
@@ -695,6 +689,12 @@ std::string& Person::GetName() {
 }
 uint32_t Person::GetPartnerId() const {
   return mPartnerId;
+}
+const Person* Person::GetPartner() const {
+  return Person::Get(mPartnerId);
+}
+Person* Person::GetPartner() {
+  return Person::Get(mPartnerId);
 }
 void Person::SetId(uint32_t val) {
   mId = val;
