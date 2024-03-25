@@ -22,8 +22,20 @@ namespace holgen {
         Visibility::Public, Constness::NotConst);
     method.mUserDefined = true;
     method.mExposeToLua = true;
-    for (const auto &arg: func.mArguments) {
-      method.mArguments.emplace_back(arg.mName, Type{mProject.mProject, arg.mType});
+    for (const auto &funcArg: func.mArguments) {
+      auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject.mProject, funcArg.mType});
+      if (mProject.GetClass(arg.mType.mName) != nullptr) {
+        arg.mType.mType = PassByType::Pointer;
+        if (!funcArg.mIsOut)
+          arg.mType.mConstness = Constness::Const;
+      } else if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
+        arg.mType.mType = PassByType::Reference;
+        if (!funcArg.mIsOut)
+          arg.mType.mConstness = Constness::Const;
+      } else if (funcArg.mIsOut) {
+        arg.mType.mType = PassByType::Reference;
+      }
     }
+
   }
 }

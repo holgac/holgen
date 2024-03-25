@@ -225,6 +225,14 @@ namespace holgen {
                "Function argument names should be strings, found \"{}\"", curToken.mContents);
       arg.mName = curToken.mContents;
       NEXT_OR_THROW(curToken, "Incomplete function definition!");
+      if (curToken.mType == TokenType::String) {
+        if (curToken.mContents == "out") {
+          arg.mIsOut = true;
+        } else if (curToken.mContents != "in") {
+          THROW("Unknown argument qualifier \"{}\"", curToken.mContents);
+        }
+        NEXT_OR_THROW(curToken, "Incomplete function definition!");
+      }
       if (curToken.mType == TokenType::Comma) {
         NEXT_OR_THROW(curToken, "Incomplete function definition!");
       }

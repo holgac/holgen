@@ -36,6 +36,7 @@ namespace holgen {
   struct FunctionArgumentDefinition {
     TypeDefinition mType;
     std::string mName;
+    bool mIsOut = false;
   };
 
   struct FunctionDefinition {
