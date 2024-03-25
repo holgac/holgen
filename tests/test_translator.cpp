@@ -6,10 +6,12 @@ using namespace holgen;
 
 namespace {
 
+  // TODO: this should use helpers::ExpectEqual
+  // TODO: does this test add any value? This is already covered in plugin tests
   void ExpectClassFieldEqual(const ClassField &expected, const ClassField &actual) {
     EXPECT_EQ(actual.mVisibility, expected.mVisibility);
     EXPECT_EQ(actual.mName, expected.mName);
-    helpers::ExpectTypeEqual(expected.mType, actual.mType);
+    helpers::ExpectEqual(expected.mType, actual.mType);
   }
 
   void ExpectFields(const Class &c, const std::vector<ClassField> &fields) {

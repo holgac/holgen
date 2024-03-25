@@ -26,11 +26,11 @@ namespace holgen {
   struct ClassField {
     ClassField(
         std::string name,
-        Type _type,
+        Type type,
         Visibility visibility = Visibility::Private,
         Staticness staticness = Staticness::NotStatic,
         std::string defaultValue = ""
-    ) : mType(std::move(_type)), mName(std::move(name)), mStaticness(staticness), mVisibility(visibility),
+    ) : mType(std::move(type)), mName(std::move(name)), mStaticness(staticness), mVisibility(visibility),
         mDefaultValue(std::move(defaultValue)) {
     }
 
@@ -46,9 +46,9 @@ namespace holgen {
   struct ClassMethodArgument {
     ClassMethodArgument(
         std::string name,
-        Type _type,
+        Type type,
         std::string defaultValue = ""
-    ) : mType(std::move(_type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {
+    ) : mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {
     }
 
     Type mType;

@@ -24,18 +24,66 @@ namespace holgen::helpers {
     EXPECT_EQ(Trim(actual.mText), Trim(expected.mText));
   }
 
-  void ExpectTypeEqual(const Type &expected, const Type &actual) {
+  void ExpectEqual(const Type &expected, const Type &actual) {
     EXPECT_EQ(actual.mName, expected.mName);
     EXPECT_EQ(actual.mType, expected.mType);
     EXPECT_EQ(actual.mConstness, expected.mConstness);
     EXPECT_EQ(actual.mConstexprness, expected.mConstexprness);
     EXPECT_EQ(actual.mTemplateParameters.size(), expected.mTemplateParameters.size());
-    for(size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
-      ExpectTypeEqual(expected.mTemplateParameters[i], actual.mTemplateParameters[i]);
+    for (size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
+      ExpectEqual(expected.mTemplateParameters[i], actual.mTemplateParameters[i]);
     }
     EXPECT_EQ(actual.mFunctionalTemplateParameters.size(), expected.mFunctionalTemplateParameters.size());
-    for(size_t i = 0; i < actual.mFunctionalTemplateParameters.size(); ++i) {
-      ExpectTypeEqual(expected.mFunctionalTemplateParameters[i], actual.mFunctionalTemplateParameters[i]);
+    for (size_t i = 0; i < actual.mFunctionalTemplateParameters.size(); ++i) {
+      ExpectEqual(expected.mFunctionalTemplateParameters[i], actual.mFunctionalTemplateParameters[i]);
     }
+  }
+
+  void ExpectEqual(const ClassField &actual, const ClassField &expected) {
+    helpers::ExpectEqual(expected.mType, actual.mType);
+    EXPECT_EQ(actual.mName, expected.mName);
+    EXPECT_EQ(actual.mVisibility, expected.mVisibility);
+    EXPECT_EQ(actual.mStaticness, expected.mStaticness);
+    EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue);
+    EXPECT_EQ(actual.mDefaultConstructorArguments.size(), expected.mDefaultConstructorArguments.size());
+
+    for (size_t i = 0; i < actual.mDefaultConstructorArguments.size(); ++i) {
+      EXPECT_EQ(expected.mDefaultConstructorArguments[i], actual.mDefaultConstructorArguments[i]);
+    }
+    EXPECT_EQ(actual.mField, expected.mField) << " in field " << actual.mName;
+  }
+
+  void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected) {
+    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected);
+    EXPECT_EQ(actual.mName, expected.mName);
+    ExpectEqual(actual.mReturnType, expected.mReturnType);
+    EXPECT_EQ(actual.mStaticness, expected.mStaticness);
+    EXPECT_EQ(actual.mConstness, expected.mConstness);
+    EXPECT_EQ(actual.mUserDefined, expected.mUserDefined);
+    EXPECT_EQ(actual.mExposeToLua, expected.mExposeToLua);
+  }
+
+  void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected) {
+    EXPECT_EQ(actual.mVisibility, expected.mVisibility);
+    EXPECT_EQ(actual.mBody.ToString(), expected.mBody.ToString());
+    ASSERT_EQ(actual.mArguments.size(), expected.mArguments.size());
+    for (size_t i = 0; i < actual.mArguments.size(); ++i) {
+      ExpectEqual(actual.mArguments[i], expected.mArguments[i]);
+    }
+    ASSERT_EQ(actual.mTemplateParameters.size(), expected.mTemplateParameters.size());
+    for (size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
+      ExpectEqual(actual.mTemplateParameters[i], expected.mTemplateParameters[i]);
+    }
+  }
+
+  void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected) {
+    ExpectEqual(actual.mType, expected.mType);
+    EXPECT_EQ(actual.mName, expected.mName);
+    EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue);
+  }
+
+  void ExpectEqual(const TemplateParameter &actual, const TemplateParameter &expected) {
+    EXPECT_EQ(actual.mType, expected.mType);
+    EXPECT_EQ(actual.mName, expected.mName);
   }
 }

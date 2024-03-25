@@ -1,4 +1,5 @@
 #pragma once
+
 #include "generator/CodeGenerator.h"
 
 namespace holgen::helpers {
@@ -8,6 +9,10 @@ namespace holgen::helpers {
 
   void ExpectGeneratedContent(const GeneratedContent &actual, const GeneratedContent &expected);
 
-  void ExpectTypeEqual(const Type &expected, const Type &actual);
-
+  void ExpectEqual(const Type &expected, const Type &actual);
+  void ExpectEqual(const ClassField &actual, const ClassField &expected);
+  void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected);
+  void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected);
+  void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected);
+  void ExpectEqual(const TemplateParameter &actual, const TemplateParameter &expected);
 }

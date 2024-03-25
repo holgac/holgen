@@ -24,25 +24,33 @@ struct TestData {
   EXPECT_EQ(cls->mEnum, nullptr);;
 
   ASSERT_NE(cls->GetField("mTestFieldUnsigned"), nullptr);
-  helpers::ExpectTypeEqual(
-      cls->GetField("mTestFieldUnsigned")->mType,
-      Type{"uint32_t"});
-  EXPECT_EQ(cls->GetField("mTestFieldUnsigned")->mDefaultValue, "42");
+  {
+    auto field = ClassField{"mTestFieldUnsigned", Type{"uint32_t"}};
+    field.mField = cls->mStruct->GetField("testFieldUnsigned");
+    field.mDefaultValue = "42";
+    helpers::ExpectEqual(*cls->GetField("mTestFieldUnsigned"), field);
+  }
 
   ASSERT_NE(cls->GetField("mTestFieldDouble"), nullptr);
-  helpers::ExpectTypeEqual(
-      cls->GetField("mTestFieldDouble")->mType,
-      Type{"double"});
+  {
+    auto field = ClassField{"mTestFieldDouble", Type{"double"}};
+    field.mField = cls->mStruct->GetField("testFieldDouble");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldDouble"), field);
+  }
 
   ASSERT_NE(cls->GetField("mTestFieldBool"), nullptr);
-  helpers::ExpectTypeEqual(
-      cls->GetField("mTestFieldBool")->mType,
-      Type{"bool"});
+  {
+    auto field = ClassField{"mTestFieldBool", Type{"bool"}};
+    field.mField = cls->mStruct->GetField("testFieldBool");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldBool"), field);
+  }
 
   ASSERT_NE(cls->GetField("mTestFieldString"), nullptr);
-  helpers::ExpectTypeEqual(
-      cls->GetField("mTestFieldString")->mType,
-      Type{"std::string"});
+  {
+    auto field = ClassField{"mTestFieldString", Type{"std::string"}};
+    field.mField = cls->mStruct->GetField("testFieldString");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldString"), field);
+  }
 }
 
 TEST_F(ClassFieldPluginTest, Containers) {
@@ -52,7 +60,7 @@ struct InnerData {
 }
 struct TestData {
   vector<InnerData> testFieldVector;
-  map<string, InnerData> testFieldMap;
+  map<string, vector<InnerData>> testFieldMap;
 }
       )R");
   ClassPlugin(project).Run();
@@ -63,13 +71,20 @@ struct TestData {
   EXPECT_EQ(cls->mEnum, nullptr);;
 
   ASSERT_NE(cls->GetField("mTestFieldVector"), nullptr);
-  auto vecType = Type{"std::vector"};
-  vecType.mTemplateParameters.emplace_back("InnerData");
-  helpers::ExpectTypeEqual(cls->GetField("mTestFieldVector")->mType, vecType);
+  {
+    auto field = ClassField{"mTestFieldVector", Type{"std::vector"}};
+    field.mType.mTemplateParameters.emplace_back("InnerData");
+    field.mField = cls->mStruct->GetField("testFieldVector");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldVector"), field);
+  }
 
   ASSERT_NE(cls->GetField("mTestFieldMap"), nullptr);
-  auto mapType = Type{"std::map"};
-  mapType.mTemplateParameters.emplace_back("std::string");
-  mapType.mTemplateParameters.emplace_back("InnerData");
-  helpers::ExpectTypeEqual(cls->GetField("mTestFieldMap")->mType, mapType);
+  {
+    auto field = ClassField{"mTestFieldMap", Type{"std::map"}};
+    field.mType.mTemplateParameters.emplace_back("std::string");
+    field.mType.mTemplateParameters.emplace_back("std::vector");
+    field.mType.mTemplateParameters.back().mTemplateParameters.emplace_back("InnerData");
+    field.mField = cls->mStruct->GetField("testFieldMap");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldMap"), field);
+  }
 }
