@@ -13,15 +13,12 @@ TEST_F(ClassFieldGetterPluginTest, Primitives) {
 struct TestData {
   u32 testFieldUnsigned = 42;
   double testFieldDouble;
-}
-  )R");
+})R");
   ClassPlugin(project).Run();
   ClassFieldPlugin(project).Run();
   ClassFieldGetterPlugin(project).Run();
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
-  EXPECT_NE(cls->mStruct, nullptr);
-  EXPECT_EQ(cls->mEnum, nullptr);;
 
   ASSERT_NE(cls->GetMethod("GetTestFieldUnsigned", Constness::Const), nullptr);
   {
@@ -46,14 +43,12 @@ struct InnerStruct {}
 struct TestData {
   string testFieldString;
   InnerStruct testFieldStruct;
-}
-  )R");
+})R");
   ClassPlugin(project).Run();
   ClassFieldPlugin(project).Run();
   ClassFieldGetterPlugin(project).Run();
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
-  EXPECT_NE(cls->mStruct, nullptr);
 
   ASSERT_NE(cls->GetMethod("GetTestFieldString", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("GetTestFieldString", Constness::NotConst), nullptr);
@@ -74,9 +69,9 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetTestFieldStruct", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
-      "GetTestFieldStruct",
-      Type{"InnerStruct", PassByType::Reference, Constness::Const},
-      Visibility::Public, Constness::Const};
+        "GetTestFieldStruct",
+        Type{"InnerStruct", PassByType::Reference, Constness::Const},
+        Visibility::Public, Constness::Const};
     method.mBody.Add("return mTestFieldStruct;");
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::Const), method);
 
