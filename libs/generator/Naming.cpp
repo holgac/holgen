@@ -23,4 +23,20 @@ namespace holgen {
     return std::format("{}{}Index", FieldNameInCpp(fieldDefinition), St::Capitalize(indexOn->mValue.mName));
   }
 
+  std::string Naming::FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) {
+    if (fieldDefinition.mType.mName == "Ref") {
+      auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+      if (underlyingStruct->GetIdField() != nullptr && !dereferenceRef) {
+        return std::format("Get{}Id", St::Capitalize(fieldDefinition.mName));
+      }
+    }
+    return std::format("Get{}", St::Capitalize(fieldDefinition.mName));
+  }
+
+  std::string Naming::ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition) {
+    auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
+    auto elemName = containerAnnotation->GetAttribute(Annotations::Container_ElemName);
+    return std::format("Get{}", St::Capitalize(elemName->mValue.mName));
+  }
+
 }

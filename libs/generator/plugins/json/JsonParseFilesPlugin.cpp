@@ -3,6 +3,7 @@
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include "../../Naming.h"
 
 namespace holgen {
   namespace {
@@ -69,7 +70,7 @@ namespace holgen {
         auto &elementName = *containerAnnotation->GetAttribute(Annotations::Container_ElemName);
         parseFunc.mBody.Add("auto elem = {}(key);",
                             St::GetIndexGetterName(elementName.mValue.mName, indexedOnField->mName));
-        parseFunc.mBody.Add("return elem->{}();", St::GetGetterMethodName(idField->mName));
+        parseFunc.mBody.Add("return elem->{}();", Naming(mProject).FieldGetterNameInCpp(*idField));
 
         parseFunc.mBody.Indent(-1);
         parseFunc.mBody.Add("}};"); // converter =

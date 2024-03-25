@@ -107,8 +107,88 @@ struct TestData {
         method, "return mTestFieldStructId;");
   }
 
-  // TODO: These functions shouldn't exist
-  return;
   ASSERT_EQ(cls->GetMethod("GetTestFieldStruct", Constness::Const), nullptr);
   ASSERT_EQ(cls->GetMethod("GetTestFieldStruct", Constness::NotConst), nullptr);
+}
+
+TEST_F(ClassFieldGetterPluginTest, ManagedRefWithId) {
+  auto project = Parse(R"R(
+@managed(by=DM, field=innerStructs)
+struct InnerStruct {
+  @id
+  u32 id;
+}
+struct DM {
+  @container(elemName=innerStruct)
+  vector<InnerStruct> innerStructs;
+}
+struct TestData {
+  Ref<InnerStruct> testFieldStruct;
+  })R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ClassFieldGetterPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("GetTestFieldStructId", Constness::Const), nullptr);
+  ASSERT_EQ(cls->GetMethod("GetTestFieldStructId", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "GetTestFieldStructId",
+        Type{"uint32_t"},
+        Visibility::Public, Constness::Const};
+    helpers::ExpectEqual(
+        *cls->GetMethod("GetTestFieldStructId", Constness::Const),
+        method, "return mTestFieldStructId;");
+  }
+
+  ASSERT_NE(cls->GetMethod("GetTestFieldStruct", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("GetTestFieldStruct", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "GetTestFieldStruct",
+        Type{"InnerStruct", PassByType::Pointer, Constness::Const},
+        Visibility::Public, Constness::Const};
+    method.mBody.Add("return InnerStruct::Get(mTestFieldStructId);");
+    method.mExposeToLua = true;
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::Const), method);
+    method.mConstness = Constness::NotConst;
+    method.mReturnType.mConstness = Constness::NotConst;
+    method.mExposeToLua = false;
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::NotConst), method);
+  }
+}
+
+TEST_F(ClassFieldGetterPluginTest, RefNoId) {
+  auto project = Parse(R"R(
+struct InnerStruct {}
+struct TestData {
+  Ref<InnerStruct> testFieldStruct;
+  })R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ClassFieldGetterPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_EQ(cls->GetMethod("GetTestFieldStructId", Constness::Const), nullptr);
+  ASSERT_EQ(cls->GetMethod("GetTestFieldStructId", Constness::NotConst), nullptr);
+
+  ASSERT_NE(cls->GetMethod("GetTestFieldStruct", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("GetTestFieldStruct", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "GetTestFieldStruct",
+        Type{"InnerStruct", PassByType::Pointer, Constness::Const},
+        Visibility::Public, Constness::Const};
+    helpers::ExpectEqual(
+        *cls->GetMethod("GetTestFieldStruct", Constness::Const),
+        method, "return mTestFieldStruct;");
+    method.mConstness = Constness::NotConst;
+    method.mReturnType.mConstness = Constness::NotConst;
+    helpers::ExpectEqual(
+        *cls->GetMethod("GetTestFieldStruct", Constness::NotConst),
+        method, "return mTestFieldStruct;");
+  }
 }

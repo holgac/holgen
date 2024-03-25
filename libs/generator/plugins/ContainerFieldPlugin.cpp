@@ -113,7 +113,7 @@ namespace holgen {
       auto indexOn = dec.GetAttribute(Annotations::Index_On);
       auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
       auto indexFieldName = Naming(mProject).FieldIndexNameInCpp(fieldDefinition, dec);
-      auto getterMethodName = St::GetGetterMethodName(fieldIndexedOn.mName);
+      auto getterMethodName = Naming(mProject).FieldGetterNameInCpp(fieldIndexedOn);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
       validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists!", elem.{}());)",
@@ -136,8 +136,6 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateContainerGetElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto container = fieldDefinition.GetAnnotation(Annotations::Container);
-    auto elemName = container->GetAttribute(Annotations::Container_ElemName);
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
@@ -146,7 +144,7 @@ namespace holgen {
     for (int i = 0; i < 2; ++i) {
       auto constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &func = generatedClass.mMethods.emplace_back(
-          St::GetGetterMethodName(elemName->mValue.mName),
+          Naming(mProject).ContainerElemGetterNameInCpp(fieldDefinition),
           Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
           Visibility::Public,
           constness

@@ -1,6 +1,7 @@
 #include "ManagedClassPlugin.h"
 #include "core/St.h"
 #include "core/Annotations.h"
+#include "../Naming.h"
 
 namespace holgen {
   void ManagedClassPlugin::Run() {
@@ -31,7 +32,7 @@ namespace holgen {
         getter.mArguments.emplace_back("id", Type{mProject.mProject, idField->mType});
         getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                          St::GlobalPointer, manager->mName,
-                         St::GetGetterMethodName(managerFieldContainerElemNameAttribute->mValue.mName));
+                         Naming(mProject).ContainerElemGetterNameInCpp(*managerField));
         generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
         generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
       }
