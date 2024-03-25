@@ -1,14 +1,5 @@
 #include "TranslatedProject.h"
-
-// TODO: dup code
-#define GEN_GETTER_BY_NAME(cls_name, retval, getterName, field) \
-const retval *cls_name::getterName(const std::string &name) const { \
-for (const auto &entry: field) { \
-if (entry.mName == name) \
-return &entry; \
-} \
-return nullptr; \
-}
+#include "holgen.h"
 
 namespace holgen {
 
@@ -16,32 +7,7 @@ namespace holgen {
       const ProjectDefinition &projectDefinition
   ) : mProject(projectDefinition), mDependencyGraph(mProject) {}
 
-  Class *TranslatedProject::GetClass(const std::string &name) {
-    for (auto &cls: mClasses) {
-      if (cls.mName == name)
-        return &cls;
-    }
-    return nullptr;
-  }
-
-  const Class *TranslatedProject::GetClass(const std::string &name) const {
-    for (auto &cls: mClasses) {
-      if (cls.mName == name)
-        return &cls;
-    }
-    return nullptr;
-  }
-
-  ClassField *Class::GetField(const std::string &name) {
-    for (auto &field: mFields) {
-      if (field.mName == name)
-        return &field;
-    }
-    return nullptr;
-  }
-
-  ClassMethod *Class::GetMethod(const std::string &name, bool isConst) {
-    Constness constness = isConst ? Constness::Const : Constness::NotConst;
+  ClassMethod *Class::GetMethod(const std::string &name, Constness constness) {
     for (auto &method: mMethods) {
       if (method.mName == name && method.mConstness == constness)
         return &method;
@@ -57,5 +23,10 @@ namespace holgen {
     return nullptr;
   }
 
+  GEN_GETTER_BY_NAME(TranslatedProject, Class, GetClass, mClasses);
+
+  GEN_GETTER_BY_NAME_NONCONST(TranslatedProject, Class, GetClass, mClasses);
+
+  GEN_GETTER_BY_NAME_NONCONST(Class, ClassField, GetField, mFields);
 }
 

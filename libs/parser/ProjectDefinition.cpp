@@ -1,86 +1,13 @@
 #include "ProjectDefinition.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-
-#define GEN_GETTER_BY_NAME(cls_name, retval, getterName, field) \
-const retval *cls_name::getterName(const std::string &name) const { \
-  for (const auto &entry: field) { \
-    if (entry.mName == name) \
-      return &entry; \
-    } \
-  return nullptr; \
-}
+#include "holgen.h"
 
 namespace holgen {
-
-  const AnnotationDefinition *FieldDefinition::GetAnnotation(const std::string &name) const {
-    for (const auto &annotation: mAnnotations) {
-      if (annotation.mName == name)
-        return &annotation;
-    }
-    return nullptr;
-  }
-
-  const AnnotationAttributeDefinition *AnnotationDefinition::GetAttribute(const std::string &name) const {
-    for (const auto &attribute: mAttributes) {
-      if (attribute.mName == name)
-        return &attribute;
-    }
-    return nullptr;
-  }
-
-  const AnnotationDefinition *EnumDefinition::GetAnnotation(const std::string &name) const {
-    for (const auto &annotation: mAnnotations) {
-      if (annotation.mName == name)
-        return &annotation;
-    }
-    return nullptr;
-  }
-
-  const AnnotationDefinition *StructDefinition::GetAnnotation(const std::string &name) const {
-    for (const auto &annotation: mAnnotations) {
-      if (annotation.mName == name)
-        return &annotation;
-    }
-    return nullptr;
-  }
-
-  const FieldDefinition *StructDefinition::GetField(const std::string &name) const {
-    for (const auto &field: mFields) {
-      if (field.mName == name)
-        return &field;
-    }
-    return nullptr;
-  }
-
   const FieldDefinition *StructDefinition::GetIdField() const {
     for (const auto &field: mFields) {
       if (field.GetAnnotation(Annotations::Id))
         return &field;
-    }
-    return nullptr;
-  }
-
-  const FunctionDefinition *StructDefinition::GetFunction(const std::string &name) const {
-    for (const auto &function: mFunctions) {
-      if (function.mName == name)
-        return &function;
-    }
-    return nullptr;
-  }
-
-  const EnumDefinition *ProjectDefinition::GetEnum(const std::string &name) const {
-    for (const auto &enumDefinition: mEnums) {
-      if (enumDefinition.mName == name)
-        return &enumDefinition;
-    }
-    return nullptr;
-  }
-
-  const StructDefinition *ProjectDefinition::GetStruct(const std::string &name) const {
-    for (const auto &structDefinition: mStructs) {
-      if (structDefinition.mName == name)
-        return &structDefinition;
     }
     return nullptr;
   }
@@ -97,13 +24,23 @@ namespace holgen {
     return true;
   }
 
-  const EnumEntryDefinition *EnumDefinition::GetEnumEntry(const std::string &name) const {
-    for (const auto &entry: mEntries) {
-      if (entry.mName == name)
-        return &entry;
-    }
-    return nullptr;
-  }
+  GEN_GETTER_BY_NAME(FieldDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
+
+  GEN_GETTER_BY_NAME(AnnotationDefinition, AnnotationAttributeDefinition, GetAttribute, mAttributes);
+
+  GEN_GETTER_BY_NAME(StructDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
+
+  GEN_GETTER_BY_NAME(StructDefinition, FieldDefinition, GetField, mFields);
+
+  GEN_GETTER_BY_NAME(StructDefinition, FunctionDefinition, GetFunction, mFunctions);
+
+  GEN_GETTER_BY_NAME(ProjectDefinition, EnumDefinition, GetEnum, mEnums);
+
+  GEN_GETTER_BY_NAME(ProjectDefinition, StructDefinition, GetStruct, mStructs);
+
+  GEN_GETTER_BY_NAME(EnumDefinition, EnumEntryDefinition, GetEnumEntry, mEntries);
+
+  GEN_GETTER_BY_NAME(EnumDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
 
   GEN_GETTER_BY_NAME(FunctionDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
 }

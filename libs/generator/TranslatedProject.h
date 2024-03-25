@@ -133,7 +133,7 @@ namespace holgen {
     HeaderContainer mSourceIncludes;
     std::set<std::string> mGlobalForwardDeclarations;
     ClassField *GetField(const std::string &name);
-    ClassMethod *GetMethod(const std::string &name, bool isConst);
+    ClassMethod *GetMethod(const std::string &name, Constness constness);
     const Typedef *GetTypedef(const std::string &name) const;
   };
 

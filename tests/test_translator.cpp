@@ -60,12 +60,12 @@ namespace {
     auto tp = Translator(parser.GetProject()).Translate();
     auto country = tp.GetClass("Country");
     ASSERT_NE(country, nullptr);
-    EXPECT_NE(country->GetMethod("GetCities", false), nullptr);
-    EXPECT_NE(country->GetMethod("GetCities", true), nullptr);
-    auto method = country->GetMethod("GetCities", false);
+    EXPECT_NE(country->GetMethod("GetCities", Constness::NotConst), nullptr);
+    EXPECT_NE(country->GetMethod("GetCities", Constness::Const), nullptr);
+    auto method = country->GetMethod("GetCities", Constness::NotConst);
     ASSERT_NE(method, nullptr);
     EXPECT_EQ(method->mArguments.size(), 0);
-    method = country->GetMethod("GetCity", true);
+    method = country->GetMethod("GetCity", Constness::Const);
     ASSERT_NE(method, nullptr);
     EXPECT_EQ(method->mArguments.size(), 1);
     EXPECT_EQ(method->mArguments[0].mType.mName, "uint32_t");
@@ -89,7 +89,7 @@ namespace {
     auto tp = Translator(parser.GetProject()).Translate();
     auto country = tp.GetClass("Country");
     ASSERT_NE(country, nullptr);
-    auto method = country->GetMethod("GetCityFromName", true);
+    auto method = country->GetMethod("GetCityFromName", Constness::Const);
     ASSERT_NE(method, nullptr);
     EXPECT_EQ(method->mArguments.size(), 1);
     EXPECT_EQ(method->mArguments[0].mType.mName, "std::string");

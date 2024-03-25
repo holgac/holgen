@@ -230,7 +230,7 @@ namespace holgen {
         Constness::NotConst, Staticness::Static);
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     for (auto &cls: mProject.mClasses) {
-      if (cls.GetMethod("CreateLuaMetatable", false)) {
+      if (cls.GetMethod("CreateLuaMetatable", Constness::NotConst)) {
         generatedClass.mSourceIncludes.AddLocalHeader(cls.mName + ".h");
         method.mBody.Add("{}::CreateLuaMetatable(luaState);", cls.mName);
       }
