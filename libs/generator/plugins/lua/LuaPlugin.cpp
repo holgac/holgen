@@ -21,7 +21,7 @@ namespace holgen {
   void LuaPlugin::CreatePushIndexMetaMethod(Class &cls) {
     auto &method = cls.mMethods.emplace_back(
         "PushIndexMetaMethod", Type{"void"}, Visibility::Private, Constness::NotConst, Staticness::Static);
-    auto& codeBlock = method.mBody;
+    auto &codeBlock = method.mBody;
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     auto structDefinition = cls.mStruct;
     if (structDefinition == nullptr)
@@ -35,34 +35,25 @@ namespace holgen {
     for (auto &fieldDefinition: structDefinition->mFields) {
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
+      auto &generatedField = *cls.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
       bool isRef = fieldDefinition.mType.mName == "Ref";
       if (isFirst) {
-        codeBlock.Line() << "if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
-                            << "\", key)) {";
+        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", Naming(mProject).FieldNameInLua(fieldDefinition));
         isFirst = false;
       } else {
-        codeBlock.Line() << "} else if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
-                            << "\", key)) {";
+        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", Naming(mProject).FieldNameInLua(fieldDefinition));
       }
       codeBlock.Indent(1);
       codeBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push,
-                       Naming(mProject).FieldNameInCpp(fieldDefinition));
+                    Naming(mProject).FieldNameInCpp(fieldDefinition));
       codeBlock.Indent(-1);
-      if (isRef) {
-        codeBlock.Line() << "} else if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, false)
-                            << "\", key)) {";
+      if (isRef && generatedField.mType.mType != PassByType::Pointer) {
+        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{",
+                      Naming(mProject).FieldNameInLua(fieldDefinition, true));
         codeBlock.Indent(1);
-        codeBlock.Add("auto ptr = {}::{}(instance->{});", fieldDefinition.mType.mTemplateParameters[0].mName,
-                         St::ManagedObject_Getter, Naming(mProject).FieldNameInCpp(fieldDefinition));
-        codeBlock.Add("if (ptr) {{");
-        codeBlock.Indent(1);
-        codeBlock.Add("{}::{}(*ptr, ls);", St::LuaHelper, St::LuaHelper_Push);
-        codeBlock.Indent(-1);
-        codeBlock.Add("}} else {{");
-        codeBlock.Indent(1);
-        codeBlock.Add("{}::{}(nullptr, ls);", St::LuaHelper, St::LuaHelper_Push);
-        codeBlock.Indent(-1);
-        codeBlock.Add("}}");
+        codeBlock.Add("{}::{}({}::{}(instance->{}), ls);", St::LuaHelper, St::LuaHelper_Push,
+                      fieldDefinition.mType.mTemplateParameters[0].mName, St::ManagedObject_Getter,
+                      Naming(mProject).FieldNameInCpp(fieldDefinition));
         codeBlock.Indent(-1);
       }
     }
@@ -76,10 +67,11 @@ namespace holgen {
         codeBlock.Line() << "} else if (0 == strcmp(\"" << luaMethod.mName << "\", key)) {";
       }
       codeBlock.Indent(1);
+      // TODO: LuaHelper::Push should work with functions
       codeBlock.Add("lua_pushcfunction(ls, [](lua_State* lsInner) {{");
       codeBlock.Indent(1);
       codeBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
-                       -ssize_t(luaMethod.mArguments.size()) - 1);
+                    -ssize_t(luaMethod.mArguments.size()) - 1);
       std::stringstream funcArgs;
       for (size_t i = 0; i < luaMethod.mArguments.size(); ++i) {
         if (i != 0)
@@ -114,15 +106,13 @@ namespace holgen {
     codeBlock.Line() << "return 1;";
     codeBlock.Indent(-1);
     codeBlock.Line() << "});"; // pushcfunction for __index
-
     codeBlock.Line() << "lua_settable(luaState, -3);";
-
   }
 
   void LuaPlugin::CreatePushNewIndexMetaMethod(Class &cls) {
     auto &method = cls.mMethods.emplace_back(
         "PushNewIndexMetaMethod", Type{"void"}, Visibility::Private, Constness::NotConst, Staticness::Static);
-    auto& codeBlock = method.mBody;
+    auto &codeBlock = method.mBody;
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     auto structDefinition = cls.mStruct;
     if (structDefinition == nullptr)
@@ -141,16 +131,16 @@ namespace holgen {
       bool isRef = fieldDefinition.mType.mName == "Ref";
       if (isFirst) {
         codeBlock.Line() << "if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
-                            << "\", key)) {";
+                         << "\", key)) {";
         isFirst = false;
       } else {
         codeBlock.Line() << "} else if (0 == strcmp(\"" << St::GetFieldNameInLua(fieldDefinition.mName, isRef)
-                            << "\", key)) {";
+                         << "\", key)) {";
       }
       codeBlock.Indent(1);
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
       codeBlock.Add("{}::{}(instance->{}, ls, -1);", St::LuaHelper, St::LuaHelper_Read,
-                       Naming(mProject).FieldNameInCpp(fieldDefinition));
+                    Naming(mProject).FieldNameInCpp(fieldDefinition));
       codeBlock.Indent(-1);
     }
     codeBlock.Line() << "}";

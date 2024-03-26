@@ -8,18 +8,28 @@
 namespace holgen {
   Naming::Naming(TranslatedProject &project) : mProject(project) {}
 
-  std::string Naming::FieldNameInCpp(const FieldDefinition &fieldDefinition) {
+  std::string Naming::FieldNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) {
     if (fieldDefinition.mType.mName == "Ref") {
       auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField() != nullptr) {
+      if (underlyingStruct->GetIdField() != nullptr && !dereferenceRef) {
         return std::format("m{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
     return std::format("m{}", St::Capitalize(fieldDefinition.mName));
   }
 
-  std::string
-  Naming::FieldIndexNameInCpp(const FieldDefinition &fieldDefinition, const AnnotationDefinition &indexAnnotation) {
+  std::string Naming::FieldNameInLua(const FieldDefinition &fieldDefinition, bool dereferenceRef) {
+    if (fieldDefinition.mType.mName == "Ref") {
+      auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
+      if (underlyingStruct->GetIdField() != nullptr && !dereferenceRef) {
+        return std::format("{}Id", fieldDefinition.mName);
+      }
+    }
+    return fieldDefinition.mName;
+  }
+
+  std::string Naming::FieldIndexNameInCpp(
+      const FieldDefinition &fieldDefinition, const AnnotationDefinition &indexAnnotation) {
     auto indexOn = indexAnnotation.GetAttribute(Annotations::Index_On);
     return std::format("{}{}Index", FieldNameInCpp(fieldDefinition), St::Capitalize(indexOn->mValue.mName));
   }
