@@ -4,34 +4,9 @@
 #include "../../Naming.h"
 
 namespace holgen {
-
   namespace {
-
-    struct LuaTypeUsage {
-      std::string mValidator;
-      std::string mGetter;
-      std::string mPusher;
-      std::string mFieldExtra;
-    };
-
-    std::map<std::string, LuaTypeUsage> LuaUsage = {
-        {"int8_t",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"int16_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"int32_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"int64_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"uint8_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"uint16_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"uint32_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"uint64_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"float",       {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"double",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-        {"bool",        {"lua_isboolean", "lua_toboolean", "lua_pushboolean", ""}},
-        {"std::string", {"lua_isstring",  "lua_tostring",  "lua_pushstring",  ".c_str()"}},
-    };
-
     std::string LuaTableField_Pointer = "p";
     std::string LuaTableField_Index = "i";
-
   }
 
   void LuaPlugin::Run() {
@@ -165,11 +140,10 @@ namespace holgen {
       }
       codeBlock.Indent(1);
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
-      codeBlock.Add("{}::{}(instance->{}, ls, -1);",St::LuaHelper, St::LuaHelper_Read,
+      codeBlock.Add("{}::{}(instance->{}, ls, -1);", St::LuaHelper, St::LuaHelper_Read,
                     Naming(mProject).FieldNameInCpp(fieldDefinition));
       codeBlock.Indent(-1);
     }
-    // TODO: expose functions
     codeBlock.Line() << "}";
     codeBlock.Line() << "return 0;";
     codeBlock.Indent(-1);
@@ -230,6 +204,7 @@ namespace holgen {
     }
     pushToLua.mBody.Line() << "lua_settable(luaState, -3);";
     // Do this last so that metamethods don't get called during object construction
+    // TODO: Use Naming for metatable naming
     pushToLua.mBody.Line() << "lua_getglobal(luaState, \"" << cls.mName << "Meta\");";
     pushToLua.mBody.Line() << "lua_setmetatable(luaState, -2);";
   }

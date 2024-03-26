@@ -41,6 +41,7 @@ namespace holgen {
     std::vector<Type> mTemplateParameters;
     // This is for std::function which uses a different syntax
     // It's converted to string as [0]([1],[2], ...)
+    // TODO: Instead of a separate field, Type should natively support function types
     std::vector<Type> mFunctionalTemplateParameters;
     std::string ToString() const;
   };

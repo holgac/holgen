@@ -26,8 +26,8 @@ namespace holgen::helpers {
 
   void ExpectEqual(const Type &expected, const Type &actual) {
     EXPECT_EQ(actual.mName, expected.mName);
-    EXPECT_EQ(actual.mType, expected.mType) << expected.mName << " pass by type does not match";
-    EXPECT_EQ(actual.mConstness, expected.mConstness);
+    EXPECT_EQ(actual.mType, expected.mType) << " in type " << expected.mName;
+    EXPECT_EQ(actual.mConstness, expected.mConstness) << " in type " << expected.mName;
     EXPECT_EQ(actual.mConstexprness, expected.mConstexprness);
     EXPECT_EQ(actual.mTemplateParameters.size(), expected.mTemplateParameters.size());
     for (size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
@@ -42,7 +42,7 @@ namespace holgen::helpers {
   void ExpectEqual(const ClassField &actual, const ClassField &expected) {
     helpers::ExpectEqual(expected.mType, actual.mType);
     EXPECT_EQ(actual.mName, expected.mName);
-    EXPECT_EQ(actual.mVisibility, expected.mVisibility);
+    EXPECT_EQ(actual.mVisibility, expected.mVisibility) << " in field " << actual.mName;
     EXPECT_EQ(actual.mStaticness, expected.mStaticness);
     EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue) << " in field " << actual.mName;
     EXPECT_EQ(actual.mDefaultConstructorArguments.size(), expected.mDefaultConstructorArguments.size());
