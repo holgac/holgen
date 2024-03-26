@@ -44,7 +44,7 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mName, expected.mName);
     EXPECT_EQ(actual.mVisibility, expected.mVisibility);
     EXPECT_EQ(actual.mStaticness, expected.mStaticness);
-    EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue);
+    EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue) << " in field " << actual.mName;
     EXPECT_EQ(actual.mDefaultConstructorArguments.size(), expected.mDefaultConstructorArguments.size());
 
     for (size_t i = 0; i < actual.mDefaultConstructorArguments.size(); ++i) {
@@ -53,7 +53,8 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mField, expected.mField) << " in field " << actual.mName;
   }
 
-  void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected, const std::optional<std::string>& expectedBody) {
+  void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected,
+                   const std::optional<std::string> &expectedBody) {
     EXPECT_EQ(actual.mVisibility, expected.mVisibility);
     if (expectedBody)
       EXPECT_EQ(Trim(actual.mBody.ToString()), Trim(*expectedBody));
@@ -69,7 +70,8 @@ namespace holgen::helpers {
     }
   }
 
-  void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected, const std::optional<std::string>& expectedBody) {
+  void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
+                   const std::optional<std::string> &expectedBody) {
     ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody);
     EXPECT_EQ(actual.mName, expected.mName);
     ExpectEqual(actual.mReturnType, expected.mReturnType);
@@ -83,6 +85,20 @@ namespace holgen::helpers {
     ExpectEqual(actual.mType, expected.mType);
     EXPECT_EQ(actual.mName, expected.mName);
     EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue);
+  }
+
+  void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expected,
+                   const std::optional<std::string> &expectedBody) {
+    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody);
+    EXPECT_EQ(actual.mExplicitness, expected.mExplicitness);
+    for (size_t i = 0; i < actual.mInitializerList.size(); ++i) {
+      ExpectEqual(actual.mInitializerList[i], expected.mInitializerList[i]);
+    }
+  }
+
+  void ExpectEqual(const ClassConstructorInitializer &actual, const ClassConstructorInitializer &expected) {
+    EXPECT_EQ(actual.mDestination, expected.mDestination);
+    EXPECT_EQ(actual.mValue, expected.mValue);
   }
 
   void ExpectEqual(const TemplateParameter &actual, const TemplateParameter &expected) {

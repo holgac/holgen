@@ -19,9 +19,7 @@ namespace holgen {
       ClassConstructor &ctor = generatedClass.mConstructors.emplace_back();
       ctor.mExplicitness = Explicitness::Explicit;
       ctor.mArguments.emplace_back("value", Type{"UnderlyingType"}, "Invalid");
-      ClassConstructorInitializer &initializer = ctor.mInitializerList.emplace_back();
-      initializer.mDestination = "mValue";
-      initializer.mValue = "value";
+      ctor.mInitializerList.emplace_back("mValue", "value");
     }
 
     {

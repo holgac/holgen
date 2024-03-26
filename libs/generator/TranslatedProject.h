@@ -102,6 +102,9 @@ namespace holgen {
   struct ClassConstructorInitializer {
     std::string mDestination;
     std::string mValue;
+
+    ClassConstructorInitializer(std::string destination, std::string value) : mDestination(std::move(destination)),
+                                                                              mValue(std::move(value)) {}
   };
 
   struct ClassConstructor : ClassMethodBase {
