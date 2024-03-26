@@ -38,6 +38,7 @@ namespace holgen {
         Visibility::Public, Constness::NotConst);
     parseFunc.mArguments.emplace_back("rootPath", Type{"std::string", PassByType::Reference, Constness::Const});
     parseFunc.mArguments.emplace_back("converterArg", Type{ConverterName, PassByType::Reference, Constness::Const});
+    // TODO: do this only when necessary
     parseFunc.mBody.Add("auto converter = converterArg;");
     for (const auto &fieldDefinition: structDefinition.mFields) {
       if (!fieldDefinition.GetAnnotation(Annotations::Container))
