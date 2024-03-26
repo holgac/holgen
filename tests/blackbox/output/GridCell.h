@@ -24,6 +24,8 @@ public:
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
+  static void PushIndexMetaMethod(lua_State* luaState);
+  static void PushNewIndexMetaMethod(lua_State* luaState);
   int32_t mX;
   int32_t mY;
   LandscapeType mLandscape;

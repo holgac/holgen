@@ -55,8 +55,7 @@ DamageMultiplier* DamageMultiplier::ReadFromLua(lua_State* luaState, int32_t idx
   lua_pop(luaState, 1);
   return ptr;
 }
-void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
-  lua_newtable(luaState);
+void DamageMultiplier::PushIndexMetaMethod(lua_State* luaState) {
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
     auto instance = DamageMultiplier::ReadFromLua(ls, -2);
@@ -71,6 +70,8 @@ void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
     return 1;
   });
   lua_settable(luaState, -3);
+}
+void DamageMultiplier::PushNewIndexMetaMethod(lua_State* luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
     auto instance = DamageMultiplier::ReadFromLua(ls, -3);
@@ -83,6 +84,11 @@ void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
     return 0;
   });
   lua_settable(luaState, -3);
+}
+void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
+  lua_newtable(luaState);
+  PushIndexMetaMethod(luaState);
+  PushNewIndexMetaMethod(luaState);
   lua_setglobal(luaState, "DamageMultiplierMeta");
 }
 }

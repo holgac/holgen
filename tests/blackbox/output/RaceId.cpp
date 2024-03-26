@@ -44,8 +44,7 @@ RaceId* RaceId::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void RaceId::CreateLuaMetatable(lua_State* luaState) {
-  lua_newtable(luaState);
+void RaceId::PushIndexMetaMethod(lua_State* luaState) {
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, [](lua_State* ls) {
     auto instance = RaceId::ReadFromLua(ls, -2);
@@ -58,6 +57,8 @@ void RaceId::CreateLuaMetatable(lua_State* luaState) {
     return 1;
   });
   lua_settable(luaState, -3);
+}
+void RaceId::PushNewIndexMetaMethod(lua_State* luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, [](lua_State* ls) {
     auto instance = RaceId::ReadFromLua(ls, -3);
@@ -68,6 +69,11 @@ void RaceId::CreateLuaMetatable(lua_State* luaState) {
     return 0;
   });
   lua_settable(luaState, -3);
+}
+void RaceId::CreateLuaMetatable(lua_State* luaState) {
+  lua_newtable(luaState);
+  PushIndexMetaMethod(luaState);
+  PushNewIndexMetaMethod(luaState);
   lua_setglobal(luaState, "RaceIdMeta");
 }
 }

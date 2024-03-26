@@ -14,8 +14,8 @@ private:
   void AddPushToLua(Class &generatedClass, const StructDefinition& structDefinition);
   void AddReadFromLua(Class &generatedClass, const StructDefinition& structDefinition);
   void EnrichClass(Class &generatedClass, const EnumDefinition& enumDefinition);
-  void CreateIndexMetaMethod(CodeBlock& codeBlock, Class& generatedClass);
-  void CreateNewIndexMetaMethod(CodeBlock& codeBlock, Class& generatedClass);
+  void CreatePushIndexMetaMethod(Class& cls);
+  void CreatePushNewIndexMetaMethod(Class& cls);
   };
 
 }

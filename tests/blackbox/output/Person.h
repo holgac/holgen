@@ -26,6 +26,8 @@ public:
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
+  static void PushIndexMetaMethod(lua_State* luaState);
+  static void PushNewIndexMetaMethod(lua_State* luaState);
   uint32_t mRace;
   uint32_t mCurrentCountry;
   uint32_t mCurrentCity;

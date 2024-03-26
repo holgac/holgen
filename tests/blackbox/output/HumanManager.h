@@ -29,6 +29,8 @@ public:
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
+  static void PushIndexMetaMethod(lua_State* luaState);
+  static void PushNewIndexMetaMethod(lua_State* luaState);
   std::unordered_map<uint32_t, Human> mHumans;
   std::map<std::string, uint32_t> mHumansNameIndex;
   uint32_t mHumansNextId = 1;

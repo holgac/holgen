@@ -28,6 +28,8 @@ public:
   static void CreateLuaMetatable(lua_State* luaState);
 protected:
 private:
+  static void PushIndexMetaMethod(lua_State* luaState);
+  static void PushNewIndexMetaMethod(lua_State* luaState);
   Person mLeader;
   std::vector<Person> mCitizens;
   std::map<uint32_t, uint32_t> mPopulation;
