@@ -41,7 +41,7 @@ namespace holgen {
   }
 
   void JsonPlugin::GenerateParseJson(Class &cls) {
-    const auto &structDefinition = *mProject.mProject.GetStruct(cls.mName);
+    const auto &structDefinition = *cls.mStruct;
     auto &parseFunc = cls.mMethods.emplace_back(ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst);
     parseFunc.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     parseFunc.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
@@ -58,7 +58,7 @@ namespace holgen {
         parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
         isFirst = false;
       } else {
-        parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fieldDefinition.mName<< "\")) {";
+        parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
       }
       parseFunc.mBody.Indent(1); // if name == fieldName
       GenerateParseJsonForField(cls, parseFunc, structDefinition, fieldDefinition);
@@ -79,7 +79,7 @@ namespace holgen {
       parseFunc.mBody.Indent(-1); // if name == fieldName
     }
 
-    if (!structDefinition.mFields.empty())
+    if (!isFirst)
       parseFunc.mBody.Line() << "}";
     parseFunc.mBody.Indent(-1);
     parseFunc.mBody.Line() << "}"; // range based for on json.GetObject()
@@ -173,10 +173,12 @@ namespace holgen {
 
   void JsonPlugin::GenerateParseJsonForFunction(
       ClassMethod &parseFunc, const FunctionDefinition &functionDefinition) {
-    parseFunc.mBody.Add("std::string val;");
-    parseFunc.mBody.Add("{}::{}(val, data.value, converter);",
-                        St::JsonHelper, St::JsonHelper_Parse);
-    parseFunc.mBody.Add("{}{} = std::move(val);", St::LuaFuncPrefix, functionDefinition.mName);
-
+    parseFunc.mBody.Add("auto res = {}::{}({}{}, data.value, converter);",
+                        St::JsonHelper, St::JsonHelper_Parse,
+                        St::LuaFuncPrefix, functionDefinition.mName);
+    parseFunc.mBody.Line() << "if (!res)";
+    parseFunc.mBody.Indent(1);
+    parseFunc.mBody.Line() << "return false;";
+    parseFunc.mBody.Indent(-1); // if !res
   }
 }

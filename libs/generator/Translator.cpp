@@ -22,6 +22,8 @@ namespace holgen {
 
   Translator::Translator(const ProjectDefinition &project) : mProject(project) {
     Validator(project).Validate();
+    // TODO: currently plugins iterate over struct fields, but we need to iterate over class fields
+    // and filter by mField to avoid processing custom fields
     AddPlugin<ClassPlugin>();
     AddPlugin<ClassFieldPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();

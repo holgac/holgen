@@ -88,6 +88,7 @@ namespace holgen {
     }
 
     {
+      // TODO: it'd be better to return a char* here since everything is const already.
       ClassMethod &toString = generatedClass.mMethods.emplace_back(
           "ToString",
           Type{"std::string"},

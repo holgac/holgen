@@ -63,13 +63,13 @@ bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& conver
       if (!res)
         return false;
     } else if (0 == strcmp(name, "Add")) {
-      std::string val;
-      JsonHelper::Parse(val, data.value, converter);
-      mFuncName_Add = std::move(val);
+      auto res = JsonHelper::Parse(mFuncName_Add, data.value, converter);
+      if (!res)
+        return false;
     } else if (0 == strcmp(name, "Subtract")) {
-      std::string val;
-      JsonHelper::Parse(val, data.value, converter);
-      mFuncName_Subtract = std::move(val);
+      auto res = JsonHelper::Parse(mFuncName_Subtract, data.value, converter);
+      if (!res)
+        return false;
     }
   }
   return true;
