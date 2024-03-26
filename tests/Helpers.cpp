@@ -54,8 +54,8 @@ namespace holgen::helpers {
   }
 
   void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected,
-                   const std::optional<std::string> &expectedBody) {
-    EXPECT_EQ(actual.mVisibility, expected.mVisibility);
+                   const std::optional<std::string> &expectedBody, const std::string& name) {
+    EXPECT_EQ(actual.mVisibility, expected.mVisibility) << " in method " << name;
     if (expectedBody)
       EXPECT_EQ(Trim(actual.mBody.ToString()), Trim(*expectedBody));
     else
@@ -72,7 +72,7 @@ namespace holgen::helpers {
 
   void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
                    const std::optional<std::string> &expectedBody) {
-    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody);
+    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, actual.mName);
     EXPECT_EQ(actual.mName, expected.mName);
     ExpectEqual(actual.mReturnType, expected.mReturnType);
     EXPECT_EQ(actual.mStaticness, expected.mStaticness);
@@ -89,7 +89,7 @@ namespace holgen::helpers {
 
   void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expected,
                    const std::optional<std::string> &expectedBody) {
-    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody);
+    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, "constructor");
     EXPECT_EQ(actual.mExplicitness, expected.mExplicitness);
     for (size_t i = 0; i < actual.mInitializerList.size(); ++i) {
       ExpectEqual(actual.mInitializerList[i], expected.mInitializerList[i]);

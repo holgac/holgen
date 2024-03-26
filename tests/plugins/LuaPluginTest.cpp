@@ -313,3 +313,104 @@ lua_settable(luaState, -3);
     )R");
   }
 }
+
+TEST_F(LuaPluginTest, PushNewIndexMetaMethodFields) {
+  auto project = Parse(R"R(
+struct TestData {
+  u32 testFieldUnsigned;
+  string testFieldString;
+  bool testFieldBool;
+}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  CppFunctionPlugin(project).Run();
+  LuaPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"PushNewIndexMetaMethod", Type{"void"}, Visibility::Private,
+                              Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    helpers::ExpectEqual(*cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), method, R"R(
+lua_pushstring(luaState, "__newindex");
+lua_pushcfunction(luaState, [](lua_State* ls) {
+  auto instance = TestData::ReadFromLua(ls, -3);
+  const char* key = lua_tostring(ls, -2);
+  if (0 == strcmp("testFieldUnsigned", key)) {
+    LuaHelper::Read(instance->mTestFieldUnsigned, ls, -1);
+  } else if (0 == strcmp("testFieldString", key)) {
+    LuaHelper::Read(instance->mTestFieldString, ls, -1);
+  } else if (0 == strcmp("testFieldBool", key)) {
+    LuaHelper::Read(instance->mTestFieldBool, ls, -1);
+  }
+  return 0;
+});
+lua_settable(luaState, -3);
+    )R");
+  }
+}
+
+TEST_F(LuaPluginTest, PushNewIndexMetaMethodRefs) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  @id
+  u32 id;
+}
+struct TestData {
+  Ref<InnerStruct> testStructRef;
+}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  CppFunctionPlugin(project).Run();
+  LuaPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"PushNewIndexMetaMethod", Type{"void"}, Visibility::Private,
+                              Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    helpers::ExpectEqual(*cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), method, R"R(
+lua_pushstring(luaState, "__newindex");
+lua_pushcfunction(luaState, [](lua_State* ls) {
+  auto instance = TestData::ReadFromLua(ls, -3);
+  const char* key = lua_tostring(ls, -2);
+  if (0 == strcmp("testStructRefId", key)) {
+    LuaHelper::Read(instance->mTestStructRefId, ls, -1);
+  }
+  return 0;
+});
+lua_settable(luaState, -3);
+    )R");
+  }
+}
+
+TEST_F(LuaPluginTest, CreateLuaMetatable) {
+  auto project = Parse(R"R(
+struct TestData {}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  CppFunctionPlugin(project).Run();
+  LuaPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("CreateLuaMetatable", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"CreateLuaMetatable", Type{"void"}, Visibility::Public,
+                              Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    helpers::ExpectEqual(*cls->GetMethod("CreateLuaMetatable", Constness::NotConst), method, R"R(
+lua_newtable(luaState);
+PushIndexMetaMethod(luaState);
+PushNewIndexMetaMethod(luaState);
+lua_setglobal(luaState, "TestDataMeta");
+    )R");
+  }
+}
