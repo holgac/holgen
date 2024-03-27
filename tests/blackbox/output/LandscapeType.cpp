@@ -46,18 +46,20 @@ LandscapeType& LandscapeType::operator =(LandscapeType::UnderlyingType rhs) {
 bool LandscapeType::operator ==(LandscapeType::UnderlyingType rhs) const {
   return mValue == rhs;
 }
-bool LandscapeType::operator !=(LandscapeType::UnderlyingType rhs) const {
-  return mValue != rhs;
-}
-LandscapeType& LandscapeType::operator =(const LandscapeType& rhs) {
-  mValue = rhs.mValue;
-  return *this;
-}
 bool LandscapeType::operator ==(const LandscapeType& rhs) const {
   return mValue == rhs.mValue;
 }
+bool LandscapeType::operator !=(LandscapeType::UnderlyingType rhs) const {
+  return mValue != rhs;
+}
 bool LandscapeType::operator !=(const LandscapeType& rhs) const {
   return mValue != rhs.mValue;
+}
+constexpr std::array<LandscapeType::UnderlyingType, 4> LandscapeType::GetEntryValues() {
+  return std::array<LandscapeType::UnderlyingType, 4>{LandValue, SeaValue, RiverValue, MountainValue};
+}
+std::array<LandscapeType, 4> LandscapeType::GetEntries() {
+  return std::array<LandscapeType, 4>{Land, Sea, River, Mountain};
 }
 bool LandscapeType::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsString()) {

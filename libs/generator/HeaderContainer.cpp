@@ -92,8 +92,8 @@ namespace holgen {
         break;
       }
     }
-    for (const auto &typdef : cls.mTypedefs) {
-      if (typdef.mTargetType == type.mName) {
+    for (const auto &usingStatement : cls.mUsings) {
+      if (usingStatement.mTargetType == type.mName) {
         isLocalType = true;
         break;
       }
@@ -132,8 +132,8 @@ namespace holgen {
         break;
       }
     }
-    for (const auto &typdef : cls.mTypedefs) {
-      if (typdef.mTargetType == type.mName) {
+    for (const auto &usingStatement : cls.mUsings) {
+      if (usingStatement.mTargetType == type.mName) {
         isLocalType = true;
         break;
       }
@@ -149,8 +149,8 @@ namespace holgen {
     }
   }
 
-  void HeaderContainer::IncludeTypedef(const TranslatedProject &project, const Class &cls __attribute__((unused)), const Typedef &typdef,
-                                       bool isHeader) {
-    IncludeType(project, typdef.mSourceType, isHeader);
+  void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Class &cls __attribute__((unused)), const Using &usingStatement,
+                                     bool isHeader) {
+    IncludeType(project, usingStatement.mSourceType, isHeader);
   }
 }

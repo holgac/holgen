@@ -53,7 +53,8 @@ namespace holgen {
       mInverseDependencies[referencedStruct->mName].insert(structDefinition.mName);
     }
     for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
-      Calculate(structDefinition, templateParameter);
+      if (templateParameter.mName != structDefinition.mName)
+        Calculate(structDefinition, templateParameter);
     }
   }
 

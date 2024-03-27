@@ -146,3 +146,50 @@ switch (mValue) {
 }
   )R");
 }
+
+TEST_F(EnumPluginTest, GetEntryValues) {
+  auto project = Parse(R"R(
+enum TestEnum {
+  Entry1;
+  Entry2 = 3;
+  Entry3 = 2;
+}
+  )R");
+  ClassPlugin(project).Run();
+  EnumPlugin(project).Run();
+  EXPECT_EQ(project.mClasses.size(), 1);
+  auto cls = project.GetClass("TestEnum");
+  ASSERT_NE(cls, nullptr);
+
+  auto method = ClassMethod{"GetEntryValues", Type{"std::array"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  method.mReturnType.mTemplateParameters.emplace_back("TestEnum::UnderlyingType");
+  method.mReturnType.mTemplateParameters.emplace_back("3");
+  method.mConstexprness = Constexprness::Constexpr;
+  ASSERT_NE(cls->GetMethod("GetEntryValues", Constness::NotConst), nullptr);
+  helpers::ExpectEqual(*cls->GetMethod("GetEntryValues", Constness::NotConst), method, R"R(
+return std::array<TestEnum::UnderlyingType, 3>{Entry1Value, Entry2Value, Entry3Value};
+  )R");
+}
+
+TEST_F(EnumPluginTest, GetEntries) {
+  auto project = Parse(R"R(
+enum TestEnum {
+  Entry1;
+  Entry2 = 3;
+  Entry3 = 2;
+}
+  )R");
+  ClassPlugin(project).Run();
+  EnumPlugin(project).Run();
+  EXPECT_EQ(project.mClasses.size(), 1);
+  auto cls = project.GetClass("TestEnum");
+  ASSERT_NE(cls, nullptr);
+
+  auto method = ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  method.mReturnType.mTemplateParameters.emplace_back("TestEnum");
+  method.mReturnType.mTemplateParameters.emplace_back("3");
+  ASSERT_NE(cls->GetMethod("GetEntries", Constness::NotConst), nullptr);
+  helpers::ExpectEqual(*cls->GetMethod("GetEntries", Constness::NotConst), method, R"R(
+return std::array<TestEnum, 3>{Entry1, Entry2, Entry3};
+  )R");
+}

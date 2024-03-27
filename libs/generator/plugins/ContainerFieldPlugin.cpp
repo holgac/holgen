@@ -27,6 +27,9 @@ namespace holgen {
     GenerateContainerAddElem(generatedClass, fieldDefinition);
     GenerateContainerGetElem(generatedClass, fieldDefinition);
     GenerateContainerGetCount(generatedClass, fieldDefinition);
+    // TODO: if annotated, should support deletion (only support integral/string)
+    // For maps, deletion is simple
+    // For vectors, delete middle element and mark as deleted (so that newly created ones can use it)
   }
 
   void ContainerFieldPlugin::ProcessContainerIndex(Class &generatedClass, const FieldDefinition &fieldDefinition,
@@ -77,6 +80,7 @@ namespace holgen {
 
   void ContainerFieldPlugin::GenerateContainerAddElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
+    // TODO: support integral/string types
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
     auto generatedField = generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));

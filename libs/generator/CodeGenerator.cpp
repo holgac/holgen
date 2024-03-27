@@ -78,8 +78,6 @@ namespace holgen {
     codeBlock.Line() << "class " << cls.mName << " {";
 
 
-    GenerateTypedefsForHeader(codeBlock, cls);
-
     GenerateForVisibility(codeBlock, cls, Visibility::Public);
     GenerateForVisibility(codeBlock, cls, Visibility::Protected);
     GenerateForVisibility(codeBlock, cls, Visibility::Private);
@@ -106,6 +104,8 @@ namespace holgen {
         break;
     }
     codeBlock.Indent(1);
+    if (visibility == Visibility::Public)
+      GenerateUsingsForHeader(codeBlock, cls);
     GenerateConstructorsForHeader(codeBlock, cls, visibility, true);
     GenerateMethodsForHeader(codeBlock, cls, visibility, true);
     GenerateFieldDeclarations(codeBlock, cls, visibility);
@@ -209,7 +209,10 @@ namespace holgen {
       willDefine = willDefine && !method.mUserDefined;
 
       {
+        // TODO: Refactor this and use it for source generation as well
         auto line = codeBlock.Line();
+        if (method.mConstexprness == Constexprness::Constexpr)
+          line << "constexpr ";
         if (method.mStaticness == Staticness::Static && isInsideClass)
           line << "static ";
         line << method.mReturnType.ToString() << " ";
@@ -288,7 +291,9 @@ namespace holgen {
       }
       {
         auto line = codeBlock.Line();
-        if (cls.GetTypedef(method.mReturnType.mName))
+        if (method.mConstexprness == Constexprness::Constexpr)
+          line << "constexpr ";
+        if (cls.GetUsing(method.mReturnType.mName))
           line << cls.mName << "::";
         line << method.mReturnType.ToString() << " " << cls.mName << "::" << method.mName << "(";
         bool isFirst = true;
@@ -297,7 +302,7 @@ namespace holgen {
             line << ", ";
           else
             isFirst = false;
-          if (cls.GetTypedef(arg.mType.mName))
+          if (cls.GetUsing(arg.mType.mName))
             line << cls.mName << "::";
           line << arg.mType.ToString() << " " << arg.mName;
         }
@@ -342,8 +347,8 @@ namespace holgen {
     for (const auto &method: cls.mMethods) {
       headers.IncludeClassMethod(*mTranslatedProject, cls, method, isHeader);
     }
-    for (const auto &typdef: cls.mTypedefs) {
-      headers.IncludeTypedef(*mTranslatedProject, cls, typdef, isHeader);
+    for (const auto &usingStatement: cls.mUsings) {
+      headers.IncludeUsing(*mTranslatedProject, cls, usingStatement, isHeader);
     }
 
     headers.Write(codeBlock);
@@ -410,9 +415,9 @@ namespace holgen {
     header.mText = codeBlock.ToString();
   }
 
-  void CodeGenerator::GenerateTypedefsForHeader(CodeBlock &codeBlock, const Class &cls) const {
-    for (auto &typdef: cls.mTypedefs) {
-      codeBlock.Add("typedef {} {};", typdef.mSourceType.ToString(), typdef.mTargetType);
+  void CodeGenerator::GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const {
+    for (auto &usingStatement: cls.mUsings) {
+      codeBlock.Add("using {}={};", usingStatement.mTargetType, usingStatement.mSourceType.ToString());
     }
   }
 
@@ -437,7 +442,7 @@ namespace holgen {
             line << ", ";
           else
             isFirst = false;
-          if (cls.GetTypedef(arg.mType.mName))
+          if (cls.GetUsing(arg.mType.mName))
             line << cls.mName << "::";
           line << arg.mType.ToString() << " " << arg.mName;
         }

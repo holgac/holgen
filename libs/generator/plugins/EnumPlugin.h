@@ -9,5 +9,7 @@ namespace holgen {
      void Run() override;
   private:
     void GenerateCommon(Class& generatedClass, const EnumDefinition& enumDefinition);
+    void GenerateOperators(Class& generatedClass);
+    void GenerateGetEntries(Class& generatedClass, bool forValues);
   };
 }

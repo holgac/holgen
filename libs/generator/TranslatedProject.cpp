@@ -15,10 +15,10 @@ namespace holgen {
     return nullptr;
   }
 
-  const Typedef *Class::GetTypedef(const std::string &name) const {
-    for (auto &typdef: mTypedefs) {
-      if (typdef.mTargetType == name)
-        return &typdef;
+  const Using *Class::GetUsing(const std::string &name) const {
+    for (auto &usingStatement: mUsings) {
+      if (usingStatement.mTargetType == name)
+        return &usingStatement;
     }
     return nullptr;
   }

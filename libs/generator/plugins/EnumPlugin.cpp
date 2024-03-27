@@ -1,5 +1,6 @@
 #include "EnumPlugin.h"
 #include "core/St.h"
+#include <format>
 
 namespace holgen {
   void EnumPlugin::Run() {
@@ -12,8 +13,21 @@ namespace holgen {
     }
   }
 
+  namespace {
+    enum class EnumOperatorReturnType {
+      This,
+      Result
+    };
+    struct EnumOperator {
+      std::string mOperator;
+      Constness mConstness;
+      EnumOperatorReturnType mReturn;
+      bool mIntegralArgument;
+    };
+  }
+
   void EnumPlugin::GenerateCommon(Class &generatedClass, const EnumDefinition &enumDefinition) {
-    generatedClass.mTypedefs.emplace_back(Type{"int64_t"}, "UnderlyingType");
+    generatedClass.mUsings.emplace_back(Type{"int64_t"}, "UnderlyingType");
     generatedClass.mFields.emplace_back("mValue", Type{"UnderlyingType"});
     {
       ClassConstructor &ctor = generatedClass.mConstructors.emplace_back();
@@ -89,6 +103,7 @@ namespace holgen {
 
     {
       // TODO: it'd be better to return a char* here since everything is const already.
+      // TODO: implement formatter and << operators
       ClassMethod &toString = generatedClass.mMethods.emplace_back(
           "ToString",
           Type{"std::string"},
@@ -105,44 +120,74 @@ namespace holgen {
       toString.mBody.Add("}}"); // switch
     }
 
-    std::vector<std::pair<std::string, std::pair<bool, bool>>> operations = {
-        {"=",  {false, false}},
-        {"==", {true,  true}},
-        {"!=", {true,  true}}
+    GenerateOperators(generatedClass);
+    GenerateGetEntries(generatedClass, true);
+    GenerateGetEntries(generatedClass, false);
+  }
+
+  void EnumPlugin::GenerateOperators(Class &generatedClass) {
+    // TODO: test these properly. Currently overloads aren't well supported.
+    const std::vector<EnumOperator> operators = {
+        {"=",  Constness::NotConst, EnumOperatorReturnType::This,   true},
+        {"==", Constness::Const,    EnumOperatorReturnType::Result, true},
+        {"==", Constness::Const,    EnumOperatorReturnType::Result, false},
+        {"!=", Constness::Const,    EnumOperatorReturnType::Result, true},
+        {"!=", Constness::Const,    EnumOperatorReturnType::Result, false}
     };
-    for (int i = 0; i < 2; ++i) {
-      bool isForIntegral = i == 0;
-      for (auto&[op, settings]: operations) {
-        auto&[isConst, returnResult] = settings;
-        ClassMethod &opMethod = generatedClass.mMethods.emplace_back(
-            "operator " + op, Type{"bool"}
-        );
-        opMethod.mName = "operator " + op;
-        if (!returnResult) {
-          opMethod.mReturnType.mName = generatedClass.mName;
-          opMethod.mReturnType.mType = PassByType::Reference;
-        }
-        auto &rhs = opMethod.mArguments.emplace_back("rhs", Type{"UnderlyingType"});
-        rhs.mName = "rhs";
-        if (!isForIntegral) {
-          rhs.mType.mConstness = Constness::Const;
-          rhs.mType.mName = generatedClass.mName;
-          rhs.mType.mType = PassByType::Reference;
-        }
-        opMethod.mConstness = isConst ? Constness::Const : Constness::NotConst;
-        {
-          auto line = opMethod.mBody.Line();
-          if (returnResult)
-            line << "return ";
-          line << "mValue";
-          line << " " << op << " rhs";
-          if (!isForIntegral)
-            line << ".mValue";
-          line << ";";
-        }
-        if (!returnResult)
-          opMethod.mBody.Add("return *this;");
+
+    for (auto &op: operators) {
+      ClassMethod &opMethod = generatedClass.mMethods.emplace_back(
+          "operator " + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness
+      );
+      if (op.mReturn == EnumOperatorReturnType::This) {
+        opMethod.mReturnType.mName = generatedClass.mName;
+        opMethod.mReturnType.mType = PassByType::Reference;
       }
+      if (op.mIntegralArgument)
+        opMethod.mArguments.emplace_back("rhs", Type{"UnderlyingType"});
+      else
+        opMethod.mArguments.emplace_back("rhs", Type{generatedClass.mName, PassByType::Reference, Constness::Const});
+      {
+        auto line = opMethod.mBody.Line();
+        if (op.mReturn == EnumOperatorReturnType::Result)
+          line << "return ";
+        line << "mValue";
+        line << " " << op.mOperator << " rhs";
+        if (!op.mIntegralArgument)
+          line << ".mValue";
+        line << ";";
+      }
+      if (op.mReturn == EnumOperatorReturnType::This)
+        opMethod.mBody.Add("return *this;");
     }
+  }
+
+  void EnumPlugin::GenerateGetEntries(Class &generatedClass, bool forValues) {
+    auto &method = generatedClass.mMethods.emplace_back(
+        forValues ? "GetEntryValues" : "GetEntries",
+        Type{"std::array"},
+        Visibility::Public,
+        Constness::NotConst,
+        Staticness::Static
+    );
+    if (forValues) {
+      method.mConstexprness = Constexprness::Constexpr;
+      method.mReturnType.mTemplateParameters.emplace_back(generatedClass.mName + "::UnderlyingType");
+    } else {
+      method.mReturnType.mTemplateParameters.emplace_back(generatedClass.mName);
+    }
+    method.mReturnType.mTemplateParameters.emplace_back(
+        std::format("{}", generatedClass.mEnum->mEntries.size()));
+    auto line = method.mBody.Line();
+    line << "return " << method.mReturnType.ToString() << "{";
+    for (size_t i = 0; i < generatedClass.mEnum->mEntries.size(); ++i) {
+      if (i > 0)
+        line << ", ";
+      if (forValues)
+        line << generatedClass.mEnum->mEntries[i].mName + "Value";
+      else
+        line << generatedClass.mEnum->mEntries[i].mName;
+    }
+    line << "};";
   }
 }

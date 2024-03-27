@@ -7,6 +7,7 @@
 
 namespace holgen {
   class Parser {
+    // TODO: don't store ProjectDefinition here. Instead store a reference to it and pass via ctor
     ProjectDefinition mProject;
     Tokenizer *mCurTokenizer = nullptr;
     void ParseFunction(Token &curToken, FunctionDefinition &functionDefinition);

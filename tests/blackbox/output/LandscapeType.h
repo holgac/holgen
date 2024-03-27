@@ -10,18 +10,19 @@
 struct lua_State;
 namespace holgen_blackbox_test {
 class LandscapeType {
-typedef int64_t UnderlyingType;
 public:
+  using UnderlyingType=int64_t;
   explicit LandscapeType(UnderlyingType value = Invalid);
   UnderlyingType Get() const;
   static LandscapeType FromString(std::string_view str);
   std::string ToString() const;
   LandscapeType& operator =(UnderlyingType rhs);
   bool operator ==(UnderlyingType rhs) const;
-  bool operator !=(UnderlyingType rhs) const;
-  LandscapeType& operator =(const LandscapeType& rhs);
   bool operator ==(const LandscapeType& rhs) const;
+  bool operator !=(UnderlyingType rhs) const;
   bool operator !=(const LandscapeType& rhs) const;
+  constexpr static std::array<LandscapeType::UnderlyingType, 4> GetEntryValues();
+  static std::array<LandscapeType, 4> GetEntries();
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   inline static constexpr const UnderlyingType LandValue = 0;

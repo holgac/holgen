@@ -27,12 +27,17 @@ int run(int argc, char **argv) {
   }
   holgen::Parser parser;
   for (auto &entry: std::filesystem::directory_iterator(std::filesystem::path(argv[1]))) {
-    if (!std::filesystem::is_regular_file(entry)) {
+    if (!std::filesystem::is_regular_file(entry) || entry.path().extension() != ".hsc") {
       continue;
     }
     auto contents = ReadFile(entry.path());
     holgen::Tokenizer tokenizer(contents);
-    parser.Parse(tokenizer);
+    try {
+      parser.Parse(tokenizer);
+    } catch (holgen::Exception &exc) {
+      std::cerr << "In file " << entry.path() << std::endl;
+      throw;
+    }
   }
   holgen::Translator translator(parser.GetProject());
   auto project = translator.Translate();

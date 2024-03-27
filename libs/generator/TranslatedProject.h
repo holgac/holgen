@@ -71,8 +71,8 @@ namespace holgen {
     bool mIsTemplateSpecialization = false;
   };
 
-  struct Typedef {
-    Typedef(
+  struct Using {
+    Using(
         Type sourceType,
         std::string targetType
     ) : mSourceType(sourceType), mTargetType(targetType) {}
@@ -95,6 +95,7 @@ namespace holgen {
     // TODO: bit flags?
     Constness mConstness;
     Staticness mStaticness;
+    Constexprness mConstexprness = Constexprness::NotConstexpr;
     bool mUserDefined = false;
     bool mExposeToLua = false;
   };
@@ -131,13 +132,13 @@ namespace holgen {
     std::vector<ClassConstructor> mConstructors;
     std::vector<ClassField> mFields;
     std::vector<TemplateParameter> mTemplateParameters;
-    std::vector<Typedef> mTypedefs;
+    std::vector<Using> mUsings;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
     std::set<std::string> mGlobalForwardDeclarations;
     ClassField *GetField(const std::string &name);
     ClassMethod *GetMethod(const std::string &name, Constness constness);
-    const Typedef *GetTypedef(const std::string &name) const;
+    const Using *GetUsing(const std::string &name) const;
   };
 
   struct TranslatedProject {
