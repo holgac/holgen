@@ -82,7 +82,9 @@ namespace holgen {
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     // TODO: support integral/string types
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
-    auto underlyingIdField = underlyingStructDefinition->GetIdField();
+    const FieldDefinition *underlyingIdField = nullptr;
+    if (underlyingStructDefinition)
+      underlyingIdField = underlyingStructDefinition->GetIdField();
     auto generatedField = generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField->mType.mName);
 
@@ -90,7 +92,7 @@ namespace holgen {
       auto &nextIdField = generatedClass.mFields.emplace_back(
           generatedField->mName + "NextId",
           Type{mProject.mProject, underlyingIdField->mType});
-      nextIdField.mDefaultValue = "1";
+      nextIdField.mDefaultValue = "0";
       generatedField = generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
     }
 
@@ -143,7 +145,9 @@ namespace holgen {
   void ContainerFieldPlugin::GenerateContainerGetElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
-    auto underlyingIdField = underlyingStructDefinition->GetIdField();
+    const FieldDefinition *underlyingIdField = nullptr;
+    if (underlyingStructDefinition)
+      underlyingIdField = underlyingStructDefinition->GetIdField();
     auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName);
     for (int i = 0; i < 2; ++i) {

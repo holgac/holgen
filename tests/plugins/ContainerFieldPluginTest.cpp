@@ -334,7 +334,7 @@ struct TestData {
         "mInnerStructsNextId",
         Type{"uint32_t"},
     };
-    field.mDefaultValue = "1";
+    field.mDefaultValue = "0";
     helpers::ExpectEqual(*cls->GetField("mInnerStructsNextId"), field);
   }
 

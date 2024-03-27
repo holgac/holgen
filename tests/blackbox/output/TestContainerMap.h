@@ -1,0 +1,37 @@
+#pragma once
+
+#include "holgen.h"
+#include <map>
+#include <cstdint>
+#include <string>
+#include <rapidjson/fwd.h>
+#include "TestContainerInnerStructWithId.h"
+#include "Converter.h"
+
+struct lua_State;
+namespace holgen_blackbox_test {
+class TestContainerMap {
+public:
+  const std::map<uint32_t, TestContainerInnerStructWithId>& GetInnerStructsWithId() const;
+  std::map<uint32_t, TestContainerInnerStructWithId>& GetInnerStructsWithId();
+  void SetInnerStructsWithId(const std::map<uint32_t, TestContainerInnerStructWithId>& val);
+  const TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key) const;
+  TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key);
+  bool AddInnerStructWithId(TestContainerInnerStructWithId&& elem);
+  const TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx) const;
+  TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx);
+  size_t GetInnerStructWithIdCount() const;
+  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  void PushToLua(lua_State* luaState) const;
+  void PushGlobalToLua(lua_State* luaState, const char* name) const;
+  static TestContainerMap* ReadFromLua(lua_State* luaState, int32_t idx);
+  static void CreateLuaMetatable(lua_State* luaState);
+protected:
+private:
+  static void PushIndexMetaMethod(lua_State* luaState);
+  static void PushNewIndexMetaMethod(lua_State* luaState);
+  std::map<uint32_t, TestContainerInnerStructWithId> mInnerStructsWithId;
+  std::map<std::string, uint32_t> mInnerStructsWithIdNameIndex;
+  uint32_t mInnerStructsWithIdNextId = 0;
+};
+}

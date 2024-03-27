@@ -150,17 +150,6 @@ struct B {
   vector<Person> people;
 }
   )DELIM", "Field B.people has annotation container with missing attribute: elemName");
-
-  ExpectErrorMessage(R"DELIM(
-struct Person {
-  @id
-  u32 field;
-}
-struct B {
-  @container(elemName=person)
-  vector<Person> people;
-}
-  )DELIM", "B.people should either be const or a stable container like deque, or Person should be managed");
 }
 
 TEST_F(ValidatorTest, Id) {

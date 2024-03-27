@@ -16,7 +16,7 @@ public:
   static void Push(const T& data, lua_State* luaState) {
     if constexpr(std::is_pointer_v<T>) {
       if (data) {
-        data->PushToLua(luaState);
+        LuaHelper::Push(*data, luaState);
       } else {
         lua_pushnil(luaState);
       }

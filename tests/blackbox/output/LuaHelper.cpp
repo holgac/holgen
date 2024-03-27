@@ -15,7 +15,10 @@
 #include "Calculator.h"
 #include "Human.h"
 #include "HumanManager.h"
-#include "GridCell.h"
+#include "TestContainerInnerStructWithId.h"
+#include "TestContainerInnerStructNoId.h"
+#include "TestContainerVector.h"
+#include "TestContainerMap.h"
 
 namespace holgen_blackbox_test {
 void LuaHelper::Push(nullptr_t , lua_State* luaState) {
@@ -145,6 +148,9 @@ void LuaHelper::CreateMetatables(lua_State* luaState) {
   Calculator::CreateLuaMetatable(luaState);
   Human::CreateLuaMetatable(luaState);
   HumanManager::CreateLuaMetatable(luaState);
-  GridCell::CreateLuaMetatable(luaState);
+  TestContainerInnerStructWithId::CreateLuaMetatable(luaState);
+  TestContainerInnerStructNoId::CreateLuaMetatable(luaState);
+  TestContainerVector::CreateLuaMetatable(luaState);
+  TestContainerMap::CreateLuaMetatable(luaState);
 }
 }

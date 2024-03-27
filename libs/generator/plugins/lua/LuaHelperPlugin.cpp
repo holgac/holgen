@@ -55,7 +55,7 @@ namespace holgen {
     baseFunc.mBody.Indent(1);
     baseFunc.mBody.Add("if (data) {{");
     baseFunc.mBody.Indent(1);
-    baseFunc.mBody.Add("data->PushToLua(luaState);");
+    baseFunc.mBody.Add("{}::{}(*data, luaState);", St::LuaHelper, St::LuaHelper_Push);
     baseFunc.mBody.Indent(-1);
     baseFunc.mBody.Add("}} else {{");
     baseFunc.mBody.Indent(1);

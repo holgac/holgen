@@ -33,6 +33,6 @@ private:
   static void PushNewIndexMetaMethod(lua_State* luaState);
   std::unordered_map<uint32_t, Human> mHumans;
   std::map<std::string, uint32_t> mHumansNameIndex;
-  uint32_t mHumansNextId = 1;
+  uint32_t mHumansNextId = 0;
 };
 }
