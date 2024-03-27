@@ -26,6 +26,8 @@ namespace holgen {
     }
     GenerateContainerAddElem(generatedClass, fieldDefinition);
     GenerateContainerGetElem(generatedClass, fieldDefinition);
+    // TODO: for sets, GenerateContainerHasElem
+    // TODO: GenerateContainerDeleteElem
     GenerateContainerGetCount(generatedClass, fieldDefinition);
     // TODO: if annotated, should support deletion (only support integral/string)
     // For maps, deletion is simple
@@ -136,6 +138,8 @@ namespace holgen {
       func.mBody.Add("elem.{}(newId);", Naming(mProject).FieldSetterNameInCpp(*underlyingIdField));
     if (isKeyedContainer) {
       func.mBody.Add("{}.emplace(newId, std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
+    } else if (TypeInfo::Get().CppSets.contains(generatedField->mType.mName)) {
+      func.mBody.Add("{}.emplace(std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
     } else {
       func.mBody.Add("{}.emplace_back(std::forward<{}>(elem));", generatedField->mName, arg.mType.mName);
     }
@@ -149,6 +153,8 @@ namespace holgen {
     if (underlyingStructDefinition)
       underlyingIdField = underlyingStructDefinition->GetIdField();
     auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    if (TypeInfo::Get().CppSets.contains(generatedField.mType.mName))
+      return;
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName);
     for (int i = 0; i < 2; ++i) {
       auto constness = i == 0 ? Constness::Const : Constness::NotConst;

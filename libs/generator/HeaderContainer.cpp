@@ -20,6 +20,8 @@ namespace holgen {
         {"std::deque",         "deque"},
         {"std::map",           "map"},
         {"std::unordered_map", "unordered_map"},
+        {"std::set",           "set"},
+        {"std::unordered_set", "unordered_set"},
         {"std::function",      "functional"},
     };
     std::set<std::string> NoHeaderTypes = {"float", "double", "void", "bool"};

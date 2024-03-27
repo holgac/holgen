@@ -91,22 +91,11 @@ namespace holgen {
     }
 
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      auto &func = generatedClass.mMethods.emplace_back(
-          "Push", Type{"void"},
-          Visibility::Public, Constness::NotConst, Staticness::Static
-      );
-      auto &templateArg = func.mTemplateParameters.emplace_back();
-      templateArg.mType = "typename";
-      templateArg.mName = "T";
+      GeneratePushForSingleElemContainer(generatedClass, container);
+    }
 
-      {
-        auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
-        data.mType.mTemplateParameters.emplace_back("T");
-      }
-      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-
-      // TOOD: implement with rawseti
-
+    for (const auto &container: TypeInfo::Get().CppSets) {
+       GeneratePushForSingleElemContainer(generatedClass, container);
     }
 
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
@@ -127,9 +116,7 @@ namespace holgen {
         data.mType.mTemplateParameters.emplace_back("V");
       }
       func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-
       // TODO: implement
-
     }
   }
 
@@ -179,21 +166,11 @@ namespace holgen {
     }
 
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      auto &func = generatedClass.mMethods.emplace_back(
-          "Read", Type{"bool"},
-          Visibility::Public, Constness::NotConst, Staticness::Static
-      );
-      auto &templateArg = func.mTemplateParameters.emplace_back();
-      templateArg.mType = "typename";
-      templateArg.mName = "T";
-      {
-        auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
-        data.mType.mTemplateParameters.emplace_back("T");
-      }
-      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-      func.mArguments.emplace_back("luaIndex", Type{"int32_t"});
-      // TOOD: implement with rawseti
-      func.mBody.Add("return false;");
+      GenerateReadForSingleElemContainer(generatedClass, container);
+    }
+
+    for (const auto &container: TypeInfo::Get().CppSets) {
+      GenerateReadForSingleElemContainer(generatedClass, container);
     }
 
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
@@ -216,16 +193,12 @@ namespace holgen {
       func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
       func.mArguments.emplace_back("luaIndex", Type{"int32_t"});
       func.mBody.Add("return false;");
-
       // TODO: implement
-
     }
-
-
   }
 
   void LuaHelperPlugin::GenerateCreateMetatables(Class &generatedClass) {
-    auto& method = generatedClass.mMethods.emplace_back(
+    auto &method = generatedClass.mMethods.emplace_back(
         "CreateMetatables", Type{"void"}, Visibility::Public,
         Constness::NotConst, Staticness::Static);
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
@@ -235,5 +208,40 @@ namespace holgen {
         method.mBody.Add("{}::CreateLuaMetatable(luaState);", cls.mName);
       }
     }
+  }
+
+  void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::string &container) {
+    auto &func = cls.mMethods.emplace_back(
+        "Push", Type{"void"},
+        Visibility::Public, Constness::NotConst, Staticness::Static
+    );
+    auto &templateArg = func.mTemplateParameters.emplace_back();
+    templateArg.mType = "typename";
+    templateArg.mName = "T";
+
+    {
+      auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+      data.mType.mTemplateParameters.emplace_back("T");
+    }
+    func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    // TOOD: implement with rawseti
+  }
+
+  void LuaHelperPlugin::GenerateReadForSingleElemContainer(Class &cls, const std::string &container) {
+    auto &func = cls.mMethods.emplace_back(
+        "Read", Type{"bool"},
+        Visibility::Public, Constness::NotConst, Staticness::Static
+    );
+    auto &templateArg = func.mTemplateParameters.emplace_back();
+    templateArg.mType = "typename";
+    templateArg.mName = "T";
+    {
+      auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
+      data.mType.mTemplateParameters.emplace_back("T");
+    }
+    func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    func.mArguments.emplace_back("luaIndex", Type{"int32_t"});
+    // TOOD: implement with rawseti
+    func.mBody.Add("return false;");
   }
 }

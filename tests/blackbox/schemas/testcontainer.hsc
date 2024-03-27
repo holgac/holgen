@@ -29,3 +29,11 @@ struct TestContainerMap {
     @index(on=name)
     map<Ref<TestContainerInnerStructWithId>, TestContainerInnerStructWithId> innerStructsWithId;
 }
+
+struct TestContainerSet {
+    @container(elemName=stringElem)
+    set<string> stringContainer;
+
+    @container(elemName=unsignedElem)
+    set<u32> unsignedContainer;
+}

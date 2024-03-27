@@ -26,6 +26,8 @@ namespace holgen {
         {"deque",         "std::deque"},
         {"map",           "std::map"},
         {"unordered_map", "std::unordered_map"},
+        {"set",           "std::set"},
+        {"unordered_set", "std::unordered_set"},
     };
 
     SignedIntegralTypes = {
@@ -56,10 +58,16 @@ namespace holgen {
         "std::map",
         "std::unordered_map",
     };
+    CppSets = {
+        "std::set",
+        "std::unordered_set",
+    };
     CppContainers = CppIndexedContainers;
     CppContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
     CppStableContainers = {
         "std::deque",
+        "std::set",
+        "std::unordered_set",
     };
     KeyableTypes = IntegralTypes;
     KeyableTypes.insert("std::string");

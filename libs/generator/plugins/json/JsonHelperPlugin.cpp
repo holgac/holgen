@@ -6,26 +6,6 @@
 
 namespace holgen {
   namespace {
-    struct RapidJsonTypeUsage {
-      std::string mValidator;
-      std::string mGetter;
-    };
-
-    std::map<std::string, RapidJsonTypeUsage> RapidJsonUsage = {
-        {"int8_t",      {"IsInt",    "GetInt"}},
-        {"int16_t",     {"IsInt",    "GetInt"}},
-        {"int32_t",     {"IsInt",    "GetInt"}},
-        {"int64_t",     {"IsInt64",  "GetInt64"}},
-        {"uint8_t",     {"IsUint",   "GetUint"}},
-        {"uint16_t",    {"IsUint",   "GetUint"}},
-        {"uint32_t",    {"IsUint",   "GetUint"}},
-        {"uint64_t",    {"IsUint64", "GetUint64"}},
-        {"float",       {"IsFloat",  "GetFloat"}},
-        {"double",      {"IsDouble", "GetDouble"}},
-        {"bool",        {"IsBool",   "GetBool"}},
-        {"std::string", {"IsString", "GetString"}},
-    };
-
     std::string ConverterName = "Converter";
     std::string ParseJson = "ParseJson";
   }
@@ -33,113 +13,140 @@ namespace holgen {
   void JsonHelperPlugin::Run() {
     auto &generatedClass = mProject.mClasses.emplace_back(St::JsonHelper);
     generatedClass.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
-    auto &baseParse = generatedClass.mMethods.emplace_back(
+    GenerateBaseParse(generatedClass);
+    GenerateParseSingleElem(generatedClass);
+    for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
+      GenerateParseJsonForSingleElemContainer(generatedClass, container);
+    }
+    for (const auto &container: TypeInfo::Get().CppSets) {
+      GenerateParseJsonForSingleElemContainer(generatedClass, container);
+    }
+    for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
+      GenerateParseJsonForKeyedContainer(generatedClass, container);
+    }
+  }
+
+  void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container) {
+    auto &method = cls.mMethods.emplace_back(
+        St::JsonHelper_Parse, Type{"bool"},
+        Visibility::Public, Constness::NotConst, Staticness::Static
+    );
+    auto &templateArg = method.mTemplateParameters.emplace_back();
+    templateArg.mType = "typename";
+    templateArg.mName = "T";
+    auto &out = method.mArguments.emplace_back("out", Type{container, PassByType::Reference});
+    out.mType.mTemplateParameters.emplace_back("T");
+    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+
+    method.mBody.Line() << "if (!json.IsArray())";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1);
+
+    method.mBody.Line() << "for (const auto& data: json.GetArray()) {";
+    method.mBody.Indent(1);
+    method.mBody.Add("T elem;", St::JsonHelper_Parse);
+    method.mBody.Add("auto res = {}(elem, data, converter);", St::JsonHelper_Parse);
+    method.mBody.Line() << "if (!res)";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1); // if !res
+    if (TypeInfo::Get().CppSets.contains(container))
+      method.mBody.Line() << "out.emplace(std::move(elem));";
+    else
+      method.mBody.Line() << "out.emplace_back(std::move(elem));";
+    method.mBody.Indent(-1);
+    method.mBody.Line() << "}"; // range based for on json.GetArray()
+    method.mBody.Line() << "return true;";
+  }
+
+  void JsonHelperPlugin::GenerateBaseParse(Class &cls) {
+    auto &method = cls.mMethods.emplace_back(
         St::JsonHelper_Parse, Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static);
-    auto &baseTemplateArg = baseParse.mTemplateParameters.emplace_back();
+    auto &baseTemplateArg = method.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
-    baseParse.mArguments.emplace_back("out", Type{"T", PassByType::Reference});
+    method.mArguments.emplace_back("out", Type{"T", PassByType::Reference});
+    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+    method.mBody.Add("return out.{}(json, converter);", ParseJson);
+  }
 
-    baseParse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    baseParse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+  void JsonHelperPlugin::GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,
+                                                 const std::string &getter) {
+    auto &method = cls.mMethods.emplace_back(
+        St::JsonHelper_Parse, Type{"bool"},
+        Visibility::Public, Constness::NotConst, Staticness::Static);
+    method.mIsTemplateSpecialization = true;
+    method.mArguments.emplace_back("out", Type{type, PassByType::Reference});
+    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+    method.mBody.Line() << "if (!json." << validator << "())";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1);
+    method.mBody.Line() << "out = json." << getter << "();";
+    method.mBody.Line() << "return true;";
+  }
 
-    baseParse.mBody.Add("return out.{}(json, converter);", ParseJson);
+  void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {
+    GenerateParseSingleElem(cls, "int8_t", "IsInt", "GetInt");
+    GenerateParseSingleElem(cls, "int16_t", "IsInt", "GetInt");
+    GenerateParseSingleElem(cls, "int32_t", "IsInt", "GetInt");
+    GenerateParseSingleElem(cls, "int64_t", "IsInt64", "GetInt64");
+    GenerateParseSingleElem(cls, "uint8_t", "IsUint", "GetUint");
+    GenerateParseSingleElem(cls, "uint16_t", "IsUint", "GetUint");
+    GenerateParseSingleElem(cls, "uint32_t", "IsUint", "GetUint");
+    GenerateParseSingleElem(cls, "uint64_t", "IsUint64", "GetUint64");
+    GenerateParseSingleElem(cls, "float", "IsFloat", "GetFloat");
+    GenerateParseSingleElem(cls, "double", "IsDouble", "GetDouble");
+    GenerateParseSingleElem(cls, "bool", "IsBool", "GetBool");
+    GenerateParseSingleElem(cls, "std::string", "IsString", "GetString");
+  }
 
-    for (const auto &[type, usage]: RapidJsonUsage) {
-      auto &parse = generatedClass.mMethods.emplace_back(
-          St::JsonHelper_Parse, Type{"bool"},
-          Visibility::Public, Constness::NotConst, Staticness::Static);
-      parse.mIsTemplateSpecialization = true;
+  void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container) {
+    auto &method = cls.mMethods.emplace_back(
+        St::JsonHelper_Parse,
+        Type{"bool"},
+        Visibility::Public, Constness::NotConst, Staticness::Static);
+    auto &keyTemplateArg = method.mTemplateParameters.emplace_back();
+    keyTemplateArg.mType = "typename";
+    keyTemplateArg.mName = "K";
+    auto &valueTemplateArg = method.mTemplateParameters.emplace_back();
+    valueTemplateArg.mType = "typename";
+    valueTemplateArg.mName = "V";
 
-      parse.mArguments.emplace_back("out", Type{type, PassByType::Reference});
-      parse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-      parse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
-
-      parse.mBody.Line() << "if (!json." << usage.mValidator << "())";
-      parse.mBody.Indent(1);
-      parse.mBody.Line() << "return false;";
-      parse.mBody.Indent(-1);
-      parse.mBody.Line() << "out = json." << usage.mGetter << "();";
-      parse.mBody.Line() << "return true;";
+    {
+      auto &out = method.mArguments.emplace_back("out", Type{container, PassByType::Reference});
+      out.mType.mTemplateParameters.emplace_back("K");
+      out.mType.mTemplateParameters.emplace_back("V");
     }
+    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
 
-    for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      auto &parse = generatedClass.mMethods.emplace_back(
-          St::JsonHelper_Parse, Type{"bool"},
-          Visibility::Public, Constness::NotConst, Staticness::Static
-      );
-      auto &templateArg = parse.mTemplateParameters.emplace_back();
-      templateArg.mType = "typename";
-      templateArg.mName = "T";
+    method.mBody.Line() << "if (!json.IsObject())";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1); // if (!json.IsObject())
 
-      {
-        auto &out = parse.mArguments.emplace_back("out", Type{container, PassByType::Reference});
-        out.mType.mTemplateParameters.emplace_back("T");
-      }
-      parse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-      parse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
-
-      parse.mBody.Line() << "if (!json.IsArray())";
-      parse.mBody.Indent(1);
-      parse.mBody.Line() << "return false;";
-      parse.mBody.Indent(-1);
-
-      parse.mBody.Line() << "for (const auto& data: json.GetArray()) {";
-      parse.mBody.Indent(1);
-      parse.mBody.Add("auto res = {}(out.emplace_back(), data, converter);", St::JsonHelper_Parse);
-      parse.mBody.Line() << "if (!res)";
-      parse.mBody.Indent(1);
-      parse.mBody.Line() << "return false;";
-      parse.mBody.Indent(-1); // if !res
-      parse.mBody.Indent(-1);
-      parse.mBody.Line() << "}"; // range based for on json.GetArray()
-      parse.mBody.Line() << "return true;";
-
-    }
-
-    for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-      auto &parse = generatedClass.mMethods.emplace_back(
-          St::JsonHelper_Parse,
-          Type{"bool"},
-          Visibility::Public, Constness::NotConst, Staticness::Static);
-      auto &keyTemplateArg = parse.mTemplateParameters.emplace_back();
-      keyTemplateArg.mType = "typename";
-      keyTemplateArg.mName = "K";
-      auto &valueTemplateArg = parse.mTemplateParameters.emplace_back();
-      valueTemplateArg.mType = "typename";
-      valueTemplateArg.mName = "V";
-
-      {
-        auto &out = parse.mArguments.emplace_back("out", Type{container, PassByType::Reference});
-        out.mType.mTemplateParameters.emplace_back("K");
-        out.mType.mTemplateParameters.emplace_back("V");
-      }
-      parse.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-      parse.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
-
-      parse.mBody.Line() << "if (!json.IsObject())";
-      parse.mBody.Indent(1);
-      parse.mBody.Line() << "return false;";
-      parse.mBody.Indent(-1); // if (!json.IsObject())
-
-      parse.mBody.Line() << "for (const auto& data: json.GetObject()) {";
-      parse.mBody.Indent(1);
-      parse.mBody.Line() << "K key;";
-      parse.mBody.Add("{}(key, data.name, converter);", St::JsonHelper_Parse);
-      parse.mBody.Line() << "auto [it, res] = out.try_emplace(key, V());";
-      parse.mBody.Line() << "if (!res)";
-      parse.mBody.Indent(1);
-      parse.mBody.Line() << "return false;";
-      parse.mBody.Indent(-1); // if !res
-      parse.mBody.Add("{}(it->second, data.value, converter);", St::JsonHelper_Parse);
-      parse.mBody.Line() << "if (!res)";
-      parse.mBody.Indent(1);
-      parse.mBody.Line() << "return false;";
-      parse.mBody.Indent(-1); // if !res
-      parse.mBody.Indent(-1);
-      parse.mBody.Line() << "}"; // range based for on json.GetArray()
-      parse.mBody.Line() << "return true;";
-    }
+    method.mBody.Line() << "for (const auto& data: json.GetObject()) {";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "K key;";
+    method.mBody.Add("{}(key, data.name, converter);", St::JsonHelper_Parse);
+    method.mBody.Line() << "auto [it, res] = out.try_emplace(key, V());";
+    method.mBody.Line() << "if (!res)";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1); // if !res
+    method.mBody.Add("{}(it->second, data.value, converter);", St::JsonHelper_Parse);
+    method.mBody.Line() << "if (!res)";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1); // if !res
+    method.mBody.Indent(-1);
+    method.mBody.Line() << "}"; // range based for on json.GetArray()
+    method.mBody.Line() << "return true;";
   }
 }

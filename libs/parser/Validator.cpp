@@ -250,8 +250,10 @@ namespace holgen {
                (!underlyingStruct || underlyingStruct->GetIdField() == nullptr),
                "{}.{} has an index but {} is not a user type with an id field",
                structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-      THROW_IF(!TypeInfo::Get().CppIndexedContainers.contains(type.mName), "{}.{} is not a valid indexed container",
-               structDefinition.mName, fieldDefinition.mName);
+      THROW_IF(
+          !TypeInfo::Get().CppIndexedContainers.contains(type.mName) && !TypeInfo::Get().CppSets.contains(type.mName),
+          "{}.{} is not a valid indexed container",
+          structDefinition.mName, fieldDefinition.mName);
       THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1, "{}.{} should have a single template parameter",
                structDefinition.mName, fieldDefinition.mName);
     }

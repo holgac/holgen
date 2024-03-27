@@ -5,6 +5,8 @@
 #include <string>
 #include <deque>
 #include <vector>
+#include <set>
+#include <unordered_set>
 #include <map>
 #include <unordered_map>
 #include <lua.hpp>
@@ -43,6 +45,12 @@ public:
   template <typename T>
   static void Push(std::vector<T>& data, lua_State* luaState) {
   }
+  template <typename T>
+  static void Push(std::set<T>& data, lua_State* luaState) {
+  }
+  template <typename T>
+  static void Push(std::unordered_set<T>& data, lua_State* luaState) {
+  }
   template <typename K, typename V>
   static void Push(std::map<K, V>& data, lua_State* luaState) {
   }
@@ -72,6 +80,14 @@ public:
   }
   template <typename T>
   static bool Read(const std::vector<T>& data, lua_State* luaState, int32_t luaIndex) {
+    return false;
+  }
+  template <typename T>
+  static bool Read(const std::set<T>& data, lua_State* luaState, int32_t luaIndex) {
+    return false;
+  }
+  template <typename T>
+  static bool Read(const std::unordered_set<T>& data, lua_State* luaState, int32_t luaIndex) {
     return false;
   }
   template <typename K, typename V>

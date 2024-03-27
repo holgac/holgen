@@ -66,6 +66,7 @@ namespace holgen {
     // All containers
     std::set<std::string> CppContainers;
     std::set<std::string> CppStableContainers;
+    std::set<std::string> CppSets;
     std::set<std::string> KeyableTypes;
     std::set<std::string> CppTypes;
 
