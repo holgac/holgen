@@ -1,5 +1,6 @@
 #include "LuaHelper.h"
 
+#include "TestEnumStruct.h"
 #include "Race.h"
 #include "Person.h"
 #include "RaceId.h"
@@ -129,6 +130,7 @@ bool LuaHelper::Read(uint8_t& data, lua_State* luaState, int32_t luaIndex) {
   return true;
 }
 void LuaHelper::CreateMetatables(lua_State* luaState) {
+  TestEnumStruct::CreateLuaMetatable(luaState);
   Race::CreateLuaMetatable(luaState);
   Person::CreateLuaMetatable(luaState);
   RaceId::CreateLuaMetatable(luaState);

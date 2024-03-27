@@ -5,6 +5,12 @@
 namespace holgen {
 
   namespace {
+      bool CanBeDefinedInHeader(const Class& cls, const ClassMethod& method) {
+        return !method.mTemplateParameters.empty()
+               || !cls.mTemplateParameters.empty()
+               || method.mConstexprness == Constexprness::Constexpr;
+      }
+
     std::string StringifyTemplateParameters(const std::vector<TemplateParameter> &templateParameters) {
       std::stringstream ss;
       ss << "template <";
@@ -193,7 +199,6 @@ namespace holgen {
     }
 
   }
-
   void CodeGenerator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
                                                bool isInsideClass) const {
     for (auto &method: cls.mMethods) {
@@ -205,8 +210,7 @@ namespace holgen {
       if (method.mIsTemplateSpecialization)
         codeBlock.Line() << "template <>";
 
-      bool willDefine = !method.mTemplateParameters.empty() || !cls.mTemplateParameters.empty();
-      willDefine = willDefine && !method.mUserDefined;
+      bool willDefine = CanBeDefinedInHeader(cls, method) && !method.mUserDefined;
 
       {
         // TODO: Refactor this and use it for source generation as well
@@ -282,8 +286,7 @@ namespace holgen {
       return;
 
     for (auto &method: cls.mMethods) {
-      if (method.mUserDefined || !method.mTemplateParameters.empty()) {
-        // These are defined in the header
+      if (method.mUserDefined || CanBeDefinedInHeader(cls, method)) {
         continue;
       }
       if (method.mIsTemplateSpecialization) {
