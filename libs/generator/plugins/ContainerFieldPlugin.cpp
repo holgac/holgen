@@ -33,9 +33,6 @@ namespace holgen {
     if (CanImplementDeleteElem(generatedClass, fieldDefinition))
       GenerateContainerDeleteElem(generatedClass, fieldDefinition);
     GenerateContainerGetCount(generatedClass, fieldDefinition);
-    // TODO: if annotated, should support deletion (only support integral/string)
-    // For maps, deletion is simple
-    // For vectors, delete middle element and mark as deleted (so that newly created ones can use it)
   }
 
   void ContainerFieldPlugin::ProcessContainerIndex(Class &generatedClass, const FieldDefinition &fieldDefinition,
@@ -67,12 +64,8 @@ namespace holgen {
           constness);
       if (i == 0)
         func.mExposeToLua = true;
-      auto &arg = func.mArguments.emplace_back(
-          "key", Type{mProject.mProject, fieldIndexedOn.mType});
-      if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
-        arg.mType.mConstness = Constness::Const;
-        arg.mType.mType = PassByType::Reference;
-      }
+      func.mArguments.emplace_back("key", Type{mProject.mProject, fieldIndexedOn.mType});
+      func.mArguments.back().mType.PreventCopying();
 
       func.mBody.Add("auto it = {}.find(key);", indexField.mName);
       func.mBody.Add("if (it == {}.end())", indexField.mName);
@@ -108,12 +101,9 @@ namespace holgen {
     if (useMoveRef) {
       func.mArguments.emplace_back(
           "elem", Type{mProject.mProject, underlyingType, PassByType::MoveReference});
-    } else if (TypeInfo::Get().CppPrimitives.contains(generatedField->mType.mName)) {
-      func.mArguments.emplace_back(
-          "elem", Type{mProject.mProject, underlyingType});
     } else {
-      func.mArguments.emplace_back(
-          "elem", Type{mProject.mProject, underlyingType, PassByType::Reference, Constness::Const});
+      func.mArguments.emplace_back("elem", Type{mProject.mProject, underlyingType});
+      func.mArguments.back().mType.PreventCopying();
     }
 
     CodeBlock validators;
@@ -283,11 +273,7 @@ namespace holgen {
     if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName)) {
       arg.mName = "key";
     }
-    // TODO: this logic exists in multiple places
-    if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
-      arg.mType.mType = PassByType::Reference;
-      arg.mType.mConstness = Constness::Const;
-    }
+    arg.mType.PreventCopying();
     func.mBody.Add("return {}.contains({});", Naming(mProject).FieldNameInCpp(fieldDefinition), arg.mName);
   }
 

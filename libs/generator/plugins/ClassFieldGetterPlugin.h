@@ -6,9 +6,9 @@ namespace holgen {
   class ClassFieldGetterPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-     void Run() override;
+    void Run() override;
   private:
-    void ProcessRefField(Class &generatedClass, ClassField &generatedField,
-                         const FieldDefinition &fieldDefinition) const;
+    void ProcessRefField(Class &cls, ClassField &field) const;
+    void ProcessField(Class &cls, ClassField &field, bool isConst) const;
   };
 }

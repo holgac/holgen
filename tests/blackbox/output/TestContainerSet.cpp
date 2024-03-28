@@ -45,7 +45,7 @@ bool TestContainerSet::AddUnsignedElem(uint32_t&& elem) {
   mUnsignedContainer.emplace(std::forward<uint32_t>(elem));
   return true;
 }
-bool TestContainerSet::AddUnsignedElem(const uint32_t& elem) {
+bool TestContainerSet::AddUnsignedElem(uint32_t elem) {
   mUnsignedContainer.emplace(elem);
   return true;
 }

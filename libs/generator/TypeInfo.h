@@ -26,13 +26,11 @@ namespace holgen {
     NotConstexpr,
   };
 
-  // This name is too generic...
   struct Type {
     explicit Type(std::string name, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst)
     : mName(std::move(name)), mConstness(constness), mType(passByType) { }
 
     explicit Type(const ProjectDefinition& project, const TypeDefinition& typeDefinition, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
-
 
     std::string mName = "void";
     Constness mConstness;
@@ -43,7 +41,8 @@ namespace holgen {
     // It's converted to string as [0]([1],[2], ...)
     // TODO: Instead of a separate field, Type should natively support function types
     std::vector<Type> mFunctionalTemplateParameters;
-    std::string ToString() const;
+    [[nodiscard]] std::string ToString() const;
+    void PreventCopying(bool addConst = true);
   };
 
   enum class TypeUseCase {

@@ -174,7 +174,7 @@ bool TestContainerVector::AddUnsignedElem(uint32_t&& elem) {
   mUnsignedContainer.emplace_back(std::forward<uint32_t>(elem));
   return true;
 }
-bool TestContainerVector::AddUnsignedElem(const uint32_t& elem) {
+bool TestContainerVector::AddUnsignedElem(uint32_t elem) {
   mUnsignedContainer.emplace_back(elem);
   return true;
 }

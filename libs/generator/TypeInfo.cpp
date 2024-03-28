@@ -125,7 +125,7 @@ namespace holgen {
   }
 
   Type::Type(
-      const ProjectDefinition& project, const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
+      const ProjectDefinition &project, const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
   ) : mConstness(constness), mType(passByType) {
     if (typeDefinition.mName == "Ref") {
       auto refType = project.GetStruct(typeDefinition.mTemplateParameters[0].mName);
@@ -146,6 +146,14 @@ namespace holgen {
 
     for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
       mTemplateParameters.emplace_back(project, templateParameter);
+    }
+  }
+
+  void Type::PreventCopying(bool addConst) {
+    if (!TypeInfo::Get().CppPrimitives.contains(mName)) {
+      mType = PassByType::Reference;
+      if (addConst)
+        mConstness = Constness::Const;
     }
   }
 }
