@@ -83,9 +83,9 @@ namespace holgen {
   void ContainerFieldPlugin::GenerateContainerAddElem(Class &generatedClass, const FieldDefinition &fieldDefinition,
                                                       bool useMoveRef) {
     auto generatedField = generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
-    if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(generatedField->mType.mName))
-      return;
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
+    if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(Type{mProject.mProject, underlyingType}.mName))
+      return;
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     const FieldDefinition *underlyingIdField = nullptr;
     if (underlyingStructDefinition)

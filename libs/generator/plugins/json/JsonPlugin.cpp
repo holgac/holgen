@@ -106,7 +106,7 @@ namespace holgen {
         parseFunc.mBody.Line() << "return false;";
         parseFunc.mBody.Indent(-1); // if !res
 
-        if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName))
+        if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) || field.mType.mType == PassByType::Pointer)
           parseFunc.mBody.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
         else
           parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);

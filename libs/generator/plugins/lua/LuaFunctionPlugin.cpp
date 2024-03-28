@@ -96,13 +96,9 @@ namespace holgen {
                                                  const FunctionDefinition &func) {
     for (auto &funcArg: func.mArguments) {
       auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject.mProject, funcArg.mType});
-      if (mProject.GetClass(arg.mType.mName) != nullptr) {
+      arg.mType.PreventCopying();
+      if (mProject.GetClass(arg.mType.mName) != nullptr)
         arg.mType.mType = PassByType::Pointer;
-        arg.mType.mConstness = Constness::Const;
-      } else if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
-        arg.mType.mType = PassByType::Reference;
-        arg.mType.mConstness = Constness::Const;
-      }
       method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, arg.mName);
     }
 

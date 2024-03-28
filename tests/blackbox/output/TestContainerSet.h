@@ -22,7 +22,6 @@ public:
   bool HasStringElem(const std::string& elem) const;
   void DeleteStringElem(std::string elem);
   size_t GetStringElemCount() const;
-  bool AddUnsignedElem(uint32_t&& elem);
   bool AddUnsignedElem(uint32_t elem);
   bool HasUnsignedElem(uint32_t elem) const;
   void DeleteUnsignedElem(uint32_t elem);

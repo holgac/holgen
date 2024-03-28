@@ -170,10 +170,6 @@ void TestContainerVector::DeleteStringElem(size_t idx) {
 size_t TestContainerVector::GetStringElemCount() const {
   return mStringContainer.size();
 }
-bool TestContainerVector::AddUnsignedElem(uint32_t&& elem) {
-  mUnsignedContainer.emplace_back(std::forward<uint32_t>(elem));
-  return true;
-}
 bool TestContainerVector::AddUnsignedElem(uint32_t elem) {
   mUnsignedContainer.emplace_back(elem);
   return true;

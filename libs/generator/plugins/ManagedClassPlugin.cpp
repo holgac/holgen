@@ -49,10 +49,7 @@ namespace holgen {
         auto indexedOnField = generatedClass.mStruct->GetField(indexOn->mValue.mName);
         ClassMethodArgument &keyArg = getter.mArguments.emplace_back("key",
                                                                      Type{mProject.mProject, indexedOnField->mType});
-        if (!TypeInfo::Get().CppPrimitives.contains(keyArg.mType.mName)) {
-          keyArg.mType.mType = PassByType::Reference;
-          keyArg.mType.mConstness = Constness::Const;
-        }
+        keyArg.mType.PreventCopying();
         getter.mBody.Add(
             "return {}<{}>::GetInstance()->{}(key);",
             St::GlobalPointer, manager->mName,

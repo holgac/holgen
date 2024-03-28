@@ -78,12 +78,7 @@ namespace holgen {
 
       {
         auto &data = func.mArguments.emplace_back("data", Type{type});
-        data.mType.mName = type;
-        if (!TypeInfo::Get().CppPrimitives.contains(data.mType.mName)) {
-          data.mType.mConstness = Constness::Const;
-          // func.mIsTemplateSpecialization = true;
-          data.mType.mType = PassByType::Reference;
-        }
+        data.mType.PreventCopying();
       }
       func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 

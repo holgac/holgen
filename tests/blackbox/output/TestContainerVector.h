@@ -47,7 +47,6 @@ public:
   std::string* GetStringElem(size_t idx);
   void DeleteStringElem(size_t idx);
   size_t GetStringElemCount() const;
-  bool AddUnsignedElem(uint32_t&& elem);
   bool AddUnsignedElem(uint32_t elem);
   const uint32_t* GetUnsignedElem(size_t idx) const;
   uint32_t* GetUnsignedElem(size_t idx);

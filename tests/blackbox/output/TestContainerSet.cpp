@@ -41,10 +41,6 @@ void TestContainerSet::DeleteStringElem(std::string elem) {
 size_t TestContainerSet::GetStringElemCount() const {
   return mStringContainer.size();
 }
-bool TestContainerSet::AddUnsignedElem(uint32_t&& elem) {
-  mUnsignedContainer.emplace(std::forward<uint32_t>(elem));
-  return true;
-}
 bool TestContainerSet::AddUnsignedElem(uint32_t elem) {
   mUnsignedContainer.emplace(elem);
   return true;

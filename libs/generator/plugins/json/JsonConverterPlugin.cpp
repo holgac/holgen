@@ -34,11 +34,8 @@ namespace holgen {
 
         func.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);
 
-        auto &retVal = func.mType.mFunctionalTemplateParameters.emplace_back(mProject.mProject, jsonConvertFrom->mValue);
-        if (!TypeInfo::Get().CppPrimitives.contains(retVal.mName)) {
-          retVal.mConstness = Constness::Const;
-          retVal.mType = PassByType::Reference;
-        }
+        func.mType.mFunctionalTemplateParameters.emplace_back(mProject.mProject, jsonConvertFrom->mValue);
+        func.mType.mFunctionalTemplateParameters.back().PreventCopying();
       }
     }
   }

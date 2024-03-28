@@ -56,11 +56,7 @@ namespace holgen {
         parseFunc.mBody.Indent(1);
 
         Type fromType(mProject.mProject, indexedOnField->mType);
-        if (!TypeInfo::Get().CppPrimitives.contains(fromType.mName)) {
-          // This is done so many times, maybe Type::AdjustForFunctionArgument?
-          fromType.mConstness = Constness::Const;
-          fromType.mType = PassByType::Reference;
-        }
+        fromType.PreventCopying();
         auto idField = underlyingStruct.GetIdField();
         Type toType(mProject.mProject, idField->mType);
         parseFunc.mBody.Add("converter.{} = [this]({} key) -> {} {{", forConverter->mValue.mName, fromType.ToString(),
