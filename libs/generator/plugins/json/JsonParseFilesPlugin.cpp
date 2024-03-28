@@ -43,13 +43,11 @@ namespace holgen {
     for (const auto &fieldDefinition: structDefinition.mFields) {
       if (!fieldDefinition.GetAnnotation(Annotations::Container))
         continue;
-      for (const auto &annotationDefinition: fieldDefinition.mAnnotations) {
-        if (annotationDefinition.mName != Annotations::Index)
-          continue;
+      for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
         auto &underlyingStruct = *mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
         auto indexedOnField = underlyingStruct.GetField(
-            annotationDefinition.GetAttribute(Annotations::Index_On)->mValue.mName);
-        auto forConverter = annotationDefinition.GetAttribute(Annotations::Index_ForConverter);
+            annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
+        auto forConverter = annotation.GetAttribute(Annotations::Index_ForConverter);
         if (forConverter == nullptr)
           continue;
         parseFunc.mBody.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
@@ -64,7 +62,7 @@ namespace holgen {
         parseFunc.mBody.Indent(1);
 
         parseFunc.mBody.Add("auto elem = {}(key);",
-                            Naming(mProject).ContainerIndexGetterNameInCpp(fieldDefinition, annotationDefinition));
+                            Naming(mProject).ContainerIndexGetterNameInCpp(fieldDefinition, annotation));
         parseFunc.mBody.Add("return elem->{}();", Naming(mProject).FieldGetterNameInCpp(*idField));
 
         parseFunc.mBody.Indent(-1);

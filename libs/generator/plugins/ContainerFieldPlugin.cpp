@@ -19,9 +19,7 @@ namespace holgen {
   void ContainerFieldPlugin::ProcessContainerField(
       Class &generatedClass, const FieldDefinition &fieldDefinition
   ) {
-    for (auto &annotation: fieldDefinition.mAnnotations) {
-      if (annotation.mName != Annotations::Index)
-        continue;
+    for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
       ProcessContainerIndex(generatedClass, fieldDefinition, annotation);
     }
     GenerateContainerNextIndexField(generatedClass, fieldDefinition);
@@ -108,12 +106,10 @@ namespace holgen {
 
     CodeBlock validators;
     CodeBlock inserters;
-    for (auto &dec: fieldDefinition.mAnnotations) {
-      if (dec.mName != Annotations::Index)
-        continue;
-      auto indexOn = dec.GetAttribute(Annotations::Index_On);
+    for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
+      auto indexOn = annotation.GetAttribute(Annotations::Index_On);
       auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
-      auto indexFieldName = Naming(mProject).FieldIndexNameInCpp(fieldDefinition, dec);
+      auto indexFieldName = Naming(mProject).FieldIndexNameInCpp(fieldDefinition, annotation);
       auto getterMethodName = Naming(mProject).FieldGetterNameInCpp(fieldIndexedOn);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
@@ -226,9 +222,7 @@ namespace holgen {
     CodeBlock indexDeleters;
     CodeBlock indexReassigners;
     auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
-    for (auto &annotation: fieldDefinition.mAnnotations) {
-      if (annotation.mName != Annotations::Index)
-        continue;
+    for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
       auto indexField = underlyingStruct->GetField(indexOn->mValue.mName);
       indexDeleters.Add("{}.erase(ptr->{}());",

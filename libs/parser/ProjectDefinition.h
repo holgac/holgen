@@ -2,11 +2,10 @@
 
 #include <string>
 #include <vector>
+#include "core/Iterators.h"
 
 
 namespace holgen {
-  struct ProjectDefinition;
-
   struct TypeDefinition {
     std::string mName;
     std::vector<TypeDefinition> mTemplateParameters;
@@ -31,6 +30,10 @@ namespace holgen {
     std::vector<AnnotationDefinition> mAnnotations;
     std::string mDefaultValue;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
+
+    auto GetAnnotations(const std::string &name) const {
+      return NameFilterForEachWrapper(name, mAnnotations);
+    }
   };
 
   struct FunctionArgumentDefinition {
@@ -56,6 +59,10 @@ namespace holgen {
     [[nodiscard]] const FieldDefinition *GetField(const std::string &name) const;
     [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
     [[nodiscard]] const FieldDefinition *GetIdField() const;
+
+    auto GetAnnotations(const std::string &name) {
+      return NameFilterForEachWrapper(name, mAnnotations);
+    }
   };
 
   struct EnumEntryDefinition {

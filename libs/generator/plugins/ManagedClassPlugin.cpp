@@ -34,10 +34,7 @@ namespace holgen {
         generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
       }
 
-      for (auto &annotation: managerField->mAnnotations) {
-        if (annotation.mName != Annotations::Index)
-          continue;
-
+      for (const auto &annotation: managerField->GetAnnotations(Annotations::Index)) {
         auto indexOn = annotation.GetAttribute(Annotations::Index_On);
         auto &getter = generatedClass.mMethods.emplace_back(
             Naming(mProject).ManagedClassIndexGetterNameInCpp(annotation),
