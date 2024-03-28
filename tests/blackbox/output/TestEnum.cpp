@@ -35,17 +35,17 @@ std::string TestEnum::ToString() const {
     default: return "INVALID";
   }
 }
-TestEnum& TestEnum::operator =(TestEnum::UnderlyingType rhs) {
+TestEnum& TestEnum::operator =(UnderlyingType rhs) {
   mValue = rhs;
   return *this;
 }
-bool TestEnum::operator ==(TestEnum::UnderlyingType rhs) const {
+bool TestEnum::operator ==(UnderlyingType rhs) const {
   return mValue == rhs;
 }
 bool TestEnum::operator ==(const TestEnum& rhs) const {
   return mValue == rhs.mValue;
 }
-bool TestEnum::operator !=(TestEnum::UnderlyingType rhs) const {
+bool TestEnum::operator !=(UnderlyingType rhs) const {
   return mValue != rhs;
 }
 bool TestEnum::operator !=(const TestEnum& rhs) const {

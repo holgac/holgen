@@ -5,11 +5,11 @@
 namespace holgen {
 
   namespace {
-      bool CanBeDefinedInHeader(const Class& cls, const ClassMethod& method) {
-        return !method.mTemplateParameters.empty()
-               || !cls.mTemplateParameters.empty()
-               || method.mConstexprness == Constexprness::Constexpr;
-      }
+    bool CanBeDefinedInHeader(const Class &cls, const ClassMethod &method) {
+      return !method.mTemplateParameters.empty()
+             || !cls.mTemplateParameters.empty()
+             || method.mConstexprness == Constexprness::Constexpr;
+    }
 
     std::string StringifyTemplateParameters(const std::vector<TemplateParameter> &templateParameters) {
       std::stringstream ss;
@@ -199,6 +199,7 @@ namespace holgen {
     }
 
   }
+
   void CodeGenerator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
                                                bool isInsideClass) const {
     for (auto &method: cls.mMethods) {
@@ -210,40 +211,12 @@ namespace holgen {
       if (method.mIsTemplateSpecialization)
         codeBlock.Line() << "template <>";
 
-      bool willDefine = CanBeDefinedInHeader(cls, method) && !method.mUserDefined;
-
-      {
-        // TODO: Refactor this and use it for source generation as well
-        auto line = codeBlock.Line();
-        if (method.mConstexprness == Constexprness::Constexpr)
-          line << "constexpr ";
-        if (method.mStaticness == Staticness::Static && isInsideClass)
-          line << "static ";
-        line << method.mReturnType.ToString() << " ";
-        if (!isInsideClass)
-          line << cls.mName << "::";
-        line << method.mName << "(";
-        bool isFirst = true;
-        for (auto &arg: method.mArguments) {
-          if (!isFirst)
-            line << ", ";
-          else
-            isFirst = false;
-          line << arg.mType.ToString() << " " << arg.mName;
-          if (!arg.mDefaultValue.empty()) {
-            line << " = " << arg.mDefaultValue;
-          }
-        }
-        line << ")";
-        if (method.mConstness == Constness::Const)
-          line << " const";
-        if (!willDefine) {
-          line << ";";
-          continue;
-        } else {
-          line << " {";
-        }
+      auto signature = GenerateFunctionSignature(cls, method, true, isInsideClass);
+      if (!CanBeDefinedInHeader(cls, method) || method.mUserDefined) {
+        codeBlock.Line() << signature << ";";
+        continue;
       }
+      codeBlock.Line() << signature << " {";
       codeBlock.Indent(1);
       codeBlock.Add(method.mBody);
       codeBlock.Indent(-1);
@@ -292,28 +265,7 @@ namespace holgen {
       if (method.mIsTemplateSpecialization) {
         codeBlock.Line() << "template <>";
       }
-      {
-        auto line = codeBlock.Line();
-        if (method.mConstexprness == Constexprness::Constexpr)
-          line << "constexpr ";
-        if (cls.GetUsing(method.mReturnType.mName))
-          line << cls.mName << "::";
-        line << method.mReturnType.ToString() << " " << cls.mName << "::" << method.mName << "(";
-        bool isFirst = true;
-        for (auto &arg: method.mArguments) {
-          if (!isFirst)
-            line << ", ";
-          else
-            isFirst = false;
-          if (cls.GetUsing(arg.mType.mName))
-            line << cls.mName << "::";
-          line << arg.mType.ToString() << " " << arg.mName;
-        }
-        line << ")";
-        if (method.mConstness == Constness::Const)
-          line << " const";
-        line << " {";
-      }
+      codeBlock.Line() << GenerateFunctionSignature(cls, method, false, false) << " {";
       codeBlock.Indent(1);
       codeBlock.Add(method.mBody);
       codeBlock.Indent(-1);
@@ -476,5 +428,29 @@ namespace holgen {
       codeBlock.Indent(-1);
       codeBlock.Line() << "}";
     }
+  }
+
+  std::string CodeGenerator::GenerateFunctionSignature(
+      const Class &cls, const ClassMethod &method, bool isInHeader, bool isInsideClass) const {
+    std::stringstream ss;
+    if (method.mConstexprness == Constexprness::Constexpr)
+      ss << "constexpr ";
+    if (method.mStaticness == Staticness::Static && isInsideClass && isInHeader)
+      ss << "static ";
+    if (!isInHeader && cls.GetUsing(method.mReturnType.mName))
+      ss << cls.mName << "::";
+    ss << method.mReturnType.ToString() << " ";
+    if (!isInHeader || !isInsideClass)
+      ss << cls.mName << "::";
+    ss << method.mName << "(";
+    for (size_t i = 0; i < method.mArguments.size(); i++) {
+      if (i != 0)
+        ss << ", ";
+      ss << method.mArguments[i].mType.ToString() << " " << method.mArguments[i].mName;
+    }
+    ss << ")";
+    if (method.mConstness == Constness::Const)
+      ss << " const";
+    return ss.str();
   }
 }
