@@ -28,12 +28,32 @@ bool TestContainerSet::AddStringElem(std::string&& elem) {
   mStringContainer.emplace(std::forward<std::string>(elem));
   return true;
 }
+bool TestContainerSet::AddStringElem(const std::string& elem) {
+  mStringContainer.emplace(elem);
+  return true;
+}
+bool TestContainerSet::HasStringElem(const std::string& elem) const {
+  return mStringContainer.contains(elem);
+}
+void TestContainerSet::DeleteStringElem(std::string elem) {
+  mStringContainer.erase(elem);
+}
 size_t TestContainerSet::GetStringElemCount() const {
   return mStringContainer.size();
 }
 bool TestContainerSet::AddUnsignedElem(uint32_t&& elem) {
   mUnsignedContainer.emplace(std::forward<uint32_t>(elem));
   return true;
+}
+bool TestContainerSet::AddUnsignedElem(const uint32_t& elem) {
+  mUnsignedContainer.emplace(elem);
+  return true;
+}
+bool TestContainerSet::HasUnsignedElem(uint32_t elem) const {
+  return mUnsignedContainer.contains(elem);
+}
+void TestContainerSet::DeleteUnsignedElem(uint32_t elem) {
+  mUnsignedContainer.erase(elem);
 }
 size_t TestContainerSet::GetUnsignedElemCount() const {
   return mUnsignedContainer.size();
@@ -81,12 +101,46 @@ void TestContainerSet::PushIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Push(instance->mStringContainer, ls);
     } else if (0 == strcmp("unsignedContainer", key)) {
       LuaHelper::Push(instance->mUnsignedContainer, ls);
+    } else if (0 == strcmp("HasStringElem", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerSet::ReadFromLua(lsInner, -2);
+        std::string arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->HasStringElem(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
+    } else if (0 == strcmp("DeleteStringElem", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerSet::ReadFromLua(lsInner, -2);
+        std::string arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        instance->DeleteStringElem(arg0);
+        return 0;
+      });
     } else if (0 == strcmp("GetStringElemCount", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {
         auto instance = TestContainerSet::ReadFromLua(lsInner, -1);
         auto result = instance->GetStringElemCount();
         LuaHelper::Push(result, lsInner);
         return 1;
+      });
+    } else if (0 == strcmp("HasUnsignedElem", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerSet::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->HasUnsignedElem(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
+    } else if (0 == strcmp("DeleteUnsignedElem", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerSet::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        instance->DeleteUnsignedElem(arg0);
+        return 0;
       });
     } else if (0 == strcmp("GetUnsignedElemCount", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {

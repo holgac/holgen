@@ -56,6 +56,18 @@ namespace holgen {
     return std::format("Add{}", St::Capitalize(elemName->mValue.mName));
   }
 
+  std::string Naming::ContainerElemExistenceCheckerNameInCpp(const FieldDefinition &fieldDefinition) {
+    auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
+    auto elemName = containerAnnotation->GetAttribute(Annotations::Container_ElemName);
+    return std::format("Has{}", St::Capitalize(elemName->mValue.mName));
+  }
+
+  std::string Naming::ContainerElemDeleterNameInCpp(const FieldDefinition &fieldDefinition) {
+    auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
+    auto elemName = containerAnnotation->GetAttribute(Annotations::Container_ElemName);
+    return std::format("Delete{}", St::Capitalize(elemName->mValue.mName));
+  }
+
   std::string Naming::ContainerElemCountNameInCpp(const FieldDefinition &fieldDefinition) {
     auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
     auto elemName = containerAnnotation->GetAttribute(Annotations::Container_ElemName);

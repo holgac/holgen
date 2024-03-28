@@ -29,20 +29,29 @@ public:
   const TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key) const;
   TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key);
   bool AddInnerStructWithId(TestContainerInnerStructWithId&& elem);
+  bool AddInnerStructWithId(TestContainerInnerStructWithId& elem);
   const TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx) const;
   TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx);
   size_t GetInnerStructWithIdCount() const;
+  const TestContainerInnerStructNoId* GetInnerStructNoIdFromName(const std::string& key) const;
+  TestContainerInnerStructNoId* GetInnerStructNoIdFromName(const std::string& key);
   bool AddInnerStructNoId(TestContainerInnerStructNoId&& elem);
+  bool AddInnerStructNoId(const TestContainerInnerStructNoId& elem);
   const TestContainerInnerStructNoId* GetInnerStructNoId(size_t idx) const;
   TestContainerInnerStructNoId* GetInnerStructNoId(size_t idx);
+  void DeleteInnerStructNoId(size_t idx);
   size_t GetInnerStructNoIdCount() const;
   bool AddStringElem(std::string&& elem);
+  bool AddStringElem(const std::string& elem);
   const std::string* GetStringElem(size_t idx) const;
   std::string* GetStringElem(size_t idx);
+  void DeleteStringElem(size_t idx);
   size_t GetStringElemCount() const;
   bool AddUnsignedElem(uint32_t&& elem);
+  bool AddUnsignedElem(const uint32_t& elem);
   const uint32_t* GetUnsignedElem(size_t idx) const;
   uint32_t* GetUnsignedElem(size_t idx);
+  void DeleteUnsignedElem(size_t idx);
   size_t GetUnsignedElemCount() const;
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
@@ -58,5 +67,6 @@ private:
   std::vector<std::string> mStringContainer;
   std::vector<uint32_t> mUnsignedContainer;
   std::map<std::string, uint32_t> mInnerStructsWithIdNameIndex;
+  std::map<std::string, size_t> mInnerStructsNoIdNameIndex;
 };
 }

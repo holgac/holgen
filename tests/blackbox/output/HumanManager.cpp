@@ -43,6 +43,18 @@ bool HumanManager::AddHuman(Human&& elem) {
   mHumans.emplace(newId, std::forward<Human>(elem));
   return true;
 }
+bool HumanManager::AddHuman(Human& elem) {
+  if (mHumansNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("Human with name={} already exists!", elem.GetName());
+    return false;
+  }
+  auto newId = mHumansNextId;
+  ++mHumansNextId;
+  mHumansNameIndex.emplace(elem.GetName(), newId);
+  elem.SetId(newId);
+  mHumans.emplace(newId, elem);
+  return true;
+}
 const Human* HumanManager::GetHuman(uint32_t idx) const {
   auto it = mHumans.find(idx);
   if (it == mHumans.end())
@@ -54,6 +66,14 @@ Human* HumanManager::GetHuman(uint32_t idx) {
   if (it == mHumans.end())
     return nullptr;
   return &it->second;
+}
+bool HumanManager::HasHuman(uint32_t key) const {
+  return mHumans.contains(key);
+}
+void HumanManager::DeleteHuman(uint32_t key) {
+  auto ptr = GetHuman(key);
+  mHumansNameIndex.erase(ptr->GetName());
+  mHumans.erase(key);
 }
 size_t HumanManager::GetHumanCount() const {
   return mHumans.size();
@@ -123,6 +143,23 @@ void HumanManager::PushIndexMetaMethod(lua_State* luaState) {
         auto result = instance->GetHuman(arg0);
         LuaHelper::Push(result, lsInner);
         return 1;
+      });
+    } else if (0 == strcmp("HasHuman", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = HumanManager::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->HasHuman(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
+    } else if (0 == strcmp("DeleteHuman", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = HumanManager::ReadFromLua(lsInner, -2);
+        uint32_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        instance->DeleteHuman(arg0);
+        return 0;
       });
     } else if (0 == strcmp("GetHumanCount", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {

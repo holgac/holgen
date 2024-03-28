@@ -65,6 +65,17 @@ bool TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId&& 
   mInnerStructsWithId.emplace_back(std::forward<TestContainerInnerStructWithId>(elem));
   return true;
 }
+bool TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
+  if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists!", elem.GetName());
+    return false;
+  }
+  auto newId = mInnerStructsWithId.size();
+  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
+  elem.SetId(newId);
+  mInnerStructsWithId.emplace_back(elem);
+  return true;
+}
 const TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithId(uint32_t idx) const {
   if (idx >= mInnerStructsWithId.size())
     return nullptr;
@@ -78,8 +89,36 @@ TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithId(uint32
 size_t TestContainerVector::GetInnerStructWithIdCount() const {
   return mInnerStructsWithId.size();
 }
+const TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoIdFromName(const std::string& key) const {
+  auto it = mInnerStructsNoIdNameIndex.find(key);
+  if (it == mInnerStructsNoIdNameIndex.end())
+    return nullptr;
+  return &mInnerStructsNoId[it->second];
+}
+TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoIdFromName(const std::string& key) {
+  auto it = mInnerStructsNoIdNameIndex.find(key);
+  if (it == mInnerStructsNoIdNameIndex.end())
+    return nullptr;
+  return &mInnerStructsNoId[it->second];
+}
 bool TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId&& elem) {
+  if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists!", elem.GetName());
+    return false;
+  }
+  auto newId = mInnerStructsNoId.size();
+  mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
   mInnerStructsNoId.emplace_back(std::forward<TestContainerInnerStructNoId>(elem));
+  return true;
+}
+bool TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId& elem) {
+  if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists!", elem.GetName());
+    return false;
+  }
+  auto newId = mInnerStructsNoId.size();
+  mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
+  mInnerStructsNoId.emplace_back(elem);
   return true;
 }
 const TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoId(size_t idx) const {
@@ -92,11 +131,24 @@ TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoId(size_t idx
     return nullptr;
   return &mInnerStructsNoId[idx];
 }
+void TestContainerVector::DeleteInnerStructNoId(size_t idx) {
+  auto ptr = GetInnerStructNoId(idx);
+  mInnerStructsNoIdNameIndex.erase(ptr->GetName());
+  if (idx != mInnerStructsNoId.size() - 1) {
+    mInnerStructsNoIdNameIndex.at(mInnerStructsNoId.back().GetName()) = idx;
+    mInnerStructsNoId[idx] = std::move(mInnerStructsNoId.back());
+  }
+  mInnerStructsNoId.pop_back();
+}
 size_t TestContainerVector::GetInnerStructNoIdCount() const {
   return mInnerStructsNoId.size();
 }
 bool TestContainerVector::AddStringElem(std::string&& elem) {
   mStringContainer.emplace_back(std::forward<std::string>(elem));
+  return true;
+}
+bool TestContainerVector::AddStringElem(const std::string& elem) {
+  mStringContainer.emplace_back(elem);
   return true;
 }
 const std::string* TestContainerVector::GetStringElem(size_t idx) const {
@@ -109,11 +161,21 @@ std::string* TestContainerVector::GetStringElem(size_t idx) {
     return nullptr;
   return &mStringContainer[idx];
 }
+void TestContainerVector::DeleteStringElem(size_t idx) {
+  if (idx != mStringContainer.size() - 1) {
+    mStringContainer[idx] = std::move(mStringContainer.back());
+  }
+  mStringContainer.pop_back();
+}
 size_t TestContainerVector::GetStringElemCount() const {
   return mStringContainer.size();
 }
 bool TestContainerVector::AddUnsignedElem(uint32_t&& elem) {
   mUnsignedContainer.emplace_back(std::forward<uint32_t>(elem));
+  return true;
+}
+bool TestContainerVector::AddUnsignedElem(const uint32_t& elem) {
+  mUnsignedContainer.emplace_back(elem);
   return true;
 }
 const uint32_t* TestContainerVector::GetUnsignedElem(size_t idx) const {
@@ -125,6 +187,12 @@ uint32_t* TestContainerVector::GetUnsignedElem(size_t idx) {
   if (idx >= mUnsignedContainer.size())
     return nullptr;
   return &mUnsignedContainer[idx];
+}
+void TestContainerVector::DeleteUnsignedElem(size_t idx) {
+  if (idx != mUnsignedContainer.size() - 1) {
+    mUnsignedContainer[idx] = std::move(mUnsignedContainer.back());
+  }
+  mUnsignedContainer.pop_back();
 }
 size_t TestContainerVector::GetUnsignedElemCount() const {
   return mUnsignedContainer.size();
@@ -209,6 +277,15 @@ void TestContainerVector::PushIndexMetaMethod(lua_State* luaState) {
         LuaHelper::Push(result, lsInner);
         return 1;
       });
+    } else if (0 == strcmp("GetInnerStructNoIdFromName", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerVector::ReadFromLua(lsInner, -2);
+        std::string arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        auto result = instance->GetInnerStructNoIdFromName(arg0);
+        LuaHelper::Push(result, lsInner);
+        return 1;
+      });
     } else if (0 == strcmp("GetInnerStructNoId", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {
         auto instance = TestContainerVector::ReadFromLua(lsInner, -2);
@@ -217,6 +294,14 @@ void TestContainerVector::PushIndexMetaMethod(lua_State* luaState) {
         auto result = instance->GetInnerStructNoId(arg0);
         LuaHelper::Push(result, lsInner);
         return 1;
+      });
+    } else if (0 == strcmp("DeleteInnerStructNoId", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerVector::ReadFromLua(lsInner, -2);
+        size_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        instance->DeleteInnerStructNoId(arg0);
+        return 0;
       });
     } else if (0 == strcmp("GetInnerStructNoIdCount", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {
@@ -234,6 +319,14 @@ void TestContainerVector::PushIndexMetaMethod(lua_State* luaState) {
         LuaHelper::Push(result, lsInner);
         return 1;
       });
+    } else if (0 == strcmp("DeleteStringElem", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerVector::ReadFromLua(lsInner, -2);
+        size_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        instance->DeleteStringElem(arg0);
+        return 0;
+      });
     } else if (0 == strcmp("GetStringElemCount", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {
         auto instance = TestContainerVector::ReadFromLua(lsInner, -1);
@@ -249,6 +342,14 @@ void TestContainerVector::PushIndexMetaMethod(lua_State* luaState) {
         auto result = instance->GetUnsignedElem(arg0);
         LuaHelper::Push(result, lsInner);
         return 1;
+      });
+    } else if (0 == strcmp("DeleteUnsignedElem", key)) {
+      lua_pushcfunction(ls, [](lua_State* lsInner) {
+        auto instance = TestContainerVector::ReadFromLua(lsInner, -2);
+        size_t arg0;
+        LuaHelper::Read(arg0, lsInner, -1);
+        instance->DeleteUnsignedElem(arg0);
+        return 0;
       });
     } else if (0 == strcmp("GetUnsignedElemCount", key)) {
       lua_pushcfunction(ls, [](lua_State* lsInner) {

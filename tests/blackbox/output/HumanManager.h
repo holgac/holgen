@@ -19,8 +19,11 @@ public:
   const Human* GetHumanFromName(const std::string& key) const;
   Human* GetHumanFromName(const std::string& key);
   bool AddHuman(Human&& elem);
+  bool AddHuman(Human& elem);
   const Human* GetHuman(uint32_t idx) const;
   Human* GetHuman(uint32_t idx);
+  bool HasHuman(uint32_t key) const;
+  void DeleteHuman(uint32_t key);
   size_t GetHumanCount() const;
   bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
   void PushToLua(lua_State* luaState) const;

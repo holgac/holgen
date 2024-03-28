@@ -18,8 +18,14 @@ public:
   void SetStringContainer(const std::set<std::string>& val);
   void SetUnsignedContainer(const std::set<uint32_t>& val);
   bool AddStringElem(std::string&& elem);
+  bool AddStringElem(const std::string& elem);
+  bool HasStringElem(const std::string& elem) const;
+  void DeleteStringElem(std::string elem);
   size_t GetStringElemCount() const;
   bool AddUnsignedElem(uint32_t&& elem);
+  bool AddUnsignedElem(const uint32_t& elem);
+  bool HasUnsignedElem(uint32_t elem) const;
+  void DeleteUnsignedElem(uint32_t elem);
   size_t GetUnsignedElemCount() const;
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;

@@ -199,7 +199,7 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
   EXPECT_EQ(cls->mFields.size(), 1);
 
-  ASSERT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
@@ -232,7 +232,7 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
   EXPECT_EQ(cls->mFields.size(), 1);
 
-  ASSERT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
@@ -270,7 +270,7 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
@@ -338,7 +338,7 @@ struct TestData {
     helpers::ExpectEqual(*cls->GetField("mInnerStructsNextId"), field);
   }
 
-  ASSERT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
@@ -457,7 +457,7 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
 
   ASSERT_NE(cls->GetMethod("GetInnerStructCount", Constness::Const), nullptr);
-  ASSERT_EQ(cls->GetMethod("GetInnerStructCount", Constness::NotConst), nullptr);
+  EXPECT_EQ(cls->GetMethod("GetInnerStructCount", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
         "GetInnerStructCount",
@@ -488,7 +488,7 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
 
   ASSERT_NE(cls->GetMethod("GetInnerStructCount", Constness::Const), nullptr);
-  ASSERT_EQ(cls->GetMethod("GetInnerStructCount", Constness::NotConst), nullptr);
+  EXPECT_EQ(cls->GetMethod("GetInnerStructCount", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
         "GetInnerStructCount",
@@ -497,6 +497,104 @@ struct TestData {
     method.mExposeToLua = true;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructCount", Constness::Const), method, R"R(
 return mInnerStructs.size();
+    )R");
+  }
+}
+
+TEST_F(ContainerFieldPluginTest, VectorDeleteElemNoId) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+}
+struct TestData {
+  @container(elemName=innerStruct)
+  vector<InnerStruct> innerStructs;
+}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ContainerFieldPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_EQ(cls->mFields.size(), 1);
+
+  EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("DeleteInnerStruct", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+      "DeleteInnerStruct",
+      Type{"void"},
+      Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("idx", Type{"size_t"});
+    method.mExposeToLua = true;
+    helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
+if (idx != mInnerStructs.size() - 1) {
+  mInnerStructs[idx] = std::move(mInnerStructs.back());
+}
+mInnerStructs.pop_back();
+    )R");
+  }
+}
+
+TEST_F(ContainerFieldPluginTest, VectorDeleteElemWithId) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  @id
+  u32 id;
+}
+struct TestData {
+  @container(elemName=innerStruct)
+  vector<InnerStruct> innerStructs;
+}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ContainerFieldPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_EQ(cls->mFields.size(), 1);
+
+  EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::NotConst), nullptr);
+}
+
+TEST_F(ContainerFieldPluginTest, VectorDeleteElemNoIdWithIndex) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  string uuid;
+  string guid;
+}
+struct TestData {
+  @index(on=uuid)
+  @index(on=guid)
+  @container(elemName=innerStruct)
+  vector<InnerStruct> innerStructs;
+}
+  )R");
+  ClassPlugin(project).Run();
+  ClassFieldPlugin(project).Run();
+  ContainerFieldPlugin(project).Run();
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("DeleteInnerStruct", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+        "DeleteInnerStruct",
+        Type{"void"},
+        Visibility::Public, Constness::NotConst};
+    method.mExposeToLua = true;
+    method.mArguments.emplace_back("idx", Type{"size_t"});
+    helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
+auto ptr = GetInnerStruct(idx);
+mInnerStructsUuidIndex.erase(ptr->GetUuid());
+mInnerStructsGuidIndex.erase(ptr->GetGuid());
+if (idx != mInnerStructs.size() - 1) {
+  mInnerStructsUuidIndex.at(mInnerStructs.back().GetUuid()) = idx;
+  mInnerStructsGuidIndex.at(mInnerStructs.back().GetGuid()) = idx;
+  mInnerStructs[idx] = std::move(mInnerStructs.back());
+}
+mInnerStructs.pop_back();
     )R");
   }
 }

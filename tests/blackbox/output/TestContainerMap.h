@@ -18,8 +18,11 @@ public:
   const TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key) const;
   TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key);
   bool AddInnerStructWithId(TestContainerInnerStructWithId&& elem);
+  bool AddInnerStructWithId(TestContainerInnerStructWithId& elem);
   const TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx) const;
   TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx);
+  bool HasInnerStructWithId(uint32_t key) const;
+  void DeleteInnerStructWithId(uint32_t key);
   size_t GetInnerStructWithIdCount() const;
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;

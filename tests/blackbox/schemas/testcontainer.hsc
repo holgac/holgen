@@ -15,6 +15,7 @@ struct TestContainerVector {
     vector<TestContainerInnerStructWithId> innerStructsWithId;
 
     @container(elemName=innerStructNoId)
+    @index(on=name)
     vector<TestContainerInnerStructNoId> innerStructsNoId;
 
     @container(elemName=stringElem)

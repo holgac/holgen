@@ -60,6 +60,17 @@ bool GameData::AddBoot(Boot&& elem) {
   mBoots.emplace_back(std::forward<Boot>(elem));
   return true;
 }
+bool GameData::AddBoot(Boot& elem) {
+  if (mBootsNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("Boot with name={} already exists!", elem.GetName());
+    return false;
+  }
+  auto newId = mBoots.size();
+  mBootsNameIndex.emplace(elem.GetName(), newId);
+  elem.SetId(newId);
+  mBoots.emplace_back(elem);
+  return true;
+}
 const Boot* GameData::GetBoot(uint32_t idx) const {
   if (idx >= mBoots.size())
     return nullptr;
@@ -113,6 +124,22 @@ bool GameData::AddArmor(Armor&& elem) {
   mArmors.emplace_back(std::forward<Armor>(elem));
   return true;
 }
+bool GameData::AddArmor(Armor& elem) {
+  if (mArmorsNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("Armor with name={} already exists!", elem.GetName());
+    return false;
+  }
+  if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
+    HOLGEN_WARN("Armor with alternativeName={} already exists!", elem.GetAlternativeName());
+    return false;
+  }
+  auto newId = mArmors.size();
+  mArmorsNameIndex.emplace(elem.GetName(), newId);
+  mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
+  elem.SetId(newId);
+  mArmors.emplace_back(elem);
+  return true;
+}
 const Armor* GameData::GetArmor(uint32_t idx) const {
   if (idx >= mArmors.size())
     return nullptr;
@@ -147,6 +174,17 @@ bool GameData::AddCharacter(Character&& elem) {
   mCharactersNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
   mCharacters.emplace_back(std::forward<Character>(elem));
+  return true;
+}
+bool GameData::AddCharacter(Character& elem) {
+  if (mCharactersNameIndex.contains(elem.GetName())) {
+    HOLGEN_WARN("Character with name={} already exists!", elem.GetName());
+    return false;
+  }
+  auto newId = mCharacters.size();
+  mCharactersNameIndex.emplace(elem.GetName(), newId);
+  elem.SetId(newId);
+  mCharacters.emplace_back(elem);
   return true;
 }
 const Character* GameData::GetCharacter(uint32_t idx) const {

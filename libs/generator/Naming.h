@@ -19,6 +19,8 @@ namespace holgen {
     std::string FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef = false);
     std::string ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition);
     std::string ContainerElemAdderNameInCpp(const FieldDefinition &fieldDefinition);
+    std::string ContainerElemExistenceCheckerNameInCpp(const FieldDefinition &fieldDefinition);
+    std::string ContainerElemDeleterNameInCpp(const FieldDefinition &fieldDefinition);
     std::string ContainerElemCountNameInCpp(const FieldDefinition &fieldDefinition);
     std::string ContainerIndexGetterNameInCpp(const FieldDefinition &fieldDefinition, const AnnotationDefinition &indexAnnotation);
     std::string ManagedClassIndexGetterNameInCpp(const AnnotationDefinition &indexAnnotation);
