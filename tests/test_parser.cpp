@@ -1,292 +1,281 @@
 #include <gtest/gtest.h>
 #include "tokenizer/Tokenizer.h"
 #include "parser/Parser.h"
+#include "Helpers.h"
 
 using namespace holgen;
 
-namespace {
-  TEST(ParserTest, EmptyStruct) {
-    Tokenizer tokenizer("struct a   { }", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mStructs.size(), 1);
-    EXPECT_EQ(proj.mStructs[0].mName, "a");
+class ParserTest : public ::testing::Test {
+protected:
+  void SetUp() override {
   }
 
-  TEST(ParserTest, StructFields) {
-    Tokenizer tokenizer(R"DELIM(
-  struct a   {
-    s32 f1;
-    float f2;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mStructs.size(), 1);
-    auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mName, "a");
-    EXPECT_EQ(s.mFields.size(), 2);
-    EXPECT_EQ(s.mFields[0].mType.mName, "s32");
-    EXPECT_EQ(s.mFields[0].mName, "f1");
-    EXPECT_EQ(s.mFields[1].mType.mName, "float");
-    EXPECT_EQ(s.mFields[1].mName, "f2");
+  void TearDown() override {
   }
 
-  TEST(ParserTest, FieldAnnotations) {
-    Tokenizer tokenizer(R"DELIM(
-  struct a   {
-    @dec1()
-    @dec2(a1, a2=5, a3, a4='long string')
-    s32 f1;
-    @dec3(a)
-    u32 f2;
-  }
-    )DELIM", "ParserTest");
+  ProjectDefinition Parse(const char *text) {
+    auto trimmed = helpers::Trim(text);
+    Tokenizer tokenizer(trimmed, Source);
     Parser parser;
     parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mStructs.size(), 1);
-    auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mAnnotations.size(), 0);
-    EXPECT_EQ(s.mFields.size(), 2);
-    auto &f = s.mFields[0];
-    auto &ds = f.mAnnotations;
-    EXPECT_EQ(ds[0].mName, "dec1");
-    EXPECT_EQ(ds[0].mAttributes.size(), 0);
-    EXPECT_EQ(ds[1].mName, "dec2");
-    EXPECT_EQ(ds[1].mAttributes.size(), 4);
-    auto &dsa = ds[1].mAttributes;
-    EXPECT_EQ(dsa[0].mName, "a1");
-    EXPECT_EQ(dsa[0].mValue.mName, "");
-    EXPECT_EQ(dsa[1].mName, "a2");
-    EXPECT_EQ(dsa[1].mValue.mName, "5");
-    EXPECT_EQ(dsa[2].mName, "a3");
-    EXPECT_EQ(dsa[2].mValue.mName, "");
-    EXPECT_EQ(dsa[3].mName, "a4");
-    EXPECT_EQ(dsa[3].mValue.mName, "long string");
-    auto &f2 = s.mFields[1];
-    auto &ds2 = f2.mAnnotations;
-    EXPECT_EQ(ds2.size(), 1);
-    EXPECT_EQ(ds2[0].mName, "dec3");
-    EXPECT_EQ(ds2[0].mAttributes.size(), 1);
-    EXPECT_EQ(ds2[0].mAttributes[0].mName, "a");
-    EXPECT_EQ(ds2[0].mAttributes[0].mValue.mName, "");
+    return parser.GetProject();
   }
 
-  TEST(ParserTest, EmptyAnnotation) {
-    Tokenizer tokenizer(R"DELIM(
-  @dec1
-  struct a   {
-    @dec2
-    s32 f1;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    ASSERT_EQ(proj.mStructs.size(), 1);
-    auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mAnnotations.size(), 1);
-    auto &ds = s.mAnnotations;
-    EXPECT_EQ(ds[0].mName, "dec1");
-    EXPECT_EQ(ds[0].mAttributes.size(), 0);
-    auto f1 = s.GetField("f1");
-    ASSERT_NE(f1, nullptr);
-    auto &df = f1->mAnnotations;
-    EXPECT_EQ(df[0].mName, "dec2");
-    EXPECT_EQ(df[0].mAttributes.size(), 0);
+  template<typename T>
+  void ExpectDefinitionSource(const T &data, size_t line, size_t col) {
+    auto &definiitonSource = data.mDefinitionSource;
+    EXPECT_EQ(definiitonSource.mSource, Source);
+    EXPECT_EQ(definiitonSource.mLine, line);
+    EXPECT_EQ(definiitonSource.mColumn, col);
   }
 
-  TEST(ParserTest, StructAnnotations) {
-    Tokenizer tokenizer(R"DELIM(
+  void ExpectAnnotationAttribute(
+      const AnnotationAttributeDefinition &annotationAttribute, const std::string &name,
+      const std::string &value, size_t line, size_t col) {
+    EXPECT_EQ(annotationAttribute.mName, name);
+    EXPECT_EQ(annotationAttribute.mValue.mName, value);
+    ExpectDefinitionSource(annotationAttribute, line, col);
+  }
+
+  void ExpectAnnotation(
+      const AnnotationDefinition &annotation, const std::string &name, size_t attributeCount,
+      size_t line, size_t col) {
+    EXPECT_EQ(annotation.mName, name);
+    EXPECT_EQ(annotation.mAttributes.size(), attributeCount);
+    ExpectDefinitionSource(annotation, line, col);
+  }
+
+  void ExpectField(const FieldDefinition &field, const std::string &name,
+                   const std::string &type, size_t annotationCount, size_t line, size_t col) {
+    EXPECT_EQ(field.mName, name);
+    EXPECT_EQ(field.mType.mName, type);
+    EXPECT_EQ(field.mAnnotations.size(), annotationCount);
+    ExpectDefinitionSource(field, line, col);
+  }
+
+  void ExpectStruct(const StructDefinition &s, const std::string &name, size_t fieldCount,
+                    size_t annotationCount, size_t line, size_t col) {
+    EXPECT_EQ(s.mName, name);
+    EXPECT_EQ(s.mFields.size(), fieldCount);
+    EXPECT_EQ(s.mAnnotations.size(), annotationCount);
+    ExpectDefinitionSource(s, line, col);
+  }
+
+  void ExpectEnum(const EnumDefinition &e, const std::string &name, const std::string &invalidValue,
+                  size_t entryCount, size_t annotationCount, size_t line, size_t col) {
+    EXPECT_EQ(e.mName, name);
+    EXPECT_EQ(e.mInvalidValue, invalidValue);
+    EXPECT_EQ(e.mEntries.size(), entryCount);
+    EXPECT_EQ(e.mAnnotations.size(), annotationCount);
+    ExpectDefinitionSource(e, line, col);
+  }
+
+  void ExpectEnumEntry(const EnumEntryDefinition &e, const std::string &name, const std::string &value,
+                       size_t annotationCount, size_t line, size_t col) {
+    EXPECT_EQ(e.mName, name);
+    EXPECT_EQ(e.mValue, value);
+    EXPECT_EQ(e.mAnnotations.size(), annotationCount);
+    ExpectDefinitionSource(e, line, col);
+  }
+
+  void ExpectFunction(const FunctionDefinition &functionDefinition,
+                      const std::string &name, const std::string &returnType,
+                      size_t argCount, size_t annotationCount, size_t line, size_t col) {
+    EXPECT_EQ(functionDefinition.mName, name);
+    EXPECT_EQ(functionDefinition.mReturnType.mName, returnType);
+    EXPECT_EQ(functionDefinition.mArguments.size(), argCount);
+    EXPECT_EQ(functionDefinition.mAnnotations.size(), annotationCount);
+    ExpectDefinitionSource(functionDefinition, line, col);
+  }
+
+  void ExpectFunctionArgument(const FunctionArgumentDefinition &arg, const std::string &name, const std::string &type,
+                              bool isOut, size_t line, size_t col) {
+    EXPECT_EQ(arg.mName, name);
+    EXPECT_EQ(arg.mType.mName, type);
+    EXPECT_EQ(arg.mIsOut, isOut);
+    ExpectDefinitionSource(arg, line, col);
+  }
+
+  const char *Source = "ParserTest";
+};
+
+TEST_F(ParserTest, EmptyStruct) {
+  auto proj = Parse("struct a   { }");
+  EXPECT_EQ(proj.mStructs.size(), 1);
+  ExpectStruct(proj.mStructs[0], "a", 0, 0, 0, 0);
+}
+
+TEST_F(ParserTest, StructFields) {
+  auto proj = Parse(R"R(
+struct a   {
+  s32 f1;
+  float f2;
+  })R");
+  EXPECT_EQ(proj.mStructs.size(), 1);
+  ExpectStruct(proj.mStructs[0], "a", 2, 0, 0, 0);
+  ExpectField(proj.mStructs[0].mFields[0], "f1", "s32", 0, 1, 2);
+  ExpectField(proj.mStructs[0].mFields[1], "f2", "float", 0, 2, 2);
+}
+
+TEST_F(ParserTest, FieldAnnotations) {
+  auto proj = Parse(R"R(
+struct a   {
   @dec1()
-  @dec2(a1, a2=5, a3, a4='long string')
-  struct a   {
-    s32 f1;
-    float f2;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mStructs.size(), 1);
-    auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mAnnotations.size(), 2);
-    auto &ds = s.mAnnotations;
-    EXPECT_EQ(ds[0].mName, "dec1");
-    EXPECT_EQ(ds[0].mAttributes.size(), 0);
-    EXPECT_EQ(ds[1].mName, "dec2");
-    EXPECT_EQ(ds[1].mAttributes.size(), 4);
-    auto &dsa = ds[1].mAttributes;
-    EXPECT_EQ(dsa[0].mName, "a1");
-    EXPECT_EQ(dsa[0].mValue.mName, "");
-    EXPECT_EQ(dsa[1].mName, "a2");
-    EXPECT_EQ(dsa[1].mValue.mName, "5");
-    EXPECT_EQ(dsa[2].mName, "a3");
-    EXPECT_EQ(dsa[2].mValue.mName, "");
-    EXPECT_EQ(dsa[3].mName, "a4");
-    EXPECT_EQ(dsa[3].mValue.mName, "long string");
-  }
+  @dec2(a1, a2=5,
+    a3, a4='long string')
+  s32 f1;
+@dec3(a)
+  u32 f2;
+})R");
+  EXPECT_EQ(proj.mStructs.size(), 1);
+  auto &s = proj.mStructs[0];
+  ExpectStruct(s, "a", 2, 0, 0, 0);
+  ExpectField(s.mFields[0], "f1", "s32", 2, 4, 2);
+  ExpectAnnotation(s.mFields[0].mAnnotations[0], "dec1", 0, 1, 2);
+  ExpectAnnotation(s.mFields[0].mAnnotations[1], "dec2", 4, 2, 2);
+  ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[0], "a1", "", 2, 8);
+  ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[1], "a2", "5", 2, 12);
+  ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[2], "a3", "", 3, 4);
+  ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[3], "a4", "long string", 3, 8);
+  ExpectField(s.mFields[1], "f2", "u32", 1, 6, 2);
+  ExpectAnnotation(s.mFields[1].mAnnotations[0], "dec3", 1, 5, 0);
+  ExpectAnnotationAttribute(s.mFields[1].mAnnotations[0].mAttributes[0], "a", "", 5, 6);
+}
 
-  TEST(ParserTest, Templates) {
-    Tokenizer tokenizer(R"DELIM(
+TEST_F(ParserTest, EmptyAnnotation) {
+  auto proj = Parse(R"R(
+@dec1
+struct a   {
+  @dec2
+  s32 f1;
+})R");
+  ASSERT_EQ(proj.mStructs.size(), 1);
+  ExpectStruct(proj.mStructs[0], "a", 1, 1, 1, 0);
+  ExpectAnnotation(proj.mStructs[0].mAnnotations[0], "dec1", 0, 0, 0);
+  ExpectField(proj.mStructs[0].mFields[0], "f1", "s32", 1, 3, 2);
+  ExpectAnnotation(proj.mStructs[0].mFields[0].mAnnotations[0], "dec2", 0, 2, 2);
+}
+
+TEST_F(ParserTest, StructAnnotations) {
+  auto proj = Parse(R"R(
+@dec1()
+@dec2(a1, a2=5, a3, a4='long string')
+struct a   {
+  s32 f1;
+  float f2;
+})R");
+  ExpectStruct(proj.mStructs[0], "a", 2, 2, 2, 0);
+  ExpectAnnotation(proj.mStructs[0].mAnnotations[0], "dec1", 0, 0, 0);
+  ExpectAnnotation(proj.mStructs[0].mAnnotations[1], "dec2", 4, 1, 0);
+  ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[0], "a1", "", 1, 6);
+  ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[1], "a2", "5", 1, 10);
+  ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[2], "a3", "", 1, 16);
+  ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[3], "a4", "long string", 1, 20);
+}
+
+TEST_F(ParserTest, Templates) {
+  auto proj = Parse(R"R(
+  // comment
   struct a   {
     map<u32, map<string, vector<float>>> myMap;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mStructs.size(), 1);
-    auto &s = proj.mStructs[0];
-    EXPECT_EQ(s.mName, "a");
-    EXPECT_EQ(s.mFields.size(), 1);
-    EXPECT_EQ(s.mFields[0].mName, "myMap");
-    auto &t = s.mFields[0].mType;
-    EXPECT_EQ(t.mName, "map");
-    EXPECT_EQ(t.mTemplateParameters.size(), 2);
-    EXPECT_EQ(t.mTemplateParameters[0].mName, "u32");
-    EXPECT_EQ(t.mTemplateParameters[0].mTemplateParameters.size(), 0);
-    EXPECT_EQ(t.mTemplateParameters[1].mName, "map");
-    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters.size(), 2);
-    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[0].mName, "string");
-    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[0].mTemplateParameters.size(), 0);
-    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mName, "vector");
-    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters.size(), 1);
-    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mName, "float");
-    EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mTemplateParameters.size(), 0);
-  }
+  })R");
+  EXPECT_EQ(proj.mStructs.size(), 1);
+  auto &s = proj.mStructs[0];
+  ExpectStruct(s, "a", 1, 0, 1, 2);
+  ExpectField(s.mFields[0], "myMap", "map", 0, 2, 4);
+  auto &t = s.mFields[0].mType;
+  EXPECT_EQ(t.mName, "map");
+  EXPECT_EQ(t.mTemplateParameters.size(), 2);
+  EXPECT_EQ(t.mTemplateParameters[0].mName, "u32");
+  EXPECT_EQ(t.mTemplateParameters[0].mTemplateParameters.size(), 0);
+  EXPECT_EQ(t.mTemplateParameters[1].mName, "map");
+  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters.size(), 2);
+  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[0].mName, "string");
+  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[0].mTemplateParameters.size(), 0);
+  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mName, "vector");
+  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters.size(), 1);
+  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mName, "float");
+  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mTemplateParameters.size(), 0);
+}
 
-  TEST(ParserTest, NestedStructs) {
-    Tokenizer tokenizer(R"DELIM(
-  struct Sound {
-    string name;
-    u32 volume;
-  }
-  struct Animal {
-    Sound sound;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mStructs.size(), 2);
-    {
+TEST_F(ParserTest, NestedStructs) {
+  auto proj = Parse(R"R(
+struct Sound {
+  string name;
+  u32 volume;
+}
+struct Animal {
+  Sound sound;
+}
+    )R");
+  EXPECT_EQ(proj.mStructs.size(), 2);
+  ExpectStruct(proj.mStructs[0], "Sound", 2, 0, 0, 0);
+  ExpectField(proj.mStructs[0].mFields[0], "name", "string", 0, 1, 2);
+  ExpectField(proj.mStructs[0].mFields[1], "volume", "u32", 0, 2, 2);
+  ExpectStruct(proj.mStructs[1], "Animal", 1, 0, 4, 0);
+  ExpectField(proj.mStructs[1].mFields[0], "sound", "Sound", 0, 5, 2);
+}
 
-      auto &s = proj.mStructs[0];
-      EXPECT_EQ(s.mName, "Sound");
-      EXPECT_EQ(s.mFields.size(), 2);
-      EXPECT_EQ(s.mFields[0].mType.mName, "string");
-      EXPECT_EQ(s.mFields[0].mName, "name");
-      EXPECT_EQ(s.mFields[1].mType.mName, "u32");
-      EXPECT_EQ(s.mFields[1].mName, "volume");
-    }
+TEST_F(ParserTest, Enums) {
+  auto proj = Parse(R"R(
+enum LandscapeType {
+  Land;
+  River = 2;
+  Sea;
+  Mountain;
+})R");
+  EXPECT_EQ(proj.mEnums.size(), 1);
+  ExpectEnum(proj.mEnums[0], "LandscapeType", "4", 4, 0, 0, 0);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[0], "Land", "0", 0, 1, 2);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[1], "River", "2", 0, 2, 2);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[2], "Sea", "1", 0, 3, 2);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[3], "Mountain", "3", 0, 4, 2);
+}
 
-    {
-      auto &s = proj.mStructs[1];
-      EXPECT_EQ(s.mName, "Animal");
-      EXPECT_EQ(s.mFields.size(), 1);
-      EXPECT_EQ(s.mFields[0].mType.mName, "Sound");
-      EXPECT_EQ(s.mFields[0].mName, "sound");
-    }
+TEST_F(ParserTest, EnumNegativeEntry) {
+  auto proj = Parse(R"R(
+enum LandscapeType {
+  Land;
+  River = -1;
+  Sea;
+  Mountain = -2;
+})R");
+  EXPECT_EQ(proj.mEnums.size(), 1);
+  ExpectEnum(proj.mEnums[0], "LandscapeType", "2", 4, 0, 0, 0);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[0], "Land", "0", 0, 1, 2);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[1], "River", "-1", 0, 2, 2);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[2], "Sea", "1", 0, 3, 2);
+  ExpectEnumEntry(proj.mEnums[0].mEntries[3], "Mountain", "-2", 0, 4, 2);
+}
 
-  }
+TEST_F(ParserTest, Functions) {
+  auto proj = Parse(R"R(
+struct Actor {
+  string name;
+}
+struct Action {
+  func func1(Actor actor);
+  func func2(s32 i1, vector<s32> i2 out) -> void;
+  func func3() -> vector<s32>;
+}
+  )R");
+  auto action = proj.GetStruct("Action");
+  ASSERT_NE(action, nullptr);
+  EXPECT_EQ(action->mFunctions.size(), 3);
+  auto func = action->GetFunction("func1");
+  ASSERT_NE(func, nullptr);
+  ExpectFunction(*func, "func1", "void", 1, 0, 4, 2);
+  ExpectFunctionArgument(func->mArguments[0], "actor", "Actor", false, 4, 13);
 
-  TEST(ParserTest, Enums) {
-    Tokenizer tokenizer(R"DELIM(
-  enum LandscapeType {
-    Land;
-    River = 2;
-    Sea;
-    Mountain;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mEnums.size(), 1);
-    auto e = proj.GetEnum("LandscapeType");
-    ASSERT_NE(e, nullptr);
-    EXPECT_EQ(e->mEntries.size(), 4);
-    EXPECT_EQ(e->mInvalidValue, "4");
-    ASSERT_NE(e->GetEnumEntry("Land"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Land")->mValue, "0");
-    ASSERT_NE(e->GetEnumEntry("Sea"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Sea")->mValue, "1");
-    ASSERT_NE(e->GetEnumEntry("River"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("River")->mValue, "2");
-    ASSERT_NE(e->GetEnumEntry("Mountain"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Mountain")->mValue, "3");
-  }
+  func = action->GetFunction("func2");
+  ASSERT_NE(func, nullptr);
+  ExpectFunction(*func, "func2", "void", 2, 0, 5, 2);
+  ExpectFunctionArgument(func->mArguments[0], "i1", "s32", false, 5, 13);
+  ExpectFunctionArgument(func->mArguments[1], "i2", "vector", true, 5, 21);
+  ASSERT_EQ(func->mArguments[1].mType.mTemplateParameters[0].mName, "s32");
 
-  TEST(ParserTest, EnumInvalidEntry) {
-    Tokenizer tokenizer(R"DELIM(
-  enum LandscapeType {
-    Land;
-    River = -1;
-    Sea;
-    Mountain = -2;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    EXPECT_EQ(proj.mEnums.size(), 1);
-    auto e = proj.GetEnum("LandscapeType");
-    ASSERT_NE(e, nullptr);
-    EXPECT_EQ(e->mEntries.size(), 4);
-    EXPECT_EQ(e->mInvalidValue, "2");
-    ASSERT_NE(e->GetEnumEntry("Land"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Land")->mValue, "0");
-    ASSERT_NE(e->GetEnumEntry("Sea"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Sea")->mValue, "1");
-    ASSERT_NE(e->GetEnumEntry("River"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("River")->mValue, "-1");
-    ASSERT_NE(e->GetEnumEntry("Mountain"), nullptr);
-    EXPECT_EQ(e->GetEnumEntry("Mountain")->mValue, "-2");
-  }
-
-  TEST(ParserTest, Functions) {
-    Tokenizer tokenizer(R"DELIM(
-  struct Actor {
-    string name;
-  }
-  struct Action {
-    func func1(Actor actor);
-    func func2(s32 i1, vector<s32> i2) -> void;
-    func func3() -> vector<s32>;
-  }
-    )DELIM", "ParserTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    auto &proj = parser.GetProject();
-    auto action = proj.GetStruct("Action");
-    ASSERT_NE(action, nullptr);
-    EXPECT_EQ(action->mFunctions.size(), 3);
-    auto func = action->GetFunction("func1");
-    ASSERT_NE(func, nullptr);
-    ASSERT_EQ(func->mReturnType.mName, "void");
-    ASSERT_EQ(func->mArguments.size(), 1);
-    ASSERT_EQ(func->mArguments[0].mType.mName, "Actor");
-    ASSERT_EQ(func->mArguments[0].mName, "actor");
-
-    func = action->GetFunction("func2");
-    ASSERT_NE(func, nullptr);
-    ASSERT_EQ(func->mReturnType.mName, "void");
-    ASSERT_EQ(func->mArguments.size(), 2);
-    ASSERT_EQ(func->mArguments[0].mType.mName, "s32");
-    ASSERT_EQ(func->mArguments[0].mName, "i1");
-    ASSERT_EQ(func->mArguments[1].mType.mName, "vector");
-    ASSERT_EQ(func->mArguments[1].mType.mTemplateParameters[0].mName, "s32");
-    ASSERT_EQ(func->mArguments[1].mName, "i2");
-
-    func = action->GetFunction("func3");
-    ASSERT_NE(func, nullptr);
-    ASSERT_EQ(func->mArguments.size(), 0);
-    ASSERT_EQ(func->mReturnType.mName, "vector");
-    ASSERT_EQ(func->mReturnType.mTemplateParameters[0].mName, "s32");
-  }
-
+  func = action->GetFunction("func3");
+  ASSERT_NE(func, nullptr);
+  ExpectFunction(*func, "func3", "vector", 0, 0, 6, 2);
+  ASSERT_EQ(func->mReturnType.mTemplateParameters[0].mName, "s32");
 }

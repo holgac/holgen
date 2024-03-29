@@ -2,10 +2,17 @@
 
 #include <string>
 #include <vector>
+#include <format>
 #include "core/Iterators.h"
 
 
 namespace holgen {
+  struct DefinitionSource {
+    std::string mSource;
+    size_t mLine = -1;
+    size_t mColumn = -1;
+  };
+
   struct TypeDefinition {
     std::string mName;
     std::vector<TypeDefinition> mTemplateParameters;
@@ -16,11 +23,13 @@ namespace holgen {
   struct AnnotationAttributeDefinition {
     std::string mName;
     TypeDefinition mValue;
+    DefinitionSource mDefinitionSource;
   };
 
   struct AnnotationDefinition {
     std::string mName;
     std::vector<AnnotationAttributeDefinition> mAttributes;
+    DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationAttributeDefinition *GetAttribute(const std::string &name) const;
   };
 
@@ -29,6 +38,7 @@ namespace holgen {
     std::string mName;
     std::vector<AnnotationDefinition> mAnnotations;
     std::string mDefaultValue;
+    DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
 
     auto GetAnnotations(const std::string &name) const {
@@ -40,6 +50,7 @@ namespace holgen {
     TypeDefinition mType;
     std::string mName;
     bool mIsOut = false;
+    DefinitionSource mDefinitionSource;
   };
 
   struct FunctionDefinition {
@@ -47,6 +58,7 @@ namespace holgen {
     TypeDefinition mReturnType;
     std::vector<FunctionArgumentDefinition> mArguments;
     std::vector<AnnotationDefinition> mAnnotations;
+    DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   };
 
@@ -55,6 +67,7 @@ namespace holgen {
     std::vector<FieldDefinition> mFields;
     std::vector<AnnotationDefinition> mAnnotations;
     std::vector<FunctionDefinition> mFunctions;
+    DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
     [[nodiscard]] const FieldDefinition *GetField(const std::string &name) const;
     [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
@@ -69,6 +82,7 @@ namespace holgen {
     std::string mName;
     std::string mValue;
     std::vector<AnnotationDefinition> mAnnotations;
+    DefinitionSource mDefinitionSource;
   };
 
   struct EnumDefinition {
@@ -76,6 +90,7 @@ namespace holgen {
     std::string mInvalidValue;
     std::vector<EnumEntryDefinition> mEntries;
     std::vector<AnnotationDefinition> mAnnotations;
+    DefinitionSource mDefinitionSource;
     [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   };
@@ -89,3 +104,15 @@ namespace holgen {
 
 
 }
+
+template<>
+struct std::formatter<holgen::DefinitionSource> : std::formatter<std::string> {
+  auto format(const holgen::DefinitionSource &definitionSource, format_context &ctx) const {
+    if (definitionSource.mLine == (decltype(definitionSource.mLine)) (-1) ||
+        definitionSource.mColumn == (decltype(definitionSource.mColumn)) (-1))
+      return std::format_to(ctx.out(), "{}", definitionSource.mSource);
+    return std::format_to(ctx.out(), "{}:{}:{}", definitionSource.mSource, definitionSource.mLine,
+                          definitionSource.mColumn);
+  }
+};
+

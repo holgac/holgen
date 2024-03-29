@@ -94,7 +94,9 @@ namespace holgen {
       ++mEndIndex;
       while (mEndIndex < mData.size() && mData[mEndIndex] != c)
         ++mEndIndex;
-      THROW_IF(mEndIndex == mData.size(), "Malformed string: {}", mData.substr(mIndex + 1))
+      THROW_IF(mEndIndex == mData.size(),
+               "Malformed string: {} in {}:{}:{}",
+               mData.substr(mIndex + 1), mSource, mLine, mColumn);
       ++mEndIndex;
       tok.mType = TokenType::String;
       // Comment tokens' contents include the comment special chars, but string literals don't, for ease of use
