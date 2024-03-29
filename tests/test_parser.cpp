@@ -6,7 +6,7 @@ using namespace holgen;
 
 namespace {
   TEST(ParserTest, EmptyStruct) {
-    Tokenizer tokenizer("struct a   { }");
+    Tokenizer tokenizer("struct a   { }", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -20,7 +20,7 @@ namespace {
     s32 f1;
     float f2;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -43,7 +43,7 @@ namespace {
     @dec3(a)
     u32 f2;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -82,7 +82,7 @@ namespace {
     @dec2
     s32 f1;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -107,7 +107,7 @@ namespace {
     s32 f1;
     float f2;
   }
-)DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -135,7 +135,7 @@ namespace {
   struct a   {
     map<u32, map<string, vector<float>>> myMap;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -168,7 +168,7 @@ namespace {
   struct Animal {
     Sound sound;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -202,7 +202,7 @@ namespace {
     Sea;
     Mountain;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -229,7 +229,7 @@ namespace {
     Sea;
     Mountain = -2;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();
@@ -258,7 +258,7 @@ namespace {
     func func2(s32 i1, vector<s32> i2) -> void;
     func func3() -> vector<s32>;
   }
-    )DELIM");
+    )DELIM", "ParserTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto &proj = parser.GetProject();

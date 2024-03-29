@@ -18,7 +18,7 @@ protected:
   }
 
   void ExpectErrorMessage(const std::string &schema, const std::string &expectedError) {
-    Tokenizer tokenizer(schema);
+    Tokenizer tokenizer(schema, "ValidatorTest");
     Parser parser;
     parser.Parse(tokenizer);
     MonolithValidator validator(parser.GetProject());

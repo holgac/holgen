@@ -1,5 +1,6 @@
 #include "Tokenizer.h"
 #include <map>
+#include <algorithm>
 #include "core/Exception.h"
 
 namespace holgen {
@@ -27,10 +28,24 @@ namespace holgen {
     }
   }
 
-  Tokenizer::Tokenizer(std::string_view sv) : mData(sv), mEndIndex(0) {
+  Tokenizer::Tokenizer(std::string_view sv, std::string source) : mData(sv), mSource(source) {
   }
 
   bool Tokenizer::GetNext(Token &tok) {
+    std::string_view oldContents(mData.data() + mIndex, mEndIndex - mIndex);
+    if (!GetNextInner(tok))
+      return false;
+    auto lastEndline = oldContents.find_last_of('\n');
+    if (lastEndline == std::string::npos) {
+      mColumn += oldContents.size();
+    } else {
+      mColumn = oldContents.size() - lastEndline - 1;
+      mLine += std::count(oldContents.begin(), oldContents.end(), '\n');
+    }
+    return true;
+  }
+
+  bool Tokenizer::GetNextInner(Token &tok) {
     if (mEndIndex == mData.size())
       return false;
     mIndex = mEndIndex;
@@ -106,5 +121,17 @@ namespace holgen {
       if (tok.mType != TokenType::Whitespace && tok.mType != TokenType::Comment)
         return true;
     }
+  }
+
+  size_t Tokenizer::GetLine() const {
+    return mLine;
+  }
+
+  size_t Tokenizer::GetColumn() const {
+    return mColumn;
+  }
+
+  std::string Tokenizer::GetSource() const {
+    return mSource;
   }
 }

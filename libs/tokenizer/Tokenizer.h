@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <string>
 
 namespace holgen {
   enum class TokenType {
@@ -35,17 +36,21 @@ namespace holgen {
   };
 
   class Tokenizer {
-  private:
-    std::string_view mData;
-    size_t mIndex;
-    size_t mEndIndex;
   public:
-    // TODO(RELEASE): string source arg for easier debugging
-    // TODO(RELEASE): calculate line and column
-    Tokenizer(std::string_view sv);
+    Tokenizer(std::string_view sv, std::string source);
     bool GetCurrent(Token& tok);
     bool GetNext(Token& tok);
     bool GetNextNonWhitespace(Token& tok);
-    // void Next();
+    size_t GetLine() const;
+    size_t GetColumn() const;
+    std::string GetSource() const;
+  private:
+    bool GetNextInner(Token& tok);
+    std::string_view mData;
+    size_t mIndex = 0;
+    size_t mEndIndex = 0;
+    size_t mLine = 0;
+    size_t mColumn = 0;
+    std::string mSource;
   };
 }

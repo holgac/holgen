@@ -15,7 +15,7 @@ protected:
   }
 
   TranslatedProject Parse(const std::string &input) {
-    Tokenizer tokenizer(input);
+    Tokenizer tokenizer(input, "TranslatorPluginTest");
     mParser.Parse(tokenizer);
     return TranslatedProject(mParser.GetProject());
   }

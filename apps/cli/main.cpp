@@ -31,7 +31,7 @@ int run(int argc, char **argv) {
       continue;
     }
     auto contents = ReadFile(entry.path());
-    holgen::Tokenizer tokenizer(contents);
+    holgen::Tokenizer tokenizer(contents, entry.path().string());
     try {
       parser.Parse(tokenizer);
     } catch (holgen::Exception &exc) {

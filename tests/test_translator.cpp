@@ -29,7 +29,7 @@ namespace {
     s32 age;
     float gender;
   }
-    )DELIM");
+    )DELIM", "TranslatorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto tp = Translator(parser.GetProject()).Translate();
@@ -56,7 +56,7 @@ namespace {
     @container(elemName=city)
     deque<City> cities;
   }
-    )DELIM");
+    )DELIM", "TranslatorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto tp = Translator(parser.GetProject()).Translate();
@@ -85,7 +85,7 @@ namespace {
     @index(on=name)
     deque<City> cities;
   }
-    )DELIM");
+    )DELIM", "TranslatorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto tp = Translator(parser.GetProject()).Translate();

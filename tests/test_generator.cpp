@@ -15,7 +15,7 @@ namespace {
     u32 age;
     float gender;
   }
-    )DELIM");
+    )DELIM", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto translatedProject = Translator(parser.GetProject()).Translate();
@@ -45,7 +45,7 @@ namespace {
     u32 age = 0;
     float gender;
   }
-    )DELIM");
+    )DELIM", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto translatedProject = Translator(parser.GetProject()).Translate();
@@ -117,7 +117,7 @@ void Person::SetGender(float val) {
     vector<string> instruments;
     map<string, double> prices;
   }
-    )DELIM");
+    )DELIM", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto translatedProject = Translator(parser.GetProject()).Translate();
@@ -224,7 +224,7 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
   struct Animal {
     vector<Sound> sounds;
   }
-    )DELIM");
+    )DELIM", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto translatedProject = Translator(parser.GetProject()).Translate();
@@ -404,7 +404,7 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
     string name;
     Person leader;
   }
-    )DELIM");
+    )DELIM", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto translatedProject = Translator(parser.GetProject()).Translate();
@@ -618,7 +618,7 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
     @container(elemName=person)
     vector<Person> people;
   }
-    )DELIM");
+    )DELIM", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
     auto translatedProject = Translator(parser.GetProject()).Translate();

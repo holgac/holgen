@@ -12,9 +12,9 @@ namespace holgen::helpers {
     return result;
   }
 
-  std::string_view Trim(const std::string &str) {
+  std::string_view Trim(const std::string_view &str) {
     auto startIdx = str.find_first_not_of(" \n");
-    auto endIdx = str.find_last_not_of(" \n");
+    auto endIdx = str.find_last_not_of(" \n") + 1;
     return std::string_view(str.data() + startIdx, endIdx - startIdx);
   }
 
@@ -54,7 +54,7 @@ namespace holgen::helpers {
   }
 
   void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected,
-                   const std::optional<std::string> &expectedBody, const std::string& name) {
+                   const std::optional<std::string> &expectedBody, const std::string &name) {
     EXPECT_EQ(actual.mVisibility, expected.mVisibility) << " in method " << name;
     if (expectedBody)
       EXPECT_EQ(Trim(actual.mBody.ToString()), Trim(*expectedBody));

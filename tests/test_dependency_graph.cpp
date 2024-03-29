@@ -18,7 +18,7 @@ protected:
   }
 
   void ExpectProcessOrder(const std::string &schema, const std::vector<std::string> &expectedProcessOrder) {
-    Tokenizer tokenizer(schema);
+    Tokenizer tokenizer(schema, "DependencyGraphTest");
     Parser parser;
     parser.Parse(tokenizer);
     DependencyGraph dg(parser.GetProject());
@@ -30,7 +30,7 @@ protected:
   }
 
   void ExpectErrorMessage(const std::string &schema, const std::string &expectedError) {
-    Tokenizer tokenizer(schema);
+    Tokenizer tokenizer(schema, "DependencyGraphTest");
     Parser parser;
     parser.Parse(tokenizer);
     EXPECT_THROW({
