@@ -68,14 +68,6 @@ namespace holgen {
   }
 
   void MonolithValidator::Validate(const StructDefinition &structDefinition) {
-    THROW_IF(ReservedKeywords.contains(structDefinition.mName), "Struct {} uses a reserved keyword.",
-             structDefinition.mName);
-    THROW_IF(ReservedClassNames.contains(structDefinition.mName), "Struct {} uses a reserved class name.",
-             structDefinition.mName);
-    THROW_IF(TypeInfo::Get().CppPrimitives.contains(structDefinition.mName), "Struct {} uses a reserved keyword.",
-             structDefinition.mName);
-    THROW_IF(&structDefinition != mProject.GetStruct(structDefinition.mName), "Duplicate struct name: {}",
-             structDefinition.mName)
     for (const auto &fieldDefinition: structDefinition.mFields) {
       Validate(structDefinition, fieldDefinition);
     }

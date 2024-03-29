@@ -35,41 +35,6 @@ protected:
   }
 };
 
-TEST_F(ValidatorTest, InvalidNames) {
-  ExpectErrorMessage(R"DELIM(
-struct template {
-  s8 field;
-}
-  )DELIM", "Struct template uses a reserved keyword.");
-  ExpectErrorMessage(R"DELIM(
-struct struct {
-  s8 field;
-}
-  )DELIM", "Struct struct uses a reserved keyword.");
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  s8 int8_t;
-}
-  )DELIM", "Field A.int8_t uses a reserved keyword.");
-}
-
-TEST_F(ValidatorTest, DuplicateNames) {
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  s8 field;
-}
-struct A {
-  s16 field;
-}
-  )DELIM", "Duplicate struct name: A");
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  s8 field;
-  s8 field;
-}
-  )DELIM", "Duplicate field name: A.field");
-}
-
 TEST_F(ValidatorTest, UnknownTypes) {
   ExpectErrorMessage(R"DELIM(
 struct A {

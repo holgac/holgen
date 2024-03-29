@@ -4,7 +4,7 @@ namespace holgen {
 
   TranslatorPlugin::TranslatorPlugin(
       TranslatedProject &translatedProject
-  ) : mProject(translatedProject), mNamingConvention(mProject) {
+  ) : mProject(translatedProject), mNamingConvention(mProject), mValidator(mProject) {
   }
 
   TranslatorPlugin::~TranslatorPlugin() {}
@@ -14,5 +14,9 @@ namespace holgen {
 
   const NamingConvention &TranslatorPlugin::Naming() const {
     return mNamingConvention;
+  }
+
+  const Validator &TranslatorPlugin::Validate() const {
+    return mValidator;
   }
 }
