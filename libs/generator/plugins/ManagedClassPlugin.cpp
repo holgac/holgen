@@ -1,7 +1,7 @@
 #include "ManagedClassPlugin.h"
 #include "core/St.h"
 #include "core/Annotations.h"
-#include "../Naming.h"
+#include "../NamingConvention.h"
 
 namespace holgen {
   void ManagedClassPlugin::Run() {
@@ -29,7 +29,7 @@ namespace holgen {
         getter.mArguments.emplace_back("id", Type{mProject.mProject, idField->mType});
         getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                          St::GlobalPointer, manager->mName,
-                         Naming(mProject).ContainerElemGetterNameInCpp(*managerField));
+                         Naming().ContainerElemGetterNameInCpp(*managerField));
         generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
         generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
       }
@@ -37,7 +37,7 @@ namespace holgen {
       for (const auto &annotation: managerField->GetAnnotations(Annotations::Index)) {
         auto indexOn = annotation.GetAttribute(Annotations::Index_On);
         auto &getter = generatedClass.mMethods.emplace_back(
-            Naming(mProject).ManagedClassIndexGetterNameInCpp(annotation),
+            Naming().ManagedClassIndexGetterNameInCpp(annotation),
             Type{generatedClass.mStruct->mName, PassByType::Pointer, Constness::NotConst},
             Visibility::Public,
             Constness::NotConst,
@@ -50,7 +50,7 @@ namespace holgen {
         getter.mBody.Add(
             "return {}<{}>::GetInstance()->{}(key);",
             St::GlobalPointer, manager->mName,
-            Naming(mProject).ContainerIndexGetterNameInCpp(*managerField, annotation));
+            Naming().ContainerIndexGetterNameInCpp(*managerField, annotation));
 
       }
 

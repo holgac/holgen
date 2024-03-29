@@ -2,7 +2,7 @@
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../Naming.h"
+#include "../../NamingConvention.h"
 
 namespace holgen {
   namespace {
@@ -29,7 +29,7 @@ namespace holgen {
         );
 
 
-        auto fieldNameInCpp = Naming(mProject).FieldNameInCpp(fieldDefinition);
+        auto fieldNameInCpp = Naming().FieldNameInCpp(fieldDefinition);
         auto referencedClass = mProject.GetClass(structDefinition.mName);
 
         func.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);

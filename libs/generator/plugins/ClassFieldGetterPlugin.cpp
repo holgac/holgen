@@ -1,7 +1,7 @@
 #include "ClassFieldGetterPlugin.h"
 #include "core/St.h"
 #include "core/Annotations.h"
-#include "../Naming.h"
+#include "../NamingConvention.h"
 
 namespace holgen {
   void ClassFieldGetterPlugin::Run() {
@@ -27,7 +27,7 @@ namespace holgen {
     for (int i = 0; i < 2; ++i) {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &getter = cls.mMethods.emplace_back(
-          Naming(mProject).FieldGetterNameInCpp(*field.mField, true),
+          Naming().FieldGetterNameInCpp(*field.mField, true),
           Type{mProject.mProject, field.mField->mType.mTemplateParameters[0], PassByType::Pointer, constness},
           Visibility::Public,
           constness);
@@ -44,7 +44,7 @@ namespace holgen {
       return;
     auto constness = isConst ? Constness::Const : Constness::NotConst;
     auto &getter = cls.mMethods.emplace_back(
-        Naming(mProject).FieldGetterNameInCpp(*field.mField), field.mType,
+        Naming().FieldGetterNameInCpp(*field.mField), field.mType,
         Visibility::Public, constness);
     getter.mReturnType.PreventCopying(isConst);
     if (field.mType.mType == PassByType::Pointer)

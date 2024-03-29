@@ -3,7 +3,7 @@
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../Naming.h"
+#include "../../NamingConvention.h"
 
 namespace holgen {
   namespace {
@@ -62,8 +62,8 @@ namespace holgen {
         parseFunc.mBody.Indent(1);
 
         parseFunc.mBody.Add("auto elem = {}(key);",
-                            Naming(mProject).ContainerIndexGetterNameInCpp(fieldDefinition, annotation));
-        parseFunc.mBody.Add("return elem->{}();", Naming(mProject).FieldGetterNameInCpp(*idField));
+                            Naming().ContainerIndexGetterNameInCpp(fieldDefinition, annotation));
+        parseFunc.mBody.Add("return elem->{}();", Naming().FieldGetterNameInCpp(*idField));
 
         parseFunc.mBody.Indent(-1);
         parseFunc.mBody.Add("}};"); // converter =
@@ -144,7 +144,7 @@ namespace holgen {
           parseFunc.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
           parseFunc.mBody.Add(
               R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
-          parseFunc.mBody.Add("{}(std::move(elem));", Naming(mProject).ContainerElemAdderNameInCpp(fieldDefinition));
+          parseFunc.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
           parseFunc.mBody.Indent(-1);
           parseFunc.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
 

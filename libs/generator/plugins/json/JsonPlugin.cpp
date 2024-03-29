@@ -3,7 +3,7 @@
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../Naming.h"
+#include "../../NamingConvention.h"
 
 namespace holgen {
   namespace {
@@ -92,7 +92,7 @@ namespace holgen {
       const StructDefinition &structDefinition __attribute__((unused)),
       const FieldDefinition &fieldDefinition
   ) {
-    auto field = *cls.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto field = *cls.GetField(Naming().FieldNameInCpp(fieldDefinition));
     if (mProject.mProject.GetStruct(fieldDefinition.mType.mName) == nullptr) {
       auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {

@@ -1,7 +1,7 @@
 #include "LuaPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../Naming.h"
+#include "../../NamingConvention.h"
 
 namespace holgen {
   namespace {
@@ -35,25 +35,25 @@ namespace holgen {
     for (auto &fieldDefinition: structDefinition->mFields) {
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
-      auto &generatedField = *cls.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+      auto &generatedField = *cls.GetField(Naming().FieldNameInCpp(fieldDefinition));
       bool isRef = fieldDefinition.mType.mName == "Ref";
       if (isFirst) {
-        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", Naming(mProject).FieldNameInLua(fieldDefinition));
+        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(fieldDefinition));
         isFirst = false;
       } else {
-        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", Naming(mProject).FieldNameInLua(fieldDefinition));
+        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(fieldDefinition));
       }
       codeBlock.Indent(1);
       codeBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push,
-                    Naming(mProject).FieldNameInCpp(fieldDefinition));
+                    Naming().FieldNameInCpp(fieldDefinition));
       codeBlock.Indent(-1);
       if (isRef && generatedField.mType.mType != PassByType::Pointer) {
         codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{",
-                      Naming(mProject).FieldNameInLua(fieldDefinition, true));
+                      Naming().FieldNameInLua(fieldDefinition, true));
         codeBlock.Indent(1);
         codeBlock.Add("{}::{}({}::{}(instance->{}), ls);", St::LuaHelper, St::LuaHelper_Push,
                       fieldDefinition.mType.mTemplateParameters[0].mName, St::ManagedObject_Getter,
-                      Naming(mProject).FieldNameInCpp(fieldDefinition));
+                      Naming().FieldNameInCpp(fieldDefinition));
         codeBlock.Indent(-1);
       }
     }
@@ -129,10 +129,10 @@ namespace holgen {
       if (fieldDefinition.GetAnnotation(Annotations::NoLua))
         continue;
       if (isFirst) {
-        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", Naming(mProject).FieldNameInLua(fieldDefinition));
+        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(fieldDefinition));
         isFirst = false;
       } else {
-        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", Naming(mProject).FieldNameInLua(fieldDefinition));
+        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(fieldDefinition));
       }
       // TODO: Implement else case
       // TODO: Make this work with pointers
@@ -140,7 +140,7 @@ namespace holgen {
       codeBlock.Indent(1);
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
       codeBlock.Add("{}::{}(instance->{}, ls, -1);", St::LuaHelper, St::LuaHelper_Read,
-                    Naming(mProject).FieldNameInCpp(fieldDefinition));
+                    Naming().FieldNameInCpp(fieldDefinition));
       codeBlock.Indent(-1);
     }
     codeBlock.Line() << "}";
@@ -161,7 +161,7 @@ namespace holgen {
     if (structDefinition.GetAnnotation(Annotations::Managed)) {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
-      auto idField = cls.GetField(Naming(mProject).FieldNameInCpp(*structDefinition.GetIdField()));
+      auto idField = cls.GetField(Naming().FieldNameInCpp(*structDefinition.GetIdField()));
       std::string tempType = "uint64_t";
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
         tempType = "int64_t";
@@ -185,7 +185,7 @@ namespace holgen {
 
     pushToLua.mBody.Add("lua_newtable(luaState);");
     if (structDefinition.GetAnnotation(Annotations::Managed)) {
-      auto idField = cls.GetField(Naming(mProject).FieldNameInCpp(*structDefinition.GetIdField()));
+      auto idField = cls.GetField(Naming().FieldNameInCpp(*structDefinition.GetIdField()));
       std::string tempType = "uint64_t";
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
         tempType = "int64_t";

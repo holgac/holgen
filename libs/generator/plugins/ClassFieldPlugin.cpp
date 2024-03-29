@@ -1,6 +1,6 @@
 #include "ClassFieldPlugin.h"
 #include "core/St.h"
-#include "../Naming.h"
+#include "../NamingConvention.h"
 
 namespace holgen {
   void ClassFieldPlugin::Run() {
@@ -9,7 +9,7 @@ namespace holgen {
         continue;
       for (auto &fieldDefinition: generatedClass.mStruct->mFields) {
         auto &generatedField = generatedClass.mFields.emplace_back(
-            Naming(mProject).FieldNameInCpp(fieldDefinition),
+            Naming().FieldNameInCpp(fieldDefinition),
             Type{mProject.mProject, fieldDefinition.mType},
             Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue);
         generatedField.mField = &fieldDefinition;

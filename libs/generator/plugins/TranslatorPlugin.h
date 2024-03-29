@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../TranslatedProject.h"
+#include "../NamingConvention.h"
 
 
 namespace holgen {
@@ -9,8 +10,12 @@ namespace holgen {
     TranslatorPlugin(TranslatedProject &translatedProject);
     virtual ~TranslatorPlugin();
     virtual void Run();
+    const NamingConvention &Naming() const;
   protected:
     TranslatedProject &mProject;
+  private:
+    // BEFORE_RELEASE: get this from GeneratorSettings
+    NamingConvention mNamingConvention;
   };
 
 }

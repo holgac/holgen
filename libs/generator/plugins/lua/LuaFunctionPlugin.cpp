@@ -1,7 +1,7 @@
 #include "LuaFunctionPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../Naming.h"
+#include "../../NamingConvention.h"
 
 namespace holgen {
   void LuaFunctionPlugin::Run() {
@@ -25,7 +25,7 @@ namespace holgen {
 
     {
       auto &setter = cls.mMethods.emplace_back(
-          Naming(mProject).LuaFunctionSetterNameInCpp(func), Type{"void"},
+          Naming().LuaFunctionSetterNameInCpp(func), Type{"void"},
           Visibility::Public, Constness::NotConst);
       setter.mArguments.emplace_back("val", Type{"std::string"});
       setter.mBody.Add("{} = val;", field.mName);

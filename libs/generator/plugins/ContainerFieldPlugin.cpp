@@ -1,7 +1,7 @@
 #include "ContainerFieldPlugin.h"
 #include "core/St.h"
 #include "core/Annotations.h"
-#include "../Naming.h"
+#include "../NamingConvention.h"
 
 namespace holgen {
   void ContainerFieldPlugin::Run() {
@@ -41,7 +41,7 @@ namespace holgen {
     auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
     auto &indexField = generatedClass.mFields.emplace_back(
-        Naming(mProject).FieldIndexNameInCpp(fieldDefinition, dec), Type{"std::map"});
+        Naming().FieldIndexNameInCpp(fieldDefinition, dec), Type{"std::map"});
     auto indexType = dec.GetAttribute(Annotations::Index_Using);
     if (indexType != nullptr) {
       indexField.mType = Type{mProject.mProject, indexType->mValue};
@@ -56,7 +56,7 @@ namespace holgen {
     for (int i = 0; i < 2; ++i) {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &func = generatedClass.mMethods.emplace_back(
-          Naming(mProject).ContainerIndexGetterNameInCpp(fieldDefinition, dec),
+          Naming().ContainerIndexGetterNameInCpp(fieldDefinition, dec),
           Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
           Visibility::Public,
           constness);
@@ -70,7 +70,7 @@ namespace holgen {
       func.mBody.Indent(1);
       func.mBody.Add("return nullptr;");
       func.mBody.Indent(-1);
-      auto generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+      auto generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
       if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName))
         func.mBody.Add("return &{}.at(it->second);", generatedField.mName);
       else
@@ -80,7 +80,7 @@ namespace holgen {
 
   void ContainerFieldPlugin::GenerateContainerAddElem(Class &generatedClass, const FieldDefinition &fieldDefinition,
                                                       bool useMoveRef) {
-    auto generatedField = generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto generatedField = generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
     auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
     if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(Type{mProject.mProject, underlyingType}.mName))
       return;
@@ -91,7 +91,7 @@ namespace holgen {
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField->mType.mName);
 
     auto &func = generatedClass.mMethods.emplace_back(
-        Naming(mProject).ContainerElemAdderNameInCpp(fieldDefinition),
+        Naming().ContainerElemAdderNameInCpp(fieldDefinition),
         Type{"bool"},
         Visibility::Public,
         Constness::NotConst
@@ -109,8 +109,8 @@ namespace holgen {
     for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
       auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
-      auto indexFieldName = Naming(mProject).FieldIndexNameInCpp(fieldDefinition, annotation);
-      auto getterMethodName = Naming(mProject).FieldGetterNameInCpp(fieldIndexedOn);
+      auto indexFieldName = Naming().FieldIndexNameInCpp(fieldDefinition, annotation);
+      auto getterMethodName = Naming().FieldGetterNameInCpp(fieldIndexedOn);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
       // TODO: remove exclamation mark
@@ -131,7 +131,7 @@ namespace holgen {
     func.mBody.Add(inserters);
     if (underlyingIdField) {
       func.mArguments.back().mType.mConstness = Constness::NotConst;
-      func.mBody.Add("elem.{}(newId);", Naming(mProject).FieldSetterNameInCpp(*underlyingIdField));
+      func.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField));
     }
     std::string elemToInsert = "elem";
     if (useMoveRef)
@@ -153,14 +153,14 @@ namespace holgen {
     const FieldDefinition *underlyingIdField = nullptr;
     if (underlyingStructDefinition)
       underlyingIdField = underlyingStructDefinition->GetIdField();
-    auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
     if (TypeInfo::Get().CppSets.contains(generatedField.mType.mName))
       return;
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName);
     for (int i = 0; i < 2; ++i) {
       auto constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto &func = generatedClass.mMethods.emplace_back(
-          Naming(mProject).ContainerElemGetterNameInCpp(fieldDefinition),
+          Naming().ContainerElemGetterNameInCpp(fieldDefinition),
           Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
           Visibility::Public,
           constness
@@ -199,19 +199,19 @@ namespace holgen {
 
   void ContainerFieldPlugin::GenerateContainerGetCount(Class &generatedClass, const FieldDefinition &fieldDefinition) {
     auto &func = generatedClass.mMethods.emplace_back(
-        Naming(mProject).ContainerElemCountNameInCpp(fieldDefinition),
+        Naming().ContainerElemCountNameInCpp(fieldDefinition),
         Type{"size_t"});
     func.mExposeToLua = true;
-    func.mBody.Add("return {}.size();", Naming(mProject).FieldNameInCpp(fieldDefinition));
+    func.mBody.Add("return {}.size();", Naming().FieldNameInCpp(fieldDefinition));
   }
 
   void ContainerFieldPlugin::GenerateContainerDeleteElem(
       Class &generatedClass, const FieldDefinition &fieldDefinition) {
     // TODO: rename to method everywhere
     auto &func = generatedClass.mMethods.emplace_back(
-        Naming(mProject).ContainerElemDeleterNameInCpp(fieldDefinition),
+        Naming().ContainerElemDeleterNameInCpp(fieldDefinition),
         Type{"void"}, Visibility::Public, Constness::NotConst);
-    auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
     if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName)) {
       func.mArguments.emplace_back("key", Type{mProject.mProject, fieldDefinition.mType.mTemplateParameters.front()});
     } else if (TypeInfo::Get().CppSets.contains(generatedField.mType.mName)) {
@@ -226,54 +226,54 @@ namespace holgen {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
       auto indexField = underlyingStruct->GetField(indexOn->mValue.mName);
       indexDeleters.Add("{}.erase(ptr->{}());",
-                        Naming(mProject).FieldIndexNameInCpp(fieldDefinition, annotation),
-                        Naming(mProject).FieldGetterNameInCpp(*indexField));
+                        Naming().FieldIndexNameInCpp(fieldDefinition, annotation),
+                        Naming().FieldGetterNameInCpp(*indexField));
       indexReassigners.Add("{}.at({}.back().{}()) = idx;",
-                           Naming(mProject).FieldIndexNameInCpp(fieldDefinition, annotation),
-                           Naming(mProject).FieldNameInCpp(fieldDefinition),
-                           Naming(mProject).FieldGetterNameInCpp(*indexField)
+                           Naming().FieldIndexNameInCpp(fieldDefinition, annotation),
+                           Naming().FieldNameInCpp(fieldDefinition),
+                           Naming().FieldGetterNameInCpp(*indexField)
       );
     }
     if (!indexDeleters.mContents.empty()) {
       func.mBody.Add("auto ptr = {}({});",
-                     Naming(mProject).ContainerElemGetterNameInCpp(fieldDefinition),
+                     Naming().ContainerElemGetterNameInCpp(fieldDefinition),
                      func.mArguments.back().mName);
       func.mBody.Add(indexDeleters);
     }
     func.mExposeToLua = true;
     if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName)) {
-      func.mBody.Add("{}.erase(key);", Naming(mProject).FieldNameInCpp(fieldDefinition));
+      func.mBody.Add("{}.erase(key);", Naming().FieldNameInCpp(fieldDefinition));
     } else if (TypeInfo::Get().CppSets.contains(generatedField.mType.mName)) {
-      func.mBody.Add("{}.erase(elem);", Naming(mProject).FieldNameInCpp(fieldDefinition));
+      func.mBody.Add("{}.erase(elem);", Naming().FieldNameInCpp(fieldDefinition));
     } else {
-      func.mBody.Add("if (idx != {}.size() - 1) {{", Naming(mProject).FieldNameInCpp(fieldDefinition));
+      func.mBody.Add("if (idx != {}.size() - 1) {{", Naming().FieldNameInCpp(fieldDefinition));
       func.mBody.Indent(1);
       func.mBody.Add(indexReassigners);
-      func.mBody.Add("{0}[idx] = std::move({0}.back());", Naming(mProject).FieldNameInCpp(fieldDefinition));
+      func.mBody.Add("{0}[idx] = std::move({0}.back());", Naming().FieldNameInCpp(fieldDefinition));
       func.mBody.Indent(-1);
       func.mBody.Add("}}");
-      func.mBody.Add("{}.pop_back();", Naming(mProject).FieldNameInCpp(fieldDefinition));
+      func.mBody.Add("{}.pop_back();", Naming().FieldNameInCpp(fieldDefinition));
     }
   }
 
   void ContainerFieldPlugin::GenerateContainerHasElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
     auto &func = generatedClass.mMethods.emplace_back(
-        Naming(mProject).ContainerElemExistenceCheckerNameInCpp(fieldDefinition),
+        Naming().ContainerElemExistenceCheckerNameInCpp(fieldDefinition),
         Type{"bool"});
     func.mExposeToLua = true;
-    auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
     auto &arg = func.mArguments.emplace_back("elem", Type{mProject.mProject,
                                                           fieldDefinition.mType.mTemplateParameters.front()});
     if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName)) {
       arg.mName = "key";
     }
     arg.mType.PreventCopying();
-    func.mBody.Add("return {}.contains({});", Naming(mProject).FieldNameInCpp(fieldDefinition), arg.mName);
+    func.mBody.Add("return {}.contains({});", Naming().FieldNameInCpp(fieldDefinition), arg.mName);
   }
 
   bool ContainerFieldPlugin::CanImplementDeleteElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
     auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
-    auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
     if (!underlyingStruct || !underlyingStruct->GetIdField())
       return true;
     if (!TypeInfo::Get().CppIndexedContainers.contains(generatedField.mType.mName))
@@ -282,13 +282,13 @@ namespace holgen {
   }
 
   bool ContainerFieldPlugin::CanImplementHasElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto &generatedField = *generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
     return !TypeInfo::Get().CppIndexedContainers.contains(generatedField.mType.mName);
   }
 
   void ContainerFieldPlugin::GenerateContainerNextIndexField(
       Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto generatedField = generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+    auto generatedField = generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
 
     if (TypeInfo::Get().CppKeyedContainers.contains(generatedField->mType.mName)) {
       auto underlyingIdField = mProject.mProject.GetStruct(
@@ -297,7 +297,7 @@ namespace holgen {
           generatedField->mName + "NextId",
           Type{mProject.mProject, underlyingIdField->mType});
       nextIdField.mDefaultValue = "0";
-      generatedField = generatedClass.GetField(Naming(mProject).FieldNameInCpp(fieldDefinition));
+      generatedField = generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
     }
 
   }
