@@ -13,7 +13,7 @@ TEST_F(ClassPluginTest, Struct) {
 struct TestData {
 }
       )R");
-  ClassPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
@@ -34,12 +34,10 @@ struct TestData {
 
 TEST_F(ClassPluginTest, ReservedKeywords) {
   ExpectErrorMessage("struct struct {}", Run, "struct ({0}:1:1) is a reserved keyword", Source);
-  Reset();
   ExpectErrorMessage("struct class {}", Run, "class ({0}:1:1) is a reserved keyword", Source);
-  Reset();
   ExpectErrorMessage("struct namespace {}", Run, "namespace ({0}:1:1) is a reserved keyword", Source);
-  Reset();
   ExpectErrorMessage("struct template {}", Run, "template ({0}:1:1) is a reserved keyword", Source);
+  ExpectErrorMessage("struct uint16_t {}", Run, "uint16_t ({0}:1:1) is a reserved keyword", Source);
 }
 
 
@@ -48,7 +46,7 @@ TEST_F(ClassPluginTest, Enum) {
 enum TestData {
 }
   )R");
-  ClassPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);

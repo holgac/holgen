@@ -25,6 +25,7 @@ namespace holgen {
     // TODO: currently plugins iterate over struct fields, but we need to iterate over class fields
     // and filter by mField to avoid processing custom fields
     // TODO: Helper generators should run first so that errors come up when processing user defined data
+    // TODO: Users should pick which plugins to run
     AddPlugin<ClassPlugin>();
     AddPlugin<ClassFieldPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();

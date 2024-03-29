@@ -3,6 +3,7 @@
 #include "HeaderContainer.h"
 
 namespace holgen {
+  // TODO: generated files should have a comment indicating they're generated
 
   namespace {
     bool CanBeDefinedInHeader(const Class &cls, const ClassMethod &method) {

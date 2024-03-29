@@ -28,5 +28,7 @@ namespace holgen {
   GEN_GETTER_BY_NAME_NONCONST(TranslatedProject, Class, GetClass, mClasses);
 
   GEN_GETTER_BY_NAME_NONCONST(Class, ClassField, GetField, mFields);
+
+  GEN_GETTER_BY_NAME(Class, ClassField, GetField, mFields);
 }
 

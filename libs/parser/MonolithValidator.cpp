@@ -78,28 +78,6 @@ namespace holgen {
   }
 
   void MonolithValidator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition) {
-    THROW_IF(ReservedKeywords.contains(fieldDefinition.mName), "Field {}.{} uses a reserved keyword.",
-             structDefinition.mName, fieldDefinition.mName);
-    THROW_IF(TypeInfo::Get().CppPrimitives.contains(fieldDefinition.mName), "Field {}.{} uses a reserved keyword.",
-             structDefinition.mName, fieldDefinition.mName);
-    THROW_IF(&fieldDefinition != structDefinition.GetField(fieldDefinition.mName), "Duplicate field name: {}.{}",
-             structDefinition.mName, fieldDefinition.mName);
-    if (fieldDefinition.mType.mName == "Ref") {
-      THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1,
-               "Ref field {}.{} should have a single template parameter",
-               structDefinition.mName, fieldDefinition.mName);
-      auto referencedType = mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      THROW_IF(referencedType == nullptr,
-               "Ref field {}.{} references {} which is not a struct defined in this project",
-               structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mTemplateParameters[0].mName);
-      auto managedAnnotation = referencedType->GetAnnotation(Annotations::Managed);
-      THROW_IF(managedAnnotation == nullptr,
-               "Ref field {}.{} references {} which is not managed",
-               structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mTemplateParameters[0].mName);
-    }
-
-    Validate(structDefinition, fieldDefinition, fieldDefinition.mType);
-
     for (auto &annotationDefinition: fieldDefinition.mAnnotations) {
       Validate(structDefinition, fieldDefinition, annotationDefinition);
     }
@@ -163,19 +141,6 @@ namespace holgen {
       Type type(mProject, fieldDefinition.mType);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mName), "Field {}.{} uses an invalid type for an id: {}",
                structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mName);
-    }
-  }
-
-  void MonolithValidator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                           const TypeDefinition &typeDefinition) {
-    Type type(mProject, typeDefinition);
-    THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && !CustomTypes.contains(type.mName)
-             && mProject.GetStruct(type.mName) == nullptr
-             && mProject.GetEnum(type.mName) == nullptr,
-             "Field {}.{} uses an unknown type: {}", structDefinition.mName, fieldDefinition.mName,
-             typeDefinition.mName);
-    for (const auto &templateParameter : typeDefinition.mTemplateParameters) {
-      Validate(structDefinition, fieldDefinition, templateParameter);
     }
   }
 

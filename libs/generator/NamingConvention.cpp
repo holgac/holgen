@@ -11,7 +11,7 @@ namespace holgen {
   std::string NamingConvention::FieldNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) const {
     if (fieldDefinition.mType.mName == "Ref") {
       auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField() != nullptr && !dereferenceRef) {
+      if (underlyingStruct->GetIdField() &&  !dereferenceRef) {
         return std::format("m{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
@@ -38,7 +38,7 @@ namespace holgen {
   NamingConvention::FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) const {
     if (fieldDefinition.mType.mName == "Ref") {
       auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField() != nullptr && !dereferenceRef) {
+      if (underlyingStruct->GetIdField() &&  !dereferenceRef) {
         return std::format("Get{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
@@ -91,7 +91,7 @@ namespace holgen {
   std::string NamingConvention::FieldSetterNameInCpp(const FieldDefinition &fieldDefinition) const {
     if (fieldDefinition.mType.mName == "Ref") {
       auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField() != nullptr) {
+      if (underlyingStruct->GetIdField()) {
         return std::format("Set{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }

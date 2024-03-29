@@ -26,6 +26,7 @@ protected:
   void ExpectErrorMessage(const std::string &input,
                           std::function<void(TranslatedProject &)> run,
                           std::format_string<Args...> fmt, Args &&...args) {
+    Reset();
     auto project = Parse(helpers::Trim(input));
     EXPECT_THROW({
                    try {
@@ -39,10 +40,10 @@ protected:
                  }, Exception);
   }
 
+  Parser mParser;
+  const char *Source = "TranslatorPluginTest";
+private:
   void Reset() {
     mParser = {};
   }
-
-  Parser mParser;
-  const char *Source = "TranslatorPluginTest";
 };

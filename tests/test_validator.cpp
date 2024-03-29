@@ -35,34 +35,6 @@ protected:
   }
 };
 
-TEST_F(ValidatorTest, UnknownTypes) {
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  someType field;
-}
-  )DELIM", "Field A.field uses an unknown type: someType");
-
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  s8 field;
-}
-struct B {
-  A a;
-  C c;
-}
-  )DELIM", "Field B.c uses an unknown type: C");
-
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  s8 field;
-}
-struct B {
-  map<string, map<string, map<string, A>>> aMap;
-  map<string, map<string, map<string, C>>> cMap;
-}
-  )DELIM", "Field B.cMap uses an unknown type: C");
-}
-
 TEST_F(ValidatorTest, JsonConvert) {
   ExpectErrorMessage(R"DELIM(
 struct A {
@@ -192,27 +164,4 @@ struct DataMan {
   )DELIM", "Struct Person references DataManager field DataMan.people that is not a container");
   return;
 
-}
-TEST_F(ValidatorTest, Ref) {
-  ExpectErrorMessage(R"DELIM(
-struct Person {
-  @id
-  u64 id;
-  Ref partner;
-}
-  )DELIM", "Ref field Person.partner should have a single template parameter");
-  ExpectErrorMessage(R"DELIM(
-struct Person {
-  @id
-  u64 id;
-  Ref<Person, Person> partner;
-}
-  )DELIM", "Ref field Person.partner should have a single template parameter");
-  ExpectErrorMessage(R"DELIM(
-struct Person {
-  @id
-  u64 id;
-  Ref<Person> partner;
-}
-  )DELIM", "Ref field Person.partner references Person which is not managed");
 }

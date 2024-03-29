@@ -1,6 +1,6 @@
 #include "TypeInfo.h"
 #include <sstream>
-#include <parser/Parser.h>
+#include "parser/Parser.h"
 #include "TranslatedProject.h"
 
 /*
@@ -49,6 +49,8 @@ namespace holgen {
     CppPrimitives.insert("float");
     CppPrimitives.insert("double");
     CppPrimitives.insert("bool");
+    CppBasicTypes = CppPrimitives;
+    CppBasicTypes.insert("std::string");
 
     CppIndexedContainers = {
         "std::vector",
@@ -64,6 +66,7 @@ namespace holgen {
     };
     CppContainers = CppIndexedContainers;
     CppContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
+    CppContainers.insert(CppSets.begin(), CppSets.end());
     CppStableContainers = {
         "std::deque",
         "std::set",
@@ -128,12 +131,12 @@ namespace holgen {
       const ProjectDefinition &project, const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
   ) : mConstness(constness), mType(passByType) {
     if (typeDefinition.mName == "Ref") {
-      auto refType = project.GetStruct(typeDefinition.mTemplateParameters[0].mName);
-      auto idField = refType->GetIdField();
+      auto underlyingStruct = project.GetStruct(typeDefinition.mTemplateParameters[0].mName);
+      auto idField = underlyingStruct->GetIdField();
       if (idField) {
-        *this = Type{project, refType->GetIdField()->mType};
+        *this = Type{project, underlyingStruct->GetIdField()->mType};
       } else {
-        *this = Type{refType->mName, PassByType::Pointer};
+        *this = Type{underlyingStruct->mName, PassByType::Pointer};
       }
       return;
     }
