@@ -1,4 +1,4 @@
-#include "Validator.h"
+#include "MonolithValidator.h"
 #include <set>
 #include <string>
 #include "generator/TypeInfo.h"
@@ -63,11 +63,11 @@ namespace holgen {
     }
   }
 
-  Validator::Validator(const ProjectDefinition &projectDefinition) : mProject(projectDefinition) {
+  MonolithValidator::MonolithValidator(const ProjectDefinition &projectDefinition) : mProject(projectDefinition) {
 
   }
 
-  void Validator::Validate(const StructDefinition &structDefinition) {
+  void MonolithValidator::Validate(const StructDefinition &structDefinition) {
     THROW_IF(ReservedKeywords.contains(structDefinition.mName), "Struct {} uses a reserved keyword.",
              structDefinition.mName);
     THROW_IF(ReservedClassNames.contains(structDefinition.mName), "Struct {} uses a reserved class name.",
@@ -85,7 +85,7 @@ namespace holgen {
     }
   }
 
-  void Validator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition) {
+  void MonolithValidator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition) {
     THROW_IF(ReservedKeywords.contains(fieldDefinition.mName), "Field {}.{} uses a reserved keyword.",
              structDefinition.mName, fieldDefinition.mName);
     THROW_IF(TypeInfo::Get().CppPrimitives.contains(fieldDefinition.mName), "Field {}.{} uses a reserved keyword.",
@@ -113,7 +113,7 @@ namespace holgen {
     }
   }
 
-  void Validator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
+  void MonolithValidator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                            const AnnotationDefinition &annotationDefinition) {
     if (annotationDefinition.mName == Annotations::JsonConvert) {
       EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
@@ -174,7 +174,7 @@ namespace holgen {
     }
   }
 
-  void Validator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
+  void MonolithValidator::Validate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                            const TypeDefinition &typeDefinition) {
     Type type(mProject, typeDefinition);
     THROW_IF(!TypeInfo::Get().CppTypes.contains(type.mName) && !CustomTypes.contains(type.mName)
@@ -187,7 +187,7 @@ namespace holgen {
     }
   }
 
-  void Validator::Validate(
+  void MonolithValidator::Validate(
       const StructDefinition &structDefinition,
       const AnnotationDefinition &annotationDefinition
   ) {
@@ -212,13 +212,13 @@ namespace holgen {
     }
   }
 
-  void Validator::Validate() {
+  void MonolithValidator::Validate() {
     for (const auto &structDefinition: mProject.mStructs) {
       Validate(structDefinition);
     }
   }
 
-  void Validator::ValidateContainerAnnotation(const StructDefinition &structDefinition,
+  void MonolithValidator::ValidateContainerAnnotation(const StructDefinition &structDefinition,
                                               const FieldDefinition &fieldDefinition,
                                               const AnnotationDefinition &annotationDefinition) {
     EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);

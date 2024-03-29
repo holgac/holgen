@@ -14,7 +14,7 @@ namespace holgen {
   protected:
     TranslatedProject &mProject;
   private:
-    // BEFORE_RELEASE: get this from GeneratorSettings
+    // TODO(RELEASE): get this from GeneratorSettings
     NamingConvention mNamingConvention;
   };
 

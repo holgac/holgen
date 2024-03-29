@@ -1,1 +1,1 @@
-add_library(parser Parser.cpp Validator.cpp ProjectDefinition.cpp ProjectDefinition.h DependencyGraph.cpp DependencyGraph.h)
+add_library(parser Parser.cpp MonolithValidator.cpp ProjectDefinition.cpp ProjectDefinition.h DependencyGraph.cpp DependencyGraph.h)

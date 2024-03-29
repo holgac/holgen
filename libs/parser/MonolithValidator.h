@@ -5,9 +5,9 @@
 
 namespace holgen {
 
-  class Validator {
+  class MonolithValidator {
   public:
-    Validator(const ProjectDefinition &projectDefinition);
+    MonolithValidator(const ProjectDefinition &projectDefinition);
     void Validate();
   private:
     const ProjectDefinition &mProject;

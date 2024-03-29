@@ -1,5 +1,5 @@
 #include "Translator.h"
-#include "parser/Validator.h"
+#include "parser/MonolithValidator.h"
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassFieldGetterPlugin.h"
@@ -21,7 +21,7 @@
 namespace holgen {
 
   Translator::Translator(const ProjectDefinition &project) : mProject(project) {
-    Validator(project).Validate();
+    MonolithValidator(project).Validate();
     // TODO: currently plugins iterate over struct fields, but we need to iterate over class fields
     // and filter by mField to avoid processing custom fields
     AddPlugin<ClassPlugin>();

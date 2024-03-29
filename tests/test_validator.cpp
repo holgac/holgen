@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "tokenizer/Tokenizer.h"
 #include "parser/Parser.h"
-#include "parser/Validator.h"
+#include "parser/MonolithValidator.h"
 #include "core/Exception.h"
 
 using namespace holgen;
@@ -21,7 +21,7 @@ protected:
     Tokenizer tokenizer(schema);
     Parser parser;
     parser.Parse(tokenizer);
-    Validator validator(parser.GetProject());
+    MonolithValidator validator(parser.GetProject());
     EXPECT_THROW({
                    try {
                      validator.Validate();

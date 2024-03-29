@@ -40,6 +40,8 @@ namespace holgen {
     size_t mIndex;
     size_t mEndIndex;
   public:
+    // TODO(RELEASE): string source arg for easier debugging
+    // TODO(RELEASE): calculate line and column
     Tokenizer(std::string_view sv);
     bool GetCurrent(Token& tok);
     bool GetNext(Token& tok);
