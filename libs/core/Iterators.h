@@ -9,7 +9,7 @@ namespace holgen {
       Next();
     }
 
-    auto operator*() {
+    auto& operator*() {
       return *mIterator;
     }
 

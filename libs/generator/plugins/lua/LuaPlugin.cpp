@@ -209,7 +209,7 @@ namespace holgen {
   void LuaPlugin::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
     if (structDefinition.GetAnnotation(Annotations::NoLua))
       return;
-    cls.mGlobalForwardDeclarations.insert("struct lua_State;");
+    cls.mGlobalForwardDeclarations.insert({"struct", "lua_State"});
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
     AddPushToLua(cls, structDefinition);
@@ -232,7 +232,7 @@ namespace holgen {
     if (enumDefinition.GetAnnotation(Annotations::NoLua))
       return;
 
-    cls.mGlobalForwardDeclarations.insert("struct lua_State;");
+    cls.mGlobalForwardDeclarations.insert({"struct", "lua_State"});
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
 

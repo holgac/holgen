@@ -79,6 +79,7 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mConstness, expected.mConstness) << " in method " << actual.mName;
     EXPECT_EQ(actual.mUserDefined, expected.mUserDefined);
     EXPECT_EQ(actual.mExposeToLua, expected.mExposeToLua);
+    EXPECT_EQ(actual.mFunction, expected.mFunction);
   }
 
   void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected) {

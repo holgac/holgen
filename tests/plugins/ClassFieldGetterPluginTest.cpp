@@ -2,10 +2,14 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassFieldGetterPlugin.h"
-#include "../Helpers.h"
 
 class ClassFieldGetterPluginTest : public TranslatorPluginTest {
 protected:
+  static void Run(TranslatedProject &project) {
+    ClassPlugin(project).Run();
+    ClassFieldPlugin(project).Run();
+    ClassFieldGetterPlugin(project).Run();
+  }
 };
 
 TEST_F(ClassFieldGetterPluginTest, Primitives) {
@@ -14,9 +18,7 @@ struct TestData {
   u32 testFieldUnsigned = 42;
   double testFieldDouble;
 })R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ClassFieldGetterPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -43,9 +45,7 @@ struct TestData {
   string testFieldString;
   InnerStruct testFieldStruct;
 })R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ClassFieldGetterPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -89,9 +89,7 @@ struct InnerStruct {
 struct TestData {
   Ref<InnerStruct> testFieldStruct;
 })R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ClassFieldGetterPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -125,9 +123,7 @@ struct DM {
 struct TestData {
   Ref<InnerStruct> testFieldStruct;
   })R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ClassFieldGetterPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -166,9 +162,7 @@ struct InnerStruct {}
 struct TestData {
   Ref<InnerStruct> testFieldStruct;
   })R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ClassFieldGetterPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 

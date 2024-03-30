@@ -4,6 +4,7 @@
 #include "../NamingConvention.h"
 
 namespace holgen {
+  // TODO: if the class has at least one const container, implement locking
   void ContainerFieldPlugin::Run() {
     for (auto &generatedClass: mProject.mClasses) {
       if (generatedClass.mStruct == nullptr)

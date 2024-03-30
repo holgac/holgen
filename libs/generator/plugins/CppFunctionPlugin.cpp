@@ -1,6 +1,5 @@
 #include "CppFunctionPlugin.h"
 #include "core/Annotations.h"
-#include "core/St.h"
 
 namespace holgen {
   void CppFunctionPlugin::Run() {
@@ -15,16 +14,23 @@ namespace holgen {
   }
 
   void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &func) {
-    // TODO: const decorator
-    auto &method = cls.mMethods.emplace_back(
+    // TODO: const attribute
+    auto method = ClassMethod{
         func.mName,
         Type{mProject.mProject, func.mReturnType},
-        Visibility::Public, Constness::NotConst);
+        Visibility::Public, Constness::NotConst};
     method.mUserDefined = true;
     method.mExposeToLua = true;
+    method.mFunction = &func;
+
+    if (mProject.GetClass(method.mReturnType.mName)) {
+      // TODO: attribute specifying whether const
+      method.mReturnType.mType = PassByType::Pointer;
+    }
+    // TODO: ref type for complex types
     for (const auto &funcArg: func.mArguments) {
       auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject.mProject, funcArg.mType});
-      if (mProject.GetClass(arg.mType.mName) != nullptr) {
+      if (mProject.GetClass(arg.mType.mName)) {
         arg.mType.mType = PassByType::Pointer;
         if (!funcArg.mIsOut)
           arg.mType.mConstness = Constness::Const;
@@ -36,6 +42,7 @@ namespace holgen {
         arg.mType.mType = PassByType::Reference;
       }
     }
-
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 }

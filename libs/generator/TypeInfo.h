@@ -27,10 +27,28 @@ namespace holgen {
   };
 
   struct Type {
-    explicit Type(std::string name, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst)
-    : mName(std::move(name)), mConstness(constness), mType(passByType) { }
+    explicit Type(std::string name, PassByType passByType = PassByType::Value,
+                  Constness constness = Constness::NotConst)
+        : mName(std::move(name)), mConstness(constness), mType(passByType) {}
 
-    explicit Type(const ProjectDefinition& project, const TypeDefinition& typeDefinition, PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
+    explicit Type(const ProjectDefinition &project, const TypeDefinition &typeDefinition,
+                  PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
+
+    bool operator==(const Type &rhs) const {
+      if (mName != rhs.mName || mConstness != rhs.mConstness || mType != rhs.mType
+          || mConstexprness != rhs.mConstexprness || mTemplateParameters.size() != rhs.mTemplateParameters.size()
+          || mFunctionalTemplateParameters.size() != rhs.mFunctionalTemplateParameters.size())
+        return false;
+      for (size_t i = 0; i < mTemplateParameters.size(); i++) {
+        if (mTemplateParameters[i] != rhs.mTemplateParameters[i])
+          return false;
+      }
+      for (size_t i = 0; i < mFunctionalTemplateParameters.size(); i++) {
+        if (mFunctionalTemplateParameters[i] != rhs.mFunctionalTemplateParameters[i])
+          return false;
+      }
+      return true;
+    }
 
     std::string mName = "void";
     Constness mConstness;

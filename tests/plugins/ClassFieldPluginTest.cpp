@@ -1,7 +1,6 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
-#include "../Helpers.h"
 
 class ClassFieldPluginTest : public TranslatorPluginTest {
 protected:
@@ -218,7 +217,7 @@ TEST_F(ClassFieldPluginTest, Map) {
       "Map type std::map used by A.field ({0}:1:11) should have a keyable first template parameter, found std::vector", Source);
 }
 
-TEST_F(ClassFieldPluginTest, UnknownType) {
+TEST_F(ClassFieldPluginTest, InvalidType) {
   ExpectErrorMessage(
       "struct A {u12 field;}", Run,
       "Unknown type u12 used by A.field ({0}:1:11)", Source);
@@ -228,6 +227,9 @@ TEST_F(ClassFieldPluginTest, UnknownType) {
   ExpectErrorMessage(
       "struct A {map<u32, B> field;}", Run,
       "Unknown type B used by A.field ({0}:1:11)", Source);
+  ExpectErrorMessage(
+      "struct A {void field;}", Run,
+      "Invalid void usage in A.field ({0}:1:11)", Source);
   // TODO: test internal types like JsonHelper
 }
 

@@ -4,20 +4,21 @@
 
 namespace holgen {
   void ClassFieldSetterPlugin::Run() {
-    for (auto &generatedClass: mProject.mClasses) {
-      if (generatedClass.mStruct == nullptr)
+    for (auto &cls: mProject.mClasses) {
+      if (cls.mStruct == nullptr)
         continue;
-      for (auto &fieldDefinition: generatedClass.mStruct->mFields) {
-        auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-        auto &setter = generatedClass.mMethods.emplace_back(
-            Naming().FieldSetterNameInCpp(fieldDefinition), Type{"void"},
+      for (auto &field: cls.mFields) {
+        if (!field.mField)
+          continue;
+        auto &method = cls.mMethods.emplace_back(
+            Naming().FieldSetterNameInCpp(*field.mField), Type{"void"},
             Visibility::Public, Constness::NotConst);
-        auto &arg = setter.mArguments.emplace_back("val", generatedField.mType);
-        if (generatedField.mType.mType == PassByType::Pointer)
+        auto &arg = method.mArguments.emplace_back("val", field.mType);
+        if (field.mType.mType == PassByType::Pointer)
           arg.mType.mType = PassByType::Pointer;
         else
           arg.mType.PreventCopying();
-        setter.mBody.Add("{} = val;", generatedField.mName);
+        method.mBody.Add("{} = val;", field.mName);
       }
     }
   }

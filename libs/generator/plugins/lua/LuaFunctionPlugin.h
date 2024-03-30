@@ -6,9 +6,13 @@ namespace holgen {
   class LuaFunctionPlugin : public TranslatorPlugin {
   public:
     using TranslatorPlugin::TranslatorPlugin;
-     void Run() override;
+    void Run() override;
   private:
-    void AddLuaFunction(Class& cls, const FunctionDefinition& functionDefinition);
-    void AddLuaFunctionPushArgs(Class& cls, ClassMethod& method, const FunctionDefinition& functionDefinition);
+    void ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition);
+    void GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition, ClassField &functionHandle);
+    void GenerateFunctionPushArgs(
+        Class &cls, ClassMethod &method, const FunctionDefinition &functionDefinition);
+    void GenerateFunction(
+        Class &cls, const FunctionDefinition &functionDefinition, ClassField &functionHandle);
   };
 }

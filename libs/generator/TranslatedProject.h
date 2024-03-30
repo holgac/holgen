@@ -96,6 +96,7 @@ namespace holgen {
     Constness mConstness;
     Staticness mStaticness;
     Constexprness mConstexprness = Constexprness::NotConstexpr;
+    const FunctionDefinition *mFunction = nullptr;
     bool mUserDefined = false;
     bool mExposeToLua = false;
   };
@@ -113,6 +114,15 @@ namespace holgen {
     Explicitness mExplicitness = Explicitness::NotExplicit;
     // empty body and empty initializer list means = default.
     // bool isDeleted = false;
+  };
+
+  struct ForwardDeclaration {
+    std::string mType;
+    std::string mName;
+
+    bool operator<(const ForwardDeclaration &other) const {
+      return mName < other.mName;
+    }
   };
 
   // Do a sample thing using lua, then figure out how to expose methods (both ways)
@@ -135,11 +145,16 @@ namespace holgen {
     std::vector<Using> mUsings;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
-    std::set<std::string> mGlobalForwardDeclarations;
-    ClassField *GetField(const std::string &name);
-    const ClassField *GetField(const std::string &name) const;
-    ClassMethod *GetMethod(const std::string &name, Constness constness);
-    const Using *GetUsing(const std::string &name) const;
+    std::set<ForwardDeclaration> mGlobalForwardDeclarations;
+    [[nodiscard]] ClassField *GetField(const std::string &name);
+    [[nodiscard]] const ClassField *GetField(const std::string &name) const;
+    [[nodiscard]] ClassMethod *GetMethod(const std::string &name, Constness constness);
+    [[nodiscard]] const Using *GetUsing(const std::string &name) const;
+    [[nodiscard]] const ForwardDeclaration *GetForwardDeclaration(const std::string &name) const;
+
+    [[nodiscard]] auto GetMethods(const std::string &name) const {
+      return NameFilterForEachWrapper(name, mMethods);
+    }
   };
 
   struct TranslatedProject {
