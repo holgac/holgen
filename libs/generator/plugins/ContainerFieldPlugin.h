@@ -8,7 +8,7 @@ namespace holgen {
     using TranslatorPlugin::TranslatorPlugin;
      void Run() override;
   private:
-    void ProcessField(Class& cls, size_t fieldIdx);
+    void ProcessField(Class& cls, ClassField& field);
     void ProcessIndex(Class& cls, const ClassField& field, const AnnotationDefinition& annotationDefinition);
     void GenerateIndexGetter(Class& generatedClass, const ClassField& field, const AnnotationDefinition& annotationDefinition);
     void GenerateNextIndexField(Class& cls, const ClassField& field);

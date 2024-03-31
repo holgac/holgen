@@ -14,11 +14,11 @@ namespace {
     helpers::ExpectEqual(expected.mType, actual.mType);
   }
 
-  void ExpectFields(const Class &c, const std::vector<ClassField> &fields) {
+  void ExpectFields(const Class &c, const std::list<ClassField> &fields) {
     EXPECT_EQ(c.mFields.size(), fields.size());
     // This makes assumptions about the order
-    for (size_t i = 0; i < c.mFields.size(); ++i) {
-      ExpectClassFieldEqual(c.mFields[i], fields[i]);
+    for(auto itActual = c.mFields.begin(), itExpected = fields.begin(); itActual != c.mFields.end(); ++itActual, ++itExpected) {
+      ExpectClassFieldEqual(*itActual, *itExpected);
     }
     EXPECT_EQ(c.mFields.size(), fields.size());
   }
@@ -33,7 +33,7 @@ namespace {
     Parser parser;
     parser.Parse(tokenizer);
     auto tp = Translator(parser.GetProject()).Translate();
-    auto &c = tp.mClasses[0];
+    auto &c = tp.mClasses.front();
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {
         ClassField{"mAge",
@@ -70,7 +70,7 @@ namespace {
     method = country->GetMethod("GetCity", Constness::Const);
     ASSERT_NE(method, nullptr);
     EXPECT_EQ(method->mArguments.size(), 1);
-    EXPECT_EQ(method->mArguments[0].mType.mName, "uint32_t");
+    EXPECT_EQ(method->mArguments.front().mType.mName, "uint32_t");
   }
 
   TEST(TranslatorTest, ContainerIndex) {
@@ -94,6 +94,6 @@ namespace {
     auto method = country->GetMethod("GetCityFromName", Constness::Const);
     ASSERT_NE(method, nullptr);
     EXPECT_EQ(method->mArguments.size(), 1);
-    EXPECT_EQ(method->mArguments[0].mType.mName, "std::string");
+    EXPECT_EQ(method->mArguments.front().mType.mName, "std::string");
   }
 }

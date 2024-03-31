@@ -73,11 +73,12 @@ namespace holgen {
       codeBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
                     -ssize_t(luaMethod.mArguments.size()) - 1);
       std::stringstream funcArgs;
-      for (size_t i = 0; i < luaMethod.mArguments.size(); ++i) {
+      size_t i = 0;
+      for (auto& arg: luaMethod.mArguments) {
         if (i != 0)
           funcArgs << ", ";
         funcArgs << "arg" << i;
-        auto sanitizedType = luaMethod.mArguments[i].mType;
+        auto sanitizedType = arg.mType;
         sanitizedType.mType = PassByType::Value;
         sanitizedType.mConstness = Constness::NotConst;
         codeBlock.Add("{} arg{};", sanitizedType.ToString(), i);
@@ -85,6 +86,7 @@ namespace holgen {
             "{}::{}(arg{}, lsInner, {});",
             St::LuaHelper, St::LuaHelper_Read, i,
             ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+        ++i;
       }
       if (luaMethod.mReturnType.mName != "void") {
         codeBlock.Add("auto result = instance->{}({});", luaMethod.mName, funcArgs.str());

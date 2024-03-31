@@ -27,7 +27,7 @@ enum TestEnum {
   ctor.mExplicitness = Explicitness::Explicit;
   ctor.mArguments.emplace_back("value", Type{"UnderlyingType"}, "Invalid");
   ctor.mInitializerList.emplace_back("mValue", "value");
-  helpers::ExpectEqual(cls->mConstructors[0], ctor);
+  helpers::ExpectEqual(cls->mConstructors.front(), ctor);
   helpers::ExpectEqual(*cls->GetField("mValue"), ClassField{"mValue", Type{"UnderlyingType"}});
 }
 

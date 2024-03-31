@@ -1,4 +1,5 @@
 #pragma once
+#include <list>
 
 #include "parser/DependencyGraph.h"
 #include "TypeInfo.h"
@@ -39,7 +40,7 @@ namespace holgen {
     Staticness mStaticness = Staticness::NotStatic;
     Visibility mVisibility = Visibility::Private;
     std::string mDefaultValue;
-    std::vector<std::string> mDefaultConstructorArguments;
+    std::list<std::string> mDefaultConstructorArguments;
     const FieldDefinition *mField = nullptr;
   };
 
@@ -66,8 +67,8 @@ namespace holgen {
   struct ClassMethodBase {
     Visibility mVisibility = Visibility::Public;
     CodeBlock mBody;
-    std::vector<ClassMethodArgument> mArguments;
-    std::vector<TemplateParameter> mTemplateParameters;
+    std::list<ClassMethodArgument> mArguments;
+    std::list<TemplateParameter> mTemplateParameters;
     bool mIsTemplateSpecialization = false;
   };
 
@@ -75,7 +76,7 @@ namespace holgen {
     Using(
         Type sourceType,
         std::string targetType
-    ) : mSourceType(sourceType), mTargetType(targetType) {}
+    ) : mSourceType(std::move(sourceType)), mTargetType(std::move(targetType)) {}
 
     Type mSourceType;
     std::string mTargetType;
@@ -110,7 +111,7 @@ namespace holgen {
   };
 
   struct ClassConstructor : ClassMethodBase {
-    std::vector<ClassConstructorInitializer> mInitializerList;
+    std::list<ClassConstructorInitializer> mInitializerList;
     Explicitness mExplicitness = Explicitness::NotExplicit;
     // empty body and empty initializer list means = default.
     // bool isDeleted = false;
@@ -138,11 +139,12 @@ namespace holgen {
     const StructDefinition *mStruct = nullptr;
     const EnumDefinition *mEnum = nullptr;
     std::string mName;
-    std::vector<ClassMethod> mMethods;
-    std::vector<ClassConstructor> mConstructors;
-    std::vector<ClassField> mFields;
-    std::vector<TemplateParameter> mTemplateParameters;
-    std::vector<Using> mUsings;
+    // TODO: deque? or list?
+    std::list<ClassMethod> mMethods;
+    std::list<ClassConstructor> mConstructors;
+    std::list<ClassField> mFields;
+    std::list<TemplateParameter> mTemplateParameters;
+    std::list<Using> mUsings;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
     std::set<ForwardDeclaration> mGlobalForwardDeclarations;
@@ -162,7 +164,7 @@ namespace holgen {
     explicit TranslatedProject(const ProjectDefinition &projectDefinition);
     const ProjectDefinition &mProject;
     const DependencyGraph mDependencyGraph;
-    std::vector<Class> mClasses;
+    std::list<Class> mClasses;
     // TODO: AddClass that checks name colls
     [[nodiscard]] Class *GetClass(const std::string &name);
     [[nodiscard]] const Class *GetClass(const std::string &name) const;

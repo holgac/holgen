@@ -233,6 +233,14 @@ struct A {
   func TestFunction() -> u32;
 }
   )R", Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
+  ExpectErrorMessage(R"R(
+struct A {
+  @luaFunc
+  func TestFunction(string arg) -> u32;
+  @luaFunc
+  func TestFunction(string arg) -> u32;
+}
+  )R", Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
 }
 
 TEST_F(LuaFunctionPluginTest, InvalidType) {

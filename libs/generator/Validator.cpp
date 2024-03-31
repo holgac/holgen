@@ -49,6 +49,29 @@ namespace holgen {
       return std::format("{} ({})", annotation.mName, annotation.mDefinitionSource);
     }
 
+    bool AreArgumentsCompatible(const ClassMethodArgument& arg1, const ClassMethodArgument& arg2) {
+      if (arg1.mType.mName != arg2.mType.mName)
+        return false;
+      if (arg1.mType.mType != arg2.mType.mType) {
+        if (arg1.mType.mType == PassByType::Pointer || arg2.mType.mType == PassByType::Pointer ||
+        arg1.mType.mType == PassByType::MoveReference || arg2.mType.mType == PassByType::MoveReference)
+          return false;
+      }
+      if (arg1.mType.mTemplateParameters.size() != arg2.mType.mTemplateParameters.size())
+        return false;
+      for (size_t j = 0; j < arg1.mType.mTemplateParameters.size(); ++j) {
+        if (arg1.mType.mTemplateParameters[j].mName != arg2.mType.mTemplateParameters[j].mName)
+          return false;
+      }
+      if (arg1.mType.mFunctionalTemplateParameters.size() != arg2.mType.mFunctionalTemplateParameters.size())
+        return false;
+      for (size_t j = 0; j < arg1.mType.mFunctionalTemplateParameters.size(); ++j) {
+        if (arg1.mType.mFunctionalTemplateParameters[j].mName != arg2.mType.mFunctionalTemplateParameters[j].mName)
+          return false;
+      }
+      return true;
+    }
+
   }
 
   Validator::Validator(
@@ -142,30 +165,15 @@ namespace holgen {
         continue;
       if (method.mArguments.size() != method2.mArguments.size())
         continue;
-      for (size_t i = 0; i < method.mArguments.size(); ++i) {
-        auto &arg = method.mArguments[i];
-        auto &arg2 = method2.mArguments[i];
-        if (arg.mType.mName != arg2.mType.mName)
-          continue;
-        if (arg.mType.mType != arg2.mType.mType) {
-          if (arg.mType.mType == PassByType::Pointer || arg2.mType.mType == PassByType::Pointer ||
-              arg.mType.mType == PassByType::MoveReference || arg2.mType.mType == PassByType::MoveReference)
-            continue;
+      bool argumentsAreCompatible = true;
+      for (auto it1 = method.mArguments.begin(), it2 = method2.mArguments.begin();
+           it1 != method.mArguments.end(); ++it1, ++it2) {
+        if (!AreArgumentsCompatible(*it1, *it2)) {
+          argumentsAreCompatible = false;
+          break;
         }
-        if (arg.mType.mTemplateParameters.size() != arg2.mType.mTemplateParameters.size())
-          continue;
-        for (size_t j = 0; j < arg.mType.mTemplateParameters.size(); ++j) {
-          if (arg.mType.mTemplateParameters[j].mName != arg2.mType.mTemplateParameters[j].mName)
-            continue;
-        }
-        if (arg.mType.mFunctionalTemplateParameters.size() != arg2.mType.mFunctionalTemplateParameters.size())
-          continue;
-        for (size_t j = 0; j < arg.mType.mFunctionalTemplateParameters.size(); ++j) {
-          if (arg.mType.mFunctionalTemplateParameters[j].mName != arg2.mType.mFunctionalTemplateParameters[j].mName)
-            continue;
-        }
-        THROW("Duplicate method: {} and {}", ToString(cls, method2), ToString(cls, method));
       }
+      THROW_IF(argumentsAreCompatible, "Duplicate method: {} and {}", ToString(cls, method2), ToString(cls, method));
     }
     ValidateType(method.mReturnType, cls, true, ToString(cls, method));
     for (auto &arg: method.mArguments) {
@@ -202,7 +210,8 @@ namespace holgen {
       if (auto container2 = field2.mField->GetAnnotation(Annotations::Container)) {
         auto elemName2 = container2->GetAttribute(Annotations::Container_ElemName);
         THROW_IF(elemName2 &&
-                     elemName2->mValue.mName == annotation.GetAttribute(Annotations::Container_ElemName)->mValue.mName,
+                     elemName2->mValue.mName ==
+                     annotation.GetAttribute(Annotations::Container_ElemName)->mValue.mName,
                  "{} has multiple container fields ({} and {}) with identical elemName: {}",
                  cls.mStruct->mName, ToString(cls, field), ToString(cls, field2), elemName2->mValue.mName);
       }
@@ -237,7 +246,8 @@ namespace holgen {
     THROW_IF(!TypeInfo::Get().KeyableTypes.contains(indexedField->mType.mName),
              "{} has an index on non-keyable field {}",
              ToString(cls, field), ToString(*underlyingClass, *indexedField));
-    THROW_IF(annotation.GetAttribute(Annotations::Index_ForConverter) && !cls.mStruct->GetAnnotation(Annotations::DataManager),
+    THROW_IF(annotation.GetAttribute(Annotations::Index_ForConverter) &&
+             !cls.mStruct->GetAnnotation(Annotations::DataManager),
              "{} has an index with a converter but the class is missing the {} annotation",
              ToString(cls, field), Annotations::DataManager);
   }

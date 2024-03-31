@@ -9,32 +9,29 @@ namespace holgen {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct == nullptr)
         continue;
-      size_t fieldCount = cls.mFields.size();
-      // iterate over original fields
-      for (size_t i = 0; i < fieldCount; ++i) {
-        if (!cls.mFields[i].mField || !cls.mFields[i].mField->GetAnnotation(Annotations::Container))
+      for (auto it = cls.mFields.begin(); it != cls.mFields.end(); ++it) {
+        if (!it->mField || !it->mField->GetAnnotation(Annotations::Container))
           continue;
-        ProcessField(cls, i);
+        ProcessField(cls, *it);
       }
     }
   }
 
-  // TODO: using size_t here to avoid iterator invalidations. Just use deque instead.
-  void ContainerFieldPlugin::ProcessField(Class &cls, size_t fieldIdx) {
-    auto container = cls.mFields[fieldIdx].mField->GetAnnotation(Annotations::Container);
-    Validate().ContainerAnnotation(cls, cls.mFields[fieldIdx], *container);
-    for (const auto &annotation: cls.mFields[fieldIdx].mField->GetAnnotations(Annotations::Index)) {
-      ProcessIndex(cls, cls.mFields[fieldIdx], annotation);
+  void ContainerFieldPlugin::ProcessField(Class &cls, ClassField &field) {
+    auto container = field.mField->GetAnnotation(Annotations::Container);
+    Validate().ContainerAnnotation(cls, field, *container);
+    for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
+      ProcessIndex(cls, field, annotation);
     }
-    GenerateNextIndexField(cls, cls.mFields[fieldIdx]);
-    GenerateAddElem(cls, cls.mFields[fieldIdx], true);
-    GenerateAddElem(cls, cls.mFields[fieldIdx], false);
-    GenerateGetElem(cls, cls.mFields[fieldIdx]);
-    if (CanImplementHasElem(cls, cls.mFields[fieldIdx]))
-      GenerateHasElem(cls, cls.mFields[fieldIdx]);
-    if (CanImplementDeleteElem(cls, cls.mFields[fieldIdx]))
-      GenerateDeleteElem(cls, cls.mFields[fieldIdx]);
-    GenerateGetCount(cls, cls.mFields[fieldIdx]);
+    GenerateNextIndexField(cls, field);
+    GenerateAddElem(cls, field, true);
+    GenerateAddElem(cls, field, false);
+    GenerateGetElem(cls, field);
+    if (CanImplementHasElem(cls, field))
+      GenerateHasElem(cls, field);
+    if (CanImplementDeleteElem(cls, field))
+      GenerateDeleteElem(cls, field);
+    GenerateGetCount(cls, field);
   }
 
   void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
@@ -307,4 +304,5 @@ namespace holgen {
       cls.mFields.emplace_back(std::move(nextIdField));
     }
   }
+
 }

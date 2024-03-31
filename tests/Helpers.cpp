@@ -47,8 +47,9 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue) << " in field " << actual.mName;
     EXPECT_EQ(actual.mDefaultConstructorArguments.size(), expected.mDefaultConstructorArguments.size());
 
-    for (size_t i = 0; i < actual.mDefaultConstructorArguments.size(); ++i) {
-      EXPECT_EQ(expected.mDefaultConstructorArguments[i], actual.mDefaultConstructorArguments[i]);
+    for (auto itExpected = expected.mDefaultConstructorArguments.begin(), itActual = actual.mDefaultConstructorArguments.begin();
+         itExpected != expected.mDefaultConstructorArguments.end(); ++itExpected, ++itActual) {
+      EXPECT_EQ(*itActual, *itExpected);
     }
     EXPECT_EQ(actual.mField, expected.mField) << " in field " << actual.mName;
   }
@@ -61,12 +62,14 @@ namespace holgen::helpers {
     else
       EXPECT_EQ(actual.mBody.ToString(), expected.mBody.ToString());
     ASSERT_EQ(actual.mArguments.size(), expected.mArguments.size());
-    for (size_t i = 0; i < actual.mArguments.size(); ++i) {
-      ExpectEqual(actual.mArguments[i], expected.mArguments[i]);
+    for (auto itExpected = expected.mArguments.begin(), itActual = actual.mArguments.begin();
+         itExpected != expected.mArguments.end(); ++itExpected, ++itActual) {
+      ExpectEqual(*itActual, *itExpected);
     }
     ASSERT_EQ(actual.mTemplateParameters.size(), expected.mTemplateParameters.size());
-    for (size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
-      ExpectEqual(actual.mTemplateParameters[i], expected.mTemplateParameters[i]);
+    for (auto itExpected = expected.mTemplateParameters.begin(), itActual = actual.mTemplateParameters.begin();
+         itExpected != expected.mTemplateParameters.end(); ++itExpected, ++itActual) {
+      ExpectEqual(*itActual, *itExpected);
     }
   }
 
@@ -92,8 +95,9 @@ namespace holgen::helpers {
                    const std::optional<std::string> &expectedBody) {
     ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, "constructor");
     EXPECT_EQ(actual.mExplicitness, expected.mExplicitness);
-    for (size_t i = 0; i < actual.mInitializerList.size(); ++i) {
-      ExpectEqual(actual.mInitializerList[i], expected.mInitializerList[i]);
+    for (auto itExpected = expected.mInitializerList.begin(), itActual = actual.mInitializerList.begin();
+         itExpected != expected.mInitializerList.end(); ++itExpected, ++itActual) {
+      ExpectEqual(*itActual, *itExpected);
     }
   }
 

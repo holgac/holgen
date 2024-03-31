@@ -12,7 +12,8 @@ namespace holgen {
              || method.mConstexprness == Constexprness::Constexpr;
     }
 
-    std::string StringifyTemplateParameters(const std::vector<TemplateParameter> &templateParameters) {
+    template <typename C>
+    std::string StringifyTemplateParameters(const C &templateParameters) {
       std::stringstream ss;
       ss << "template <";
       bool isFirst = true;
@@ -176,10 +177,10 @@ namespace holgen {
         line << cls.mName << "(";
         bool isFirst = true;
         for (auto &arg: ctor.mArguments) {
-          if (!isFirst)
-            line << ", ";
-          else
+          if (isFirst)
             isFirst = false;
+          else
+            line << ", ";
           line << arg.mType.ToString() << " " << arg.mName;
           if (!arg.mDefaultValue.empty()) {
             line << " = " << arg.mDefaultValue;
@@ -394,10 +395,10 @@ namespace holgen {
         line << cls.mName << "::" << cls.mName << "(";
         bool isFirst = true;
         for (auto &arg: ctor.mArguments) {
-          if (!isFirst)
-            line << ", ";
-          else
+          if (isFirst)
             isFirst = false;
+          else
+            line << ", ";
           if (cls.GetUsing(arg.mType.mName))
             line << cls.mName << "::";
           line << arg.mType.ToString() << " " << arg.mName;
@@ -444,10 +445,13 @@ namespace holgen {
     if (!isInHeader || !isInsideClass)
       ss << cls.mName << "::";
     ss << method.mName << "(";
-    for (size_t i = 0; i < method.mArguments.size(); i++) {
-      if (i != 0)
+    bool isFirst = true;
+    for(auto& arg: method.mArguments) {
+      if (isFirst)
+        isFirst = false;
+      else
         ss << ", ";
-      ss << method.mArguments[i].mType.ToString() << " " << method.mArguments[i].mName;
+      ss << arg.mType.ToString() << " " << arg.mName;
     }
     ss << ")";
     if (method.mConstness == Constness::Const)
