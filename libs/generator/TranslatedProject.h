@@ -42,6 +42,7 @@ namespace holgen {
     std::string mDefaultValue;
     std::list<std::string> mDefaultConstructorArguments;
     const FieldDefinition *mField = nullptr;
+    const EnumEntryDefinition *mEntry = nullptr;
   };
 
   struct ClassMethodArgument {

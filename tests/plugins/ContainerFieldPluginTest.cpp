@@ -595,7 +595,6 @@ struct A {
   @container(elemName=b)
   vector<Inner> inners;
   })R", Run, "container annotation in A.inners ({}:5:3) should be used only once", Source);
-  return;
   ExpectErrorMessage(R"R(
 struct Inner {}
 struct A {

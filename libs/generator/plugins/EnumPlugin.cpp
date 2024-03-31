@@ -5,11 +5,11 @@
 namespace holgen {
   void EnumPlugin::Run() {
 
-    for (auto &generatedClass: mProject.mClasses) {
-      if (generatedClass.mEnum == nullptr)
+    for (auto &cls: mProject.mClasses) {
+      if (cls.mEnum == nullptr)
         continue;
-      auto &enumDefinition = *generatedClass.mEnum;
-      GenerateCommon(generatedClass, enumDefinition);
+      GenerateCommon(cls);
+      Validate().Enum(cls);
     }
   }
 
@@ -26,106 +26,30 @@ namespace holgen {
     };
   }
 
-  void EnumPlugin::GenerateCommon(Class &generatedClass, const EnumDefinition &enumDefinition) {
-    generatedClass.mUsings.emplace_back(Type{"int64_t"}, "UnderlyingType");
-    generatedClass.mFields.emplace_back("mValue", Type{"UnderlyingType"});
+  void EnumPlugin::GenerateCommon(Class &cls) {
+    cls.mUsings.emplace_back(Type{"int64_t"}, St::Enum_UnderlyingType);
+    cls.mFields.emplace_back("mValue", Type{St::Enum_UnderlyingType});
     {
-      ClassConstructor &ctor = generatedClass.mConstructors.emplace_back();
+      ClassConstructor &ctor = cls.mConstructors.emplace_back();
       ctor.mExplicitness = Explicitness::Explicit;
-      ctor.mArguments.emplace_back("value", Type{"UnderlyingType"}, "Invalid");
+      ctor.mArguments.emplace_back("value", Type{St::Enum_UnderlyingType}, "Invalid");
       ctor.mInitializerList.emplace_back("mValue", "value");
     }
 
     {
-      ClassMethod &valueGetter = generatedClass.mMethods.emplace_back("Get", Type{"UnderlyingType"});
+      ClassMethod &valueGetter = cls.mMethods.emplace_back("Get", Type{St::Enum_UnderlyingType});
       valueGetter.mBody.Add("return mValue;");
     }
 
-    for (auto &entry: enumDefinition.mEntries) {
-      ClassField &valueField = generatedClass.mFields.emplace_back(
-          entry.mName + "Value",
-          Type{"UnderlyingType", PassByType::Value, Constness::Const},
-          Visibility::Public,
-          Staticness::Static,
-          entry.mValue
-      );
-      valueField.mType.mConstexprness = Constexprness::Constexpr;
-
-      ClassField &entryField = generatedClass.mFields.emplace_back(
-          entry.mName,
-          Type{generatedClass.mName, PassByType::Value, Constness::Const},
-          Visibility::Public,
-          Staticness::Static
-      );
-      entryField.mDefaultConstructorArguments.push_back(entry.mValue);
-    }
-
-    {
-      ClassField &invalidEntry = generatedClass.mFields.emplace_back(
-          "Invalid",
-          Type{"UnderlyingType", PassByType::Value, Constness::Const},
-          Visibility::Public,
-          Staticness::Static,
-          enumDefinition.mInvalidValue
-      );
-      invalidEntry.mType.mConstexprness = Constexprness::Constexpr;
-      invalidEntry.mDefaultValue = enumDefinition.mInvalidValue;
-    }
-
-    {
-      ClassMethod &fromString = generatedClass.mMethods.emplace_back(
-          "FromString", Type{generatedClass.mName},
-          Visibility::Public, Constness::NotConst, Staticness::Static
-      );
-      fromString.mArguments.emplace_back("str", Type{"std::string_view"});
-      bool isFirst = true;
-      for (auto &entry: enumDefinition.mEntries) {
-        if (isFirst) {
-          isFirst = false;
-          fromString.mBody.Add("if (str == \"{}\") {{", entry.mName);
-        } else {
-          fromString.mBody.Add("}} else if (str == \"{}\") {{", entry.mName);
-        }
-        fromString.mBody.Indent(1);
-        fromString.mBody.Add("return {}({});", generatedClass.mName, entry.mValue);
-        fromString.mBody.Indent(-1);
-      }
-      if (!enumDefinition.mEntries.empty()) {
-        fromString.mBody.Add("}} else {{");
-        fromString.mBody.Indent(1);
-      }
-      fromString.mBody.Add("return {}({}::Invalid);", generatedClass.mName, generatedClass.mName);
-      if (!enumDefinition.mEntries.empty()) {
-        fromString.mBody.Indent(-1);
-        fromString.mBody.Add("}}");
-      }
-    }
-
-    {
-      // TODO: it'd be better to return a char* here since everything is const already.
-      // TODO: implement formatter and << operators
-      ClassMethod &toString = generatedClass.mMethods.emplace_back(
-          "ToString",
-          Type{"std::string"},
-          Visibility::Public,
-          Constness::Const
-      );
-      toString.mBody.Add("switch (mValue) {{");
-      toString.mBody.Indent(1);
-      for (auto &entry: enumDefinition.mEntries) {
-        toString.mBody.Add("case {}: return \"{}\";", entry.mValue, entry.mName);
-      }
-      toString.mBody.Add("default: return \"INVALID\";");
-      toString.mBody.Indent(-1);
-      toString.mBody.Add("}}"); // switch
-    }
-
-    GenerateOperators(generatedClass);
-    GenerateGetEntries(generatedClass, true);
-    GenerateGetEntries(generatedClass, false);
+    GenerateEntries(cls);
+    GenerateFromString(cls);
+    GenerateToString(cls);
+    GenerateOperators(cls);
+    GenerateGetEntries(cls, true);
+    GenerateGetEntries(cls, false);
   }
 
-  void EnumPlugin::GenerateOperators(Class &generatedClass) {
+  void EnumPlugin::GenerateOperators(Class &cls) {
     // TODO: test these properly. Currently overloads aren't well supported.
     const std::vector<EnumOperator> operators = {
         {"=",  Constness::NotConst, EnumOperatorReturnType::This,   true},
@@ -136,17 +60,17 @@ namespace holgen {
     };
 
     for (auto &op: operators) {
-      ClassMethod &opMethod = generatedClass.mMethods.emplace_back(
+      ClassMethod &opMethod = cls.mMethods.emplace_back(
           "operator " + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness
       );
       if (op.mReturn == EnumOperatorReturnType::This) {
-        opMethod.mReturnType.mName = generatedClass.mName;
+        opMethod.mReturnType.mName = cls.mName;
         opMethod.mReturnType.mType = PassByType::Reference;
       }
       if (op.mIntegralArgument)
-        opMethod.mArguments.emplace_back("rhs", Type{"UnderlyingType"});
+        opMethod.mArguments.emplace_back("rhs", Type{St::Enum_UnderlyingType});
       else
-        opMethod.mArguments.emplace_back("rhs", Type{generatedClass.mName, PassByType::Reference, Constness::Const});
+        opMethod.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
       {
         auto line = opMethod.mBody.Line();
         if (op.mReturn == EnumOperatorReturnType::Result)
@@ -162,32 +86,130 @@ namespace holgen {
     }
   }
 
-  void EnumPlugin::GenerateGetEntries(Class &generatedClass, bool forValues) {
-    auto &method = generatedClass.mMethods.emplace_back(
+  void EnumPlugin::GenerateGetEntries(Class &cls, bool forValues) {
+    auto method = ClassMethod{
         forValues ? "GetEntryValues" : "GetEntries",
         Type{"std::array"},
         Visibility::Public,
         Constness::NotConst,
         Staticness::Static
-    );
+    };
     if (forValues) {
       method.mConstexprness = Constexprness::Constexpr;
-      method.mReturnType.mTemplateParameters.emplace_back(generatedClass.mName + "::UnderlyingType");
+      method.mReturnType.mTemplateParameters.emplace_back(
+          std::format("{}::{}", cls.mName, St::Enum_UnderlyingType));
     } else {
-      method.mReturnType.mTemplateParameters.emplace_back(generatedClass.mName);
+      method.mReturnType.mTemplateParameters.emplace_back(cls.mName);
     }
     method.mReturnType.mTemplateParameters.emplace_back(
-        std::format("{}", generatedClass.mEnum->mEntries.size()));
-    auto line = method.mBody.Line();
-    line << "return " << method.mReturnType.ToString() << "{";
-    for (size_t i = 0; i < generatedClass.mEnum->mEntries.size(); ++i) {
-      if (i > 0)
-        line << ", ";
-      if (forValues)
-        line << generatedClass.mEnum->mEntries[i].mName + "Value";
-      else
-        line << generatedClass.mEnum->mEntries[i].mName;
+        std::format("{}", cls.mEnum->mEntries.size()));
+    {
+      auto line = method.mBody.Line();
+      line << "return " << method.mReturnType.ToString() << "{";
+      for (size_t i = 0; i < cls.mEnum->mEntries.size(); ++i) {
+        if (i > 0)
+          line << ", ";
+        if (forValues)
+          line << cls.mEnum->mEntries[i].mName + "Value";
+        else
+          line << cls.mEnum->mEntries[i].mName;
+      }
+      line << "};";
     }
-    line << "};";
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
+  }
+
+  void EnumPlugin::GenerateEntries(Class &cls) {
+    for (auto &entry: cls.mEnum->mEntries) {
+      auto valueField = ClassField{
+          entry.mName + "Value",
+          Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
+          Visibility::Public,
+          Staticness::Static,
+          entry.mValue
+      };
+      valueField.mType.mConstexprness = Constexprness::Constexpr;
+      valueField.mEntry = &entry;
+      auto entryField = ClassField{
+          entry.mName,
+          Type{cls.mName, PassByType::Value, Constness::Const},
+          Visibility::Public,
+          Staticness::Static
+      };
+      entryField.mDefaultConstructorArguments.push_back(entry.mValue);
+      entryField.mEntry = &entry;
+
+      Validate().NewField(cls, valueField);
+      cls.mFields.push_back(std::move(valueField));
+      Validate().NewField(cls, entryField);
+      cls.mFields.push_back(std::move(entryField));
+
+    }
+
+    {
+      auto invalidEntry = ClassField{
+          "Invalid",
+          Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
+          Visibility::Public,
+          Staticness::Static,
+          cls.mEnum->mInvalidValue
+      };
+      invalidEntry.mType.mConstexprness = Constexprness::Constexpr;
+      invalidEntry.mDefaultValue = cls.mEnum->mInvalidValue;
+      Validate().NewField(cls, invalidEntry);
+      cls.mFields.push_back(std::move(invalidEntry));
+    }
+  }
+
+  void EnumPlugin::GenerateFromString(Class &cls) {
+    auto method = ClassMethod{
+        "FromString", Type{cls.mName},
+        Visibility::Public, Constness::NotConst, Staticness::Static
+    };
+    method.mArguments.emplace_back("str", Type{"std::string_view"});
+    bool isFirst = true;
+    for (auto &entry: cls.mEnum->mEntries) {
+      if (isFirst) {
+        isFirst = false;
+        method.mBody.Add("if (str == \"{}\") {{", entry.mName);
+      } else {
+        method.mBody.Add("}} else if (str == \"{}\") {{", entry.mName);
+      }
+      method.mBody.Indent(1);
+      method.mBody.Add("return {}({});", cls.mName, entry.mValue);
+      method.mBody.Indent(-1);
+    }
+    if (!cls.mEnum->mEntries.empty()) {
+      method.mBody.Add("}} else {{");
+      method.mBody.Indent(1);
+    }
+    method.mBody.Add("return {}({}::Invalid);", cls.mName, cls.mName);
+    if (!cls.mEnum->mEntries.empty()) {
+      method.mBody.Indent(-1);
+      method.mBody.Add("}}");
+    }
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
+  }
+
+  void EnumPlugin::GenerateToString(Class &cls) {
+    // TODO: implement formatter and << operators
+    auto method = ClassMethod{
+        "ToString",
+        Type{"char", PassByType::Pointer, Constness::Const},
+        Visibility::Public,
+        Constness::Const
+    };
+    method.mBody.Add("switch (mValue) {{");
+    method.mBody.Indent(1);
+    for (auto &entry: cls.mEnum->mEntries) {
+      method.mBody.Add("case {}: return \"{}\";", entry.mValue, entry.mName);
+    }
+    method.mBody.Add("default: return \"INVALID\";");
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}"); // switch
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 }

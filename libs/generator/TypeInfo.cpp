@@ -52,11 +52,14 @@ namespace holgen {
     CppPrimitives.insert("double");
     CppPrimitives.insert("bool");
     CppBasicTypes = CppPrimitives;
+    CppBasicTypes.insert("char");
     CppBasicTypes.insert("std::string");
+    CppBasicTypes.insert("std::string_view");
 
     CppIndexedContainers = {
         "std::vector",
         "std::deque",
+        "std::array",
     };
     CppKeyedContainers = {
         "std::map",

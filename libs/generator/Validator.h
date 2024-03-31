@@ -11,6 +11,7 @@ namespace holgen {
     void NewField(const Class &cls, const ClassField &field) const;
     void RefField(const Class &cls, const FieldDefinition &fieldDefinition) const;
     void NewMethod(const Class &cls, const ClassMethod &method) const;
+    void Enum(const Class &cls) const;
     void ContainerAnnotation(
         const Class &cls, const ClassField &field, const AnnotationDefinition &annotationDefinition) const;
     void ManagedAnnotation(const Class &cls, const AnnotationDefinition &annotationDefinition) const;

@@ -4,6 +4,7 @@
 #include "core/Annotations.h"
 #include "TypeInfo.h"
 #include "core/Exception.h"
+#include "core/St.h"
 #include "TranslatedProject.h"
 
 namespace holgen {
@@ -31,9 +32,15 @@ namespace holgen {
       return std::format("{}.{} ({})", cls.mName, fieldDefinition.mName, fieldDefinition.mDefinitionSource);
     }
 
+    std::string ToString(const Class &cls, const EnumEntryDefinition &entryDefinition) {
+      return std::format("{}.{} ({})", cls.mName, entryDefinition.mName, entryDefinition.mDefinitionSource);
+    }
+
     std::string ToString(const Class &cls, const ClassField &field) {
       if (field.mField)
         return ToString(cls, *field.mField);
+      else if (field.mEntry)
+        return ToString(cls, *field.mEntry);
       else
         return std::format("{}.{}", cls.mName, field.mName);
     }
@@ -91,6 +98,16 @@ namespace holgen {
     auto dup = cls.GetField(field.mName);
     THROW_IF(dup, "Duplicate field: {} and {}", ToString(cls, *dup), ToString(cls, field));
     ValidateType(field.mType, cls, false, ToString(cls, field));
+    if (field.mEntry) {
+      THROW_IF(field.mDefaultValue.empty() && field.mDefaultConstructorArguments.empty(),
+               "Default value for enum entry {} is missing", ToString(cls, field));
+      auto defaultValue = field.mDefaultValue.empty() ? field.mDefaultConstructorArguments.front()
+                                                      : field.mDefaultValue;
+      auto integral = std::atoll(defaultValue.c_str());
+      THROW_IF(defaultValue != std::to_string(integral),
+               "Default value of {} is not integral: {}",
+               ToString(cls, field), defaultValue);
+    }
   }
 
   void Validator::ValidateType(const Type &type, const Class &cls, bool acceptVoid, const std::string &source) const {
@@ -102,13 +119,19 @@ namespace holgen {
                "Primitive type {} used by {} cannot have functional template parameters",
                type.mName, source);
     } else if (TypeInfo::Get().CppIndexedContainers.contains(type.mName)) {
-      THROW_IF(type.mTemplateParameters.size() != 1,
-               "Container type {} used by {} should have a single template parameter",
-               type.mName, source);
+      if (type.mName == "std::array") {
+        THROW_IF(type.mTemplateParameters.size() != 2,
+                 "Array type {} used by {} should have two template parameters",
+                 type.mName, source)
+      } else {
+        THROW_IF(type.mTemplateParameters.size() != 1,
+                 "Container type {} used by {} should have a single template parameter",
+                 type.mName, source);
+      }
       THROW_IF(type.mFunctionalTemplateParameters.size() > 0,
                "Container type {} used by {} cannot have functional template arguments",
                type.mName, source);
-      ValidateType(type.mTemplateParameters[0], cls, false, source);
+      ValidateType(type.mTemplateParameters.front(), cls, false, source);
     } else if (TypeInfo::Get().CppSets.contains(type.mName)) {
       THROW_IF(type.mTemplateParameters.size() != 1,
                "Set type {} used by {} should have a single template parameter",
@@ -144,6 +167,9 @@ namespace holgen {
       THROW_IF(type.mType == PassByType::Value,
                "Forward declared type {} used by {} cannot be passed by value",
                type.mName, source);
+    } else if (type.mName.starts_with(std::format("{}::", cls.mName))) {
+      auto rest = type.mName.substr(cls.mName.size() + 2);
+      THROW_IF(!cls.GetUsing(rest), "Class-defined type {} does not exist in {}", type.mName, source);
     } else {
       THROW("Unknown type {} used by {}", type.mName, source);
     }
@@ -305,5 +331,9 @@ namespace holgen {
         [&annotationName](const auto &annotation) { return annotation.mName == annotationName; });
     THROW_IF(count != 1, "{} annotation in {} should be used only once",
              annotationName, ToString(cls, field));
+  }
+
+  void Validator::Enum(const Class &cls) const {
+    THROW_IF(!cls.mEnum, "{} is not an enum", ToString(cls));
   }
 }

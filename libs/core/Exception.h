@@ -2,9 +2,9 @@
 
 #include <format>
 
-#define THROW_IF(cond, msg, ...) if (cond) { \
+#define THROW_IF(cond, msg, ...) { if (cond) { \
   THROW(msg, ## __VA_ARGS__) \
-  }
+  } }
 
 #define THROW(msg, ...) throw Exception(std::format("{}:{}: " msg, __FILE__, __LINE__, ## __VA_ARGS__));
 

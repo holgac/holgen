@@ -8,8 +8,11 @@ namespace holgen {
     using TranslatorPlugin::TranslatorPlugin;
      void Run() override;
   private:
-    void GenerateCommon(Class& generatedClass, const EnumDefinition& enumDefinition);
-    void GenerateOperators(Class& generatedClass);
-    void GenerateGetEntries(Class& generatedClass, bool forValues);
+    void GenerateCommon(Class& cls);
+    void GenerateOperators(Class& cls);
+    void GenerateEntries(Class& cls);
+    void GenerateFromString(Class& cls);
+    void GenerateToString(Class& cls);
+    void GenerateGetEntries(Class& cls, bool forValues);
   };
 }

@@ -1,10 +1,13 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/EnumPlugin.h"
 #include "generator/plugins/ClassPlugin.h"
-#include "../Helpers.h"
 
 class EnumPluginTest : public TranslatorPluginTest {
-
+protected:
+  static void Run(TranslatedProject &project) {
+    ClassPlugin(project).Run();
+    EnumPlugin(project).Run();
+  }
 };
 
 TEST_F(EnumPluginTest, EmptyEnum) {
@@ -12,8 +15,7 @@ TEST_F(EnumPluginTest, EmptyEnum) {
 enum TestEnum {
 }
       )R");
-  ClassPlugin(project).Run();
-  EnumPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
@@ -39,8 +41,7 @@ enum TestEnum {
   Entry3 = 1;
 }
   )R");
-  ClassPlugin(project).Run();
-  EnumPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
@@ -98,8 +99,7 @@ enum TestEnum {
   Entry3 = 2;
 }
   )R");
-  ClassPlugin(project).Run();
-  EnumPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
@@ -129,13 +129,12 @@ enum TestEnum {
   Entry3 = 2;
 }
   )R");
-  ClassPlugin(project).Run();
-  EnumPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"ToString", Type{"std::string"}};
+  auto method = ClassMethod{"ToString", Type{"char", PassByType::Pointer, Constness::Const}};
   ASSERT_NE(cls->GetMethod("ToString", Constness::Const), nullptr);
   helpers::ExpectEqual(*cls->GetMethod("ToString", Constness::Const), method, R"R(
 switch (mValue) {
@@ -155,13 +154,13 @@ enum TestEnum {
   Entry3 = 2;
 }
   )R");
-  ClassPlugin(project).Run();
-  EnumPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"GetEntryValues", Type{"std::array"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"GetEntryValues", Type{"std::array"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mReturnType.mTemplateParameters.emplace_back("TestEnum::UnderlyingType");
   method.mReturnType.mTemplateParameters.emplace_back("3");
   method.mConstexprness = Constexprness::Constexpr;
@@ -179,17 +178,26 @@ enum TestEnum {
   Entry3 = 2;
 }
   )R");
-  ClassPlugin(project).Run();
-  EnumPlugin(project).Run();
+  Run(project);
   EXPECT_EQ(project.mClasses.size(), 1);
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mReturnType.mTemplateParameters.emplace_back("TestEnum");
   method.mReturnType.mTemplateParameters.emplace_back("3");
   ASSERT_NE(cls->GetMethod("GetEntries", Constness::NotConst), nullptr);
   helpers::ExpectEqual(*cls->GetMethod("GetEntries", Constness::NotConst), method, R"R(
 return std::array<TestEnum, 3>{Entry1, Entry2, Entry3};
   )R");
+}
+
+TEST_F(EnumPluginTest, DuplicateEntry) {
+  ExpectErrorMessage(R"R(
+enum TestEnum {
+  Entry1 = 5;
+  Entry1 = 5;
+}
+  )R", Run, "Duplicate field: TestEnum.Entry1 ({0}:2:3) and TestEnum.Entry1 ({0}:3:3)", Source);
 }
