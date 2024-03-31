@@ -45,14 +45,6 @@ namespace holgen {
                fieldDefinition.mName,
                annotationDefinition.mName, attributeName);
     }
-
-    void EnforceAttributeExists(const StructDefinition &structDefinition,
-                                const AnnotationDefinition &annotationDefinition, const std::string &attributeName) {
-      auto attribute = annotationDefinition.GetAttribute(attributeName);
-      THROW_IF(attribute == nullptr,
-               "Struct {} has annotation {} with missing attribute: {}", structDefinition.mName,
-               annotationDefinition.mName, attributeName);
-    }
   }
 
   MonolithValidator::MonolithValidator(const ProjectDefinition &projectDefinition) : mProject(projectDefinition) {
@@ -62,10 +54,6 @@ namespace holgen {
   void MonolithValidator::Validate(const StructDefinition &structDefinition) {
     for (const auto &fieldDefinition: structDefinition.mFields) {
       Validate(structDefinition, fieldDefinition);
-    }
-
-    for (auto &annotationDefinition: structDefinition.mAnnotations) {
-      Validate(structDefinition, annotationDefinition);
     }
   }
 
@@ -100,31 +88,6 @@ namespace holgen {
       Type type(mProject, fieldDefinition.mType);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mName), "Field {}.{} uses an invalid type for an id: {}",
                structDefinition.mName, fieldDefinition.mName, fieldDefinition.mType.mName);
-    }
-  }
-
-  void MonolithValidator::Validate(
-      const StructDefinition &structDefinition,
-      const AnnotationDefinition &annotationDefinition
-  ) {
-    if (annotationDefinition.mName == Annotations::Managed) {
-      EnforceAttributeExists(structDefinition, annotationDefinition, Annotations::Managed_By);
-      EnforceAttributeExists(structDefinition, annotationDefinition, Annotations::Managed_Field);
-      auto dataManagerAttribute = annotationDefinition.GetAttribute(Annotations::Managed_By);
-      auto dataManager = mProject.GetStruct(dataManagerAttribute->mValue.mName);
-      THROW_IF(dataManager == nullptr, "Struct {} references a DataManager {} that does not exist",
-               structDefinition.mName, dataManagerAttribute->mValue.mName);
-      auto dataManagerAnnotation = dataManager->GetAnnotation(Annotations::DataManager);
-      THROW_IF(dataManagerAnnotation == nullptr,
-               "Struct {} references a DataManager {} that does not have the {} annotation!",
-               structDefinition.mName, dataManager->mName, Annotations::DataManager);
-      auto fieldAttribute = annotationDefinition.GetAttribute(Annotations::Managed_Field);
-      auto field = dataManager->GetField(fieldAttribute->mValue.mName);
-      THROW_IF(field == nullptr, "Struct {} references DataManager field {}.{} that does not exist",
-               structDefinition.mName, dataManager->mName, fieldAttribute->mValue.mName);
-      auto fieldAnnotation = field->GetAnnotation(Annotations::Container);
-      THROW_IF(fieldAnnotation == nullptr, "Struct {} references DataManager field {}.{} that is not a container",
-               structDefinition.mName, dataManager->mName, fieldAttribute->mValue.mName);
     }
   }
 

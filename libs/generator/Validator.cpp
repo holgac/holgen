@@ -49,12 +49,12 @@ namespace holgen {
       return std::format("{} ({})", annotation.mName, annotation.mDefinitionSource);
     }
 
-    bool AreArgumentsCompatible(const ClassMethodArgument& arg1, const ClassMethodArgument& arg2) {
+    bool AreArgumentsCompatible(const ClassMethodArgument &arg1, const ClassMethodArgument &arg2) {
       if (arg1.mType.mName != arg2.mType.mName)
         return false;
       if (arg1.mType.mType != arg2.mType.mType) {
         if (arg1.mType.mType == PassByType::Pointer || arg2.mType.mType == PassByType::Pointer ||
-        arg1.mType.mType == PassByType::MoveReference || arg2.mType.mType == PassByType::MoveReference)
+            arg1.mType.mType == PassByType::MoveReference || arg2.mType.mType == PassByType::MoveReference)
           return false;
       }
       if (arg1.mType.mTemplateParameters.size() != arg2.mType.mTemplateParameters.size())
@@ -179,6 +179,8 @@ namespace holgen {
     for (auto &arg: method.mArguments) {
       ValidateType(arg.mType, cls, false, ToString(cls, method));
     }
+    THROW_IF(method.mConstness == Constness::Const && method.mStaticness == Staticness::Static,
+             "Const static method: {}", ToString(cls, method));
   }
 
   void Validator::ContainerAnnotation(const Class &cls, const ClassField &field,
@@ -216,6 +218,29 @@ namespace holgen {
                  cls.mStruct->mName, ToString(cls, field), ToString(cls, field2), elemName2->mValue.mName);
       }
     }
+  }
+
+  void Validator::ManagedAnnotation(const Class &cls, const AnnotationDefinition &annotation) const {
+    THROW_IF(!cls.mStruct || !cls.mStruct->GetIdField(), "{} is a managed class without an id field", ToString(cls));
+    EnforceUniqueAnnotation(cls, Annotations::Managed);
+    ValidateAttributeCount(annotation, Annotations::Managed_By, ToString(cls));
+    ValidateAttributeCount(annotation, Annotations::Managed_Field, ToString(cls));
+    auto dataManager = mProject.GetClass(annotation.GetAttribute(Annotations::Managed_By)->mValue.mName);
+    THROW_IF(!dataManager || !dataManager->mStruct, "{} is managed by {} which does not exist",
+             ToString(cls), annotation.GetAttribute(Annotations::Managed_By)->mValue.mName);
+    THROW_IF(!dataManager->mStruct->GetAnnotation(Annotations::DataManager),
+             "{} is managed by {} which is not a data manager",
+             ToString(cls), ToString(*dataManager));
+    auto containerField = dataManager->mStruct->GetField(
+        annotation.GetAttribute(Annotations::Managed_Field)->mValue.mName);
+    THROW_IF(!containerField, "{} is managed by {} field of {} which does not exist",
+             ToString(cls), annotation.GetAttribute(Annotations::Managed_Field)->mValue.mName,
+             ToString(*dataManager));
+    THROW_IF(!containerField->GetAnnotation(Annotations::Container), "{} is managed by {} which is not a container",
+             ToString(cls), ToString(*dataManager, *containerField));
+    THROW_IF(containerField->mType.mTemplateParameters.back().mName != cls.mStruct->mName,
+             "{} is managed by {} which is not a container of {}",
+             ToString(cls), ToString(*dataManager, *containerField), cls.mName);
   }
 
   void Validator::IndexAnnotation(const Class &cls, const ClassField &field,
@@ -262,6 +287,15 @@ namespace holgen {
              attributeName, ToString(annotation), source);
     THROW_IF(count > maxCount, "Too many {} attributes in {} annotation of {}",
              attributeName, ToString(annotation), source);
+  }
+
+  void Validator::EnforceUniqueAnnotation(
+      const Class &cls, const std::string &annotationName) const {
+    size_t count = std::count_if(
+        cls.mStruct->mAnnotations.begin(), cls.mStruct->mAnnotations.end(),
+        [&annotationName](const auto &annotation) { return annotation.mName == annotationName; });
+    THROW_IF(count != 1, "{} annotation in {} should be used only once",
+             annotationName, ToString(cls));
   }
 
   void Validator::EnforceUniqueAnnotation(

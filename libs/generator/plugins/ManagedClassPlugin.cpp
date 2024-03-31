@@ -5,55 +5,55 @@
 
 namespace holgen {
   void ManagedClassPlugin::Run() {
-    for (auto &generatedClass: mProject.mClasses) {
-      if (generatedClass.mStruct == nullptr)
+    for (auto &cls: mProject.mClasses) {
+      if (cls.mStruct == nullptr)
         continue;
-      auto managedAnnotation = generatedClass.mStruct->GetAnnotation(Annotations::Managed);
+      auto managedAnnotation = cls.mStruct->GetAnnotation(Annotations::Managed);
       if (managedAnnotation == nullptr)
         continue;
+      Validate().ManagedAnnotation(cls, *managedAnnotation);
 
-      auto managedByAttribute = managedAnnotation->GetAttribute(Annotations::Managed_By);
-      auto managedFieldAttribute = managedAnnotation->GetAttribute(Annotations::Managed_Field);
-      auto manager = mProject.mProject.GetStruct(managedByAttribute->mValue.mName);
-      auto managerField = manager->GetField(managedFieldAttribute->mValue.mName);
-      auto idField = generatedClass.mStruct->GetIdField();
+      auto manager = mProject.GetClass(managedAnnotation->GetAttribute(Annotations::Managed_By)->mValue.mName);
+      auto managerField = manager->GetField(Naming().FieldNameInCpp(*manager->mStruct->GetField(
+          managedAnnotation->GetAttribute(Annotations::Managed_Field)->mValue.mName)));
 
-      {
-        auto &getter = generatedClass.mMethods.emplace_back(
-            St::ManagedObject_Getter,
-            Type{generatedClass.mStruct->mName, PassByType::Pointer, Constness::NotConst},
-            Visibility::Public,
-            Constness::NotConst,
-            Staticness::Static
-        );
-        getter.mArguments.emplace_back("id", Type{mProject.mProject, idField->mType});
-        getter.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
-                         St::GlobalPointer, manager->mName,
-                         Naming().ContainerElemGetterNameInCpp(*managerField));
-        generatedClass.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
-        generatedClass.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
+      cls.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
+      cls.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
+      GenerateStaticGetter(cls, *manager, *managerField);
+      for (const auto &annotation: managerField->mField->GetAnnotations(Annotations::Index)) {
+        GenerateIndexGetter(cls, *manager, *managerField, annotation);
       }
-
-      for (const auto &annotation: managerField->GetAnnotations(Annotations::Index)) {
-        auto indexOn = annotation.GetAttribute(Annotations::Index_On);
-        auto &getter = generatedClass.mMethods.emplace_back(
-            Naming().ManagedClassIndexGetterNameInCpp(annotation),
-            Type{generatedClass.mStruct->mName, PassByType::Pointer, Constness::NotConst},
-            Visibility::Public,
-            Constness::NotConst,
-            Staticness::Static
-        );
-        auto indexedOnField = generatedClass.mStruct->GetField(indexOn->mValue.mName);
-        ClassMethodArgument &keyArg = getter.mArguments.emplace_back("key",
-                                                                     Type{mProject.mProject, indexedOnField->mType});
-        keyArg.mType.PreventCopying();
-        getter.mBody.Add(
-            "return {}<{}>::GetInstance()->{}(key);",
-            St::GlobalPointer, manager->mName,
-            Naming().ContainerIndexGetterNameInCpp(*managerField, annotation));
-
-      }
-
     }
+  }
+
+  void ManagedClassPlugin::GenerateStaticGetter(
+      Class &cls, const Class &manager, const ClassField &managerField) const {
+    auto method = ClassMethod{
+        St::ManagedObject_Getter,
+        Type{cls.mName, PassByType::Pointer, Constness::NotConst},
+        Visibility::Public, Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("id", Type{mProject.mProject, cls.mStruct->GetIdField()->mType});
+    method.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
+                     St::GlobalPointer, manager.mName, Naming().ContainerElemGetterNameInCpp(*managerField.mField));
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
+  }
+
+  void ManagedClassPlugin::GenerateIndexGetter(Class &cls, const Class &manager, const ClassField &managerField,
+                                               const AnnotationDefinition &annotation) const {
+    auto method = ClassMethod{
+        Naming().ManagedClassIndexGetterNameInCpp(annotation),
+        Type{cls.mStruct->mName, PassByType::Pointer, Constness::NotConst},
+        Visibility::Public, Constness::NotConst, Staticness::Static};
+    auto indexedOnField = cls.mStruct->GetField(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
+    ClassMethodArgument &keyArg = method.mArguments.emplace_back(
+        "key", Type{mProject.mProject, indexedOnField->mType});
+    keyArg.mType.PreventCopying();
+    method.mBody.Add("return {}<{}>::GetInstance()->{}(key);",
+                     St::GlobalPointer, manager.mName,
+                     Naming().ContainerIndexGetterNameInCpp(*managerField.mField, annotation));
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
+
   }
 }
