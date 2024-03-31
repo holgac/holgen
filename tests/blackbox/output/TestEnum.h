@@ -1,7 +1,6 @@
 #pragma once
 
 #include "holgen.h"
-#include <string>
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "TestEnum.h"
@@ -15,7 +14,7 @@ public:
   explicit TestEnum(UnderlyingType value = Invalid);
   UnderlyingType Get() const;
   static TestEnum FromString(std::string_view str);
-  std::string ToString() const;
+  const char* ToString() const;
   TestEnum& operator =(UnderlyingType rhs);
   bool operator ==(UnderlyingType rhs) const;
   bool operator ==(const TestEnum& rhs) const;

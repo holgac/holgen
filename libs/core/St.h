@@ -28,6 +28,8 @@ namespace holgen {
     inline static const std::string LuaFuncPrefix = "mFuncName_";
     inline static const std::string ManagedObject_Getter = "Get";
     inline static const std::string Enum_UnderlyingType = "UnderlyingType";
+    inline static const std::string Converter = "Converter";
+    inline static const std::string ParseJson = "ParseJson";
   };
 
 }

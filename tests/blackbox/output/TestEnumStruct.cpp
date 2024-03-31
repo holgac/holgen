@@ -19,7 +19,7 @@ bool TestEnumStruct::ParseJson(const rapidjson::Value& json, const Converter& co
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "enumField")) {
-      auto res = JsonHelper::Parse(mEnumField, data.value, converter);
+      auto res = mEnumField.ParseJson(data.value, converter);
       if (!res)
         return false;
     }

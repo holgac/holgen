@@ -3,182 +3,157 @@
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../NamingConvention.h"
 
 namespace holgen {
-  namespace {
-    struct RapidJsonTypeUsage {
-      std::string mValidator;
-      std::string mGetter;
-    };
-
-    std::map<std::string, RapidJsonTypeUsage> RapidJsonUsage = {
-        {"int8_t",      {"IsInt",    "GetInt"}},
-        {"int16_t",     {"IsInt",    "GetInt"}},
-        {"int32_t",     {"IsInt",    "GetInt"}},
-        {"int64_t",     {"IsInt64",  "GetInt64"}},
-        {"uint8_t",     {"IsUint",   "GetUint"}},
-        {"uint16_t",    {"IsUint",   "GetUint"}},
-        {"uint32_t",    {"IsUint",   "GetUint"}},
-        {"uint64_t",    {"IsUint64", "GetUint64"}},
-        {"float",       {"IsFloat",  "GetFloat"}},
-        {"double",      {"IsDouble", "GetDouble"}},
-        {"bool",        {"IsBool",   "GetBool"}},
-        {"std::string", {"IsString", "GetString"}},
-    };
-
-    std::string ConverterName = "Converter";
-    std::string ParseJson = "ParseJson";
-  }
-
   void JsonPlugin::Run() {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
-        EnrichClass(cls, *cls.mStruct);
+        ProcessStruct(cls);
       else if (cls.mEnum)
-        EnrichClass(cls, *cls.mEnum);
+        ProcessEnum(cls);
     }
   }
 
   void JsonPlugin::GenerateParseJson(Class &cls) {
-    const auto &structDefinition = *cls.mStruct;
-    auto &parseFunc = cls.mMethods.emplace_back(ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst);
-    parseFunc.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    parseFunc.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+    auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back(
+        "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back(
+        "converter", Type{St::Converter, PassByType::Reference, Constness::Const});
 
-    parseFunc.mBody.Line() << "for(const auto& data: json.GetObject()) {";
-    parseFunc.mBody.Indent(1);
-    parseFunc.mBody.Line() << "const auto& name = data.name.GetString();";
+    method.mBody.Line() << "for(const auto& data: json.GetObject()) {";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "const auto& name = data.name.GetString();";
     // parseFunc.mBody.Line() << "const auto& value = data.value;";
+    // TODO: a helper class for string switching below
+    // Pass source string (and optional extra conds), and a map<case, action> and it generates the code below.
+    // later it can be smarter (i.e. switch on one of the chars to split as much as possible)
     bool isFirst = true;
-    for (const auto &fieldDefinition: structDefinition.mFields) {
-      if (fieldDefinition.GetAnnotation(Annotations::NoJson))
+    for (const auto &field: cls.mFields) {
+      if (!field.mField || field.mField->GetAnnotation(Annotations::NoJson))
         continue;
       if (isFirst) {
-        parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
+        method.mBody.Line() << "if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
         isFirst = false;
       } else {
-        parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fieldDefinition.mName << "\")) {";
+        method.mBody.Line() << "} else if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
       }
-      parseFunc.mBody.Indent(1); // if name == fieldName
-      GenerateParseJsonForField(cls, parseFunc, structDefinition, fieldDefinition);
-      parseFunc.mBody.Indent(-1); // if name == fieldName
+      method.mBody.Indent(1); // if name == fieldName
+      GenerateParseJsonForField(method, field);
+      method.mBody.Indent(-1); // if name == fieldName
     }
 
-    for (const auto &fd: structDefinition.mFunctions) {
-      if (fd.GetAnnotation(Annotations::NoJson) || !fd.GetAnnotation(Annotations::LuaFunc))
+    for (const auto &luaMethod: cls.mMethods) {
+      if (!luaMethod.mFunction || luaMethod.mFunction->GetAnnotation(Annotations::NoJson) ||
+          !luaMethod.mFunction->GetAnnotation(Annotations::LuaFunc))
         continue;
       if (isFirst) {
-        parseFunc.mBody.Line() << "if (0 == strcmp(name, \"" << fd.mName << "\")) {";
+        method.mBody.Line() << "if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
         isFirst = false;
       } else {
-        parseFunc.mBody.Line() << "} else if (0 == strcmp(name, \"" << fd.mName << "\")) {";
+        method.mBody.Line() << "} else if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
       }
-      parseFunc.mBody.Indent(1); // if name == fieldName
-      GenerateParseJsonForFunction(parseFunc, fd);
-      parseFunc.mBody.Indent(-1); // if name == fieldName
+      method.mBody.Indent(1); // if name == fieldName
+      GenerateParseJsonForFunction(method, luaMethod);
+      method.mBody.Indent(-1); // if name == fieldName
     }
 
     if (!isFirst)
-      parseFunc.mBody.Line() << "}";
-    parseFunc.mBody.Indent(-1);
-    parseFunc.mBody.Line() << "}"; // range based for on json.GetObject()
-    parseFunc.mBody.Line() << "return true;";
+      method.mBody.Line() << "}";
+    method.mBody.Indent(-1);
+    method.mBody.Line() << "}"; // range based for on json.GetObject()
+    method.mBody.Line() << "return true;";
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
-  void JsonPlugin::GenerateParseJsonForField(
-      Class &cls __attribute__((unused)),
-      ClassMethod &parseFunc,
-      const StructDefinition &structDefinition __attribute__((unused)),
-      const FieldDefinition &fieldDefinition
-  ) {
-    auto field = *cls.GetField(Naming().FieldNameInCpp(fieldDefinition));
-    if (mProject.mProject.GetStruct(fieldDefinition.mType.mName) == nullptr) {
-      auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
+  void JsonPlugin::GenerateParseJsonForField(ClassMethod &method, const ClassField &field) {
+    if (mProject.GetClass(field.mType.mName) == nullptr) {
+      auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
         Type type(mProject.mProject, jsonConvertFrom->mValue);
-        parseFunc.mBody.Line() << type.ToString() << " temp;";
-        parseFunc.mBody.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
-        parseFunc.mBody.Line() << "if (!res)";
-        parseFunc.mBody.Indent(1);
-        parseFunc.mBody.Line() << "return false;";
-        parseFunc.mBody.Indent(-1); // if !res
-
+        method.mBody.Line() << type.ToString() << " temp;";
+        method.mBody.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
+        method.mBody.Line() << "if (!res)";
+        method.mBody.Indent(1);
+        method.mBody.Line() << "return false;";
+        method.mBody.Indent(-1); // if !res
         if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) || field.mType.mType == PassByType::Pointer)
-          parseFunc.mBody.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
+          method.mBody.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
         else
-          parseFunc.mBody.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);
+          method.mBody.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);
       } else {
-        parseFunc.mBody.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                            field.mName);
-        parseFunc.mBody.Line() << "if (!res)";
-        parseFunc.mBody.Indent(1);
-        parseFunc.mBody.Line() << "return false;";
-        parseFunc.mBody.Indent(-1); // if !res
+        method.mBody.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                         field.mName);
+        method.mBody.Line() << "if (!res)";
+        method.mBody.Indent(1);
+        method.mBody.Line() << "return false;";
+        method.mBody.Indent(-1); // if !res
       }
     } else {
-      parseFunc.mBody.Add("auto res = {}.{}(data.value, converter);",
-                          field.mName, ParseJson);
+      // TODO: this case is not necessary - JsonHelper::ParseJson handles this
+      method.mBody.Add("auto res = {}.{}(data.value, converter);",
+                       field.mName, St::ParseJson);
 
-      parseFunc.mBody.Line() << "if (!res)";
-      parseFunc.mBody.Indent(1);
-      parseFunc.mBody.Line() << "return false;";
-      parseFunc.mBody.Indent(-1); // if !res
+      method.mBody.Line() << "if (!res)";
+      method.mBody.Indent(1);
+      method.mBody.Line() << "return false;";
+      method.mBody.Indent(-1); // if !res
     }
   }
 
-  void JsonPlugin::EnrichClass(Class &cls, const StructDefinition &structDefinition) {
-    if (structDefinition.GetAnnotation(Annotations::NoJson))
+  void JsonPlugin::ProcessStruct(Class &cls) {
+    if (cls.mStruct->GetAnnotation(Annotations::NoJson))
       return;
     cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
     cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
     cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-    if (structDefinition.GetAnnotation(Annotations::DataManager) == nullptr)
+    if (cls.mStruct->GetAnnotation(Annotations::DataManager) == nullptr)
       // TODO: currently we iterate over the json obj when deserializing, but this wouldn't work with
       // dependencies. For DataManager we should have something custom so that a single file can define
       // everything too. But for now ParseFiles is good enough.
       GenerateParseJson(cls);
   }
 
-
-  void JsonPlugin::EnrichClass(Class &cls, const EnumDefinition &enumDefinition) {
-    if (enumDefinition.GetAnnotation(Annotations::NoJson))
+  void JsonPlugin::ProcessEnum(Class &cls) {
+    if (cls.mEnum->GetAnnotation(Annotations::NoJson))
       return;
     cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
     cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
     cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-    auto &parseFunc = cls.mMethods.emplace_back(ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst);
-    parseFunc.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    parseFunc.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
-    parseFunc.mBody.Add("if (json.IsString()) {{");
-    parseFunc.mBody.Indent(1);
-    parseFunc.mBody.Add("*this = {}::FromString(std::string_view(json.GetString(), json.GetStringLength()));",
-                        cls.mName);
-    parseFunc.mBody.Indent(-1);
-    parseFunc.mBody.Add("}} else if (json.IsInt64()) {{");
-    parseFunc.mBody.Indent(1);
-    parseFunc.mBody.Add("*this = {}(json.GetInt64());", cls.mName);
-    parseFunc.mBody.Indent(-1);
-    parseFunc.mBody.Add("}} else {{");
-    parseFunc.mBody.Indent(1);
-    // TODO: logging?
-    parseFunc.mBody.Add("*this = {}({}::Invalid);", cls.mName, cls.mName);
-    parseFunc.mBody.Add("return false;");
-    parseFunc.mBody.Indent(-1);
-    parseFunc.mBody.Add("}}");
-    parseFunc.mBody.Add("return true;");
+    auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
+    method.mBody.Add("if (json.IsString()) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("*this = {}::FromString(std::string_view(json.GetString(), json.GetStringLength()));",
+                     cls.mName);
+    method.mBody.Indent(-1);
+    method.mBody.Add("}} else if (json.IsInt64()) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("*this = {}(json.GetInt64());", cls.mName);
+    method.mBody.Indent(-1);
+    method.mBody.Add("}} else {{");
+    method.mBody.Indent(1);
+    // TODO: HOLGEN_WARN here
+    method.mBody.Add("*this = {}({}::Invalid);", cls.mName, cls.mName);
+    method.mBody.Add("return false;");
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+    method.mBody.Add("return true;");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
-  void JsonPlugin::GenerateParseJsonForFunction(
-      ClassMethod &parseFunc, const FunctionDefinition &functionDefinition) {
-    parseFunc.mBody.Add("auto res = {}::{}({}{}, data.value, converter);",
-                        St::JsonHelper, St::JsonHelper_Parse,
-                        St::LuaFuncPrefix, functionDefinition.mName);
-    parseFunc.mBody.Line() << "if (!res)";
-    parseFunc.mBody.Indent(1);
-    parseFunc.mBody.Line() << "return false;";
-    parseFunc.mBody.Indent(-1); // if !res
+  void JsonPlugin::GenerateParseJsonForFunction(ClassMethod &method, const ClassMethod &luaFunction) {
+    method.mBody.Add("auto res = {}::{}({}{}, data.value, converter);",
+                     St::JsonHelper, St::JsonHelper_Parse,
+                     St::LuaFuncPrefix, luaFunction.mFunction->mName);
+    method.mBody.Line() << "if (!res)";
+    method.mBody.Indent(1);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1); // if !res
   }
 }

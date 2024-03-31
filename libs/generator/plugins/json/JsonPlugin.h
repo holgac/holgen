@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <map>
 #include <set>
 #include <string>
@@ -11,12 +10,11 @@ namespace holgen {
   public:
     using TranslatorPlugin::TranslatorPlugin;
     void Run() override;
-
   private:
-    void EnrichClass(Class &cls, const StructDefinition& structDefinition);
-    void EnrichClass(Class &cls,const EnumDefinition& enumDefinition);
+    void ProcessStruct(Class &cls);
+    void ProcessEnum(Class &cls);
     void GenerateParseJson(Class &cls);
-    void GenerateParseJsonForField(Class& cls, ClassMethod& parseFunc, const StructDefinition& structDefinition, const FieldDefinition& fieldDefinition);
-    void GenerateParseJsonForFunction(ClassMethod& parseFunc, const FunctionDefinition& functionDefinition);
+    void GenerateParseJsonForField(ClassMethod &method, const ClassField &field);
+    void GenerateParseJsonForFunction(ClassMethod &method, const ClassMethod &luaFunction);
   };
 }

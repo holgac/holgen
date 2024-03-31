@@ -31,7 +31,7 @@ namespace {
         {
             FileType::CMakeFile,
             "CMakeLists.txt",
-            "add_library(generator_test_cmake Person.cpp JsonHelper.cpp Converter.cpp LuaHelper.cpp GlobalPointer.cpp FilesystemHelper.cpp)"
+            "add_library(generator_test_cmake Person.cpp Converter.cpp JsonHelper.cpp LuaHelper.cpp GlobalPointer.cpp FilesystemHelper.cpp)"
         }
     );
     // TODO: test helpers

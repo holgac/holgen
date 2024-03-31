@@ -87,6 +87,8 @@ namespace holgen {
     std::set<std::string> CppSets;
     std::set<std::string> KeyableTypes;
     std::set<std::string> CppTypes;
+    // Types that are valid but require no validation
+    std::set<std::string> AllowlistedTypes;
 
   };
 

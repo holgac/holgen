@@ -2,15 +2,11 @@
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../NamingConvention.h"
 
 namespace holgen {
-  namespace {
-    std::string ConverterName = "Converter";
-  }
-
   void JsonConverterPlugin::Run() {
-    auto &generatedClass = mProject.mClasses.emplace_back(ConverterName);
+    Validate().JsonConverters();
+    auto cls = Class{St::Converter};
     std::set<std::string> processedConverters;
     for (const auto &structDefinition: mProject.mProject.mStructs) {
       for (const auto &fieldDefinition: structDefinition.mFields) {
@@ -22,21 +18,20 @@ namespace holgen {
         if (processedConverters.contains(jsonConvertUsing->mValue.mName))
           continue;
         processedConverters.insert(jsonConvertUsing->mValue.mName);
-        auto &func = generatedClass.mFields.emplace_back(
-            jsonConvertUsing->mValue.mName,
-            Type{"std::function"},
-            Visibility::Public
-        );
-
+        auto field = ClassField{jsonConvertUsing->mValue.mName,
+                                Type{"std::function"}, Visibility::Public};
 
         auto fieldNameInCpp = Naming().FieldNameInCpp(fieldDefinition);
         auto referencedClass = mProject.GetClass(structDefinition.mName);
 
-        func.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);
-
-        func.mType.mFunctionalTemplateParameters.emplace_back(mProject.mProject, jsonConvertFrom->mValue);
-        func.mType.mFunctionalTemplateParameters.back().PreventCopying();
+        field.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);
+        field.mType.mFunctionalTemplateParameters.emplace_back(mProject.mProject, jsonConvertFrom->mValue);
+        field.mType.mFunctionalTemplateParameters.back().PreventCopying();
+        Validate().NewField(cls, field);
+        cls.mFields.emplace_back(std::move(field));
       }
     }
+    Validate().NewClass(cls);
+    mProject.mClasses.emplace_back(std::move(cls));
   }
 }

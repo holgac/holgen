@@ -634,6 +634,7 @@ struct A {
       Source);
 }
 
+// TODO(LOW_PRI): split this test
 TEST_F(ContainerFieldPluginTest, InvalidIndexAnnotation) {
   ExpectErrorMessage(R"R(
 struct Inner {string field;}

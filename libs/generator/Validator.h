@@ -17,8 +17,9 @@ namespace holgen {
     void ManagedAnnotation(const Class &cls, const AnnotationDefinition &annotationDefinition) const;
     void IndexAnnotation(
         const Class &cls, const ClassField &field, const AnnotationDefinition &annotationDefinition) const;
+    void JsonConverters() const;
   private:
-    void ValidateType(const Type &type, const Class &cls, bool acceptVoid, const std::string &source) const;
+    void ValidateType(const Type &type, const Class &cls, bool acceptVoid, const ClassMethod* method, const std::string &source) const;
     void ValidateAttributeCount(const AnnotationDefinition &annotation, const std::string &attributeName,
                                 const std::string &source, size_t minCount = 1, size_t maxCount = 1) const;
     void EnforceUniqueAnnotation(const Class &cls, const ClassField &field, const std::string &annotationName) const;

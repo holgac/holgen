@@ -33,7 +33,8 @@ namespace {
     Parser parser;
     parser.Parse(tokenizer);
     auto tp = Translator(parser.GetProject()).Translate();
-    auto &c = tp.mClasses.front();
+    ASSERT_NE(tp.GetClass("Person"), nullptr);
+    auto &c = *tp.GetClass("Person");
     EXPECT_EQ(c.mName, "Person");
     ExpectFields(c, {
         ClassField{"mAge",

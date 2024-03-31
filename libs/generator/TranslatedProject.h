@@ -101,6 +101,7 @@ namespace holgen {
     const FunctionDefinition *mFunction = nullptr;
     bool mUserDefined = false;
     bool mExposeToLua = false;
+    [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
   };
 
   struct ClassConstructorInitializer {
@@ -154,6 +155,7 @@ namespace holgen {
     [[nodiscard]] ClassMethod *GetMethod(const std::string &name, Constness constness);
     [[nodiscard]] const Using *GetUsing(const std::string &name) const;
     [[nodiscard]] const ForwardDeclaration *GetForwardDeclaration(const std::string &name) const;
+    [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
 
     [[nodiscard]] auto GetMethods(const std::string &name) const {
       return NameFilterForEachWrapper(name, mMethods);

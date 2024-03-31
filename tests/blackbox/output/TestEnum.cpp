@@ -27,7 +27,7 @@ TestEnum TestEnum::FromString(std::string_view str) {
     return TestEnum(TestEnum::Invalid);
   }
 }
-std::string TestEnum::ToString() const {
+const char* TestEnum::ToString() const {
   switch (mValue) {
     case 5: return "Entry5";
     case 0: return "Entry1";

@@ -13,6 +13,8 @@ namespace holgen {
     void Run() override;
 
   private:
+    void GenerateConverterPopulators(Class &cls, ClassMethod &method);
     void GenerateParseFiles(Class &cls);
+    void GenerateFilesByName(ClassMethod &method);
   };
 }

@@ -3,10 +3,6 @@
 #include "parser/Parser.h"
 #include "TranslatedProject.h"
 
-/*
- * TODO: array
- * Either array<Elem, Enum> or array<Elem, count>
- */
 namespace holgen {
   TypeInfo::TypeInfo() {
     TypeToCppType = {
@@ -59,7 +55,6 @@ namespace holgen {
     CppIndexedContainers = {
         "std::vector",
         "std::deque",
-        "std::array",
     };
     CppKeyedContainers = {
         "std::map",
@@ -79,6 +74,15 @@ namespace holgen {
     };
     KeyableTypes = IntegralTypes;
     KeyableTypes.insert("std::string");
+    AllowlistedTypes = {
+        "rapidjson::Value",
+        "lua_State",
+        // TODO: properly validate functions and remove this hack
+        "std::function",
+        // TODO: support arrays
+        // Support array<Elem, Enum> and array<Elem, count>
+        "std::array",
+    };
     for (auto&[_, cppType] : TypeToCppType)
       CppTypes.insert(cppType);
   }

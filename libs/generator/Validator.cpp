@@ -97,7 +97,7 @@ namespace holgen {
     THROW_IF(TypeInfo::Get().CppPrimitives.contains(field.mName), "{} is a reserved keyword", ToString(cls, field));
     auto dup = cls.GetField(field.mName);
     THROW_IF(dup, "Duplicate field: {} and {}", ToString(cls, *dup), ToString(cls, field));
-    ValidateType(field.mType, cls, false, ToString(cls, field));
+    ValidateType(field.mType, cls, false, nullptr, ToString(cls, field));
     if (field.mEntry) {
       THROW_IF(field.mDefaultValue.empty() && field.mDefaultConstructorArguments.empty(),
                "Default value for enum entry {} is missing", ToString(cls, field));
@@ -110,7 +110,11 @@ namespace holgen {
     }
   }
 
-  void Validator::ValidateType(const Type &type, const Class &cls, bool acceptVoid, const std::string &source) const {
+  void Validator::ValidateType(
+      const Type &type, const Class &cls, bool acceptVoid, const ClassMethod *method, const std::string &source) const {
+    auto isTemplateParameter = [&](const std::string &name) {
+      return cls.GetTemplateParameter(name) || (method && method->GetTemplateParameter(name));
+    };
     if (TypeInfo::Get().CppBasicTypes.contains(type.mName)) {
       THROW_IF(type.mTemplateParameters.size() > 0,
                "Primitive type {} used by {} cannot have template parameters",
@@ -119,19 +123,13 @@ namespace holgen {
                "Primitive type {} used by {} cannot have functional template parameters",
                type.mName, source);
     } else if (TypeInfo::Get().CppIndexedContainers.contains(type.mName)) {
-      if (type.mName == "std::array") {
-        THROW_IF(type.mTemplateParameters.size() != 2,
-                 "Array type {} used by {} should have two template parameters",
-                 type.mName, source)
-      } else {
-        THROW_IF(type.mTemplateParameters.size() != 1,
-                 "Container type {} used by {} should have a single template parameter",
-                 type.mName, source);
-      }
+      THROW_IF(type.mTemplateParameters.size() != 1,
+               "Container type {} used by {} should have a single template parameter",
+               type.mName, source);
       THROW_IF(type.mFunctionalTemplateParameters.size() > 0,
                "Container type {} used by {} cannot have functional template arguments",
                type.mName, source);
-      ValidateType(type.mTemplateParameters.front(), cls, false, source);
+      ValidateType(type.mTemplateParameters.front(), cls, false, method, source);
     } else if (TypeInfo::Get().CppSets.contains(type.mName)) {
       THROW_IF(type.mTemplateParameters.size() != 1,
                "Set type {} used by {} should have a single template parameter",
@@ -139,10 +137,11 @@ namespace holgen {
       THROW_IF(type.mFunctionalTemplateParameters.size() > 0,
                "Set type {} used by {} cannot have functional template arguments",
                type.mName, source);
-      THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName),
+      THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName) &&
+               !isTemplateParameter(type.mTemplateParameters[0].mName),
                "Set type {} used by {} should have a keyable template parameter, found {}",
                type.mName, source, type.mTemplateParameters[0].mName);
-      ValidateType(type.mTemplateParameters[0], cls, false, source);
+      ValidateType(type.mTemplateParameters[0], cls, false, method, source);
     } else if (TypeInfo::Get().CppKeyedContainers.contains(type.mName)) {
       THROW_IF(type.mTemplateParameters.size() != 2,
                "Map type {} used by {} should have two template parameters",
@@ -150,19 +149,22 @@ namespace holgen {
       THROW_IF(type.mFunctionalTemplateParameters.size() > 0,
                "Map type {} used by {} cannot have functional template arguments",
                type.mName, source);
-      THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName),
+      THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName) &&
+                   !isTemplateParameter(type.mTemplateParameters[0].mName),
                "Map type {} used by {} should have a keyable first template parameter, found {}",
                type.mName, source, type.mTemplateParameters[0].mName);
-      ValidateType(type.mTemplateParameters[1], cls, false, source);
+      ValidateType(type.mTemplateParameters[1], cls, false, method, source);
     } else if (type.mName == "void") {
       THROW_IF(!acceptVoid, "Invalid void usage in {}", source);
       THROW_IF(type.mType == PassByType::Reference || type.mType == PassByType::MoveReference,
                "Void cannot be passed by reference in {}", source);
       THROW_IF(type.mTemplateParameters.size() > 0, "Void cannot have template parameters in {}", source);
-    } else if (auto cls2 = mProject.GetClass(type.mName)) {
-      THROW_IF(!cls2->mStruct && !cls2->mEnum, "Internal type {} used by {}", type.mName, source);
+    } else if (mProject.GetClass(type.mName)) {
+      // all good
+    } else if (isTemplateParameter(type.mName)) {
+      // all good
     } else if (auto usingStatement = cls.GetUsing(type.mName)) {
-      ValidateType(usingStatement->mSourceType, cls, acceptVoid, source);
+      ValidateType(usingStatement->mSourceType, cls, acceptVoid, method, source);
     } else if (cls.GetForwardDeclaration(type.mName)) {
       THROW_IF(type.mType == PassByType::Value,
                "Forward declared type {} used by {} cannot be passed by value",
@@ -171,7 +173,8 @@ namespace holgen {
       auto rest = type.mName.substr(cls.mName.size() + 2);
       THROW_IF(!cls.GetUsing(rest), "Class-defined type {} does not exist in {}", type.mName, source);
     } else {
-      THROW("Unknown type {} used by {}", type.mName, source);
+      THROW_IF(!TypeInfo::Get().AllowlistedTypes.contains(type.mName), "Unknown type {} used by {}", type.mName,
+               source);
     }
   }
 
@@ -201,9 +204,9 @@ namespace holgen {
       }
       THROW_IF(argumentsAreCompatible, "Duplicate method: {} and {}", ToString(cls, method2), ToString(cls, method));
     }
-    ValidateType(method.mReturnType, cls, true, ToString(cls, method));
+    ValidateType(method.mReturnType, cls, true, &method, ToString(cls, method));
     for (auto &arg: method.mArguments) {
-      ValidateType(arg.mType, cls, false, ToString(cls, method));
+      ValidateType(arg.mType, cls, false, &method, ToString(cls, method));
     }
     THROW_IF(method.mConstness == Constness::Const && method.mStaticness == Staticness::Static,
              "Const static method: {}", ToString(cls, method));
@@ -335,5 +338,85 @@ namespace holgen {
 
   void Validator::Enum(const Class &cls) const {
     THROW_IF(!cls.mEnum, "{} is not an enum", ToString(cls));
+  }
+
+  namespace {
+    struct ConverterSpec {
+      const Class &mClass;
+      const ClassField &mField;
+      const TypeDefinition &mFromType;
+      const TypeDefinition &mToType;
+    };
+  }
+
+  void Validator::JsonConverters() const {
+    std::map<std::string, ConverterSpec> converters;
+    for (auto &cls: mProject.mClasses) {
+      if (!cls.mStruct)
+        continue;
+      for (auto &field: cls.mFields) {
+        if (!field.mField || !field.mField->GetAnnotation(Annotations::JsonConvert))
+          continue;
+        auto converter = field.mField->GetAnnotation(Annotations::JsonConvert);
+        EnforceUniqueAnnotation(cls, field, Annotations::JsonConvert);
+        ValidateAttributeCount(*converter, Annotations::JsonConvert_From, ToString(cls, field));
+        ValidateAttributeCount(*converter, Annotations::JsonConvert_Using, ToString(cls, field));
+        auto cs = ConverterSpec{cls, field, converter->GetAttribute(Annotations::JsonConvert_From)->mValue,
+                                field.mField->mType};
+        auto key = converter->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName;
+        auto[it, res] = converters.try_emplace(key, cs);
+        if (!res) {
+          THROW_IF(cs.mFromType != it->second.mFromType,
+                   "Json converter {} is used by {} and {} with different source types: {} and {}",
+                   key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
+                   Type{mProject.mProject, it->second.mFromType}.ToString(),
+                   Type{mProject.mProject, cs.mFromType}.ToString());
+          THROW_IF(cs.mToType != it->second.mToType,
+                   "Json converter {} is used by {} and {} with different target types: {} and {}",
+                   key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
+                   Type{mProject.mProject, it->second.mToType}.ToString(),
+                   Type{mProject.mProject, cs.mToType}.ToString());
+        }
+      }
+    }
+
+    for (auto &cls: mProject.mClasses) {
+      if (!cls.mStruct)
+        continue;
+      for (auto &field: cls.mFields) {
+        if (!field.mField || !field.mField->GetAnnotation(Annotations::Index) ||
+            !field.mField->GetAnnotation(Annotations::Index)->GetAttribute(Annotations::Index_ForConverter))
+          continue;
+        auto index = field.mField->GetAnnotation(Annotations::Index);
+        auto converter = field.mField->GetAnnotation(Annotations::Index)->GetAttribute(Annotations::Index_ForConverter);
+        auto it = converters.find(converter->mValue.mName);
+        THROW_IF(it == converters.end(), "{} of {} references non-existent converter {}",
+                 ToString(*field.mField->GetAnnotation(Annotations::Index)), ToString(cls, field),
+                 converter->mValue.mName);
+
+        auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
+        auto indexFieldDefinition = underlyingClass->mStruct->GetField(
+            index->GetAttribute(Annotations::Index_On)->mValue.mName);
+        auto indexField = underlyingClass->GetField(mNaming.FieldNameInCpp(*indexFieldDefinition));
+        auto underlyingIdField = underlyingClass->mStruct->GetIdField();
+        auto existingFromTypeName = Type{mProject.mProject, it->second.mFromType}.ToString();
+        auto existingToTypeName = Type{mProject.mProject, it->second.mToType}.ToString();
+        auto fromTypeName = indexField->mType.ToString();
+        std::string toTypeName = "size_t";
+        if (underlyingIdField)
+          toTypeName = Type{mProject.mProject, underlyingIdField->mType}.ToString();
+        // TODO: tolerate mismatches of integral types?
+        THROW_IF(fromTypeName != existingFromTypeName,
+                 "{} of {} references converter {} with different source type than {}: {} and {}",
+                 ToString(*field.mField->GetAnnotation(Annotations::Index)), ToString(cls, field),
+                 converter->mValue.mName, ToString(it->second.mClass, it->second.mField),
+                 fromTypeName, existingFromTypeName);
+        THROW_IF(toTypeName != existingToTypeName,
+                 "{} of {} references converter {} with different target type than {}: {} and {}",
+                 ToString(*field.mField->GetAnnotation(Annotations::Index)), ToString(cls, field),
+                 converter->mValue.mName, ToString(it->second.mClass, it->second.mField),
+                 toTypeName, existingToTypeName);
+      }
+    }
   }
 }

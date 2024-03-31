@@ -79,7 +79,7 @@ size_t HumanManager::GetHumanCount() const {
   return mHumans.size();
 }
 bool HumanManager::ParseFiles(const std::string& rootPath, const Converter& converterArg) {
-  auto converter = converterArg;
+  auto &converter = converterArg;
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;
   std::queue<std::filesystem::path> pathsQueue;
   pathsQueue.push(std::filesystem::path(rootPath));

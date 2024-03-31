@@ -22,10 +22,8 @@ namespace holgen {
 
   Translator::Translator(const ProjectDefinition &project) : mProject(project) {
     MonolithValidator(project).Validate();
-    // TODO: currently plugins iterate over struct fields, but we need to iterate over class fields
-    // and filter by mField to avoid processing custom fields
-    // TODO: Helper generators should run first so that errors come up when processing user defined data
     // TODO: Users should pick which plugins to run
+
     AddPlugin<ClassPlugin>();
     AddPlugin<ClassFieldPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();
@@ -35,10 +33,10 @@ namespace holgen {
     AddPlugin<ContainerFieldPlugin>();
     AddPlugin<ManagedClassPlugin>();
     AddPlugin<EnumPlugin>();
+    AddPlugin<JsonConverterPlugin>();
     AddPlugin<JsonPlugin>();
     AddPlugin<JsonParseFilesPlugin>();
     AddPlugin<JsonHelperPlugin>();
-    AddPlugin<JsonConverterPlugin>();
     AddPlugin<LuaPlugin>();
     AddPlugin<LuaHelperPlugin>();
     AddPlugin<GlobalPointerPlugin>();

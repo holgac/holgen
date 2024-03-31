@@ -27,11 +27,13 @@ namespace holgen {
 
   GEN_GETTER_BY_NAME_NONCONST(TranslatedProject, Class, GetClass, mClasses);
 
+  GEN_GETTER_BY_NAME(ClassMethod, TemplateParameter, GetTemplateParameter, mTemplateParameters)
+
   GEN_GETTER_BY_NAME_NONCONST(Class, ClassField, GetField, mFields);
 
   GEN_GETTER_BY_NAME(Class, ClassField, GetField, mFields)
 
   GEN_GETTER_BY_NAME(Class, ForwardDeclaration, GetForwardDeclaration, mGlobalForwardDeclarations)
 
+  GEN_GETTER_BY_NAME(Class, TemplateParameter, GetTemplateParameter, mTemplateParameters)
 }
-

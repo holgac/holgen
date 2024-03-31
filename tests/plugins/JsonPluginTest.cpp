@@ -2,20 +2,24 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/json/JsonPlugin.h"
-#include "../Helpers.h"
+#include "generator/plugins/json/JsonConverterPlugin.h"
+#include "generator/plugins/lua/LuaFunctionPlugin.h"
 
 class JsonPluginTest : public TranslatorPluginTest {
-
+protected:
+  static void Run(TranslatedProject &project) {
+    ClassPlugin(project).Run();
+    ClassFieldPlugin(project).Run();
+    JsonConverterPlugin(project).Run();
+    // Not a direct dependency, but needed to parse lua function names
+    LuaFunctionPlugin(project).Run();
+    JsonPlugin(project).Run();
+  }
 };
 
 TEST_F(JsonPluginTest, StructParseJsonEmpty) {
-  auto project = Parse(R"R(
-struct TestData {
-}
-  )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  JsonPlugin(project).Run();
+  auto project = Parse("struct TestData {}");
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -44,9 +48,7 @@ struct TestData {
   func testFieldFunc(u32 a1) -> bool;
 }
       )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  JsonPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -90,9 +92,7 @@ struct TestData {
   string testFieldString;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  JsonPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -124,13 +124,8 @@ return true;
 }
 
 TEST_F(JsonPluginTest, EnumParseJson) {
-  auto project = Parse(R"R(
-enum TestData {
-}
-  )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  JsonPlugin(project).Run();
+  auto project = Parse("enum TestData {}");
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 

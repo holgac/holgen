@@ -1,44 +1,40 @@
 #include "JsonHelperPlugin.h"
-#include <vector>
 #include "generator/TypeInfo.h"
-#include "core/Annotations.h"
 #include "core/St.h"
 
 namespace holgen {
-  namespace {
-    std::string ConverterName = "Converter";
-    std::string ParseJson = "ParseJson";
-  }
-
   void JsonHelperPlugin::Run() {
-    auto &generatedClass = mProject.mClasses.emplace_back(St::JsonHelper);
-    generatedClass.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
-    GenerateBaseParse(generatedClass);
-    GenerateParseSingleElem(generatedClass);
+    auto cls = Class{St::JsonHelper};
+    cls.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
+    GenerateBaseParse(cls);
+    GenerateParseSingleElem(cls);
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      GenerateParseJsonForSingleElemContainer(generatedClass, container);
+      GenerateParseJsonForSingleElemContainer(cls, container);
     }
     for (const auto &container: TypeInfo::Get().CppSets) {
-      GenerateParseJsonForSingleElemContainer(generatedClass, container);
+      GenerateParseJsonForSingleElemContainer(cls, container);
     }
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-      GenerateParseJsonForKeyedContainer(generatedClass, container);
+      GenerateParseJsonForKeyedContainer(cls, container);
     }
+    Validate().NewClass(cls);
+    mProject.mClasses.emplace_back(std::move(cls));
   }
 
   void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container) {
-    auto &method = cls.mMethods.emplace_back(
+    auto method = ClassMethod{
         St::JsonHelper_Parse, Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static
-    );
+    };
     auto &templateArg = method.mTemplateParameters.emplace_back();
     templateArg.mType = "typename";
     templateArg.mName = "T";
     auto &out = method.mArguments.emplace_back("out", Type{container, PassByType::Reference});
     out.mType.mTemplateParameters.emplace_back("T");
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
 
+    // TODO: HOLGEN_WARN
     method.mBody.Line() << "if (!json.IsArray())";
     method.mBody.Indent(1);
     method.mBody.Line() << "return false;";
@@ -59,36 +55,42 @@ namespace holgen {
     method.mBody.Indent(-1);
     method.mBody.Line() << "}"; // range based for on json.GetArray()
     method.mBody.Line() << "return true;";
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
   void JsonHelperPlugin::GenerateBaseParse(Class &cls) {
-    auto &method = cls.mMethods.emplace_back(
+    auto method = ClassMethod{
         St::JsonHelper_Parse, Type{"bool"},
-        Visibility::Public, Constness::NotConst, Staticness::Static);
+        Visibility::Public, Constness::NotConst, Staticness::Static};
     auto &baseTemplateArg = method.mTemplateParameters.emplace_back();
     baseTemplateArg.mType = "typename";
     baseTemplateArg.mName = "T";
     method.mArguments.emplace_back("out", Type{"T", PassByType::Reference});
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
-    method.mBody.Add("return out.{}(json, converter);", ParseJson);
+    method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
+    method.mBody.Add("return out.{}(json, converter);", St::ParseJson);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
   void JsonHelperPlugin::GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,
                                                  const std::string &getter) {
-    auto &method = cls.mMethods.emplace_back(
+    auto method = ClassMethod{
         St::JsonHelper_Parse, Type{"bool"},
-        Visibility::Public, Constness::NotConst, Staticness::Static);
+        Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mIsTemplateSpecialization = true;
     method.mArguments.emplace_back("out", Type{type, PassByType::Reference});
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
     method.mBody.Line() << "if (!json." << validator << "())";
     method.mBody.Indent(1);
     method.mBody.Line() << "return false;";
     method.mBody.Indent(-1);
     method.mBody.Line() << "out = json." << getter << "();";
     method.mBody.Line() << "return true;";
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
   void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {
@@ -107,10 +109,9 @@ namespace holgen {
   }
 
   void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container) {
-    auto &method = cls.mMethods.emplace_back(
-        St::JsonHelper_Parse,
-        Type{"bool"},
-        Visibility::Public, Constness::NotConst, Staticness::Static);
+    auto method = ClassMethod{
+        St::JsonHelper_Parse, Type{"bool"},
+        Visibility::Public, Constness::NotConst, Staticness::Static};
     auto &keyTemplateArg = method.mTemplateParameters.emplace_back();
     keyTemplateArg.mType = "typename";
     keyTemplateArg.mName = "K";
@@ -124,7 +125,7 @@ namespace holgen {
       out.mType.mTemplateParameters.emplace_back("V");
     }
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{ConverterName, PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
 
     method.mBody.Line() << "if (!json.IsObject())";
     method.mBody.Indent(1);
@@ -148,5 +149,7 @@ namespace holgen {
     method.mBody.Indent(-1);
     method.mBody.Line() << "}"; // range based for on json.GetArray()
     method.mBody.Line() << "return true;";
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 }

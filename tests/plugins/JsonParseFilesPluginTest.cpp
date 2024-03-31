@@ -2,9 +2,16 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/json/JsonParseFilesPlugin.h"
-#include "../Helpers.h"
+#include "generator/plugins/json/JsonConverterPlugin.h"
 
 class JsonParseFilesPluginTest : public TranslatorPluginTest {
+protected:
+  static void Run(TranslatedProject &project) {
+    ClassPlugin(project).Run();
+    ClassFieldPlugin(project).Run();
+    JsonConverterPlugin(project).Run();
+    JsonParseFilesPlugin(project).Run();
+  }
 
 };
 
@@ -30,9 +37,7 @@ struct TestData {
   vector<InnerStruct2> innerStruct2s;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  JsonParseFilesPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -42,7 +47,7 @@ struct TestData {
     method.mArguments.emplace_back("rootPath", Type{"std::string", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converterArg", Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseFiles", Constness::NotConst), method, R"R(
-auto converter = converterArg;
+auto &converter = converterArg;
 std::map<std::string, std::vector<std::filesystem::path>> filesByName;
 std::queue<std::filesystem::path> pathsQueue;
 pathsQueue.push(std::filesystem::path(rootPath));
@@ -121,9 +126,7 @@ struct TestData {
   vector<InnerStruct2> innerStruct2s;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  JsonParseFilesPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
