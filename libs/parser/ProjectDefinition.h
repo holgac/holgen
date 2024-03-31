@@ -31,6 +31,10 @@ namespace holgen {
     std::vector<AnnotationAttributeDefinition> mAttributes;
     DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationAttributeDefinition *GetAttribute(const std::string &name) const;
+
+    auto GetAttributes(const std::string &name) const {
+      return NameFilterForEachWrapper(name, mAttributes);
+    }
   };
 
   struct FieldDefinition {

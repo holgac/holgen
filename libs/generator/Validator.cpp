@@ -1,6 +1,7 @@
 #include "Validator.h"
 #include <set>
 #include <string>
+#include "core/Annotations.h"
 #include "TypeInfo.h"
 #include "core/Exception.h"
 #include "TranslatedProject.h"
@@ -44,9 +45,15 @@ namespace holgen {
         return std::format("{}.{}", cls.mName, method.mName);
     }
 
+    std::string ToString(const AnnotationDefinition &annotation) {
+      return std::format("{} ({})", annotation.mName, annotation.mDefinitionSource);
+    }
+
   }
 
-  Validator::Validator(TranslatedProject &project) : mProject(project) {}
+  Validator::Validator(
+      TranslatedProject &project, const NamingConvention &naming
+  ) : mProject(project), mNaming(naming) {}
 
   void Validator::NewClass(const Class &cls) const {
     THROW_IF(ReservedKeywords.contains(cls.mName), "{} is a reserved keyword", ToString(cls));
@@ -164,5 +171,95 @@ namespace holgen {
     for (auto &arg: method.mArguments) {
       ValidateType(arg.mType, cls, false, ToString(cls, method));
     }
+  }
+
+  void Validator::ContainerAnnotation(const Class &cls, const ClassField &field,
+                                      const AnnotationDefinition &annotation) const {
+    EnforceUniqueAnnotation(cls, field, Annotations::Container);
+    ValidateAttributeCount(annotation, Annotations::Container_ElemName, ToString(cls, field));
+    if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
+      auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
+      THROW_IF(underlyingClass == nullptr, "{} is a keyed container of {} which is not a user type",
+               ToString(cls, field), field.mType.mTemplateParameters.back().ToString());
+      THROW_IF(!underlyingClass->mStruct || !underlyingClass->mStruct->GetIdField(),
+               "{} is a keyed container of {} which is not a user type with an id field",
+               ToString(cls, field), ToString(*underlyingClass));
+      auto key = field.mField->mType.mTemplateParameters.front();
+      if (key.mName == "Ref") {
+        THROW_IF(key.mTemplateParameters.front().mName != underlyingClass->mStruct->mName,
+                 "Keyed container {} of {} should use Ref<{}>",
+                 ToString(cls, field), underlyingClass->mStruct->mName, cls.mStruct->mName);
+      }
+    } else {
+      THROW_IF(
+          !TypeInfo::Get().CppIndexedContainers.contains(field.mType.mName) &&
+          !TypeInfo::Get().CppSets.contains(field.mType.mName),
+          "{} should have a container type, found {}", ToString(cls, field), field.mType.mName);
+    }
+    for (auto &field2: cls.mFields) {
+      if (!field2.mField || field2.mField == field.mField)
+        continue;
+      if (auto container2 = field2.mField->GetAnnotation(Annotations::Container)) {
+        auto elemName2 = container2->GetAttribute(Annotations::Container_ElemName);
+        THROW_IF(elemName2 &&
+                     elemName2->mValue.mName == annotation.GetAttribute(Annotations::Container_ElemName)->mValue.mName,
+                 "{} has multiple container fields ({} and {}) with identical elemName: {}",
+                 cls.mStruct->mName, ToString(cls, field), ToString(cls, field2), elemName2->mValue.mName);
+      }
+    }
+  }
+
+  void Validator::IndexAnnotation(const Class &cls, const ClassField &field,
+                                  const AnnotationDefinition &annotation) const {
+    // This doesn't make sense right now since we check index annotation only for containers, added just in case
+    THROW_IF(!field.mField || !field.mField->GetAnnotation(Annotations::Container),
+             "{} annotation of {} should only be used on container fields",
+             annotation.mName, ToString(cls, field));
+    ValidateAttributeCount(annotation, Annotations::Index_On, ToString(cls, field));
+    ValidateAttributeCount(annotation, Annotations::Index_Using, ToString(cls, field), 0);
+    ValidateAttributeCount(annotation, Annotations::Index_ForConverter, ToString(cls, field), 0);
+    if (auto indexUsing = annotation.GetAttribute(Annotations::Index_Using)) {
+      auto type = Type{mProject.mProject, indexUsing->mValue};
+      THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
+               "{} attribute of {} of {} should be a keyed container type, found {}",
+               indexUsing->mName, ToString(annotation), ToString(cls, field), type.mName);
+    }
+    auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
+    THROW_IF(!underlyingClass, "{} has an index on {} which is not a user defined struct",
+             ToString(cls, field), field.mType.mTemplateParameters.back().ToString());
+    auto indexOn = annotation.GetAttribute(Annotations::Index_On);
+    auto indexedFieldDefinition = underlyingClass->mStruct->GetField(indexOn->mValue.mName);
+    THROW_IF(!indexedFieldDefinition, "{} has an index on non-existent field {} of {}",
+             ToString(cls, field), indexOn->mValue.mName, ToString(*underlyingClass));
+    auto indexedField = underlyingClass->GetField(mNaming.FieldNameInCpp(*indexedFieldDefinition));
+    THROW_IF(!indexedField, "{} has an index on non-existent field {} of {}",
+             ToString(cls, field), indexOn->mValue.mName, ToString(*underlyingClass));
+    THROW_IF(!TypeInfo::Get().KeyableTypes.contains(indexedField->mType.mName),
+             "{} has an index on non-keyable field {}",
+             ToString(cls, field), ToString(*underlyingClass, *indexedField));
+    THROW_IF(annotation.GetAttribute(Annotations::Index_ForConverter) && !cls.mStruct->GetAnnotation(Annotations::DataManager),
+             "{} has an index with a converter but the class is missing the {} annotation",
+             ToString(cls, field), Annotations::DataManager);
+  }
+
+  void Validator::ValidateAttributeCount(
+      const AnnotationDefinition &annotation, const std::string &attributeName,
+      const std::string &source, size_t minCount, size_t maxCount) const {
+    size_t count = std::count_if(
+        annotation.mAttributes.begin(), annotation.mAttributes.end(),
+        [&attributeName](const auto &attribute) { return attribute.mName == attributeName; });
+    THROW_IF(count < minCount, "Missing {} attribute in {} annotation of {}",
+             attributeName, ToString(annotation), source);
+    THROW_IF(count > maxCount, "Too many {} attributes in {} annotation of {}",
+             attributeName, ToString(annotation), source);
+  }
+
+  void Validator::EnforceUniqueAnnotation(
+      const Class &cls, const ClassField &field, const std::string &annotationName) const {
+    size_t count = std::count_if(
+        field.mField->mAnnotations.begin(), field.mField->mAnnotations.end(),
+        [&annotationName](const auto &annotation) { return annotation.mName == annotationName; });
+    THROW_IF(count != 1, "{} annotation in {} should be used only once",
+             annotationName, ToString(cls, field));
   }
 }

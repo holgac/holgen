@@ -37,14 +37,6 @@ namespace holgen {
                annotationDefinition.mName);
     }
 
-    void EnforceAnnotationExists(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
-                                 const std::string &annotationName) {
-      auto annotation = fieldDefinition.GetAnnotation(annotationName);
-      THROW_IF(annotation == nullptr,
-               "Field {}.{} does not have a annotation {}", structDefinition.mName,
-               fieldDefinition.mName, annotationName);
-    }
-
     void EnforceAttributeExists(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
                                 const AnnotationDefinition &annotationDefinition, const std::string &attributeName) {
       auto attribute = annotationDefinition.GetAttribute(attributeName);
@@ -101,39 +93,6 @@ namespace holgen {
         THROW_IF(it->second.second != convertTo, "Converter {} cannot convert to multiple types: {} and {}",
                  converterName->mValue.mName, it->second.second.mName, convertTo.mName);
       }
-    } else if (annotationDefinition.mName == Annotations::Container) {
-      ValidateContainerAnnotation(structDefinition, fieldDefinition, annotationDefinition);
-    } else if (annotationDefinition.mName == Annotations::Index) {
-      EnforceAnnotationExists(structDefinition, fieldDefinition, Annotations::Container);
-      // double validate to avoid order problems, this validator piece depends on Container being valid.
-      Validate(structDefinition, fieldDefinition, *fieldDefinition.GetAnnotation(Annotations::Container));
-      EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Index_On);
-      auto indexUsing = annotationDefinition.GetAttribute(Annotations::Index_Using);
-      if (indexUsing) {
-        EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Index_Using);
-        auto type = Type{mProject, indexUsing->mValue};
-        THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
-                 "{}.{} uses invalid index type: {}",
-                 structDefinition.mName, fieldDefinition.mName, indexUsing->mValue.mName)
-      }
-      auto indexOn = annotationDefinition.GetAttribute(Annotations::Index_On);
-      auto underlyingStruct = mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
-      auto underlyingField = underlyingStruct->GetField(indexOn->mValue.mName);
-      THROW_IF(underlyingField == nullptr, "{}.{} indexes on {}.{} which doesn't exist",
-               structDefinition.mName, fieldDefinition.mName,
-               underlyingStruct->mName, indexOn->mValue.mName
-      )
-      Type indexType(mProject, underlyingField->mType);
-      THROW_IF(!TypeInfo::Get().KeyableTypes.contains(indexType.mName),
-               "{}.{} indexes on {}.{} which is not a valid key",
-               structDefinition.mName, fieldDefinition.mName,
-               underlyingStruct->mName, indexOn->mName
-      )
-      auto indexForConverter = annotationDefinition.GetAttribute(Annotations::Index_ForConverter);
-      THROW_IF(
-          indexForConverter != nullptr && structDefinition.GetAnnotation(Annotations::DataManager) == nullptr,
-          "{} attribute can only be used when the struct is decorated with {}",
-          indexForConverter->mName, Annotations::DataManager);
     } else if (annotationDefinition.mName == Annotations::Id) {
       auto idField = structDefinition.GetIdField();
       THROW_IF(&fieldDefinition != idField, "struct {} has multiple id fields: {} and {}",
@@ -172,43 +131,6 @@ namespace holgen {
   void MonolithValidator::Validate() {
     for (const auto &structDefinition: mProject.mStructs) {
       Validate(structDefinition);
-    }
-  }
-
-  void MonolithValidator::ValidateContainerAnnotation(const StructDefinition &structDefinition,
-                                              const FieldDefinition &fieldDefinition,
-                                              const AnnotationDefinition &annotationDefinition) {
-    EnforceUnique(structDefinition, fieldDefinition, annotationDefinition);
-    EnforceAttributeExists(structDefinition, fieldDefinition, annotationDefinition, Annotations::Container_ElemName);
-    auto type = Type{mProject, fieldDefinition.mType};
-    auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
-    auto underlyingStruct = mProject.GetStruct(underlyingType.mName);
-    if (TypeInfo::Get().CppKeyedContainers.contains(type.mName)) {
-      THROW_IF(underlyingStruct == nullptr, "{}.{} is a keyed container of {} which is not a user type",
-               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-      THROW_IF(underlyingStruct->GetIdField() == nullptr,
-               "{}.{} is a keyed container of {} which does not have an id field",
-               structDefinition.mName, fieldDefinition.mName, underlyingType.mName);
-      THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 2, "{}.{} should have two template parameters",
-               structDefinition.mName, fieldDefinition.mName);
-      auto &key = fieldDefinition.mType.mTemplateParameters[0];
-      if (key.mName == "Ref") {
-        THROW_IF(key.mTemplateParameters.size() != 1, "{}.{} has an unusual ref key type",
-                 structDefinition.mName, fieldDefinition.mName);
-        THROW_IF(key.mTemplateParameters[0].mName != underlyingStruct->mName,
-                 "{}.{} uses a Ref key on an unrelated object",
-                 structDefinition.mName, fieldDefinition.mName);
-      } else {
-        THROW_IF(!TypeInfo::Get().KeyableTypes.contains(key.mName), "{}.{} has an unusual key type",
-                 structDefinition.mName, fieldDefinition.mName);
-      }
-    } else {
-      THROW_IF(
-          !TypeInfo::Get().CppIndexedContainers.contains(type.mName) && !TypeInfo::Get().CppSets.contains(type.mName),
-          "{}.{} is not a valid container to use index with",
-          structDefinition.mName, fieldDefinition.mName);
-      THROW_IF(fieldDefinition.mType.mTemplateParameters.size() != 1, "{}.{} should have a single template parameter",
-               structDefinition.mName, fieldDefinition.mName);
     }
   }
 }

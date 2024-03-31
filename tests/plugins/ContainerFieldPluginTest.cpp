@@ -2,10 +2,14 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ContainerFieldPlugin.h"
-#include "../Helpers.h"
 
 class ContainerFieldPluginTest : public TranslatorPluginTest {
-
+protected:
+  static void Run(TranslatedProject &project) {
+    ClassPlugin(project).Run();
+    ClassFieldPlugin(project).Run();
+    ContainerFieldPlugin(project).Run();
+  }
 };
 
 TEST_F(ContainerFieldPluginTest, Index) {
@@ -23,9 +27,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -66,9 +68,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -132,9 +132,7 @@ struct TestData {
   map<Ref<InnerStruct>, InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -192,9 +190,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_EQ(cls->mFields.size(), 1);
@@ -225,9 +221,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_EQ(cls->mFields.size(), 1);
@@ -264,9 +258,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -310,9 +302,7 @@ struct TestData {
   map<Ref<InnerStruct>, InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -370,9 +360,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_EQ(cls->mFields.size(), 1);
@@ -410,9 +398,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_EQ(cls->mFields.size(), 1);
@@ -450,9 +436,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -521,9 +505,9 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("DeleteInnerStruct", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
-      "DeleteInnerStruct",
-      Type{"void"},
-      Visibility::Public, Constness::NotConst};
+        "DeleteInnerStruct",
+        Type{"void"},
+        Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("idx", Type{"size_t"});
     method.mExposeToLua = true;
     helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
@@ -570,9 +554,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -597,4 +579,108 @@ if (idx != mInnerStructs.size() - 1) {
 mInnerStructs.pop_back();
     )R");
   }
+}
+
+TEST_F(ContainerFieldPluginTest, InvalidContainerAnnotation) {
+  ExpectErrorMessage(R"R(
+struct Inner {}
+struct A {
+  @container
+  vector<Inner> inners;
+})R", Run, "Missing elemName attribute in container ({0}:3:3) annotation of A.inners ({0}:4:3)", Source);
+  ExpectErrorMessage(R"R(
+struct Inner {}
+struct A {
+  @container(elemName=a)
+  @container(elemName=b)
+  vector<Inner> inners;
+  })R", Run, "container annotation in A.inners ({}:5:3) should be used only once", Source);
+  return;
+  ExpectErrorMessage(R"R(
+struct Inner {}
+struct A {
+  @container(elemName=inner, elemName=another)
+  vector<Inner> inners;
+})R", Run, "Too many elemName attributes in container ({0}:3:3) annotation of A.inners ({0}:4:3)", Source);
+}
+
+TEST_F(ContainerFieldPluginTest, InvalidContainerField) {
+  ExpectErrorMessage(R"R(
+struct A {
+  @container(elemName=name)
+  map<u32, string> inners;
+})R", Run, "A.inners ({0}:3:3) is a keyed container of std::string which is not a user type", Source);
+  ExpectErrorMessage(R"R(
+struct Inner {}
+struct A {
+  @container(elemName=name)
+  map<u32, Inner> inners;
+})R", Run, "A.inners ({0}:4:3) is a keyed container of Inner ({0}:1:1) which is not a user type with an id field",
+                     Source);
+  ExpectErrorMessage(R"R(
+struct A {
+  @container(elemName=inner)
+  u32 inners;
+})R", Run, "A.inners ({0}:3:3) should have a container type, found uint32_t", Source);
+  ExpectErrorMessage(
+      R"R(
+struct Inner1 {} struct Inner2 {}
+struct A {
+  @container(elemName=inner)
+  vector<Inner1> inners1;
+  @container(elemName=inner)
+  vector<Inner2> inners2;
+  })R", Run,
+      "A has multiple container fields (A.inners1 ({0}:4:3) and A.inners2 ({0}:6:3)) with identical elemName: inner",
+      Source);
+}
+
+TEST_F(ContainerFieldPluginTest, InvalidIndexAnnotation) {
+  ExpectErrorMessage(R"R(
+struct Inner {string field;}
+struct A {
+  @index
+  @container(elemName=inner)
+  vector<Inner> inners;
+  })R", Run, "Missing on attribute in index ({0}:3:3) annotation of A.inners ({0}:5:3)", Source);
+  ExpectErrorMessage(R"R(
+struct Inner {string field;}
+struct A {
+  @index(on=field, using=whatever)
+  @container(elemName=inner)
+  vector<Inner> inners;
+  })R", Run,
+                     "using attribute of index ({0}:3:3) of A.inners ({0}:5:3) should be a keyed container type, found whatever",
+                     Source);
+  ExpectErrorMessage(R"R(
+struct A {
+  @index(on=field)
+  @container(elemName=inner)
+  vector<string> inners;
+  })R", Run, "A.inners ({0}:4:3) has an index on std::string which is not a user defined struct", Source);
+  ExpectErrorMessage(R"R(
+struct Inner {}
+struct A {
+  @index(on=someField)
+  @container(elemName=inner)
+  vector<Inner> inners;
+  })R", Run, "A.inners ({0}:5:3) has an index on non-existent field someField of Inner ({0}:1:1)", Source);
+  ExpectErrorMessage(R"R(
+struct Inner2 {}
+struct Inner {Inner2 someField;}
+struct A {
+  @index(on=someField)
+  @container(elemName=inner)
+  vector<Inner> inners;
+  })R", Run, "A.inners ({0}:6:3) has an index on non-keyable field Inner.someField ({0}:2:15)", Source);
+  ExpectErrorMessage(
+      R"R(
+struct Inner {u32 someField;}
+struct A {
+  @index(on=someField, forConverter=someConverter)
+  @container(elemName=inner)
+  vector<Inner> inners;
+  })R", Run,
+      "A.inners ({0}:5:3) has an index with a converter but the class is missing the dataManager annotation",
+      Source);
 }

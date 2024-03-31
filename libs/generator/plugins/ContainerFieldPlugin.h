@@ -8,16 +8,17 @@ namespace holgen {
     using TranslatorPlugin::TranslatorPlugin;
      void Run() override;
   private:
-    void ProcessContainerField(Class& generatedClass, const FieldDefinition& fieldDefinition);
-    void ProcessContainerIndex(Class& generatedClass, const FieldDefinition& fieldDefinition, const AnnotationDefinition& annotationDefinition);
-    void GenerateContainerNextIndexField(Class& generatedClass, const FieldDefinition& fieldDefinition);
-    void GenerateContainerAddElem(Class& generatedClass, const FieldDefinition& fieldDefinition, bool useMoveRef);
-    void GenerateContainerHasElem(Class& generatedClass, const FieldDefinition& fieldDefinition);
-    void GenerateContainerGetElem(Class& generatedClass, const FieldDefinition& fieldDefinition);
-    void GenerateContainerGetCount(Class& generatedClass, const FieldDefinition& fieldDefinition);
-    void GenerateContainerDeleteElem(Class& generatedClass, const FieldDefinition& fieldDefinition);
-    bool CanImplementHasElem(Class& generatedClass, const FieldDefinition& fieldDefinition);
-    bool CanImplementDeleteElem(Class& generatedClass, const FieldDefinition& fieldDefinition);
+    void ProcessField(Class& cls, size_t fieldIdx);
+    void ProcessIndex(Class& cls, const ClassField& field, const AnnotationDefinition& annotationDefinition);
+    void GenerateIndexGetter(Class& generatedClass, const ClassField& field, const AnnotationDefinition& annotationDefinition);
+    void GenerateNextIndexField(Class& cls, const ClassField& field);
+    void GenerateAddElem(Class& cls, const ClassField& field, bool useMoveRef);
+    void GenerateHasElem(Class& cls, const ClassField& field);
+    void GenerateGetElem(Class& cls, const ClassField& field);
+    void GenerateGetCount(Class& cls, const ClassField& field);
+    void GenerateDeleteElem(Class& cls, const ClassField& field);
+    bool CanImplementHasElem(Class& generatedClass, const ClassField& field);
+    bool CanImplementDeleteElem(Class& generatedClass, const ClassField& field);
 
   };
 }

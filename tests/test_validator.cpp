@@ -77,18 +77,6 @@ struct B {
   )DELIM", "Converter myFunc cannot convert from multiple types: u8 and string");
 }
 
-TEST_F(ValidatorTest, Container) {
-  ExpectErrorMessage(R"DELIM(
-struct Person {
-  u32 field;
-}
-struct B {
-  @container()
-  vector<Person> people;
-}
-  )DELIM", "Field B.people has annotation container with missing attribute: elemName");
-}
-
 TEST_F(ValidatorTest, Id) {
   ExpectErrorMessage(R"DELIM(
 struct Person {

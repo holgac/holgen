@@ -107,7 +107,6 @@ namespace holgen {
      * Defines an extra unique index for a container field by creating a map<indexedFieldType, idFieldType> field.
      * TODO: how to prevent index field modifications? Can remove setter method for lua only. trust cpp?
      * Maybe the setter of the indexed field can notify data manager? If so, use friend and make it private.
-     * TODO: should just use size_t if no id field is specified
      *
      * Parameters:
      *  On: Field to index on (determines map's key)
@@ -116,7 +115,7 @@ namespace holgen {
      *
      * Example:
      * struct Person {
-     * @id()
+     * @id // not required for index
      * u32 id;
      *
      * u32 ssn;

@@ -35,12 +35,14 @@ namespace holgen {
         "int16_t",
         "int32_t",
         "int64_t",
+        "ssize_t",
     };
     UnsignedIntegralTypes = {
         "uint8_t",
         "uint16_t",
         "uint32_t",
         "uint64_t",
+        "size_t",
     };
     IntegralTypes = SignedIntegralTypes;
     IntegralTypes.insert(UnsignedIntegralTypes.begin(), UnsignedIntegralTypes.end());

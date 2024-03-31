@@ -4,7 +4,7 @@ namespace holgen {
 
   TranslatorPlugin::TranslatorPlugin(
       TranslatedProject &translatedProject
-  ) : mProject(translatedProject), mNamingConvention(mProject), mValidator(mProject) {
+  ) : mProject(translatedProject), mNamingConvention(mProject), mValidator(mProject, mNamingConvention) {
   }
 
   TranslatorPlugin::~TranslatorPlugin() {}

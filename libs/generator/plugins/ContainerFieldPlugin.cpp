@@ -6,44 +6,48 @@
 namespace holgen {
   // TODO: if the class has at least one const container, implement locking
   void ContainerFieldPlugin::Run() {
-    for (auto &generatedClass: mProject.mClasses) {
-      if (generatedClass.mStruct == nullptr)
+    for (auto &cls: mProject.mClasses) {
+      if (cls.mStruct == nullptr)
         continue;
-      for (auto &fieldDefinition: generatedClass.mStruct->mFields) {
-        if (fieldDefinition.GetAnnotation(Annotations::Container) == nullptr)
+      size_t fieldCount = cls.mFields.size();
+      // iterate over original fields
+      for (size_t i = 0; i < fieldCount; ++i) {
+        if (!cls.mFields[i].mField || !cls.mFields[i].mField->GetAnnotation(Annotations::Container))
           continue;
-        ProcessContainerField(generatedClass, fieldDefinition);
+        ProcessField(cls, i);
       }
     }
   }
 
-  void ContainerFieldPlugin::ProcessContainerField(
-      Class &generatedClass, const FieldDefinition &fieldDefinition
-  ) {
-    for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
-      ProcessContainerIndex(generatedClass, fieldDefinition, annotation);
+  // TODO: using size_t here to avoid iterator invalidations. Just use deque instead.
+  void ContainerFieldPlugin::ProcessField(Class &cls, size_t fieldIdx) {
+    auto container = cls.mFields[fieldIdx].mField->GetAnnotation(Annotations::Container);
+    Validate().ContainerAnnotation(cls, cls.mFields[fieldIdx], *container);
+    for (const auto &annotation: cls.mFields[fieldIdx].mField->GetAnnotations(Annotations::Index)) {
+      ProcessIndex(cls, cls.mFields[fieldIdx], annotation);
     }
-    GenerateContainerNextIndexField(generatedClass, fieldDefinition);
-    GenerateContainerAddElem(generatedClass, fieldDefinition, true);
-    GenerateContainerAddElem(generatedClass, fieldDefinition, false);
-    GenerateContainerGetElem(generatedClass, fieldDefinition);
-    if (CanImplementHasElem(generatedClass, fieldDefinition))
-      GenerateContainerHasElem(generatedClass, fieldDefinition);
-    if (CanImplementDeleteElem(generatedClass, fieldDefinition))
-      GenerateContainerDeleteElem(generatedClass, fieldDefinition);
-    GenerateContainerGetCount(generatedClass, fieldDefinition);
+    GenerateNextIndexField(cls, cls.mFields[fieldIdx]);
+    GenerateAddElem(cls, cls.mFields[fieldIdx], true);
+    GenerateAddElem(cls, cls.mFields[fieldIdx], false);
+    GenerateGetElem(cls, cls.mFields[fieldIdx]);
+    if (CanImplementHasElem(cls, cls.mFields[fieldIdx]))
+      GenerateHasElem(cls, cls.mFields[fieldIdx]);
+    if (CanImplementDeleteElem(cls, cls.mFields[fieldIdx]))
+      GenerateDeleteElem(cls, cls.mFields[fieldIdx]);
+    GenerateGetCount(cls, cls.mFields[fieldIdx]);
   }
 
-  void ContainerFieldPlugin::ProcessContainerIndex(Class &generatedClass, const FieldDefinition &fieldDefinition,
-                                                   const AnnotationDefinition &dec) {
-    auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
+  void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
+                                          const AnnotationDefinition &annotationDefinition) {
+    Validate().IndexAnnotation(cls, field, annotationDefinition);
+    auto &underlyingType = field.mField->mType.mTemplateParameters.back();
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
-    auto indexOn = dec.GetAttribute(Annotations::Index_On);
+    auto indexOn = annotationDefinition.GetAttribute(Annotations::Index_On);
     auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
     auto underlyingIdField = underlyingStructDefinition->GetIdField();
-    auto &indexField = generatedClass.mFields.emplace_back(
-        Naming().FieldIndexNameInCpp(fieldDefinition, dec), Type{"std::map"});
-    auto indexType = dec.GetAttribute(Annotations::Index_Using);
+    auto indexField = ClassField{
+        Naming().FieldIndexNameInCpp(*field.mField, annotationDefinition), Type{"std::map"}};
+    auto indexType = annotationDefinition.GetAttribute(Annotations::Index_Using);
     if (indexType != nullptr) {
       indexField.mType = Type{mProject.mProject, indexType->mValue};
     }
@@ -56,250 +60,251 @@ namespace holgen {
 
     for (int i = 0; i < 2; ++i) {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
-      auto &func = generatedClass.mMethods.emplace_back(
-          Naming().ContainerIndexGetterNameInCpp(fieldDefinition, dec),
+      auto method = ClassMethod{
+          Naming().ContainerIndexGetterNameInCpp(*field.mField, annotationDefinition),
           Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
           Visibility::Public,
-          constness);
+          constness};
       if (i == 0)
-        func.mExposeToLua = true;
-      func.mArguments.emplace_back("key", Type{mProject.mProject, fieldIndexedOn.mType});
-      func.mArguments.back().mType.PreventCopying();
+        method.mExposeToLua = true;
+      method.mArguments.emplace_back("key", Type{mProject.mProject, fieldIndexedOn.mType});
+      method.mArguments.back().mType.PreventCopying();
 
-      func.mBody.Add("auto it = {}.find(key);", indexField.mName);
-      func.mBody.Add("if (it == {}.end())", indexField.mName);
-      func.mBody.Indent(1);
-      func.mBody.Add("return nullptr;");
-      func.mBody.Indent(-1);
-      auto generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-      if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName))
-        func.mBody.Add("return &{}.at(it->second);", generatedField.mName);
+      method.mBody.Add("auto it = {}.find(key);", indexField.mName);
+      method.mBody.Add("if (it == {}.end())", indexField.mName);
+      method.mBody.Indent(1);
+      method.mBody.Add("return nullptr;");
+      method.mBody.Indent(-1);
+      if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName))
+        method.mBody.Add("return &{}.at(it->second);", field.mName);
       else
-        func.mBody.Add("return &{}[it->second];", generatedField.mName);
+        method.mBody.Add("return &{}[it->second];", field.mName);
+      Validate().NewMethod(cls, method);
+      cls.mMethods.emplace_back(std::move(method));
     }
+    Validate().NewField(cls, indexField);
+    cls.mFields.emplace_back(std::move(indexField));
   }
 
-  void ContainerFieldPlugin::GenerateContainerAddElem(Class &generatedClass, const FieldDefinition &fieldDefinition,
-                                                      bool useMoveRef) {
-    auto generatedField = generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-    auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
-    if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(Type{mProject.mProject, underlyingType}.mName))
+  void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, bool useMoveRef) {
+    auto &underlyingType = field.mType.mTemplateParameters.back();
+    if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(underlyingType.mName))
       return;
-    auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
+    auto underlyingClass = mProject.GetClass(underlyingType.mName);
     const FieldDefinition *underlyingIdField = nullptr;
-    if (underlyingStructDefinition)
-      underlyingIdField = underlyingStructDefinition->GetIdField();
-    bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField->mType.mName);
+    if (underlyingClass && underlyingClass->mStruct)
+      underlyingIdField = underlyingClass->mStruct->GetIdField();
+    bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
 
-    auto &func = generatedClass.mMethods.emplace_back(
-        Naming().ContainerElemAdderNameInCpp(fieldDefinition),
+    auto method = ClassMethod{
+        Naming().ContainerElemAdderNameInCpp(*field.mField),
         Type{"bool"},
         Visibility::Public,
         Constness::NotConst
-    );
+    };
     if (useMoveRef) {
-      func.mArguments.emplace_back(
-          "elem", Type{mProject.mProject, underlyingType, PassByType::MoveReference});
+      method.mArguments.emplace_back("elem", underlyingType);
+      method.mArguments.back().mType.mType = PassByType::MoveReference;
     } else {
-      func.mArguments.emplace_back("elem", Type{mProject.mProject, underlyingType});
-      func.mArguments.back().mType.PreventCopying();
+      method.mArguments.emplace_back("elem", underlyingType);
+      method.mArguments.back().mType.PreventCopying();
     }
 
     CodeBlock validators;
     CodeBlock inserters;
-    for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
+    for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
-      auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
-      auto indexFieldName = Naming().FieldIndexNameInCpp(fieldDefinition, annotation);
+      auto &fieldIndexedOn = *underlyingClass->mStruct->GetField(indexOn->mValue.mName);
+      auto indexFieldName = Naming().FieldIndexNameInCpp(*field.mField, annotation);
       auto getterMethodName = Naming().FieldGetterNameInCpp(fieldIndexedOn);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
       // TODO: remove exclamation mark
       validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists!", elem.{}());)",
-                     underlyingStructDefinition->mName, indexOn->mValue.mName, getterMethodName);
+                     underlyingClass->mName, indexOn->mValue.mName, getterMethodName);
       validators.Add("return false;");
       validators.Indent(-1);
       validators.Add("}}");
       inserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
     }
-    func.mBody.Add(validators);
+    method.mBody.Add(validators);
     if (isKeyedContainer) {
-      func.mBody.Add("auto newId = {}NextId;", generatedField->mName);
-      func.mBody.Add("++{}NextId;", generatedField->mName);
+      method.mBody.Add("auto newId = {}NextId;", field.mName);
+      method.mBody.Add("++{}NextId;", field.mName);
     } else if (!inserters.mContents.empty() || underlyingIdField) {
-      func.mBody.Line() << "auto newId = " << generatedField->mName << ".size();";
+      method.mBody.Add("auto newId = {}.size();", field.mName);
     }
-    func.mBody.Add(inserters);
+    method.mBody.Add(inserters);
     if (underlyingIdField) {
-      func.mArguments.back().mType.mConstness = Constness::NotConst;
-      func.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField));
+      method.mArguments.back().mType.mConstness = Constness::NotConst;
+      method.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField));
     }
     std::string elemToInsert = "elem";
     if (useMoveRef)
-      elemToInsert = std::format("std::forward<{}>(elem)", func.mArguments.back().mType.mName);
+      elemToInsert = std::format("std::forward<{}>(elem)", method.mArguments.back().mType.mName);
     if (isKeyedContainer) {
-      func.mBody.Add("{}.emplace(newId, {});", generatedField->mName,
-                     elemToInsert);
-    } else if (TypeInfo::Get().CppSets.contains(generatedField->mType.mName)) {
-      func.mBody.Add("{}.emplace({});", generatedField->mName, elemToInsert);
+      method.mBody.Add("{}.emplace(newId, {});", field.mName,
+                       elemToInsert);
+    } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
+      method.mBody.Add("{}.emplace({});", field.mName, elemToInsert);
     } else {
-      func.mBody.Add("{}.emplace_back({});", generatedField->mName, elemToInsert);
+      method.mBody.Add("{}.emplace_back({});", field.mName, elemToInsert);
     }
-    func.mBody.Line() << "return true;";
+    method.mBody.Line() << "return true;";
+    cls.mMethods.emplace_back(std::move(method));
   }
 
-  void ContainerFieldPlugin::GenerateContainerGetElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto &underlyingType = fieldDefinition.mType.mTemplateParameters.back();
-    auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
+  void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) {
+    auto &underlyingType = field.mType.mTemplateParameters.back();
+    auto underlyingClass = mProject.GetClass(underlyingType.mName);
     const FieldDefinition *underlyingIdField = nullptr;
-    if (underlyingStructDefinition)
-      underlyingIdField = underlyingStructDefinition->GetIdField();
-    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-    if (TypeInfo::Get().CppSets.contains(generatedField.mType.mName))
+    if (underlyingClass && underlyingClass->mStruct)
+      underlyingIdField = underlyingClass->mStruct->GetIdField();
+    if (TypeInfo::Get().CppSets.contains(field.mType.mName))
       return;
-    bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName);
+    bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
     for (int i = 0; i < 2; ++i) {
       auto constness = i == 0 ? Constness::Const : Constness::NotConst;
-      auto &func = generatedClass.mMethods.emplace_back(
-          Naming().ContainerElemGetterNameInCpp(fieldDefinition),
-          Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
+      auto method = ClassMethod{
+          Naming().ContainerElemGetterNameInCpp(*field.mField),
+          underlyingType,
           Visibility::Public,
           constness
-      );
+      };
+      method.mReturnType.mType = PassByType::Pointer;
+      method.mReturnType.mConstness = constness;
       if (i == 0)
-        func.mExposeToLua = true;
+        method.mExposeToLua = true;
       bool isSigned = false;
       if (underlyingIdField) {
-        auto &arg = func.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mType});
+        auto &arg = method.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mType});
         if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName))
           isSigned = true;
       } else {
-        func.mArguments.emplace_back("idx", Type{"size_t"});
+        method.mArguments.emplace_back("idx", Type{"size_t"});
       }
       if (isKeyedContainer) {
-        func.mBody.Add("auto it = {}.find(idx);", generatedField.mName);
-        func.mBody.Add("if (it == {}.end())", generatedField.mName);
+        method.mBody.Add("auto it = {}.find(idx);", field.mName);
+        method.mBody.Add("if (it == {}.end())", field.mName);
       } else {
-        auto line = func.mBody.Line();
-        line << "if (idx >= " << generatedField.mName << ".size()";
+        auto line = method.mBody.Line();
+        line << "if (idx >= " << field.mName << ".size()";
         if (isSigned) {
           line << " || idx < 0";
         }
         line << ")";
       }
-      func.mBody.Indent(1);
-      func.mBody.Line() << "return nullptr;";
-      func.mBody.Indent(-1);
+      method.mBody.Indent(1);
+      method.mBody.Line() << "return nullptr;";
+      method.mBody.Indent(-1);
       if (isKeyedContainer) {
-        func.mBody.Add("return &it->second;");
+        method.mBody.Add("return &it->second;");
       } else {
-        func.mBody.Line() << "return &" << generatedField.mName << "[idx];";
+        method.mBody.Line() << "return &" << field.mName << "[idx];";
       }
+      cls.mMethods.emplace_back(std::move(method));
     }
   }
 
-  void ContainerFieldPlugin::GenerateContainerGetCount(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto &func = generatedClass.mMethods.emplace_back(
-        Naming().ContainerElemCountNameInCpp(fieldDefinition),
-        Type{"size_t"});
-    func.mExposeToLua = true;
-    func.mBody.Add("return {}.size();", Naming().FieldNameInCpp(fieldDefinition));
+  void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field) {
+    auto method = ClassMethod{
+        Naming().ContainerElemCountNameInCpp(*field.mField),
+        Type{"size_t"}};
+    method.mExposeToLua = true;
+    method.mBody.Add("return {}.size();", field.mName);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
-  void ContainerFieldPlugin::GenerateContainerDeleteElem(
-      Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    // TODO: rename to method everywhere
-    auto &func = generatedClass.mMethods.emplace_back(
-        Naming().ContainerElemDeleterNameInCpp(fieldDefinition),
-        Type{"void"}, Visibility::Public, Constness::NotConst);
-    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-    if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName)) {
-      func.mArguments.emplace_back("key", Type{mProject.mProject, fieldDefinition.mType.mTemplateParameters.front()});
-    } else if (TypeInfo::Get().CppSets.contains(generatedField.mType.mName)) {
-      func.mArguments.emplace_back("elem", Type{mProject.mProject, fieldDefinition.mType.mTemplateParameters.front()});
+  void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &field) {
+    auto method = ClassMethod{
+        Naming().ContainerElemDeleterNameInCpp(*field.mField),
+        Type{"void"}, Visibility::Public, Constness::NotConst};
+    if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
+      method.mArguments.emplace_back("key", field.mType.mTemplateParameters.front());
+    } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
+      method.mArguments.emplace_back("elem", field.mType.mTemplateParameters.front());
     } else {
-      func.mArguments.emplace_back("idx", Type{"size_t"});
+      method.mArguments.emplace_back("idx", Type{"size_t"});
     }
     CodeBlock indexDeleters;
     CodeBlock indexReassigners;
-    auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
-    for (const auto &annotation: fieldDefinition.GetAnnotations(Annotations::Index)) {
+    auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
+    for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
-      auto indexField = underlyingStruct->GetField(indexOn->mValue.mName);
+      auto indexField = underlyingClass->mStruct->GetField(indexOn->mValue.mName);
       indexDeleters.Add("{}.erase(ptr->{}());",
-                        Naming().FieldIndexNameInCpp(fieldDefinition, annotation),
+                        Naming().FieldIndexNameInCpp(*field.mField, annotation),
                         Naming().FieldGetterNameInCpp(*indexField));
       indexReassigners.Add("{}.at({}.back().{}()) = idx;",
-                           Naming().FieldIndexNameInCpp(fieldDefinition, annotation),
-                           Naming().FieldNameInCpp(fieldDefinition),
-                           Naming().FieldGetterNameInCpp(*indexField)
+                           Naming().FieldIndexNameInCpp(*field.mField, annotation),
+                           field.mName, Naming().FieldGetterNameInCpp(*indexField)
       );
     }
     if (!indexDeleters.mContents.empty()) {
-      func.mBody.Add("auto ptr = {}({});",
-                     Naming().ContainerElemGetterNameInCpp(fieldDefinition),
-                     func.mArguments.back().mName);
-      func.mBody.Add(indexDeleters);
+      method.mBody.Add("auto ptr = {}({});",
+                       Naming().ContainerElemGetterNameInCpp(*field.mField),
+                       method.mArguments.back().mName);
+      method.mBody.Add(indexDeleters);
     }
-    func.mExposeToLua = true;
-    if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName)) {
-      func.mBody.Add("{}.erase(key);", Naming().FieldNameInCpp(fieldDefinition));
-    } else if (TypeInfo::Get().CppSets.contains(generatedField.mType.mName)) {
-      func.mBody.Add("{}.erase(elem);", Naming().FieldNameInCpp(fieldDefinition));
+    method.mExposeToLua = true;
+    if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
+      method.mBody.Add("{}.erase(key);", field.mName);
+    } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
+      method.mBody.Add("{}.erase(elem);", field.mName);
     } else {
-      func.mBody.Add("if (idx != {}.size() - 1) {{", Naming().FieldNameInCpp(fieldDefinition));
-      func.mBody.Indent(1);
-      func.mBody.Add(indexReassigners);
-      func.mBody.Add("{0}[idx] = std::move({0}.back());", Naming().FieldNameInCpp(fieldDefinition));
-      func.mBody.Indent(-1);
-      func.mBody.Add("}}");
-      func.mBody.Add("{}.pop_back();", Naming().FieldNameInCpp(fieldDefinition));
+      method.mBody.Add("if (idx != {}.size() - 1) {{", field.mName);
+      method.mBody.Indent(1);
+      method.mBody.Add(indexReassigners);
+      method.mBody.Add("{0}[idx] = std::move({0}.back());", field.mName);
+      method.mBody.Indent(-1);
+      method.mBody.Add("}}");
+      method.mBody.Add("{}.pop_back();", field.mName);
     }
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
-  void ContainerFieldPlugin::GenerateContainerHasElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto &func = generatedClass.mMethods.emplace_back(
-        Naming().ContainerElemExistenceCheckerNameInCpp(fieldDefinition),
-        Type{"bool"});
-    func.mExposeToLua = true;
-    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-    auto &arg = func.mArguments.emplace_back("elem", Type{mProject.mProject,
-                                                          fieldDefinition.mType.mTemplateParameters.front()});
-    if (TypeInfo::Get().CppKeyedContainers.contains(generatedField.mType.mName)) {
+  void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) {
+    auto method = ClassMethod{
+        Naming().ContainerElemExistenceCheckerNameInCpp(*field.mField),
+        Type{"bool"}};
+    method.mExposeToLua = true;
+    auto &arg = method.mArguments.emplace_back("elem", field.mType.mTemplateParameters.front());
+    if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
       arg.mName = "key";
     }
     arg.mType.PreventCopying();
-    func.mBody.Add("return {}.contains({});", Naming().FieldNameInCpp(fieldDefinition), arg.mName);
+    method.mBody.Add("return {}.contains({});", field.mName, arg.mName);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.emplace_back(std::move(method));
   }
 
-  bool ContainerFieldPlugin::CanImplementDeleteElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
-    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
+  bool ContainerFieldPlugin::CanImplementDeleteElem(
+      Class &generatedClass __attribute__((unused)), const ClassField &field) {
+    auto underlyingStruct = mProject.mProject.GetStruct(field.mType.mTemplateParameters.back().mName);
     if (!underlyingStruct || !underlyingStruct->GetIdField())
       return true;
-    if (!TypeInfo::Get().CppIndexedContainers.contains(generatedField.mType.mName))
+    if (!TypeInfo::Get().CppIndexedContainers.contains(field.mType.mName))
       return true;
     return false;
   }
 
-  bool ContainerFieldPlugin::CanImplementHasElem(Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto &generatedField = *generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-    return !TypeInfo::Get().CppIndexedContainers.contains(generatedField.mType.mName);
+  bool ContainerFieldPlugin::CanImplementHasElem(
+      Class &generatedClass __attribute__((unused)), const ClassField &field) {
+    return !TypeInfo::Get().CppIndexedContainers.contains(field.mType.mName);
   }
 
-  void ContainerFieldPlugin::GenerateContainerNextIndexField(
-      Class &generatedClass, const FieldDefinition &fieldDefinition) {
-    auto generatedField = generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
-
-    if (TypeInfo::Get().CppKeyedContainers.contains(generatedField->mType.mName)) {
-      auto underlyingIdField = mProject.mProject.GetStruct(
-          fieldDefinition.mType.mTemplateParameters.back().mName)->GetIdField();
-      auto &nextIdField = generatedClass.mFields.emplace_back(
-          generatedField->mName + "NextId",
-          Type{mProject.mProject, underlyingIdField->mType});
+  void ContainerFieldPlugin::GenerateNextIndexField(Class &cls, const ClassField &field) {
+    if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
+      auto underlyingIdField = mProject.GetClass(
+          field.mType.mTemplateParameters.back().mName)->mStruct->GetIdField();
+      auto nextIdField = ClassField{
+          field.mName + "NextId",
+          Type{mProject.mProject, underlyingIdField->mType}};
       nextIdField.mDefaultValue = "0";
-      generatedField = generatedClass.GetField(Naming().FieldNameInCpp(fieldDefinition));
+      Validate().NewField(cls, nextIdField);
+      cls.mFields.emplace_back(std::move(nextIdField));
     }
-
   }
 }
