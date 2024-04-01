@@ -148,9 +148,9 @@ namespace holgen {
   }
 
   void JsonPlugin::GenerateParseJsonForFunction(ClassMethod &method, const ClassMethod &luaFunction) {
-    method.mBody.Add("auto res = {}::{}({}{}, data.value, converter);",
+    method.mBody.Add("auto res = {}::{}({}, data.value, converter);",
                      St::JsonHelper, St::JsonHelper_Parse,
-                     St::LuaFuncPrefix, luaFunction.mFunction->mName);
+                     Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction));
     method.mBody.Line() << "if (!res)";
     method.mBody.Indent(1);
     method.mBody.Line() << "return false;";

@@ -101,4 +101,8 @@ namespace holgen {
   std::string NamingConvention::LuaFunctionSetterNameInCpp(const FunctionDefinition &functionDefinition) const {
     return std::format("Set{}LuaFunc", functionDefinition.mName);
   }
+
+  std::string NamingConvention::LuaFunctionHandleNameInCpp(const FunctionDefinition &functionDefinition) const {
+    return "mLuaFuncHandle_" + functionDefinition.mName;
+  }
 }

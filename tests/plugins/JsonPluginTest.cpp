@@ -73,7 +73,7 @@ for(const auto& data: json.GetObject()) {
     if (!res)
       return false;
   } else if (0 == strcmp(name, "testFieldFunc")) {
-    auto res = JsonHelper::Parse(mFuncName_testFieldFunc, data.value, converter);
+    auto res = JsonHelper::Parse(mLuaFuncHandle_testFieldFunc, data.value, converter);
     if (!res)
       return false;
   }

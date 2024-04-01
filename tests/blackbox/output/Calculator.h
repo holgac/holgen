@@ -29,7 +29,7 @@ private:
   static void PushIndexMetaMethod(lua_State* luaState);
   static void PushNewIndexMetaMethod(lua_State* luaState);
   Number mCurVal;
-  std::string mFuncName_Add;
-  std::string mFuncName_Subtract;
+  std::string mLuaFuncHandle_Add;
+  std::string mLuaFuncHandle_Subtract;
 };
 }

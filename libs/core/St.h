@@ -24,8 +24,6 @@ namespace holgen {
     inline static const std::string LuaHelper = "LuaHelper";
     inline static const std::string LuaHelper_Push = "Push";
     inline static const std::string LuaHelper_Read = "Read";
-    // TODO: make it a function and move to Naming. Probably better to use m<funcName>_FuncHandle
-    inline static const std::string LuaFuncPrefix = "mFuncName_";
     inline static const std::string ManagedObject_Getter = "Get";
     inline static const std::string Enum_UnderlyingType = "UnderlyingType";
     inline static const std::string Converter = "Converter";

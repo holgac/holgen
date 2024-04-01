@@ -16,10 +16,10 @@ void Calculator::SetCurVal(const Number& val) {
   mCurVal = val;
 }
 int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
-  HOLGEN_WARN_AND_RETURN_IF(mFuncName_Add.empty(), {}, "Calling unset Add function");
-  lua_getglobal(luaState, mFuncName_Add.c_str());
+  HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Add.empty(), {}, "Calling unset Add function");
+  lua_getglobal(luaState, mLuaFuncHandle_Add.c_str());
   if (lua_isnil(luaState, -1)) {
-    HOLGEN_WARN("Calling undefined Add function {}", mFuncName_Add);
+    HOLGEN_WARN("Calling undefined Add function {}", mLuaFuncHandle_Add);
     lua_pop(luaState, 1);
     return {};
   }
@@ -32,15 +32,15 @@ int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
   return result;
 }
 void Calculator::SetAddLuaFunc(std::string val) {
-  mFuncName_Add = val;
+  mLuaFuncHandle_Add = val;
 }
 Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
-  HOLGEN_WARN_AND_RETURN_IF(mFuncName_Subtract.empty(), {}, "Calling unset Subtract function");
+  HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Subtract.empty(), {}, "Calling unset Subtract function");
   lua_getglobal(luaState, "Ops");
-  lua_pushstring(luaState, mFuncName_Subtract.c_str());
+  lua_pushstring(luaState, mLuaFuncHandle_Subtract.c_str());
   lua_gettable(luaState, -2);
   if (lua_isnil(luaState, -1)) {
-    HOLGEN_WARN("Calling undefined Subtract function Ops.{}", mFuncName_Subtract);
+    HOLGEN_WARN("Calling undefined Subtract function Ops.{}", mLuaFuncHandle_Subtract);
     lua_pop(luaState, 1);
     return {};
   }
@@ -53,7 +53,7 @@ Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
   return result;
 }
 void Calculator::SetSubtractLuaFunc(std::string val) {
-  mFuncName_Subtract = val;
+  mLuaFuncHandle_Subtract = val;
 }
 bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {
@@ -63,11 +63,11 @@ bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& conver
       if (!res)
         return false;
     } else if (0 == strcmp(name, "Add")) {
-      auto res = JsonHelper::Parse(mFuncName_Add, data.value, converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_Add, data.value, converter);
       if (!res)
         return false;
     } else if (0 == strcmp(name, "Subtract")) {
-      auto res = JsonHelper::Parse(mFuncName_Subtract, data.value, converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, data.value, converter);
       if (!res)
         return false;
     }
