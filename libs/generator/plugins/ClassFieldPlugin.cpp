@@ -1,5 +1,6 @@
 #include "ClassFieldPlugin.h"
 #include "core/St.h"
+#include "core/Annotations.h"
 
 namespace holgen {
   void ClassFieldPlugin::Run() {
@@ -17,8 +18,16 @@ namespace holgen {
         if (fieldDefinition.mType.mName == "Ref" && field.mDefaultValue.empty()) {
           if (field.mType.mType == PassByType::Pointer)
             field.mDefaultValue = "nullptr";
-          else
-            field.mDefaultValue = "-1";
+          else {
+            auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
+            auto idField = underlyingStruct->GetIdField();
+            if (!idField || TypeInfo::Get().IntegralTypes.contains(Type{mProject.mProject, idField->mType}.mName))
+              field.mDefaultValue = "-1";
+          }
+        }
+        if (field.mDefaultValue.empty() && fieldDefinition.GetAnnotation(Annotations::Id) &&
+            TypeInfo::Get().IntegralTypes.contains(field.mType.mName)) {
+          field.mDefaultValue = "-1";
         }
         Validate().NewField(cls, field);
         cls.mFields.push_back(std::move(field));

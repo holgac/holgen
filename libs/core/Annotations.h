@@ -94,7 +94,6 @@ namespace holgen {
      * Defines the field as an id. Determines whether Refs are raw pointers or indices.
      *
      * Can only exist once per struct. The field needs to be an integral type.
-     * TODO: default = -1
      * TODO: strings should also work
      *
      * Example:

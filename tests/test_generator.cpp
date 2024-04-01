@@ -657,7 +657,7 @@ public:
   static Person* Get(uint32_t id);
 protected:
 private:
-  uint32_t mId;
+  uint32_t mId = -1;
   std::string mName;
   uint32_t mPartnerId = -1;
 };

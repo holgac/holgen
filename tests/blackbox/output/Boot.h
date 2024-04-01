@@ -29,7 +29,7 @@ protected:
 private:
   static void PushIndexMetaMethod(lua_State* luaState);
   static void PushNewIndexMetaMethod(lua_State* luaState);
-  uint32_t mId;
+  uint32_t mId = -1;
   std::string mName;
   std::string mColor;
 };
