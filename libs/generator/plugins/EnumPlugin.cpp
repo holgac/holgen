@@ -28,25 +28,32 @@ namespace holgen {
 
   void EnumPlugin::GenerateCommon(Class &cls) {
     cls.mUsings.emplace_back(Type{"int64_t"}, St::Enum_UnderlyingType);
-    cls.mFields.emplace_back("mValue", Type{St::Enum_UnderlyingType});
+
     {
+      auto field = ClassField{"mValue", Type{St::Enum_UnderlyingType}};
+      Validate().NewField(cls, field);
+      cls.mFields.push_back(std::move(field));
+      // TODO: validate ctors
       ClassConstructor &ctor = cls.mConstructors.emplace_back();
       ctor.mExplicitness = Explicitness::Explicit;
       ctor.mArguments.emplace_back("value", Type{St::Enum_UnderlyingType}, "Invalid");
       ctor.mInitializerList.emplace_back("mValue", "value");
     }
 
-    {
-      ClassMethod &valueGetter = cls.mMethods.emplace_back("Get", Type{St::Enum_UnderlyingType});
-      valueGetter.mBody.Add("return mValue;");
-    }
-
+    GenerateGetValue(cls);
     GenerateEntries(cls);
     GenerateFromString(cls);
     GenerateToString(cls);
     GenerateOperators(cls);
     GenerateGetEntries(cls, true);
     GenerateGetEntries(cls, false);
+  }
+
+  void EnumPlugin::GenerateGetValue(Class &cls) {
+    auto method = ClassMethod{"Get", Type{St::Enum_UnderlyingType}};
+    method.mBody.Add("return mValue;");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
   void EnumPlugin::GenerateOperators(Class &cls) {
@@ -60,19 +67,19 @@ namespace holgen {
     };
 
     for (auto &op: operators) {
-      ClassMethod &opMethod = cls.mMethods.emplace_back(
+      auto method = ClassMethod{
           "operator " + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness
-      );
+      };
       if (op.mReturn == EnumOperatorReturnType::This) {
-        opMethod.mReturnType.mName = cls.mName;
-        opMethod.mReturnType.mType = PassByType::Reference;
+        method.mReturnType.mName = cls.mName;
+        method.mReturnType.mType = PassByType::Reference;
       }
       if (op.mIntegralArgument)
-        opMethod.mArguments.emplace_back("rhs", Type{St::Enum_UnderlyingType});
+        method.mArguments.emplace_back("rhs", Type{St::Enum_UnderlyingType});
       else
-        opMethod.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
+        method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
       {
-        auto line = opMethod.mBody.Line();
+        auto line = method.mBody.Line();
         if (op.mReturn == EnumOperatorReturnType::Result)
           line << "return ";
         line << "mValue";
@@ -82,7 +89,9 @@ namespace holgen {
         line << ";";
       }
       if (op.mReturn == EnumOperatorReturnType::This)
-        opMethod.mBody.Add("return *this;");
+        method.mBody.Add("return *this;");
+      Validate().NewMethod(cls, method);
+      cls.mMethods.push_back(std::move(method));
     }
   }
 

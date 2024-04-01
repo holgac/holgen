@@ -3,8 +3,6 @@
 #include "core/St.h"
 
 namespace holgen {
-  // TODO: refactor this too
-
   namespace {
 
     struct LuaTypeUsage {
@@ -34,194 +32,233 @@ namespace holgen {
   }
 
   void LuaHelperPlugin::Run() {
-    auto &generatedClass = mProject.mClasses.emplace_back(St::LuaHelper);
-    generatedClass.mHeaderIncludes.AddLibHeader("lua.hpp");
-    GenerateLuaHelperPush(generatedClass);
-    GenerateLuaHelperRead(generatedClass);
-    GenerateCreateMetatables(generatedClass);
+    auto cls = Class{St::LuaHelper};
+    cls.mHeaderIncludes.AddLibHeader("lua.hpp");
+    GeneratePush(cls);
+    GenerateRead(cls);
+    GenerateCreateMetatables(cls);
+    Validate().NewClass(cls);
+    mProject.mClasses.push_back(std::move(cls));
   }
 
-  void LuaHelperPlugin::GenerateLuaHelperPush(Class &generatedClass) {
-    auto &baseFunc = generatedClass.mMethods.emplace_back(
-        "Push", Type{"void"},
-        Visibility::Public, Constness::NotConst, Staticness::Static);
-    baseFunc.mTemplateParameters.emplace_back("typename", "T");
+  void LuaHelperPlugin::GeneratePush(Class &cls) {
+    GenerateBasePush(cls);
+    GeneratePushNil(cls);
+    GeneratePushForPrimitives(cls);
+    GeneratePushForContainers(cls);
+  }
 
-    baseFunc.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
-    baseFunc.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  void LuaHelperPlugin::GeneratePushForContainers(Class &cls) {
+    for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
+      GeneratePushForSingleElemContainer(cls, container);
+    }
 
-    baseFunc.mBody.Add("if constexpr(std::is_pointer_v<T>) {{");
-    baseFunc.mBody.Indent(1);
-    baseFunc.mBody.Add("if (data) {{");
-    baseFunc.mBody.Indent(1);
-    baseFunc.mBody.Add("{}::{}(*data, luaState);", St::LuaHelper, St::LuaHelper_Push);
-    baseFunc.mBody.Indent(-1);
-    baseFunc.mBody.Add("}} else {{");
-    baseFunc.mBody.Indent(1);
-    baseFunc.mBody.Line() << "lua_pushnil(luaState);";
-    baseFunc.mBody.Indent(-1);
-    baseFunc.mBody.Add("}}");
-    baseFunc.mBody.Indent(-1);
-    baseFunc.mBody.Add("}} else {{");
-    baseFunc.mBody.Indent(1);
-    baseFunc.mBody.Line() << "data.PushToLua(luaState);";
-    baseFunc.mBody.Indent(-1);
-    baseFunc.mBody.Add("}}");
+    for (const auto &container: TypeInfo::Get().CppSets) {
+      GeneratePushForSingleElemContainer(cls, container);
+    }
 
-    GenerateLuaHelperPushNil(generatedClass);
-
-    for (const auto &[type, usage]: LuaUsage) {
-      auto &func = generatedClass.mMethods.emplace_back(
+    for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
+      auto method = ClassMethod{
           "Push", Type{"void"},
-          Visibility::Public, Constness::NotConst, Staticness::Static);
+          Visibility::Public, Constness::NotConst, Staticness::Static
+      };
+      method.mTemplateParameters.emplace_back("typename", "K");
+      method.mTemplateParameters.emplace_back("typename", "V");
 
       {
-        auto &data = func.mArguments.emplace_back("data", Type{type});
+        auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+        data.mType.mTemplateParameters.emplace_back("K");
+        data.mType.mTemplateParameters.emplace_back("V");
+      }
+      method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+      // TODO: implement
+      Validate().NewMethod(cls, method);
+      cls.mMethods.push_back(std::move(method));
+    }
+  }
+
+  void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
+    for (const auto &[type, usage]: LuaUsage) {
+      auto method = ClassMethod{
+          "Push", Type{"void"},
+          Visibility::Public, Constness::NotConst, Staticness::Static};
+
+      {
+        auto &data = method.mArguments.emplace_back("data", Type{type});
         data.mType.PreventCopying();
       }
-      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+      method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
-      func.mBody.Line() << usage.mPusher << "(luaState, data" << usage.mFieldExtra << ");";
-    }
-
-    for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      GeneratePushForSingleElemContainer(generatedClass, container);
-    }
-
-    for (const auto &container: TypeInfo::Get().CppSets) {
-       GeneratePushForSingleElemContainer(generatedClass, container);
-    }
-
-    for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-      auto &func = generatedClass.mMethods.emplace_back(
-          "Push", Type{"void"},
-          Visibility::Public, Constness::NotConst, Staticness::Static
-      );
-      func.mTemplateParameters.emplace_back("typename", "K");
-      func.mTemplateParameters.emplace_back("typename", "V");
-
-      {
-        auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
-        data.mType.mTemplateParameters.emplace_back("K");
-        data.mType.mTemplateParameters.emplace_back("V");
-      }
-      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-      // TODO: implement
+      method.mBody.Line() << usage.mPusher << "(luaState, data" << usage.mFieldExtra << ");";
+      Validate().NewMethod(cls, method);
+      cls.mMethods.push_back(std::move(method));
     }
   }
 
-  void LuaHelperPlugin::GenerateLuaHelperPushNil(Class &generatedClass) {
-    auto &func = generatedClass.mMethods.emplace_back(
+  void LuaHelperPlugin::GenerateBasePush(Class &cls) {
+    auto method = ClassMethod{
         "Push", Type{"void"},
-        Visibility::Public, Constness::NotConst, Staticness::Static
-    );
-    func.mArguments.emplace_back("", Type{"nullptr_t"});
-    func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    func.mBody.Line() << "lua_pushnil(luaState);";
+        Visibility::Public, Constness::NotConst, Staticness::Static};
+    method.mTemplateParameters.emplace_back("typename", "T");
+
+    method.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+
+    method.mBody.Add("if constexpr(std::is_pointer_v<T>) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("if (data) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("{}::{}(*data, luaState);", St::LuaHelper, St::LuaHelper_Push);
+    method.mBody.Indent(-1);
+    method.mBody.Add("}} else {{");
+    method.mBody.Indent(1);
+    method.mBody.Line() << "lua_pushnil(luaState);";
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+    method.mBody.Indent(-1);
+    method.mBody.Add("}} else {{");
+    method.mBody.Indent(1);
+    method.mBody.Line() << "data.PushToLua(luaState);";
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
-  void LuaHelperPlugin::GenerateLuaHelperRead(Class &generatedClass) {
-    auto &baseFunc = generatedClass.mMethods.emplace_back(
+  void LuaHelperPlugin::GeneratePushNil(Class &cls) {
+    auto method = ClassMethod{
+        "Push", Type{"void"},
+        Visibility::Public, Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("", Type{"nullptr_t"});
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    method.mBody.Line() << "lua_pushnil(luaState);";
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+  }
+
+  void LuaHelperPlugin::GenerateRead(Class &cls) {
+    GenerateBaseRead(cls);
+    GenerateReadForPrimitives(cls);
+    GenerateReadForContainers(cls);
+
+  }
+
+  void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
+    auto method = ClassMethod{
         "Read", Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static
-    );
-    baseFunc.mTemplateParameters.emplace_back("typename", "T");
+    };
+    method.mTemplateParameters.emplace_back("typename", "T");
 
-    baseFunc.mArguments.emplace_back("data", Type{"T", PassByType::Reference});
-    baseFunc.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    baseFunc.mArguments.emplace_back("luaIndex", Type{"int32_t"});
+    method.mArguments.emplace_back("data", Type{"T", PassByType::Reference});
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
 
     // TODO: implement reading objects from lua?
-    baseFunc.mBody.Line() << "// *data = T::ReadFromLua(luaState, luaIndex);";
-    baseFunc.mBody.Line() << "return false; //*data != nullptr;";
+    // DataManager (or container fields) should have a lua ConstructElem method that reads from
+    // a lua table, calls AddElem and returns the new element. Useful for mods for programmatic insertions
+    method.mBody.Line() << "// *data = T::ReadFromLua(luaState, luaIndex);";
+    method.mBody.Line() << "return false; //*data != nullptr;";
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+  }
 
-    for (const auto &[type, usage]: LuaUsage) {
-      auto &func = generatedClass.mMethods.emplace_back(
-          "Read", Type{"bool"},
-          Visibility::Public, Constness::NotConst, Staticness::Static
-      );
-
-      func.mArguments.emplace_back("data", Type{type, PassByType::Reference});
-      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-      func.mArguments.emplace_back("luaIndex", Type{"int32_t"});
-
-      func.mBody.Line() << "if (!" << usage.mValidator << "(luaState, luaIndex))";
-      func.mBody.Indent(1);
-      func.mBody.Line() << "return false;";
-      func.mBody.Indent(-1);
-      func.mBody.Line() << "data = " << usage.mGetter << "(luaState, luaIndex);";
-      func.mBody.Line() << "return true;";
-    }
+  void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
 
     for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
-      GenerateReadForSingleElemContainer(generatedClass, container);
+      GenerateReadForSingleElemContainer(cls, container);
     }
 
     for (const auto &container: TypeInfo::Get().CppSets) {
-      GenerateReadForSingleElemContainer(generatedClass, container);
+      GenerateReadForSingleElemContainer(cls, container);
     }
 
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-      auto &func = generatedClass.mMethods.emplace_back(
+      auto method = ClassMethod{
           "Read", Type{"bool"},
           Visibility::Public, Constness::NotConst, Staticness::Static
-      );
-      func.mTemplateParameters.emplace_back("typename", "K");
-      func.mTemplateParameters.emplace_back("typename", "V");
+      };
+      method.mTemplateParameters.emplace_back("typename", "K");
+      method.mTemplateParameters.emplace_back("typename", "V");
 
       {
-        auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
+        auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
         data.mType.mTemplateParameters.emplace_back("K");
         data.mType.mTemplateParameters.emplace_back("V");
       }
-      func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-      func.mArguments.emplace_back("luaIndex", Type{"int32_t"});
-      func.mBody.Add("return false;");
+      method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+      method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
+      method.mBody.Add("return false;");
       // TODO: implement
+      Validate().NewMethod(cls, method);
+      cls.mMethods.push_back(std::move(method));
     }
   }
 
-  void LuaHelperPlugin::GenerateCreateMetatables(Class &generatedClass) {
-    auto &method = generatedClass.mMethods.emplace_back(
+  void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
+    for (const auto &[type, usage]: LuaUsage) {
+      auto method = ClassMethod{
+          "Read", Type{"bool"},
+          Visibility::Public, Constness::NotConst, Staticness::Static
+      };
+      method.mArguments.emplace_back("data", Type{type, PassByType::Reference});
+      method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+      method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
+      method.mBody.Line() << "if (!" << usage.mValidator << "(luaState, luaIndex))";
+      method.mBody.Indent(1);
+      method.mBody.Line() << "return false;";
+      method.mBody.Indent(-1);
+      method.mBody.Line() << "data = " << usage.mGetter << "(luaState, luaIndex);";
+      method.mBody.Line() << "return true;";
+      Validate().NewMethod(cls, method);
+      cls.mMethods.push_back(std::move(method));
+    }
+  }
+
+  void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
+    auto method = ClassMethod{
         "CreateMetatables", Type{"void"}, Visibility::Public,
-        Constness::NotConst, Staticness::Static);
+        Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    for (auto &cls: mProject.mClasses) {
-      if (cls.GetMethod("CreateLuaMetatable", Constness::NotConst)) {
-        generatedClass.mSourceIncludes.AddLocalHeader(cls.mName + ".h");
-        method.mBody.Add("{}::CreateLuaMetatable(luaState);", cls.mName);
+    for (auto &other: mProject.mClasses) {
+      if (other.GetMethod("CreateLuaMetatable", Constness::NotConst)) {
+        cls.mSourceIncludes.AddLocalHeader(other.mName + ".h");
+        method.mBody.Add("{}::CreateLuaMetatable(luaState);", other.mName);
       }
     }
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
   void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::string &container) {
-    auto &func = cls.mMethods.emplace_back(
+    auto method = ClassMethod{
         "Push", Type{"void"},
-        Visibility::Public, Constness::NotConst, Staticness::Static
-    );
-    func.mTemplateParameters.emplace_back("typename", "T");
-
+        Visibility::Public, Constness::NotConst, Staticness::Static};
+    method.mTemplateParameters.emplace_back("typename", "T");
     {
-      auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+      auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference});
       data.mType.mTemplateParameters.emplace_back("T");
     }
-    func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    // TOOD: implement with rawseti
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    // TODO: implement with rawseti
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
   void LuaHelperPlugin::GenerateReadForSingleElemContainer(Class &cls, const std::string &container) {
-    auto &func = cls.mMethods.emplace_back(
+    auto method = ClassMethod{
         "Read", Type{"bool"},
-        Visibility::Public, Constness::NotConst, Staticness::Static
-    );
-    func.mTemplateParameters.emplace_back("typename", "T");
+        Visibility::Public, Constness::NotConst, Staticness::Static};
+    method.mTemplateParameters.emplace_back("typename", "T");
     {
-      auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
+      auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
       data.mType.mTemplateParameters.emplace_back("T");
     }
-    func.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    func.mArguments.emplace_back("luaIndex", Type{"int32_t"});
-    // TOOD: implement with rawseti
-    func.mBody.Add("return false;");
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
+    // TODO: implement with rawseti
+    method.mBody.Add("return false;");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 }

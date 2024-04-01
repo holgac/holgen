@@ -20,13 +20,14 @@ namespace holgen {
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
     cls.mGlobalForwardDeclarations.insert({"struct", "lua_State"});
-    auto &field = cls.mFields.emplace_back(St::LuaFuncPrefix + functionDefinition.mName, Type{"std::string"});
-    GenerateFunctionSetter(cls, functionDefinition, field);
+    auto field = ClassField{St::LuaFuncPrefix + functionDefinition.mName, Type{"std::string"}};
     GenerateFunction(cls, functionDefinition, field);
+    GenerateFunctionSetter(cls, functionDefinition, field);
+    Validate().NewField(cls, field);
+    cls.mFields.push_back(std::move(field));
   }
 
-  void LuaFunctionPlugin::GenerateFunctionPushArgs(Class &cls __attribute__((unused)), ClassMethod &method,
-                                                   const FunctionDefinition &functionDefinition) {
+  void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method, const FunctionDefinition &functionDefinition) {
     for (auto &funcArg: functionDefinition.mArguments) {
       auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject.mProject, funcArg.mType});
       arg.mType.PreventCopying();
@@ -38,11 +39,13 @@ namespace holgen {
 
   void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition,
                                                  ClassField &functionHandle) {
-    auto &method = cls.mMethods.emplace_back(
+    auto method = ClassMethod{
         Naming().LuaFunctionSetterNameInCpp(functionDefinition), Type{"void"},
-        Visibility::Public, Constness::NotConst);
+        Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"std::string"});
     method.mBody.Add("{} = val;", functionHandle.mName);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
   void LuaFunctionPlugin::GenerateFunction(
@@ -85,7 +88,7 @@ namespace holgen {
     }
 
     method.mBody.Add("{}::{}(*this, luaState);", St::LuaHelper, St::LuaHelper_Push);
-    GenerateFunctionPushArgs(cls, method, functionDefinition);
+    GenerateFunctionPushArgs(method, functionDefinition);
 
     bool returnsVal = method.mReturnType.mName != "void";
     method.mBody.Add("lua_call(luaState, {}, {});", 1 + functionDefinition.mArguments.size(), returnsVal ? 1 : 0);

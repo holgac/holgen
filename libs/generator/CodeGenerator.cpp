@@ -305,7 +305,7 @@ namespace holgen {
       headers.IncludeClassMethod(*mTranslatedProject, cls, method, isHeader);
     }
     for (const auto &usingStatement: cls.mUsings) {
-      headers.IncludeUsing(*mTranslatedProject, cls, usingStatement, isHeader);
+      headers.IncludeUsing(*mTranslatedProject, usingStatement, isHeader);
     }
 
     headers.Write(codeBlock);

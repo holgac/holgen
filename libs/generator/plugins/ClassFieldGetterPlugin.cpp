@@ -25,15 +25,17 @@ namespace holgen {
       return;
     for (int i = 0; i < 2; ++i) {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
-      auto &method = cls.mMethods.emplace_back(
+      auto method = ClassMethod{
           Naming().FieldGetterNameInCpp(*field.mField, true),
           Type{mProject.mProject, field.mField->mType.mTemplateParameters[0], PassByType::Pointer, constness},
           Visibility::Public,
-          constness);
+          constness};
       method.mBody.Add("return {}::{}({});", underlyingType->mName, St::ManagedObject_Getter,
                        field.mName);
       if (i == 0)
         method.mExposeToLua = true;
+      Validate().NewMethod(cls, method);
+      cls.mMethods.push_back(std::move(method));
     }
   }
 
@@ -42,12 +44,14 @@ namespace holgen {
     if (!isConst && TypeInfo::Get().CppPrimitives.contains(field.mType.mName))
       return;
     auto constness = isConst ? Constness::Const : Constness::NotConst;
-    auto &method = cls.mMethods.emplace_back(
+    auto method = ClassMethod{
         Naming().FieldGetterNameInCpp(*field.mField), field.mType,
-        Visibility::Public, constness);
+        Visibility::Public, constness};
     method.mReturnType.PreventCopying(isConst);
     if (field.mType.mType == PassByType::Pointer)
       method.mReturnType.mType = PassByType::Pointer;
     method.mBody.Add("return {};", field.mName);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 }

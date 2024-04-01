@@ -119,40 +119,22 @@ namespace holgen {
   }
 
   void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls,
-                                           const ClassMethod &classMethod, const Type &type,
+                                           const ClassMethod &method, const Type &type,
                                            bool isHeader) {
-    bool isLocalType = false;
-    for (const auto &templateParameter: cls.mTemplateParameters) {
-      if (templateParameter.mName == type.mName) {
-        isLocalType = true;
-        break;
-      }
-    }
-    for (const auto &templateParameter: classMethod.mTemplateParameters) {
-      if (templateParameter.mName == type.mName) {
-        isLocalType = true;
-        break;
-      }
-    }
-    for (const auto &usingStatement : cls.mUsings) {
-      if (usingStatement.mTargetType == type.mName) {
-        isLocalType = true;
-        break;
-      }
-    }
-    // TODO: is this necessary anymore?
+    bool isLocalType = cls.GetTemplateParameter(type.mName) ||
+                       method.GetTemplateParameter(type.mName) ||
+                       cls.GetUsing(type.mName);
     if (!isLocalType && type.mName != cls.mName)
       IncludeType(project, type, isHeader);
     for (const auto &templateParameter: type.mTemplateParameters) {
-      IncludeClassMethod(project, cls, classMethod, templateParameter, isHeader);
+      IncludeClassMethod(project, cls, method, templateParameter, isHeader);
     }
     for (const auto &templateParameter: type.mFunctionalTemplateParameters) {
-      IncludeClassMethod(project, cls, classMethod, templateParameter, isHeader);
+      IncludeClassMethod(project, cls, method, templateParameter, isHeader);
     }
   }
 
-  void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Class &cls __attribute__((unused)), const Using &usingStatement,
-                                     bool isHeader) {
+  void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Using &usingStatement, bool isHeader) {
     IncludeType(project, usingStatement.mSourceType, isHeader);
   }
 }

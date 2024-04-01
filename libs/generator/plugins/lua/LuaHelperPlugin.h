@@ -4,18 +4,23 @@
 
 namespace holgen {
 
-class LuaHelperPlugin : public TranslatorPlugin {
-public:
-  using TranslatorPlugin::TranslatorPlugin;
-  void Run() override;
-private:
-  // TODO: LuaHelper in name not necessary
-  void GenerateLuaHelperPush(Class &generatedClass);
-  void GenerateLuaHelperRead(Class &generatedClass);
-  void GenerateLuaHelperPushNil(Class &generatedClass);
-  void GenerateCreateMetatables(Class &generatedClass);
-  void GeneratePushForSingleElemContainer(Class &cls, const std::string& container);
-  void GenerateReadForSingleElemContainer(Class &cls, const std::string& container);
-};
+  class LuaHelperPlugin : public TranslatorPlugin {
+  public:
+    using TranslatorPlugin::TranslatorPlugin;
+    void Run() override;
+  private:
+    void GeneratePush(Class &cls);
+    void GenerateBasePush(Class &cls);
+    void GeneratePushNil(Class &cls);
+    void GeneratePushForSingleElemContainer(Class &cls, const std::string &container);
+    void GenerateReadForSingleElemContainer(Class &cls, const std::string &container);
+    void GeneratePushForPrimitives(Class &cls);
+    void GeneratePushForContainers(Class &cls);
+    void GenerateRead(Class &cls);
+    void GenerateBaseRead(Class &cls);
+    void GenerateReadForPrimitives(Class &cls);
+    void GenerateReadForContainers(Class &cls);
+    void GenerateCreateMetatables(Class &cls);
+  };
 
 }

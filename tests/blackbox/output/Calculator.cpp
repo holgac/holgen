@@ -15,9 +15,6 @@ Number& Calculator::GetCurVal() {
 void Calculator::SetCurVal(const Number& val) {
   mCurVal = val;
 }
-void Calculator::SetAddLuaFunc(std::string val) {
-  mFuncName_Add = val;
-}
 int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
   HOLGEN_WARN_AND_RETURN_IF(mFuncName_Add.empty(), {}, "Calling unset Add function");
   lua_getglobal(luaState, mFuncName_Add.c_str());
@@ -34,8 +31,8 @@ int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
   lua_pop(luaState, 1);
   return result;
 }
-void Calculator::SetSubtractLuaFunc(std::string val) {
-  mFuncName_Subtract = val;
+void Calculator::SetAddLuaFunc(std::string val) {
+  mFuncName_Add = val;
 }
 Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
   HOLGEN_WARN_AND_RETURN_IF(mFuncName_Subtract.empty(), {}, "Calling unset Subtract function");
@@ -54,6 +51,9 @@ Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
   result = Number::ReadFromLua(luaState, -1);
   lua_pop(luaState, 2);
   return result;
+}
+void Calculator::SetSubtractLuaFunc(std::string val) {
+  mFuncName_Subtract = val;
 }
 bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   for(const auto& data: json.GetObject()) {

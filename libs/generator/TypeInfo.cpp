@@ -82,6 +82,7 @@ namespace holgen {
         // TODO: support arrays
         // Support array<Elem, Enum> and array<Elem, count>
         "std::array",
+        "nullptr_t",
     };
     for (auto&[_, cppType] : TypeToCppType)
       CppTypes.insert(cppType);
