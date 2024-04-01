@@ -272,11 +272,11 @@ struct TestData {
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
-  HOLGEN_WARN("InnerStruct with uuid={} already exists!", elem.GetUuid());
+  HOLGEN_WARN("InnerStruct with uuid={} already exists", elem.GetUuid());
   return false;
 }
 if (mInnerStructsGuidIndex.contains(elem.GetGuid())) {
-  HOLGEN_WARN("InnerStruct with guid={} already exists!", elem.GetGuid());
+  HOLGEN_WARN("InnerStruct with guid={} already exists", elem.GetGuid());
   return false;
 }
 auto newId = mInnerStructs.size();
@@ -338,7 +338,7 @@ struct TestData {
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
-  HOLGEN_WARN("InnerStruct with uuid={} already exists!", elem.GetUuid());
+  HOLGEN_WARN("InnerStruct with uuid={} already exists", elem.GetUuid());
   return false;
 }
 auto newId = mInnerStructsNextId;

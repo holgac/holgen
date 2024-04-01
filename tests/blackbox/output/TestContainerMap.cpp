@@ -30,7 +30,7 @@ TestContainerInnerStructWithId* TestContainerMap::GetInnerStructWithIdFromName(c
 }
 bool TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mInnerStructsWithIdNextId;
@@ -42,7 +42,7 @@ bool TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId&& ele
 }
 bool TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mInnerStructsWithIdNextId;

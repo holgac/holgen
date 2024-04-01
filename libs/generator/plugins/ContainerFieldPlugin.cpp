@@ -116,8 +116,7 @@ namespace holgen {
       auto getterMethodName = Naming().FieldGetterNameInCpp(fieldIndexedOn);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
-      // TODO: remove exclamation mark
-      validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists!", elem.{}());)",
+      validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists", elem.{}());)",
                      underlyingClass->mName, indexOn->mValue.mName, getterMethodName);
       validators.Add("return false;");
       validators.Indent(-1);

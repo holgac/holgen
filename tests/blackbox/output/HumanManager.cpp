@@ -34,7 +34,7 @@ Human* HumanManager::GetHumanFromName(const std::string& key) {
 }
 bool HumanManager::AddHuman(Human&& elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Human with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Human with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mHumansNextId;
@@ -46,7 +46,7 @@ bool HumanManager::AddHuman(Human&& elem) {
 }
 bool HumanManager::AddHuman(Human& elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Human with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Human with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mHumansNextId;

@@ -52,7 +52,7 @@ Boot* GameData::GetBootFromName(const std::string& key) {
 }
 bool GameData::AddBoot(Boot&& elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Boot with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mBoots.size();
@@ -63,7 +63,7 @@ bool GameData::AddBoot(Boot&& elem) {
 }
 bool GameData::AddBoot(Boot& elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Boot with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mBoots.size();
@@ -111,11 +111,11 @@ Armor* GameData::GetArmorFromAlternativeName(const std::string& key) {
 }
 bool GameData::AddArmor(Armor&& elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Armor with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
     return false;
   }
   if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
-    HOLGEN_WARN("Armor with alternativeName={} already exists!", elem.GetAlternativeName());
+    HOLGEN_WARN("Armor with alternativeName={} already exists", elem.GetAlternativeName());
     return false;
   }
   auto newId = mArmors.size();
@@ -127,11 +127,11 @@ bool GameData::AddArmor(Armor&& elem) {
 }
 bool GameData::AddArmor(Armor& elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Armor with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
     return false;
   }
   if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
-    HOLGEN_WARN("Armor with alternativeName={} already exists!", elem.GetAlternativeName());
+    HOLGEN_WARN("Armor with alternativeName={} already exists", elem.GetAlternativeName());
     return false;
   }
   auto newId = mArmors.size();
@@ -168,7 +168,7 @@ Character* GameData::GetCharacterFromName(const std::string& key) {
 }
 bool GameData::AddCharacter(Character&& elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Character with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Character with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mCharacters.size();
@@ -179,7 +179,7 @@ bool GameData::AddCharacter(Character&& elem) {
 }
 bool GameData::AddCharacter(Character& elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Character with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("Character with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mCharacters.size();

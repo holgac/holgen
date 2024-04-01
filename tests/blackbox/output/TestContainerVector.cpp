@@ -57,7 +57,7 @@ TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithIdFromNam
 }
 bool TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mInnerStructsWithId.size();
@@ -68,7 +68,7 @@ bool TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId&& 
 }
 bool TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mInnerStructsWithId.size();
@@ -104,7 +104,7 @@ TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoIdFromName(co
 }
 bool TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId&& elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mInnerStructsNoId.size();
@@ -114,7 +114,7 @@ bool TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId&& elem
 }
 bool TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId& elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists!", elem.GetName());
+    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
     return false;
   }
   auto newId = mInnerStructsNoId.size();
