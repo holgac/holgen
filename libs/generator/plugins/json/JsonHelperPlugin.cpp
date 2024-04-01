@@ -32,20 +32,12 @@ namespace holgen {
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
 
-    // TODO: HOLGEN_WARN
-    method.mBody.Line() << "if (!json.IsArray())";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1);
-
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing {}");)R", container);
     method.mBody.Line() << "for (const auto& data: json.GetArray()) {";
     method.mBody.Indent(1);
     method.mBody.Add("T elem;", St::JsonHelper_Parse);
     method.mBody.Add("auto res = {}(elem, data, converter);", St::JsonHelper_Parse);
-    method.mBody.Line() << "if (!res)";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1); // if !res
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of {}");)R", container);
     if (TypeInfo::Get().CppSets.contains(container))
       method.mBody.Line() << "out.insert(std::move(elem));";
     else
@@ -79,10 +71,7 @@ namespace holgen {
     method.mArguments.emplace_back("out", Type{type, PassByType::Reference});
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
-    method.mBody.Line() << "if (!json." << validator << "())";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1);
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!json.{}(), false, "Found type mismatch in json when parsing {}");)R", validator, type);
     method.mBody.Line() << "out = json." << getter << "();";
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
@@ -119,25 +108,17 @@ namespace holgen {
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
 
-    method.mBody.Line() << "if (!json.IsObject())";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1); // if (!json.IsObject())
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing {}");)R", container);
 
     method.mBody.Line() << "for (const auto& data: json.GetObject()) {";
     method.mBody.Indent(1);
     method.mBody.Line() << "K key;";
-    method.mBody.Add("{}(key, data.name, converter);", St::JsonHelper_Parse);
-    method.mBody.Line() << "auto [it, res] = out.try_emplace(key, V());";
-    method.mBody.Line() << "if (!res)";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1); // if !res
-    method.mBody.Add("{}(it->second, data.value, converter);", St::JsonHelper_Parse);
-    method.mBody.Line() << "if (!res)";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1); // if !res
+    method.mBody.Add("auto res = {}(key, data.name, converter);", St::JsonHelper_Parse);
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R", container);
+    method.mBody.Line() << "auto [it, insertRes] = out.try_emplace(key, V());";
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R", container);
+    method.mBody.Add("res = {}(it->second, data.value, converter);", St::JsonHelper_Parse);
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R", container);
     method.mBody.Indent(-1);
     method.mBody.Line() << "}"; // range based for on json.GetArray()
     method.mBody.Line() << "return true;";

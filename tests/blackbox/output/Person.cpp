@@ -37,38 +37,36 @@ void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;
 }
 bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Person");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "race")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Person.race field");
       mRace = converter.raceNameToId(temp);
     } else if (0 == strcmp(name, "currentCountry")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Person.currentCountry field");
       mCurrentCountry = converter.countryNameToId(temp);
     } else if (0 == strcmp(name, "currentCity")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Person.currentCity field");
       mCurrentCity = converter.cityNameToId(temp);
     } else if (0 == strcmp(name, "homeCountry")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Person.homeCountry field");
       mHomeCountry = converter.countryNameToId(temp);
     } else if (0 == strcmp(name, "placeOfBirth")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Person.placeOfBirth field");
       mPlaceOfBirth = converter.cityNameToId(temp);
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing Person: {}", name);
     }
   }
   return true;

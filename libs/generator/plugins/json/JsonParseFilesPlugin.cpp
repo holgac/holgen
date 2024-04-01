@@ -126,7 +126,7 @@ namespace holgen {
 
     if (codeBlock.mContents.size() != 0) {
       method.mBody.Add("auto converter = converterArg;");
-      method.mBody.Add(codeBlock);
+      method.mBody.Add(std::move(codeBlock));
     } else {
       method.mBody.Add("auto &converter = converterArg;");
     }

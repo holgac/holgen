@@ -29,9 +29,6 @@ TEST_F(JsonPluginTest, StructParseJsonEmpty) {
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
-for(const auto& data: json.GetObject()) {
-  const auto& name = data.name.GetString();
-}
 return true;
     )R");
   }
@@ -58,24 +55,23 @@ struct TestData {
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
+HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
 for(const auto& data: json.GetObject()) {
   const auto& name = data.name.GetString();
   if (0 == strcmp(name, "testFieldUnsigned")) {
     auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
-    if (!res)
-      return false;
+    HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestData.testFieldUnsigned field");
   } else if (0 == strcmp(name, "testFieldDouble")) {
     auto res = JsonHelper::Parse(mTestFieldDouble, data.value, converter);
-    if (!res)
-      return false;
+    HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestData.testFieldDouble field");
   } else if (0 == strcmp(name, "testFieldBool")) {
     auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter);
-    if (!res)
-      return false;
+    HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestData.testFieldBool field");
   } else if (0 == strcmp(name, "testFieldFunc")) {
     auto res = JsonHelper::Parse(mLuaFuncHandle_testFieldFunc, data.value, converter);
-    if (!res)
-      return false;
+    HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestData.testFieldFunc");
+  } else {
+    HOLGEN_WARN("Unexpected entry in json when parsing TestData: {}", name);
   }
 }
 return true;
@@ -102,20 +98,21 @@ struct TestData {
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
+HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
 for(const auto& data: json.GetObject()) {
   const auto& name = data.name.GetString();
   if (0 == strcmp(name, "testFieldUnsigned")) {
     std::string temp;
     auto res = JsonHelper::Parse(temp, data.value, converter);
-    if (!res)
-      return false;
+    HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestData.testFieldUnsigned field");
     mTestFieldUnsigned = converter.testU32Converter(temp);
   } else if (0 == strcmp(name, "testFieldString")) {
     bool temp;
     auto res = JsonHelper::Parse(temp, data.value, converter);
-    if (!res)
-      return false;
+    HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestData.testFieldString field");
     mTestFieldString = std::move(converter.testStringConverter(temp));
+  } else {
+    HOLGEN_WARN("Unexpected entry in json when parsing TestData: {}", name);
   }
 }
 return true;
@@ -141,6 +138,7 @@ if (json.IsString()) {
   *this = TestData(json.GetInt64());
 } else {
   *this = TestData(TestData::Invalid);
+  HOLGEN_WARN("Could not json-parse TestData enum: invalid json type");
   return false;
 }
 return true;

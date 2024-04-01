@@ -21,26 +21,23 @@ namespace holgen {
     method.mArguments.emplace_back(
         "converter", Type{St::Converter, PassByType::Reference, Constness::Const});
 
-    method.mBody.Line() << "for(const auto& data: json.GetObject()) {";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "const auto& name = data.name.GetString();";
-    // parseFunc.mBody.Line() << "const auto& value = data.value;";
     // TODO: a helper class for string switching below
     // Pass source string (and optional extra conds), and a map<case, action> and it generates the code below.
     // later it can be smarter (i.e. switch on one of the chars to split as much as possible)
+    CodeBlock switchBlock;
     bool isFirst = true;
     for (const auto &field: cls.mFields) {
       if (!field.mField || field.mField->GetAnnotation(Annotations::NoJson))
         continue;
       if (isFirst) {
-        method.mBody.Line() << "if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
+        switchBlock.Line() << "if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
         isFirst = false;
       } else {
-        method.mBody.Line() << "} else if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
+        switchBlock.Line() << "} else if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
       }
-      method.mBody.Indent(1); // if name == fieldName
-      GenerateParseJsonForField(method, field);
-      method.mBody.Indent(-1); // if name == fieldName
+      switchBlock.Indent(1); // if name == fieldName
+      GenerateParseJsonForField(cls, switchBlock, field);
+      switchBlock.Indent(-1); // if name == fieldName
     }
 
     for (const auto &luaMethod: cls.mMethods) {
@@ -48,59 +45,65 @@ namespace holgen {
           !luaMethod.mFunction->GetAnnotation(Annotations::LuaFunc))
         continue;
       if (isFirst) {
-        method.mBody.Line() << "if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
+        switchBlock.Line() << "if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
         isFirst = false;
       } else {
-        method.mBody.Line() << "} else if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
+        switchBlock.Line() << "} else if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
       }
-      method.mBody.Indent(1); // if name == fieldName
-      GenerateParseJsonForFunction(method, luaMethod);
-      method.mBody.Indent(-1); // if name == fieldName
+      switchBlock.Indent(1); // if name == fieldName
+      GenerateParseJsonForFunction(cls, switchBlock, luaMethod);
+      switchBlock.Indent(-1); // if name == fieldName
     }
 
-    if (!isFirst)
+    if (!switchBlock.mContents.empty()) {
+      method.mBody.Add(
+          R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing {}");)R",
+          cls.mName);
+
+      method.mBody.Add("for(const auto& data: json.GetObject()) {{");
+      method.mBody.Indent(1);
+      method.mBody.Add("const auto& name = data.name.GetString();");
+      method.mBody.Add(std::move(switchBlock));
+      method.mBody.Line() << "} else {";
+      method.mBody.Indent(1);
+      method.mBody.Add(R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
+      method.mBody.Indent(-1);
       method.mBody.Line() << "}";
-    method.mBody.Indent(-1);
-    method.mBody.Line() << "}"; // range based for on json.GetObject()
+      method.mBody.Indent(-1);
+      method.mBody.Line() << "}"; // range based for on json.GetObject()
+    }
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
 
-  void JsonPlugin::GenerateParseJsonForField(ClassMethod &method, const ClassField &field) {
+  void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, const ClassField &field) {
     if (mProject.GetClass(field.mType.mName) == nullptr) {
       auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {
         auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
         Type type(mProject.mProject, jsonConvertFrom->mValue);
-        method.mBody.Line() << type.ToString() << " temp;";
-        method.mBody.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
-        method.mBody.Line() << "if (!res)";
-        method.mBody.Indent(1);
-        method.mBody.Line() << "return false;";
-        method.mBody.Indent(-1); // if !res
+        codeBlock.Line() << type.ToString() << " temp;";
+        codeBlock.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
+        codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{} field");)R",
+                      cls.mStruct->mName, field.mField->mName);
         if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) || field.mType.mType == PassByType::Pointer)
-          method.mBody.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
+          codeBlock.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
         else
-          method.mBody.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);
+          codeBlock.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);
       } else {
-        method.mBody.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                         field.mName);
-        method.mBody.Line() << "if (!res)";
-        method.mBody.Indent(1);
-        method.mBody.Line() << "return false;";
-        method.mBody.Indent(-1); // if !res
+        codeBlock.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                      field.mName);
+        codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{} field");)R",
+                      cls.mStruct->mName, field.mField->mName);
       }
     } else {
       // TODO: this case is not necessary - JsonHelper::ParseJson handles this
-      method.mBody.Add("auto res = {}.{}(data.value, converter);",
-                       field.mName, St::ParseJson);
-
-      method.mBody.Line() << "if (!res)";
-      method.mBody.Indent(1);
-      method.mBody.Line() << "return false;";
-      method.mBody.Indent(-1); // if !res
+      codeBlock.Add("auto res = {}.{}(data.value, converter);",
+                    field.mName, St::ParseJson);
+      codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{} field");)R",
+                    cls.mStruct->mName, field.mField->mName);
     }
   }
 
@@ -137,8 +140,8 @@ namespace holgen {
     method.mBody.Indent(-1);
     method.mBody.Add("}} else {{");
     method.mBody.Indent(1);
-    // TODO: HOLGEN_WARN here
     method.mBody.Add("*this = {}({}::Invalid);", cls.mName, cls.mName);
+    method.mBody.Add(R"R(HOLGEN_WARN("Could not json-parse {} enum: invalid json type");)R", cls.mName);
     method.mBody.Add("return false;");
     method.mBody.Indent(-1);
     method.mBody.Add("}}");
@@ -147,13 +150,11 @@ namespace holgen {
     cls.mMethods.push_back(std::move(method));
   }
 
-  void JsonPlugin::GenerateParseJsonForFunction(ClassMethod &method, const ClassMethod &luaFunction) {
-    method.mBody.Add("auto res = {}::{}({}, data.value, converter);",
-                     St::JsonHelper, St::JsonHelper_Parse,
-                     Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction));
-    method.mBody.Line() << "if (!res)";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1); // if !res
+  void JsonPlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock, const ClassMethod &luaFunction) {
+    codeBlock.Add("auto res = {}::{}({}, data.value, converter);",
+                  St::JsonHelper, St::JsonHelper_Parse,
+                  Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction));
+    codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{}");)R",
+                  cls.mStruct->mName, luaFunction.mFunction->mName);
   }
 }

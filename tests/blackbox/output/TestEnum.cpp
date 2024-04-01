@@ -61,6 +61,7 @@ bool TestEnum::ParseJson(const rapidjson::Value& json, const Converter& converte
     *this = TestEnum(json.GetInt64());
   } else {
     *this = TestEnum(TestEnum::Invalid);
+    HOLGEN_WARN("Could not json-parse TestEnum enum: invalid json type");
     return false;
   }
   return true;

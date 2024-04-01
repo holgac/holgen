@@ -39,20 +39,20 @@ Boot* Boot::GetFromName(const std::string& key) {
   return GlobalPointer<GameData>::GetInstance()->GetBootFromName(key);
 }
 bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Boot");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "id")) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Boot.id field");
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Boot.name field");
     } else if (0 == strcmp(name, "color")) {
       auto res = JsonHelper::Parse(mColor, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Boot.color field");
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing Boot: {}", name);
     }
   }
   return true;

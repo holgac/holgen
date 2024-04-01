@@ -124,14 +124,14 @@ namespace holgen {
       validators.Add("}}");
       inserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
     }
-    method.mBody.Add(validators);
+    method.mBody.Add(std::move(validators));
     if (isKeyedContainer) {
       method.mBody.Add("auto newId = {}NextId;", field.mName);
       method.mBody.Add("++{}NextId;", field.mName);
     } else if (!inserters.mContents.empty() || underlyingIdField) {
       method.mBody.Add("auto newId = {}.size();", field.mName);
     }
-    method.mBody.Add(inserters);
+    method.mBody.Add(std::move(inserters));
     if (underlyingIdField) {
       method.mArguments.back().mType.mConstness = Constness::NotConst;
       method.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField));
@@ -242,7 +242,7 @@ namespace holgen {
       method.mBody.Add("auto ptr = {}({});",
                        Naming().ContainerElemGetterNameInCpp(*field.mField),
                        method.mArguments.back().mName);
-      method.mBody.Add(indexDeleters);
+      method.mBody.Add(std::move(indexDeleters));
     }
     method.mExposeToLua = true;
     if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
@@ -252,7 +252,7 @@ namespace holgen {
     } else {
       method.mBody.Add("if (idx != {}.size() - 1) {{", field.mName);
       method.mBody.Indent(1);
-      method.mBody.Add(indexReassigners);
+      method.mBody.Add(std::move(indexReassigners));
       method.mBody.Add("{0}[idx] = std::move({0}.back());", field.mName);
       method.mBody.Indent(-1);
       method.mBody.Add("}}");

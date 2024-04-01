@@ -22,16 +22,17 @@ void TestContainerInnerStructWithId::SetName(const std::string& val) {
   mName = val;
 }
 bool TestContainerInnerStructWithId::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerInnerStructWithId");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "id")) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestContainerInnerStructWithId.id field");
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestContainerInnerStructWithId.name field");
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing TestContainerInnerStructWithId: {}", name);
     }
   }
   return true;

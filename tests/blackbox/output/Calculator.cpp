@@ -56,20 +56,20 @@ void Calculator::SetSubtractLuaFunc(std::string val) {
   mLuaFuncHandle_Subtract = val;
 }
 bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Calculator");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "curVal")) {
       auto res = mCurVal.ParseJson(data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Calculator.curVal field");
     } else if (0 == strcmp(name, "Add")) {
       auto res = JsonHelper::Parse(mLuaFuncHandle_Add, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Calculator.Add");
     } else if (0 == strcmp(name, "Subtract")) {
       auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Calculator.Subtract");
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing Calculator: {}", name);
     }
   }
   return true;

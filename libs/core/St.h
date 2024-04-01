@@ -29,5 +29,4 @@ namespace holgen {
     inline static const std::string Converter = "Converter";
     inline static const std::string ParseJson = "ParseJson";
   };
-
 }

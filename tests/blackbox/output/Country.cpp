@@ -34,22 +34,22 @@ void Country::SetPopulation(const std::map<uint32_t, uint32_t>& val) {
   mPopulation = val;
 }
 bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Country");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "leader")) {
       auto res = mLeader.ParseJson(data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Country.leader field");
     } else if (0 == strcmp(name, "citizens")) {
       auto res = JsonHelper::Parse(mCitizens, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Country.citizens field");
     } else if (0 == strcmp(name, "population")) {
       std::map<std::string, uint32_t> temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Country.population field");
       mPopulation = std::move(converter.raceU32Map(temp));
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing Country: {}", name);
     }
   }
   return true;

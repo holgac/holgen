@@ -8,6 +8,12 @@ namespace holgen {
     mIndentations.insert(mIndentations.end(), cb.mIndentations.begin(), cb.mIndentations.end());
   }
 
+  void CodeBlock::Add(CodeBlock &&cb) {
+    mContents.insert(mContents.end(), std::make_move_iterator(cb.mContents.begin()), std::make_move_iterator(cb.mContents.end()));
+    mLines.insert(mLines.end(), std::make_move_iterator(cb.mLines.begin()), std::make_move_iterator(cb.mLines.end()));
+    mIndentations.insert(mIndentations.end(), std::make_move_iterator(cb.mIndentations.begin()), std::make_move_iterator(cb.mIndentations.end()));
+  }
+
   std::string CodeBlock::ToString() const {
     ssize_t currentIndentation = 0;
     auto contentIt = mContents.begin();

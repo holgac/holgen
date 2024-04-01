@@ -29,6 +29,7 @@ namespace holgen {
     }
 
     void Add(const CodeBlock &codeBlock);
+    void Add(CodeBlock &&codeBlock);
 
 
     template<typename... Args>

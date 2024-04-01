@@ -22,16 +22,17 @@ void DamageMultiplier::SetValue(float val) {
   mValue = val;
 }
 bool DamageMultiplier::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing DamageMultiplier");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "when")) {
       auto res = JsonHelper::Parse(mWhen, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse DamageMultiplier.when field");
     } else if (0 == strcmp(name, "value")) {
       auto res = JsonHelper::Parse(mValue, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse DamageMultiplier.value field");
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing DamageMultiplier: {}", name);
     }
   }
   return true;

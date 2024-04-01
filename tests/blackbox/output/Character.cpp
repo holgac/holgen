@@ -54,28 +54,27 @@ Character* Character::GetFromName(const std::string& key) {
   return GlobalPointer<GameData>::GetInstance()->GetCharacterFromName(key);
 }
 bool Character::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Character");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "id")) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Character.id field");
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Character.name field");
     } else if (0 == strcmp(name, "boot")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Character.boot field");
       mBootId = converter.bootNameToId(temp);
     } else if (0 == strcmp(name, "armor")) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Character.armor field");
       mArmorId = converter.armorNameToId(temp);
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
     }
   }
   return true;

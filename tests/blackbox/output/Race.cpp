@@ -40,24 +40,23 @@ void Race::SetNames(const std::map<std::string, std::vector<std::string>>& val) 
   mNames = val;
 }
 bool Race::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Race");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "id")) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.id field");
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.name field");
     } else if (0 == strcmp(name, "hairColors")) {
       auto res = JsonHelper::Parse(mHairColors, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.hairColors field");
     } else if (0 == strcmp(name, "names")) {
       auto res = JsonHelper::Parse(mNames, data.value, converter);
-      if (!res)
-        return false;
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.names field");
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing Race: {}", name);
     }
   }
   return true;
