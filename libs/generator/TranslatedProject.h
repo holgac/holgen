@@ -1,4 +1,5 @@
 #pragma once
+
 #include <list>
 
 #include "parser/DependencyGraph.h"
@@ -59,8 +60,7 @@ namespace holgen {
   };
 
   struct TemplateParameter {
-    // TODO: ctor
-    // TODO: type here?
+    TemplateParameter(std::string type, std::string name);
     std::string mType;
     std::string mName;
   };
@@ -71,6 +71,8 @@ namespace holgen {
     std::list<ClassMethodArgument> mArguments;
     std::list<TemplateParameter> mTemplateParameters;
     bool mIsTemplateSpecialization = false;
+  protected:
+    ClassMethodBase() = default;
   };
 
   struct Using {
@@ -84,7 +86,7 @@ namespace holgen {
   };
 
   struct ClassMethod : ClassMethodBase {
-    explicit ClassMethod(
+    ClassMethod(
         std::string name, Type returnType,
         Visibility visibility = Visibility::Public,
         Constness constness = Constness::Const,
@@ -113,6 +115,7 @@ namespace holgen {
   };
 
   struct ClassConstructor : ClassMethodBase {
+    ClassConstructor() = default;
     std::list<ClassConstructorInitializer> mInitializerList;
     Explicitness mExplicitness = Explicitness::NotExplicit;
     // empty body and empty initializer list means = default.

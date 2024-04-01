@@ -3,6 +3,7 @@
 #include "core/St.h"
 
 namespace holgen {
+  // TODO: refactor this too
 
   namespace {
 
@@ -44,9 +45,7 @@ namespace holgen {
     auto &baseFunc = generatedClass.mMethods.emplace_back(
         "Push", Type{"void"},
         Visibility::Public, Constness::NotConst, Staticness::Static);
-    auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
-    baseTemplateArg.mType = "typename";
-    baseTemplateArg.mName = "T";
+    baseFunc.mTemplateParameters.emplace_back("typename", "T");
 
     baseFunc.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
     baseFunc.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
@@ -98,12 +97,8 @@ namespace holgen {
           "Push", Type{"void"},
           Visibility::Public, Constness::NotConst, Staticness::Static
       );
-      auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
-      keyTemplateArg.mType = "typename";
-      keyTemplateArg.mName = "K";
-      auto &valueTemplateArg = func.mTemplateParameters.emplace_back();
-      valueTemplateArg.mType = "typename";
-      valueTemplateArg.mName = "V";
+      func.mTemplateParameters.emplace_back("typename", "K");
+      func.mTemplateParameters.emplace_back("typename", "V");
 
       {
         auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
@@ -130,9 +125,7 @@ namespace holgen {
         "Read", Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static
     );
-    auto &baseTemplateArg = baseFunc.mTemplateParameters.emplace_back();
-    baseTemplateArg.mType = "typename";
-    baseTemplateArg.mName = "T";
+    baseFunc.mTemplateParameters.emplace_back("typename", "T");
 
     baseFunc.mArguments.emplace_back("data", Type{"T", PassByType::Reference});
     baseFunc.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
@@ -173,12 +166,8 @@ namespace holgen {
           "Read", Type{"bool"},
           Visibility::Public, Constness::NotConst, Staticness::Static
       );
-      auto &keyTemplateArg = func.mTemplateParameters.emplace_back();
-      keyTemplateArg.mType = "typename";
-      keyTemplateArg.mName = "K";
-      auto &valueTemplateArg = func.mTemplateParameters.emplace_back();
-      valueTemplateArg.mType = "typename";
-      valueTemplateArg.mName = "V";
+      func.mTemplateParameters.emplace_back("typename", "K");
+      func.mTemplateParameters.emplace_back("typename", "V");
 
       {
         auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
@@ -210,9 +199,7 @@ namespace holgen {
         "Push", Type{"void"},
         Visibility::Public, Constness::NotConst, Staticness::Static
     );
-    auto &templateArg = func.mTemplateParameters.emplace_back();
-    templateArg.mType = "typename";
-    templateArg.mName = "T";
+    func.mTemplateParameters.emplace_back("typename", "T");
 
     {
       auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference});
@@ -227,9 +214,7 @@ namespace holgen {
         "Read", Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static
     );
-    auto &templateArg = func.mTemplateParameters.emplace_back();
-    templateArg.mType = "typename";
-    templateArg.mName = "T";
+    func.mTemplateParameters.emplace_back("typename", "T");
     {
       auto &data = func.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
       data.mType.mTemplateParameters.emplace_back("T");

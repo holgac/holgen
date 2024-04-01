@@ -4,9 +4,7 @@
 namespace holgen {
   void GlobalPointerPlugin::Run() {
     auto cls = Class{St::GlobalPointer};
-    auto &clsTemplate = cls.mTemplateParameters.emplace_back();
-    clsTemplate.mType = "typename";
-    clsTemplate.mName = "T";
+    cls.mTemplateParameters.emplace_back("typename", "T");
 
     GenerateInstanceField(cls);
     GenerateGetInstance(cls);

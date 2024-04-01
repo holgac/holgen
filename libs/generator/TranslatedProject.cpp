@@ -36,4 +36,7 @@ namespace holgen {
   GEN_GETTER_BY_NAME(Class, ForwardDeclaration, GetForwardDeclaration, mGlobalForwardDeclarations)
 
   GEN_GETTER_BY_NAME(Class, TemplateParameter, GetTemplateParameter, mTemplateParameters)
+
+  TemplateParameter::TemplateParameter(std::string type, std::string name) : mType(std::move(type)),
+                                                                             mName(std::move(name)) {}
 }

@@ -26,9 +26,7 @@ namespace holgen {
         St::JsonHelper_Parse, Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static
     };
-    auto &templateArg = method.mTemplateParameters.emplace_back();
-    templateArg.mType = "typename";
-    templateArg.mName = "T";
+    method.mTemplateParameters.emplace_back("typename", "T");
     auto &out = method.mArguments.emplace_back("out", Type{container, PassByType::Reference});
     out.mType.mTemplateParameters.emplace_back("T");
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
@@ -63,9 +61,7 @@ namespace holgen {
     auto method = ClassMethod{
         St::JsonHelper_Parse, Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static};
-    auto &baseTemplateArg = method.mTemplateParameters.emplace_back();
-    baseTemplateArg.mType = "typename";
-    baseTemplateArg.mName = "T";
+    method.mTemplateParameters.emplace_back("typename", "T");
     method.mArguments.emplace_back("out", Type{"T", PassByType::Reference});
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
@@ -112,12 +108,8 @@ namespace holgen {
     auto method = ClassMethod{
         St::JsonHelper_Parse, Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static};
-    auto &keyTemplateArg = method.mTemplateParameters.emplace_back();
-    keyTemplateArg.mType = "typename";
-    keyTemplateArg.mName = "K";
-    auto &valueTemplateArg = method.mTemplateParameters.emplace_back();
-    valueTemplateArg.mType = "typename";
-    valueTemplateArg.mName = "V";
+    method.mTemplateParameters.emplace_back("typename", "K");
+    method.mTemplateParameters.emplace_back("typename", "V");
 
     {
       auto &out = method.mArguments.emplace_back("out", Type{container, PassByType::Reference});
