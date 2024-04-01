@@ -3,18 +3,22 @@
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
-#include "../Helpers.h"
 
 class LuaPluginTest : public TranslatorPluginTest {
+protected:
+  static void Run(TranslatedProject &project) {
+    ClassPlugin(project).Run();
+    ClassFieldPlugin(project).Run();
+    CppFunctionPlugin(project).Run();
+    LuaPlugin(project).Run();
+  }
 };
 
 TEST_F(LuaPluginTest, Enum) {
   auto project = Parse(R"R(
 enum TestData {}
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -32,9 +36,7 @@ TEST_F(LuaPluginTest, PushToLuaNotManaged) {
   auto project = Parse(R"R(
 struct TestData {}
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -57,9 +59,7 @@ TEST_F(LuaPluginTest, PushGlobalToLua) {
   auto project = Parse(R"R(
 struct TestData {}
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -88,9 +88,7 @@ struct DM {
   vector<TestData> testData;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -114,9 +112,7 @@ TEST_F(LuaPluginTest, ReadFromLuaNotManaged) {
   auto project = Parse(R"R(
 struct TestData {}
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -149,9 +145,7 @@ struct DM {
   vector<TestData> testData;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -182,9 +176,7 @@ struct TestData {
   InnerStruct testFieldInnerStruct;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -225,10 +217,7 @@ struct TestData {
   func functionReturningString() -> string;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  CppFunctionPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -281,10 +270,7 @@ struct TestData {
   Ref<InnerStructNoId> testStructNoIdRef;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  CppFunctionPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -322,10 +308,7 @@ struct TestData {
   bool testFieldBool;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  CppFunctionPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -363,10 +346,7 @@ struct TestData {
   Ref<InnerStruct> testStructRef;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  CppFunctionPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -394,10 +374,7 @@ TEST_F(LuaPluginTest, CreateLuaMetatable) {
   auto project = Parse(R"R(
 struct TestData {}
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  CppFunctionPlugin(project).Run();
-  LuaPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 

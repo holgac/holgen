@@ -4,21 +4,26 @@
 namespace holgen {
 
   void FilesystemHelperPlugin::Run() {
-    auto &cls = mProject.mClasses.emplace_back(St::FilesystemHelper);
+    auto cls = Class{St::FilesystemHelper};
     cls.mSourceIncludes.AddStandardHeader("fstream");
     // TODO: use std::filesystem::path instead of std::string
-    auto &readFile = cls.mMethods.emplace_back(St::FilesystemHelper_ReadFile, Type{"std::string"}, Visibility::Public,
-                                               Constness::NotConst,
-                                               Staticness::Static);
-    readFile.mArguments.emplace_back(
+    auto method = ClassMethod{
+        St::FilesystemHelper_ReadFile, Type{"std::string"}, Visibility::Public,
+        Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back(
         "filePath", Type{"std::string", PassByType::Reference, Constness::Const});
-    readFile.mBody.Add("std::ifstream fin(filePath, std::ios_base::binary);");
-    readFile.mBody.Add("fin.seekg(0, std::ios_base::end);");
-    readFile.mBody.Add("auto bufferSize = fin.tellg();");
-    readFile.mBody.Add("bufferSize += 1;");
-    readFile.mBody.Add("std::string contents(bufferSize, 0);");
-    readFile.mBody.Add("fin.seekg(0, std::ios_base::beg);");
-    readFile.mBody.Add("fin.read(contents.data(), contents.size());");
-    readFile.mBody.Add("return contents;");
+    method.mBody.Add("std::ifstream fin(filePath, std::ios_base::binary);");
+    method.mBody.Add("fin.seekg(0, std::ios_base::end);");
+    method.mBody.Add("auto bufferSize = fin.tellg();");
+    method.mBody.Add("bufferSize += 1;");
+    method.mBody.Add("std::string contents(bufferSize, 0);");
+    method.mBody.Add("fin.seekg(0, std::ios_base::beg);");
+    method.mBody.Add("fin.read(contents.data(), contents.size());");
+    method.mBody.Add("return contents;");
+
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+    Validate().NewClass(cls);
+    mProject.mClasses.push_back(std::move(cls));
   }
 }
