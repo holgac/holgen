@@ -48,8 +48,7 @@ Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
   LuaHelper::Push(*this, luaState);
   LuaHelper::Push(val, luaState);
   lua_call(luaState, 2, 1);
-  Number* result;
-  result = Number::ReadFromLua(luaState, -1);
+  auto result = Number::ReadFromLua(luaState, -1);
   lua_pop(luaState, 2);
   return result;
 }

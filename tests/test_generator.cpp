@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include "tokenizer/Tokenizer.h"
+#include "parser/Parser.h"
 #include "generator/CodeGenerator.h"
 #include "Helpers.h"
 

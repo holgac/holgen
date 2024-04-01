@@ -105,4 +105,8 @@ namespace holgen {
   std::string NamingConvention::LuaFunctionHandleNameInCpp(const FunctionDefinition &functionDefinition) const {
     return "mLuaFuncHandle_" + functionDefinition.mName;
   }
+
+  std::string NamingConvention::LuaMetatableName(const Class& cls) const {
+    return cls.mName + "Meta";
+  }
 }

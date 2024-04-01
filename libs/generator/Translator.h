@@ -4,12 +4,8 @@
 #include <string>
 #include <memory>
 #include "core/LineWithAction.h"
-// Needed for Project (TODO: move to separate file and fwd declare)
-#include "parser/Parser.h"
 #include "TranslatedProject.h"
 #include "plugins/TranslatorPlugin.h"
-// #include "generators/Generator.h"
-
 
 namespace holgen {
   class Translator {

@@ -217,8 +217,7 @@ if (lua_isnil(luaState, -1)) {
 }
 LuaHelper::Push(*this, luaState);
 lua_call(luaState, 1, 1);
-InnerStruct* result;
-result = InnerStruct::ReadFromLua(luaState, -1);
+auto result = InnerStruct::ReadFromLua(luaState, -1);
 lua_pop(luaState, 1);
 return result;
   )R");

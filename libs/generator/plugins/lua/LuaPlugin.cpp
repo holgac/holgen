@@ -149,45 +149,45 @@ namespace holgen {
     cls.mMethods.push_back(std::move(method));
   }
 
-  void LuaPlugin::GenerateReadFromLua(Class &generatedClass) {
+  void LuaPlugin::GenerateReadFromLua(Class &cls) {
     // Only works with negative indices
     // TODO: generate comments?
     auto method = ClassMethod{
-        "ReadFromLua", Type{generatedClass.mName, PassByType::Pointer},
+        "ReadFromLua", Type{cls.mName, PassByType::Pointer},
         Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
-    if (generatedClass.mStruct->GetAnnotation(Annotations::Managed)) {
+    if (cls.mStruct->GetAnnotation(Annotations::Managed)) {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
-      auto idField = generatedClass.GetField(Naming().FieldNameInCpp(*generatedClass.mStruct->GetIdField()));
+      auto idField = cls.GetField(Naming().FieldNameInCpp(*cls.mStruct->GetIdField()));
       std::string tempType = "uint64_t";
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
         tempType = "int64_t";
       }
       method.mBody.Add("{} id = reinterpret_cast<{}>(lua_touserdata(luaState, -1));", idField->mType.mName, tempType);
-      method.mBody.Add("auto ptr = {}::{}(id);", generatedClass.mName, St::ManagedObject_Getter);
+      method.mBody.Add("auto ptr = {}::{}(id);", cls.mName, St::ManagedObject_Getter);
       method.mBody.Add("lua_pop(luaState, 1);");
       method.mBody.Add("return ptr;");
     } else {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
-      method.mBody.Add("auto ptr = ({}*)lua_touserdata(luaState, -1);", generatedClass.mName);
+      method.mBody.Add("auto ptr = ({}*)lua_touserdata(luaState, -1);", cls.mName);
       method.mBody.Add("lua_pop(luaState, 1);");
       method.mBody.Add("return ptr;");
     }
-    Validate().NewMethod(generatedClass, method);
-    generatedClass.mMethods.push_back(std::move(method));
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
-  void LuaPlugin::GeneratePushToLua(Class &generatedClass) {
+  void LuaPlugin::GeneratePushToLua(Class &cls) {
     auto method = ClassMethod{
         "PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
     method.mBody.Add("lua_newtable(luaState);");
-    if (generatedClass.mStruct->GetAnnotation(Annotations::Managed)) {
-      auto idField = generatedClass.GetField(Naming().FieldNameInCpp(*generatedClass.mStruct->GetIdField()));
+    if (cls.mStruct->GetAnnotation(Annotations::Managed)) {
+      auto idField = cls.GetField(Naming().FieldNameInCpp(*cls.mStruct->GetIdField()));
       std::string tempType = "uint64_t";
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
         tempType = "int64_t";
@@ -203,11 +203,10 @@ namespace holgen {
     }
     method.mBody.Add("lua_settable(luaState, -3);");
     // Do this last so that metamethods don't get called during object construction
-    // TODO: Use Naming for metatable naming
-    method.mBody.Add("lua_getglobal(luaState, \"{}Meta\");", generatedClass.mName);
+    method.mBody.Add("lua_getglobal(luaState, \"{}\");", Naming().LuaMetatableName(cls));
     method.mBody.Add("lua_setmetatable(luaState, -2);");
-    Validate().NewMethod(generatedClass, method);
-    generatedClass.mMethods.push_back(std::move(method));
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
   void LuaPlugin::ProcessStruct(Class &cls) {
@@ -231,7 +230,7 @@ namespace holgen {
     method.mBody.Add("lua_newtable(luaState);");
     method.mBody.Add("PushIndexMetaMethod(luaState);");
     method.mBody.Add("PushNewIndexMetaMethod(luaState);");
-    method.mBody.Add("lua_setglobal(luaState, \"{}Meta\");", cls.mName);
+    method.mBody.Add("lua_setglobal(luaState, \"{}\");", Naming().LuaMetatableName(cls));
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
@@ -249,13 +248,13 @@ namespace holgen {
     cls.mMethods.push_back(std::move(method));
   }
 
-  void LuaPlugin::GeneratePushGlobalToLua(Class &generatedClass) {
+  void LuaPlugin::GeneratePushGlobalToLua(Class &cls) {
     auto method = ClassMethod{"PushGlobalToLua", Type{"void"}};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("name", Type{"char", PassByType::Pointer, Constness::Const});
     method.mBody.Add("PushToLua(luaState);");
     method.mBody.Add("lua_setglobal(luaState, name);");
-    Validate().NewMethod(generatedClass, method);
-    generatedClass.mMethods.push_back(std::move(method));
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 }

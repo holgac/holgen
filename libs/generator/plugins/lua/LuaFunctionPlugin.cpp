@@ -95,9 +95,7 @@ namespace holgen {
     if (returnsVal) {
       if (mProject.GetClass(method.mReturnType.mName)) {
         method.mReturnType.mType = PassByType::Pointer;
-        // TODO: auto
-        method.mBody.Add("{}* result;", method.mReturnType.mName);
-        method.mBody.Add("result = {}::ReadFromLua(luaState, -1);", method.mReturnType.mName);
+        method.mBody.Add("auto result = {}::ReadFromLua(luaState, -1);", method.mReturnType.mName);
       } else {
         method.mBody.Add("{} result;", method.mReturnType.mName);
         method.mBody.Add("{}::{}(result, luaState, -1);", St::LuaHelper, St::LuaHelper_Read);

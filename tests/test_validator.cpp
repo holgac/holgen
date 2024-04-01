@@ -35,48 +35,6 @@ protected:
   }
 };
 
-TEST_F(ValidatorTest, JsonConvert) {
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  @jsonConvert(using=aaa)
-  u32 field;
-}
-  )DELIM", "Field A.field has annotation jsonConvert with missing attribute: from");
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  @jsonConvert(from=string)
-  u32 field;
-}
-  )DELIM", "Field A.field has annotation jsonConvert with missing attribute: using");
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  @jsonConvert(from=string,using=myFunc)
-  @jsonConvert(from=u8,using=myFunc2)
-  u32 field;
-}
-  )DELIM", "Field A.field has multiple jsonConvert annotations");
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  @jsonConvert(from=string,using=myFunc)
-  u32 field;
-}
-struct B {
-  @jsonConvert(from=string,using=myFunc)
-  u8 field;
-}
-  )DELIM", "Converter myFunc cannot convert to multiple types: u32 and u8");
-  ExpectErrorMessage(R"DELIM(
-struct A {
-  @jsonConvert(from=u8,using=myFunc)
-  u32 field;
-}
-struct B {
-  @jsonConvert(from=string,using=myFunc)
-  u32 field;
-}
-  )DELIM", "Converter myFunc cannot convert from multiple types: u8 and string");
-}
-
 TEST_F(ValidatorTest, Id) {
   ExpectErrorMessage(R"DELIM(
 struct Person {

@@ -11,9 +11,9 @@ namespace holgen {
   private:
     void ProcessStruct(Class &cls);
     void ProcessEnum(Class &cls);
-    void GeneratePushGlobalToLua(Class &generatedClass);
-    void GeneratePushToLua(Class &generatedClass);
-    void GenerateReadFromLua(Class &generatedClass);
+    void GeneratePushGlobalToLua(Class &cls);
+    void GeneratePushToLua(Class &cls);
+    void GenerateReadFromLua(Class &cls);
     void GeneratePushIndexMetaMethod(Class &cls);
     void GeneratePushNewIndexMetaMethod(Class &cls);
     void GenerateCreateLuaMetatable(Class &cls);
