@@ -28,7 +28,7 @@ public:
       auto res = Parse(elem, data, converter);
       if (!res)
         return false;
-      out.emplace_back(std::move(elem));
+      out.push_back(std::move(elem));
     }
     return true;
   }
@@ -41,7 +41,7 @@ public:
       auto res = Parse(elem, data, converter);
       if (!res)
         return false;
-      out.emplace_back(std::move(elem));
+      out.push_back(std::move(elem));
     }
     return true;
   }
@@ -54,7 +54,7 @@ public:
       auto res = Parse(elem, data, converter);
       if (!res)
         return false;
-      out.emplace(std::move(elem));
+      out.insert(std::move(elem));
     }
     return true;
   }
@@ -67,7 +67,7 @@ public:
       auto res = Parse(elem, data, converter);
       if (!res)
         return false;
-      out.emplace(std::move(elem));
+      out.insert(std::move(elem));
     }
     return true;
   }

@@ -43,6 +43,6 @@ namespace holgen {
       }
     }
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 }

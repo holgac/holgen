@@ -19,7 +19,7 @@ namespace holgen {
 
     template<typename Plugin, typename ...Args>
     void AddPlugin(Args &&... args) {
-      mPlugins.emplace_back(std::move(std::make_unique<Plugin>(mProject, std::forward<Args>(args)...)));
+      mPlugins.push_back(std::move(std::make_unique<Plugin>(mProject, std::forward<Args>(args)...)));
     }
 
     TranslatedProject Translate();

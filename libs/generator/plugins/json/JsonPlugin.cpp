@@ -64,7 +64,7 @@ namespace holgen {
     method.mBody.Line() << "}"; // range based for on json.GetObject()
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void JsonPlugin::GenerateParseJsonForField(ClassMethod &method, const ClassField &field) {
@@ -144,7 +144,7 @@ namespace holgen {
     method.mBody.Add("}}");
     method.mBody.Add("return true;");
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void JsonPlugin::GenerateParseJsonForFunction(ClassMethod &method, const ClassMethod &luaFunction) {

@@ -21,7 +21,7 @@ namespace holgen {
             field.mDefaultValue = "-1";
         }
         Validate().NewField(cls, field);
-        cls.mFields.emplace_back(std::move(field));
+        cls.mFields.push_back(std::move(field));
       }
     }
   }

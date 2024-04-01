@@ -28,10 +28,10 @@ namespace holgen {
         field.mType.mFunctionalTemplateParameters.emplace_back(mProject.mProject, jsonConvertFrom->mValue);
         field.mType.mFunctionalTemplateParameters.back().PreventCopying();
         Validate().NewField(cls, field);
-        cls.mFields.emplace_back(std::move(field));
+        cls.mFields.push_back(std::move(field));
       }
     }
     Validate().NewClass(cls);
-    mProject.mClasses.emplace_back(std::move(cls));
+    mProject.mClasses.push_back(std::move(cls));
   }
 }

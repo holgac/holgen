@@ -90,7 +90,7 @@ namespace holgen {
     }
     method.mBody.Add("return true;");
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void JsonParseFilesPlugin::GenerateConverterPopulators(Class &cls, ClassMethod &method) {

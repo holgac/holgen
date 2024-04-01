@@ -13,7 +13,7 @@ namespace holgen {
     GenerateSetInstance(cls);
 
     Validate().NewClass(cls);
-    mProject.mClasses.emplace_back(std::move(cls));
+    mProject.mClasses.push_back(std::move(cls));
   }
 
   void GlobalPointerPlugin::GenerateInstanceField(Class &cls) const {
@@ -21,7 +21,7 @@ namespace holgen {
         "mInstance", Type{"T", PassByType::Pointer}, Visibility::Private,
         Staticness::Static, "nullptr"};
     Validate().NewField(cls, field);
-    cls.mFields.emplace_back(std::move(field));
+    cls.mFields.push_back(std::move(field));
   }
 
   void GlobalPointerPlugin::GenerateGetInstance(Class &cls) const {
@@ -30,7 +30,7 @@ namespace holgen {
         Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mBody.Add("return mInstance;");
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void GlobalPointerPlugin::GenerateSetInstance(Class &cls) const {
@@ -41,6 +41,6 @@ namespace holgen {
     // the users handle storage and deletion?
     method.mBody.Add("mInstance = ptr;");
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 }

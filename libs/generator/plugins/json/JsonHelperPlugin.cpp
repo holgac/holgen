@@ -18,7 +18,7 @@ namespace holgen {
       GenerateParseJsonForKeyedContainer(cls, container);
     }
     Validate().NewClass(cls);
-    mProject.mClasses.emplace_back(std::move(cls));
+    mProject.mClasses.push_back(std::move(cls));
   }
 
   void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container) {
@@ -49,14 +49,14 @@ namespace holgen {
     method.mBody.Line() << "return false;";
     method.mBody.Indent(-1); // if !res
     if (TypeInfo::Get().CppSets.contains(container))
-      method.mBody.Line() << "out.emplace(std::move(elem));";
+      method.mBody.Line() << "out.insert(std::move(elem));";
     else
-      method.mBody.Line() << "out.emplace_back(std::move(elem));";
+      method.mBody.Line() << "out.push_back(std::move(elem));";
     method.mBody.Indent(-1);
     method.mBody.Line() << "}"; // range based for on json.GetArray()
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void JsonHelperPlugin::GenerateBaseParse(Class &cls) {
@@ -71,7 +71,7 @@ namespace holgen {
     method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
     method.mBody.Add("return out.{}(json, converter);", St::ParseJson);
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void JsonHelperPlugin::GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,
@@ -90,7 +90,7 @@ namespace holgen {
     method.mBody.Line() << "out = json." << getter << "();";
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {
@@ -150,6 +150,6 @@ namespace holgen {
     method.mBody.Line() << "}"; // range based for on json.GetArray()
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 }

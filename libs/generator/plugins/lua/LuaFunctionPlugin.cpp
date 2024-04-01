@@ -109,6 +109,6 @@ namespace holgen {
         method.mBody.Add(R"R(lua_pop(luaState, 1);)R", functionHandle.mName);
     }
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 }

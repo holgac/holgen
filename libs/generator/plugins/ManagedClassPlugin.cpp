@@ -36,7 +36,7 @@ namespace holgen {
     method.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                      St::GlobalPointer, manager.mName, Naming().ContainerElemGetterNameInCpp(*managerField.mField));
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void ManagedClassPlugin::GenerateIndexGetter(Class &cls, const Class &manager, const ClassField &managerField,
@@ -53,7 +53,7 @@ namespace holgen {
                      St::GlobalPointer, manager.mName,
                      Naming().ContainerIndexGetterNameInCpp(*managerField.mField, annotation));
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
 
   }
 }

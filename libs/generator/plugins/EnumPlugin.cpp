@@ -117,7 +117,7 @@ namespace holgen {
       line << "};";
     }
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void EnumPlugin::GenerateEntries(Class &cls) {
@@ -190,7 +190,7 @@ namespace holgen {
       method.mBody.Add("}}");
     }
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void EnumPlugin::GenerateToString(Class &cls) {
@@ -210,6 +210,6 @@ namespace holgen {
     method.mBody.Indent(-1);
     method.mBody.Add("}}"); // switch
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 }

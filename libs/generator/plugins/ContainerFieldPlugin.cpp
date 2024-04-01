@@ -77,10 +77,10 @@ namespace holgen {
       else
         method.mBody.Add("return &{}[it->second];", field.mName);
       Validate().NewMethod(cls, method);
-      cls.mMethods.emplace_back(std::move(method));
+      cls.mMethods.push_back(std::move(method));
     }
     Validate().NewField(cls, indexField);
-    cls.mFields.emplace_back(std::move(indexField));
+    cls.mFields.push_back(std::move(indexField));
   }
 
   void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, bool useMoveRef) {
@@ -148,7 +148,7 @@ namespace holgen {
       method.mBody.Add("{}.emplace_back({});", field.mName, elemToInsert);
     }
     method.mBody.Line() << "return true;";
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) {
@@ -199,7 +199,7 @@ namespace holgen {
       } else {
         method.mBody.Line() << "return &" << field.mName << "[idx];";
       }
-      cls.mMethods.emplace_back(std::move(method));
+      cls.mMethods.push_back(std::move(method));
     }
   }
 
@@ -210,7 +210,7 @@ namespace holgen {
     method.mExposeToLua = true;
     method.mBody.Add("return {}.size();", field.mName);
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &field) {
@@ -259,7 +259,7 @@ namespace holgen {
       method.mBody.Add("{}.pop_back();", field.mName);
     }
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) {
@@ -274,7 +274,7 @@ namespace holgen {
     arg.mType.PreventCopying();
     method.mBody.Add("return {}.contains({});", field.mName, arg.mName);
     Validate().NewMethod(cls, method);
-    cls.mMethods.emplace_back(std::move(method));
+    cls.mMethods.push_back(std::move(method));
   }
 
   bool ContainerFieldPlugin::CanImplementDeleteElem(
@@ -301,7 +301,7 @@ namespace holgen {
           Type{mProject.mProject, underlyingIdField->mType}};
       nextIdField.mDefaultValue = "0";
       Validate().NewField(cls, nextIdField);
-      cls.mFields.emplace_back(std::move(nextIdField));
+      cls.mFields.push_back(std::move(nextIdField));
     }
   }
 
