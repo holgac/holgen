@@ -147,11 +147,9 @@ struct TestData {
         Type{"InnerStruct", PassByType::Pointer, Constness::Const},
         Visibility::Public, Constness::Const};
     method.mBody.Add("return InnerStruct::Get(mTestFieldStructId);");
-    method.mExposeToLua = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::Const), method);
     method.mConstness = Constness::NotConst;
     method.mReturnType.mConstness = Constness::NotConst;
-    method.mExposeToLua = false;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::NotConst), method);
   }
 }

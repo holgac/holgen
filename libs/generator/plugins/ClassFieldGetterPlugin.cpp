@@ -32,8 +32,6 @@ namespace holgen {
           constness};
       method.mBody.Add("return {}::{}({});", underlyingType->mName, St::ManagedObject_Getter,
                        field.mName);
-      if (i == 0)
-        method.mExposeToLua = true;
       Validate().NewMethod(cls, method);
       cls.mMethods.push_back(std::move(method));
     }

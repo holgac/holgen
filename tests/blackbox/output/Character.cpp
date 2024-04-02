@@ -118,20 +118,6 @@ void Character::PushIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Push(instance->mArmorId, ls);
     } else if (0 == strcmp("armor", key)) {
       LuaHelper::Push(Armor::Get(instance->mArmorId), ls);
-    } else if (0 == strcmp("GetBoot", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = Character::ReadFromLua(lsInner, -1);
-        auto result = instance->GetBoot();
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else if (0 == strcmp("GetArmor", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = Character::ReadFromLua(lsInner, -1);
-        auto result = instance->GetArmor();
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
     } else {
       return 0;
     }
