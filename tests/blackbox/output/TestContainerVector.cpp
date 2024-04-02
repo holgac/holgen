@@ -55,27 +55,25 @@ TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithIdFromNam
     return nullptr;
   return &mInnerStructsWithId[it->second];
 }
-bool TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
+TestContainerInnerStructWithId* TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mInnerStructsWithId.size();
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mInnerStructsWithId.emplace_back(std::forward<TestContainerInnerStructWithId>(elem));
-  return true;
+  return &(mInnerStructsWithId.emplace_back(std::forward<TestContainerInnerStructWithId>(elem)));
 }
-bool TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
+TestContainerInnerStructWithId* TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mInnerStructsWithId.size();
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mInnerStructsWithId.emplace_back(elem);
-  return true;
+  return &(mInnerStructsWithId.emplace_back(elem));
 }
 const TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithId(uint32_t idx) const {
   if (idx >= mInnerStructsWithId.size())
@@ -102,25 +100,23 @@ TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoIdFromName(co
     return nullptr;
   return &mInnerStructsNoId[it->second];
 }
-bool TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId&& elem) {
+TestContainerInnerStructNoId* TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId&& elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mInnerStructsNoId.size();
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
-  mInnerStructsNoId.emplace_back(std::forward<TestContainerInnerStructNoId>(elem));
-  return true;
+  return &(mInnerStructsNoId.emplace_back(std::forward<TestContainerInnerStructNoId>(elem)));
 }
-bool TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId& elem) {
+TestContainerInnerStructNoId* TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId& elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mInnerStructsNoId.size();
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
-  mInnerStructsNoId.emplace_back(elem);
-  return true;
+  return &(mInnerStructsNoId.emplace_back(elem));
 }
 const TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoId(size_t idx) const {
   if (idx >= mInnerStructsNoId.size())
@@ -144,13 +140,11 @@ void TestContainerVector::DeleteInnerStructNoId(size_t idx) {
 size_t TestContainerVector::GetInnerStructNoIdCount() const {
   return mInnerStructsNoId.size();
 }
-bool TestContainerVector::AddStringElem(std::string&& elem) {
-  mStringContainer.emplace_back(std::forward<std::string>(elem));
-  return true;
+std::string* TestContainerVector::AddStringElem(std::string&& elem) {
+  return &(mStringContainer.emplace_back(std::forward<std::string>(elem)));
 }
-bool TestContainerVector::AddStringElem(const std::string& elem) {
-  mStringContainer.emplace_back(elem);
-  return true;
+std::string* TestContainerVector::AddStringElem(const std::string& elem) {
+  return &(mStringContainer.emplace_back(elem));
 }
 const std::string* TestContainerVector::GetStringElem(size_t idx) const {
   if (idx >= mStringContainer.size())
@@ -171,9 +165,8 @@ void TestContainerVector::DeleteStringElem(size_t idx) {
 size_t TestContainerVector::GetStringElemCount() const {
   return mStringContainer.size();
 }
-bool TestContainerVector::AddUnsignedElem(uint32_t elem) {
-  mUnsignedContainer.emplace_back(elem);
-  return true;
+uint32_t* TestContainerVector::AddUnsignedElem(uint32_t elem) {
+  return &(mUnsignedContainer.emplace_back(elem));
 }
 const uint32_t* TestContainerVector::GetUnsignedElem(size_t idx) const {
   if (idx >= mUnsignedContainer.size())

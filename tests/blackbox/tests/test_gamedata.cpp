@@ -24,14 +24,14 @@ TEST_F(GameDataTest, ElementGettersAndAdders) {
     a.SetName("plate mail");
     a.SetAlternativeName("platy");
     a.SetArmorClass(3);
-    gd.AddArmor(std::move(a));
+    EXPECT_NE(gd.AddArmor(std::move(a)), nullptr);
   }
   {
     Armor a;
     a.SetName("chain mail");
     a.SetAlternativeName("chainy");
     a.SetArmorClass(4);
-    gd.AddArmor(std::move(a));
+    EXPECT_NE(gd.AddArmor(std::move(a)), nullptr);
   }
   ASSERT_EQ(gd.GetArmors().size(), 2);
   EXPECT_EQ(gd.GetArmor(0)->GetName(), "plate mail");
@@ -49,7 +49,7 @@ TEST_F(GameDataTest, ElementGettersAndAdders) {
     Armor a;
     a.SetName("chain mail");
     a.SetArmorClass(4);
-    EXPECT_FALSE(gd.AddArmor(std::move(a)));
+    EXPECT_EQ(gd.AddArmor(std::move(a)), nullptr);
   }
 
   auto a2 = gd.GetArmorFromName("chain mail2");

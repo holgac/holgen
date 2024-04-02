@@ -18,8 +18,8 @@ public:
   void SetInnerStructsWithId(const std::map<uint32_t, TestContainerInnerStructWithId>& val);
   const TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key) const;
   TestContainerInnerStructWithId* GetInnerStructWithIdFromName(const std::string& key);
-  bool AddInnerStructWithId(TestContainerInnerStructWithId&& elem);
-  bool AddInnerStructWithId(TestContainerInnerStructWithId& elem);
+  TestContainerInnerStructWithId* AddInnerStructWithId(TestContainerInnerStructWithId&& elem);
+  TestContainerInnerStructWithId* AddInnerStructWithId(TestContainerInnerStructWithId& elem);
   const TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx) const;
   TestContainerInnerStructWithId* GetInnerStructWithId(uint32_t idx);
   bool HasInnerStructWithId(uint32_t key) const;

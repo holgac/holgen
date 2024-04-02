@@ -25,8 +25,7 @@ namespace holgen {
               field.mDefaultValue = "-1";
           }
         }
-        if (field.mDefaultValue.empty() && fieldDefinition.GetAnnotation(Annotations::Id) &&
-            TypeInfo::Get().IntegralTypes.contains(field.mType.mName)) {
+        if (field.mDefaultValue.empty() && fieldDefinition.GetAnnotation(Annotations::Id)) {
           field.mDefaultValue = "-1";
         }
         Validate().NewField(cls, field);

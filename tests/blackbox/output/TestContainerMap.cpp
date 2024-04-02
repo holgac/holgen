@@ -28,29 +28,31 @@ TestContainerInnerStructWithId* TestContainerMap::GetInnerStructWithIdFromName(c
     return nullptr;
   return &mInnerStructsWithId.at(it->second);
 }
-bool TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
+TestContainerInnerStructWithId* TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mInnerStructsWithIdNextId;
   ++mInnerStructsWithIdNextId;
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mInnerStructsWithId.emplace(newId, std::forward<TestContainerInnerStructWithId>(elem));
-  return true;
+  auto [it, res] = mInnerStructsWithId.emplace(newId, std::forward<TestContainerInnerStructWithId>(elem));
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
+  return &(it->second);
 }
-bool TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
+TestContainerInnerStructWithId* TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mInnerStructsWithIdNextId;
   ++mInnerStructsWithIdNextId;
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mInnerStructsWithId.emplace(newId, elem);
-  return true;
+  auto [it, res] = mInnerStructsWithId.emplace(newId, elem);
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
+  return &(it->second);
 }
 const TestContainerInnerStructWithId* TestContainerMap::GetInnerStructWithId(uint32_t idx) const {
   auto it = mInnerStructsWithId.find(idx);

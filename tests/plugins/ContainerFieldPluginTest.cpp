@@ -200,12 +200,46 @@ struct TestData {
   {
     auto method = ClassMethod{
         "AddInnerStruct",
-        Type{"bool"},
+        Type{"InnerStruct", PassByType::Pointer},
         Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
-mInnerStructs.emplace_back(std::forward<InnerStruct>(elem));
-return true;
+return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
+    )R");
+  }
+}
+
+TEST_F(ContainerFieldPluginTest, VectorAddElemNoIdWithIndex) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  string uuid;
+}
+struct TestData {
+  @container(elemName=innerStruct)
+  @index(on=uuid)
+  vector<InnerStruct> innerStructs;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{
+      "AddInnerStruct",
+      Type{"InnerStruct", PassByType::Pointer},
+      Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
+    helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
+if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
+  HOLGEN_WARN("InnerStruct with uuid={} already exists", elem.GetUuid());
+  return nullptr;
+}
+auto newId = mInnerStructs.size();
+mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
+return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
     )R");
   }
 }
@@ -231,14 +265,13 @@ struct TestData {
   {
     auto method = ClassMethod{
         "AddInnerStruct",
-        Type{"bool"},
+        Type{"InnerStruct", PassByType::Pointer},
         Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 auto newId = mInnerStructs.size();
 elem.SetId(newId);
-mInnerStructs.emplace_back(std::forward<InnerStruct>(elem));
-return true;
+return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
     )R");
   }
 }
@@ -267,24 +300,23 @@ struct TestData {
   {
     auto method = ClassMethod{
         "AddInnerStruct",
-        Type{"bool"},
+        Type{"InnerStruct", PassByType::Pointer},
         Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
   HOLGEN_WARN("InnerStruct with uuid={} already exists", elem.GetUuid());
-  return false;
+  return nullptr;
 }
 if (mInnerStructsGuidIndex.contains(elem.GetGuid())) {
   HOLGEN_WARN("InnerStruct with guid={} already exists", elem.GetGuid());
-  return false;
+  return nullptr;
 }
 auto newId = mInnerStructs.size();
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 mInnerStructsGuidIndex.emplace(elem.GetGuid(), newId);
 elem.SetId(newId);
-mInnerStructs.emplace_back(std::forward<InnerStruct>(elem));
-return true;
+return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
     )R");
   }
 }
@@ -333,20 +365,21 @@ struct TestData {
   {
     auto method = ClassMethod{
         "AddInnerStruct",
-        Type{"bool"},
+        Type{"InnerStruct", PassByType::Pointer},
         Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
   HOLGEN_WARN("InnerStruct with uuid={} already exists", elem.GetUuid());
-  return false;
+  return nullptr;
 }
 auto newId = mInnerStructsNextId;
 ++mInnerStructsNextId;
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 elem.SetId(newId);
-mInnerStructs.emplace(newId, std::forward<InnerStruct>(elem));
-return true;
+auto [it, res] = mInnerStructs.emplace(newId, std::forward<InnerStruct>(elem));
+HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestData.innerStructs modified externally?");
+return &(it->second);
     )R");
   }
 }

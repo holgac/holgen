@@ -32,29 +32,31 @@ Human* HumanManager::GetHumanFromName(const std::string& key) {
     return nullptr;
   return &mHumans.at(it->second);
 }
-bool HumanManager::AddHuman(Human&& elem) {
+Human* HumanManager::AddHuman(Human&& elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Human with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mHumansNextId;
   ++mHumansNextId;
   mHumansNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mHumans.emplace(newId, std::forward<Human>(elem));
-  return true;
+  auto [it, res] = mHumans.emplace(newId, std::forward<Human>(elem));
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
+  return &(it->second);
 }
-bool HumanManager::AddHuman(Human& elem) {
+Human* HumanManager::AddHuman(Human& elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Human with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mHumansNextId;
   ++mHumansNextId;
   mHumansNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mHumans.emplace(newId, elem);
-  return true;
+  auto [it, res] = mHumans.emplace(newId, elem);
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
+  return &(it->second);
 }
 const Human* HumanManager::GetHuman(uint32_t idx) const {
   auto it = mHumans.find(idx);

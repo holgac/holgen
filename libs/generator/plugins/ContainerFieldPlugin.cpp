@@ -41,7 +41,6 @@ namespace holgen {
     auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
     auto indexOn = annotationDefinition.GetAttribute(Annotations::Index_On);
     auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
-    auto underlyingIdField = underlyingStructDefinition->GetIdField();
     auto indexField = ClassField{
         Naming().FieldIndexNameInCpp(*field.mField, annotationDefinition), Type{"std::map"}};
     auto indexType = annotationDefinition.GetAttribute(Annotations::Index_Using);
@@ -50,7 +49,7 @@ namespace holgen {
     }
 
     indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, fieldIndexedOn.mType);
-    if (underlyingIdField)
+    if (auto underlyingIdField = underlyingStructDefinition->GetIdField())
       indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, underlyingIdField->mType);
     else
       indexField.mType.mTemplateParameters.emplace_back("size_t");
@@ -94,16 +93,12 @@ namespace holgen {
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
 
     auto method = ClassMethod{
-        Naming().ContainerElemAdderNameInCpp(*field.mField),
-        Type{"bool"},
-        Visibility::Public,
-        Constness::NotConst
-    };
+        Naming().ContainerElemAdderNameInCpp(*field.mField), Type{underlyingType.mName, PassByType::Pointer},
+        Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("elem", underlyingType);
     if (useMoveRef) {
-      method.mArguments.emplace_back("elem", underlyingType);
       method.mArguments.back().mType.mType = PassByType::MoveReference;
     } else {
-      method.mArguments.emplace_back("elem", underlyingType);
       method.mArguments.back().mType.PreventCopying();
     }
 
@@ -118,7 +113,7 @@ namespace holgen {
       validators.Indent(1);
       validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists", elem.{}());)",
                      underlyingClass->mName, indexOn->mValue.mName, getterMethodName);
-      validators.Add("return false;");
+      validators.Add("return nullptr;");
       validators.Indent(-1);
       validators.Add("}}");
       inserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
@@ -139,14 +134,21 @@ namespace holgen {
     if (useMoveRef)
       elemToInsert = std::format("std::forward<{}>(elem)", method.mArguments.back().mType.mName);
     if (isKeyedContainer) {
-      method.mBody.Add("{}.emplace(newId, {});", field.mName,
-                       elemToInsert);
+      method.mBody.Add("auto [it, res] = {}.emplace(newId, {});", field.mName, elemToInsert);
+      method.mBody.Add(
+          "HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Corrupt internal ID counter - was {}.{} modified externally?\");",
+          cls.mName, field.mField->mName);
+      method.mBody.Add("return &(it->second);", field.mName);
     } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
-      method.mBody.Add("{}.emplace({});", field.mName, elemToInsert);
+      method.mBody.Add("auto [it, res] = {}.emplace({});", field.mName, elemToInsert);
+      method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Attempting to insert duplicate element to {}\");",
+                       field.mName);
+      method.mBody.Add("return &(*it);", field.mName);
+      method.mReturnType.mConstness = Constness::Const;
     } else {
-      method.mBody.Add("{}.emplace_back({});", field.mName, elemToInsert);
+      method.mBody.Add("return &({}.emplace_back({}));", field.mName, elemToInsert);
     }
-    method.mBody.Line() << "return true;";
+    Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
 

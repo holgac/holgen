@@ -25,13 +25,15 @@ void TestContainerSet::SetStringContainer(const std::set<std::string>& val) {
 void TestContainerSet::SetUnsignedContainer(const std::set<uint32_t>& val) {
   mUnsignedContainer = val;
 }
-bool TestContainerSet::AddStringElem(std::string&& elem) {
-  mStringContainer.emplace(std::forward<std::string>(elem));
-  return true;
+const std::string* TestContainerSet::AddStringElem(std::string&& elem) {
+  auto [it, res] = mStringContainer.emplace(std::forward<std::string>(elem));
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to mStringContainer");
+  return &(*it);
 }
-bool TestContainerSet::AddStringElem(const std::string& elem) {
-  mStringContainer.emplace(elem);
-  return true;
+const std::string* TestContainerSet::AddStringElem(const std::string& elem) {
+  auto [it, res] = mStringContainer.emplace(elem);
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to mStringContainer");
+  return &(*it);
 }
 bool TestContainerSet::HasStringElem(const std::string& elem) const {
   return mStringContainer.contains(elem);
@@ -42,9 +44,10 @@ void TestContainerSet::DeleteStringElem(std::string elem) {
 size_t TestContainerSet::GetStringElemCount() const {
   return mStringContainer.size();
 }
-bool TestContainerSet::AddUnsignedElem(uint32_t elem) {
-  mUnsignedContainer.emplace(elem);
-  return true;
+const uint32_t* TestContainerSet::AddUnsignedElem(uint32_t elem) {
+  auto [it, res] = mUnsignedContainer.emplace(elem);
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to mUnsignedContainer");
+  return &(*it);
 }
 bool TestContainerSet::HasUnsignedElem(uint32_t elem) const {
   return mUnsignedContainer.contains(elem);

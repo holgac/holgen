@@ -19,8 +19,8 @@ public:
   void SetHumans(const std::unordered_map<uint32_t, Human>& val);
   const Human* GetHumanFromName(const std::string& key) const;
   Human* GetHumanFromName(const std::string& key);
-  bool AddHuman(Human&& elem);
-  bool AddHuman(Human& elem);
+  Human* AddHuman(Human&& elem);
+  Human* AddHuman(Human& elem);
   const Human* GetHuman(uint32_t idx) const;
   Human* GetHuman(uint32_t idx);
   bool HasHuman(uint32_t key) const;

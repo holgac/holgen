@@ -50,27 +50,25 @@ Boot* GameData::GetBootFromName(const std::string& key) {
     return nullptr;
   return &mBoots[it->second];
 }
-bool GameData::AddBoot(Boot&& elem) {
+Boot* GameData::AddBoot(Boot&& elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mBoots.size();
   mBootsNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mBoots.emplace_back(std::forward<Boot>(elem));
-  return true;
+  return &(mBoots.emplace_back(std::forward<Boot>(elem)));
 }
-bool GameData::AddBoot(Boot& elem) {
+Boot* GameData::AddBoot(Boot& elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mBoots.size();
   mBootsNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mBoots.emplace_back(elem);
-  return true;
+  return &(mBoots.emplace_back(elem));
 }
 const Boot* GameData::GetBoot(uint32_t idx) const {
   if (idx >= mBoots.size())
@@ -109,37 +107,35 @@ Armor* GameData::GetArmorFromAlternativeName(const std::string& key) {
     return nullptr;
   return &mArmors[it->second];
 }
-bool GameData::AddArmor(Armor&& elem) {
+Armor* GameData::AddArmor(Armor&& elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
     HOLGEN_WARN("Armor with alternativeName={} already exists", elem.GetAlternativeName());
-    return false;
+    return nullptr;
   }
   auto newId = mArmors.size();
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
   elem.SetId(newId);
-  mArmors.emplace_back(std::forward<Armor>(elem));
-  return true;
+  return &(mArmors.emplace_back(std::forward<Armor>(elem)));
 }
-bool GameData::AddArmor(Armor& elem) {
+Armor* GameData::AddArmor(Armor& elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
     HOLGEN_WARN("Armor with alternativeName={} already exists", elem.GetAlternativeName());
-    return false;
+    return nullptr;
   }
   auto newId = mArmors.size();
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
   elem.SetId(newId);
-  mArmors.emplace_back(elem);
-  return true;
+  return &(mArmors.emplace_back(elem));
 }
 const Armor* GameData::GetArmor(uint32_t idx) const {
   if (idx >= mArmors.size())
@@ -166,27 +162,25 @@ Character* GameData::GetCharacterFromName(const std::string& key) {
     return nullptr;
   return &mCharacters[it->second];
 }
-bool GameData::AddCharacter(Character&& elem) {
+Character* GameData::AddCharacter(Character&& elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Character with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mCharacters.size();
   mCharactersNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mCharacters.emplace_back(std::forward<Character>(elem));
-  return true;
+  return &(mCharacters.emplace_back(std::forward<Character>(elem)));
 }
-bool GameData::AddCharacter(Character& elem) {
+Character* GameData::AddCharacter(Character& elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Character with name={} already exists", elem.GetName());
-    return false;
+    return nullptr;
   }
   auto newId = mCharacters.size();
   mCharactersNameIndex.emplace(elem.GetName(), newId);
   elem.SetId(newId);
-  mCharacters.emplace_back(elem);
-  return true;
+  return &(mCharacters.emplace_back(elem));
 }
 const Character* GameData::GetCharacter(uint32_t idx) const {
   if (idx >= mCharacters.size())
