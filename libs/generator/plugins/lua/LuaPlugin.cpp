@@ -1,12 +1,12 @@
 #include "LuaPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../NamingConvention.h"
 
 namespace holgen {
   namespace {
     std::string LuaTableField_Pointer = "p";
     std::string LuaTableField_Index = "i";
+    std::string LuaTableField_Type = "t";
   }
 
   void LuaPlugin::Run() {
@@ -157,7 +157,7 @@ namespace holgen {
         Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
-    if (cls.mStruct->GetAnnotation(Annotations::Managed)) {
+    if (!ShouldEmbedPointer(cls)) {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
       auto idField = cls.GetField(Naming().FieldNameInCpp(*cls.mStruct->GetIdField()));
@@ -186,7 +186,7 @@ namespace holgen {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
     method.mBody.Add("lua_newtable(luaState);");
-    if (cls.mStruct->GetAnnotation(Annotations::Managed)) {
+    if (!ShouldEmbedPointer(cls)) {
       auto idField = cls.GetField(Naming().FieldNameInCpp(*cls.mStruct->GetIdField()));
       std::string tempType = "uint64_t";
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
@@ -196,12 +196,17 @@ namespace holgen {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
       method.mBody.Add("lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));");
     } else {
-      // TODO: debug generator? Or generate extra debug stuff that's gated behind a macro?
-      // Specifying object type would help here
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
       method.mBody.Add("lua_pushlightuserdata(luaState, (void*)this);");
     }
     method.mBody.Add("lua_settable(luaState, -3);");
+    /*
+    // TODO: this should read from GeneratorSettings
+    // can also just get the metatable that's already available?
+    method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Type);
+    method.mBody.Add("lua_pushstring(luaState, \"{}\");", cls.mName);
+    method.mBody.Add("lua_settable(luaState, -3);");
+    */
     // Do this last so that metamethods don't get called during object construction
     method.mBody.Add("lua_getglobal(luaState, \"{}\");", Naming().LuaMetatableName(cls));
     method.mBody.Add("lua_setmetatable(luaState, -2);");
@@ -256,5 +261,17 @@ namespace holgen {
     method.mBody.Add("lua_setglobal(luaState, name);");
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
+  }
+
+  bool LuaPlugin::ShouldEmbedPointer(Class& cls) {
+    auto managed = cls.mStruct->GetAnnotation(Annotations::Managed);
+    if (!managed)
+      return true;
+    auto manager = mProject.GetClass(managed->GetAttribute(Annotations::Managed_By)->mValue.mName);
+    auto fieldDefinition = manager->mStruct->GetField(managed->GetAttribute(Annotations::Managed_Field)->mValue.mName);
+    auto field = manager->GetField(Naming().FieldNameInCpp(*fieldDefinition));
+    if (TypeInfo::Get().CppStableContainers.contains(field->mType.mName))
+      return true;
+    return false;
   }
 }

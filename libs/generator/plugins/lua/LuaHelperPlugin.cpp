@@ -26,9 +26,6 @@ namespace holgen {
         {"bool",        {"lua_isboolean", "lua_toboolean", "lua_pushboolean", ""}},
         {"std::string", {"lua_isstring",  "lua_tostring",  "lua_pushstring",  ".c_str()"}},
     };
-
-    std::string LuaTableField_Pointer = "p";
-    std::string LuaTableField_Index = "i";
   }
 
   void LuaHelperPlugin::Run() {

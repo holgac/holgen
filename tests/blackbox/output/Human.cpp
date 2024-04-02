@@ -48,9 +48,8 @@ bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) 
 }
 void Human::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
-  uint64_t id = mId;
-  lua_pushstring(luaState, "i");
-  lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));
+  lua_pushstring(luaState, "p");
+  lua_pushlightuserdata(luaState, (void*)this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "HumanMeta");
   lua_setmetatable(luaState, -2);
@@ -60,10 +59,9 @@ void Human::PushGlobalToLua(lua_State* luaState, const char* name) const {
   lua_setglobal(luaState, name);
 }
 Human* Human::ReadFromLua(lua_State* luaState, int32_t idx) {
-  lua_pushstring(luaState, "i");
+  lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(luaState, -1));
-  auto ptr = Human::Get(id);
+  auto ptr = (Human*)lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }

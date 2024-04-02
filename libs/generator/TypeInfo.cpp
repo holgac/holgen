@@ -67,11 +67,11 @@ namespace holgen {
     CppContainers = CppIndexedContainers;
     CppContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
     CppContainers.insert(CppSets.begin(), CppSets.end());
-    CppStableContainers = {
-        "std::deque",
-        "std::set",
-        "std::unordered_set",
-    };
+
+    CppStableContainers = {"std::deque"};
+    CppStableContainers.insert(CppSets.begin(), CppSets.end());
+    CppStableContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
+
     KeyableTypes = IntegralTypes;
     KeyableTypes.insert("std::string");
     AllowlistedTypes = {
