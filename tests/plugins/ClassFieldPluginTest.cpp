@@ -139,6 +139,26 @@ struct TestData {
   }
 }
 
+TEST_F(ClassFieldPluginTest, UserData) {
+  auto project = Parse(R"R(
+struct TestData {
+  userdata testFieldUserData;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_EQ(cls->mFields.size(), 1);
+
+  ASSERT_NE(cls->GetField("mTestFieldUserData"), nullptr);
+  {
+    auto field = ClassField{"mTestFieldUserData", Type{"void", PassByType::Pointer}};
+    field.mField = cls->mStruct->GetField("testFieldUserData");
+    field.mDefaultValue = "nullptr";
+    helpers::ExpectEqual(*cls->GetField("mTestFieldUserData"), field);
+  }
+}
+
 TEST_F(ClassFieldPluginTest, ManagedRefWithId) {
   auto project = Parse(R"R(
 struct DM { @container(elemName=innerDatum) vector<InnerData> innerData; }
@@ -190,7 +210,8 @@ TEST_F(ClassFieldPluginTest, Set) {
       "Set type std::set used by A.field ({0}:1:11) should have a single template parameter", Source);
   ExpectErrorMessage(
       "struct A {set<vector<u32>> field;}", Run,
-      "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector", Source);
+      "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector",
+      Source);
   ExpectErrorMessage(
       "struct A {set<B> field;} struct B {}", Run,
       "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found B", Source);
@@ -199,7 +220,8 @@ TEST_F(ClassFieldPluginTest, Set) {
 TEST_F(ClassFieldPluginTest, Map) {
   ExpectErrorMessage(
       "struct A {map<string, set<vector<u32>>> field;}", Run,
-      "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector", Source);
+      "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector",
+      Source);
   ExpectErrorMessage(
       "struct A {map field;}", Run,
       "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
@@ -214,7 +236,8 @@ TEST_F(ClassFieldPluginTest, Map) {
       "Container type std::vector used by A.field ({0}:1:11) should have a single template parameter", Source);
   ExpectErrorMessage(
       "struct A {map<vector<u32>, u32> field;}", Run,
-      "Map type std::map used by A.field ({0}:1:11) should have a keyable first template parameter, found std::vector", Source);
+      "Map type std::map used by A.field ({0}:1:11) should have a keyable first template parameter, found std::vector",
+      Source);
 }
 
 TEST_F(ClassFieldPluginTest, InvalidType) {

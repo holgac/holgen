@@ -131,8 +131,6 @@ namespace holgen {
     }
   };
 
-  // Do a sample thing using lua, then figure out how to expose methods (both ways)
-  // CRTP was useful for these when calling derived static methods from the base (when defining lua metaclass)
   // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
   struct Class {
     explicit Class(std::string name, const StructDefinition *_struct) : mStruct(_struct), mName(std::move(name)) {}
@@ -144,7 +142,6 @@ namespace holgen {
     const StructDefinition *mStruct = nullptr;
     const EnumDefinition *mEnum = nullptr;
     std::string mName;
-    // TODO: deque? or list?
     std::list<ClassMethod> mMethods;
     std::list<ClassConstructor> mConstructors;
     std::list<ClassField> mFields;

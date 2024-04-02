@@ -31,7 +31,7 @@ namespace holgen {
     codeBlock.Add("const char* key = lua_tostring(ls, -1);");
     bool isFirst = true;
     for (auto &field: cls.mFields) {
-      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua))
+      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData)
         continue;
       bool isRef = field.mField->mType.mName == "Ref";
       if (isFirst) {
@@ -264,7 +264,7 @@ namespace holgen {
     cls.mMethods.push_back(std::move(method));
   }
 
-  bool LuaPlugin::ShouldEmbedPointer(Class& cls) {
+  bool LuaPlugin::ShouldEmbedPointer(Class &cls) {
     auto managed = cls.mStruct->GetAnnotation(Annotations::Managed);
     if (!managed)
       return true;

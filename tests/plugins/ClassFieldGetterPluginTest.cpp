@@ -80,6 +80,30 @@ struct TestData {
   }
 }
 
+TEST_F(ClassFieldGetterPluginTest, UserData) {
+  auto project = Parse(R"R(
+struct TestData {
+  userdata testFieldUserData;
+  })R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"GetTestFieldUserData", Type{"T", PassByType::Pointer, Constness::Const}, Visibility::Public, Constness::Const};
+    method.mTemplateParameters.emplace_back("typename", "T");
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::Const), method,
+                         "return reinterpret_cast<const T*>(mTestFieldUserData);");
+
+    method.mConstness = Constness::NotConst;
+    method.mReturnType.mConstness = Constness::NotConst;
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::NotConst), method,
+                         "return reinterpret_cast<T*>(mTestFieldUserData);");
+  }
+}
+
 TEST_F(ClassFieldGetterPluginTest, RefWithId) {
   auto project = Parse(R"R(
 struct InnerStruct {

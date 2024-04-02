@@ -1,6 +1,5 @@
 #include "ClassFieldSetterPlugin.h"
 #include "core/St.h"
-#include "../NamingConvention.h"
 
 namespace holgen {
   void ClassFieldSetterPlugin::Run() {
@@ -18,7 +17,13 @@ namespace holgen {
           arg.mType.mType = PassByType::Pointer;
         else
           arg.mType.PreventCopying();
-        method.mBody.Add("{} = val;", field.mName);
+        if (field.mField->mType.mName == St::UserData) {
+          method.mTemplateParameters.emplace_back("typename", "T");
+          arg.mType.mName = "T";
+          method.mBody.Add("{} = reinterpret_cast<void*>(val);", field.mName);
+        } else {
+          method.mBody.Add("{} = val;", field.mName);
+        }
         Validate().NewMethod(cls, method);
         cls.mMethods.push_back(std::move(method));
       }

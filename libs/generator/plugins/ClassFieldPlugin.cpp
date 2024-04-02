@@ -15,15 +15,14 @@ namespace holgen {
             Type{mProject.mProject, fieldDefinition.mType},
             Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
         field.mField = &fieldDefinition;
-        if (fieldDefinition.mType.mName == "Ref" && field.mDefaultValue.empty()) {
+        if (fieldDefinition.mType.mName == St::UserData) {
+          field.mType = Type{"void", PassByType::Pointer};
+          field.mDefaultValue = "nullptr";
+        } else if (fieldDefinition.mType.mName == "Ref" && field.mDefaultValue.empty()) {
           if (field.mType.mType == PassByType::Pointer)
             field.mDefaultValue = "nullptr";
-          else {
-            auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters.back().mName);
-            auto idField = underlyingStruct->GetIdField();
-            if (!idField || TypeInfo::Get().IntegralTypes.contains(Type{mProject.mProject, idField->mType}.mName))
-              field.mDefaultValue = "-1";
-          }
+          else
+            field.mDefaultValue = "-1";
         }
         if (field.mDefaultValue.empty() && fieldDefinition.GetAnnotation(Annotations::Id)) {
           field.mDefaultValue = "-1";

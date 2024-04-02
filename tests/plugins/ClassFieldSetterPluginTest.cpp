@@ -68,6 +68,25 @@ struct TestData {
   ASSERT_EQ(cls->GetMethod("GetTestFieldStruct", Constness::Const), nullptr);
 }
 
+TEST_F(ClassFieldSetterPluginTest, UserData) {
+  auto project = Parse(R"R(
+struct TestData {
+  userdata testFieldUserData;
+  })R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("SetTestFieldUserData", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"SetTestFieldUserData", Type{"void"}, Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("val", Type{"T", PassByType::Pointer});
+    method.mTemplateParameters.emplace_back("typename", "T");
+    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldUserData", Constness::NotConst), method,
+                         "mTestFieldUserData = reinterpret_cast<void*>(val);");
+  }
+}
+
 TEST_F(ClassFieldSetterPluginTest, RefWithId) {
   auto project = Parse(R"R(
 struct InnerStruct {

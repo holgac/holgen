@@ -27,7 +27,9 @@ namespace holgen {
     CodeBlock switchBlock;
     bool isFirst = true;
     for (const auto &field: cls.mFields) {
-      if (!field.mField || field.mField->GetAnnotation(Annotations::NoJson))
+      if (
+          !field.mField || field.mField->GetAnnotation(Annotations::NoJson) ||
+          field.mField->mType.mName == St::UserData)
         continue;
       if (isFirst) {
         switchBlock.Line() << "if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";

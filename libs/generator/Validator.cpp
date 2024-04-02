@@ -155,7 +155,7 @@ namespace holgen {
                type.mName, source, type.mTemplateParameters[0].mName);
       ValidateType(type.mTemplateParameters[1], cls, false, method, source);
     } else if (type.mName == "void") {
-      THROW_IF(!acceptVoid, "Invalid void usage in {}", source);
+      THROW_IF(!acceptVoid && type.mType != PassByType::Pointer, "Invalid void usage in {}", source);
       THROW_IF(type.mType == PassByType::Reference || type.mType == PassByType::MoveReference,
                "Void cannot be passed by reference in {}", source);
       THROW_IF(type.mTemplateParameters.size() > 0, "Void cannot have template parameters in {}", source);

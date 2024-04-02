@@ -48,7 +48,14 @@ namespace holgen {
     method.mReturnType.PreventCopying(isConst);
     if (field.mType.mType == PassByType::Pointer)
       method.mReturnType.mType = PassByType::Pointer;
-    method.mBody.Add("return {};", field.mName);
+
+    if (field.mField->mType.mName == St::UserData) {
+      method.mTemplateParameters.emplace_back("typename", "T");
+      method.mReturnType.mName = "T";
+      method.mBody.Add("return reinterpret_cast<{}T*>({});", isConst ? "const " : "", field.mName);
+    } else {
+      method.mBody.Add("return {};", field.mName);
+    }
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
