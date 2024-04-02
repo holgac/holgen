@@ -12,7 +12,6 @@ public:
   static void SetInstance(T* ptr) {
     mInstance = ptr;
   }
-protected:
 private:
   inline static T* mInstance = nullptr;
 };

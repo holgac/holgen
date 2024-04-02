@@ -92,8 +92,6 @@ public:
     }
     return true;
   }
-protected:
-private:
 };
 template <>
 bool JsonHelper::Parse(int8_t& out, const rapidjson::Value& json, const Converter& converter);

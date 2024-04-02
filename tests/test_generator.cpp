@@ -80,7 +80,6 @@ public:
   float GetGender() const;
   void SetAge(uint32_t val);
   void SetGender(float val);
-protected:
 private:
   uint32_t mAge = 0;
   float mGender;
@@ -161,7 +160,6 @@ public:
   void SetInstruments(const std::vector<std::string>& val);
   void SetPrices(const std::map<std::string, double>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-protected:
 private:
   std::vector<std::string> mInstruments;
   std::map<std::string, double> mPrices;
@@ -269,7 +267,6 @@ public:
   void SetName(const std::string& val);
   void SetVolume(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-protected:
 private:
   std::string mName;
   uint32_t mVolume;
@@ -351,7 +348,6 @@ public:
   std::vector<Sound>& GetSounds();
   void SetSounds(const std::vector<Sound>& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-protected:
 private:
   std::vector<Sound> mSounds;
 };
@@ -458,7 +454,6 @@ public:
   void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-protected:
 private:
   uint32_t mCurrentCountry;
   uint32_t mCurrentCity;
@@ -565,7 +560,6 @@ public:
   void SetName(const std::string& val);
   void SetLeader(const Person& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-protected:
 private:
   std::string mName;
   Person mLeader;
@@ -678,7 +672,6 @@ public:
   void SetName(const std::string& val);
   void SetPartnerId(uint32_t val);
   static Person* Get(uint32_t id);
-protected:
 private:
   uint32_t mId = -1;
   std::string mName;

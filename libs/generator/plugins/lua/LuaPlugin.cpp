@@ -19,6 +19,7 @@ namespace holgen {
   }
 
   void LuaPlugin::GeneratePushIndexMetaMethod(Class &cls) {
+    // TODO: use static private function for these
     auto method = ClassMethod{"PushIndexMetaMethod", Type{"void"},
                               Visibility::Private, Constness::NotConst, Staticness::Static};
     auto &codeBlock = method.mBody;

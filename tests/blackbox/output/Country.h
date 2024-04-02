@@ -27,7 +27,6 @@ public:
   void PushGlobalToLua(lua_State* luaState, const char* name) const;
   static Country* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
-protected:
 private:
   static void PushIndexMetaMethod(lua_State* luaState);
   static void PushNewIndexMetaMethod(lua_State* luaState);

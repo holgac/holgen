@@ -100,7 +100,5 @@ public:
     return false;
   }
   static void CreateMetatables(lua_State* luaState);
-protected:
-private:
 };
 }

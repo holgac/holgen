@@ -103,24 +103,28 @@ namespace holgen {
   }
 
   void CodeGenerator::GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
-    switch (visibility) {
-      case Visibility::Public:
-        codeBlock.Line() << "public:";
-        break;
-      case Visibility::Protected:
-        codeBlock.Line() << "protected:";
-        break;
-      case Visibility::Private:
-        codeBlock.Line() << "private:";
-        break;
-    }
-    codeBlock.Indent(1);
+    CodeBlock codeBlockForVisibility;
     if (visibility == Visibility::Public)
-      GenerateUsingsForHeader(codeBlock, cls);
-    GenerateConstructorsForHeader(codeBlock, cls, visibility, true);
-    GenerateMethodsForHeader(codeBlock, cls, visibility, true);
-    GenerateFieldDeclarations(codeBlock, cls, visibility);
-    codeBlock.Indent(-1);
+      GenerateUsingsForHeader(codeBlockForVisibility, cls);
+    GenerateConstructorsForHeader(codeBlockForVisibility, cls, visibility, true);
+    GenerateMethodsForHeader(codeBlockForVisibility, cls, visibility, true);
+    GenerateFieldDeclarations(codeBlockForVisibility, cls, visibility);
+    if (!codeBlockForVisibility.mContents.empty()) {
+      switch (visibility) {
+        case Visibility::Public:
+          codeBlock.Line() << "public:";
+          break;
+        case Visibility::Protected:
+          codeBlock.Line() << "protected:";
+          break;
+        case Visibility::Private:
+          codeBlock.Line() << "private:";
+              break;
+      }
+      codeBlock.Indent(1);
+      codeBlock.Add(std::move(codeBlockForVisibility));
+      codeBlock.Indent(-1);
+    }
   }
 
   void CodeGenerator::GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {

@@ -34,7 +34,6 @@ public:
   inline static constexpr const UnderlyingType Entry2Value = 1;
   static const TestEnum Entry2;
   inline static constexpr const UnderlyingType Invalid = 2;
-protected:
 private:
   UnderlyingType mValue;
 };
