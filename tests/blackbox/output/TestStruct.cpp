@@ -34,13 +34,13 @@ bool TestStruct::ParseJson(const rapidjson::Value& json, const Converter& conver
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "testFieldBool")) {
       auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestStruct.testFieldBool field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldBool field");
     } else if (0 == strcmp(name, "testFieldUnsigned")) {
       auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestStruct.testFieldUnsigned field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldUnsigned field");
     } else if (0 == strcmp(name, "testFieldString")) {
       auto res = JsonHelper::Parse(mTestFieldString, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestStruct.testFieldString field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldString field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestStruct: {}", name);
     }

@@ -5,6 +5,34 @@
 #include "core/St.h"
 
 namespace holgen {
+  namespace {
+    // To represent structs with a single (non-id) field in json,
+    // we might want to just use that field instead of a json object.
+    // This only works when the field type is primitive or string
+    ClassField *GetSingleBasicField(Class &cls) {
+      ClassField *singleField = nullptr;
+      ClassField *idField = nullptr;
+      for (auto &field: cls.mFields) {
+        if (!field.mField)
+          continue;
+        if (field.mField->GetAnnotation(Annotations::Id)) {
+          idField = &field;
+          continue;
+        }
+        if (singleField)
+          return nullptr;
+        singleField = &field;
+      }
+      if (singleField) {
+        if (TypeInfo::Get().CppBasicTypes.contains(singleField->mType.mName))
+          return singleField;
+        return nullptr;
+      }
+      // id field is always basic
+      return idField;
+    }
+  }
+
   void JsonPlugin::Run() {
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct)
@@ -38,7 +66,7 @@ namespace holgen {
         switchBlock.Line() << "} else if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
       }
       switchBlock.Indent(1); // if name == fieldName
-      GenerateParseJsonForField(cls, switchBlock, field);
+      GenerateParseJsonForField(cls, switchBlock, field, "data.value");
       switchBlock.Indent(-1); // if name == fieldName
     }
 
@@ -58,9 +86,15 @@ namespace holgen {
     }
 
     if (!switchBlock.mContents.empty()) {
-      method.mBody.Add(
-          R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing {}");)R",
-          cls.mName);
+      auto singleField = GetSingleBasicField(cls);
+      if (singleField) {
+        method.mBody.Add("if (json.IsObject()) {{");
+        method.mBody.Indent(1);
+      } else {
+        method.mBody.Add(
+            R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing {}");)R",
+            cls.mName);
+      }
 
       method.mBody.Add("for(const auto& data: json.GetObject()) {{");
       method.mBody.Indent(1);
@@ -73,13 +107,21 @@ namespace holgen {
       method.mBody.Line() << "}";
       method.mBody.Indent(-1);
       method.mBody.Line() << "}"; // range based for on json.GetObject()
+      if (singleField) {
+        method.mBody.Indent(-1);
+        method.mBody.Add("}} else {{");
+        method.mBody.Indent(1);
+        GenerateParseJsonForField(cls, method.mBody, *singleField, "json");
+        method.mBody.Indent(-1);
+        method.mBody.Add("}}"); // else
+      }
     }
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
 
-  void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, const ClassField &field) {
+  void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName) {
     if (mProject.GetClass(field.mType.mName) == nullptr) {
       auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
       if (jsonConvert != nullptr) {
@@ -87,24 +129,24 @@ namespace holgen {
         auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
         Type type(mProject.mProject, jsonConvertFrom->mValue);
         codeBlock.Line() << type.ToString() << " temp;";
-        codeBlock.Add("auto res = {}::{}(temp, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse);
-        codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{} field");)R",
+        codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse, varName);
+        codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                       cls.mStruct->mName, field.mField->mName);
         if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) || field.mType.mType == PassByType::Pointer)
           codeBlock.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
         else
           codeBlock.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);
       } else {
-        codeBlock.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                      field.mName);
-        codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{} field");)R",
+        codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                      field.mName, varName);
+        codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                       cls.mStruct->mName, field.mField->mName);
       }
     } else {
       // TODO: this case is not necessary - JsonHelper::ParseJson handles this
       codeBlock.Add("auto res = {}.{}(data.value, converter);",
                     field.mName, St::ParseJson);
-      codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{} field");)R",
+      codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                     cls.mStruct->mName, field.mField->mName);
     }
   }
@@ -156,7 +198,7 @@ namespace holgen {
     codeBlock.Add("auto res = {}::{}({}, data.value, converter);",
                   St::JsonHelper, St::JsonHelper_Parse,
                   Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction));
-    codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse {}.{}");)R",
+    codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{}");)R",
                   cls.mStruct->mName, luaFunction.mFunction->mName);
   }
 }

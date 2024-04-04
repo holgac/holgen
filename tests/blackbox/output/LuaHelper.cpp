@@ -22,6 +22,9 @@
 #include "TestContainerMap.h"
 #include "TestContainerSet.h"
 #include "TestStruct.h"
+#include "TestStructSingleElem.h"
+#include "TestStructSingleElemWithId.h"
+#include "TestStructSingleElemContainer.h"
 
 namespace holgen_blackbox_test {
 void LuaHelper::Push(nullptr_t , lua_State* luaState) {
@@ -157,5 +160,8 @@ void LuaHelper::CreateMetatables(lua_State* luaState) {
   TestContainerMap::CreateLuaMetatable(luaState);
   TestContainerSet::CreateLuaMetatable(luaState);
   TestStruct::CreateLuaMetatable(luaState);
+  TestStructSingleElem::CreateLuaMetatable(luaState);
+  TestStructSingleElemWithId::CreateLuaMetatable(luaState);
+  TestStructSingleElemContainer::CreateLuaMetatable(luaState);
 }
 }

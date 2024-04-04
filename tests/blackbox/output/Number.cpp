@@ -14,15 +14,19 @@ void Number::SetValue(int64_t val) {
   mValue = val;
 }
 bool Number::ParseJson(const rapidjson::Value& json, const Converter& converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Number");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "value")) {
-      auto res = JsonHelper::Parse(mValue, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Number.value field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Number: {}", name);
+  if (json.IsObject()) {
+    for(const auto& data: json.GetObject()) {
+      const auto& name = data.name.GetString();
+      if (0 == strcmp(name, "value")) {
+        auto res = JsonHelper::Parse(mValue, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Number.value field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Number: {}", name);
+      }
     }
+  } else {
+    auto res = JsonHelper::Parse(mValue, json, converter);
+    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Number.value field");
   }
   return true;
 }

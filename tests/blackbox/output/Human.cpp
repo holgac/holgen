@@ -31,18 +31,22 @@ Human* Human::GetFromName(const std::string& key) {
   return GlobalPointer<HumanManager>::GetInstance()->GetHumanFromName(key);
 }
 bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Human");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "id")) {
-      auto res = JsonHelper::Parse(mId, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Human.id field");
-    } else if (0 == strcmp(name, "name")) {
-      auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Human.name field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Human: {}", name);
+  if (json.IsObject()) {
+    for(const auto& data: json.GetObject()) {
+      const auto& name = data.name.GetString();
+      if (0 == strcmp(name, "id")) {
+        auto res = JsonHelper::Parse(mId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.id field");
+      } else if (0 == strcmp(name, "name")) {
+        auto res = JsonHelper::Parse(mName, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.name field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Human: {}", name);
+      }
     }
+  } else {
+    auto res = JsonHelper::Parse(mName, json, converter);
+    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.name field");
   }
   return true;
 }

@@ -28,10 +28,10 @@ bool DamageMultiplier::ParseJson(const rapidjson::Value& json, const Converter& 
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "when")) {
       auto res = JsonHelper::Parse(mWhen, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse DamageMultiplier.when field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.when field");
     } else if (0 == strcmp(name, "value")) {
       auto res = JsonHelper::Parse(mValue, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse DamageMultiplier.value field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.value field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing DamageMultiplier: {}", name);
     }

@@ -45,13 +45,13 @@ bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "id")) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Boot.id field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.id field");
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Boot.name field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.name field");
     } else if (0 == strcmp(name, "color")) {
       auto res = JsonHelper::Parse(mColor, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Boot.color field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.color field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing Boot: {}", name);
     }

@@ -64,10 +64,10 @@ bool TestContainerSet::ParseJson(const rapidjson::Value& json, const Converter& 
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "stringContainer")) {
       auto res = JsonHelper::Parse(mStringContainer, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestContainerSet.stringContainer field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.stringContainer field");
     } else if (0 == strcmp(name, "unsignedContainer")) {
       auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestContainerSet.unsignedContainer field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.unsignedContainer field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestContainerSet: {}", name);
     }

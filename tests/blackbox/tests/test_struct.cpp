@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 #include "TestStruct.h"
+#include "TestStructSingleElemContainer.h"
 #include "JsonHelper.h"
 
 using namespace holgen_blackbox_test;
@@ -37,4 +38,38 @@ TEST_F(StructTest, UserData) {
   EXPECT_TRUE(testStruct.GetTestFieldUserdata<std::string>()->empty());
   s = "value";
   EXPECT_EQ(*testStruct.GetTestFieldUserdata<std::string>(), "value");
+}
+
+TEST_F(StructTest, SingleElem) {
+  rapidjson::Document doc;
+  doc.Parse(R"R(
+{
+  "singleElemStructs": [
+    {"name": "elem1"},
+    "elem2"
+  ]
+}
+)R");
+  TestStructSingleElemContainer container;
+  container.ParseJson(doc, {});
+  ASSERT_EQ(container.GetSingleElemStructCount(), 2);
+  EXPECT_EQ(container.GetSingleElemStruct(0)->GetName(), "elem1");
+  EXPECT_EQ(container.GetSingleElemStruct(1)->GetName(), "elem2");
+}
+
+TEST_F(StructTest, SingleElemWithId) {
+  rapidjson::Document doc;
+  doc.Parse(R"R(
+{
+  "singleElemStructsWithId": [
+    {"name": "elem1"},
+    "elem2"
+  ]
+}
+  )R");
+  TestStructSingleElemContainer container;
+  container.ParseJson(doc, {});
+  ASSERT_EQ(container.GetSingleElemStructWithIdCount(), 2);
+  EXPECT_EQ(container.GetSingleElemStructWithId(0)->GetName(), "elem1");
+  EXPECT_EQ(container.GetSingleElemStructWithId(1)->GetName(), "elem2");
 }

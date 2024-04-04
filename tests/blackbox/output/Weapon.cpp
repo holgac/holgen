@@ -43,16 +43,16 @@ bool Weapon::ParseJson(const rapidjson::Value& json, const Converter& converter)
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "damageMin")) {
       auto res = JsonHelper::Parse(mDamageMin, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Weapon.damageMin field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMin field");
     } else if (0 == strcmp(name, "damageMax")) {
       auto res = JsonHelper::Parse(mDamageMax, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Weapon.damageMax field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMax field");
     } else if (0 == strcmp(name, "damageMultipliers")) {
       auto res = JsonHelper::Parse(mDamageMultipliers, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Weapon.damageMultipliers field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMultipliers field");
     } else if (0 == strcmp(name, "modifiers")) {
       auto res = JsonHelper::Parse(mModifiers, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Weapon.modifiers field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.modifiers field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing Weapon: {}", name);
     }

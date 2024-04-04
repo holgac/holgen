@@ -14,7 +14,8 @@ namespace holgen {
     void ProcessStruct(Class &cls);
     void ProcessEnum(Class &cls);
     void GenerateParseJson(Class &cls);
-    void GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, const ClassField &field);
+    void GenerateParseJsonForField(
+        Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName);
     void GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock, const ClassMethod &luaFunction);
   };
 }

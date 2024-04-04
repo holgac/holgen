@@ -83,7 +83,7 @@ bool TestContainerMap::ParseJson(const rapidjson::Value& json, const Converter& 
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "innerStructsWithId")) {
       auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse TestContainerMap.innerStructsWithId field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerMap.innerStructsWithId field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestContainerMap: {}", name);
     }

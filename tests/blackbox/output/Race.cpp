@@ -46,16 +46,16 @@ bool Race::ParseJson(const rapidjson::Value& json, const Converter& converter) {
     const auto& name = data.name.GetString();
     if (0 == strcmp(name, "id")) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.id field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.id field");
     } else if (0 == strcmp(name, "name")) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.name field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.name field");
     } else if (0 == strcmp(name, "hairColors")) {
       auto res = JsonHelper::Parse(mHairColors, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.hairColors field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.hairColors field");
     } else if (0 == strcmp(name, "names")) {
       auto res = JsonHelper::Parse(mNames, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Could not json-parse Race.names field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.names field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing Race: {}", name);
     }
