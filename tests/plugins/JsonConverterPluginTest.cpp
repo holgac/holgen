@@ -102,6 +102,34 @@ struct TestData2 {
   }
 }
 
+TEST_F(JsonConverterPluginTest, ElemConverter) {
+  auto project = Parse(R"R(
+struct TestContainer {
+  @jsonConvert(elem, from=string, using=testDataConverter)
+  vector<Ref<TestData>> testData;
+}
+struct TestData {
+  @id
+  u32 id;
+  @jsonConvert(from=string, using=testDataConverter)
+  Ref<TestData> testFieldRef;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("Converter");
+  ASSERT_NE(cls, nullptr);
+  ASSERT_EQ(cls->mFields.size(), 1);
+
+  EXPECT_NE(cls->GetField("testDataConverter"), nullptr);
+  {
+    auto field = ClassField{"testDataConverter", Type{"std::function"}, Visibility::Public};
+    field.mType.mFunctionalTemplateParameters.emplace_back(Type{"uint32_t"});
+    field.mType.mFunctionalTemplateParameters.emplace_back(
+        Type{"std::string", PassByType::Reference, Constness::Const});
+    helpers::ExpectEqual(*cls->GetField("testDataConverter"), field);
+  }
+}
+
 TEST_F(JsonConverterPluginTest, InconsistentSourceTypeInConverter) {
   ExpectErrorMessage(
       R"R(

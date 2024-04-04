@@ -10,6 +10,7 @@
 namespace holgen_blackbox_test {
 class Converter {
 public:
+  std::function<uint64_t(const std::string&)> testJsonConvertTag;
   std::function<uint32_t(const std::string&)> raceNameToId;
   std::function<uint32_t(const std::string&)> countryNameToId;
   std::function<uint32_t(const std::string&)> cityNameToId;

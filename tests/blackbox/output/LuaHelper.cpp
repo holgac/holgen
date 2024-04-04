@@ -2,6 +2,9 @@
 #include "LuaHelper.h"
 
 #include "TestEnumStruct.h"
+#include "TestJsonTag.h"
+#include "TestJsonTagManager.h"
+#include "TestJsonStructWithTags.h"
 #include "Race.h"
 #include "Person.h"
 #include "RaceId.h"
@@ -140,6 +143,9 @@ bool LuaHelper::Read(uint8_t& data, lua_State* luaState, int32_t luaIndex) {
 }
 void LuaHelper::CreateMetatables(lua_State* luaState) {
   TestEnumStruct::CreateLuaMetatable(luaState);
+  TestJsonTag::CreateLuaMetatable(luaState);
+  TestJsonTagManager::CreateLuaMetatable(luaState);
+  TestJsonStructWithTags::CreateLuaMetatable(luaState);
   Race::CreateLuaMetatable(luaState);
   Person::CreateLuaMetatable(luaState);
   RaceId::CreateLuaMetatable(luaState);

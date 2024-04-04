@@ -150,7 +150,7 @@ namespace holgen {
                "Map type {} used by {} cannot have functional template arguments",
                type.mName, source);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName) &&
-                   !isTemplateParameter(type.mTemplateParameters[0].mName),
+               !isTemplateParameter(type.mTemplateParameters[0].mName),
                "Map type {} used by {} should have a keyable first template parameter, found {}",
                type.mName, source, type.mTemplateParameters[0].mName);
       ValidateType(type.mTemplateParameters[1], cls, false, method, source);
@@ -345,7 +345,7 @@ namespace holgen {
       const Class &mClass;
       const ClassField &mField;
       const TypeDefinition &mFromType;
-      const TypeDefinition &mToType;
+      const TypeDefinition *mToType;
     };
   }
 
@@ -362,7 +362,10 @@ namespace holgen {
         ValidateAttributeCount(*converter, Annotations::JsonConvert_From, ToString(cls, field));
         ValidateAttributeCount(*converter, Annotations::JsonConvert_Using, ToString(cls, field));
         auto cs = ConverterSpec{cls, field, converter->GetAttribute(Annotations::JsonConvert_From)->mValue,
-                                field.mField->mType};
+                                &field.mField->mType};
+        auto convertElem = converter->GetAttribute(Annotations::JsonConvert_Elem);
+        if (convertElem)
+          cs.mToType = &field.mField->mType.mTemplateParameters.back();
         auto key = converter->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName;
         auto[it, res] = converters.try_emplace(key, cs);
         if (!res) {
@@ -371,11 +374,11 @@ namespace holgen {
                    key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
                    Type{mProject.mProject, it->second.mFromType}.ToString(),
                    Type{mProject.mProject, cs.mFromType}.ToString());
-          THROW_IF(cs.mToType != it->second.mToType,
+          THROW_IF(*cs.mToType != *it->second.mToType,
                    "Json converter {} is used by {} and {} with different target types: {} and {}",
                    key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
-                   Type{mProject.mProject, it->second.mToType}.ToString(),
-                   Type{mProject.mProject, cs.mToType}.ToString());
+                   Type{mProject.mProject, *it->second.mToType}.ToString(),
+                   Type{mProject.mProject, *cs.mToType}.ToString());
         }
       }
     }
@@ -400,7 +403,7 @@ namespace holgen {
         auto indexField = underlyingClass->GetField(mNaming.FieldNameInCpp(*indexFieldDefinition));
         auto underlyingIdField = underlyingClass->mStruct->GetIdField();
         auto existingFromTypeName = Type{mProject.mProject, it->second.mFromType}.ToString();
-        auto existingToTypeName = Type{mProject.mProject, it->second.mToType}.ToString();
+        auto existingToTypeName = Type{mProject.mProject, *it->second.mToType}.ToString();
         auto fromTypeName = indexField->mType.ToString();
         std::string toTypeName = "size_t";
         if (underlyingIdField)

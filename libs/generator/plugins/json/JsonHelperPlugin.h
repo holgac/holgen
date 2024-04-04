@@ -12,8 +12,8 @@ namespace holgen {
     using TranslatorPlugin::TranslatorPlugin;
     void Run() override;
   private:
-    void GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container);
-    void GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container);
+    void GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container, bool withConverter);
+    void GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container, bool withConverter);
     void GenerateBaseParse(Class &cls);
     void GenerateParseSingleElem(Class &cls);
     void GenerateParseSingleElem(

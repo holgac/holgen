@@ -15,6 +15,7 @@ namespace holgen {
           continue;
         auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
+        auto jsonConvertElem = jsonConvert->GetAttribute(Annotations::JsonConvert_Elem);
         if (processedConverters.contains(jsonConvertUsing->mValue.mName))
           continue;
         processedConverters.insert(jsonConvertUsing->mValue.mName);
@@ -24,7 +25,12 @@ namespace holgen {
         auto fieldNameInCpp = Naming().FieldNameInCpp(fieldDefinition);
         auto referencedClass = mProject.GetClass(structDefinition.mName);
 
-        field.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);
+        if (jsonConvertElem) {
+          field.mType.mFunctionalTemplateParameters.emplace_back(
+              referencedClass->GetField(fieldNameInCpp)->mType.mTemplateParameters.back());
+        } else {
+          field.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);
+        }
         field.mType.mFunctionalTemplateParameters.emplace_back(mProject.mProject, jsonConvertFrom->mValue);
         field.mType.mFunctionalTemplateParameters.back().PreventCopying();
         Validate().NewField(cls, field);

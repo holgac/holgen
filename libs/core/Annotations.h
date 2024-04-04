@@ -22,6 +22,7 @@ namespace holgen {
     inline static const std::string JsonConvert = "jsonConvert";
     inline static const std::string JsonConvert_From = "from";
     inline static const std::string JsonConvert_Using = "using";
+    inline static const std::string JsonConvert_Elem = "elem";
 
     /*
      * Disables lua integration for the specified data type.
