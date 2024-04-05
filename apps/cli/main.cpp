@@ -1,6 +1,7 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <queue>
 #include "core/Exception.h"
 #include "tokenizer/Tokenizer.h"
 #include "parser/Parser.h"
@@ -26,18 +27,29 @@ int run(int argc, char **argv) {
     return -1;
   }
   holgen::Parser parser;
-  for (auto &entry: std::filesystem::directory_iterator(std::filesystem::path(argv[1]))) {
-    if (!std::filesystem::is_regular_file(entry) || entry.path().extension() != ".hsc") {
-      continue;
+  std::queue<std::filesystem::path> pathsQueue;
+  pathsQueue.push(argv[1]);
+
+  while(!pathsQueue.empty()) {
+    auto& curPath = pathsQueue.front();
+    for (auto &entry: std::filesystem::directory_iterator(std::filesystem::path(curPath))) {
+      if (std::filesystem::is_directory(entry)) {
+        pathsQueue.push(entry.path());
+        continue;
+      }
+      if (!std::filesystem::is_regular_file(entry) || entry.path().extension() != ".hsc") {
+        continue;
+      }
+      auto contents = ReadFile(entry.path());
+      holgen::Tokenizer tokenizer(contents, entry.path().string());
+      try {
+        parser.Parse(tokenizer);
+      } catch (holgen::Exception &exc) {
+        std::cerr << "In file " << entry.path() << std::endl;
+        throw;
+      }
     }
-    auto contents = ReadFile(entry.path());
-    holgen::Tokenizer tokenizer(contents, entry.path().string());
-    try {
-      parser.Parse(tokenizer);
-    } catch (holgen::Exception &exc) {
-      std::cerr << "In file " << entry.path() << std::endl;
-      throw;
-    }
+    pathsQueue.pop();
   }
   holgen::Translator translator(parser.GetProject());
   auto project = translator.Translate();
