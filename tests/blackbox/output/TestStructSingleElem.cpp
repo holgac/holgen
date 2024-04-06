@@ -10,12 +10,15 @@ namespace holgen_blackbox_test {
 const std::string& TestStructSingleElem::GetName() const {
   return mName;
 }
+
 std::string& TestStructSingleElem::GetName() {
   return mName;
 }
+
 void TestStructSingleElem::SetName(const std::string& val) {
   mName = val;
 }
+
 bool TestStructSingleElem::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
@@ -33,6 +36,7 @@ bool TestStructSingleElem::ParseJson(const rapidjson::Value& json, const Convert
   }
   return true;
 }
+
 void TestStructSingleElem::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -41,10 +45,12 @@ void TestStructSingleElem::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestStructSingleElemMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestStructSingleElem::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestStructSingleElem* TestStructSingleElem::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -52,6 +58,7 @@ TestStructSingleElem* TestStructSingleElem::ReadFromLua(lua_State* luaState, int
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestStructSingleElem::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestStructSingleElem::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -63,6 +70,7 @@ int TestStructSingleElem::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestStructSingleElem::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestStructSingleElem::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -73,6 +81,7 @@ int TestStructSingleElem::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestStructSingleElem::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

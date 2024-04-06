@@ -10,24 +10,29 @@ namespace holgen_blackbox_test {
 const std::map<uint32_t, TestContainerInnerStructWithId>& TestContainerMap::GetInnerStructsWithId() const {
   return mInnerStructsWithId;
 }
+
 std::map<uint32_t, TestContainerInnerStructWithId>& TestContainerMap::GetInnerStructsWithId() {
   return mInnerStructsWithId;
 }
+
 void TestContainerMap::SetInnerStructsWithId(const std::map<uint32_t, TestContainerInnerStructWithId>& val) {
   mInnerStructsWithId = val;
 }
+
 const TestContainerInnerStructWithId* TestContainerMap::GetInnerStructWithIdFromName(const std::string& key) const {
   auto it = mInnerStructsWithIdNameIndex.find(key);
   if (it == mInnerStructsWithIdNameIndex.end())
     return nullptr;
   return &mInnerStructsWithId.at(it->second);
 }
+
 TestContainerInnerStructWithId* TestContainerMap::GetInnerStructWithIdFromName(const std::string& key) {
   auto it = mInnerStructsWithIdNameIndex.find(key);
   if (it == mInnerStructsWithIdNameIndex.end())
     return nullptr;
   return &mInnerStructsWithId.at(it->second);
 }
+
 TestContainerInnerStructWithId* TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
@@ -41,6 +46,7 @@ TestContainerInnerStructWithId* TestContainerMap::AddInnerStructWithId(TestConta
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
   return &(it->second);
 }
+
 TestContainerInnerStructWithId* TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
@@ -54,29 +60,35 @@ TestContainerInnerStructWithId* TestContainerMap::AddInnerStructWithId(TestConta
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
   return &(it->second);
 }
+
 const TestContainerInnerStructWithId* TestContainerMap::GetInnerStructWithId(uint32_t idx) const {
   auto it = mInnerStructsWithId.find(idx);
   if (it == mInnerStructsWithId.end())
     return nullptr;
   return &it->second;
 }
+
 TestContainerInnerStructWithId* TestContainerMap::GetInnerStructWithId(uint32_t idx) {
   auto it = mInnerStructsWithId.find(idx);
   if (it == mInnerStructsWithId.end())
     return nullptr;
   return &it->second;
 }
+
 bool TestContainerMap::HasInnerStructWithId(uint32_t key) const {
   return mInnerStructsWithId.contains(key);
 }
+
 void TestContainerMap::DeleteInnerStructWithId(uint32_t key) {
   auto ptr = GetInnerStructWithId(key);
   mInnerStructsWithIdNameIndex.erase(ptr->GetName());
   mInnerStructsWithId.erase(key);
 }
+
 size_t TestContainerMap::GetInnerStructWithIdCount() const {
   return mInnerStructsWithId.size();
 }
+
 bool TestContainerMap::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerMap");
   for(const auto& data: json.GetObject()) {
@@ -90,6 +102,7 @@ bool TestContainerMap::ParseJson(const rapidjson::Value& json, const Converter& 
   }
   return true;
 }
+
 void TestContainerMap::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -98,10 +111,12 @@ void TestContainerMap::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestContainerMapMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestContainerMap::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestContainerMap* TestContainerMap::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -109,6 +124,7 @@ TestContainerMap* TestContainerMap::ReadFromLua(lua_State* luaState, int32_t idx
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestContainerMap::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerMap::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -162,6 +178,7 @@ int TestContainerMap::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestContainerMap::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerMap::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -172,6 +189,7 @@ int TestContainerMap::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestContainerMap::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

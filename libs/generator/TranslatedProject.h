@@ -168,7 +168,6 @@ namespace holgen {
     const ProjectDefinition &mProject;
     const DependencyGraph mDependencyGraph;
     std::list<Class> mClasses;
-    // TODO: AddClass that checks name colls
     [[nodiscard]] Class *GetClass(const std::string &name);
     [[nodiscard]] const Class *GetClass(const std::string &name) const;
   };

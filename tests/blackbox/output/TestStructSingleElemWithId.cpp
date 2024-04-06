@@ -10,18 +10,23 @@ namespace holgen_blackbox_test {
 uint32_t TestStructSingleElemWithId::GetId() const {
   return mId;
 }
+
 const std::string& TestStructSingleElemWithId::GetName() const {
   return mName;
 }
+
 std::string& TestStructSingleElemWithId::GetName() {
   return mName;
 }
+
 void TestStructSingleElemWithId::SetId(uint32_t val) {
   mId = val;
 }
+
 void TestStructSingleElemWithId::SetName(const std::string& val) {
   mName = val;
 }
+
 bool TestStructSingleElemWithId::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
@@ -42,6 +47,7 @@ bool TestStructSingleElemWithId::ParseJson(const rapidjson::Value& json, const C
   }
   return true;
 }
+
 void TestStructSingleElemWithId::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -50,10 +56,12 @@ void TestStructSingleElemWithId::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestStructSingleElemWithIdMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestStructSingleElemWithId::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestStructSingleElemWithId* TestStructSingleElemWithId::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -61,6 +69,7 @@ TestStructSingleElemWithId* TestStructSingleElemWithId::ReadFromLua(lua_State* l
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestStructSingleElemWithId::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestStructSingleElemWithId::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -74,6 +83,7 @@ int TestStructSingleElemWithId::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestStructSingleElemWithId::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestStructSingleElemWithId::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -86,6 +96,7 @@ int TestStructSingleElemWithId::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestStructSingleElemWithId::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

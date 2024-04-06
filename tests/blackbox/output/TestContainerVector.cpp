@@ -10,51 +10,65 @@ namespace holgen_blackbox_test {
 const std::vector<TestContainerInnerStructWithId>& TestContainerVector::GetInnerStructsWithId() const {
   return mInnerStructsWithId;
 }
+
 std::vector<TestContainerInnerStructWithId>& TestContainerVector::GetInnerStructsWithId() {
   return mInnerStructsWithId;
 }
+
 const std::vector<TestContainerInnerStructNoId>& TestContainerVector::GetInnerStructsNoId() const {
   return mInnerStructsNoId;
 }
+
 std::vector<TestContainerInnerStructNoId>& TestContainerVector::GetInnerStructsNoId() {
   return mInnerStructsNoId;
 }
+
 const std::vector<std::string>& TestContainerVector::GetStringContainer() const {
   return mStringContainer;
 }
+
 std::vector<std::string>& TestContainerVector::GetStringContainer() {
   return mStringContainer;
 }
+
 const std::vector<uint32_t>& TestContainerVector::GetUnsignedContainer() const {
   return mUnsignedContainer;
 }
+
 std::vector<uint32_t>& TestContainerVector::GetUnsignedContainer() {
   return mUnsignedContainer;
 }
+
 void TestContainerVector::SetInnerStructsWithId(const std::vector<TestContainerInnerStructWithId>& val) {
   mInnerStructsWithId = val;
 }
+
 void TestContainerVector::SetInnerStructsNoId(const std::vector<TestContainerInnerStructNoId>& val) {
   mInnerStructsNoId = val;
 }
+
 void TestContainerVector::SetStringContainer(const std::vector<std::string>& val) {
   mStringContainer = val;
 }
+
 void TestContainerVector::SetUnsignedContainer(const std::vector<uint32_t>& val) {
   mUnsignedContainer = val;
 }
+
 const TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithIdFromName(const std::string& key) const {
   auto it = mInnerStructsWithIdNameIndex.find(key);
   if (it == mInnerStructsWithIdNameIndex.end())
     return nullptr;
   return &mInnerStructsWithId[it->second];
 }
+
 TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithIdFromName(const std::string& key) {
   auto it = mInnerStructsWithIdNameIndex.find(key);
   if (it == mInnerStructsWithIdNameIndex.end())
     return nullptr;
   return &mInnerStructsWithId[it->second];
 }
+
 TestContainerInnerStructWithId* TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId&& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
@@ -65,6 +79,7 @@ TestContainerInnerStructWithId* TestContainerVector::AddInnerStructWithId(TestCo
   elem.SetId(newId);
   return &(mInnerStructsWithId.emplace_back(std::forward<TestContainerInnerStructWithId>(elem)));
 }
+
 TestContainerInnerStructWithId* TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId& elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
@@ -75,31 +90,37 @@ TestContainerInnerStructWithId* TestContainerVector::AddInnerStructWithId(TestCo
   elem.SetId(newId);
   return &(mInnerStructsWithId.emplace_back(elem));
 }
+
 const TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithId(uint32_t idx) const {
   if (idx >= mInnerStructsWithId.size())
     return nullptr;
   return &mInnerStructsWithId[idx];
 }
+
 TestContainerInnerStructWithId* TestContainerVector::GetInnerStructWithId(uint32_t idx) {
   if (idx >= mInnerStructsWithId.size())
     return nullptr;
   return &mInnerStructsWithId[idx];
 }
+
 size_t TestContainerVector::GetInnerStructWithIdCount() const {
   return mInnerStructsWithId.size();
 }
+
 const TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoIdFromName(const std::string& key) const {
   auto it = mInnerStructsNoIdNameIndex.find(key);
   if (it == mInnerStructsNoIdNameIndex.end())
     return nullptr;
   return &mInnerStructsNoId[it->second];
 }
+
 TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoIdFromName(const std::string& key) {
   auto it = mInnerStructsNoIdNameIndex.find(key);
   if (it == mInnerStructsNoIdNameIndex.end())
     return nullptr;
   return &mInnerStructsNoId[it->second];
 }
+
 TestContainerInnerStructNoId* TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId&& elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
@@ -109,6 +130,7 @@ TestContainerInnerStructNoId* TestContainerVector::AddInnerStructNoId(TestContai
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
   return &(mInnerStructsNoId.emplace_back(std::forward<TestContainerInnerStructNoId>(elem)));
 }
+
 TestContainerInnerStructNoId* TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId& elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
@@ -118,16 +140,19 @@ TestContainerInnerStructNoId* TestContainerVector::AddInnerStructNoId(const Test
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
   return &(mInnerStructsNoId.emplace_back(elem));
 }
+
 const TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoId(size_t idx) const {
   if (idx >= mInnerStructsNoId.size())
     return nullptr;
   return &mInnerStructsNoId[idx];
 }
+
 TestContainerInnerStructNoId* TestContainerVector::GetInnerStructNoId(size_t idx) {
   if (idx >= mInnerStructsNoId.size())
     return nullptr;
   return &mInnerStructsNoId[idx];
 }
+
 void TestContainerVector::DeleteInnerStructNoId(size_t idx) {
   auto ptr = GetInnerStructNoId(idx);
   mInnerStructsNoIdNameIndex.erase(ptr->GetName());
@@ -137,56 +162,69 @@ void TestContainerVector::DeleteInnerStructNoId(size_t idx) {
   }
   mInnerStructsNoId.pop_back();
 }
+
 size_t TestContainerVector::GetInnerStructNoIdCount() const {
   return mInnerStructsNoId.size();
 }
+
 std::string* TestContainerVector::AddStringElem(std::string&& elem) {
   return &(mStringContainer.emplace_back(std::forward<std::string>(elem)));
 }
+
 std::string* TestContainerVector::AddStringElem(const std::string& elem) {
   return &(mStringContainer.emplace_back(elem));
 }
+
 const std::string* TestContainerVector::GetStringElem(size_t idx) const {
   if (idx >= mStringContainer.size())
     return nullptr;
   return &mStringContainer[idx];
 }
+
 std::string* TestContainerVector::GetStringElem(size_t idx) {
   if (idx >= mStringContainer.size())
     return nullptr;
   return &mStringContainer[idx];
 }
+
 void TestContainerVector::DeleteStringElem(size_t idx) {
   if (idx != mStringContainer.size() - 1) {
     mStringContainer[idx] = std::move(mStringContainer.back());
   }
   mStringContainer.pop_back();
 }
+
 size_t TestContainerVector::GetStringElemCount() const {
   return mStringContainer.size();
 }
+
 uint32_t* TestContainerVector::AddUnsignedElem(uint32_t elem) {
   return &(mUnsignedContainer.emplace_back(elem));
 }
+
 const uint32_t* TestContainerVector::GetUnsignedElem(size_t idx) const {
   if (idx >= mUnsignedContainer.size())
     return nullptr;
   return &mUnsignedContainer[idx];
 }
+
 uint32_t* TestContainerVector::GetUnsignedElem(size_t idx) {
   if (idx >= mUnsignedContainer.size())
     return nullptr;
   return &mUnsignedContainer[idx];
 }
+
 void TestContainerVector::DeleteUnsignedElem(size_t idx) {
   if (idx != mUnsignedContainer.size() - 1) {
     mUnsignedContainer[idx] = std::move(mUnsignedContainer.back());
   }
   mUnsignedContainer.pop_back();
 }
+
 size_t TestContainerVector::GetUnsignedElemCount() const {
   return mUnsignedContainer.size();
 }
+
 bool TestContainerVector::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerVector");
   for(const auto& data: json.GetObject()) {
@@ -209,6 +247,7 @@ bool TestContainerVector::ParseJson(const rapidjson::Value& json, const Converte
   }
   return true;
 }
+
 void TestContainerVector::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -217,10 +256,12 @@ void TestContainerVector::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestContainerVectorMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestContainerVector::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestContainerVector* TestContainerVector::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -228,6 +269,7 @@ TestContainerVector* TestContainerVector::ReadFromLua(lua_State* luaState, int32
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestContainerVector::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerVector::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -351,6 +393,7 @@ int TestContainerVector::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestContainerVector::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerVector::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -367,6 +410,7 @@ int TestContainerVector::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestContainerVector::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

@@ -10,12 +10,15 @@ namespace holgen_blackbox_test {
 const std::vector<uint64_t>& TestJsonStructWithTags::GetTags() const {
   return mTags;
 }
+
 std::vector<uint64_t>& TestJsonStructWithTags::GetTags() {
   return mTags;
 }
+
 void TestJsonStructWithTags::SetTags(const std::vector<uint64_t>& val) {
   mTags = val;
 }
+
 bool TestJsonStructWithTags::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
@@ -33,6 +36,7 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value& json, const Conve
   }
   return true;
 }
+
 void TestJsonStructWithTags::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -41,10 +45,12 @@ void TestJsonStructWithTags::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestJsonStructWithTagsMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestJsonStructWithTags::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestJsonStructWithTags* TestJsonStructWithTags::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -52,6 +58,7 @@ TestJsonStructWithTags* TestJsonStructWithTags::ReadFromLua(lua_State* luaState,
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestJsonStructWithTags::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -63,6 +70,7 @@ int TestJsonStructWithTags::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestJsonStructWithTags::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -73,6 +81,7 @@ int TestJsonStructWithTags::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestJsonStructWithTags::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

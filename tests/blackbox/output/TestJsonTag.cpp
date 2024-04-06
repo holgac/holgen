@@ -12,24 +12,31 @@ namespace holgen_blackbox_test {
 uint64_t TestJsonTag::GetId() const {
   return mId;
 }
+
 const std::string& TestJsonTag::GetName() const {
   return mName;
 }
+
 std::string& TestJsonTag::GetName() {
   return mName;
 }
+
 void TestJsonTag::SetId(uint64_t val) {
   mId = val;
 }
+
 void TestJsonTag::SetName(const std::string& val) {
   mName = val;
 }
+
 TestJsonTag* TestJsonTag::Get(uint64_t id) {
   return GlobalPointer<TestJsonTagManager>::GetInstance()->GetTag(id);
 }
+
 TestJsonTag* TestJsonTag::GetFromName(const std::string& key) {
   return GlobalPointer<TestJsonTagManager>::GetInstance()->GetTagFromName(key);
 }
+
 bool TestJsonTag::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
@@ -50,6 +57,7 @@ bool TestJsonTag::ParseJson(const rapidjson::Value& json, const Converter& conve
   }
   return true;
 }
+
 void TestJsonTag::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   uint64_t id = mId;
@@ -59,10 +67,12 @@ void TestJsonTag::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestJsonTagMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestJsonTag::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestJsonTag* TestJsonTag::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);
@@ -71,6 +81,7 @@ TestJsonTag* TestJsonTag::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestJsonTag::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestJsonTag::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -84,6 +95,7 @@ int TestJsonTag::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestJsonTag::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestJsonTag::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -96,6 +108,7 @@ int TestJsonTag::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestJsonTag::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

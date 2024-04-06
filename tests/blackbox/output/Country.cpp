@@ -10,30 +10,39 @@ namespace holgen_blackbox_test {
 const Person& Country::GetLeader() const {
   return mLeader;
 }
+
 Person& Country::GetLeader() {
   return mLeader;
 }
+
 const std::vector<Person>& Country::GetCitizens() const {
   return mCitizens;
 }
+
 std::vector<Person>& Country::GetCitizens() {
   return mCitizens;
 }
+
 const std::map<uint32_t, uint32_t>& Country::GetPopulation() const {
   return mPopulation;
 }
+
 std::map<uint32_t, uint32_t>& Country::GetPopulation() {
   return mPopulation;
 }
+
 void Country::SetLeader(const Person& val) {
   mLeader = val;
 }
+
 void Country::SetCitizens(const std::vector<Person>& val) {
   mCitizens = val;
 }
+
 void Country::SetPopulation(const std::map<uint32_t, uint32_t>& val) {
   mPopulation = val;
 }
+
 bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Country");
   for(const auto& data: json.GetObject()) {
@@ -55,6 +64,7 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
   }
   return true;
 }
+
 void Country::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -63,10 +73,12 @@ void Country::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "CountryMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Country::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Country* Country::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -74,6 +86,7 @@ Country* Country::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Country::IndexMetaMethod(lua_State* luaState) {
   auto instance = Country::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -89,6 +102,7 @@ int Country::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Country::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Country::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -103,6 +117,7 @@ int Country::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Country::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

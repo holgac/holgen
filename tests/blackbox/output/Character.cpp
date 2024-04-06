@@ -12,48 +12,63 @@ namespace holgen_blackbox_test {
 uint32_t Character::GetId() const {
   return mId;
 }
+
 const std::string& Character::GetName() const {
   return mName;
 }
+
 std::string& Character::GetName() {
   return mName;
 }
+
 uint32_t Character::GetBootId() const {
   return mBootId;
 }
+
 const Boot* Character::GetBoot() const {
   return Boot::Get(mBootId);
 }
+
 Boot* Character::GetBoot() {
   return Boot::Get(mBootId);
 }
+
 uint32_t Character::GetArmorId() const {
   return mArmorId;
 }
+
 const Armor* Character::GetArmor() const {
   return Armor::Get(mArmorId);
 }
+
 Armor* Character::GetArmor() {
   return Armor::Get(mArmorId);
 }
+
 void Character::SetId(uint32_t val) {
   mId = val;
 }
+
 void Character::SetName(const std::string& val) {
   mName = val;
 }
+
 void Character::SetBootId(uint32_t val) {
   mBootId = val;
 }
+
 void Character::SetArmorId(uint32_t val) {
   mArmorId = val;
 }
+
 Character* Character::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetCharacter(id);
 }
+
 Character* Character::GetFromName(const std::string& key) {
   return GlobalPointer<GameData>::GetInstance()->GetCharacterFromName(key);
 }
+
 bool Character::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Character");
   for(const auto& data: json.GetObject()) {
@@ -80,6 +95,7 @@ bool Character::ParseJson(const rapidjson::Value& json, const Converter& convert
   }
   return true;
 }
+
 void Character::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   uint64_t id = mId;
@@ -89,10 +105,12 @@ void Character::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "CharacterMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Character::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Character* Character::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);
@@ -101,6 +119,7 @@ Character* Character::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Character::IndexMetaMethod(lua_State* luaState) {
   auto instance = Character::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -122,6 +141,7 @@ int Character::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Character::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Character::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -138,6 +158,7 @@ int Character::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Character::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

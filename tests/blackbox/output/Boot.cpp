@@ -12,33 +12,43 @@ namespace holgen_blackbox_test {
 uint32_t Boot::GetId() const {
   return mId;
 }
+
 const std::string& Boot::GetName() const {
   return mName;
 }
+
 std::string& Boot::GetName() {
   return mName;
 }
+
 const std::string& Boot::GetColor() const {
   return mColor;
 }
+
 std::string& Boot::GetColor() {
   return mColor;
 }
+
 void Boot::SetId(uint32_t val) {
   mId = val;
 }
+
 void Boot::SetName(const std::string& val) {
   mName = val;
 }
+
 void Boot::SetColor(const std::string& val) {
   mColor = val;
 }
+
 Boot* Boot::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetBoot(id);
 }
+
 Boot* Boot::GetFromName(const std::string& key) {
   return GlobalPointer<GameData>::GetInstance()->GetBootFromName(key);
 }
+
 bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Boot");
   for(const auto& data: json.GetObject()) {
@@ -58,6 +68,7 @@ bool Boot::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   }
   return true;
 }
+
 void Boot::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   uint64_t id = mId;
@@ -67,10 +78,12 @@ void Boot::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "BootMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Boot::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Boot* Boot::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);
@@ -79,6 +92,7 @@ Boot* Boot::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Boot::IndexMetaMethod(lua_State* luaState) {
   auto instance = Boot::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -94,6 +108,7 @@ int Boot::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Boot::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Boot::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -108,6 +123,7 @@ int Boot::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Boot::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

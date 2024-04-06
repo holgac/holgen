@@ -14,42 +14,53 @@ namespace holgen_blackbox_test {
 const std::vector<Boot>& GameData::GetBoots() const {
   return mBoots;
 }
+
 std::vector<Boot>& GameData::GetBoots() {
   return mBoots;
 }
+
 const std::vector<Armor>& GameData::GetArmors() const {
   return mArmors;
 }
+
 std::vector<Armor>& GameData::GetArmors() {
   return mArmors;
 }
+
 const std::vector<Character>& GameData::GetCharacters() const {
   return mCharacters;
 }
+
 std::vector<Character>& GameData::GetCharacters() {
   return mCharacters;
 }
+
 void GameData::SetBoots(const std::vector<Boot>& val) {
   mBoots = val;
 }
+
 void GameData::SetArmors(const std::vector<Armor>& val) {
   mArmors = val;
 }
+
 void GameData::SetCharacters(const std::vector<Character>& val) {
   mCharacters = val;
 }
+
 const Boot* GameData::GetBootFromName(const std::string& key) const {
   auto it = mBootsNameIndex.find(key);
   if (it == mBootsNameIndex.end())
     return nullptr;
   return &mBoots[it->second];
 }
+
 Boot* GameData::GetBootFromName(const std::string& key) {
   auto it = mBootsNameIndex.find(key);
   if (it == mBootsNameIndex.end())
     return nullptr;
   return &mBoots[it->second];
 }
+
 Boot* GameData::AddBoot(Boot&& elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
@@ -60,6 +71,7 @@ Boot* GameData::AddBoot(Boot&& elem) {
   elem.SetId(newId);
   return &(mBoots.emplace_back(std::forward<Boot>(elem)));
 }
+
 Boot* GameData::AddBoot(Boot& elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
@@ -70,43 +82,51 @@ Boot* GameData::AddBoot(Boot& elem) {
   elem.SetId(newId);
   return &(mBoots.emplace_back(elem));
 }
+
 const Boot* GameData::GetBoot(uint32_t idx) const {
   if (idx >= mBoots.size())
     return nullptr;
   return &mBoots[idx];
 }
+
 Boot* GameData::GetBoot(uint32_t idx) {
   if (idx >= mBoots.size())
     return nullptr;
   return &mBoots[idx];
 }
+
 size_t GameData::GetBootCount() const {
   return mBoots.size();
 }
+
 const Armor* GameData::GetArmorFromName(const std::string& key) const {
   auto it = mArmorsNameIndex.find(key);
   if (it == mArmorsNameIndex.end())
     return nullptr;
   return &mArmors[it->second];
 }
+
 Armor* GameData::GetArmorFromName(const std::string& key) {
   auto it = mArmorsNameIndex.find(key);
   if (it == mArmorsNameIndex.end())
     return nullptr;
   return &mArmors[it->second];
 }
+
 const Armor* GameData::GetArmorFromAlternativeName(const std::string& key) const {
   auto it = mArmorsAlternativeNameIndex.find(key);
   if (it == mArmorsAlternativeNameIndex.end())
     return nullptr;
   return &mArmors[it->second];
 }
+
 Armor* GameData::GetArmorFromAlternativeName(const std::string& key) {
   auto it = mArmorsAlternativeNameIndex.find(key);
   if (it == mArmorsAlternativeNameIndex.end())
     return nullptr;
   return &mArmors[it->second];
 }
+
 Armor* GameData::AddArmor(Armor&& elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
@@ -122,6 +142,7 @@ Armor* GameData::AddArmor(Armor&& elem) {
   elem.SetId(newId);
   return &(mArmors.emplace_back(std::forward<Armor>(elem)));
 }
+
 Armor* GameData::AddArmor(Armor& elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
@@ -137,31 +158,37 @@ Armor* GameData::AddArmor(Armor& elem) {
   elem.SetId(newId);
   return &(mArmors.emplace_back(elem));
 }
+
 const Armor* GameData::GetArmor(uint32_t idx) const {
   if (idx >= mArmors.size())
     return nullptr;
   return &mArmors[idx];
 }
+
 Armor* GameData::GetArmor(uint32_t idx) {
   if (idx >= mArmors.size())
     return nullptr;
   return &mArmors[idx];
 }
+
 size_t GameData::GetArmorCount() const {
   return mArmors.size();
 }
+
 const Character* GameData::GetCharacterFromName(const std::string& key) const {
   auto it = mCharactersNameIndex.find(key);
   if (it == mCharactersNameIndex.end())
     return nullptr;
   return &mCharacters[it->second];
 }
+
 Character* GameData::GetCharacterFromName(const std::string& key) {
   auto it = mCharactersNameIndex.find(key);
   if (it == mCharactersNameIndex.end())
     return nullptr;
   return &mCharacters[it->second];
 }
+
 Character* GameData::AddCharacter(Character&& elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Character with name={} already exists", elem.GetName());
@@ -172,6 +199,7 @@ Character* GameData::AddCharacter(Character&& elem) {
   elem.SetId(newId);
   return &(mCharacters.emplace_back(std::forward<Character>(elem)));
 }
+
 Character* GameData::AddCharacter(Character& elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Character with name={} already exists", elem.GetName());
@@ -182,19 +210,23 @@ Character* GameData::AddCharacter(Character& elem) {
   elem.SetId(newId);
   return &(mCharacters.emplace_back(elem));
 }
+
 const Character* GameData::GetCharacter(uint32_t idx) const {
   if (idx >= mCharacters.size())
     return nullptr;
   return &mCharacters[idx];
 }
+
 Character* GameData::GetCharacter(uint32_t idx) {
   if (idx >= mCharacters.size())
     return nullptr;
   return &mCharacters[idx];
 }
+
 size_t GameData::GetCharacterCount() const {
   return mCharacters.size();
 }
+
 bool GameData::ParseFiles(const std::string& rootPath, const Converter& converterArg) {
   auto converter = converterArg;
   if (converter.bootNameToId == nullptr) {
@@ -277,6 +309,7 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
   }
   return true;
 }
+
 void GameData::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -285,10 +318,12 @@ void GameData::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "GameDataMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void GameData::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 GameData* GameData::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -296,6 +331,7 @@ GameData* GameData::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int GameData::IndexMetaMethod(lua_State* luaState) {
   auto instance = GameData::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -395,6 +431,7 @@ int GameData::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int GameData::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = GameData::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -409,6 +446,7 @@ int GameData::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void GameData::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

@@ -10,24 +10,31 @@ namespace holgen_blackbox_test {
 bool TestStruct::GetTestFieldBool() const {
   return mTestFieldBool;
 }
+
 uint32_t TestStruct::GetTestFieldUnsigned() const {
   return mTestFieldUnsigned;
 }
+
 const std::string& TestStruct::GetTestFieldString() const {
   return mTestFieldString;
 }
+
 std::string& TestStruct::GetTestFieldString() {
   return mTestFieldString;
 }
+
 void TestStruct::SetTestFieldBool(bool val) {
   mTestFieldBool = val;
 }
+
 void TestStruct::SetTestFieldUnsigned(uint32_t val) {
   mTestFieldUnsigned = val;
 }
+
 void TestStruct::SetTestFieldString(const std::string& val) {
   mTestFieldString = val;
 }
+
 bool TestStruct::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStruct");
   for(const auto& data: json.GetObject()) {
@@ -47,6 +54,7 @@ bool TestStruct::ParseJson(const rapidjson::Value& json, const Converter& conver
   }
   return true;
 }
+
 void TestStruct::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -55,10 +63,12 @@ void TestStruct::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestStructMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestStruct::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestStruct* TestStruct::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -66,6 +76,7 @@ TestStruct* TestStruct::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestStruct::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestStruct::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -81,6 +92,7 @@ int TestStruct::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestStruct::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestStruct::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -95,6 +107,7 @@ int TestStruct::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestStruct::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

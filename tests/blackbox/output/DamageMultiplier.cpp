@@ -10,18 +10,23 @@ namespace holgen_blackbox_test {
 const std::string& DamageMultiplier::GetWhen() const {
   return mWhen;
 }
+
 std::string& DamageMultiplier::GetWhen() {
   return mWhen;
 }
+
 float DamageMultiplier::GetValue() const {
   return mValue;
 }
+
 void DamageMultiplier::SetWhen(const std::string& val) {
   mWhen = val;
 }
+
 void DamageMultiplier::SetValue(float val) {
   mValue = val;
 }
+
 bool DamageMultiplier::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing DamageMultiplier");
   for(const auto& data: json.GetObject()) {
@@ -38,6 +43,7 @@ bool DamageMultiplier::ParseJson(const rapidjson::Value& json, const Converter& 
   }
   return true;
 }
+
 void DamageMultiplier::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -46,10 +52,12 @@ void DamageMultiplier::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "DamageMultiplierMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void DamageMultiplier::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 DamageMultiplier* DamageMultiplier::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -57,6 +65,7 @@ DamageMultiplier* DamageMultiplier::ReadFromLua(lua_State* luaState, int32_t idx
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int DamageMultiplier::IndexMetaMethod(lua_State* luaState) {
   auto instance = DamageMultiplier::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -70,6 +79,7 @@ int DamageMultiplier::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int DamageMultiplier::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = DamageMultiplier::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -82,6 +92,7 @@ int DamageMultiplier::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

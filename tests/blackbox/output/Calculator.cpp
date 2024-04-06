@@ -10,12 +10,15 @@ namespace holgen_blackbox_test {
 const Number& Calculator::GetCurVal() const {
   return mCurVal;
 }
+
 Number& Calculator::GetCurVal() {
   return mCurVal;
 }
+
 void Calculator::SetCurVal(const Number& val) {
   mCurVal = val;
 }
+
 int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
   HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Add.empty(), {}, "Calling unset Add function");
   lua_getglobal(luaState, mLuaFuncHandle_Add.c_str());
@@ -32,9 +35,11 @@ int64_t Calculator::Add(lua_State* luaState, int64_t val) const {
   lua_pop(luaState, 1);
   return result;
 }
+
 void Calculator::SetAddLuaFunc(std::string val) {
   mLuaFuncHandle_Add = val;
 }
+
 Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
   HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Subtract.empty(), {}, "Calling unset Subtract function");
   lua_getglobal(luaState, "Ops");
@@ -52,9 +57,11 @@ Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
   lua_pop(luaState, 2);
   return result;
 }
+
 void Calculator::SetSubtractLuaFunc(std::string val) {
   mLuaFuncHandle_Subtract = val;
 }
+
 bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Calculator");
   for(const auto& data: json.GetObject()) {
@@ -74,6 +81,7 @@ bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& conver
   }
   return true;
 }
+
 void Calculator::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -82,10 +90,12 @@ void Calculator::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "CalculatorMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Calculator::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Calculator* Calculator::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -93,6 +103,7 @@ Calculator* Calculator::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Calculator::IndexMetaMethod(lua_State* luaState) {
   auto instance = Calculator::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -115,6 +126,7 @@ int Calculator::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Calculator::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Calculator::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -125,6 +137,7 @@ int Calculator::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Calculator::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

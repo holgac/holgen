@@ -10,69 +10,86 @@ namespace holgen_blackbox_test {
 const std::vector<TestStructSingleElem>& TestStructSingleElemContainer::GetSingleElemStructs() const {
   return mSingleElemStructs;
 }
+
 std::vector<TestStructSingleElem>& TestStructSingleElemContainer::GetSingleElemStructs() {
   return mSingleElemStructs;
 }
+
 const std::vector<TestStructSingleElemWithId>& TestStructSingleElemContainer::GetSingleElemStructsWithId() const {
   return mSingleElemStructsWithId;
 }
+
 std::vector<TestStructSingleElemWithId>& TestStructSingleElemContainer::GetSingleElemStructsWithId() {
   return mSingleElemStructsWithId;
 }
+
 void TestStructSingleElemContainer::SetSingleElemStructs(const std::vector<TestStructSingleElem>& val) {
   mSingleElemStructs = val;
 }
+
 void TestStructSingleElemContainer::SetSingleElemStructsWithId(const std::vector<TestStructSingleElemWithId>& val) {
   mSingleElemStructsWithId = val;
 }
+
 TestStructSingleElem* TestStructSingleElemContainer::AddSingleElemStruct(TestStructSingleElem&& elem) {
   return &(mSingleElemStructs.emplace_back(std::forward<TestStructSingleElem>(elem)));
 }
+
 TestStructSingleElem* TestStructSingleElemContainer::AddSingleElemStruct(const TestStructSingleElem& elem) {
   return &(mSingleElemStructs.emplace_back(elem));
 }
+
 const TestStructSingleElem* TestStructSingleElemContainer::GetSingleElemStruct(size_t idx) const {
   if (idx >= mSingleElemStructs.size())
     return nullptr;
   return &mSingleElemStructs[idx];
 }
+
 TestStructSingleElem* TestStructSingleElemContainer::GetSingleElemStruct(size_t idx) {
   if (idx >= mSingleElemStructs.size())
     return nullptr;
   return &mSingleElemStructs[idx];
 }
+
 void TestStructSingleElemContainer::DeleteSingleElemStruct(size_t idx) {
   if (idx != mSingleElemStructs.size() - 1) {
     mSingleElemStructs[idx] = std::move(mSingleElemStructs.back());
   }
   mSingleElemStructs.pop_back();
 }
+
 size_t TestStructSingleElemContainer::GetSingleElemStructCount() const {
   return mSingleElemStructs.size();
 }
+
 TestStructSingleElemWithId* TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId&& elem) {
   auto newId = mSingleElemStructsWithId.size();
   elem.SetId(newId);
   return &(mSingleElemStructsWithId.emplace_back(std::forward<TestStructSingleElemWithId>(elem)));
 }
+
 TestStructSingleElemWithId* TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId& elem) {
   auto newId = mSingleElemStructsWithId.size();
   elem.SetId(newId);
   return &(mSingleElemStructsWithId.emplace_back(elem));
 }
+
 const TestStructSingleElemWithId* TestStructSingleElemContainer::GetSingleElemStructWithId(uint32_t idx) const {
   if (idx >= mSingleElemStructsWithId.size())
     return nullptr;
   return &mSingleElemStructsWithId[idx];
 }
+
 TestStructSingleElemWithId* TestStructSingleElemContainer::GetSingleElemStructWithId(uint32_t idx) {
   if (idx >= mSingleElemStructsWithId.size())
     return nullptr;
   return &mSingleElemStructsWithId[idx];
 }
+
 size_t TestStructSingleElemContainer::GetSingleElemStructWithIdCount() const {
   return mSingleElemStructsWithId.size();
 }
+
 bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructSingleElemContainer");
   for(const auto& data: json.GetObject()) {
@@ -89,6 +106,7 @@ bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value& json, cons
   }
   return true;
 }
+
 void TestStructSingleElemContainer::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -97,10 +115,12 @@ void TestStructSingleElemContainer::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestStructSingleElemContainerMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestStructSingleElemContainer::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestStructSingleElemContainer* TestStructSingleElemContainer::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -108,6 +128,7 @@ TestStructSingleElemContainer* TestStructSingleElemContainer::ReadFromLua(lua_St
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestStructSingleElemContainer::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestStructSingleElemContainer::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -161,6 +182,7 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestStructSingleElemContainer::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestStructSingleElemContainer::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -173,6 +195,7 @@ int TestStructSingleElemContainer::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestStructSingleElemContainer::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

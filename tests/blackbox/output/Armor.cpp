@@ -12,42 +12,55 @@ namespace holgen_blackbox_test {
 uint32_t Armor::GetId() const {
   return mId;
 }
+
 const std::string& Armor::GetName() const {
   return mName;
 }
+
 std::string& Armor::GetName() {
   return mName;
 }
+
 const std::string& Armor::GetAlternativeName() const {
   return mAlternativeName;
 }
+
 std::string& Armor::GetAlternativeName() {
   return mAlternativeName;
 }
+
 int8_t Armor::GetArmorClass() const {
   return mArmorClass;
 }
+
 void Armor::SetId(uint32_t val) {
   mId = val;
 }
+
 void Armor::SetName(const std::string& val) {
   mName = val;
 }
+
 void Armor::SetAlternativeName(const std::string& val) {
   mAlternativeName = val;
 }
+
 void Armor::SetArmorClass(int8_t val) {
   mArmorClass = val;
 }
+
 Armor* Armor::Get(uint32_t id) {
   return GlobalPointer<GameData>::GetInstance()->GetArmor(id);
 }
+
 Armor* Armor::GetFromName(const std::string& key) {
   return GlobalPointer<GameData>::GetInstance()->GetArmorFromName(key);
 }
+
 Armor* Armor::GetFromAlternativeName(const std::string& key) {
   return GlobalPointer<GameData>::GetInstance()->GetArmorFromAlternativeName(key);
 }
+
 bool Armor::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Armor");
   for(const auto& data: json.GetObject()) {
@@ -70,6 +83,7 @@ bool Armor::ParseJson(const rapidjson::Value& json, const Converter& converter) 
   }
   return true;
 }
+
 void Armor::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   uint64_t id = mId;
@@ -79,10 +93,12 @@ void Armor::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "ArmorMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Armor::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Armor* Armor::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);
@@ -91,6 +107,7 @@ Armor* Armor::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Armor::IndexMetaMethod(lua_State* luaState) {
   auto instance = Armor::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -108,6 +125,7 @@ int Armor::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Armor::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Armor::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -124,6 +142,7 @@ int Armor::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Armor::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

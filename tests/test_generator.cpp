@@ -101,12 +101,15 @@ namespace generator_test_namespace {
 uint32_t Person::GetAge() const {
   return mAge;
 }
+
 float Person::GetGender() const {
   return mGender;
 }
+
 void Person::SetAge(uint32_t val) {
   mAge = val;
 }
+
 void Person::SetGender(float val) {
   mGender = val;
 }
@@ -184,21 +187,27 @@ namespace generator_test_namespace {
 const std::vector<std::string>& Market::GetInstruments() const {
   return mInstruments;
 }
+
 std::vector<std::string>& Market::GetInstruments() {
   return mInstruments;
 }
+
 const std::map<std::string, double>& Market::GetPrices() const {
   return mPrices;
 }
+
 std::map<std::string, double>& Market::GetPrices() {
   return mPrices;
 }
+
 void Market::SetInstruments(const std::vector<std::string>& val) {
   mInstruments = val;
 }
+
 void Market::SetPrices(const std::map<std::string, double>& val) {
   mPrices = val;
 }
+
 bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Market");
   for(const auto& data: json.GetObject()) {
@@ -292,18 +301,23 @@ namespace generator_test_namespace {
 const std::string& Sound::GetName() const {
   return mName;
 }
+
 std::string& Sound::GetName() {
   return mName;
 }
+
 uint32_t Sound::GetVolume() const {
   return mVolume;
 }
+
 void Sound::SetName(const std::string& val) {
   mName = val;
 }
+
 void Sound::SetVolume(uint32_t val) {
   mVolume = val;
 }
+
 bool Sound::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Sound");
   for(const auto& data: json.GetObject()) {
@@ -372,12 +386,15 @@ namespace generator_test_namespace {
 const std::vector<Sound>& Animal::GetSounds() const {
   return mSounds;
 }
+
 std::vector<Sound>& Animal::GetSounds() {
   return mSounds;
 }
+
 void Animal::SetSounds(const std::vector<Sound>& val) {
   mSounds = val;
 }
+
 bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
@@ -484,27 +501,35 @@ namespace generator_test_namespace {
 uint32_t Person::GetCurrentCountry() const {
   return mCurrentCountry;
 }
+
 uint32_t Person::GetCurrentCity() const {
   return mCurrentCity;
 }
+
 uint32_t Person::GetHomeCountry() const {
   return mHomeCountry;
 }
+
 uint32_t Person::GetPlaceOfBirth() const {
   return mPlaceOfBirth;
 }
+
 void Person::SetCurrentCountry(uint32_t val) {
   mCurrentCountry = val;
 }
+
 void Person::SetCurrentCity(uint32_t val) {
   mCurrentCity = val;
 }
+
 void Person::SetHomeCountry(uint32_t val) {
   mHomeCountry = val;
 }
+
 void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;
 }
+
 bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Person");
   for(const auto& data: json.GetObject()) {
@@ -588,21 +613,27 @@ namespace generator_test_namespace {
 const std::string& Country::GetName() const {
   return mName;
 }
+
 std::string& Country::GetName() {
   return mName;
 }
+
 const Person& Country::GetLeader() const {
   return mLeader;
 }
+
 Person& Country::GetLeader() {
   return mLeader;
 }
+
 void Country::SetName(const std::string& val) {
   mName = val;
 }
+
 void Country::SetLeader(const Person& val) {
   mLeader = val;
 }
+
 bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Country");
   for(const auto& data: json.GetObject()) {
@@ -702,30 +733,39 @@ namespace generator_test_namespace {
 uint32_t Person::GetId() const {
   return mId;
 }
+
 const std::string& Person::GetName() const {
   return mName;
 }
+
 std::string& Person::GetName() {
   return mName;
 }
+
 uint32_t Person::GetPartnerId() const {
   return mPartnerId;
 }
+
 const Person* Person::GetPartner() const {
   return Person::Get(mPartnerId);
 }
+
 Person* Person::GetPartner() {
   return Person::Get(mPartnerId);
 }
+
 void Person::SetId(uint32_t val) {
   mId = val;
 }
+
 void Person::SetName(const std::string& val) {
   mName = val;
 }
+
 void Person::SetPartnerId(uint32_t val) {
   mPartnerId = val;
 }
+
 Person* Person::Get(uint32_t id) {
   return GlobalPointer<Country>::GetInstance()->GetPerson(id);
 }

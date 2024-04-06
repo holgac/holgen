@@ -14,24 +14,29 @@ namespace holgen_blackbox_test {
 const std::unordered_map<uint32_t, Human>& HumanManager::GetHumans() const {
   return mHumans;
 }
+
 std::unordered_map<uint32_t, Human>& HumanManager::GetHumans() {
   return mHumans;
 }
+
 void HumanManager::SetHumans(const std::unordered_map<uint32_t, Human>& val) {
   mHumans = val;
 }
+
 const Human* HumanManager::GetHumanFromName(const std::string& key) const {
   auto it = mHumansNameIndex.find(key);
   if (it == mHumansNameIndex.end())
     return nullptr;
   return &mHumans.at(it->second);
 }
+
 Human* HumanManager::GetHumanFromName(const std::string& key) {
   auto it = mHumansNameIndex.find(key);
   if (it == mHumansNameIndex.end())
     return nullptr;
   return &mHumans.at(it->second);
 }
+
 Human* HumanManager::AddHuman(Human&& elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Human with name={} already exists", elem.GetName());
@@ -45,6 +50,7 @@ Human* HumanManager::AddHuman(Human&& elem) {
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
   return &(it->second);
 }
+
 Human* HumanManager::AddHuman(Human& elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("Human with name={} already exists", elem.GetName());
@@ -58,29 +64,35 @@ Human* HumanManager::AddHuman(Human& elem) {
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
   return &(it->second);
 }
+
 const Human* HumanManager::GetHuman(uint32_t idx) const {
   auto it = mHumans.find(idx);
   if (it == mHumans.end())
     return nullptr;
   return &it->second;
 }
+
 Human* HumanManager::GetHuman(uint32_t idx) {
   auto it = mHumans.find(idx);
   if (it == mHumans.end())
     return nullptr;
   return &it->second;
 }
+
 bool HumanManager::HasHuman(uint32_t key) const {
   return mHumans.contains(key);
 }
+
 void HumanManager::DeleteHuman(uint32_t key) {
   auto ptr = GetHuman(key);
   mHumansNameIndex.erase(ptr->GetName());
   mHumans.erase(key);
 }
+
 size_t HumanManager::GetHumanCount() const {
   return mHumans.size();
 }
+
 bool HumanManager::ParseFiles(const std::string& rootPath, const Converter& converterArg) {
   auto &converter = converterArg;
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;
@@ -103,6 +115,7 @@ bool HumanManager::ParseFiles(const std::string& rootPath, const Converter& conv
   }
   return true;
 }
+
 void HumanManager::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -111,10 +124,12 @@ void HumanManager::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "HumanManagerMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void HumanManager::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 HumanManager* HumanManager::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -122,6 +137,7 @@ HumanManager* HumanManager::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int HumanManager::IndexMetaMethod(lua_State* luaState) {
   auto instance = HumanManager::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -175,6 +191,7 @@ int HumanManager::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int HumanManager::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = HumanManager::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -185,6 +202,7 @@ int HumanManager::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void HumanManager::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

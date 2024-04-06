@@ -10,18 +10,23 @@ namespace holgen_blackbox_test {
 uint32_t TestContainerInnerStructNoId::GetField() const {
   return mField;
 }
+
 const std::string& TestContainerInnerStructNoId::GetName() const {
   return mName;
 }
+
 std::string& TestContainerInnerStructNoId::GetName() {
   return mName;
 }
+
 void TestContainerInnerStructNoId::SetField(uint32_t val) {
   mField = val;
 }
+
 void TestContainerInnerStructNoId::SetName(const std::string& val) {
   mName = val;
 }
+
 bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerInnerStructNoId");
   for(const auto& data: json.GetObject()) {
@@ -38,6 +43,7 @@ bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value& json, const
   }
   return true;
 }
+
 void TestContainerInnerStructNoId::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -46,10 +52,12 @@ void TestContainerInnerStructNoId::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestContainerInnerStructNoIdMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestContainerInnerStructNoId::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestContainerInnerStructNoId* TestContainerInnerStructNoId::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -57,6 +65,7 @@ TestContainerInnerStructNoId* TestContainerInnerStructNoId::ReadFromLua(lua_Stat
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestContainerInnerStructNoId::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerInnerStructNoId::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -70,6 +79,7 @@ int TestContainerInnerStructNoId::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestContainerInnerStructNoId::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerInnerStructNoId::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -82,6 +92,7 @@ int TestContainerInnerStructNoId::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestContainerInnerStructNoId::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

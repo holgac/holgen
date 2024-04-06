@@ -10,13 +10,16 @@ namespace holgen_blackbox_test {
 const TestEnum TestEnum::Entry5(5);
 const TestEnum TestEnum::Entry1(0);
 const TestEnum TestEnum::Entry2(1);
+
 TestEnum::TestEnum(TestEnum::UnderlyingType value) :
   mValue(value)
 {
 }
+
 TestEnum::UnderlyingType TestEnum::Get() const {
   return mValue;
 }
+
 TestEnum TestEnum::FromString(std::string_view str) {
   if (str == "Entry5") {
     return TestEnum(5);
@@ -28,6 +31,7 @@ TestEnum TestEnum::FromString(std::string_view str) {
     return TestEnum(TestEnum::Invalid);
   }
 }
+
 const char* TestEnum::ToString() const {
   switch (mValue) {
     case 5: return "Entry5";
@@ -36,25 +40,32 @@ const char* TestEnum::ToString() const {
     default: return "INVALID";
   }
 }
+
 TestEnum& TestEnum::operator =(UnderlyingType rhs) {
   mValue = rhs;
   return *this;
 }
+
 bool TestEnum::operator ==(UnderlyingType rhs) const {
   return mValue == rhs;
 }
+
 bool TestEnum::operator ==(const TestEnum& rhs) const {
   return mValue == rhs.mValue;
 }
+
 bool TestEnum::operator !=(UnderlyingType rhs) const {
   return mValue != rhs;
 }
+
 bool TestEnum::operator !=(const TestEnum& rhs) const {
   return mValue != rhs.mValue;
 }
+
 std::array<TestEnum, 3> TestEnum::GetEntries() {
   return std::array<TestEnum, 3>{Entry5, Entry1, Entry2};
 }
+
 bool TestEnum::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsString()) {
     *this = TestEnum::FromString(std::string_view(json.GetString(), json.GetStringLength()));
@@ -67,6 +78,7 @@ bool TestEnum::ParseJson(const rapidjson::Value& json, const Converter& converte
   }
   return true;
 }
+
 void TestEnum::PushToLua(lua_State* luaState) const {
   LuaHelper::Push(mValue, luaState);
 }

@@ -10,33 +10,43 @@ namespace holgen_blackbox_test {
 uint32_t Weapon::GetDamageMin() const {
   return mDamageMin;
 }
+
 uint32_t Weapon::GetDamageMax() const {
   return mDamageMax;
 }
+
 const std::vector<DamageMultiplier>& Weapon::GetDamageMultipliers() const {
   return mDamageMultipliers;
 }
+
 std::vector<DamageMultiplier>& Weapon::GetDamageMultipliers() {
   return mDamageMultipliers;
 }
+
 const std::vector<std::string>& Weapon::GetModifiers() const {
   return mModifiers;
 }
+
 std::vector<std::string>& Weapon::GetModifiers() {
   return mModifiers;
 }
+
 void Weapon::SetDamageMin(uint32_t val) {
   mDamageMin = val;
 }
+
 void Weapon::SetDamageMax(uint32_t val) {
   mDamageMax = val;
 }
+
 void Weapon::SetDamageMultipliers(const std::vector<DamageMultiplier>& val) {
   mDamageMultipliers = val;
 }
+
 void Weapon::SetModifiers(const std::vector<std::string>& val) {
   mModifiers = val;
 }
+
 bool Weapon::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Weapon");
   for(const auto& data: json.GetObject()) {
@@ -59,6 +69,7 @@ bool Weapon::ParseJson(const rapidjson::Value& json, const Converter& converter)
   }
   return true;
 }
+
 void Weapon::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -67,10 +78,12 @@ void Weapon::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "WeaponMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Weapon::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Weapon* Weapon::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -78,6 +91,7 @@ Weapon* Weapon::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Weapon::IndexMetaMethod(lua_State* luaState) {
   auto instance = Weapon::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -102,6 +116,7 @@ int Weapon::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Weapon::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Weapon::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -118,6 +133,7 @@ int Weapon::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Weapon::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

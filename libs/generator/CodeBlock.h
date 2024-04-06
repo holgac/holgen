@@ -37,7 +37,7 @@ namespace holgen {
       AddLine(std::format(fmt, std::forward<Args>(args)...));
     }
 
-    void AddLine(const std::string &line) {
+    void AddLine(const std::string &line = "") {
       mContents.push_back(CodeUnitType::Code);
       mLines.push_back(line);
     }

@@ -12,24 +12,31 @@ namespace holgen_blackbox_test {
 uint32_t Human::GetId() const {
   return mId;
 }
+
 const std::string& Human::GetName() const {
   return mName;
 }
+
 std::string& Human::GetName() {
   return mName;
 }
+
 void Human::SetId(uint32_t val) {
   mId = val;
 }
+
 void Human::SetName(const std::string& val) {
   mName = val;
 }
+
 Human* Human::Get(uint32_t id) {
   return GlobalPointer<HumanManager>::GetInstance()->GetHuman(id);
 }
+
 Human* Human::GetFromName(const std::string& key) {
   return GlobalPointer<HumanManager>::GetInstance()->GetHumanFromName(key);
 }
+
 bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
@@ -50,6 +57,7 @@ bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) 
   }
   return true;
 }
+
 void Human::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -58,10 +66,12 @@ void Human::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "HumanMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Human::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Human* Human::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -69,6 +79,7 @@ Human* Human::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Human::IndexMetaMethod(lua_State* luaState) {
   auto instance = Human::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -82,6 +93,7 @@ int Human::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Human::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Human::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -94,6 +106,7 @@ int Human::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Human::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

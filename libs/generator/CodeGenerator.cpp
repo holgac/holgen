@@ -119,7 +119,7 @@ namespace holgen {
           break;
         case Visibility::Private:
           codeBlock.Line() << "private:";
-              break;
+          break;
       }
       codeBlock.Indent(1);
       codeBlock.Add(std::move(codeBlockForVisibility));
@@ -245,9 +245,30 @@ namespace holgen {
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Add("namespace {} {{", mGeneratorSettings.mNamespace);
 
-    GenerateFieldsForSource(codeBlock, cls);
-    GenerateConstructorsForSource(codeBlock, cls);
-    GenerateMethodsForSource(codeBlock, cls);
+    bool previousBlockWasEmpty = true;
+    {
+      auto block = GenerateFieldsForSource(cls);
+      codeBlock.Add(std::move(block));
+      previousBlockWasEmpty = block.mContents.empty();
+    }
+
+    {
+      auto block = GenerateConstructorsForSource(cls);
+      if (!block.mContents.empty()) {
+        if (!previousBlockWasEmpty)
+          codeBlock.AddLine();
+        codeBlock.Add(std::move(block));
+      }
+    }
+
+    {
+      auto block = GenerateMethodsForSource(cls);
+      if (!block.mContents.empty()) {
+        if (!previousBlockWasEmpty)
+          codeBlock.AddLine();
+        codeBlock.Add(std::move(block));
+      }
+    }
 
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Add("}}"); // namespace
@@ -255,32 +276,41 @@ namespace holgen {
     source.mText = codeBlock.ToString();
   }
 
-  void CodeGenerator::GenerateFieldsForSource(CodeBlock &codeBlock, const Class &cls) const {
+  CodeBlock CodeGenerator::GenerateFieldsForSource(const Class &cls) const {
+    CodeBlock codeBlock;
     for (auto &field: cls.mFields) {
       if (field.mStaticness == Staticness::Static && field.mType.mName == cls.mName) {
-        codeBlock.Line() << field.mType.ToString() << " " << cls.mName << "::" << field.mName
-                         << StringifyFieldDefinition(field) << ";";
+        codeBlock.Add("{} {}::{}{};", field.mType.ToString(), cls.mName, field.mName, StringifyFieldDefinition(field));
       }
     }
+    return codeBlock;
   }
 
-  void CodeGenerator::GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const {
+  CodeBlock CodeGenerator::GenerateMethodsForSource(const Class &cls) const {
+    CodeBlock codeBlock;
     if (!cls.mTemplateParameters.empty())
-      return;
+      return {};
+
+    bool isFirstMethod = true;
 
     for (auto &method: cls.mMethods) {
       if (method.mUserDefined || CanBeDefinedInHeader(cls, method)) {
         continue;
       }
+      if (isFirstMethod)
+        isFirstMethod = false;
+      else
+        codeBlock.AddLine();
       if (method.mIsTemplateSpecialization) {
-        codeBlock.Line() << "template <>";
+        codeBlock.Add("template <>");
       }
       codeBlock.Line() << GenerateFunctionSignature(cls, method, false, false) << " {";
       codeBlock.Indent(1);
       codeBlock.Add(method.mBody);
       codeBlock.Indent(-1);
-      codeBlock.Line() << "}";
+      codeBlock.Add("}}");
     }
+    return codeBlock;
   }
 
   void CodeGenerator::GenerateCMakeLists(GeneratedContent &cmake, const TranslatedProject &translatedProject) const {
@@ -388,17 +418,23 @@ namespace holgen {
     }
   }
 
-  void CodeGenerator::GenerateConstructorsForSource(CodeBlock &codeBlock, const Class &cls) const {
+  CodeBlock CodeGenerator::GenerateConstructorsForSource(const Class &cls) const {
+    CodeBlock codeBlock;
     if (!cls.mTemplateParameters.empty())
-      return;
+      return {};
+    bool isFirstMethod = true;
 
     for (auto &ctor: cls.mConstructors) {
       if (!ctor.mTemplateParameters.empty()) {
         // These are defined in the header
         continue;
       }
+      if (isFirstMethod)
+        isFirstMethod = false;
+      else
+        codeBlock.AddLine();
       if (ctor.mIsTemplateSpecialization) {
-        codeBlock.Line() << "template <>";
+        codeBlock.Add("template <>");
       }
       {
         auto line = codeBlock.Line();
@@ -440,6 +476,7 @@ namespace holgen {
       codeBlock.Indent(-1);
       codeBlock.Line() << "}";
     }
+    return codeBlock;
   }
 
   std::string CodeGenerator::GenerateFunctionSignature(

@@ -14,24 +14,29 @@ namespace holgen_blackbox_test {
 const std::vector<TestJsonTag>& TestJsonTagManager::GetTags() const {
   return mTags;
 }
+
 std::vector<TestJsonTag>& TestJsonTagManager::GetTags() {
   return mTags;
 }
+
 void TestJsonTagManager::SetTags(const std::vector<TestJsonTag>& val) {
   mTags = val;
 }
+
 const TestJsonTag* TestJsonTagManager::GetTagFromName(const std::string& key) const {
   auto it = mTagsNameIndex.find(key);
   if (it == mTagsNameIndex.end())
     return nullptr;
   return &mTags[it->second];
 }
+
 TestJsonTag* TestJsonTagManager::GetTagFromName(const std::string& key) {
   auto it = mTagsNameIndex.find(key);
   if (it == mTagsNameIndex.end())
     return nullptr;
   return &mTags[it->second];
 }
+
 TestJsonTag* TestJsonTagManager::AddTag(TestJsonTag&& elem) {
   if (mTagsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestJsonTag with name={} already exists", elem.GetName());
@@ -42,6 +47,7 @@ TestJsonTag* TestJsonTagManager::AddTag(TestJsonTag&& elem) {
   elem.SetId(newId);
   return &(mTags.emplace_back(std::forward<TestJsonTag>(elem)));
 }
+
 TestJsonTag* TestJsonTagManager::AddTag(TestJsonTag& elem) {
   if (mTagsNameIndex.contains(elem.GetName())) {
     HOLGEN_WARN("TestJsonTag with name={} already exists", elem.GetName());
@@ -52,19 +58,23 @@ TestJsonTag* TestJsonTagManager::AddTag(TestJsonTag& elem) {
   elem.SetId(newId);
   return &(mTags.emplace_back(elem));
 }
+
 const TestJsonTag* TestJsonTagManager::GetTag(uint64_t idx) const {
   if (idx >= mTags.size())
     return nullptr;
   return &mTags[idx];
 }
+
 TestJsonTag* TestJsonTagManager::GetTag(uint64_t idx) {
   if (idx >= mTags.size())
     return nullptr;
   return &mTags[idx];
 }
+
 size_t TestJsonTagManager::GetTagCount() const {
   return mTags.size();
 }
+
 bool TestJsonTagManager::ParseFiles(const std::string& rootPath, const Converter& converterArg) {
   auto &converter = converterArg;
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;
@@ -103,6 +113,7 @@ bool TestJsonTagManager::ParseFiles(const std::string& rootPath, const Converter
   }
   return true;
 }
+
 void TestJsonTagManager::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -111,10 +122,12 @@ void TestJsonTagManager::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestJsonTagManagerMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestJsonTagManager::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestJsonTagManager* TestJsonTagManager::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -122,6 +135,7 @@ TestJsonTagManager* TestJsonTagManager::ReadFromLua(lua_State* luaState, int32_t
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestJsonTagManager::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestJsonTagManager::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -167,6 +181,7 @@ int TestJsonTagManager::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestJsonTagManager::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestJsonTagManager::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -177,6 +192,7 @@ int TestJsonTagManager::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestJsonTagManager::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

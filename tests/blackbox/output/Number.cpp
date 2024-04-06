@@ -10,9 +10,11 @@ namespace holgen_blackbox_test {
 int64_t Number::GetValue() const {
   return mValue;
 }
+
 void Number::SetValue(int64_t val) {
   mValue = val;
 }
+
 bool Number::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
@@ -30,6 +32,7 @@ bool Number::ParseJson(const rapidjson::Value& json, const Converter& converter)
   }
   return true;
 }
+
 void Number::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -38,10 +41,12 @@ void Number::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "NumberMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Number::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Number* Number::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -49,6 +54,7 @@ Number* Number::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Number::IndexMetaMethod(lua_State* luaState) {
   auto instance = Number::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -60,6 +66,7 @@ int Number::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Number::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Number::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -70,6 +77,7 @@ int Number::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Number::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

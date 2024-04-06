@@ -10,36 +10,47 @@ namespace holgen_blackbox_test {
 uint32_t Race::GetId() const {
   return mId;
 }
+
 const std::string& Race::GetName() const {
   return mName;
 }
+
 std::string& Race::GetName() {
   return mName;
 }
+
 const std::vector<std::string>& Race::GetHairColors() const {
   return mHairColors;
 }
+
 std::vector<std::string>& Race::GetHairColors() {
   return mHairColors;
 }
+
 const std::map<std::string, std::vector<std::string>>& Race::GetNames() const {
   return mNames;
 }
+
 std::map<std::string, std::vector<std::string>>& Race::GetNames() {
   return mNames;
 }
+
 void Race::SetId(uint32_t val) {
   mId = val;
 }
+
 void Race::SetName(const std::string& val) {
   mName = val;
 }
+
 void Race::SetHairColors(const std::vector<std::string>& val) {
   mHairColors = val;
 }
+
 void Race::SetNames(const std::map<std::string, std::vector<std::string>>& val) {
   mNames = val;
 }
+
 bool Race::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Race");
   for(const auto& data: json.GetObject()) {
@@ -62,6 +73,7 @@ bool Race::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   }
   return true;
 }
+
 void Race::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -70,10 +82,12 @@ void Race::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "RaceMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void Race::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 Race* Race::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -81,6 +95,7 @@ Race* Race::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int Race::IndexMetaMethod(lua_State* luaState) {
   auto instance = Race::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -98,6 +113,7 @@ int Race::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int Race::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = Race::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -114,6 +130,7 @@ int Race::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void Race::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

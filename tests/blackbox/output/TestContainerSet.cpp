@@ -10,54 +10,69 @@ namespace holgen_blackbox_test {
 const std::set<std::string>& TestContainerSet::GetStringContainer() const {
   return mStringContainer;
 }
+
 std::set<std::string>& TestContainerSet::GetStringContainer() {
   return mStringContainer;
 }
+
 const std::set<uint32_t>& TestContainerSet::GetUnsignedContainer() const {
   return mUnsignedContainer;
 }
+
 std::set<uint32_t>& TestContainerSet::GetUnsignedContainer() {
   return mUnsignedContainer;
 }
+
 void TestContainerSet::SetStringContainer(const std::set<std::string>& val) {
   mStringContainer = val;
 }
+
 void TestContainerSet::SetUnsignedContainer(const std::set<uint32_t>& val) {
   mUnsignedContainer = val;
 }
+
 const std::string* TestContainerSet::AddStringElem(std::string&& elem) {
   auto [it, res] = mStringContainer.emplace(std::forward<std::string>(elem));
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to mStringContainer");
   return &(*it);
 }
+
 const std::string* TestContainerSet::AddStringElem(const std::string& elem) {
   auto [it, res] = mStringContainer.emplace(elem);
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to mStringContainer");
   return &(*it);
 }
+
 bool TestContainerSet::HasStringElem(const std::string& elem) const {
   return mStringContainer.contains(elem);
 }
+
 void TestContainerSet::DeleteStringElem(std::string elem) {
   mStringContainer.erase(elem);
 }
+
 size_t TestContainerSet::GetStringElemCount() const {
   return mStringContainer.size();
 }
+
 const uint32_t* TestContainerSet::AddUnsignedElem(uint32_t elem) {
   auto [it, res] = mUnsignedContainer.emplace(elem);
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to mUnsignedContainer");
   return &(*it);
 }
+
 bool TestContainerSet::HasUnsignedElem(uint32_t elem) const {
   return mUnsignedContainer.contains(elem);
 }
+
 void TestContainerSet::DeleteUnsignedElem(uint32_t elem) {
   mUnsignedContainer.erase(elem);
 }
+
 size_t TestContainerSet::GetUnsignedElemCount() const {
   return mUnsignedContainer.size();
 }
+
 bool TestContainerSet::ParseJson(const rapidjson::Value& json, const Converter& converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerSet");
   for(const auto& data: json.GetObject()) {
@@ -74,6 +89,7 @@ bool TestContainerSet::ParseJson(const rapidjson::Value& json, const Converter& 
   }
   return true;
 }
+
 void TestContainerSet::PushToLua(lua_State* luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -82,10 +98,12 @@ void TestContainerSet::PushToLua(lua_State* luaState) const {
   lua_getglobal(luaState, "TestContainerSetMeta");
   lua_setmetatable(luaState, -2);
 }
+
 void TestContainerSet::PushGlobalToLua(lua_State* luaState, const char* name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
+
 TestContainerSet* TestContainerSet::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
@@ -93,6 +111,7 @@ TestContainerSet* TestContainerSet::ReadFromLua(lua_State* luaState, int32_t idx
   lua_pop(luaState, 1);
   return ptr;
 }
+
 int TestContainerSet::IndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerSet::ReadFromLua(luaState, -2);
   const char* key = lua_tostring(luaState, -1);
@@ -154,6 +173,7 @@ int TestContainerSet::IndexMetaMethod(lua_State* luaState) {
   }
   return 1;
 }
+
 int TestContainerSet::NewIndexMetaMethod(lua_State* luaState) {
   auto instance = TestContainerSet::ReadFromLua(luaState, -3);
   const char* key = lua_tostring(luaState, -2);
@@ -166,6 +186,7 @@ int TestContainerSet::NewIndexMetaMethod(lua_State* luaState) {
   }
   return 0;
 }
+
 void TestContainerSet::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");

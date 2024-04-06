@@ -45,9 +45,9 @@ namespace holgen {
                                        bool isInsideClass) const;
     void
     GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
-    void GenerateMethodsForSource(CodeBlock &codeBlock, const Class &cls) const;
-    void GenerateFieldsForSource(CodeBlock &codeBlock, const Class &cls) const;
-    void GenerateConstructorsForSource(CodeBlock &codeBlock, const Class &cls) const;
+    [[nodiscard]] CodeBlock GenerateMethodsForSource(const Class &cls) const;
+    [[nodiscard]] CodeBlock GenerateFieldsForSource(const Class &cls) const;
+    [[nodiscard]] CodeBlock GenerateConstructorsForSource(const Class &cls) const;
     void GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
     std::string GenerateFunctionSignature(const Class& cls, const ClassMethod &method, bool isInHeader, bool isInsideClass) const;
   };
