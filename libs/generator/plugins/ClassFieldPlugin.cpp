@@ -8,6 +8,7 @@ namespace holgen {
       if (cls.mStruct == nullptr)
         continue;
       for (auto &fieldDefinition: cls.mStruct->mFields) {
+        // TODO: if @optimize(alignment) (or @packed?), order the fields to minimize padding. Default to it?
         if (fieldDefinition.mType.mName == "Ref")
           Validate().RefField(cls, fieldDefinition);
         auto field = ClassField{

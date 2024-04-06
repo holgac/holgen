@@ -73,14 +73,19 @@ namespace holgen {
         if (i != 0)
           funcArgs << ", ";
         funcArgs << "arg" << i;
-        auto sanitizedType = arg.mType;
-        sanitizedType.mType = PassByType::Value;
-        sanitizedType.mConstness = Constness::NotConst;
-        codeBlock.Add("{} arg{};", sanitizedType.ToString(), i);
-        codeBlock.Add(
-            "{}::{}(arg{}, lsInner, {});",
-            St::LuaHelper, St::LuaHelper_Read, i,
-            ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+        if (mProject.GetClass(arg.mType.mName)) {
+          codeBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});",
+                        i, arg.mType.mName, ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+        } else {
+          auto sanitizedType = arg.mType;
+          sanitizedType.mType = PassByType::Value;
+          sanitizedType.mConstness = Constness::NotConst;
+          codeBlock.Add("{} arg{};", sanitizedType.ToString(), i);
+          codeBlock.Add(
+              "{}::{}(arg{}, lsInner, {});",
+              St::LuaHelper, St::LuaHelper_Read, i,
+              ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+        }
         ++i;
       }
       if (luaMethod.mReturnType.mName != "void") {
