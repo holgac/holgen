@@ -32,6 +32,7 @@ namespace holgen {
         "int32_t",
         "int64_t",
         "ssize_t",
+        "int",
     };
     UnsignedIntegralTypes = {
         "uint8_t",

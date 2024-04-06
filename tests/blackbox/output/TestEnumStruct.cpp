@@ -48,39 +48,35 @@ TestEnumStruct* TestEnumStruct::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void TestEnumStruct::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestEnumStruct::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("enumField", key)) {
-      LuaHelper::Push(instance->mEnumField, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void TestEnumStruct::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestEnumStruct::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("enumField", key)) {
-      LuaHelper::Read(instance->mEnumField, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
-    }
+int TestEnumStruct::IndexMetaMethod(lua_State* luaState) {
+  auto instance = TestEnumStruct::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("enumField", key)) {
+    LuaHelper::Push(instance->mEnumField, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int TestEnumStruct::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = TestEnumStruct::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("enumField", key)) {
+    LuaHelper::Read(instance->mEnumField, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
+  }
+  return 0;
 }
 void TestEnumStruct::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestEnumStruct::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestEnumStruct::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestEnumStructMeta");
 }
 }

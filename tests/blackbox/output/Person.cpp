@@ -91,55 +91,51 @@ Person* Person::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void Person::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Person::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("race", key)) {
-      LuaHelper::Push(instance->mRace, ls);
-    } else if (0 == strcmp("currentCountry", key)) {
-      LuaHelper::Push(instance->mCurrentCountry, ls);
-    } else if (0 == strcmp("currentCity", key)) {
-      LuaHelper::Push(instance->mCurrentCity, ls);
-    } else if (0 == strcmp("homeCountry", key)) {
-      LuaHelper::Push(instance->mHomeCountry, ls);
-    } else if (0 == strcmp("placeOfBirth", key)) {
-      LuaHelper::Push(instance->mPlaceOfBirth, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Person.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void Person::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Person::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("race", key)) {
-      LuaHelper::Read(instance->mRace, ls, -1);
-    } else if (0 == strcmp("currentCountry", key)) {
-      LuaHelper::Read(instance->mCurrentCountry, ls, -1);
-    } else if (0 == strcmp("currentCity", key)) {
-      LuaHelper::Read(instance->mCurrentCity, ls, -1);
-    } else if (0 == strcmp("homeCountry", key)) {
-      LuaHelper::Read(instance->mHomeCountry, ls, -1);
-    } else if (0 == strcmp("placeOfBirth", key)) {
-      LuaHelper::Read(instance->mPlaceOfBirth, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Person.{}", key);
-    }
+int Person::IndexMetaMethod(lua_State* luaState) {
+  auto instance = Person::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("race", key)) {
+    LuaHelper::Push(instance->mRace, luaState);
+  } else if (0 == strcmp("currentCountry", key)) {
+    LuaHelper::Push(instance->mCurrentCountry, luaState);
+  } else if (0 == strcmp("currentCity", key)) {
+    LuaHelper::Push(instance->mCurrentCity, luaState);
+  } else if (0 == strcmp("homeCountry", key)) {
+    LuaHelper::Push(instance->mHomeCountry, luaState);
+  } else if (0 == strcmp("placeOfBirth", key)) {
+    LuaHelper::Push(instance->mPlaceOfBirth, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Person.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int Person::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = Person::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("race", key)) {
+    LuaHelper::Read(instance->mRace, luaState, -1);
+  } else if (0 == strcmp("currentCountry", key)) {
+    LuaHelper::Read(instance->mCurrentCountry, luaState, -1);
+  } else if (0 == strcmp("currentCity", key)) {
+    LuaHelper::Read(instance->mCurrentCity, luaState, -1);
+  } else if (0 == strcmp("homeCountry", key)) {
+    LuaHelper::Read(instance->mHomeCountry, luaState, -1);
+  } else if (0 == strcmp("placeOfBirth", key)) {
+    LuaHelper::Read(instance->mPlaceOfBirth, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Person.{}", key);
+  }
+  return 0;
 }
 void Person::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, Person::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, Person::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "PersonMeta");
 }
 }

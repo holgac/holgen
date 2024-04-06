@@ -57,43 +57,39 @@ TestContainerInnerStructNoId* TestContainerInnerStructNoId::ReadFromLua(lua_Stat
   lua_pop(luaState, 1);
   return ptr;
 }
-void TestContainerInnerStructNoId::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestContainerInnerStructNoId::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("field", key)) {
-      LuaHelper::Push(instance->mField, ls);
-    } else if (0 == strcmp("name", key)) {
-      LuaHelper::Push(instance->mName, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestContainerInnerStructNoId.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void TestContainerInnerStructNoId::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestContainerInnerStructNoId::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("field", key)) {
-      LuaHelper::Read(instance->mField, ls, -1);
-    } else if (0 == strcmp("name", key)) {
-      LuaHelper::Read(instance->mName, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestContainerInnerStructNoId.{}", key);
-    }
+int TestContainerInnerStructNoId::IndexMetaMethod(lua_State* luaState) {
+  auto instance = TestContainerInnerStructNoId::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("field", key)) {
+    LuaHelper::Push(instance->mField, luaState);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestContainerInnerStructNoId.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int TestContainerInnerStructNoId::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = TestContainerInnerStructNoId::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("field", key)) {
+    LuaHelper::Read(instance->mField, luaState, -1);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Read(instance->mName, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestContainerInnerStructNoId.{}", key);
+  }
+  return 0;
 }
 void TestContainerInnerStructNoId::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestContainerInnerStructNoId::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestContainerInnerStructNoId::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestContainerInnerStructNoIdMeta");
 }
 }

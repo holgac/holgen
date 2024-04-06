@@ -57,43 +57,39 @@ DamageMultiplier* DamageMultiplier::ReadFromLua(lua_State* luaState, int32_t idx
   lua_pop(luaState, 1);
   return ptr;
 }
-void DamageMultiplier::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = DamageMultiplier::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("when", key)) {
-      LuaHelper::Push(instance->mWhen, ls);
-    } else if (0 == strcmp("value", key)) {
-      LuaHelper::Push(instance->mValue, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void DamageMultiplier::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = DamageMultiplier::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("when", key)) {
-      LuaHelper::Read(instance->mWhen, ls, -1);
-    } else if (0 == strcmp("value", key)) {
-      LuaHelper::Read(instance->mValue, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
-    }
+int DamageMultiplier::IndexMetaMethod(lua_State* luaState) {
+  auto instance = DamageMultiplier::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("when", key)) {
+    LuaHelper::Push(instance->mWhen, luaState);
+  } else if (0 == strcmp("value", key)) {
+    LuaHelper::Push(instance->mValue, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int DamageMultiplier::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = DamageMultiplier::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("when", key)) {
+    LuaHelper::Read(instance->mWhen, luaState, -1);
+  } else if (0 == strcmp("value", key)) {
+    LuaHelper::Read(instance->mValue, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
+  }
+  return 0;
 }
 void DamageMultiplier::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, DamageMultiplier::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, DamageMultiplier::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "DamageMultiplierMeta");
 }
 }

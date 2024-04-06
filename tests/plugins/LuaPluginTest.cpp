@@ -166,7 +166,7 @@ return ptr;
   }
 }
 
-TEST_F(LuaPluginTest, PushIndexMetaMethodFields) {
+TEST_F(LuaPluginTest, IndexMetaMethodFields) {
   auto project = Parse(R"R(
 struct InnerStruct {}
 struct TestData {
@@ -180,36 +180,32 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushIndexMetaMethod", Constness::NotConst), nullptr);
+  ASSERT_NE(cls->GetMethod("IndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"PushIndexMetaMethod", Type{"void"}, Visibility::Private,
+    auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushIndexMetaMethod", Constness::NotConst), method, R"R(
-lua_pushstring(luaState, "__index");
-lua_pushcfunction(luaState, [](lua_State* ls) {
-  auto instance = TestData::ReadFromLua(ls, -2);
-  const char* key = lua_tostring(ls, -1);
-  if (0 == strcmp("testFieldUnsigned", key)) {
-    LuaHelper::Push(instance->mTestFieldUnsigned, ls);
-  } else if (0 == strcmp("testFieldString", key)) {
-    LuaHelper::Push(instance->mTestFieldString, ls);
-  } else if (0 == strcmp("testFieldBool", key)) {
-    LuaHelper::Push(instance->mTestFieldBool, ls);
-  } else if (0 == strcmp("testFieldInnerStruct", key)) {
-    LuaHelper::Push(instance->mTestFieldInnerStruct, ls);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
-    return 0;
-  }
-  return 1;
-});
-lua_settable(luaState, -3);
+    helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
+auto instance = TestData::ReadFromLua(luaState, -2);
+const char* key = lua_tostring(luaState, -1);
+if (0 == strcmp("testFieldUnsigned", key)) {
+  LuaHelper::Push(instance->mTestFieldUnsigned, luaState);
+} else if (0 == strcmp("testFieldString", key)) {
+  LuaHelper::Push(instance->mTestFieldString, luaState);
+} else if (0 == strcmp("testFieldBool", key)) {
+  LuaHelper::Push(instance->mTestFieldBool, luaState);
+} else if (0 == strcmp("testFieldInnerStruct", key)) {
+  LuaHelper::Push(instance->mTestFieldInnerStruct, luaState);
+} else {
+  HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
+  return 0;
+}
+return 1;
     )R");
   }
 }
 
-TEST_F(LuaPluginTest, PushIndexMetaMethodFunctions) {
+TEST_F(LuaPluginTest, IndexMetaMethodFunctions) {
   auto project = Parse(R"R(
 struct TestData {
   @cppFunc
@@ -222,45 +218,41 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushIndexMetaMethod", Constness::NotConst), nullptr);
+  ASSERT_NE(cls->GetMethod("IndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"PushIndexMetaMethod", Type{"void"}, Visibility::Private,
+    auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushIndexMetaMethod", Constness::NotConst), method, R"R(
-lua_pushstring(luaState, "__index");
-lua_pushcfunction(luaState, [](lua_State* ls) {
-  auto instance = TestData::ReadFromLua(ls, -2);
-  const char* key = lua_tostring(ls, -1);
-  if (0 == strcmp("functionReturningVoid", key)) {
-    lua_pushcfunction(ls, [](lua_State* lsInner) {
-      auto instance = TestData::ReadFromLua(lsInner, -3);
-      int32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -2);
-      std::string arg1;
-      LuaHelper::Read(arg1, lsInner, -1);
-      instance->functionReturningVoid(arg0, arg1);
-      return 0;
-    });
-  } else if (0 == strcmp("functionReturningString", key)) {
-    lua_pushcfunction(ls, [](lua_State* lsInner) {
-      auto instance = TestData::ReadFromLua(lsInner, -1);
-      auto result = instance->functionReturningString();
-      LuaHelper::Push(result, lsInner);
-      return 1;
-    });
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
+    helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
+auto instance = TestData::ReadFromLua(luaState, -2);
+const char* key = lua_tostring(luaState, -1);
+if (0 == strcmp("functionReturningVoid", key)) {
+  lua_pushcfunction(luaState, [](lua_State* lsInner) {
+    auto instance = TestData::ReadFromLua(lsInner, -3);
+    int32_t arg0;
+    LuaHelper::Read(arg0, lsInner, -2);
+    std::string arg1;
+    LuaHelper::Read(arg1, lsInner, -1);
+    instance->functionReturningVoid(arg0, arg1);
     return 0;
-  }
-  return 1;
-});
-lua_settable(luaState, -3);
-    )R");
-  }
+  });
+} else if (0 == strcmp("functionReturningString", key)) {
+  lua_pushcfunction(luaState, [](lua_State* lsInner) {
+    auto instance = TestData::ReadFromLua(lsInner, -1);
+    auto result = instance->functionReturningString();
+    LuaHelper::Push(result, lsInner);
+    return 1;
+  });
+} else {
+  HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
+  return 0;
+}
+return 1;
+  )R");
+}
 }
 
-TEST_F(LuaPluginTest, PushIndexMetaMethodRefs) {
+TEST_F(LuaPluginTest, IndexMetaMethodRefs) {
   auto project = Parse(R"R(
 struct InnerStructWithId {
   @id
@@ -276,32 +268,28 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushIndexMetaMethod", Constness::NotConst), nullptr);
+  ASSERT_NE(cls->GetMethod("IndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"PushIndexMetaMethod", Type{"void"}, Visibility::Private,
+    auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushIndexMetaMethod", Constness::NotConst), method, R"R(
-lua_pushstring(luaState, "__index");
-lua_pushcfunction(luaState, [](lua_State* ls) {
-  auto instance = TestData::ReadFromLua(ls, -2);
-  const char* key = lua_tostring(ls, -1);
-  if (0 == strcmp("testStructWithIdRefId", key)) {
-    LuaHelper::Push(instance->mTestStructWithIdRefId, ls);
-  } else if (0 == strcmp("testStructNoIdRef", key)) {
-    LuaHelper::Push(instance->mTestStructNoIdRef, ls);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
-    return 0;
-  }
-  return 1;
-});
-lua_settable(luaState, -3);
+    helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
+auto instance = TestData::ReadFromLua(luaState, -2);
+const char* key = lua_tostring(luaState, -1);
+if (0 == strcmp("testStructWithIdRefId", key)) {
+  LuaHelper::Push(instance->mTestStructWithIdRefId, luaState);
+} else if (0 == strcmp("testStructNoIdRef", key)) {
+  LuaHelper::Push(instance->mTestStructNoIdRef, luaState);
+} else {
+  HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
+  return 0;
+}
+return 1;
     )R");
   }
 }
 
-TEST_F(LuaPluginTest, PushNewIndexMetaMethodFields) {
+TEST_F(LuaPluginTest, NewIndexMetaMethodFields) {
   auto project = Parse(R"R(
 struct TestData {
   u32 testFieldUnsigned;
@@ -313,33 +301,29 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), nullptr);
+  ASSERT_NE(cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"PushNewIndexMetaMethod", Type{"void"}, Visibility::Private,
+    auto method = ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private,
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), method, R"R(
-lua_pushstring(luaState, "__newindex");
-lua_pushcfunction(luaState, [](lua_State* ls) {
-  auto instance = TestData::ReadFromLua(ls, -3);
-  const char* key = lua_tostring(ls, -2);
-  if (0 == strcmp("testFieldUnsigned", key)) {
-    LuaHelper::Read(instance->mTestFieldUnsigned, ls, -1);
-  } else if (0 == strcmp("testFieldString", key)) {
-    LuaHelper::Read(instance->mTestFieldString, ls, -1);
-  } else if (0 == strcmp("testFieldBool", key)) {
-    LuaHelper::Read(instance->mTestFieldBool, ls, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
-  }
-  return 0;
-});
-lua_settable(luaState, -3);
+    helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
+auto instance = TestData::ReadFromLua(luaState, -3);
+const char* key = lua_tostring(luaState, -2);
+if (0 == strcmp("testFieldUnsigned", key)) {
+  LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
+} else if (0 == strcmp("testFieldString", key)) {
+  LuaHelper::Read(instance->mTestFieldString, luaState, -1);
+} else if (0 == strcmp("testFieldBool", key)) {
+  LuaHelper::Read(instance->mTestFieldBool, luaState, -1);
+} else {
+  HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
+}
+return 0;
     )R");
   }
 }
 
-TEST_F(LuaPluginTest, PushNewIndexMetaMethodRefs) {
+TEST_F(LuaPluginTest, NewIndexMetaMethodRefs) {
   auto project = Parse(R"R(
 struct InnerStruct {
   @id
@@ -353,24 +337,20 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), nullptr);
+  ASSERT_NE(cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"PushNewIndexMetaMethod", Type{"void"}, Visibility::Private,
+    auto method = ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private,
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushNewIndexMetaMethod", Constness::NotConst), method, R"R(
-lua_pushstring(luaState, "__newindex");
-lua_pushcfunction(luaState, [](lua_State* ls) {
-  auto instance = TestData::ReadFromLua(ls, -3);
-  const char* key = lua_tostring(ls, -2);
-  if (0 == strcmp("testStructRefId", key)) {
-    LuaHelper::Read(instance->mTestStructRefId, ls, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
-  }
-  return 0;
-});
-lua_settable(luaState, -3);
+    helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
+auto instance = TestData::ReadFromLua(luaState, -3);
+const char* key = lua_tostring(luaState, -2);
+if (0 == strcmp("testStructRefId", key)) {
+  LuaHelper::Read(instance->mTestStructRefId, luaState, -1);
+} else {
+  HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
+}
+return 0;
     )R");
   }
 }
@@ -390,8 +370,12 @@ struct TestData {}
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("CreateLuaMetatable", Constness::NotConst), method, R"R(
 lua_newtable(luaState);
-PushIndexMetaMethod(luaState);
-PushNewIndexMetaMethod(luaState);
+lua_pushstring(luaState, "__index");
+lua_pushcfunction(luaState, TestData::IndexMetaMethod);
+lua_settable(luaState, -3);
+lua_pushstring(luaState, "__newindex");
+lua_pushcfunction(luaState, TestData::NewIndexMetaMethod);
+lua_settable(luaState, -3);
 lua_setglobal(luaState, "TestDataMeta");
     )R");
   }

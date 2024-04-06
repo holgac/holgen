@@ -19,17 +19,10 @@ namespace holgen {
     }
   }
 
-  void LuaPlugin::GeneratePushIndexMetaMethod(Class &cls) {
-    // TODO: use static private function for these
-    auto method = ClassMethod{"PushIndexMetaMethod", Type{"void"},
+  void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
+    auto method = ClassMethod{"IndexMetaMethod", Type{"int"},
                               Visibility::Private, Constness::NotConst, Staticness::Static};
-    auto &codeBlock = method.mBody;
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    codeBlock.Add("lua_pushstring(luaState, \"__index\");");
-    codeBlock.Add("lua_pushcfunction(luaState, [](lua_State* ls) {{");
-    codeBlock.Indent(1);
-    codeBlock.Add("auto instance = {}::ReadFromLua(ls, -2);", cls.mName);
-    codeBlock.Add("const char* key = lua_tostring(ls, -1);");
     CodeBlock stringSwitcherElseCase;
     stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
     stringSwitcherElseCase.Add("return 0;");
@@ -39,13 +32,13 @@ namespace holgen {
         continue;
       bool isRef = field.mField->mType.mName == "Ref";
       switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
-        switchBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push, field.mName);
+        switchBlock.Add("{}::{}(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push, field.mName);
       });
       if (isRef && field.mType.mType != PassByType::Pointer) {
         auto underlyingStruct = mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.front().mName);
         if (underlyingStruct->GetAnnotation(Annotations::Managed)) {
           switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
-            switchBlock.Add("{}::{}({}::{}(instance->{}), ls);", St::LuaHelper, St::LuaHelper_Push,
+            switchBlock.Add("{}::{}({}::{}(instance->{}), luaState);", St::LuaHelper, St::LuaHelper_Push,
                             field.mField->mType.mTemplateParameters[0].mName, St::ManagedObject_Getter, field.mName);
           });
         }
@@ -56,7 +49,7 @@ namespace holgen {
         continue;
       switcher.AddCase(luaMethod.mName, [&](CodeBlock &switchBlock) {
         // TODO: LuaHelper::Push should work with functions
-        switchBlock.Add("lua_pushcfunction(ls, [](lua_State* lsInner) {{");
+        switchBlock.Add("lua_pushcfunction(luaState, [](lua_State* lsInner) {{");
         switchBlock.Indent(1);
         switchBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
                         -ssize_t(luaMethod.mArguments.size()) - 1);
@@ -93,48 +86,43 @@ namespace holgen {
         switchBlock.Add("}});");
       });
     }
-    codeBlock.Add(std::move(switcher.Generate()));
-    codeBlock.Line() << "return 1;";
-    codeBlock.Indent(-1);
-    codeBlock.Line() << "});"; // pushcfunction for __index
-    codeBlock.Add("lua_settable(luaState, -3);");
+
+    if (!switcher.IsEmpty()) {
+      method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -2);", cls.mName);
+      method.mBody.Add("const char* key = lua_tostring(luaState, -1);");
+      method.mBody.Add(std::move(switcher.Generate()));
+      method.mBody.Line() << "return 1;";
+    } else {
+      method.mBody.Line() << "return 0;";
+    }
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
 
-  void LuaPlugin::GeneratePushNewIndexMetaMethod(Class &cls) {
+  void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
     auto method = ClassMethod{
-        "PushNewIndexMetaMethod", Type{"void"}, Visibility::Private, Constness::NotConst, Staticness::Static};
-    auto &codeBlock = method.mBody;
+        "NewIndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    auto structDefinition = cls.mStruct;
-    if (structDefinition == nullptr)
-      return;
-    codeBlock.Add("lua_pushstring(luaState, \"__newindex\");");
-    codeBlock.Add("lua_pushcfunction(luaState, [](lua_State* ls) {{");
-    codeBlock.Indent(1);
-
-    codeBlock.Add("auto instance = {}::ReadFromLua(ls, -3);", cls.mName);
-    codeBlock.Add("const char* key = lua_tostring(ls, -2);");
     CodeBlock stringSwitcherElseCase;
     stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
     StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
       // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
-      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua))
+      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData)
         continue;
       // TODO: Make this work with pointers
       // TODO: Make this work with nested structs
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
       switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
-        switchBlock.Add("{}::{}(instance->{}, ls, -1);", St::LuaHelper, St::LuaHelper_Read, field.mName);
+        switchBlock.Add("{}::{}(instance->{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read, field.mName);
       });
     }
-    codeBlock.Add(std::move(switcher.Generate()));
-    codeBlock.Line() << "return 0;";
-    codeBlock.Indent(-1);
-    codeBlock.Line() << "});"; // pushcfunction for __newindex
-    codeBlock.Add("lua_settable(luaState, -3);");
+    if (!switcher.IsEmpty()) {
+      method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -3);", cls.mName);
+      method.mBody.Add("const char* key = lua_tostring(luaState, -2);");
+      method.mBody.Add(std::move(switcher.Generate()));
+    }
+    method.mBody.Line() << "return 0;";
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
@@ -213,8 +201,8 @@ namespace holgen {
     GeneratePushToLua(cls);
     GeneratePushGlobalToLua(cls);
     GenerateReadFromLua(cls);
-    GeneratePushIndexMetaMethod(cls);
-    GeneratePushNewIndexMetaMethod(cls);
+    GenerateIndexMetaMethod(cls);
+    GenerateNewIndexMetaMethod(cls);
     GenerateCreateLuaMetatable(cls);
   }
 
@@ -223,8 +211,14 @@ namespace holgen {
         "CreateLuaMetatable", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mBody.Add("lua_newtable(luaState);");
-    method.mBody.Add("PushIndexMetaMethod(luaState);");
-    method.mBody.Add("PushNewIndexMetaMethod(luaState);");
+
+    method.mBody.Add("lua_pushstring(luaState, \"__index\");");
+    method.mBody.Add("lua_pushcfunction(luaState, {}::IndexMetaMethod);", cls.mName);
+    method.mBody.Add("lua_settable(luaState, -3);");
+
+    method.mBody.Add("lua_pushstring(luaState, \"__newindex\");");
+    method.mBody.Add("lua_pushcfunction(luaState, {}::NewIndexMetaMethod);", cls.mName);
+    method.mBody.Add("lua_settable(luaState, -3);");
     method.mBody.Add("lua_setglobal(luaState, \"{}\");", Naming().LuaMetatableName(cls));
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));

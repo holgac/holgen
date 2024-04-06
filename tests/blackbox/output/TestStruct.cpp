@@ -66,49 +66,43 @@ TestStruct* TestStruct::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void TestStruct::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestStruct::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("testFieldBool", key)) {
-      LuaHelper::Push(instance->mTestFieldBool, ls);
-    } else if (0 == strcmp("testFieldUnsigned", key)) {
-      LuaHelper::Push(instance->mTestFieldUnsigned, ls);
-    } else if (0 == strcmp("testFieldString", key)) {
-      LuaHelper::Push(instance->mTestFieldString, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void TestStruct::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestStruct::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("testFieldBool", key)) {
-      LuaHelper::Read(instance->mTestFieldBool, ls, -1);
-    } else if (0 == strcmp("testFieldUnsigned", key)) {
-      LuaHelper::Read(instance->mTestFieldUnsigned, ls, -1);
-    } else if (0 == strcmp("testFieldString", key)) {
-      LuaHelper::Read(instance->mTestFieldString, ls, -1);
-    } else if (0 == strcmp("testFieldUserdata", key)) {
-      LuaHelper::Read(instance->mTestFieldUserdata, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
-    }
+int TestStruct::IndexMetaMethod(lua_State* luaState) {
+  auto instance = TestStruct::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("testFieldBool", key)) {
+    LuaHelper::Push(instance->mTestFieldBool, luaState);
+  } else if (0 == strcmp("testFieldUnsigned", key)) {
+    LuaHelper::Push(instance->mTestFieldUnsigned, luaState);
+  } else if (0 == strcmp("testFieldString", key)) {
+    LuaHelper::Push(instance->mTestFieldString, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int TestStruct::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = TestStruct::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("testFieldBool", key)) {
+    LuaHelper::Read(instance->mTestFieldBool, luaState, -1);
+  } else if (0 == strcmp("testFieldUnsigned", key)) {
+    LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
+  } else if (0 == strcmp("testFieldString", key)) {
+    LuaHelper::Read(instance->mTestFieldString, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
+  }
+  return 0;
 }
 void TestStruct::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestStruct::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestStruct::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructMeta");
 }
 }

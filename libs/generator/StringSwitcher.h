@@ -15,10 +15,11 @@ namespace holgen {
     StringSwitcher(std::string sourceStr, CodeBlock elseCase = {});
 
 
-    template <typename... Args>
+    template<typename... Args>
     void AddCase(Args... args) {
       AddCase(StringSwitchCase{std::forward<Args>(args)...});
     }
+
     void AddCase(StringSwitchCase aCase);
     CodeBlock Generate();
     bool IsEmpty() const;

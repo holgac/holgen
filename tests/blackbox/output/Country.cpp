@@ -74,47 +74,43 @@ Country* Country::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void Country::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Country::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("leader", key)) {
-      LuaHelper::Push(instance->mLeader, ls);
-    } else if (0 == strcmp("citizens", key)) {
-      LuaHelper::Push(instance->mCitizens, ls);
-    } else if (0 == strcmp("population", key)) {
-      LuaHelper::Push(instance->mPopulation, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Country.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void Country::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Country::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("leader", key)) {
-      LuaHelper::Read(instance->mLeader, ls, -1);
-    } else if (0 == strcmp("citizens", key)) {
-      LuaHelper::Read(instance->mCitizens, ls, -1);
-    } else if (0 == strcmp("population", key)) {
-      LuaHelper::Read(instance->mPopulation, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Country.{}", key);
-    }
+int Country::IndexMetaMethod(lua_State* luaState) {
+  auto instance = Country::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("leader", key)) {
+    LuaHelper::Push(instance->mLeader, luaState);
+  } else if (0 == strcmp("citizens", key)) {
+    LuaHelper::Push(instance->mCitizens, luaState);
+  } else if (0 == strcmp("population", key)) {
+    LuaHelper::Push(instance->mPopulation, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Country.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int Country::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = Country::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("leader", key)) {
+    LuaHelper::Read(instance->mLeader, luaState, -1);
+  } else if (0 == strcmp("citizens", key)) {
+    LuaHelper::Read(instance->mCitizens, luaState, -1);
+  } else if (0 == strcmp("population", key)) {
+    LuaHelper::Read(instance->mPopulation, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Country.{}", key);
+  }
+  return 0;
 }
 void Country::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, Country::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, Country::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "CountryMeta");
 }
 }

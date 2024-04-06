@@ -53,39 +53,35 @@ RaceId* RaceId::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void RaceId::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = RaceId::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("id", key)) {
-      LuaHelper::Push(instance->mId, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void RaceId::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = RaceId::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("id", key)) {
-      LuaHelper::Read(instance->mId, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);
-    }
+int RaceId::IndexMetaMethod(lua_State* luaState) {
+  auto instance = RaceId::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Push(instance->mId, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int RaceId::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = RaceId::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Read(instance->mId, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);
+  }
+  return 0;
 }
 void RaceId::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, RaceId::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, RaceId::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "RaceIdMeta");
 }
 }

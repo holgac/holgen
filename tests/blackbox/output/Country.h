@@ -28,8 +28,8 @@ public:
   static Country* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 private:
-  static void PushIndexMetaMethod(lua_State* luaState);
-  static void PushNewIndexMetaMethod(lua_State* luaState);
+  static int IndexMetaMethod(lua_State* luaState);
+  static int NewIndexMetaMethod(lua_State* luaState);
   Person mLeader;
   std::vector<Person> mCitizens;
   std::map<uint32_t, uint32_t> mPopulation;

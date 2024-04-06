@@ -109,81 +109,77 @@ TestContainerMap* TestContainerMap::ReadFromLua(lua_State* luaState, int32_t idx
   lua_pop(luaState, 1);
   return ptr;
 }
-void TestContainerMap::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestContainerMap::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("innerStructsWithId", key)) {
-      LuaHelper::Push(instance->mInnerStructsWithId, ls);
-    } else if (0 == strcmp("GetInnerStructWithIdFromName", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
-        std::string arg0;
-        LuaHelper::Read(arg0, lsInner, -1);
-        auto result = instance->GetInnerStructWithIdFromName(arg0);
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else if (0 == strcmp("GetInnerStructWithId", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
-        uint32_t arg0;
-        LuaHelper::Read(arg0, lsInner, -1);
-        auto result = instance->GetInnerStructWithId(arg0);
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else if (0 == strcmp("HasInnerStructWithId", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
-        uint32_t arg0;
-        LuaHelper::Read(arg0, lsInner, -1);
-        auto result = instance->HasInnerStructWithId(arg0);
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else if (0 == strcmp("DeleteInnerStructWithId", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
-        uint32_t arg0;
-        LuaHelper::Read(arg0, lsInner, -1);
-        instance->DeleteInnerStructWithId(arg0);
-        return 0;
-      });
-    } else if (0 == strcmp("GetInnerStructWithIdCount", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestContainerMap::ReadFromLua(lsInner, -1);
-        auto result = instance->GetInnerStructWithIdCount();
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
+int TestContainerMap::IndexMetaMethod(lua_State* luaState) {
+  auto instance = TestContainerMap::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("innerStructsWithId", key)) {
+    LuaHelper::Push(instance->mInnerStructsWithId, luaState);
+  } else if (0 == strcmp("GetInnerStructWithIdFromName", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      std::string arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->GetInnerStructWithIdFromName(arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else if (0 == strcmp("GetInnerStructWithId", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      uint32_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->GetInnerStructWithId(arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else if (0 == strcmp("HasInnerStructWithId", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      uint32_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->HasInnerStructWithId(arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else if (0 == strcmp("DeleteInnerStructWithId", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      uint32_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      instance->DeleteInnerStructWithId(arg0);
       return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void TestContainerMap::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestContainerMap::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("innerStructsWithId", key)) {
-      LuaHelper::Read(instance->mInnerStructsWithId, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
-    }
+    });
+  } else if (0 == strcmp("GetInnerStructWithIdCount", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestContainerMap::ReadFromLua(lsInner, -1);
+      auto result = instance->GetInnerStructWithIdCount();
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int TestContainerMap::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = TestContainerMap::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("innerStructsWithId", key)) {
+    LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
+  }
+  return 0;
 }
 void TestContainerMap::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestContainerMap::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestContainerMap::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestContainerMapMeta");
 }
 }

@@ -78,58 +78,54 @@ Weapon* Weapon::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void Weapon::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Weapon::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("damageMin", key)) {
-      LuaHelper::Push(instance->mDamageMin, ls);
-    } else if (0 == strcmp("damageMax", key)) {
-      LuaHelper::Push(instance->mDamageMax, ls);
-    } else if (0 == strcmp("damageMultipliers", key)) {
-      LuaHelper::Push(instance->mDamageMultipliers, ls);
-    } else if (0 == strcmp("modifiers", key)) {
-      LuaHelper::Push(instance->mModifiers, ls);
-    } else if (0 == strcmp("GetAverageDamage", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = Weapon::ReadFromLua(lsInner, -1);
-        auto result = instance->GetAverageDamage();
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void Weapon::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Weapon::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("damageMin", key)) {
-      LuaHelper::Read(instance->mDamageMin, ls, -1);
-    } else if (0 == strcmp("damageMax", key)) {
-      LuaHelper::Read(instance->mDamageMax, ls, -1);
-    } else if (0 == strcmp("damageMultipliers", key)) {
-      LuaHelper::Read(instance->mDamageMultipliers, ls, -1);
-    } else if (0 == strcmp("modifiers", key)) {
-      LuaHelper::Read(instance->mModifiers, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
-    }
+int Weapon::IndexMetaMethod(lua_State* luaState) {
+  auto instance = Weapon::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("damageMin", key)) {
+    LuaHelper::Push(instance->mDamageMin, luaState);
+  } else if (0 == strcmp("damageMax", key)) {
+    LuaHelper::Push(instance->mDamageMax, luaState);
+  } else if (0 == strcmp("damageMultipliers", key)) {
+    LuaHelper::Push(instance->mDamageMultipliers, luaState);
+  } else if (0 == strcmp("modifiers", key)) {
+    LuaHelper::Push(instance->mModifiers, luaState);
+  } else if (0 == strcmp("GetAverageDamage", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = Weapon::ReadFromLua(lsInner, -1);
+      auto result = instance->GetAverageDamage();
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int Weapon::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = Weapon::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("damageMin", key)) {
+    LuaHelper::Read(instance->mDamageMin, luaState, -1);
+  } else if (0 == strcmp("damageMax", key)) {
+    LuaHelper::Read(instance->mDamageMax, luaState, -1);
+  } else if (0 == strcmp("damageMultipliers", key)) {
+    LuaHelper::Read(instance->mDamageMultipliers, luaState, -1);
+  } else if (0 == strcmp("modifiers", key)) {
+    LuaHelper::Read(instance->mModifiers, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
+  }
+  return 0;
 }
 void Weapon::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, Weapon::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, Weapon::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "WeaponMeta");
 }
 }

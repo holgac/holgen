@@ -27,7 +27,7 @@ namespace holgen {
     }
     if (mElseCase.mContents.empty())
       codeBlock.Add("}}");
-    else {
+    else if (!mCases.empty()) {
       codeBlock.Add("}} else {{");
       codeBlock.Indent(1);
       codeBlock.Add(std::move(mElseCase));

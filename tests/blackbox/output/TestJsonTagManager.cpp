@@ -122,73 +122,69 @@ TestJsonTagManager* TestJsonTagManager::ReadFromLua(lua_State* luaState, int32_t
   lua_pop(luaState, 1);
   return ptr;
 }
-void TestJsonTagManager::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestJsonTagManager::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("tags", key)) {
-      LuaHelper::Push(instance->mTags, ls);
-    } else if (0 == strcmp("GetOrInsert", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);
-        std::string arg0;
-        LuaHelper::Read(arg0, lsInner, -1);
-        auto result = instance->GetOrInsert(arg0);
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else if (0 == strcmp("GetTagFromName", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);
-        std::string arg0;
-        LuaHelper::Read(arg0, lsInner, -1);
-        auto result = instance->GetTagFromName(arg0);
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else if (0 == strcmp("GetTag", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);
-        uint64_t arg0;
-        LuaHelper::Read(arg0, lsInner, -1);
-        auto result = instance->GetTag(arg0);
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else if (0 == strcmp("GetTagCount", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = TestJsonTagManager::ReadFromLua(lsInner, -1);
-        auto result = instance->GetTagCount();
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void TestJsonTagManager::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestJsonTagManager::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("tags", key)) {
-      LuaHelper::Read(instance->mTags, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
-    }
+int TestJsonTagManager::IndexMetaMethod(lua_State* luaState) {
+  auto instance = TestJsonTagManager::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("tags", key)) {
+    LuaHelper::Push(instance->mTags, luaState);
+  } else if (0 == strcmp("GetOrInsert", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);
+      std::string arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->GetOrInsert(arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else if (0 == strcmp("GetTagFromName", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);
+      std::string arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->GetTagFromName(arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else if (0 == strcmp("GetTag", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);
+      uint64_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->GetTag(arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else if (0 == strcmp("GetTagCount", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestJsonTagManager::ReadFromLua(lsInner, -1);
+      auto result = instance->GetTagCount();
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int TestJsonTagManager::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = TestJsonTagManager::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("tags", key)) {
+    LuaHelper::Read(instance->mTags, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
+  }
+  return 0;
 }
 void TestJsonTagManager::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestJsonTagManager::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestJsonTagManager::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestJsonTagManagerMeta");
 }
 }

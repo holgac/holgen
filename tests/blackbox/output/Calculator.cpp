@@ -93,50 +93,46 @@ Calculator* Calculator::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void Calculator::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Calculator::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("curVal", key)) {
-      LuaHelper::Push(instance->mCurVal, ls);
-    } else if (0 == strcmp("SubtractThenMultiply", key)) {
-      lua_pushcfunction(ls, [](lua_State* lsInner) {
-        auto instance = Calculator::ReadFromLua(lsInner, -3);
-        int64_t arg0;
-        LuaHelper::Read(arg0, lsInner, -2);
-        int64_t arg1;
-        LuaHelper::Read(arg1, lsInner, -1);
-        auto result = instance->SubtractThenMultiply(arg0, arg1);
-        LuaHelper::Push(result, lsInner);
-        return 1;
-      });
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void Calculator::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Calculator::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("curVal", key)) {
-      LuaHelper::Read(instance->mCurVal, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
-    }
+int Calculator::IndexMetaMethod(lua_State* luaState) {
+  auto instance = Calculator::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("curVal", key)) {
+    LuaHelper::Push(instance->mCurVal, luaState);
+  } else if (0 == strcmp("SubtractThenMultiply", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = Calculator::ReadFromLua(lsInner, -3);
+      int64_t arg0;
+      LuaHelper::Read(arg0, lsInner, -2);
+      int64_t arg1;
+      LuaHelper::Read(arg1, lsInner, -1);
+      auto result = instance->SubtractThenMultiply(arg0, arg1);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int Calculator::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = Calculator::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("curVal", key)) {
+    LuaHelper::Read(instance->mCurVal, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
+  }
+  return 0;
 }
 void Calculator::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, Calculator::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, Calculator::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "CalculatorMeta");
 }
 }

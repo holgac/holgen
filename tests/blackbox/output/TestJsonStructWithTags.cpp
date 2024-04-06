@@ -52,39 +52,35 @@ TestJsonStructWithTags* TestJsonStructWithTags::ReadFromLua(lua_State* luaState,
   lua_pop(luaState, 1);
   return ptr;
 }
-void TestJsonStructWithTags::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestJsonStructWithTags::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("tags", key)) {
-      LuaHelper::Push(instance->mTags, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void TestJsonStructWithTags::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestJsonStructWithTags::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("tags", key)) {
-      LuaHelper::Read(instance->mTags, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
-    }
+int TestJsonStructWithTags::IndexMetaMethod(lua_State* luaState) {
+  auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("tags", key)) {
+    LuaHelper::Push(instance->mTags, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int TestJsonStructWithTags::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("tags", key)) {
+    LuaHelper::Read(instance->mTags, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
+  }
+  return 0;
 }
 void TestJsonStructWithTags::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestJsonStructWithTags::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestJsonStructWithTags::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestJsonStructWithTagsMeta");
 }
 }

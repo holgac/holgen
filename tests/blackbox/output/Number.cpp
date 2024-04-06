@@ -49,39 +49,35 @@ Number* Number::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void Number::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Number::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("value", key)) {
-      LuaHelper::Push(instance->mValue, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Number.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void Number::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = Number::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("value", key)) {
-      LuaHelper::Read(instance->mValue, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: Number.{}", key);
-    }
+int Number::IndexMetaMethod(lua_State* luaState) {
+  auto instance = Number::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("value", key)) {
+    LuaHelper::Push(instance->mValue, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Number.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int Number::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = Number::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("value", key)) {
+    LuaHelper::Read(instance->mValue, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Number.{}", key);
+  }
+  return 0;
 }
 void Number::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, Number::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, Number::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "NumberMeta");
 }
 }

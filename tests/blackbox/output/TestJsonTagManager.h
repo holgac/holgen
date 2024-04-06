@@ -31,8 +31,8 @@ public:
   static TestJsonTagManager* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 private:
-  static void PushIndexMetaMethod(lua_State* luaState);
-  static void PushNewIndexMetaMethod(lua_State* luaState);
+  static int IndexMetaMethod(lua_State* luaState);
+  static int NewIndexMetaMethod(lua_State* luaState);
   std::vector<TestJsonTag> mTags;
   std::map<std::string, uint64_t> mTagsNameIndex;
 };

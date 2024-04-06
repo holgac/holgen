@@ -71,43 +71,39 @@ TestJsonTag* TestJsonTag::ReadFromLua(lua_State* luaState, int32_t idx) {
   lua_pop(luaState, 1);
   return ptr;
 }
-void TestJsonTag::PushIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestJsonTag::ReadFromLua(ls, -2);
-    const char* key = lua_tostring(ls, -1);
-    if (0 == strcmp("id", key)) {
-      LuaHelper::Push(instance->mId, ls);
-    } else if (0 == strcmp("name", key)) {
-      LuaHelper::Push(instance->mName, ls);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestJsonTag.{}", key);
-      return 0;
-    }
-    return 1;
-  });
-  lua_settable(luaState, -3);
-}
-void TestJsonTag::PushNewIndexMetaMethod(lua_State* luaState) {
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, [](lua_State* ls) {
-    auto instance = TestJsonTag::ReadFromLua(ls, -3);
-    const char* key = lua_tostring(ls, -2);
-    if (0 == strcmp("id", key)) {
-      LuaHelper::Read(instance->mId, ls, -1);
-    } else if (0 == strcmp("name", key)) {
-      LuaHelper::Read(instance->mName, ls, -1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestJsonTag.{}", key);
-    }
+int TestJsonTag::IndexMetaMethod(lua_State* luaState) {
+  auto instance = TestJsonTag::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Push(instance->mId, luaState);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonTag.{}", key);
     return 0;
-  });
-  lua_settable(luaState, -3);
+  }
+  return 1;
+}
+int TestJsonTag::NewIndexMetaMethod(lua_State* luaState) {
+  auto instance = TestJsonTag::ReadFromLua(luaState, -3);
+  const char* key = lua_tostring(luaState, -2);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Read(instance->mId, luaState, -1);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Read(instance->mName, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonTag.{}", key);
+  }
+  return 0;
 }
 void TestJsonTag::CreateLuaMetatable(lua_State* luaState) {
   lua_newtable(luaState);
-  PushIndexMetaMethod(luaState);
-  PushNewIndexMetaMethod(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestJsonTag::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestJsonTag::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestJsonTagMeta");
 }
 }
