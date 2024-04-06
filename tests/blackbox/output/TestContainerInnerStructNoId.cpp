@@ -26,10 +26,10 @@ bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value& json, const
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerInnerStructNoId");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "field")) {
+    if (0 == strcmp("field", name)) {
       auto res = JsonHelper::Parse(mField, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.field field");
-    } else if (0 == strcmp(name, "name")) {
+    } else if (0 == strcmp("name", name)) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.name field");
     } else {

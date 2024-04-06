@@ -58,18 +58,18 @@ bool Character::ParseJson(const rapidjson::Value& json, const Converter& convert
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Character");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "id")) {
+    if (0 == strcmp("id", name)) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.id field");
-    } else if (0 == strcmp(name, "name")) {
+    } else if (0 == strcmp("name", name)) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
-    } else if (0 == strcmp(name, "boot")) {
+    } else if (0 == strcmp("boot", name)) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.boot field");
       mBootId = converter.bootNameToId(temp);
-    } else if (0 == strcmp(name, "armor")) {
+    } else if (0 == strcmp("armor", name)) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");

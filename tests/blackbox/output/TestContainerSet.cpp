@@ -62,10 +62,10 @@ bool TestContainerSet::ParseJson(const rapidjson::Value& json, const Converter& 
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerSet");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "stringContainer")) {
+    if (0 == strcmp("stringContainer", name)) {
       auto res = JsonHelper::Parse(mStringContainer, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.stringContainer field");
-    } else if (0 == strcmp(name, "unsignedContainer")) {
+    } else if (0 == strcmp("unsignedContainer", name)) {
       auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.unsignedContainer field");
     } else {

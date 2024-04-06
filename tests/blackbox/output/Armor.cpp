@@ -52,16 +52,16 @@ bool Armor::ParseJson(const rapidjson::Value& json, const Converter& converter) 
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Armor");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "id")) {
+    if (0 == strcmp("id", name)) {
       auto res = JsonHelper::Parse(mId, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.id field");
-    } else if (0 == strcmp(name, "name")) {
+    } else if (0 == strcmp("name", name)) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.name field");
-    } else if (0 == strcmp(name, "alternativeName")) {
+    } else if (0 == strcmp("alternativeName", name)) {
       auto res = JsonHelper::Parse(mAlternativeName, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.alternativeName field");
-    } else if (0 == strcmp(name, "armorClass")) {
+    } else if (0 == strcmp("armorClass", name)) {
       auto res = JsonHelper::Parse(mArmorClass, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.armorClass field");
     } else {

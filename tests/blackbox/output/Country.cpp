@@ -38,13 +38,13 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Country");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "leader")) {
+    if (0 == strcmp("leader", name)) {
       auto res = mLeader.ParseJson(data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.leader field");
-    } else if (0 == strcmp(name, "citizens")) {
+    } else if (0 == strcmp("citizens", name)) {
       auto res = JsonHelper::Parse(mCitizens, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.citizens field");
-    } else if (0 == strcmp(name, "population")) {
+    } else if (0 == strcmp("population", name)) {
       std::map<std::string, uint32_t> temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.population field");

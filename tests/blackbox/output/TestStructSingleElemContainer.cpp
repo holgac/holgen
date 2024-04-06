@@ -77,10 +77,10 @@ bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value& json, cons
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructSingleElemContainer");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "singleElemStructs")) {
+    if (0 == strcmp("singleElemStructs", name)) {
       auto res = JsonHelper::Parse(mSingleElemStructs, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructs field");
-    } else if (0 == strcmp(name, "singleElemStructsWithId")) {
+    } else if (0 == strcmp("singleElemStructsWithId", name)) {
       auto res = JsonHelper::Parse(mSingleElemStructsWithId, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructsWithId field");
     } else {

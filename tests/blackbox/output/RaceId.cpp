@@ -17,7 +17,7 @@ bool RaceId::ParseJson(const rapidjson::Value& json, const Converter& converter)
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
       const auto& name = data.name.GetString();
-      if (0 == strcmp(name, "id")) {
+      if (0 == strcmp("id", name)) {
         std::string temp;
         auto res = JsonHelper::Parse(temp, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse RaceId.id field");

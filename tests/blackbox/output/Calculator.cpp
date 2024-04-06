@@ -59,13 +59,13 @@ bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& conver
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Calculator");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "curVal")) {
+    if (0 == strcmp("curVal", name)) {
       auto res = mCurVal.ParseJson(data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.curVal field");
-    } else if (0 == strcmp(name, "Add")) {
+    } else if (0 == strcmp("Add", name)) {
       auto res = JsonHelper::Parse(mLuaFuncHandle_Add, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Add");
-    } else if (0 == strcmp(name, "Subtract")) {
+    } else if (0 == strcmp("Subtract", name)) {
       auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Subtract");
     } else {

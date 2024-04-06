@@ -53,7 +53,7 @@ struct TestData {
 if (json.IsObject()) {
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "testFieldUnsigned")) {
+    if (0 == strcmp("testFieldUnsigned", name)) {
       auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
     } else {
@@ -93,16 +93,16 @@ struct TestData {
 HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
 for(const auto& data: json.GetObject()) {
   const auto& name = data.name.GetString();
-  if (0 == strcmp(name, "testFieldUnsigned")) {
+  if (0 == strcmp("testFieldUnsigned", name)) {
     auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
-  } else if (0 == strcmp(name, "testFieldDouble")) {
+  } else if (0 == strcmp("testFieldDouble", name)) {
     auto res = JsonHelper::Parse(mTestFieldDouble, data.value, converter);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldDouble field");
-  } else if (0 == strcmp(name, "testFieldBool")) {
+  } else if (0 == strcmp("testFieldBool", name)) {
     auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldBool field");
-  } else if (0 == strcmp(name, "testFieldFunc")) {
+  } else if (0 == strcmp("testFieldFunc", name)) {
     auto res = JsonHelper::Parse(mLuaFuncHandle_testFieldFunc, data.value, converter);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldFunc");
   } else {
@@ -136,12 +136,12 @@ struct TestData {
 HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
 for(const auto& data: json.GetObject()) {
   const auto& name = data.name.GetString();
-  if (0 == strcmp(name, "testFieldUnsigned")) {
+  if (0 == strcmp("testFieldUnsigned", name)) {
     std::string temp;
     auto res = JsonHelper::Parse(temp, data.value, converter);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
     mTestFieldUnsigned = converter.testU32Converter(temp);
-  } else if (0 == strcmp(name, "testFieldString")) {
+  } else if (0 == strcmp("testFieldString", name)) {
     bool temp;
     auto res = JsonHelper::Parse(temp, data.value, converter);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldString field");

@@ -20,7 +20,7 @@ bool TestStructSingleElem::ParseJson(const rapidjson::Value& json, const Convert
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
       const auto& name = data.name.GetString();
-      if (0 == strcmp(name, "name")) {
+      if (0 == strcmp("name", name)) {
         auto res = JsonHelper::Parse(mName, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElem.name field");
       } else {

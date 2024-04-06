@@ -34,10 +34,10 @@ bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) 
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
       const auto& name = data.name.GetString();
-      if (0 == strcmp(name, "id")) {
+      if (0 == strcmp("id", name)) {
         auto res = JsonHelper::Parse(mId, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.id field");
-      } else if (0 == strcmp(name, "name")) {
+      } else if (0 == strcmp("name", name)) {
         auto res = JsonHelper::Parse(mName, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.name field");
       } else {

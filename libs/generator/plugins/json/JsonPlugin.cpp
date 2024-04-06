@@ -1,5 +1,6 @@
 #include "JsonPlugin.h"
 #include <vector>
+#include "generator/StringSwitcher.h"
 #include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
@@ -49,43 +50,29 @@ namespace holgen {
     method.mArguments.emplace_back(
         "converter", Type{St::Converter, PassByType::Reference, Constness::Const});
 
-    // TODO: a helper class for string switching below
-    // Pass source string (and optional extra conds), and a map<case, action> and it generates the code below.
-    // later it can be smarter (i.e. switch on one of the chars to split as much as possible)
-    CodeBlock switchBlock;
-    bool isFirst = true;
+    CodeBlock stringSwitcherElseCase;
+    stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
+    StringSwitcher switcher("name", std::move(stringSwitcherElseCase));
     for (const auto &field: cls.mFields) {
       if (
           !field.mField || field.mField->GetAnnotation(Annotations::NoJson) ||
           field.mField->mType.mName == St::UserData)
         continue;
-      if (isFirst) {
-        switchBlock.Line() << "if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
-        isFirst = false;
-      } else {
-        switchBlock.Line() << "} else if (0 == strcmp(name, \"" << field.mField->mName << "\")) {";
-      }
-      switchBlock.Indent(1); // if name == fieldName
-      GenerateParseJsonForField(cls, switchBlock, field, "data.value");
-      switchBlock.Indent(-1); // if name == fieldName
+      switcher.AddCase(field.mField->mName, [&](CodeBlock &switchBlock) {
+        GenerateParseJsonForField(cls, switchBlock, field, "data.value");
+      });
     }
 
     for (const auto &luaMethod: cls.mMethods) {
       if (!luaMethod.mFunction || luaMethod.mFunction->GetAnnotation(Annotations::NoJson) ||
           !luaMethod.mFunction->GetAnnotation(Annotations::LuaFunc))
         continue;
-      if (isFirst) {
-        switchBlock.Line() << "if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
-        isFirst = false;
-      } else {
-        switchBlock.Line() << "} else if (0 == strcmp(name, \"" << luaMethod.mFunction->mName << "\")) {";
-      }
-      switchBlock.Indent(1); // if name == fieldName
-      GenerateParseJsonForFunction(cls, switchBlock, luaMethod);
-      switchBlock.Indent(-1); // if name == fieldName
+      switcher.AddCase(luaMethod.mFunction->mName, [&](CodeBlock &switchBlock) {
+        GenerateParseJsonForFunction(cls, switchBlock, luaMethod);
+      });
     }
 
-    if (!switchBlock.mContents.empty()) {
+    if (!switcher.IsEmpty()) {
       auto singleField = GetSingleBasicField(cls);
       if (singleField) {
         method.mBody.Add("if (json.IsObject()) {{");
@@ -99,12 +86,7 @@ namespace holgen {
       method.mBody.Add("for(const auto& data: json.GetObject()) {{");
       method.mBody.Indent(1);
       method.mBody.Add("const auto& name = data.name.GetString();");
-      method.mBody.Add(std::move(switchBlock));
-      method.mBody.Line() << "} else {";
-      method.mBody.Indent(1);
-      method.mBody.Add(R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
-      method.mBody.Indent(-1);
-      method.mBody.Line() << "}";
+      method.mBody.Add(std::move(switcher.Generate()));
       method.mBody.Indent(-1);
       method.mBody.Line() << "}"; // range based for on json.GetObject()
       if (singleField) {

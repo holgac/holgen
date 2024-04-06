@@ -81,7 +81,7 @@ bool TestContainerMap::ParseJson(const rapidjson::Value& json, const Converter& 
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerMap");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "innerStructsWithId")) {
+    if (0 == strcmp("innerStructsWithId", name)) {
       auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerMap.innerStructsWithId field");
     } else {

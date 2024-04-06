@@ -32,13 +32,13 @@ bool TestStruct::ParseJson(const rapidjson::Value& json, const Converter& conver
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStruct");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "testFieldBool")) {
+    if (0 == strcmp("testFieldBool", name)) {
       auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldBool field");
-    } else if (0 == strcmp(name, "testFieldUnsigned")) {
+    } else if (0 == strcmp("testFieldUnsigned", name)) {
       auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldUnsigned field");
-    } else if (0 == strcmp(name, "testFieldString")) {
+    } else if (0 == strcmp("testFieldString", name)) {
       auto res = JsonHelper::Parse(mTestFieldString, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldString field");
     } else {

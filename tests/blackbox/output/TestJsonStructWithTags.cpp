@@ -20,7 +20,7 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value& json, const Conve
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestJsonStructWithTags");
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
-    if (0 == strcmp(name, "tags")) {
+    if (0 == strcmp("tags", name)) {
       auto res = JsonHelper::Parse<std::string>(mTags, data.value, converter, converter.testJsonConvertTag);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
     } else {

@@ -1,6 +1,7 @@
 #include "LuaPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include "generator/StringSwitcher.h"
 
 namespace holgen {
   namespace {
@@ -29,82 +30,68 @@ namespace holgen {
     codeBlock.Indent(1);
     codeBlock.Add("auto instance = {}::ReadFromLua(ls, -2);", cls.mName);
     codeBlock.Add("const char* key = lua_tostring(ls, -1);");
-    bool isFirst = true;
+    CodeBlock stringSwitcherElseCase;
+    // TODO: enable this
+    // stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {{}}", name);)R");
+    stringSwitcherElseCase.Add("return 0;");
+    StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
       if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData)
         continue;
       bool isRef = field.mField->mType.mName == "Ref";
-      if (isFirst) {
-        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(*field.mField));
-        isFirst = false;
-      } else {
-        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(*field.mField));
-      }
-      codeBlock.Indent(1);
-      codeBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push, field.mName);
-      codeBlock.Indent(-1);
+      switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
+        switchBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push, field.mName);
+      });
       if (isRef && field.mType.mType != PassByType::Pointer) {
-        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{",
-                      Naming().FieldNameInLua(*field.mField, true));
-        codeBlock.Indent(1);
-        codeBlock.Add("{}::{}({}::{}(instance->{}), ls);", St::LuaHelper, St::LuaHelper_Push,
-                      field.mField->mType.mTemplateParameters[0].mName, St::ManagedObject_Getter, field.mName);
-        codeBlock.Indent(-1);
+        switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
+          switchBlock.Add("{}::{}({}::{}(instance->{}), ls);", St::LuaHelper, St::LuaHelper_Push,
+                        field.mField->mType.mTemplateParameters[0].mName, St::ManagedObject_Getter, field.mName);
+        });
       }
     }
     for (auto &luaMethod: cls.mMethods) {
       if (!luaMethod.mExposeToLua)
         continue;
-      if (isFirst) {
-        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", luaMethod.mName);
-        isFirst = false;
-      } else {
-        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", luaMethod.mName);
-      }
-      codeBlock.Indent(1);
-      // TODO: LuaHelper::Push should work with functions
-      codeBlock.Add("lua_pushcfunction(ls, [](lua_State* lsInner) {{");
-      codeBlock.Indent(1);
-      codeBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
-                    -ssize_t(luaMethod.mArguments.size()) - 1);
-      std::stringstream funcArgs;
-      size_t i = 0;
-      for (auto &arg: luaMethod.mArguments) {
-        if (i != 0)
-          funcArgs << ", ";
-        funcArgs << "arg" << i;
-        if (mProject.GetClass(arg.mType.mName)) {
-          codeBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});",
-                        i, arg.mType.mName, ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
-        } else {
-          auto sanitizedType = arg.mType;
-          sanitizedType.mType = PassByType::Value;
-          sanitizedType.mConstness = Constness::NotConst;
-          codeBlock.Add("{} arg{};", sanitizedType.ToString(), i);
-          codeBlock.Add(
-              "{}::{}(arg{}, lsInner, {});",
-              St::LuaHelper, St::LuaHelper_Read, i,
-              ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+      switcher.AddCase(luaMethod.mName, [&](CodeBlock &switchBlock) {
+        // TODO: LuaHelper::Push should work with functions
+        switchBlock.Add("lua_pushcfunction(ls, [](lua_State* lsInner) {{");
+        switchBlock.Indent(1);
+        switchBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
+                      -ssize_t(luaMethod.mArguments.size()) - 1);
+        std::stringstream funcArgs;
+        size_t i = 0;
+        for (auto &arg: luaMethod.mArguments) {
+          if (i != 0)
+            funcArgs << ", ";
+          funcArgs << "arg" << i;
+          if (mProject.GetClass(arg.mType.mName)) {
+            switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});",
+                          i, arg.mType.mName, ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+          } else {
+            auto sanitizedType = arg.mType;
+            sanitizedType.mType = PassByType::Value;
+            sanitizedType.mConstness = Constness::NotConst;
+            switchBlock.Add("{} arg{};", sanitizedType.ToString(), i);
+            switchBlock.Add(
+                "{}::{}(arg{}, lsInner, {});",
+                St::LuaHelper, St::LuaHelper_Read, i,
+                ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+          }
+          ++i;
         }
-        ++i;
-      }
-      if (luaMethod.mReturnType.mName != "void") {
-        codeBlock.Add("auto result = instance->{}({});", luaMethod.mName, funcArgs.str());
-        codeBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
-        codeBlock.Add("return 1;");
-      } else {
-        codeBlock.Add("instance->{}({});", luaMethod.mName, funcArgs.str());
-        codeBlock.Add("return 0;");
-      }
-      codeBlock.Indent(-1);
-      codeBlock.Add("}});");
-      codeBlock.Indent(-1);
+        if (luaMethod.mReturnType.mName != "void") {
+          switchBlock.Add("auto result = instance->{}({});", luaMethod.mName, funcArgs.str());
+          switchBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
+          switchBlock.Add("return 1;");
+        } else {
+          switchBlock.Add("instance->{}({});", luaMethod.mName, funcArgs.str());
+          switchBlock.Add("return 0;");
+        }
+        switchBlock.Indent(-1);
+        switchBlock.Add("}});");
+      });
     }
-    codeBlock.Line() << "} else {";
-    codeBlock.Indent(1);
-    codeBlock.Line() << "return 0;";
-    codeBlock.Indent(-1);
-    codeBlock.Line() << "}";
+    codeBlock.Add(std::move(switcher.Generate()));
     codeBlock.Line() << "return 1;";
     codeBlock.Indent(-1);
     codeBlock.Line() << "});"; // pushcfunction for __index
@@ -127,26 +114,23 @@ namespace holgen {
 
     codeBlock.Add("auto instance = {}::ReadFromLua(ls, -3);", cls.mName);
     codeBlock.Add("const char* key = lua_tostring(ls, -2);");
-    bool isFirst = true;
+    CodeBlock stringSwitcherElseCase;
+    // TODO: enable this
+    // stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {{}}", name);)R");
+    StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
       // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
       if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua))
         continue;
-      if (isFirst) {
-        codeBlock.Add("if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(*field.mField));
-        isFirst = false;
-      } else {
-        codeBlock.Add("}} else if (0 == strcmp(\"{}\", key)) {{", Naming().FieldNameInLua(*field.mField));
-      }
       // TODO: Implement else case
       // TODO: Make this work with pointers
       // TODO: Make this work with nested structs
-      codeBlock.Indent(1);
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
-      codeBlock.Add("{}::{}(instance->{}, ls, -1);", St::LuaHelper, St::LuaHelper_Read, field.mName);
-      codeBlock.Indent(-1);
+      switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
+        switchBlock.Add("{}::{}(instance->{}, ls, -1);", St::LuaHelper, St::LuaHelper_Read, field.mName);
+      });
     }
-    codeBlock.Line() << "}";
+    codeBlock.Add(std::move(switcher.Generate()));
     codeBlock.Line() << "return 0;";
     codeBlock.Indent(-1);
     codeBlock.Line() << "});"; // pushcfunction for __newindex

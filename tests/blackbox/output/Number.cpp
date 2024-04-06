@@ -17,7 +17,7 @@ bool Number::ParseJson(const rapidjson::Value& json, const Converter& converter)
   if (json.IsObject()) {
     for(const auto& data: json.GetObject()) {
       const auto& name = data.name.GetString();
-      if (0 == strcmp(name, "value")) {
+      if (0 == strcmp("value", name)) {
         auto res = JsonHelper::Parse(mValue, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Number.value field");
       } else {
