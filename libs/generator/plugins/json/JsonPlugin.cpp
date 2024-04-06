@@ -25,7 +25,9 @@ namespace holgen {
         singleField = &field;
       }
       if (singleField) {
-        if (TypeInfo::Get().CppBasicTypes.contains(singleField->mType.mName))
+        if (TypeInfo::Get().CppBasicTypes.contains(singleField->mType.mName) ||
+            TypeInfo::Get().CppIndexedContainers.contains(singleField->mType.mName) ||
+            TypeInfo::Get().CppSets.contains(singleField->mType.mName))
           return singleField;
         return nullptr;
       }

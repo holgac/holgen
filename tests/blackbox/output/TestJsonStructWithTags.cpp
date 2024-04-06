@@ -17,15 +17,19 @@ void TestJsonStructWithTags::SetTags(const std::vector<uint64_t>& val) {
   mTags = val;
 }
 bool TestJsonStructWithTags::ParseJson(const rapidjson::Value& json, const Converter& converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestJsonStructWithTags");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
-    if (0 == strcmp("tags", name)) {
-      auto res = JsonHelper::Parse<std::string>(mTags, data.value, converter, converter.testJsonConvertTag);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructWithTags: {}", name);
+  if (json.IsObject()) {
+    for(const auto& data: json.GetObject()) {
+      const auto& name = data.name.GetString();
+      if (0 == strcmp("tags", name)) {
+        auto res = JsonHelper::Parse<std::string>(mTags, data.value, converter, converter.testJsonConvertTag);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructWithTags: {}", name);
+      }
     }
+  } else {
+    auto res = JsonHelper::Parse<std::string>(mTags, json, converter, converter.testJsonConvertTag);
+    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
   }
   return true;
 }

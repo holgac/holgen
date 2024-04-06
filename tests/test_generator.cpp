@@ -379,15 +379,19 @@ void Animal::SetSounds(const std::vector<Sound>& val) {
   mSounds = val;
 }
 bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Animal");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
-    if (0 == strcmp("sounds", name)) {
-      auto res = JsonHelper::Parse(mSounds, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Animal.sounds field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Animal: {}", name);
+  if (json.IsObject()) {
+    for(const auto& data: json.GetObject()) {
+      const auto& name = data.name.GetString();
+      if (0 == strcmp("sounds", name)) {
+        auto res = JsonHelper::Parse(mSounds, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Animal.sounds field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Animal: {}", name);
+      }
     }
+  } else {
+    auto res = JsonHelper::Parse(mSounds, json, converter);
+    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Animal.sounds field");
   }
   return true;
 }
