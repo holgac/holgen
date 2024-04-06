@@ -286,8 +286,6 @@ lua_pushcfunction(luaState, [](lua_State* ls) {
   const char* key = lua_tostring(ls, -1);
   if (0 == strcmp("testStructWithIdRefId", key)) {
     LuaHelper::Push(instance->mTestStructWithIdRefId, ls);
-  } else if (0 == strcmp("testStructWithIdRef", key)) {
-    LuaHelper::Push(InnerStructWithId::Get(instance->mTestStructWithIdRefId), ls);
   } else if (0 == strcmp("testStructNoIdRef", key)) {
     LuaHelper::Push(instance->mTestStructNoIdRef, ls);
   } else {

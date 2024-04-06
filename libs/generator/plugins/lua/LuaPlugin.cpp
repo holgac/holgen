@@ -43,10 +43,13 @@ namespace holgen {
         switchBlock.Add("{}::{}(instance->{}, ls);", St::LuaHelper, St::LuaHelper_Push, field.mName);
       });
       if (isRef && field.mType.mType != PassByType::Pointer) {
-        switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
-          switchBlock.Add("{}::{}({}::{}(instance->{}), ls);", St::LuaHelper, St::LuaHelper_Push,
-                        field.mField->mType.mTemplateParameters[0].mName, St::ManagedObject_Getter, field.mName);
-        });
+        auto underlyingStruct = mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.front().mName);
+        if (underlyingStruct->GetAnnotation(Annotations::Managed)) {
+          switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
+            switchBlock.Add("{}::{}({}::{}(instance->{}), ls);", St::LuaHelper, St::LuaHelper_Push,
+                            field.mField->mType.mTemplateParameters[0].mName, St::ManagedObject_Getter, field.mName);
+          });
+        }
       }
     }
     for (auto &luaMethod: cls.mMethods) {
@@ -57,7 +60,7 @@ namespace holgen {
         switchBlock.Add("lua_pushcfunction(ls, [](lua_State* lsInner) {{");
         switchBlock.Indent(1);
         switchBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
-                      -ssize_t(luaMethod.mArguments.size()) - 1);
+                        -ssize_t(luaMethod.mArguments.size()) - 1);
         std::stringstream funcArgs;
         size_t i = 0;
         for (auto &arg: luaMethod.mArguments) {
@@ -66,7 +69,7 @@ namespace holgen {
           funcArgs << "arg" << i;
           if (mProject.GetClass(arg.mType.mName)) {
             switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});",
-                          i, arg.mType.mName, ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+                            i, arg.mType.mName, ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
           } else {
             auto sanitizedType = arg.mType;
             sanitizedType.mType = PassByType::Value;
