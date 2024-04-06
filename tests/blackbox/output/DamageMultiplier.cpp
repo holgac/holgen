@@ -67,6 +67,7 @@ void DamageMultiplier::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("value", key)) {
       LuaHelper::Push(instance->mValue, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
       return 0;
     }
     return 1;
@@ -82,6 +83,8 @@ void DamageMultiplier::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mWhen, ls, -1);
     } else if (0 == strcmp("value", key)) {
       LuaHelper::Read(instance->mValue, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
     }
     return 0;
   });

@@ -107,8 +107,8 @@ namespace holgen {
     GenerateParseSingleElem(cls, "uint16_t", "IsUint", "GetUint");
     GenerateParseSingleElem(cls, "uint32_t", "IsUint", "GetUint");
     GenerateParseSingleElem(cls, "uint64_t", "IsUint64", "GetUint64");
-    GenerateParseSingleElem(cls, "float", "IsFloat", "GetFloat");
-    GenerateParseSingleElem(cls, "double", "IsDouble", "GetDouble");
+    GenerateParseSingleElem(cls, "float", "IsNumber", "GetFloat");
+    GenerateParseSingleElem(cls, "double", "IsNumber", "GetDouble");
     GenerateParseSingleElem(cls, "bool", "IsBool", "GetBool");
     GenerateParseSingleElem(cls, "std::string", "IsString", "GetString");
   }

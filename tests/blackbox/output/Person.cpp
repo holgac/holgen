@@ -107,6 +107,7 @@ void Person::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("placeOfBirth", key)) {
       LuaHelper::Push(instance->mPlaceOfBirth, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: Person.{}", key);
       return 0;
     }
     return 1;
@@ -128,6 +129,8 @@ void Person::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mHomeCountry, ls, -1);
     } else if (0 == strcmp("placeOfBirth", key)) {
       LuaHelper::Read(instance->mPlaceOfBirth, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Person.{}", key);
     }
     return 0;
   });

@@ -151,6 +151,7 @@ void TestContainerSet::PushIndexMetaMethod(lua_State* luaState) {
         return 1;
       });
     } else {
+      HOLGEN_WARN("Unexpected lua field: TestContainerSet.{}", key);
       return 0;
     }
     return 1;
@@ -166,6 +167,8 @@ void TestContainerSet::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mStringContainer, ls, -1);
     } else if (0 == strcmp("unsignedContainer", key)) {
       LuaHelper::Read(instance->mUnsignedContainer, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestContainerSet.{}", key);
     }
     return 0;
   });

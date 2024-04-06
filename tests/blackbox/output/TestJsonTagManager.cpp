@@ -164,6 +164,7 @@ void TestJsonTagManager::PushIndexMetaMethod(lua_State* luaState) {
         return 1;
       });
     } else {
+      HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
       return 0;
     }
     return 1;
@@ -177,6 +178,8 @@ void TestJsonTagManager::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("tags", key)) {
       LuaHelper::Read(instance->mTags, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
     }
     return 0;
   });

@@ -31,8 +31,7 @@ namespace holgen {
     codeBlock.Add("auto instance = {}::ReadFromLua(ls, -2);", cls.mName);
     codeBlock.Add("const char* key = lua_tostring(ls, -1);");
     CodeBlock stringSwitcherElseCase;
-    // TODO: enable this
-    // stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {{}}", name);)R");
+    stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
     stringSwitcherElseCase.Add("return 0;");
     StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
@@ -118,14 +117,12 @@ namespace holgen {
     codeBlock.Add("auto instance = {}::ReadFromLua(ls, -3);", cls.mName);
     codeBlock.Add("const char* key = lua_tostring(ls, -2);");
     CodeBlock stringSwitcherElseCase;
-    // TODO: enable this
-    // stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {{}}", name);)R");
+    stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
     StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
       // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
       if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua))
         continue;
-      // TODO: Implement else case
       // TODO: Make this work with pointers
       // TODO: Make this work with nested structs
       // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].

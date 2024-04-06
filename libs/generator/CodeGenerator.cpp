@@ -353,7 +353,7 @@ namespace holgen {
     codeBlock.Line();
     codeBlock.Add("#ifndef HOLGEN_WARN");
     codeBlock.Add(
-        R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}} " msg, __FILE__, __LINE__, ## __VA_ARGS__))");
+        R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}} " msg "\n", __FILE__, __LINE__, ## __VA_ARGS__))");
     codeBlock.Add("#endif // ifndef HOLGEN_WARN");
 
     codeBlock.Line();

@@ -56,6 +56,7 @@ void TestEnumStruct::PushIndexMetaMethod(lua_State* luaState) {
     if (0 == strcmp("enumField", key)) {
       LuaHelper::Push(instance->mEnumField, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
       return 0;
     }
     return 1;
@@ -69,6 +70,8 @@ void TestEnumStruct::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("enumField", key)) {
       LuaHelper::Read(instance->mEnumField, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
     }
     return 0;
   });

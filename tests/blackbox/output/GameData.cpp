@@ -392,6 +392,7 @@ void GameData::PushIndexMetaMethod(lua_State* luaState) {
         return 1;
       });
     } else {
+      HOLGEN_WARN("Unexpected lua field: GameData.{}", key);
       return 0;
     }
     return 1;
@@ -409,6 +410,8 @@ void GameData::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mArmors, ls, -1);
     } else if (0 == strcmp("characters", key)) {
       LuaHelper::Read(instance->mCharacters, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: GameData.{}", key);
     }
     return 0;
   });

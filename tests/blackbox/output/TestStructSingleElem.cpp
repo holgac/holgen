@@ -60,6 +60,7 @@ void TestStructSingleElem::PushIndexMetaMethod(lua_State* luaState) {
     if (0 == strcmp("name", key)) {
       LuaHelper::Push(instance->mName, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: TestStructSingleElem.{}", key);
       return 0;
     }
     return 1;
@@ -73,6 +74,8 @@ void TestStructSingleElem::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("name", key)) {
       LuaHelper::Read(instance->mName, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestStructSingleElem.{}", key);
     }
     return 0;
   });

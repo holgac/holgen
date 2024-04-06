@@ -91,6 +91,7 @@ void Boot::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("color", key)) {
       LuaHelper::Push(instance->mColor, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: Boot.{}", key);
       return 0;
     }
     return 1;
@@ -108,6 +109,8 @@ void Boot::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mName, ls, -1);
     } else if (0 == strcmp("color", key)) {
       LuaHelper::Read(instance->mColor, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Boot.{}", key);
     }
     return 0;
   });

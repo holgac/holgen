@@ -95,6 +95,7 @@ void Race::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("names", key)) {
       LuaHelper::Push(instance->mNames, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: Race.{}", key);
       return 0;
     }
     return 1;
@@ -114,6 +115,8 @@ void Race::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mHairColors, ls, -1);
     } else if (0 == strcmp("names", key)) {
       LuaHelper::Read(instance->mNames, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Race.{}", key);
     }
     return 0;
   });

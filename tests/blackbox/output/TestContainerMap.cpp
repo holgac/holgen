@@ -159,6 +159,7 @@ void TestContainerMap::PushIndexMetaMethod(lua_State* luaState) {
         return 1;
       });
     } else {
+      HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
       return 0;
     }
     return 1;
@@ -172,6 +173,8 @@ void TestContainerMap::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("innerStructsWithId", key)) {
       LuaHelper::Read(instance->mInnerStructsWithId, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
     }
     return 0;
   });

@@ -78,6 +78,7 @@ void TestStruct::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("testFieldString", key)) {
       LuaHelper::Push(instance->mTestFieldString, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
       return 0;
     }
     return 1;
@@ -97,6 +98,8 @@ void TestStruct::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mTestFieldString, ls, -1);
     } else if (0 == strcmp("testFieldUserdata", key)) {
       LuaHelper::Read(instance->mTestFieldUserdata, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
     }
     return 0;
   });

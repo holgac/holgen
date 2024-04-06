@@ -199,6 +199,7 @@ lua_pushcfunction(luaState, [](lua_State* ls) {
   } else if (0 == strcmp("testFieldInnerStruct", key)) {
     LuaHelper::Push(instance->mTestFieldInnerStruct, ls);
   } else {
+    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
     return 0;
   }
   return 1;
@@ -249,6 +250,7 @@ lua_pushcfunction(luaState, [](lua_State* ls) {
       return 1;
     });
   } else {
+    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
     return 0;
   }
   return 1;
@@ -289,6 +291,7 @@ lua_pushcfunction(luaState, [](lua_State* ls) {
   } else if (0 == strcmp("testStructNoIdRef", key)) {
     LuaHelper::Push(instance->mTestStructNoIdRef, ls);
   } else {
+    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
     return 0;
   }
   return 1;
@@ -326,6 +329,8 @@ lua_pushcfunction(luaState, [](lua_State* ls) {
     LuaHelper::Read(instance->mTestFieldString, ls, -1);
   } else if (0 == strcmp("testFieldBool", key)) {
     LuaHelper::Read(instance->mTestFieldBool, ls, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
   }
   return 0;
 });
@@ -360,6 +365,8 @@ lua_pushcfunction(luaState, [](lua_State* ls) {
   const char* key = lua_tostring(ls, -2);
   if (0 == strcmp("testStructRefId", key)) {
     LuaHelper::Read(instance->mTestStructRefId, ls, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
   }
   return 0;
 });

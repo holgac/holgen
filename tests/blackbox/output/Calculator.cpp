@@ -112,6 +112,7 @@ void Calculator::PushIndexMetaMethod(lua_State* luaState) {
         return 1;
       });
     } else {
+      HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
       return 0;
     }
     return 1;
@@ -125,6 +126,8 @@ void Calculator::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("curVal", key)) {
       LuaHelper::Read(instance->mCurVal, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
     }
     return 0;
   });

@@ -172,6 +172,7 @@ void HumanManager::PushIndexMetaMethod(lua_State* luaState) {
         return 1;
       });
     } else {
+      HOLGEN_WARN("Unexpected lua field: HumanManager.{}", key);
       return 0;
     }
     return 1;
@@ -185,6 +186,8 @@ void HumanManager::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("humans", key)) {
       LuaHelper::Read(instance->mHumans, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: HumanManager.{}", key);
     }
     return 0;
   });

@@ -99,6 +99,7 @@ void Weapon::PushIndexMetaMethod(lua_State* luaState) {
         return 1;
       });
     } else {
+      HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
       return 0;
     }
     return 1;
@@ -118,6 +119,8 @@ void Weapon::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mDamageMultipliers, ls, -1);
     } else if (0 == strcmp("modifiers", key)) {
       LuaHelper::Read(instance->mModifiers, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
     }
     return 0;
   });

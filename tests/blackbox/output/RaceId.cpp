@@ -61,6 +61,7 @@ void RaceId::PushIndexMetaMethod(lua_State* luaState) {
     if (0 == strcmp("id", key)) {
       LuaHelper::Push(instance->mId, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);
       return 0;
     }
     return 1;
@@ -74,6 +75,8 @@ void RaceId::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("id", key)) {
       LuaHelper::Read(instance->mId, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);
     }
     return 0;
   });

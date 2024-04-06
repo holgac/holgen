@@ -52,13 +52,13 @@ bool JsonHelper::Parse(uint64_t& out, const rapidjson::Value& json, const Conver
 }
 template <>
 bool JsonHelper::Parse(float& out, const rapidjson::Value& json, const Converter& converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsFloat(), false, "Found type mismatch in json when parsing float");
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsNumber(), false, "Found type mismatch in json when parsing float");
   out = json.GetFloat();
   return true;
 }
 template <>
 bool JsonHelper::Parse(double& out, const rapidjson::Value& json, const Converter& converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsDouble(), false, "Found type mismatch in json when parsing double");
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsNumber(), false, "Found type mismatch in json when parsing double");
   out = json.GetDouble();
   return true;
 }

@@ -57,6 +57,7 @@ void Number::PushIndexMetaMethod(lua_State* luaState) {
     if (0 == strcmp("value", key)) {
       LuaHelper::Push(instance->mValue, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: Number.{}", key);
       return 0;
     }
     return 1;
@@ -70,6 +71,8 @@ void Number::PushNewIndexMetaMethod(lua_State* luaState) {
     const char* key = lua_tostring(ls, -2);
     if (0 == strcmp("value", key)) {
       LuaHelper::Read(instance->mValue, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Number.{}", key);
     }
     return 0;
   });

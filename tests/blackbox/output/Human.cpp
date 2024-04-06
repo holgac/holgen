@@ -79,6 +79,7 @@ void Human::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Push(instance->mName, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: Human.{}", key);
       return 0;
     }
     return 1;
@@ -94,6 +95,8 @@ void Human::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mId, ls, -1);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Read(instance->mName, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Human.{}", key);
     }
     return 0;
   });

@@ -86,6 +86,7 @@ void Country::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("population", key)) {
       LuaHelper::Push(instance->mPopulation, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: Country.{}", key);
       return 0;
     }
     return 1;
@@ -103,6 +104,8 @@ void Country::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mCitizens, ls, -1);
     } else if (0 == strcmp("population", key)) {
       LuaHelper::Read(instance->mPopulation, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Country.{}", key);
     }
     return 0;
   });

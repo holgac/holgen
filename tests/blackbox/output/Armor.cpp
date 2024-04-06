@@ -105,6 +105,7 @@ void Armor::PushIndexMetaMethod(lua_State* luaState) {
     } else if (0 == strcmp("armorClass", key)) {
       LuaHelper::Push(instance->mArmorClass, ls);
     } else {
+      HOLGEN_WARN("Unexpected lua field: Armor.{}", key);
       return 0;
     }
     return 1;
@@ -124,6 +125,8 @@ void Armor::PushNewIndexMetaMethod(lua_State* luaState) {
       LuaHelper::Read(instance->mAlternativeName, ls, -1);
     } else if (0 == strcmp("armorClass", key)) {
       LuaHelper::Read(instance->mArmorClass, ls, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Armor.{}", key);
     }
     return 0;
   });
