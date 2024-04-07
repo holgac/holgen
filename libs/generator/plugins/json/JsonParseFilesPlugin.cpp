@@ -45,49 +45,49 @@ namespace holgen {
           continue;
         auto &fieldDefinition = *field.mField;
         auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
-        // TODO: invert if
-        if (templateParameter.mName == structToProcess) {
-          {
-            auto line = method.mBody.Line();
-            if (isFirst) {
-              line << "auto it";
-              isFirst = false;
-            } else {
-              line << "it";
-            }
-            line << " = filesByName.find(\"" << fieldDefinition.mName << "\");";
+        if (templateParameter.mName != structToProcess)
+          continue;
+
+        {
+          auto line = method.mBody.Line();
+          if (isFirst) {
+            line << "auto it";
+            isFirst = false;
+          } else {
+            line << "it";
           }
-          method.mBody.Add("if (it != filesByName.end()) {{");
-          method.mBody.Indent(1);
-
-          method.mBody.Add("for (const auto& filePath: it->second) {{");
-          method.mBody.Indent(1);
-          method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
-                           St::FilesystemHelper_ReadFile);
-          method.mBody.Add("rapidjson::Document doc;");
-          method.mBody.Add("doc.Parse(contents.c_str());");
-          method.mBody.Add(
-              R"(HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {{}}: It is supposed to contain a list of {} entries", filePath.string());)",
-              structToProcess);
-          method.mBody.Add("for (auto& jsonElem: doc.GetArray()) {{"); // if (!doc.IsArray())
-          method.mBody.Indent(1);
-          method.mBody.Add(
-              R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
-          Type type(mProject, templateParameter);
-          method.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
-          method.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
-          method.mBody.Add(
-              R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
-          method.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
-          method.mBody.Indent(-1);
-          method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
-
-          method.mBody.Indent(-1);
-          method.mBody.Add("}}"); // for(path: filesByName[field])
-
-          method.mBody.Indent(-1);
-          method.mBody.Add("}}"); // if (it != filesByName.end())
+          line << " = filesByName.find(\"" << fieldDefinition.mName << "\");";
         }
+        method.mBody.Add("if (it != filesByName.end()) {{");
+        method.mBody.Indent(1);
+
+        method.mBody.Add("for (const auto& filePath: it->second) {{");
+        method.mBody.Indent(1);
+        method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
+                         St::FilesystemHelper_ReadFile);
+        method.mBody.Add("rapidjson::Document doc;");
+        method.mBody.Add("doc.Parse(contents.c_str());");
+        method.mBody.Add(
+            R"(HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {{}}: It is supposed to contain a list of {} entries", filePath.string());)",
+            structToProcess);
+        method.mBody.Add("for (auto& jsonElem: doc.GetArray()) {{"); // if (!doc.IsArray())
+        method.mBody.Indent(1);
+        method.mBody.Add(
+            R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
+        Type type(mProject, templateParameter);
+        method.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
+        method.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
+        method.mBody.Add(
+            R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
+        method.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
+        method.mBody.Indent(-1);
+        method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
+
+        method.mBody.Indent(-1);
+        method.mBody.Add("}}"); // for(path: filesByName[field])
+
+        method.mBody.Indent(-1);
+        method.mBody.Add("}}"); // if (it != filesByName.end())
       }
     }
     method.mBody.Add("return true;");
@@ -126,11 +126,11 @@ namespace holgen {
       }
     }
 
-    if (codeBlock.mContents.size() != 0) {
+    if (codeBlock.mContents.empty()) {
+      method.mBody.Add("auto &converter = converterArg;");
+    } else {
       method.mBody.Add("auto converter = converterArg;");
       method.mBody.Add(std::move(codeBlock));
-    } else {
-      method.mBody.Add("auto &converter = converterArg;");
     }
   }
 

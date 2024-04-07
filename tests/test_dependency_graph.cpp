@@ -75,3 +75,13 @@ struct D {
   )DELIM", {"C", "D", "B", "A"});
 }
 
+TEST_F(DependencyGraphTest, Refs) {
+  ExpectProcessOrder(R"DELIM(
+struct A {
+  Ref<B> b;
+}
+struct B {
+  Ref<A> a;
+}
+  )DELIM", {"A", "B"});
+}

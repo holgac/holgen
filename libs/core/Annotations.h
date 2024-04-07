@@ -2,8 +2,6 @@
 
 
 namespace holgen {
-  // TODO: properly define what managed, datamanager, id and container annotations do.
-  // currently things are mixed up a bit.
   // This kinda serves as documentation
   class Annotations {
   public:
@@ -55,8 +53,8 @@ namespace holgen {
     /*
      * Indicates that the field is a container that should be exposed.
      * Methods like AddElem, GetElem, GetElemCount, DeleteElem are added and exposed to lua.
-     * Be careful using this with a vector if the underlying data type is not managed, the
-     * object addresses will change when the vector resizes.
+     * Be careful using this with a vector if the underlying data type is not managed; the
+     * object addresses will change when the vector resizes (affects lua handles)
      *
      * TODO: For data managers, implement locking const containers
      * If it's OK for Lua to modify the container at startup (i.e. when loading a mod where iterator
@@ -72,8 +70,10 @@ namespace holgen {
 
     /**
      * Indicates that the struct is managed by the given DataManager.
-     * It adds a static Class::Get function * that uses GlobalPointer<DataManager> to fetch the object.
+     * It adds a static Class::Get function that uses GlobalPointer<DataManager> to fetch the object.
      * Lua instances and Refs use an index (determined by @id field) instead of pointer.
+     *
+     * Requires an id field.
      *
      * Example:
      * @managed(by=Country, field=people)

@@ -14,6 +14,7 @@ namespace holgen {
   private:
     void Calculate();
     void Calculate(const StructDefinition& structDefinition, const TypeDefinition& typeDefinition);
+    void Calculate(const StructDefinition& structDefinition, const FieldDefinition& fieldDefinition);
     void Calculate(const StructDefinition& structDefinition);
     const ProjectDefinition &mProject;
     std::map<std::string, std::set<std::string>> mDependencies;

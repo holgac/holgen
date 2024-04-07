@@ -1,8 +1,16 @@
 #include "DependencyGraph.h"
 #include <queue>
+#include <algorithm>
+#include "core/Annotations.h"
 #include "core/Exception.h"
 
 namespace holgen {
+  namespace {
+    std::vector<std::string> AnnotationsToCheck = {
+        Annotations::JsonConvert,
+    };
+  }
+
   DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(project) {
     Calculate();
   }
@@ -38,8 +46,21 @@ namespace holgen {
 
   void DependencyGraph::Calculate(const StructDefinition &structDefinition) {
     for (const auto &fieldDefinition: structDefinition.mFields) {
-      Calculate(structDefinition, fieldDefinition.mType);
+      Calculate(structDefinition, fieldDefinition);
     }
+  }
+
+  void DependencyGraph::Calculate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition) {
+    if (fieldDefinition.mType.mName == "Ref") {
+      bool shouldProcess = std::any_of(
+          AnnotationsToCheck.begin(), AnnotationsToCheck.end(),
+          [&fieldDefinition](const std::string &annotation) {
+            return fieldDefinition.GetAnnotation(annotation);
+          });
+      if (!shouldProcess)
+        return;
+    }
+    Calculate(structDefinition, fieldDefinition.mType);
   }
 
   void DependencyGraph::Calculate(const StructDefinition &structDefinition, const TypeDefinition &typeDefinition) {
@@ -52,6 +73,7 @@ namespace holgen {
       mDependencies[structDefinition.mName].insert(referencedStruct->mName);
       mInverseDependencies[referencedStruct->mName].insert(structDefinition.mName);
     }
+
     for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
       // This is overly strict - figure out how to handle this better
       if (templateParameter.mName != structDefinition.mName)
@@ -62,6 +84,4 @@ namespace holgen {
   const std::vector<std::string> &DependencyGraph::GetProcessOrder() const {
     return mProcessOrder;
   }
-
 }
-

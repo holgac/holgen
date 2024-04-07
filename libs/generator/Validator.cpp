@@ -235,7 +235,7 @@ namespace holgen {
       auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
       THROW_IF(underlyingClass == nullptr, "{} is a keyed container of {} which is not a user type",
                ToString(cls, field), field.mType.mTemplateParameters.back().ToString());
-      THROW_IF(!underlyingClass->mStruct || !underlyingClass->mStruct->GetIdField(),
+      THROW_IF(!underlyingClass->mStruct || !underlyingClass->GetIdField(),
                "{} is a keyed container of {} which is not a user type with an id field",
                ToString(cls, field), ToString(*underlyingClass));
       auto key = field.mField->mType.mTemplateParameters.front();
