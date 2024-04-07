@@ -14,8 +14,8 @@ namespace holgen {
       Validate().ManagedAnnotation(cls, *managedAnnotation);
 
       auto manager = mProject.GetClass(managedAnnotation->GetAttribute(Annotations::Managed_By)->mValue.mName);
-      auto managerField = manager->GetField(Naming().FieldNameInCpp(*manager->mStruct->GetField(
-          managedAnnotation->GetAttribute(Annotations::Managed_Field)->mValue.mName)));
+      auto managerField = manager->GetFieldFromDefinitionName(
+          managedAnnotation->GetAttribute(Annotations::Managed_Field)->mValue.mName);
 
       cls.mSourceIncludes.AddLocalHeader(St::GlobalPointer + ".h");
       cls.mSourceIncludes.AddLocalHeader(manager->mName + ".h");
@@ -32,7 +32,7 @@ namespace holgen {
         St::ManagedObject_Getter,
         Type{cls.mName, PassByType::Pointer, Constness::NotConst},
         Visibility::Public, Constness::NotConst, Staticness::Static};
-    method.mArguments.emplace_back("id", Type{mProject.mProject, cls.mStruct->GetIdField()->mType});
+    method.mArguments.emplace_back("id", Type{mProject.mProject, cls.GetIdField()->mField->mType});
     method.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                      St::GlobalPointer, manager.mName, Naming().ContainerElemGetterNameInCpp(*managerField.mField));
     Validate().NewMethod(cls, method);
@@ -45,9 +45,9 @@ namespace holgen {
         Naming().ManagedClassIndexGetterNameInCpp(annotation),
         Type{cls.mStruct->mName, PassByType::Pointer, Constness::NotConst},
         Visibility::Public, Constness::NotConst, Staticness::Static};
-    auto indexedOnField = cls.mStruct->GetField(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
+    auto indexedOnField = cls.GetFieldFromDefinitionName(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
     ClassMethodArgument &keyArg = method.mArguments.emplace_back(
-        "key", Type{mProject.mProject, indexedOnField->mType});
+        "key", Type{mProject.mProject, indexedOnField->mField->mType});
     keyArg.mType.PreventCopying();
     method.mBody.Add("return {}<{}>::GetInstance()->{}(key);",
                      St::GlobalPointer, manager.mName,

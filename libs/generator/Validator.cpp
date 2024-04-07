@@ -90,6 +90,7 @@ namespace holgen {
     THROW_IF(TypeInfo::Get().CppPrimitives.contains(cls.mName), "{} is a reserved keyword", ToString(cls));
     auto dup = mProject.GetClass(cls.mName);
     THROW_IF(dup, "Duplicate class: {} and {}", ToString(*dup), ToString(cls));
+    // TODO: validate mixins?
   }
 
   void Validator::NewField(const Class &cls, const ClassField &field) const {
@@ -214,6 +215,7 @@ namespace holgen {
 
   void Validator::ContainerAnnotation(const Class &cls, const ClassField &field,
                                       const AnnotationDefinition &annotation) const {
+    // TODO: not mixin
     EnforceUniqueAnnotation(cls, field, Annotations::Container);
     ValidateAttributeCount(annotation, Annotations::Container_ElemName, ToString(cls, field));
     if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
@@ -250,7 +252,8 @@ namespace holgen {
   }
 
   void Validator::ManagedAnnotation(const Class &cls, const AnnotationDefinition &annotation) const {
-    THROW_IF(!cls.mStruct || !cls.mStruct->GetIdField(), "{} is a managed class without an id field", ToString(cls));
+    // TODO: not mixin
+    THROW_IF(!cls.GetIdField(), "{} is a managed class without an id field", ToString(cls));
     EnforceUniqueAnnotation(cls, Annotations::Managed);
     ValidateAttributeCount(annotation, Annotations::Managed_By, ToString(cls));
     ValidateAttributeCount(annotation, Annotations::Managed_Field, ToString(cls));
@@ -260,14 +263,14 @@ namespace holgen {
     THROW_IF(!dataManager->mStruct->GetAnnotation(Annotations::DataManager),
              "{} is managed by {} which is not a data manager",
              ToString(cls), ToString(*dataManager));
-    auto containerField = dataManager->mStruct->GetField(
+    auto containerField = dataManager->GetFieldFromDefinitionName(
         annotation.GetAttribute(Annotations::Managed_Field)->mValue.mName);
     THROW_IF(!containerField, "{} is managed by {} field of {} which does not exist",
              ToString(cls), annotation.GetAttribute(Annotations::Managed_Field)->mValue.mName,
              ToString(*dataManager));
-    THROW_IF(!containerField->GetAnnotation(Annotations::Container), "{} is managed by {} which is not a container",
-             ToString(cls), ToString(*dataManager, *containerField));
-    THROW_IF(containerField->mType.mTemplateParameters.back().mName != cls.mStruct->mName,
+    THROW_IF(!containerField->mField->GetAnnotation(Annotations::Container), "{} is managed by {} which is not a container",
+             ToString(cls), ToString(*dataManager, *containerField->mField));
+    THROW_IF(containerField->mField->mType.mTemplateParameters.back().mName != cls.mStruct->mName,
              "{} is managed by {} which is not a container of {}",
              ToString(cls), ToString(*dataManager, *containerField), cls.mName);
   }
@@ -291,10 +294,7 @@ namespace holgen {
     THROW_IF(!underlyingClass, "{} has an index on {} which is not a user defined struct",
              ToString(cls, field), field.mType.mTemplateParameters.back().ToString());
     auto indexOn = annotation.GetAttribute(Annotations::Index_On);
-    auto indexedFieldDefinition = underlyingClass->mStruct->GetField(indexOn->mValue.mName);
-    THROW_IF(!indexedFieldDefinition, "{} has an index on non-existent field {} of {}",
-             ToString(cls, field), indexOn->mValue.mName, ToString(*underlyingClass));
-    auto indexedField = underlyingClass->GetField(mNaming.FieldNameInCpp(*indexedFieldDefinition));
+    auto indexedField = underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
     THROW_IF(!indexedField, "{} has an index on non-existent field {} of {}",
              ToString(cls, field), indexOn->mValue.mName, ToString(*underlyingClass));
     THROW_IF(!TypeInfo::Get().KeyableTypes.contains(indexedField->mType.mName),
@@ -398,16 +398,15 @@ namespace holgen {
                  converter->mValue.mName);
 
         auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
-        auto indexFieldDefinition = underlyingClass->mStruct->GetField(
+        auto indexField = underlyingClass->GetFieldFromDefinitionName(
             index->GetAttribute(Annotations::Index_On)->mValue.mName);
-        auto indexField = underlyingClass->GetField(mNaming.FieldNameInCpp(*indexFieldDefinition));
-        auto underlyingIdField = underlyingClass->mStruct->GetIdField();
+        auto underlyingIdField = underlyingClass->GetIdField();
         auto existingFromTypeName = Type{mProject.mProject, it->second.mFromType}.ToString();
         auto existingToTypeName = Type{mProject.mProject, *it->second.mToType}.ToString();
         auto fromTypeName = indexField->mType.ToString();
         std::string toTypeName = "size_t";
         if (underlyingIdField)
-          toTypeName = Type{mProject.mProject, underlyingIdField->mType}.ToString();
+          toTypeName = Type{mProject.mProject, underlyingIdField->mField->mType}.ToString();
         // TODO: tolerate mismatches of integral types?
         THROW_IF(fromTypeName != existingFromTypeName,
                  "{} of {} references converter {} with different source type than {}: {} and {}",

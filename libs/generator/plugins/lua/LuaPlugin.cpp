@@ -137,7 +137,7 @@ namespace holgen {
     if (!ShouldEmbedPointer(cls)) {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
-      auto idField = cls.GetField(Naming().FieldNameInCpp(*cls.mStruct->GetIdField()));
+      auto idField = cls.GetIdField();
       std::string tempType = "uint64_t";
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
         tempType = "int64_t";
@@ -164,7 +164,7 @@ namespace holgen {
 
     method.mBody.Add("lua_newtable(luaState);");
     if (!ShouldEmbedPointer(cls)) {
-      auto idField = cls.GetField(Naming().FieldNameInCpp(*cls.mStruct->GetIdField()));
+      auto idField = cls.GetIdField();
       std::string tempType = "uint64_t";
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
         tempType = "int64_t";
@@ -251,8 +251,7 @@ namespace holgen {
     if (!managed)
       return true;
     auto manager = mProject.GetClass(managed->GetAttribute(Annotations::Managed_By)->mValue.mName);
-    auto fieldDefinition = manager->mStruct->GetField(managed->GetAttribute(Annotations::Managed_Field)->mValue.mName);
-    auto field = manager->GetField(Naming().FieldNameInCpp(*fieldDefinition));
+    auto field = manager->GetFieldFromDefinitionName(managed->GetAttribute(Annotations::Managed_Field)->mValue.mName);
     if (TypeInfo::Get().CppStableContainers.contains(field->mType.mName))
       return true;
     return false;

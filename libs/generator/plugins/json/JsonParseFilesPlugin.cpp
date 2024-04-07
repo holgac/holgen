@@ -40,10 +40,12 @@ namespace holgen {
 
     bool isFirst = true;
     for (const auto &structToProcess : mProject.mDependencyGraph.GetProcessOrder()) {
-      for (const auto &fieldDefinition: cls.mStruct->mFields) {
-        if (!fieldDefinition.GetAnnotation(Annotations::Container))
+      for (const auto &field: cls.mFields) {
+        if (!field.mField || !field.mField->GetAnnotation(Annotations::Container))
           continue;
+        auto &fieldDefinition = *field.mField;
         auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
+        // TODO: invert if
         if (templateParameter.mName == structToProcess) {
           {
             auto line = method.mBody.Line();
@@ -99,8 +101,8 @@ namespace holgen {
       if (!field.mField || !field.mField->GetAnnotation(Annotations::Container))
         continue;
       for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
-        auto &underlyingStruct = *mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.back().mName);
-        auto indexedOnField = underlyingStruct.GetField(
+        auto &underlyingClass = *mProject.GetClass(field.mField->mType.mTemplateParameters.back().mName);
+        auto indexedOnField = underlyingClass.GetFieldFromDefinitionName(
             annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
         auto forConverter = annotation.GetAttribute(Annotations::Index_ForConverter);
         if (forConverter == nullptr)
@@ -108,15 +110,15 @@ namespace holgen {
         codeBlock.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
         codeBlock.Indent(1);
 
-        Type fromType(mProject.mProject, indexedOnField->mType);
+        Type fromType(mProject.mProject, indexedOnField->mField->mType);
         fromType.PreventCopying();
-        auto idField = underlyingStruct.GetIdField();
-        Type toType(mProject.mProject, idField->mType);
+        auto idField = underlyingClass.GetIdField();
+        Type toType(mProject.mProject, idField->mField->mType);
         codeBlock.Add("converter.{} = [this]({} key) -> {} {{", forConverter->mValue.mName, fromType.ToString(),
                       toType.ToString());
         codeBlock.Indent(1);
         codeBlock.Add("auto elem = {}(key);", Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation));
-        codeBlock.Add("return elem->{}();", Naming().FieldGetterNameInCpp(*idField));
+        codeBlock.Add("return elem->{}();", Naming().FieldGetterNameInCpp(*idField->mField));
         codeBlock.Indent(-1);
         codeBlock.Add("}};"); // converter =
         codeBlock.Indent(-1);

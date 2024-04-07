@@ -38,9 +38,9 @@ namespace holgen {
                                           const AnnotationDefinition &annotationDefinition) {
     Validate().IndexAnnotation(cls, field, annotationDefinition);
     auto &underlyingType = field.mField->mType.mTemplateParameters.back();
-    auto underlyingStructDefinition = mProject.mProject.GetStruct(underlyingType.mName);
+    auto underlyingClass = mProject.GetClass(underlyingType.mName);
     auto indexOn = annotationDefinition.GetAttribute(Annotations::Index_On);
-    auto &fieldIndexedOn = *underlyingStructDefinition->GetField(indexOn->mValue.mName);
+    auto &fieldIndexedOn = *underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
     auto indexField = ClassField{
         Naming().FieldIndexNameInCpp(*field.mField, annotationDefinition), Type{"std::map"}};
     auto indexType = annotationDefinition.GetAttribute(Annotations::Index_Using);
@@ -48,9 +48,9 @@ namespace holgen {
       indexField.mType = Type{mProject.mProject, indexType->mValue};
     }
 
-    indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, fieldIndexedOn.mType);
-    if (auto underlyingIdField = underlyingStructDefinition->GetIdField())
-      indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, underlyingIdField->mType);
+    indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, fieldIndexedOn.mField->mType);
+    if (auto underlyingIdField = underlyingClass->GetIdField())
+      indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, underlyingIdField->mField->mType);
     else
       indexField.mType.mTemplateParameters.emplace_back("size_t");
 
@@ -63,7 +63,7 @@ namespace holgen {
           constness};
       if (i == 0)
         method.mExposeToLua = true;
-      method.mArguments.emplace_back("key", Type{mProject.mProject, fieldIndexedOn.mType});
+      method.mArguments.emplace_back("key", Type{mProject.mProject, fieldIndexedOn.mField->mType});
       method.mArguments.back().mType.PreventCopying();
 
       method.mBody.Add("auto it = {}.find(key);", indexField.mName);
@@ -87,9 +87,9 @@ namespace holgen {
     if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(underlyingType.mName))
       return;
     auto underlyingClass = mProject.GetClass(underlyingType.mName);
-    const FieldDefinition *underlyingIdField = nullptr;
+    const ClassField *underlyingIdField = nullptr;
     if (underlyingClass && underlyingClass->mStruct)
-      underlyingIdField = underlyingClass->mStruct->GetIdField();
+      underlyingIdField = underlyingClass->GetIdField();
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
 
     auto method = ClassMethod{
@@ -106,9 +106,9 @@ namespace holgen {
     CodeBlock inserters;
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
-      auto &fieldIndexedOn = *underlyingClass->mStruct->GetField(indexOn->mValue.mName);
+      auto &fieldIndexedOn = *underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
       auto indexFieldName = Naming().FieldIndexNameInCpp(*field.mField, annotation);
-      auto getterMethodName = Naming().FieldGetterNameInCpp(fieldIndexedOn);
+      auto getterMethodName = Naming().FieldGetterNameInCpp(*fieldIndexedOn.mField);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
       validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists", elem.{}());)",
@@ -128,7 +128,7 @@ namespace holgen {
     method.mBody.Add(std::move(inserters));
     if (underlyingIdField) {
       method.mArguments.back().mType.mConstness = Constness::NotConst;
-      method.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField));
+      method.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField->mField));
     }
     std::string elemToInsert = "elem";
     if (useMoveRef)
@@ -155,9 +155,9 @@ namespace holgen {
   void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) {
     auto &underlyingType = field.mType.mTemplateParameters.back();
     auto underlyingClass = mProject.GetClass(underlyingType.mName);
-    const FieldDefinition *underlyingIdField = nullptr;
+    const ClassField *underlyingIdField = nullptr;
     if (underlyingClass && underlyingClass->mStruct)
-      underlyingIdField = underlyingClass->mStruct->GetIdField();
+      underlyingIdField = underlyingClass->GetIdField();
     if (TypeInfo::Get().CppSets.contains(field.mType.mName))
       return;
     bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
@@ -175,7 +175,7 @@ namespace holgen {
         method.mExposeToLua = true;
       bool isSigned = false;
       if (underlyingIdField) {
-        auto &arg = method.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mType});
+        auto &arg = method.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mField->mType});
         if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName))
           isSigned = true;
       } else {
@@ -230,13 +230,13 @@ namespace holgen {
     auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
-      auto indexField = underlyingClass->mStruct->GetField(indexOn->mValue.mName);
+      auto indexField = underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
       indexDeleters.Add("{}.erase(ptr->{}());",
                         Naming().FieldIndexNameInCpp(*field.mField, annotation),
-                        Naming().FieldGetterNameInCpp(*indexField));
+                        Naming().FieldGetterNameInCpp(*indexField->mField));
       indexReassigners.Add("{}.at({}.back().{}()) = idx;",
                            Naming().FieldIndexNameInCpp(*field.mField, annotation),
-                           field.mName, Naming().FieldGetterNameInCpp(*indexField)
+                           field.mName, Naming().FieldGetterNameInCpp(*indexField->mField)
       );
     }
     if (!indexDeleters.mContents.empty()) {
@@ -296,10 +296,10 @@ namespace holgen {
   void ContainerFieldPlugin::GenerateNextIndexField(Class &cls, const ClassField &field) {
     if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
       auto underlyingIdField = mProject.GetClass(
-          field.mType.mTemplateParameters.back().mName)->mStruct->GetIdField();
+          field.mType.mTemplateParameters.back().mName)->GetIdField();
       auto nextIdField = ClassField{
           field.mName + "NextId",
-          Type{mProject.mProject, underlyingIdField->mType}};
+          Type{mProject.mProject, underlyingIdField->mField->mType}};
       nextIdField.mDefaultValue = "0";
       Validate().NewField(cls, nextIdField);
       cls.mFields.push_back(std::move(nextIdField));

@@ -8,11 +8,11 @@ namespace holgen {
     Validate().JsonConverters();
     auto cls = Class{St::Converter};
     std::set<std::string> processedConverters;
-    for (const auto &structDefinition: mProject.mProject.mStructs) {
-      for (const auto &fieldDefinition: structDefinition.mFields) {
-        auto jsonConvert = fieldDefinition.GetAnnotation(Annotations::JsonConvert);
-        if (jsonConvert == nullptr)
+    for (const auto &targetCls: mProject.mClasses) {
+      for (const auto &targetField: targetCls.mFields) {
+        if (!targetField.mField || !targetField.mField->GetAnnotation(Annotations::JsonConvert))
           continue;
+        auto jsonConvert = targetField.mField->GetAnnotation(Annotations::JsonConvert);
         auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
         auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
         auto jsonConvertElem = jsonConvert->GetAttribute(Annotations::JsonConvert_Elem);
@@ -22,15 +22,10 @@ namespace holgen {
         auto field = ClassField{jsonConvertUsing->mValue.mName,
                                 Type{"std::function"}, Visibility::Public};
 
-        auto fieldNameInCpp = Naming().FieldNameInCpp(fieldDefinition);
-        auto referencedClass = mProject.GetClass(structDefinition.mName);
-
-        if (jsonConvertElem) {
-          field.mType.mFunctionalTemplateParameters.emplace_back(
-              referencedClass->GetField(fieldNameInCpp)->mType.mTemplateParameters.back());
-        } else {
-          field.mType.mFunctionalTemplateParameters.emplace_back(referencedClass->GetField(fieldNameInCpp)->mType);
-        }
+        if (jsonConvertElem)
+          field.mType.mFunctionalTemplateParameters.emplace_back(targetField.mType.mTemplateParameters.back());
+        else
+          field.mType.mFunctionalTemplateParameters.emplace_back(targetField.mType);
         field.mType.mFunctionalTemplateParameters.emplace_back(mProject.mProject, jsonConvertFrom->mValue);
         field.mType.mFunctionalTemplateParameters.back().PreventCopying();
         Validate().NewField(cls, field);

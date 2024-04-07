@@ -9,6 +9,7 @@ namespace holgen {
         continue;
       if (cls.mStruct->GetAnnotation(Annotations::NoLua))
         return;
+      // TODO: mixins
       for (auto &func: cls.mStruct->mFunctions) {
         if (func.GetAnnotation(Annotations::LuaFunc))
           ProcessLuaFunction(cls, func);

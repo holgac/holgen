@@ -4,6 +4,8 @@
 namespace holgen {
   void ClassPlugin::Run() {
     for (auto &structDefinition: mProject.mProject.mStructs) {
+      if (structDefinition.mIsMixin)
+        continue;
       auto cls = Class(structDefinition.mName, &structDefinition);
       Validate().NewClass(cls);
       mProject.mClasses.push_back(std::move(cls));

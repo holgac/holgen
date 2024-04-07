@@ -152,7 +152,9 @@ namespace holgen {
     HeaderContainer mSourceIncludes;
     std::set<ForwardDeclaration> mGlobalForwardDeclarations;
     [[nodiscard]] ClassField *GetField(const std::string &name);
+    [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);
     [[nodiscard]] const ClassField *GetField(const std::string &name) const;
+    [[nodiscard]] const ClassField *GetIdField() const;
     [[nodiscard]] ClassMethod *GetMethod(const std::string &name, Constness constness);
     [[nodiscard]] const Using *GetUsing(const std::string &name) const;
     [[nodiscard]] const ForwardDeclaration *GetForwardDeclaration(const std::string &name) const;

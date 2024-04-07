@@ -3,6 +3,7 @@
 
 namespace holgen {
   void CppFunctionPlugin::Run() {
+    // TODO: mixins
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct == nullptr)
         continue;

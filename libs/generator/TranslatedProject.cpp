@@ -1,4 +1,5 @@
 #include "TranslatedProject.h"
+#include "core/Annotations.h"
 #include "holgen.h"
 
 namespace holgen {
@@ -36,6 +37,23 @@ namespace holgen {
   GEN_GETTER_BY_NAME(Class, ForwardDeclaration, GetForwardDeclaration, mGlobalForwardDeclarations)
 
   GEN_GETTER_BY_NAME(Class, TemplateParameter, GetTemplateParameter, mTemplateParameters)
+
+  ClassField *Class::GetFieldFromDefinitionName(const std::string &name) {
+    for (auto &field : mFields) {
+      if (field.mField && field.mField->mName == name) {
+        return &field;
+      }
+    }
+    return nullptr;
+  }
+
+  const ClassField *Class::GetIdField() const {
+    for (auto &field : mFields) {
+      if (field.mField && field.mField->GetAnnotation(Annotations::Id))
+        return &field;
+    }
+    return nullptr;
+  }
 
   TemplateParameter::TemplateParameter(std::string type, std::string name) : mType(std::move(type)),
                                                                              mName(std::move(name)) {}
