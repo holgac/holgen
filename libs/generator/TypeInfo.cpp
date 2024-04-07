@@ -139,15 +139,15 @@ namespace holgen {
   }
 
   Type::Type(
-      const ProjectDefinition &project, const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
+      const TranslatedProject &project, const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
   ) : mConstness(constness), mType(passByType) {
     if (typeDefinition.mName == "Ref") {
-      auto underlyingStruct = project.GetStruct(typeDefinition.mTemplateParameters[0].mName);
-      auto idField = underlyingStruct->GetIdField();
+      auto underlyingClass = project.GetClass(typeDefinition.mTemplateParameters[0].mName);
+      auto idField = underlyingClass->GetIdField();
       if (idField) {
-        *this = Type{project, underlyingStruct->GetIdField()->mType};
+        *this = idField->mType;
       } else {
-        *this = Type{underlyingStruct->mName, PassByType::Pointer};
+        *this = Type{underlyingClass->mStruct->mName, PassByType::Pointer};
       }
       return;
     }

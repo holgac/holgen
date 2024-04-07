@@ -1,12 +1,14 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassIdFieldPlugin.h"
 #include "generator/plugins/ContainerFieldPlugin.h"
 
 class ContainerFieldPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
     ClassPlugin(project).Run();
+    ClassIdFieldPlugin(project).Run();
     ClassFieldPlugin(project).Run();
     ContainerFieldPlugin(project).Run();
   }
@@ -498,9 +500,7 @@ struct TestData {
   map<Ref<InnerStruct>, InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
@@ -527,9 +527,7 @@ struct TestData {
   vector<InnerStruct> innerStructs;
 }
   )R");
-  ClassPlugin(project).Run();
-  ClassFieldPlugin(project).Run();
-  ContainerFieldPlugin(project).Run();
+  Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_EQ(cls->mFields.size(), 1);

@@ -10,8 +10,8 @@ namespace holgen {
 
   std::string NamingConvention::FieldNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) const {
     if (fieldDefinition.mType.mName == "Ref") {
-      auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField() &&  !dereferenceRef) {
+      auto underlyingClass = mProject.GetClass(fieldDefinition.mType.mTemplateParameters[0].mName);
+      if (underlyingClass->GetIdField() && !dereferenceRef) {
         return std::format("m{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
@@ -20,8 +20,8 @@ namespace holgen {
 
   std::string NamingConvention::FieldNameInLua(const FieldDefinition &fieldDefinition, bool dereferenceRef) const {
     if (fieldDefinition.mType.mName == "Ref") {
-      auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField() != nullptr && !dereferenceRef) {
+      auto underlyingClass = mProject.GetClass(fieldDefinition.mType.mTemplateParameters[0].mName);
+      if (underlyingClass->GetIdField() && !dereferenceRef) {
         return std::format("{}Id", fieldDefinition.mName);
       }
     }
@@ -37,8 +37,8 @@ namespace holgen {
   std::string
   NamingConvention::FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) const {
     if (fieldDefinition.mType.mName == "Ref") {
-      auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField() &&  !dereferenceRef) {
+      auto underlyingClass = mProject.GetClass(fieldDefinition.mType.mTemplateParameters[0].mName);
+      if (underlyingClass->GetIdField() && !dereferenceRef) {
         return std::format("Get{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
@@ -90,8 +90,8 @@ namespace holgen {
 
   std::string NamingConvention::FieldSetterNameInCpp(const FieldDefinition &fieldDefinition) const {
     if (fieldDefinition.mType.mName == "Ref") {
-      auto underlyingStruct = mProject.mProject.GetStruct(fieldDefinition.mType.mTemplateParameters[0].mName);
-      if (underlyingStruct->GetIdField()) {
+      auto underlyingClass = mProject.GetClass(fieldDefinition.mType.mTemplateParameters[0].mName);
+      if (underlyingClass->GetIdField()) {
         return std::format("Set{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
@@ -106,7 +106,7 @@ namespace holgen {
     return "mLuaFuncHandle_" + functionDefinition.mName;
   }
 
-  std::string NamingConvention::LuaMetatableName(const Class& cls) const {
+  std::string NamingConvention::LuaMetatableName(const Class &cls) const {
     return cls.mName + "Meta";
   }
 }

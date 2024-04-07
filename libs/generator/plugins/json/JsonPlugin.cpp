@@ -9,7 +9,7 @@ namespace holgen {
   namespace {
     // To represent structs with a single (non-id) field in json,
     // we might want to just use that field instead of a json object.
-    // This only works when the field type is primitive or string
+    // This only works when the field type is primitive, string or a sequence
     ClassField *GetSingleBasicField(Class &cls) {
       ClassField *singleField = nullptr;
       ClassField *idField = nullptr;
@@ -114,12 +114,12 @@ namespace holgen {
       auto jsonConvertElem = jsonConvert->GetAttribute(Annotations::JsonConvert_Elem);
       if (jsonConvertElem) {
         codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper, St::JsonHelper_Parse,
-                      Type{mProject.mProject, jsonConvertFrom->mValue}.ToString(),
+                      Type{mProject, jsonConvertFrom->mValue}.ToString(),
                       field.mName, varName, jsonConvertUsing->mValue.mName);
         codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                       cls.mStruct->mName, field.mField->mName);
       } else {
-        Type type(mProject.mProject, jsonConvertFrom->mValue);
+        Type type(mProject, jsonConvertFrom->mValue);
         codeBlock.Line() << type.ToString() << " temp;";
         codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse, varName);
         codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",

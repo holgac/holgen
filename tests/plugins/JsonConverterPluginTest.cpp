@@ -1,12 +1,14 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassIdFieldPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
 
 class JsonConverterPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
     ClassPlugin(project).Run();
+    ClassIdFieldPlugin(project).Run();
     ClassFieldPlugin(project).Run();
     JsonConverterPlugin(project).Run();
   }
@@ -108,19 +110,24 @@ struct TestContainer {
   @jsonConvert(elem, from=string, using=testDataConverter)
   vector<Ref<TestData>> testData;
 }
+@managed(by=DM, field=testData)
 struct TestData {
   @id
   u32 id;
   @jsonConvert(from=string, using=testDataConverter)
   Ref<TestData> testFieldRef;
 }
+struct DM {
+  @container(elemName=testDatum)
+  vector<TestData> testData;
+}
   )R");
   Run(project);
   auto cls = project.GetClass("Converter");
   ASSERT_NE(cls, nullptr);
-  ASSERT_EQ(cls->mFields.size(), 1);
+  EXPECT_EQ(cls->mFields.size(), 1);
 
-  EXPECT_NE(cls->GetField("testDataConverter"), nullptr);
+  ASSERT_NE(cls->GetField("testDataConverter"), nullptr);
   {
     auto field = ClassField{"testDataConverter", Type{"std::function"}, Visibility::Public};
     field.mType.mFunctionalTemplateParameters.emplace_back(Type{"uint32_t"});

@@ -1,6 +1,7 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassIdFieldPlugin.h"
 #include "generator/plugins/json/JsonPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
@@ -9,6 +10,7 @@ class JsonPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
     ClassPlugin(project).Run();
+    ClassIdFieldPlugin(project).Run();
     ClassFieldPlugin(project).Run();
     JsonConverterPlugin(project).Run();
     // Not a direct dependency, but needed to parse lua function names

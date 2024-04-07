@@ -8,6 +8,7 @@ namespace holgen {
   public:
     explicit Validator(TranslatedProject &project, const NamingConvention &naming);
     void NewClass(const Class &cls) const;
+    void IdField(const Class &cls, const ClassField &field) const;
     void NewField(const Class &cls, const ClassField &field) const;
     void RefField(const Class &cls, const FieldDefinition &fieldDefinition) const;
     void NewMethod(const Class &cls, const ClassMethod &method) const;

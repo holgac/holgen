@@ -99,6 +99,14 @@ namespace holgen {
       ValidateMixins(*cls.mStruct);
   }
 
+  void Validator::IdField(const Class &cls, const ClassField &field) const {
+    NewField(cls, field);
+    THROW_IF(!TypeInfo::Get().KeyableTypes.contains(field.mType.mName), "{} uses an invalid type for an id: {}",
+             ToString(cls, field), field.mType.mName);
+    auto dup = cls.GetIdField();
+    THROW_IF(dup, "{} has multiple id fields: {} and {}", ToString(cls), ToString(cls, *dup), ToString(cls, field));
+  }
+
   void Validator::NewField(const Class &cls, const ClassField &field) const {
     THROW_IF(ReservedKeywords.contains(field.mName), "{} is a reserved keyword", ToString(cls, field));
     THROW_IF(TypeInfo::Get().CppPrimitives.contains(field.mName), "{} is a reserved keyword", ToString(cls, field));
@@ -290,7 +298,7 @@ namespace holgen {
     ValidateAttributeCount(annotation, Annotations::Index_Using, ToString(cls, field), 0);
     ValidateAttributeCount(annotation, Annotations::Index_ForConverter, ToString(cls, field), 0);
     if (auto indexUsing = annotation.GetAttribute(Annotations::Index_Using)) {
-      auto type = Type{mProject.mProject, indexUsing->mValue};
+      auto type = Type{mProject, indexUsing->mValue};
       THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
                "{} attribute of {} of {} should be a keyed container type, found {}",
                indexUsing->mName, ToString(annotation), ToString(cls, field), type.mName);
@@ -377,13 +385,13 @@ namespace holgen {
           THROW_IF(cs.mFromType != it->second.mFromType,
                    "Json converter {} is used by {} and {} with different source types: {} and {}",
                    key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
-                   Type{mProject.mProject, it->second.mFromType}.ToString(),
-                   Type{mProject.mProject, cs.mFromType}.ToString());
+                   Type{mProject, it->second.mFromType}.ToString(),
+                   Type{mProject, cs.mFromType}.ToString());
           THROW_IF(*cs.mToType != *it->second.mToType,
                    "Json converter {} is used by {} and {} with different target types: {} and {}",
                    key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
-                   Type{mProject.mProject, *it->second.mToType}.ToString(),
-                   Type{mProject.mProject, *cs.mToType}.ToString());
+                   Type{mProject, *it->second.mToType}.ToString(),
+                   Type{mProject, *cs.mToType}.ToString());
         }
       }
     }
@@ -406,12 +414,12 @@ namespace holgen {
         auto indexField = underlyingClass->GetFieldFromDefinitionName(
             index->GetAttribute(Annotations::Index_On)->mValue.mName);
         auto underlyingIdField = underlyingClass->GetIdField();
-        auto existingFromTypeName = Type{mProject.mProject, it->second.mFromType}.ToString();
-        auto existingToTypeName = Type{mProject.mProject, *it->second.mToType}.ToString();
+        auto existingFromTypeName = Type{mProject, it->second.mFromType}.ToString();
+        auto existingToTypeName = Type{mProject, *it->second.mToType}.ToString();
         auto fromTypeName = indexField->mType.ToString();
         std::string toTypeName = "size_t";
         if (underlyingIdField)
-          toTypeName = Type{mProject.mProject, underlyingIdField->mField->mType}.ToString();
+          toTypeName = Type{mProject, underlyingIdField->mField->mType}.ToString();
         // TODO: tolerate mismatches of integral types?
         THROW_IF(fromTypeName != existingFromTypeName,
                  "{} of {} references converter {} with different source type than {}: {} and {}",

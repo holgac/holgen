@@ -7,7 +7,7 @@
 
 namespace holgen {
   struct TypeDefinition;
-  struct ProjectDefinition;
+  struct TranslatedProject;
 
   enum class PassByType {
     Value,
@@ -31,7 +31,7 @@ namespace holgen {
                   Constness constness = Constness::NotConst)
         : mName(std::move(name)), mConstness(constness), mType(passByType) {}
 
-    explicit Type(const ProjectDefinition &project, const TypeDefinition &typeDefinition,
+    explicit Type(const TranslatedProject &project, const TypeDefinition &typeDefinition,
                   PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
 
     bool operator==(const Type &rhs) const {

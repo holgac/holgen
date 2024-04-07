@@ -27,7 +27,7 @@ namespace holgen {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto method = ClassMethod{
           Naming().FieldGetterNameInCpp(*field.mField, true),
-          Type{mProject.mProject, field.mField->mType.mTemplateParameters[0], PassByType::Pointer, constness},
+          Type{mProject, field.mField->mType.mTemplateParameters[0], PassByType::Pointer, constness},
           Visibility::Public,
           constness};
       method.mBody.Add("return {}::{}({});", underlyingType->mName, St::ManagedObject_Getter,

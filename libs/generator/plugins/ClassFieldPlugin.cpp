@@ -16,12 +16,15 @@ namespace holgen {
       ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
     }
     for (auto &fieldDefinition: structDefinition.mFields) {
+      // Skip ids; they're processed in their own plugin
+      if (fieldDefinition.GetAnnotation(Annotations::Id))
+        continue;
       // TODO: if @optimize(alignment) (or @packed?), order the fields to minimize padding. Default to it?
       if (fieldDefinition.mType.mName == "Ref")
         Validate().RefField(cls, fieldDefinition);
       auto field = ClassField{
           Naming().FieldNameInCpp(fieldDefinition),
-          Type{mProject.mProject, fieldDefinition.mType},
+          Type{mProject, fieldDefinition.mType},
           Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
       field.mField = &fieldDefinition;
       if (fieldDefinition.mType.mName == St::UserData) {
@@ -32,9 +35,6 @@ namespace holgen {
           field.mDefaultValue = "nullptr";
         else
           field.mDefaultValue = "-1";
-      }
-      if (field.mDefaultValue.empty() && fieldDefinition.GetAnnotation(Annotations::Id)) {
-        field.mDefaultValue = "-1";
       }
       Validate().NewField(cls, field);
       cls.mFields.push_back(std::move(field));

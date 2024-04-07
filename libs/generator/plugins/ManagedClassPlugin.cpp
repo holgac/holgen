@@ -32,7 +32,7 @@ namespace holgen {
         St::ManagedObject_Getter,
         Type{cls.mName, PassByType::Pointer, Constness::NotConst},
         Visibility::Public, Constness::NotConst, Staticness::Static};
-    method.mArguments.emplace_back("id", Type{mProject.mProject, cls.GetIdField()->mField->mType});
+    method.mArguments.emplace_back("id", Type{mProject, cls.GetIdField()->mField->mType});
     method.mBody.Add("return {}<{}>::GetInstance()->{}(id);",
                      St::GlobalPointer, manager.mName, Naming().ContainerElemGetterNameInCpp(*managerField.mField));
     Validate().NewMethod(cls, method);
@@ -47,7 +47,7 @@ namespace holgen {
         Visibility::Public, Constness::NotConst, Staticness::Static};
     auto indexedOnField = cls.GetFieldFromDefinitionName(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
     ClassMethodArgument &keyArg = method.mArguments.emplace_back(
-        "key", Type{mProject.mProject, indexedOnField->mField->mType});
+        "key", Type{mProject, indexedOnField->mField->mType});
     keyArg.mType.PreventCopying();
     method.mBody.Add("return {}<{}>::GetInstance()->{}(key);",
                      St::GlobalPointer, manager.mName,

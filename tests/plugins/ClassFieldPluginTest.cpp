@@ -1,11 +1,13 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassIdFieldPlugin.h"
 
 class ClassFieldPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
     ClassPlugin(project).Run();
+    ClassIdFieldPlugin(project).Run();
     ClassFieldPlugin(project).Run();
   }
 };
@@ -53,6 +55,36 @@ struct TestData {
     field.mField = cls->mStruct->GetField("testFieldString");
     helpers::ExpectEqual(*cls->GetField("mTestFieldString"), field);
   }
+}
+
+TEST_F(ClassFieldPluginTest, Mixins) {
+  auto project = Parse(R"R(
+mixin TestMixin1 {
+  u32 testFieldUnsigned = 42;
+}
+mixin TestMixin2 : TestMixin1 {
+  double testFieldDouble;
+}
+mixin TestMixin3 {
+  bool testFieldBool;
+}
+struct TestData : TestMixin2, TestMixin3 {
+  string testFieldString;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_NE(cls->mStruct, nullptr);
+  EXPECT_EQ(cls->mEnum, nullptr);;
+
+  ASSERT_NE(cls->GetField("mTestFieldUnsigned"), nullptr);
+  ASSERT_NE(cls->GetField("mTestFieldDouble"), nullptr);
+  ASSERT_NE(cls->GetField("mTestFieldBool"), nullptr);
+  ASSERT_NE(cls->GetField("mTestFieldString"), nullptr);
+  ASSERT_EQ(project.GetClass("TestMixin1"), nullptr);
+  ASSERT_EQ(project.GetClass("TestMixin2"), nullptr);
+  ASSERT_EQ(project.GetClass("TestMixin3"), nullptr);
 }
 
 TEST_F(ClassFieldPluginTest, Containers) {
@@ -119,6 +151,33 @@ TEST_F(ClassFieldPluginTest, RefWithId) {
 struct InnerData {
   @id
   u32 innerField;
+}
+struct TestData {
+  Ref<InnerData> testFieldRef;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_EQ(cls->mFields.size(), 1);
+
+  EXPECT_EQ(cls->GetField("mTestFieldRef"), nullptr);
+  ASSERT_NE(cls->GetField("mTestFieldRefId"), nullptr);
+  {
+    auto field = ClassField{"mTestFieldRefId", Type{"uint32_t"}};
+    field.mField = cls->mStruct->GetField("testFieldRef");
+    field.mDefaultValue = "-1";
+    helpers::ExpectEqual(*cls->GetField("mTestFieldRefId"), field);
+  }
+}
+
+TEST_F(ClassFieldPluginTest, RefWithIdInMixin) {
+  auto project = Parse(R"R(
+mixin InnerMixin {
+  @id
+  u32 innerField;
+}
+struct InnerData: InnerMixin {
 }
 struct TestData {
   Ref<InnerData> testFieldRef;

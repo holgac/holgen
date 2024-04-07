@@ -45,12 +45,12 @@ namespace holgen {
         Naming().FieldIndexNameInCpp(*field.mField, annotationDefinition), Type{"std::map"}};
     auto indexType = annotationDefinition.GetAttribute(Annotations::Index_Using);
     if (indexType != nullptr) {
-      indexField.mType = Type{mProject.mProject, indexType->mValue};
+      indexField.mType = Type{mProject, indexType->mValue};
     }
 
-    indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, fieldIndexedOn.mField->mType);
+    indexField.mType.mTemplateParameters.emplace_back(mProject, fieldIndexedOn.mField->mType);
     if (auto underlyingIdField = underlyingClass->GetIdField())
-      indexField.mType.mTemplateParameters.emplace_back(mProject.mProject, underlyingIdField->mField->mType);
+      indexField.mType.mTemplateParameters.emplace_back(mProject, underlyingIdField->mField->mType);
     else
       indexField.mType.mTemplateParameters.emplace_back("size_t");
 
@@ -58,12 +58,12 @@ namespace holgen {
       Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto method = ClassMethod{
           Naming().ContainerIndexGetterNameInCpp(*field.mField, annotationDefinition),
-          Type{mProject.mProject, underlyingType, PassByType::Pointer, constness},
+          Type{mProject, underlyingType, PassByType::Pointer, constness},
           Visibility::Public,
           constness};
       if (i == 0)
         method.mExposeToLua = true;
-      method.mArguments.emplace_back("key", Type{mProject.mProject, fieldIndexedOn.mField->mType});
+      method.mArguments.emplace_back("key", Type{mProject, fieldIndexedOn.mField->mType});
       method.mArguments.back().mType.PreventCopying();
 
       method.mBody.Add("auto it = {}.find(key);", indexField.mName);
@@ -175,7 +175,7 @@ namespace holgen {
         method.mExposeToLua = true;
       bool isSigned = false;
       if (underlyingIdField) {
-        auto &arg = method.mArguments.emplace_back("idx", Type{mProject.mProject, underlyingIdField->mField->mType});
+        auto &arg = method.mArguments.emplace_back("idx", Type{mProject, underlyingIdField->mField->mType});
         if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName))
           isSigned = true;
       } else {
@@ -299,7 +299,7 @@ namespace holgen {
           field.mType.mTemplateParameters.back().mName)->GetIdField();
       auto nextIdField = ClassField{
           field.mName + "NextId",
-          Type{mProject.mProject, underlyingIdField->mField->mType}};
+          Type{mProject, underlyingIdField->mField->mType}};
       nextIdField.mDefaultValue = "0";
       Validate().NewField(cls, nextIdField);
       cls.mFields.push_back(std::move(nextIdField));

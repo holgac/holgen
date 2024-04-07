@@ -24,7 +24,7 @@ namespace holgen {
     // TODO: const attribute
     auto method = ClassMethod{
         func.mName,
-        Type{mProject.mProject, func.mReturnType},
+        Type{mProject, func.mReturnType},
         Visibility::Public, Constness::NotConst};
     method.mUserDefined = true;
     method.mExposeToLua = true;
@@ -36,7 +36,7 @@ namespace holgen {
     }
     // TODO: ref type for complex types
     for (const auto &funcArg: func.mArguments) {
-      auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject.mProject, funcArg.mType});
+      auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
       if (mProject.GetClass(arg.mType.mName)) {
         arg.mType.mType = PassByType::Pointer;
         if (!funcArg.mIsOut)

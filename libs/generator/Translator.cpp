@@ -1,6 +1,6 @@
 #include "Translator.h"
-#include "parser/MonolithValidator.h"
 #include "generator/plugins/ClassPlugin.h"
+#include "generator/plugins/ClassIdFieldPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassFieldGetterPlugin.h"
 #include "generator/plugins/ClassFieldSetterPlugin.h"
@@ -21,10 +21,9 @@
 namespace holgen {
 
   Translator::Translator(const ProjectDefinition &project) : mProject(project) {
-    MonolithValidator(project).Validate();
     // TODO: Users should pick which plugins to run
-
     AddPlugin<ClassPlugin>();
+    AddPlugin<ClassIdFieldPlugin>();
     AddPlugin<ClassFieldPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();
     AddPlugin<ClassFieldSetterPlugin>();

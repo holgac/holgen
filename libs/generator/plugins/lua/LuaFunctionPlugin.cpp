@@ -34,7 +34,7 @@ namespace holgen {
 
   void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method, const FunctionDefinition &functionDefinition) {
     for (auto &funcArg: functionDefinition.mArguments) {
-      auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject.mProject, funcArg.mType});
+      auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
       arg.mType.PreventCopying();
       if (mProject.GetClass(arg.mType.mName) != nullptr)
         arg.mType.mType = PassByType::Pointer;
@@ -57,7 +57,7 @@ namespace holgen {
       Class &cls, const FunctionDefinition &functionDefinition, ClassField &functionHandle) {
     auto method = ClassMethod{
         St::Capitalize(functionDefinition.mName),
-        Type{mProject.mProject, functionDefinition.mReturnType}
+        Type{mProject, functionDefinition.mReturnType}
     };
     method.mFunction = &functionDefinition;
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
