@@ -3,14 +3,20 @@
 
 namespace holgen {
   void CppFunctionPlugin::Run() {
-    // TODO: mixins
     for (auto &cls: mProject.mClasses) {
       if (cls.mStruct == nullptr)
         continue;
-      for (auto &func: cls.mStruct->mFunctions) {
-        if (func.GetAnnotation(Annotations::CppFunc))
-          AddCppFunction(cls, func);
-      }
+      ProcessStructDefinition(cls, *cls.mStruct);
+    }
+  }
+
+  void CppFunctionPlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+    for(auto& mixin: structDefinition.mMixins) {
+      ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
+    }
+    for (auto &func: structDefinition.mFunctions) {
+      if (func.GetAnnotation(Annotations::CppFunc))
+        AddCppFunction(cls, func);
     }
   }
 

@@ -9,5 +9,6 @@ namespace holgen {
      void Run() override;
   private:
     void AddCppFunction(Class& cls, const FunctionDefinition& functionDefinition);
+    void ProcessStructDefinition(Class& cls, const StructDefinition& structDefinition);
   };
 }

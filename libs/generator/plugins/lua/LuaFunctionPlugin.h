@@ -8,6 +8,7 @@ namespace holgen {
     using TranslatorPlugin::TranslatorPlugin;
     void Run() override;
   private:
+    void ProcessStructDefinition(Class& cls, const StructDefinition& structDefinition);
     void ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition);
     void GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition, ClassField &functionHandle);
     void GenerateFunctionPushArgs(ClassMethod &method, const FunctionDefinition &functionDefinition);

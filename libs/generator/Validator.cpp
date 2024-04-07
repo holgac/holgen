@@ -1,6 +1,7 @@
 #include "Validator.h"
 #include <set>
 #include <string>
+#include <queue>
 #include "core/Annotations.h"
 #include "TypeInfo.h"
 #include "core/Exception.h"
@@ -19,9 +20,13 @@ namespace holgen {
         "Ref",
     };
 
+    std::string ToString(const StructDefinition &structDefinition) {
+      return std::format("{} ({})", structDefinition.mName, structDefinition.mDefinitionSource);
+    }
+
     std::string ToString(const Class &cls) {
       if (cls.mStruct)
-        return std::format("{} ({})", cls.mStruct->mName, cls.mStruct->mDefinitionSource);
+        return ToString(*cls.mStruct);
       else if (cls.mEnum)
         return std::format("{} ({})", cls.mEnum->mName, cls.mEnum->mDefinitionSource);
       else
@@ -90,7 +95,8 @@ namespace holgen {
     THROW_IF(TypeInfo::Get().CppPrimitives.contains(cls.mName), "{} is a reserved keyword", ToString(cls));
     auto dup = mProject.GetClass(cls.mName);
     THROW_IF(dup, "Duplicate class: {} and {}", ToString(*dup), ToString(cls));
-    // TODO: validate mixins?
+    if (cls.mStruct)
+      ValidateMixins(*cls.mStruct);
   }
 
   void Validator::NewField(const Class &cls, const ClassField &field) const {
@@ -215,7 +221,6 @@ namespace holgen {
 
   void Validator::ContainerAnnotation(const Class &cls, const ClassField &field,
                                       const AnnotationDefinition &annotation) const {
-    // TODO: not mixin
     EnforceUniqueAnnotation(cls, field, Annotations::Container);
     ValidateAttributeCount(annotation, Annotations::Container_ElemName, ToString(cls, field));
     if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
@@ -252,7 +257,6 @@ namespace holgen {
   }
 
   void Validator::ManagedAnnotation(const Class &cls, const AnnotationDefinition &annotation) const {
-    // TODO: not mixin
     THROW_IF(!cls.GetIdField(), "{} is a managed class without an id field", ToString(cls));
     EnforceUniqueAnnotation(cls, Annotations::Managed);
     ValidateAttributeCount(annotation, Annotations::Managed_By, ToString(cls));
@@ -268,7 +272,8 @@ namespace holgen {
     THROW_IF(!containerField, "{} is managed by {} field of {} which does not exist",
              ToString(cls), annotation.GetAttribute(Annotations::Managed_Field)->mValue.mName,
              ToString(*dataManager));
-    THROW_IF(!containerField->mField->GetAnnotation(Annotations::Container), "{} is managed by {} which is not a container",
+    THROW_IF(!containerField->mField->GetAnnotation(Annotations::Container),
+             "{} is managed by {} which is not a container",
              ToString(cls), ToString(*dataManager, *containerField->mField));
     THROW_IF(containerField->mField->mType.mTemplateParameters.back().mName != cls.mStruct->mName,
              "{} is managed by {} which is not a container of {}",
@@ -421,4 +426,23 @@ namespace holgen {
       }
     }
   }
+
+  void Validator::ValidateMixins(const StructDefinition &structDefinition) const {
+    std::map<std::string, const StructDefinition *> mixinUsage{{structDefinition.mName, &structDefinition}};
+    ValidateMixins(structDefinition, mixinUsage);
+  }
+
+  void Validator::ValidateMixins(
+      const StructDefinition &structDefinition, std::map<std::string, const StructDefinition *> &mixinUsage) const {
+    for (auto &mixin: structDefinition.mMixins) {
+      THROW_IF(mixinUsage.contains(mixin),
+               "Circular or duplicate mixin usage detected in {} and {}",
+               ToString(*mixinUsage.at(mixin)), ToString(structDefinition));
+      auto mixinStruct = mProject.mProject.GetStruct(mixin);
+      THROW_IF(!mixinStruct, "{} uses unrecognized mixin {}", ToString(structDefinition), mixin);
+      mixinUsage.emplace(mixin, &structDefinition);
+      ValidateMixins(*mixinStruct, mixinUsage);
+    }
+  }
+
 }

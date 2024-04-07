@@ -5,15 +5,19 @@
 namespace holgen {
   void LuaFunctionPlugin::Run() {
     for (auto &cls: mProject.mClasses) {
-      if (cls.mStruct == nullptr)
+      if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::NoLua))
         continue;
-      if (cls.mStruct->GetAnnotation(Annotations::NoLua))
-        return;
-      // TODO: mixins
-      for (auto &func: cls.mStruct->mFunctions) {
-        if (func.GetAnnotation(Annotations::LuaFunc))
-          ProcessLuaFunction(cls, func);
-      }
+      ProcessStructDefinition(cls, *cls.mStruct);
+    }
+  }
+
+  void LuaFunctionPlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+    for(auto& mixin: structDefinition.mMixins) {
+      ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
+    }
+    for (auto &func: structDefinition.mFunctions) {
+      if (func.GetAnnotation(Annotations::LuaFunc))
+        ProcessLuaFunction(cls, func);
     }
   }
 
