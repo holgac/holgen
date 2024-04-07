@@ -128,11 +128,10 @@ namespace holgen {
   }
 
   void LuaPlugin::GenerateReadFromLua(Class &cls) {
-    // Only works with negative indices
-    // TODO: generate comments?
     auto method = ClassMethod{
         "ReadFromLua", Type{cls.mName, PassByType::Pointer},
         Visibility::Public, Constness::NotConst, Staticness::Static};
+    method.mComments.push_back("This only works with negative indices");
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
     if (!ShouldEmbedPointer(cls)) {

@@ -70,6 +70,7 @@ namespace holgen {
     CodeBlock mBody;
     std::list<ClassMethodArgument> mArguments;
     std::list<TemplateParameter> mTemplateParameters;
+    std::vector<std::string> mComments;
     bool mIsTemplateSpecialization = false;
   protected:
     ClassMethodBase() = default;

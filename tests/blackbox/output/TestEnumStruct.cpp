@@ -24,7 +24,7 @@ bool TestEnumStruct::ParseJson(const rapidjson::Value& json, const Converter& co
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp("enumField", name)) {
-      auto res = mEnumField.ParseJson(data.value, converter);
+      auto res = JsonHelper::Parse(mEnumField, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumField field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestEnumStruct: {}", name);

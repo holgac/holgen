@@ -29,6 +29,7 @@ public:
   bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;
+  // This only works with negative indices
   static HumanManager* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 private:

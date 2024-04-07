@@ -215,6 +215,24 @@ namespace holgen {
       if (!ShouldGenerateMethod(method, visibility, isInsideClass))
         continue;
 
+      if (!method.mComments.empty()) {
+        if (method.mComments.size() == 1) {
+          codeBlock.Add("// {}", method.mComments[0]);
+        } else {
+          codeBlock.Add("/*");
+          for (auto line: method.mComments) {
+            while (true) {
+              auto idx = line.find("*/");
+              if (idx == std::string::npos)
+                break;
+              line.replace(idx, 2, "* /");
+            }
+            codeBlock.Add(" * {}", line);
+          }
+          codeBlock.Add(" */");
+        }
+      }
+
       if (!method.mTemplateParameters.empty())
         codeBlock.AddLine(StringifyTemplateParameters(method.mTemplateParameters));
       if (method.mIsTemplateSpecialization)
@@ -383,7 +401,7 @@ namespace holgen {
     codeBlock.Line();
     codeBlock.Add("#ifndef HOLGEN_WARN");
     codeBlock.Add(
-        R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}} " msg "\n", __FILE__, __LINE__, ## __VA_ARGS__))");
+        R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}} " msg, __FILE__, __LINE__, ## __VA_ARGS__) << std::endl)");
     codeBlock.Add("#endif // ifndef HOLGEN_WARN");
 
     codeBlock.Line();
