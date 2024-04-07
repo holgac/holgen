@@ -279,3 +279,33 @@ struct Action {
   ExpectFunction(*func, "func3", "vector", 0, 0, 6, 2);
   ASSERT_EQ(func->mReturnType.mTemplateParameters[0].mName, "s32");
 }
+
+TEST_F(ParserTest, Mixin) {
+  auto proj = Parse("struct A : B { } mixin B {}");
+  EXPECT_EQ(proj.mStructs.size(), 2);
+  auto a = proj.GetStruct("A");
+  ASSERT_NE(a, nullptr);
+  EXPECT_EQ(a->mIsMixin, false);
+  auto b = proj.GetStruct("B");
+  ASSERT_NE(b, nullptr);
+  EXPECT_EQ(b->mIsMixin, true);
+  ASSERT_EQ(a->mMixins.size(), 1);
+  ASSERT_EQ(a->mMixins[0], "B");
+}
+
+TEST_F(ParserTest, MultipleMixins) {
+  auto proj = Parse("struct A : B, C { } mixin B {} mixin C {}");
+  EXPECT_EQ(proj.mStructs.size(), 3);
+  auto a = proj.GetStruct("A");
+  ASSERT_NE(a, nullptr);
+  EXPECT_EQ(a->mIsMixin, false);
+  auto b = proj.GetStruct("B");
+  ASSERT_NE(b, nullptr);
+  EXPECT_EQ(b->mIsMixin, true);
+  auto c = proj.GetStruct("C");
+  ASSERT_NE(c, nullptr);
+  EXPECT_EQ(c->mIsMixin, true);
+  ASSERT_EQ(a->mMixins.size(), 2);
+  ASSERT_EQ(a->mMixins[0], "B");
+  ASSERT_EQ(a->mMixins[1], "C");
+}

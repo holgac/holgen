@@ -639,7 +639,7 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
   for(const auto& data: json.GetObject()) {
     const auto& name = data.name.GetString();
     if (0 == strcmp("leader", name)) {
-      auto res = mLeader.ParseJson(data.value, converter);
+      auto res = JsonHelper::Parse(mLeader, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.leader field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing Country: {}", name);

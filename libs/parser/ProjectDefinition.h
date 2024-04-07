@@ -71,6 +71,8 @@ namespace holgen {
     std::vector<FieldDefinition> mFields;
     std::vector<AnnotationDefinition> mAnnotations;
     std::vector<FunctionDefinition> mFunctions;
+    std::vector<std::string> mMixins;
+    bool mIsMixin = false;
     DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
     [[nodiscard]] const FieldDefinition *GetField(const std::string &name) const;
@@ -101,6 +103,7 @@ namespace holgen {
 
   struct ProjectDefinition {
     std::vector<StructDefinition> mStructs;
+    std::vector<StructDefinition> mMixins;
     std::vector<EnumDefinition> mEnums;
     [[nodiscard]] const StructDefinition *GetStruct(const std::string &name) const;
     [[nodiscard]] const EnumDefinition *GetEnum(const std::string &name) const;
