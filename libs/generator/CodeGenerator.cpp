@@ -8,9 +8,13 @@ namespace holgen {
   }
 
   namespace {
-    bool CanBeDefinedInHeader(const Class &cls, const ClassMethod &method) {
+    bool CanBeDefinedInHeader(const Class &cls, const ClassMethodBase &method) {
       return !method.mTemplateParameters.empty()
-             || !cls.mTemplateParameters.empty()
+             || !cls.mTemplateParameters.empty();
+    }
+
+    bool CanBeDefinedInHeader(const Class &cls, const ClassMethod &method) {
+      return CanBeDefinedInHeader(cls, (const ClassMethodBase &) method)
              || method.mConstexprness == Constexprness::Constexpr;
     }
 
@@ -107,6 +111,10 @@ namespace holgen {
     if (visibility == Visibility::Public)
       GenerateUsingsForHeader(codeBlockForVisibility, cls);
     GenerateConstructorsForHeader(codeBlockForVisibility, cls, visibility, true);
+    auto dtorCodeBlock = GenerateDestructor(cls, visibility, true);
+    if (!dtorCodeBlock.mContents.empty()) {
+      codeBlockForVisibility.Add(std::move(dtorCodeBlock));
+    }
     GenerateMethodsForHeader(codeBlockForVisibility, cls, visibility, true);
     GenerateFieldDeclarations(codeBlockForVisibility, cls, visibility);
     if (!codeBlockForVisibility.mContents.empty()) {
@@ -206,7 +214,6 @@ namespace holgen {
       codeBlock.Indent(-1);
       codeBlock.Line() << "}";
     }
-
   }
 
   void CodeGenerator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
@@ -280,6 +287,15 @@ namespace holgen {
     }
 
     {
+      auto block = GenerateDestructor(cls);
+      if (!block.mContents.empty()) {
+        if (!previousBlockWasEmpty)
+          codeBlock.AddLine();
+        codeBlock.Add(std::move(block));
+      }
+    }
+
+    {
       auto block = GenerateMethodsForSource(cls);
       if (!block.mContents.empty()) {
         if (!previousBlockWasEmpty)
@@ -312,7 +328,7 @@ namespace holgen {
     bool isFirstMethod = true;
 
     for (auto &method: cls.mMethods) {
-      if (method.mUserDefined || CanBeDefinedInHeader(cls, method)) {
+      if (CanBeDefinedInHeader(cls, method) || method.mUserDefined) {
         continue;
       }
       if (isFirstMethod)
@@ -522,5 +538,33 @@ namespace holgen {
     if (method.mConstness == Constness::Const)
       ss << " const";
     return ss.str();
+  }
+
+  CodeBlock CodeGenerator::GenerateDestructor(const Class &cls, Visibility visibility,
+                                          bool isHeader) const {
+    CodeBlock codeBlock;
+    if (!cls.mDestructor.has_value())
+      return {};
+    if (isHeader && cls.mDestructor->mVisibility != visibility)
+      return {};
+    bool definedInHeader = CanBeDefinedInHeader(cls, *cls.mDestructor);
+    if (isHeader) {
+      if (!definedInHeader) {
+        codeBlock.Add("~{}();", cls.mName);
+      } else {
+        codeBlock.Add("~{}() {{", cls.mName);
+        codeBlock.Indent(1);
+        codeBlock.Add(cls.mDestructor->mBody);
+        codeBlock.Indent(-1);
+        codeBlock.Add("}}");
+      }
+    } else if (!definedInHeader) {
+      codeBlock.Add("{0}::~{0}() {{", cls.mName);
+      codeBlock.Indent(1);
+      codeBlock.Add(cls.mDestructor->mBody);
+      codeBlock.Indent(-1);
+      codeBlock.Add("}}");
+    }
+    return codeBlock;
   }
 }

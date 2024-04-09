@@ -18,11 +18,11 @@ namespace holgen {
     for(auto& mixin: structDefinition.mMixins) {
       ProcessStructDefinition(cls, destructor, *mProject.mProject.GetStruct(mixin));
     }
-    for(auto& method: cls.mMethods) {
-      if (!method.mFunction || !method.mFunction->GetAnnotation(Annotations::CppFunc))
+    for(auto& func: structDefinition.mFunctions) {
+      if (!func.GetAnnotation(Annotations::CppFunc))
         continue;
-      if (method.mFunction->GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
-        destructor.mBody.Add("{}();", method.mName);
+      if (func.GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
+        destructor.mBody.Add("{}();", func.mName);
       }
     }
   }

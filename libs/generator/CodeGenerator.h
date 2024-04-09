@@ -41,14 +41,17 @@ namespace holgen {
     void GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const;
     void GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const;
     void GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
-    void GenerateConstructorsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility,
-                                       bool isInsideClass) const;
-    void
-    GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
+    void GenerateConstructorsForHeader(
+        CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
+    [[nodiscard]] CodeBlock GenerateDestructor(
+        const Class &cls, Visibility visibility = Visibility::Public, bool isHeader = false) const;
+    void GenerateMethodsForHeader(
+        CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
     [[nodiscard]] CodeBlock GenerateMethodsForSource(const Class &cls) const;
     [[nodiscard]] CodeBlock GenerateFieldsForSource(const Class &cls) const;
     [[nodiscard]] CodeBlock GenerateConstructorsForSource(const Class &cls) const;
     void GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
-    std::string GenerateFunctionSignature(const Class& cls, const ClassMethod &method, bool isInHeader, bool isInsideClass) const;
+    std::string
+    GenerateFunctionSignature(const Class &cls, const ClassMethod &method, bool isInHeader, bool isInsideClass) const;
   };
 }
