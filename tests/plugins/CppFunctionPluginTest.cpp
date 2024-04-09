@@ -1,12 +1,14 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
+#include "generator/plugins/CppDestructorPlugin.h"
 
 class CppFunctionPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
     ClassPlugin(project).Run();
     CppFunctionPlugin(project).Run();
+    CppDestructorPlugin(project).Run();
   }
 };
 
@@ -66,10 +68,67 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public, Constness::NotConst};
+  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
+                            Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t"});
   method.mUserDefined = true;
   method.mExposeToLua = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
+}
+
+TEST_F(CppFunctionPluginTest, NoOnDestroy) {
+  auto project = Parse(R"R(
+struct TestData {
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  ASSERT_EQ(cls->mDestructor.has_value(), false);
+}
+
+TEST_F(CppFunctionPluginTest, OnDestroy) {
+  auto project = Parse(R"R(
+struct TestData {
+  @cppFunc(onDestroy)
+  func func1();
+  @cppFunc(onDestroy)
+  func func2();
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  ASSERT_EQ(cls->mDestructor.has_value(), true);
+
+  auto method = ClassDestructor{};
+  helpers::ExpectEqual(*cls->mDestructor, method, R"R(
+func1();
+func2();
+  )R");
+}
+
+TEST_F(CppFunctionPluginTest, OnDestroyFunctionWithArgs) {
+  ExpectErrorMessage(R"R(
+struct TestData {
+  @cppFunc(onDestroy)
+  func func1(s32 val);
+}
+)R",
+                     Run,
+                     "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions with arguments",
+                     Source);
+}
+
+TEST_F(CppFunctionPluginTest, OnDestroyFunctionWithReturnType) {
+  ExpectErrorMessage(R"R(
+struct TestData {
+  @cppFunc(onDestroy)
+  func func1() -> s32;
+}
+  )R",
+                     Run,
+                     "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions that return a value",
+                     Source);
 }

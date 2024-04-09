@@ -26,6 +26,9 @@ namespace holgen {
         func.mName,
         Type{mProject, func.mReturnType},
         Visibility::Public, Constness::NotConst};
+    if (func.GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
+      method.mVisibility = Visibility::Protected;
+    }
     method.mUserDefined = true;
     method.mExposeToLua = true;
     method.mFunction = &func;

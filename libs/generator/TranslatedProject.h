@@ -123,6 +123,10 @@ namespace holgen {
     // bool isDeleted = false;
   };
 
+  struct ClassDestructor : ClassMethodBase {
+    ClassDestructor() = default;
+  };
+
   struct ForwardDeclaration {
     std::string mType;
     std::string mName;
@@ -145,6 +149,7 @@ namespace holgen {
     std::string mName;
     std::list<ClassMethod> mMethods;
     std::list<ClassConstructor> mConstructors;
+    std::optional<ClassDestructor> mDestructor;
     std::list<ClassField> mFields;
     std::list<TemplateParameter> mTemplateParameters;
     std::list<Using> mUsings;

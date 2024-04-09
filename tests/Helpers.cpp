@@ -91,6 +91,11 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue);
   }
 
+  void ExpectEqual(const ClassDestructor &actual, const ClassDestructor &expected,
+                            const std::optional<std::string> &expectedBody) {
+    ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, "destructor");
+  }
+
   void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expected,
                    const std::optional<std::string> &expectedBody) {
     ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, "constructor");

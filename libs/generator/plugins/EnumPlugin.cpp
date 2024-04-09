@@ -50,6 +50,7 @@ namespace holgen {
   }
 
   void EnumPlugin::GenerateGetValue(Class &cls) {
+    // TODO: rename to GetValue
     auto method = ClassMethod{"Get", Type{St::Enum_UnderlyingType}};
     method.mBody.Add("return mValue;");
     Validate().NewMethod(cls, method);
@@ -130,6 +131,7 @@ namespace holgen {
   }
 
   void EnumPlugin::GenerateEntries(Class &cls) {
+    // TODO: iterate twice so that all entries are added before all values and in the same order.
     for (auto &entry: cls.mEnum->mEntries) {
       auto valueField = ClassField{
           entry.mName + "Value",

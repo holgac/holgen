@@ -167,12 +167,15 @@ namespace holgen {
      * used to store and reference the function
      */
     inline static const std::string LuaFunc = "luaFunc";
-    inline static const std::string LuaFuncTable = "table";
+    inline static const std::string LuaFunc_Table = "table";
 
     /**
      * Marks the function below as a custom function implemented in cpp
      * and callable from cpp and lua.
+     *
+     * onDestroy: Called when the object is destroyed, use it to free unmanaged resources
      */
     inline static const std::string CppFunc = "cppFunc";
+    inline static const std::string CppFunc_OnDestroy = "onDestroy";
   };
 }

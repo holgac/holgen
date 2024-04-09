@@ -15,6 +15,7 @@ namespace holgen::helpers {
   void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected, const std::optional<std::string>& expectedBody = std::nullopt);
   void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected);
   void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expected, const std::optional<std::string>& expectedBody = std::nullopt);
+  void ExpectEqual(const ClassDestructor &actual, const ClassDestructor &expected, const std::optional<std::string>& expectedBody = std::nullopt);
   void ExpectEqual(const ClassConstructorInitializer &actual, const ClassConstructorInitializer &expected);
   void ExpectEqual(const TemplateParameter &actual, const TemplateParameter &expected);
 }

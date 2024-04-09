@@ -6,6 +6,7 @@
 #include "generator/plugins/ClassFieldSetterPlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
+#include "generator/plugins/CppDestructorPlugin.h"
 #include "generator/plugins/ContainerFieldPlugin.h"
 #include "generator/plugins/ManagedClassPlugin.h"
 #include "generator/plugins/EnumPlugin.h"
@@ -29,6 +30,7 @@ namespace holgen {
     AddPlugin<ClassFieldSetterPlugin>();
     AddPlugin<LuaFunctionPlugin>();
     AddPlugin<CppFunctionPlugin>();
+    AddPlugin<CppDestructorPlugin>();
     AddPlugin<ContainerFieldPlugin>();
     AddPlugin<ManagedClassPlugin>();
     AddPlugin<EnumPlugin>();

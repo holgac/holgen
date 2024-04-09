@@ -64,7 +64,7 @@ namespace holgen {
     method.mBody.Add(
         R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {{}}, "Calling unset {} function");)",
         functionHandle.mName, functionDefinition.mName);
-    auto luaFuncTable = functionDefinition.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFuncTable);
+    auto luaFuncTable = functionDefinition.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
 
     if (luaFuncTable) {
       method.mBody.Add("lua_getglobal(luaState, \"{}\");", luaFuncTable->mValue.mName);
