@@ -50,8 +50,7 @@ namespace holgen {
   }
 
   void EnumPlugin::GenerateGetValue(Class &cls) {
-    // TODO: rename to GetValue
-    auto method = ClassMethod{"Get", Type{St::Enum_UnderlyingType}};
+    auto method = ClassMethod{"GetValue", Type{St::Enum_UnderlyingType}};
     method.mBody.Add("return mValue;");
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
@@ -131,7 +130,19 @@ namespace holgen {
   }
 
   void EnumPlugin::GenerateEntries(Class &cls) {
-    // TODO: iterate twice so that all entries are added before all values and in the same order.
+    for (auto &entry: cls.mEnum->mEntries) {
+      auto entryField = ClassField{
+          entry.mName,
+          Type{cls.mName, PassByType::Value, Constness::Const},
+          Visibility::Public,
+          Staticness::Static
+      };
+      entryField.mDefaultConstructorArguments.push_back(entry.mValue);
+      entryField.mEntry = &entry;
+
+      Validate().NewField(cls, entryField);
+      cls.mFields.push_back(std::move(entryField));
+    }
     for (auto &entry: cls.mEnum->mEntries) {
       auto valueField = ClassField{
           entry.mName + "Value",
@@ -142,35 +153,20 @@ namespace holgen {
       };
       valueField.mType.mConstexprness = Constexprness::Constexpr;
       valueField.mEntry = &entry;
-      auto entryField = ClassField{
-          entry.mName,
-          Type{cls.mName, PassByType::Value, Constness::Const},
-          Visibility::Public,
-          Staticness::Static
-      };
-      entryField.mDefaultConstructorArguments.push_back(entry.mValue);
-      entryField.mEntry = &entry;
-
       Validate().NewField(cls, valueField);
       cls.mFields.push_back(std::move(valueField));
-      Validate().NewField(cls, entryField);
-      cls.mFields.push_back(std::move(entryField));
-
     }
-
-    {
-      auto invalidEntry = ClassField{
-          "Invalid",
-          Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
-          Visibility::Public,
-          Staticness::Static,
-          cls.mEnum->mInvalidValue
-      };
-      invalidEntry.mType.mConstexprness = Constexprness::Constexpr;
-      invalidEntry.mDefaultValue = cls.mEnum->mInvalidValue;
-      Validate().NewField(cls, invalidEntry);
-      cls.mFields.push_back(std::move(invalidEntry));
-    }
+    auto invalidEntry = ClassField{
+        "Invalid",
+        Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
+        Visibility::Public,
+        Staticness::Static,
+        cls.mEnum->mInvalidValue
+    };
+    invalidEntry.mType.mConstexprness = Constexprness::Constexpr;
+    invalidEntry.mDefaultValue = cls.mEnum->mInvalidValue;
+    Validate().NewField(cls, invalidEntry);
+    cls.mFields.push_back(std::move(invalidEntry));
   }
 
   void EnumPlugin::GenerateFromString(Class &cls) {

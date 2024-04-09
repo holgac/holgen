@@ -13,7 +13,7 @@ class TestEnum {
 public:
   using UnderlyingType=int64_t;
   explicit TestEnum(UnderlyingType value = Invalid);
-  UnderlyingType Get() const;
+  UnderlyingType GetValue() const;
   static TestEnum FromString(std::string_view str);
   const char* ToString() const;
   TestEnum& operator =(UnderlyingType rhs);
@@ -27,12 +27,12 @@ public:
   static std::array<TestEnum, 3> GetEntries();
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
-  inline static constexpr const UnderlyingType Entry5Value = 5;
   static const TestEnum Entry5;
-  inline static constexpr const UnderlyingType Entry1Value = 0;
   static const TestEnum Entry1;
-  inline static constexpr const UnderlyingType Entry2Value = 1;
   static const TestEnum Entry2;
+  inline static constexpr const UnderlyingType Entry5Value = 5;
+  inline static constexpr const UnderlyingType Entry1Value = 0;
+  inline static constexpr const UnderlyingType Entry2Value = 1;
   inline static constexpr const UnderlyingType Invalid = 2;
 private:
   UnderlyingType mValue;

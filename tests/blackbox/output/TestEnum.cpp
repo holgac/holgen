@@ -16,7 +16,7 @@ TestEnum::TestEnum(TestEnum::UnderlyingType value) :
 {
 }
 
-TestEnum::UnderlyingType TestEnum::Get() const {
+TestEnum::UnderlyingType TestEnum::GetValue() const {
   return mValue;
 }
 
