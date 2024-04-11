@@ -21,7 +21,9 @@
 
 namespace holgen {
 
-  Translator::Translator(const ProjectDefinition &project) : mProject(project) {
+  Translator::Translator(
+      const TranslatorSettings &translatorSettings
+  ) : mTranslatorSettings(translatorSettings) {
     // TODO: Users should pick which plugins to run
     AddPlugin<ClassPlugin>();
     AddPlugin<ClassIdFieldPlugin>();
@@ -44,10 +46,11 @@ namespace holgen {
     AddPlugin<FilesystemHelperPlugin>();
   }
 
-  TranslatedProject Translator::Translate() {
+  TranslatedProject Translator::Translate(const ProjectDefinition &project) const {
+    TranslatedProject translatedProject(project);
     for (const auto &plugin: mPlugins) {
-      plugin->Run();
+      plugin(translatedProject);
     }
-    return mProject;
+    return translatedProject;
   }
 }

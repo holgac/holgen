@@ -51,8 +51,9 @@ int run(int argc, char **argv) {
     }
     pathsQueue.pop();
   }
-  holgen::Translator translator(parser.GetProject());
-  auto project = translator.Translate();
+  holgen::TranslatorSettings translatorSettings{argv[3]};
+  holgen::Translator translator{translatorSettings};
+  auto project = translator.Translate(parser.GetProject());
   auto generator = holgen::CodeGenerator({argv[3], argv[4], argv[5]});
   auto results = generator.Generate(project);
   std::filesystem::path outDir(argv[2]);

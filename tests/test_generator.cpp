@@ -20,7 +20,10 @@ namespace {
     )R", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator(parser.GetProject()).Translate();
+    TranslatorSettings translatorSettings{
+        .mNamespace = "generator_test_namespace",
+    };
+    auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -53,7 +56,10 @@ add_library(generator_test_cmake Person.cpp Converter.cpp JsonHelper.cpp LuaHelp
     )R", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator(parser.GetProject()).Translate();
+    TranslatorSettings translatorSettings{
+        .mNamespace = "generator_test_namespace",
+    };
+    auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -129,7 +135,10 @@ void Person::SetGender(float val) {
     )R", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator(parser.GetProject()).Translate();
+    TranslatorSettings translatorSettings{
+        .mNamespace = "generator_test_namespace",
+    };
+    auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -244,7 +253,10 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
     )R", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator(parser.GetProject()).Translate();
+    TranslatorSettings translatorSettings{
+        .mNamespace = "generator_test_namespace",
+    };
+    auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -441,7 +453,10 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
     )R", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator(parser.GetProject()).Translate();
+    TranslatorSettings translatorSettings{
+        .mNamespace = "generator_test_namespace",
+    };
+    auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
@@ -672,7 +687,10 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
     )R", "GeneratorTest");
     Parser parser;
     parser.Parse(tokenizer);
-    auto translatedProject = Translator(parser.GetProject()).Translate();
+    TranslatorSettings translatorSettings{
+        .mNamespace = "generator_test_namespace",
+    };
+    auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
         .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
