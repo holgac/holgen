@@ -136,6 +136,11 @@ namespace holgen {
     }
   };
 
+  enum class ClassType {
+    Class,
+    Struct,
+  };
+
   // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
   struct Class {
     explicit Class(std::string name, const StructDefinition *_struct) : mStruct(_struct), mName(std::move(name)) {}
@@ -152,10 +157,14 @@ namespace holgen {
     std::optional<ClassDestructor> mDestructor;
     std::list<ClassField> mFields;
     std::list<TemplateParameter> mTemplateParameters;
+    std::list<std::string> mTemplateSpecializations;
     std::list<Using> mUsings;
+    std::list<Class> mSpecializations;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
     std::set<ForwardDeclaration> mGlobalForwardDeclarations;
+    ClassType mClassType = ClassType::Class;
+    std::string mNamespace;
     [[nodiscard]] ClassField *GetField(const std::string &name);
     [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);
     [[nodiscard]] const ClassField *GetField(const std::string &name) const;

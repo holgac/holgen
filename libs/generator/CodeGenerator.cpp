@@ -84,26 +84,57 @@ namespace holgen {
     if (!mGeneratorSettings.mNamespace.empty())
       codeBlock.Add("namespace {} {{", mGeneratorSettings.mNamespace);
 
+    GenerateClassDefinition(cls, codeBlock);
+
+    if (!mGeneratorSettings.mNamespace.empty())
+      codeBlock.Add("}}"); // namespace
+
+    for (auto &specialization: cls.mSpecializations) {
+      GenerateClassDefinition(specialization, codeBlock);
+    }
+    header.mText = codeBlock.ToString();
+  }
+
+  void CodeGenerator::GenerateClassDefinition(const Class &cls, CodeBlock &codeBlock) const {
+    if (!cls.mNamespace.empty())
+      codeBlock.Add("namespace {} {{", cls.mNamespace);
     GenerateClassDeclarationsForHeader(codeBlock, cls);
-
-    if (!cls.mTemplateParameters.empty())
-      codeBlock.AddLine(StringifyTemplateParameters(cls.mTemplateParameters));
-
     // TODO: struct-specific namespaces defined via annotations
-    codeBlock.Add("class {} {{", cls.mName);
-
-
+    if (!cls.mTemplateParameters.empty() || !cls.mTemplateSpecializations.empty())
+      codeBlock.AddLine(StringifyTemplateParameters(cls.mTemplateParameters));
+    codeBlock.Add("{} {{", GenerateClassDeclaration(cls));
     GenerateForVisibility(codeBlock, cls, Visibility::Public);
     GenerateForVisibility(codeBlock, cls, Visibility::Protected);
     GenerateForVisibility(codeBlock, cls, Visibility::Private);
-
     codeBlock.Add("}};"); // class
     GenerateMethodsForHeader(codeBlock, cls, Visibility::Public, false);
     GenerateMethodsForHeader(codeBlock, cls, Visibility::Protected, false);
     GenerateMethodsForHeader(codeBlock, cls, Visibility::Private, false);
-    if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Add("}}"); // namespace
-    header.mText = codeBlock.ToString();
+    if (!cls.mNamespace.empty())
+      codeBlock.Add("}}");
+  }
+
+  std::string CodeGenerator::GenerateClassDeclaration(const Class &cls) const {
+    std::stringstream line;
+    if (cls.mClassType == ClassType::Struct)
+      line << "struct ";
+    else
+      line << "class ";
+    line << cls.mName;
+    if (!cls.mTemplateSpecializations.empty()) {
+      line << "<";
+      bool isFirst = true;
+      for (const auto &templateSpecialization: cls.mTemplateSpecializations) {
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          line << ", ";
+        }
+        line << templateSpecialization;
+      }
+      line << ">";
+    }
+    return line.str();
   }
 
   void CodeGenerator::GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
@@ -541,7 +572,7 @@ namespace holgen {
   }
 
   CodeBlock CodeGenerator::GenerateDestructor(const Class &cls, Visibility visibility,
-                                          bool isHeader) const {
+                                              bool isHeader) const {
     CodeBlock codeBlock;
     if (!cls.mDestructor.has_value())
       return {};
