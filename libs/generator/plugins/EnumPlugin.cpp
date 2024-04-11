@@ -47,6 +47,7 @@ namespace holgen {
     GenerateOperators(cls);
     GenerateGetEntries(cls, true);
     GenerateGetEntries(cls, false);
+    GenerateHash(cls);
   }
 
   void EnumPlugin::GenerateGetValue(Class &cls) {
@@ -221,5 +222,18 @@ namespace holgen {
     method.mBody.Add("}}"); // switch
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
+  }
+
+  void EnumPlugin::GenerateHash(Class &cls) {
+    auto className = std::format("{}::{}", cls.mNamespace, cls.mName);
+    auto hash = Class{"hash", "std"};
+    hash.mTemplateSpecializations.push_back(className);
+    hash.mClassType = ClassType::Struct;
+
+    auto hasher = ClassMethod{"operator()", Type{"size_t"}, Visibility::Public, Constness::Const};
+    hasher.mArguments.emplace_back("obj", Type{className, PassByType::Value, Constness::Const});
+    hasher.mBody.Add("return std::hash<{}::UnderlyingType>()(obj.GetValue());", className);
+    hash.mMethods.push_back(std::move(hasher));
+    cls.mSpecializations.push_back(std::move(hash));
   }
 }

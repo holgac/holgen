@@ -46,3 +46,27 @@ TEST_F(EnumTest, GetEntries) {
   EXPECT_THAT(TestEnum::GetEntries(), ::testing::ElementsAre(TestEnum::Entry5, TestEnum::Entry1, TestEnum::Entry2));
   EXPECT_THAT(TestEnum::GetEntryValues(), ::testing::ElementsAre(5, 0, 1));
 }
+
+TEST_F(EnumTest, StdUnorderedMap) {
+  std::unordered_map<TestEnum, int> map;
+  EXPECT_EQ(map.contains(TestEnum::Entry1), false);
+  map[TestEnum::Entry1] = 1001;
+  map[TestEnum::Entry5] = 1005;
+  ASSERT_EQ(map.contains(TestEnum::Entry1), true);
+  EXPECT_EQ(map.at(TestEnum::Entry1), 1001);
+  ASSERT_EQ(map.contains(TestEnum::Entry5), true);
+  EXPECT_EQ(map.at(TestEnum::Entry5), 1005);
+  EXPECT_EQ(map.contains(TestEnum::Entry2), false);
+}
+
+TEST_F(EnumTest, StdMap) {
+  std::map<TestEnum, int> map;
+  EXPECT_EQ(map.contains(TestEnum::Entry1), false);
+  map[TestEnum::Entry1] = 1001;
+  map[TestEnum::Entry5] = 1005;
+  ASSERT_EQ(map.contains(TestEnum::Entry1), true);
+  EXPECT_EQ(map.at(TestEnum::Entry1), 1001);
+  ASSERT_EQ(map.contains(TestEnum::Entry5), true);
+  EXPECT_EQ(map.at(TestEnum::Entry5), 1005);
+  EXPECT_EQ(map.contains(TestEnum::Entry2), false);
+}

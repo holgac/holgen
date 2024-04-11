@@ -15,5 +15,6 @@ namespace holgen {
     void GenerateToString(Class &cls);
     void GenerateGetEntries(Class &cls, bool forValues);
     void GenerateGetValue(Class &cls);
+    void GenerateHash(Class &cls);
   };
 }

@@ -10,7 +10,8 @@ namespace holgen {
   namespace {
     bool CanBeDefinedInHeader(const Class &cls, const ClassMethodBase &method) {
       return !method.mTemplateParameters.empty()
-             || !cls.mTemplateParameters.empty();
+             || !cls.mTemplateParameters.empty()
+             || !cls.mTemplateSpecializations.empty();
     }
 
     bool CanBeDefinedInHeader(const Class &cls, const ClassMethod &method) {

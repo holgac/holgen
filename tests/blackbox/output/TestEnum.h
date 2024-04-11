@@ -40,3 +40,12 @@ private:
   UnderlyingType mValue;
 };
 }
+namespace std {
+template <>
+struct hash<holgen_blackbox_test::TestEnum> {
+public:
+  size_t operator()(const holgen_blackbox_test::TestEnum obj) const {
+    return std::hash<holgen_blackbox_test::TestEnum::UnderlyingType>()(obj.GetValue());
+  }
+};
+}
