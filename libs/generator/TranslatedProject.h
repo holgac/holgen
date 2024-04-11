@@ -171,6 +171,7 @@ namespace holgen {
     std::set<ForwardDeclaration> mGlobalForwardDeclarations;
     ClassType mClassType = ClassType::Class;
     std::string mNamespace;
+    std::list<std::string> mBaseClasses;
     [[nodiscard]] ClassField *GetField(const std::string &name);
     [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);
     [[nodiscard]] const ClassField *GetField(const std::string &name) const;

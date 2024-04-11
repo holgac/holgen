@@ -128,6 +128,18 @@ namespace holgen {
       }
       line << ">";
     }
+    if (!cls.mBaseClasses.empty()) {
+      line << " :";
+      bool isFirst = true;
+      for (const auto &baseClass: cls.mBaseClasses) {
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          line << ",";
+        }
+        line << " public " << baseClass;
+      }
+    }
     return line.str();
   }
 

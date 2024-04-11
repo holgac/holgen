@@ -70,3 +70,9 @@ TEST_F(EnumTest, StdMap) {
   EXPECT_EQ(map.at(TestEnum::Entry5), 1005);
   EXPECT_EQ(map.contains(TestEnum::Entry2), false);
 }
+
+TEST_F(EnumTest, Formatter) {
+  EXPECT_EQ(std::format("{}", TestEnum::Entry1), "Entry1");
+  EXPECT_EQ(std::format("{}", TestEnum::Entry2), "Entry2");
+  EXPECT_EQ(std::format("{}", TestEnum::Entry5), "Entry5");
+}

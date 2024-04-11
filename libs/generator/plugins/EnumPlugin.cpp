@@ -48,6 +48,7 @@ namespace holgen {
     GenerateGetEntries(cls, true);
     GenerateGetEntries(cls, false);
     GenerateHash(cls);
+    GenerateFormatter(cls);
   }
 
   void EnumPlugin::GenerateGetValue(Class &cls) {
@@ -59,7 +60,6 @@ namespace holgen {
 
   void EnumPlugin::GenerateOperators(Class &cls) {
     // TODO: test these properly. Currently overloads aren't well supported.
-    // TODO: should work with sets/unordered_sets out of the box
     const std::vector<EnumOperator> operators = {
         {"=",  Constness::NotConst, EnumOperatorReturnType::This,   true},
         {"==", Constness::Const,    EnumOperatorReturnType::Result, true},
@@ -205,7 +205,7 @@ namespace holgen {
   }
 
   void EnumPlugin::GenerateToString(Class &cls) {
-    // TODO: implement formatter and << operators
+    // TODO: << operator?
     auto method = ClassMethod{
         "ToString",
         Type{"char", PassByType::Pointer, Constness::Const},
@@ -231,9 +231,26 @@ namespace holgen {
     hash.mClassType = ClassType::Struct;
 
     auto hasher = ClassMethod{"operator()", Type{"size_t"}, Visibility::Public, Constness::Const};
-    hasher.mArguments.emplace_back("obj", Type{className, PassByType::Value, Constness::Const});
+    hasher.mArguments.emplace_back("obj", Type{className, PassByType::Reference, Constness::Const});
     hasher.mBody.Add("return std::hash<{}::UnderlyingType>()(obj.GetValue());", className);
     hash.mMethods.push_back(std::move(hasher));
     cls.mSpecializations.push_back(std::move(hash));
+  }
+
+  void EnumPlugin::GenerateFormatter(Class &cls) {
+    cls.mHeaderIncludes.AddStandardHeader("format");
+    auto className = std::format("{}::{}", cls.mNamespace, cls.mName);
+    auto formatter = Class{"formatter", "std"};
+    formatter.mTemplateSpecializations.push_back(className);
+    formatter.mClassType = ClassType::Struct;
+    formatter.mBaseClasses.push_back("formatter<string>");
+
+    auto format = ClassMethod{"format", Type{"auto"}, Visibility::Public, Constness::Const};
+    format.mTemplateParameters.emplace_back("typename", "FormatContext");
+    format.mArguments.emplace_back("obj", Type{className, PassByType::Reference, Constness::Const});
+    format.mArguments.emplace_back("ctx", Type{"FormatContext", PassByType::Reference, Constness::NotConst});
+    format.mBody.Add("return format_to(ctx.out(), \"{{}}\", obj.ToString());");
+    formatter.mMethods.push_back(std::move(format));
+    cls.mSpecializations.push_back(std::move(formatter));
   }
 }

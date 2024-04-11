@@ -2,6 +2,7 @@
 #pragma once
 
 #include "holgen.h"
+#include <format>
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "TestEnum.h"
@@ -44,8 +45,18 @@ namespace std {
 template <>
 struct hash<holgen_blackbox_test::TestEnum> {
 public:
-  size_t operator()(const holgen_blackbox_test::TestEnum obj) const {
+  size_t operator()(const holgen_blackbox_test::TestEnum& obj) const {
     return std::hash<holgen_blackbox_test::TestEnum::UnderlyingType>()(obj.GetValue());
+  }
+};
+}
+namespace std {
+template <>
+struct formatter<holgen_blackbox_test::TestEnum> : public formatter<string> {
+public:
+  template <typename FormatContext>
+  auto format(const holgen_blackbox_test::TestEnum& obj, FormatContext& ctx) const {
+    return format_to(ctx.out(), "{}", obj.ToString());
   }
 };
 }
