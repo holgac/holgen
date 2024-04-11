@@ -3,7 +3,7 @@
 
 namespace holgen {
   void GlobalPointerPlugin::Run() {
-    auto cls = Class{St::GlobalPointer};
+    auto cls = Class{St::GlobalPointer, mSettings.mNamespace};
     cls.mTemplateParameters.emplace_back("typename", "T");
 
     GenerateInstanceField(cls);

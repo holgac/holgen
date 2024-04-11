@@ -4,7 +4,7 @@
 namespace holgen {
 
   void FilesystemHelperPlugin::Run() {
-    auto cls = Class{St::FilesystemHelper};
+    auto cls = Class{St::FilesystemHelper, mSettings.mNamespace};
     cls.mSourceIncludes.AddStandardHeader("fstream");
     // TODO: use std::filesystem::path instead of std::string
     auto method = ClassMethod{

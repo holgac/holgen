@@ -62,6 +62,10 @@ bool TestEnum::operator !=(const TestEnum& rhs) const {
   return mValue != rhs.mValue;
 }
 
+bool TestEnum::operator <(UnderlyingType rhs) const {
+  return mValue < rhs;
+}
+
 bool TestEnum::operator <(const TestEnum& rhs) const {
   return mValue < rhs.mValue;
 }

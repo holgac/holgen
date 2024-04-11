@@ -29,7 +29,7 @@ namespace holgen {
   }
 
   void LuaHelperPlugin::Run() {
-    auto cls = Class{St::LuaHelper};
+    auto cls = Class{St::LuaHelper, mSettings.mNamespace};
     cls.mHeaderIncludes.AddLibHeader("lua.hpp");
     GeneratePush(cls);
     GenerateRead(cls);

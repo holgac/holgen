@@ -143,11 +143,17 @@ namespace holgen {
 
   // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
   struct Class {
-    explicit Class(std::string name, const StructDefinition *_struct) : mStruct(_struct), mName(std::move(name)) {}
+    explicit Class(
+        std::string name, std::string _namespace, const StructDefinition *_struct
+    ) : mStruct(_struct), mName(std::move(name)), mNamespace(std::move(_namespace)) {}
 
-    explicit Class(std::string name, const EnumDefinition *_enum) : mEnum(_enum), mName(std::move(name)) {}
+    explicit Class(
+        std::string name, std::string _namespace, const EnumDefinition *_enum
+    ) : mEnum(_enum), mName(std::move(name)), mNamespace(std::move(_namespace)) {}
 
-    explicit Class(std::string name) : mName(std::move(name)) {}
+    explicit Class(
+        std::string name, std::string _namespace
+    ) : mName(std::move(name)), mNamespace(std::move(_namespace)) {}
 
     const StructDefinition *mStruct = nullptr;
     const EnumDefinition *mEnum = nullptr;

@@ -6,7 +6,7 @@
 namespace holgen {
   void JsonConverterPlugin::Run() {
     Validate().JsonConverters();
-    auto cls = Class{St::Converter};
+    auto cls = Class{St::Converter, mSettings.mNamespace};
     std::set<std::string> processedConverters;
     for (const auto &targetCls: mProject.mClasses) {
       for (const auto &targetField: targetCls.mFields) {

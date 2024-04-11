@@ -3,8 +3,9 @@
 namespace holgen {
 
   TranslatorPlugin::TranslatorPlugin(
-      TranslatedProject &translatedProject
-  ) : mProject(translatedProject), mNamingConvention(mProject), mValidator(mProject, mNamingConvention) {
+      TranslatedProject &translatedProject, const TranslatorSettings &translatorSettings
+  ) : mProject(translatedProject), mSettings(translatorSettings), mNamingConvention(mProject),
+      mValidator(mProject, mNamingConvention) {
   }
 
   TranslatorPlugin::~TranslatorPlugin() {}

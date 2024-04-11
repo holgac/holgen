@@ -25,7 +25,6 @@ namespace {
     };
     auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
-        .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
         .mConfigHeader = "",
     };
@@ -61,7 +60,6 @@ add_library(generator_test_cmake Person.cpp Converter.cpp JsonHelper.cpp LuaHelp
     };
     auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
-        .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
         .mConfigHeader = "",
     };
@@ -140,7 +138,6 @@ void Person::SetGender(float val) {
     };
     auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
-        .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
         .mConfigHeader = "",
     };
@@ -258,7 +255,6 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
     };
     auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
-        .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
         .mConfigHeader = "",
     };
@@ -458,7 +454,6 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
     };
     auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
-        .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
         .mConfigHeader = "",
     };
@@ -692,7 +687,6 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
     };
     auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
     GeneratorSettings generatorSettings{
-        .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
         .mConfigHeader = "",
     };

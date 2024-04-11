@@ -9,13 +9,13 @@
 class JsonPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project).Run();
-    ClassIdFieldPlugin(project).Run();
-    ClassFieldPlugin(project).Run();
-    JsonConverterPlugin(project).Run();
+    ClassPlugin(project, {}).Run();
+    ClassIdFieldPlugin(project, {}).Run();
+    ClassFieldPlugin(project, {}).Run();
+    JsonConverterPlugin(project, {}).Run();
     // Not a direct dependency, but needed to parse lua function names
-    LuaFunctionPlugin(project).Run();
-    JsonPlugin(project).Run();
+    LuaFunctionPlugin(project, {}).Run();
+    JsonPlugin(project, {}).Run();
   }
 };
 

@@ -19,7 +19,6 @@ namespace holgen {
 
   // This is read from CLI args
   struct GeneratorSettings {
-    std::string mNamespace;
     std::string mCMakeTarget;
     std::string mConfigHeader;
   };

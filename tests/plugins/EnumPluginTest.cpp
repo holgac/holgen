@@ -5,8 +5,8 @@
 class EnumPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project).Run();
-    EnumPlugin(project).Run();
+    ClassPlugin(project, {}).Run();
+    EnumPlugin(project, {}).Run();
   }
 };
 

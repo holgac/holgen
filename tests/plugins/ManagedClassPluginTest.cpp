@@ -7,10 +7,10 @@
 class ManagedClassPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project).Run();
-    ClassIdFieldPlugin(project).Run();
-    ClassFieldPlugin(project).Run();
-    ManagedClassPlugin(project).Run();
+    ClassPlugin(project, {}).Run();
+    ClassIdFieldPlugin(project, {}).Run();
+    ClassFieldPlugin(project, {}).Run();
+    ManagedClassPlugin(project, {}).Run();
   }
 };
 

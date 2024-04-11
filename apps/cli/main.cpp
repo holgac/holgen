@@ -30,8 +30,8 @@ int run(int argc, char **argv) {
   std::queue<std::filesystem::path> pathsQueue;
   pathsQueue.push(argv[1]);
 
-  while(!pathsQueue.empty()) {
-    auto& curPath = pathsQueue.front();
+  while (!pathsQueue.empty()) {
+    auto &curPath = pathsQueue.front();
     for (auto &entry: std::filesystem::directory_iterator(std::filesystem::path(curPath))) {
       if (std::filesystem::is_directory(entry)) {
         pathsQueue.push(entry.path());
@@ -54,7 +54,7 @@ int run(int argc, char **argv) {
   holgen::TranslatorSettings translatorSettings{argv[3]};
   holgen::Translator translator{translatorSettings};
   auto project = translator.Translate(parser.GetProject());
-  auto generator = holgen::CodeGenerator({argv[3], argv[4], argv[5]});
+  auto generator = holgen::CodeGenerator({argv[4], argv[5]});
   auto results = generator.Generate(project);
   std::filesystem::path outDir(argv[2]);
   for (auto &result: results) {

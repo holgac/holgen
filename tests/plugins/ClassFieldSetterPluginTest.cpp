@@ -7,10 +7,10 @@
 class ClassFieldSetterPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project).Run();
-    ClassIdFieldPlugin(project).Run();
-    ClassFieldPlugin(project).Run();
-    ClassFieldSetterPlugin(project).Run();
+    ClassPlugin(project, {}).Run();
+    ClassIdFieldPlugin(project, {}).Run();
+    ClassFieldPlugin(project, {}).Run();
+    ClassFieldSetterPlugin(project, {}).Run();
   }
 };
 

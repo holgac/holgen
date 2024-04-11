@@ -81,14 +81,7 @@ namespace holgen {
     GenerateIncludes(codeBlock, cls, true);
     for (auto &fwdDecl : cls.mGlobalForwardDeclarations)
       codeBlock.Add("{} {};", fwdDecl.mType, fwdDecl.mName);
-    if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Add("namespace {} {{", mGeneratorSettings.mNamespace);
-
     GenerateClassDefinition(cls, codeBlock);
-
-    if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Add("}}"); // namespace
-
     for (auto &specialization: cls.mSpecializations) {
       GenerateClassDefinition(specialization, codeBlock);
     }
@@ -298,8 +291,8 @@ namespace holgen {
     codeBlock.Line();
     GenerateIncludes(codeBlock, cls, false);
 
-    if (!mGeneratorSettings.mNamespace.empty())
-      codeBlock.Add("namespace {} {{", mGeneratorSettings.mNamespace);
+    if (!cls.mNamespace.empty())
+      codeBlock.Add("namespace {} {{", cls.mNamespace);
 
     bool previousBlockWasEmpty = true;
     {
@@ -335,7 +328,7 @@ namespace holgen {
       }
     }
 
-    if (!mGeneratorSettings.mNamespace.empty())
+    if (!cls.mNamespace.empty())
       codeBlock.Add("}}"); // namespace
 
     source.mText = codeBlock.ToString();

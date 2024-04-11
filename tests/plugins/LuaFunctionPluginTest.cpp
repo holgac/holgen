@@ -5,8 +5,8 @@
 class LuaFunctionPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project).Run();
-    LuaFunctionPlugin(project).Run();
+    ClassPlugin(project, {}).Run();
+    LuaFunctionPlugin(project, {}).Run();
   }
 };
 

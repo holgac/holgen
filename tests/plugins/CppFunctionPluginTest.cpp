@@ -6,9 +6,9 @@
 class CppFunctionPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project).Run();
-    CppFunctionPlugin(project).Run();
-    CppDestructorPlugin(project).Run();
+    ClassPlugin(project, {}).Run();
+    CppFunctionPlugin(project, {}).Run();
+    CppDestructorPlugin(project, {}).Run();
   }
 };
 

@@ -4,7 +4,7 @@
 class ClassPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project).Run();
+    ClassPlugin(project, {}).Run();
   }
 };
 

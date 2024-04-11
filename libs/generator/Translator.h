@@ -7,13 +7,9 @@
 #include "core/LineWithAction.h"
 #include "TranslatedProject.h"
 #include "plugins/TranslatorPlugin.h"
+#include "TranslatorSettings.h"
 
 namespace holgen {
-  // This is read from CLI args
-  struct TranslatorSettings {
-    std::string mNamespace;
-  };
-
   class Translator {
   public:
     Translator(const TranslatorSettings &translatorSettings);
@@ -22,7 +18,7 @@ namespace holgen {
     void AddPlugin(Args &&... args) {
       // mPlugins.push_back(std::move(std::make_unique<Plugin>(mProject, std::forward<Args>(args)...)));
       mPlugins.push_back([&](TranslatedProject &project) {
-        Plugin(project, std::forward<Args>(args)...).Run();
+        Plugin(project, mTranslatorSettings, std::forward<Args>(args)...).Run();
       });
     }
 

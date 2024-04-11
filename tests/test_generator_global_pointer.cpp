@@ -10,10 +10,12 @@ namespace {
   TEST(GeneratorGlobalPointerTest, HeaderAndSource) {
     ProjectDefinition pd;
     TranslatedProject tp(pd);
-    GlobalPointerPlugin ggp(tp);
+    TranslatorSettings translatorSettings{
+        .mNamespace = "generator_test_namespace",
+    };
+    GlobalPointerPlugin ggp(tp, translatorSettings);
     ggp.Run();
     GeneratorSettings generatorSettings{
-        .mNamespace = "generator_test_namespace",
         .mCMakeTarget = "generator_test_cmake",
         .mConfigHeader = "",
     };

@@ -21,6 +21,7 @@ public:
   bool operator ==(const TestEnum& rhs) const;
   bool operator !=(UnderlyingType rhs) const;
   bool operator !=(const TestEnum& rhs) const;
+  bool operator <(UnderlyingType rhs) const;
   bool operator <(const TestEnum& rhs) const;
   constexpr static std::array<TestEnum::UnderlyingType, 3> GetEntryValues() {
     return std::array<TestEnum::UnderlyingType, 3>{Entry5Value, Entry1Value, Entry2Value};
