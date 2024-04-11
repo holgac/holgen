@@ -62,6 +62,10 @@ bool TestEnum::operator !=(const TestEnum& rhs) const {
   return mValue != rhs.mValue;
 }
 
+bool TestEnum::operator <(const TestEnum& rhs) const {
+  return mValue < rhs.mValue;
+}
+
 std::array<TestEnum, 3> TestEnum::GetEntries() {
   return std::array<TestEnum, 3>{Entry5, Entry1, Entry2};
 }

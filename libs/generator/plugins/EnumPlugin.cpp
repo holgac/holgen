@@ -58,12 +58,15 @@ namespace holgen {
 
   void EnumPlugin::GenerateOperators(Class &cls) {
     // TODO: test these properly. Currently overloads aren't well supported.
+    // TODO: should work with sets/unordered_sets out of the box
     const std::vector<EnumOperator> operators = {
         {"=",  Constness::NotConst, EnumOperatorReturnType::This,   true},
         {"==", Constness::Const,    EnumOperatorReturnType::Result, true},
         {"==", Constness::Const,    EnumOperatorReturnType::Result, false},
         {"!=", Constness::Const,    EnumOperatorReturnType::Result, true},
-        {"!=", Constness::Const,    EnumOperatorReturnType::Result, false}
+        {"!=", Constness::Const,    EnumOperatorReturnType::Result, false},
+        {"<",  Constness::Const,    EnumOperatorReturnType::Result, true},
+        {"<",  Constness::Const,    EnumOperatorReturnType::Result, false}
     };
 
     for (auto &op: operators) {
