@@ -130,10 +130,18 @@ namespace holgen {
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
     if (curToken.mType == TokenType::Equals) {
       PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
-      PARSER_THROW_IF(curToken.mType != TokenType::String, "Default value should be a string, found \"{}\"",
-                      curToken.mContents);
-      fieldDefinition.mDefaultValue = curToken.mContents;
-      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      if (curToken.mType == TokenType::String) {
+        fieldDefinition.mDefaultValue = curToken.mContents;
+        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      }
+      if (curToken.mType == TokenType::Period) {
+        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+        if (curToken.mType == TokenType::String) {
+          fieldDefinition.mDefaultValue = std::format("{}.{}", fieldDefinition.mDefaultValue, curToken.mContents);
+          PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+        }
+      }
+      PARSER_THROW_IF(fieldDefinition.mDefaultValue.empty(), "Invalid default value in field definition!");
     }
     PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
                     "Field definition should be terminated with a ';', found \"{}\"",
