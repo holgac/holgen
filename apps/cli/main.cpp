@@ -59,6 +59,10 @@ int run(int argc, char **argv) {
   std::filesystem::path outDir(argv[2]);
   for (auto &result: results) {
     auto target = outDir / result.mName;
+    auto dirname = target.parent_path();
+    if (!std::filesystem::exists(dirname)) {
+      std::filesystem::create_directories(dirname);
+    }
     if (std::filesystem::exists(target) && result.mText == ReadFile(target)) {
       continue;
     }

@@ -12,5 +12,5 @@ add_subdirectory(x_lua)
 include_directories(x_lua/src)
 
 add_subdirectory(output)
-include_directories(output)
+include_directories(output/gen)
 add_subdirectory(tests)

@@ -73,12 +73,12 @@ namespace holgen {
 
   void CodeGenerator::GenerateClassHeader(GeneratedContent &header, const Class &cls) const {
     header.mType = FileType::CppHeader;
-    header.mName = cls.mName + ".h";
+    header.mName = std::format("gen/{}.h", cls.mName);
     CodeBlock codeBlock;
     codeBlock.Add("// {}", GenMessage);
     codeBlock.Add("#pragma once");
     codeBlock.Line();
-    codeBlock.Add("#include \"holgen.h\"");
+    codeBlock.Add("#include \"../holgen.h\"");
     GenerateIncludes(codeBlock, cls, true);
     for (auto &fwdDecl : cls.mGlobalForwardDeclarations)
       codeBlock.Add("{} {};", fwdDecl.mType, fwdDecl.mName);
@@ -297,7 +297,7 @@ namespace holgen {
 
   void CodeGenerator::GenerateClassSource(GeneratedContent &source, const Class &cls) const {
     source.mType = FileType::CppSource;
-    source.mName = cls.mName + ".cpp";
+    source.mName = std::format("gen/{}.cpp", cls.mName);
     CodeBlock codeBlock;
     codeBlock.Add("// {}", GenMessage);
     codeBlock.Add("#include \"{}.h\"", cls.mName);
@@ -393,7 +393,7 @@ namespace holgen {
       auto line = codeBlock.Line();
       line << "add_library(" << mGeneratorSettings.mCMakeTarget;
       for (auto &cls: translatedProject.mClasses) {
-        line << " " << cls.mName << ".cpp";
+        line << " gen/" << cls.mName << ".cpp";
       }
       line << ")";
     }
