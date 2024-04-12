@@ -25,7 +25,7 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_NE(cls->mStruct, nullptr);
-  EXPECT_EQ(cls->mEnum, nullptr);;
+  EXPECT_EQ(cls->mEnum, nullptr);
 
   ASSERT_NE(cls->GetField("mTestFieldUnsigned"), nullptr);
   {
@@ -76,7 +76,7 @@ struct TestData : TestMixin2, TestMixin3 {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_NE(cls->mStruct, nullptr);
-  EXPECT_EQ(cls->mEnum, nullptr);;
+  EXPECT_EQ(cls->mEnum, nullptr);
 
   ASSERT_NE(cls->GetField("mTestFieldUnsigned"), nullptr);
   ASSERT_NE(cls->GetField("mTestFieldDouble"), nullptr);
@@ -101,7 +101,7 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
   EXPECT_NE(cls->mStruct, nullptr);
-  EXPECT_EQ(cls->mEnum, nullptr);;
+  EXPECT_EQ(cls->mEnum, nullptr);
 
   ASSERT_NE(cls->GetField("mTestFieldVector"), nullptr);
   {

@@ -14,7 +14,7 @@ namespace holgen {
     // the existing files. It should also throw if provided with more blocks than found,
     // to avoid accidentally overwriting sections that no longer exist. Probably a cli flag
     // like --force could be useful for overwriting, otherwise the user needs to delete the files.
-    std::string mText;
+    CodeBlock mBody;
   };
 
   // This is read from CLI args

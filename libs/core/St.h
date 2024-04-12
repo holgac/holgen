@@ -29,5 +29,7 @@ namespace holgen {
     inline static const std::string Converter = "Converter";
     inline static const std::string ParseJson = "ParseJson";
     inline static const std::string UserData = "userdata";
+    inline static const std::string UserDefinedSectionBegin = "HOLGEN_USER_DEFINED_BEGIN:";
+    inline static const std::string UserDefinedSectionEnd = "HOLGEN_USER_DEFINED_END:";
   };
 }

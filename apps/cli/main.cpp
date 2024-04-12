@@ -7,6 +7,7 @@
 #include "parser/Parser.h"
 #include "generator/Translator.h"
 #include "generator/CodeGenerator.h"
+#include "generator/UserDefinedSectionExtractor.h"
 
 namespace {
   // TODO: this is needed by dataManager's ParseFiles too. Move to FileSystemHelper?
@@ -63,11 +64,17 @@ int run(int argc, char **argv) {
     if (!std::filesystem::exists(dirname)) {
       std::filesystem::create_directories(dirname);
     }
-    if (std::filesystem::exists(target) && result.mText == ReadFile(target)) {
-      continue;
+    std::map<std::string, std::string> sections;
+    std::string existingContents;
+    if (std::filesystem::exists(target)) {
+      existingContents = ReadFile(target);
+      sections = holgen::UserDefinedSectionExtractor().Extract(existingContents);
     }
+    auto newContents = result.mBody.ToString(result.mType, sections);
+    if (newContents == existingContents)
+      continue;
     std::ofstream fout(target);
-    fout.write(result.mText.data(), result.mText.size());
+    fout.write(newContents.c_str(), newContents.size());
   }
   return 0;
 }

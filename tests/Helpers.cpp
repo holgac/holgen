@@ -19,10 +19,11 @@ namespace holgen::helpers {
     return std::string_view(str.data() + startIdx, endIdx - startIdx);
   }
 
-  void ExpectGeneratedContent(const GeneratedContent &actual, const GeneratedContent &expected) {
-    EXPECT_EQ(actual.mType, expected.mType);
-    EXPECT_EQ(actual.mName, expected.mName);
-    EXPECT_EQ(Trim(actual.mText), Trim(expected.mText));
+  void ExpectGeneratedContent(const GeneratedContent &actual, FileType fileType, const std::string &name,
+                              const std::string &contents) {
+    EXPECT_EQ(actual.mType, fileType);
+    EXPECT_EQ(actual.mName, name);
+    EXPECT_EQ(Trim(actual.mBody.ToString(fileType, {})), Trim(contents));
   }
 
   void ExpectEqual(const Type &expected, const Type &actual) {
@@ -93,7 +94,7 @@ namespace holgen::helpers {
   }
 
   void ExpectEqual(const ClassDestructor &actual, const ClassDestructor &expected,
-                            const std::optional<std::string> &expectedBody) {
+                   const std::optional<std::string> &expectedBody) {
     ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, "destructor");
   }
 

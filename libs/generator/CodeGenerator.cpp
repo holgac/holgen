@@ -99,7 +99,7 @@ namespace holgen {
     for (auto &specialization: cls.mSpecializations) {
       GenerateClassDefinition(specialization, codeBlock);
     }
-    header.mText = codeBlock.ToString(header.mType, {});
+    header.mBody = std::move(codeBlock);
   }
 
   void CodeGenerator::GenerateClassDefinition(const Class &cls, CodeBlock &codeBlock) const {
@@ -357,7 +357,7 @@ namespace holgen {
     if (!cls.mNamespace.empty())
       codeBlock.Add("}}"); // namespace
 
-    source.mText = codeBlock.ToString(source.mType, {});
+    source.mBody = std::move(codeBlock);
   }
 
   CodeBlock CodeGenerator::GenerateFieldsForSource(const Class &cls) const {
@@ -401,18 +401,32 @@ namespace holgen {
     cmake.mType = FileType::CMakeFile;
     cmake.mName = "CMakeLists.txt";
     CodeBlock codeBlock;
-    codeBlock.Add("# {}", GenMessage);
+    codeBlock.Add("# {}", PartialGenMessage);
     {
       auto line = codeBlock.Line();
-      line << "add_library(" << mGeneratorSettings.mCMakeTarget;
+      line << "set(gen_sources";
       for (auto &cls: translatedProject.mClasses) {
         line << " gen/" << cls.mName << ".cpp";
       }
       line << ")";
     }
+    {
+      auto line = codeBlock.Line();
+      line << "set(src_sources";
+      for (auto &cls: translatedProject.mClasses) {
+        if (HasUserDefinedMethods(cls))
+          line << " src/" << cls.mName << ".cpp";
+      }
+      line << ")";
+    }
+    codeBlock.Add("set(custom_sources)");
+    codeBlock.UserDefined("CustomSources");
+    codeBlock.Add("add_library({} ${{gen_sources}} ${{src_sources}} ${{custom_sources}})",
+                  mGeneratorSettings.mCMakeTarget);
+    codeBlock.UserDefined("CustomDependencies");
     // TODO: complete lua generator, fix unused parameters and enable this
     // codeBlock.Line() << "target_compile_options(" << mGeneratorSettings.mCMakeTarget << " PRIVATE -Wall -Wextra -Wpedantic -Werror)";
-    cmake.mText = codeBlock.ToString(cmake.mType, {});
+    cmake.mBody = std::move(codeBlock);
   }
 
   void CodeGenerator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
@@ -493,7 +507,7 @@ namespace holgen {
     codeBlock.Add("}}");
     codeBlock.Add("#endif // ifndef HOLGEN_WARN_AND_CONTINUE_IF");
 
-    header.mText = codeBlock.ToString(header.mType, {});
+    header.mBody = std::move(codeBlock);
   }
 
   void CodeGenerator::GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const {
@@ -624,10 +638,11 @@ namespace holgen {
     CodeBlock codeBlock;
     codeBlock.Add("// {}", PartialGenMessage);
     codeBlock.Add("#include \"../gen/{}.h\"", cls.mName);
+    codeBlock.UserDefined("{}_CustomIncludes", cls.mName);
     codeBlock.Line();
     if (!cls.mNamespace.empty())
       codeBlock.Add("namespace {} {{", cls.mNamespace);
-    for(auto& method: cls.mMethods) {
+    for (auto &method: cls.mMethods) {
       if (!method.mUserDefined)
         continue;
       codeBlock.Add("{} {{", GenerateFunctionSignature(cls, method, false, false));
@@ -636,6 +651,6 @@ namespace holgen {
     }
     if (!cls.mNamespace.empty())
       codeBlock.Add("}}");
-    source.mText = codeBlock.ToString(source.mType, {});
+    source.mBody = std::move(codeBlock);
   }
 }

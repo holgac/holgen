@@ -61,7 +61,7 @@ TEST_F(GameDataTest, ParseFiles) {
   gd.ParseFiles("gamedata", {});
   auto plateMail = gd.GetArmorFromName("Plate Mail");
   ASSERT_NE(plateMail, nullptr);
-  EXPECT_EQ(plateMail->GetArmorClass(), 3);;
+  EXPECT_EQ(plateMail->GetArmorClass(), 3);
   auto wizardRobe = gd.GetArmorFromName("Wizard Robe");
   ASSERT_NE(wizardRobe, nullptr);
   auto gorion = gd.GetCharacterFromName("Gorion");

@@ -7,16 +7,6 @@
 
 using namespace holgen_blackbox_test;
 
-uint64_t TestJsonTagManager::GetOrInsert(const std::string &tag) {
-  auto tagPtr = GetTagFromName(tag);
-  if (!tagPtr) {
-    TestJsonTag tagObj;
-    tagObj.SetName(tag);
-    tagPtr = AddTag(std::move(tagObj));
-  }
-  return tagPtr->GetId();
-}
-
 class JsonTest : public ::testing::Test {
 protected:
   void SetUp() override {

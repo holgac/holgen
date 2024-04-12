@@ -15,14 +15,6 @@ using namespace holgen_blackbox_test;
 namespace {
 }
 
-namespace holgen_blackbox_test {
-  int64_t Calculator::SubtractThenMultiply(int64_t lhs, int64_t rhs) {
-    auto val = lhs - rhs;
-    mCurVal.SetValue(mCurVal.GetValue() * val);
-    return mCurVal.GetValue();
-  }
-}
-
 class LuaTest : public ::testing::Test {
 protected:
   void SetUp() override {
