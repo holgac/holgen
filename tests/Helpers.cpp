@@ -1,5 +1,6 @@
 #include "Helpers.h"
 #include <gtest/gtest.h>
+#include "generator/FileType.h"
 
 namespace holgen::helpers {
 
@@ -58,9 +59,9 @@ namespace holgen::helpers {
                    const std::optional<std::string> &expectedBody, const std::string &name) {
     EXPECT_EQ(actual.mVisibility, expected.mVisibility) << " in method " << name;
     if (expectedBody)
-      EXPECT_EQ(Trim(actual.mBody.ToString()), Trim(*expectedBody));
+      EXPECT_EQ(Trim(actual.mBody.ToString(FileType::CppSource, {})), Trim(*expectedBody));
     else
-      EXPECT_EQ(actual.mBody.ToString(), expected.mBody.ToString());
+      EXPECT_EQ(actual.mBody.ToString(FileType::CppSource, {}), expected.mBody.ToString(FileType::CppSource, {}));
     ASSERT_EQ(actual.mArguments.size(), expected.mArguments.size());
     for (auto itExpected = expected.mArguments.begin(), itActual = actual.mArguments.begin();
          itExpected != expected.mArguments.end(); ++itExpected, ++itActual) {
