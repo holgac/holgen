@@ -177,5 +177,19 @@ namespace holgen {
      */
     inline static const std::string CppFunc = "cppFunc";
     inline static const std::string CppFunc_OnDestroy = "onDestroy";
+
+    /**
+     * Adds a comment to a struct, field or function.
+     *
+     * @comment("This is a comment")
+     * struct A {
+     *   @comment("another comment", "second line")
+     *   s32 a;
+     *   @comment("func comment")
+     *   @comment("another func comment")
+     *   func f(s32 a);
+     * }
+     */
+    inline static const std::string Comment = "comment";
   };
 }

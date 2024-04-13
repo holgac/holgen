@@ -4,6 +4,7 @@
 #include "../NamingConvention.h"
 #include "../Validator.h"
 #include "../TranslatorSettings.h"
+#include "core/Annotations.h"
 
 namespace holgen {
   class TranslatorPlugin {
@@ -16,6 +17,15 @@ namespace holgen {
   protected:
     TranslatedProject &mProject;
     const TranslatorSettings &mSettings;
+
+    template <typename T, typename C>
+    void FillComments(const T& definition, C& container) {
+      for(auto& annotation: definition.GetAnnotations(Annotations::Comment)) {
+        for(auto& attribute: annotation.mAttributes) {
+          container.push_back(attribute.mName);
+        }
+      }
+    }
   private:
     // TODO(RELEASE): get this from TranslatorSettings
     NamingConvention mNamingConvention;

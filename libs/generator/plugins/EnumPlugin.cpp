@@ -144,6 +144,7 @@ namespace holgen {
       entryField.mDefaultConstructorArguments.push_back(entry.mValue);
       entryField.mEntry = &entry;
 
+      FillComments(entry, entryField.mComments);
       Validate().NewField(cls, entryField);
       cls.mFields.push_back(std::move(entryField));
     }

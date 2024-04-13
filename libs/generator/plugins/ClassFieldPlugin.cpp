@@ -36,6 +36,7 @@ namespace holgen {
         else
           field.mDefaultValue = "-1";
       }
+      FillComments(fieldDefinition, field.mComments);
       Validate().NewField(cls, field);
       cls.mFields.push_back(std::move(field));
     }

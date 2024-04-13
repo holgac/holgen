@@ -37,6 +37,28 @@ namespace holgen {
       return ss.str();
     }
 
+    void AddComments(CodeBlock &codeBlock, const std::list<std::string> &comments) {
+      if (comments.empty())
+        return;
+      if (!comments.empty()) {
+        if (comments.size() == 1) {
+          codeBlock.Add("// {}", comments.front());
+        } else {
+          codeBlock.Add("/*");
+          for (auto line: comments) {
+            while (true) {
+              auto idx = line.find("*/");
+              if (idx == std::string::npos)
+                break;
+              line.replace(idx, 2, "* /");
+            }
+            codeBlock.Add(" * {}", line);
+          }
+          codeBlock.Add(" */");
+        }
+      }
+    }
+
     std::string StringifyFieldDefinition(const ClassField &field) {
       std::stringstream ss;
       if (!field.mDefaultConstructorArguments.empty()) {
@@ -107,6 +129,7 @@ namespace holgen {
       codeBlock.Add("namespace {} {{", cls.mNamespace);
     GenerateClassDeclarationsForHeader(codeBlock, cls);
     // TODO: struct-specific namespaces defined via annotations
+    AddComments(codeBlock, cls.mComments);
     if (!cls.mTemplateParameters.empty() || !cls.mTemplateSpecializations.empty())
       codeBlock.AddLine(StringifyTemplateParameters(cls.mTemplateParameters));
     codeBlock.Add("{} {{", GenerateClassDeclaration(cls));
@@ -193,6 +216,7 @@ namespace holgen {
         bool canDefineInline = true;
         if (field.mType.mName == cls.mName && field.mStaticness == Staticness::Static)
           canDefineInline = false;
+        AddComments(codeBlock, field.mComments);
         auto line = codeBlock.Line();
         if (field.mStaticness == Staticness::Static) {
           if (canDefineInline)
@@ -272,23 +296,7 @@ namespace holgen {
       if (!ShouldGenerateMethod(method, visibility, isInsideClass))
         continue;
 
-      if (!method.mComments.empty()) {
-        if (method.mComments.size() == 1) {
-          codeBlock.Add("// {}", method.mComments[0]);
-        } else {
-          codeBlock.Add("/*");
-          for (auto line: method.mComments) {
-            while (true) {
-              auto idx = line.find("*/");
-              if (idx == std::string::npos)
-                break;
-              line.replace(idx, 2, "* /");
-            }
-            codeBlock.Add(" * {}", line);
-          }
-          codeBlock.Add(" */");
-        }
-      }
+      AddComments(codeBlock, method.mComments);
 
       if (!method.mTemplateParameters.empty())
         codeBlock.AddLine(StringifyTemplateParameters(method.mTemplateParameters));

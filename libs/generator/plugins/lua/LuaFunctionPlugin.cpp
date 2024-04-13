@@ -114,6 +114,7 @@ namespace holgen {
       if (luaFuncTable)
         method.mBody.Add(R"R(lua_pop(luaState, 1);)R", functionHandle.mName);
     }
+    FillComments(functionDefinition, method.mComments);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }

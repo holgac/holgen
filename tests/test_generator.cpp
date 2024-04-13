@@ -9,8 +9,7 @@ using namespace holgen::helpers;
 
 namespace {
 
-  TEST(GeneratorTest, Helpers
-  ) {
+  TEST(GeneratorTest, Helpers) {
   Tokenizer tokenizer(R"R(
   @noLua()
   struct Person   {
@@ -44,8 +43,8 @@ set(custom_sources)
 # HOLGEN_USER_DEFINED_BEGIN:CustomSources
 # HOLGEN_USER_DEFINED_END:CustomSources
 add_library(generator_test_cmake ${gen_sources} ${src_sources} ${custom_sources})
-# HOLGEN_USER_DEFINED_BEGIN:Dependencies
-# HOLGEN_USER_DEFINED_END:Dependencies
+# HOLGEN_USER_DEFINED_BEGIN:CustomDependencies
+# HOLGEN_USER_DEFINED_END:CustomDependencies
 )R"
   );
   // TODO: test helpers
@@ -53,11 +52,15 @@ add_library(generator_test_cmake ${gen_sources} ${src_sources} ${custom_sources}
 
 TEST(GeneratorTest, ClassWithGetters
 ) {
-Tokenizer tokenizer(R"R(
+    Tokenizer tokenizer(R"R(
   @noLua()
   @noJson()
+  @comment('Person class')
+  @comment('Represents a person')
   struct Person   {
+    @comment('this is the age of the person')
     u32 age = 0;
+    @comment('gender of the person', "The value should be between 0 and 1")
     float gender;
   }
     )R", "GeneratorTest");
@@ -86,6 +89,10 @@ R"R(
 #include <cstdint>
 
 namespace generator_test_namespace {
+/*
+ * Person class
+ * Represents a person
+ */
 class Person {
 public:
   uint32_t GetAge() const;
@@ -93,7 +100,12 @@ public:
   void SetAge(uint32_t val);
   void SetGender(float val);
 private:
+  // this is the age of the person
   uint32_t mAge = 0;
+  /*
+   * gender of the person
+   * The value should be between 0 and 1
+   */
   float mGender;
 };
 }
@@ -130,11 +142,14 @@ void Person::SetGender(float val) {
 
 TEST(GeneratorTest, ClassWithContainers
 ) {
-Tokenizer tokenizer(R"R(
+    Tokenizer tokenizer(R"R(
   @noLua()
   struct Market {
     vector<string> instruments;
     map<string, double> prices;
+    @cppFunc
+    @comment('Callback when a new trade is executed')
+    func OnNewTrade(string instrument, double price);
   }
     )R", "GeneratorTest");
 Parser parser;
@@ -174,6 +189,8 @@ public:
   std::map<std::string, double>& GetPrices();
   void SetInstruments(const std::vector<std::string>& val);
   void SetPrices(const std::map<std::string, double>& val);
+  // Callback when a new trade is executed
+  void OnNewTrade(const std::string& instrument, double price);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
 private:
   std::vector<std::string> mInstruments;

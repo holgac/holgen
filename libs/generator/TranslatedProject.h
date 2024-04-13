@@ -42,6 +42,7 @@ namespace holgen {
     Visibility mVisibility = Visibility::Private;
     std::string mDefaultValue;
     std::list<std::string> mDefaultConstructorArguments;
+    std::list<std::string> mComments;
     const FieldDefinition *mField = nullptr;
     const EnumEntryDefinition *mEntry = nullptr;
   };
@@ -70,7 +71,7 @@ namespace holgen {
     CodeBlock mBody;
     std::list<ClassMethodArgument> mArguments;
     std::list<TemplateParameter> mTemplateParameters;
-    std::vector<std::string> mComments;
+    std::list<std::string> mComments;
     bool mIsTemplateSpecialization = false;
   protected:
     ClassMethodBase() = default;
@@ -172,6 +173,7 @@ namespace holgen {
     ClassType mClassType = ClassType::Class;
     std::string mNamespace;
     std::list<std::string> mBaseClasses;
+    std::list<std::string> mComments;
     [[nodiscard]] ClassField *GetField(const std::string &name);
     [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);
     [[nodiscard]] const ClassField *GetField(const std::string &name) const;

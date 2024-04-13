@@ -60,7 +60,7 @@ namespace holgen {
       THROW_IF(
           !usedSections.contains(sectionName) && !sectionContent.empty(),
           "Section {} was removed since the last run. Proceeding would erase the content. "
-          "Please manually remove the seciton and rerun the generator.",
+          "Please manually remove the section and rerun the generator.",
           sectionName);
     }
     return out.str();

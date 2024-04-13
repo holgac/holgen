@@ -64,6 +64,9 @@ namespace holgen {
     std::vector<AnnotationDefinition> mAnnotations;
     DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
+    auto GetAnnotations(const std::string &name) const {
+      return NameFilterForEachWrapper(name, mAnnotations);
+    }
   };
 
   struct StructDefinition {
@@ -79,7 +82,7 @@ namespace holgen {
     [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
     [[nodiscard]] const FieldDefinition *GetIdField() const;
 
-    auto GetAnnotations(const std::string &name) {
+    auto GetAnnotations(const std::string &name) const {
       return NameFilterForEachWrapper(name, mAnnotations);
     }
   };
@@ -89,6 +92,10 @@ namespace holgen {
     std::string mValue;
     std::vector<AnnotationDefinition> mAnnotations;
     DefinitionSource mDefinitionSource;
+    [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
+    auto GetAnnotations(const std::string &name) const {
+      return NameFilterForEachWrapper(name, mAnnotations);
+    }
   };
 
   struct EnumDefinition {
@@ -99,6 +106,9 @@ namespace holgen {
     DefinitionSource mDefinitionSource;
     [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
+    auto GetAnnotations(const std::string &name) const {
+      return NameFilterForEachWrapper(name, mAnnotations);
+    }
   };
 
   struct ProjectDefinition {

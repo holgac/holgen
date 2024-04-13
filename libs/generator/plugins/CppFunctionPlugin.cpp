@@ -20,25 +20,25 @@ namespace holgen {
     }
   }
 
-  void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &func) {
+  void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &functionDefinition) {
     // TODO: const attribute
     auto method = ClassMethod{
-        func.mName,
-        Type{mProject, func.mReturnType},
+        functionDefinition.mName,
+        Type{mProject, functionDefinition.mReturnType},
         Visibility::Public, Constness::NotConst};
-    if (func.GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
+    if (functionDefinition.GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
       method.mVisibility = Visibility::Protected;
     }
     method.mUserDefined = true;
     method.mExposeToLua = true;
-    method.mFunction = &func;
+    method.mFunction = &functionDefinition;
 
     if (mProject.GetClass(method.mReturnType.mName)) {
       // TODO: attribute specifying whether const
       method.mReturnType.mType = PassByType::Pointer;
     }
     // TODO: ref type for complex types
-    for (const auto &funcArg: func.mArguments) {
+    for (const auto &funcArg: functionDefinition.mArguments) {
       auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
       if (mProject.GetClass(arg.mType.mName)) {
         arg.mType.mType = PassByType::Pointer;
@@ -52,6 +52,7 @@ namespace holgen {
         arg.mType.mType = PassByType::Reference;
       }
     }
+    FillComments(functionDefinition, method.mComments);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
