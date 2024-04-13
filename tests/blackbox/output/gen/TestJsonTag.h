@@ -11,6 +11,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class TestJsonTag {
 public:
+  bool operator==(const TestJsonTag& rhs) const;
   uint64_t GetId() const;
   const std::string& GetName() const;
   std::string& GetName();

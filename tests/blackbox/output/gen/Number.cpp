@@ -7,6 +7,11 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool Number::operator==(const Number& rhs) const {
+  return
+      mValue == rhs.mValue;
+}
+
 int64_t Number::GetValue() const {
   return mValue;
 }

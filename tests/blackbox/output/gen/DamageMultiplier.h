@@ -11,6 +11,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class DamageMultiplier {
 public:
+  bool operator==(const DamageMultiplier& rhs) const;
   const std::string& GetWhen() const;
   std::string& GetWhen();
   float GetValue() const;

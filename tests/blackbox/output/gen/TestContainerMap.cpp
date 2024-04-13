@@ -7,6 +7,11 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestContainerMap::operator==(const TestContainerMap& rhs) const {
+  return
+      mInnerStructsWithId == rhs.mInnerStructsWithId;
+}
+
 const std::map<uint32_t, TestContainerInnerStructWithId>& TestContainerMap::GetInnerStructsWithId() const {
   return mInnerStructsWithId;
 }

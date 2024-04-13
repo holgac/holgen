@@ -14,6 +14,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class HumanManager {
 public:
+  bool operator==(const HumanManager& rhs) const;
   const std::unordered_map<uint32_t, Human>& GetHumans() const;
   std::unordered_map<uint32_t, Human>& GetHumans();
   void SetHumans(const std::unordered_map<uint32_t, Human>& val);

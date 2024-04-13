@@ -7,6 +7,13 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool Country::operator==(const Country& rhs) const {
+  return
+      mLeader == rhs.mLeader &&
+      mCitizens == rhs.mCitizens &&
+      mPopulation == rhs.mPopulation;
+}
+
 const Person& Country::GetLeader() const {
   return mLeader;
 }

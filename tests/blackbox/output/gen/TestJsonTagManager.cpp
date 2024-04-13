@@ -11,6 +11,11 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestJsonTagManager::operator==(const TestJsonTagManager& rhs) const {
+  return
+      mTags == rhs.mTags;
+}
+
 const std::vector<TestJsonTag>& TestJsonTagManager::GetTags() const {
   return mTags;
 }

@@ -11,6 +11,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class TestContainerInnerStructNoId {
 public:
+  bool operator==(const TestContainerInnerStructNoId& rhs) const;
   uint32_t GetField() const;
   const std::string& GetName() const;
   std::string& GetName();

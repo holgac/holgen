@@ -7,6 +7,14 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool Race::operator==(const Race& rhs) const {
+  return
+      mId == rhs.mId &&
+      mName == rhs.mName &&
+      mHairColors == rhs.mHairColors &&
+      mNames == rhs.mNames;
+}
+
 uint32_t Race::GetId() const {
   return mId;
 }

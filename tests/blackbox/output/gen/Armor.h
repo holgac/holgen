@@ -11,6 +11,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Armor {
 public:
+  bool operator==(const Armor& rhs) const;
   uint32_t GetId() const;
   const std::string& GetName() const;
   std::string& GetName();

@@ -7,6 +7,11 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestEnumStruct::operator==(const TestEnumStruct& rhs) const {
+  return
+      mEnumField == rhs.mEnumField;
+}
+
 const TestEnum& TestEnumStruct::GetEnumField() const {
   return mEnumField;
 }

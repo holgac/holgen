@@ -15,6 +15,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class TestContainerVector {
 public:
+  bool operator==(const TestContainerVector& rhs) const;
   const std::vector<TestContainerInnerStructWithId>& GetInnerStructsWithId() const;
   std::vector<TestContainerInnerStructWithId>& GetInnerStructsWithId();
   const std::vector<TestContainerInnerStructNoId>& GetInnerStructsNoId() const;

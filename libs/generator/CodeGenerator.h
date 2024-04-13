@@ -9,11 +9,6 @@ namespace holgen {
   struct GeneratedContent {
     FileType mType;
     std::string mName;
-    // TODO: use CodeBlock here. CodeBlock::ToString should get a map that
-    // specifies what each user defined block should be replaced with, read from
-    // the existing files. It should also throw if provided with more blocks than found,
-    // to avoid accidentally overwriting sections that no longer exist. Probably a cli flag
-    // like --force could be useful for overwriting, otherwise the user needs to delete the files.
     CodeBlock mBody;
   };
 

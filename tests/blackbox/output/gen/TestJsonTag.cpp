@@ -9,6 +9,12 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestJsonTag::operator==(const TestJsonTag& rhs) const {
+  return
+      mId == rhs.mId &&
+      mName == rhs.mName;
+}
+
 uint64_t TestJsonTag::GetId() const {
   return mId;
 }

@@ -7,6 +7,11 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestJsonStructWithTags::operator==(const TestJsonStructWithTags& rhs) const {
+  return
+      mTags == rhs.mTags;
+}
+
 const std::vector<uint64_t>& TestJsonStructWithTags::GetTags() const {
   return mTags;
 }

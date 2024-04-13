@@ -71,6 +71,7 @@ namespace holgen {
     };
 
     for (auto &op: operators) {
+      // TODO: remove space
       auto method = ClassMethod{
           "operator " + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness
       };

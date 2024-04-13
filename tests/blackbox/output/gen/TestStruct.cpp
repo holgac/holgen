@@ -7,6 +7,14 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestStruct::operator==(const TestStruct& rhs) const {
+  return
+      mTestFieldBool == rhs.mTestFieldBool &&
+      mTestFieldUnsigned == rhs.mTestFieldUnsigned &&
+      mTestFieldString == rhs.mTestFieldString &&
+      mTestFieldUserdata == rhs.mTestFieldUserdata;
+}
+
 bool TestStruct::GetTestFieldBool() const {
   return mTestFieldBool;
 }

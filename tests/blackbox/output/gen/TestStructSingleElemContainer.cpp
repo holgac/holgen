@@ -7,6 +7,12 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestStructSingleElemContainer::operator==(const TestStructSingleElemContainer& rhs) const {
+  return
+      mSingleElemStructs == rhs.mSingleElemStructs &&
+      mSingleElemStructsWithId == rhs.mSingleElemStructsWithId;
+}
+
 const std::vector<TestStructSingleElem>& TestStructSingleElemContainer::GetSingleElemStructs() const {
   return mSingleElemStructs;
 }

@@ -191,5 +191,17 @@ namespace holgen {
      * }
      */
     inline static const std::string Comment = "comment";
+
+    /**
+     * For floating point fields, defines the epsilon value to use when comparing them in operator==.
+     * Can also be defined for a struct to apply to all floating point fields, but the field definition takes precedence.
+     *
+     * @epsilon('0.001')
+     * struct A {
+     *   @epsilon('0.000001')
+     *   double f;
+     * }
+     */
+    inline static const std::string Epsilon = "epsilon";
   };
 }

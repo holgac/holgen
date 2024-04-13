@@ -75,6 +75,7 @@ namespace holgen {
     std::set<std::string> IntegralTypes;
     std::set<std::string> SignedIntegralTypes;
     std::set<std::string> UnsignedIntegralTypes;
+    std::set<std::string> FloatingPointTypes;
     std::set<std::string> CppPrimitives;
     std::set<std::string> CppBasicTypes;
     // Containers that allow random access

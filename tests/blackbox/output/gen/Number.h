@@ -10,6 +10,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Number {
 public:
+  bool operator==(const Number& rhs) const;
   int64_t GetValue() const;
   void SetValue(int64_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);

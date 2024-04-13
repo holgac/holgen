@@ -41,12 +41,15 @@ namespace holgen {
         "uint64_t",
         "size_t",
     };
+    FloatingPointTypes = {
+        "float",
+        "double",
+    };
     IntegralTypes = SignedIntegralTypes;
     IntegralTypes.insert(UnsignedIntegralTypes.begin(), UnsignedIntegralTypes.end());
 
     CppPrimitives = IntegralTypes;
-    CppPrimitives.insert("float");
-    CppPrimitives.insert("double");
+    CppPrimitives.insert(FloatingPointTypes.begin(), FloatingPointTypes.end());
     CppPrimitives.insert("bool");
     CppBasicTypes = CppPrimitives;
     CppBasicTypes.insert("char");

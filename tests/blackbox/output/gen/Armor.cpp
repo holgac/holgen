@@ -9,6 +9,14 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool Armor::operator==(const Armor& rhs) const {
+  return
+      mId == rhs.mId &&
+      mName == rhs.mName &&
+      mAlternativeName == rhs.mAlternativeName &&
+      mArmorClass == rhs.mArmorClass;
+}
+
 uint32_t Armor::GetId() const {
   return mId;
 }

@@ -11,6 +11,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class TestStructSingleElem {
 public:
+  bool operator==(const TestStructSingleElem& rhs) const;
   const std::string& GetName() const;
   std::string& GetName();
   void SetName(const std::string& val);

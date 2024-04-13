@@ -13,6 +13,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Race {
 public:
+  bool operator==(const Race& rhs) const;
   uint32_t GetId() const;
   const std::string& GetName() const;
   std::string& GetName();

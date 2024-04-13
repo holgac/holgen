@@ -21,12 +21,13 @@ TEST_F(StructTest, BasicTypes) {
   EXPECT_EQ(testStruct.GetTestFieldBool(), true);
   testStruct.SetTestFieldBool(false);
   EXPECT_EQ(testStruct.GetTestFieldBool(), false);
-  EXPECT_EQ( testStruct.GetTestFieldUnsigned(), 42);
+  EXPECT_EQ(testStruct.GetTestFieldUnsigned(), 42);
   testStruct.SetTestFieldUnsigned(32);
-  EXPECT_EQ( testStruct.GetTestFieldUnsigned(), 32);
-  EXPECT_TRUE( testStruct.GetTestFieldString().empty());
+  EXPECT_EQ(testStruct.GetTestFieldUnsigned(), 32);
+  EXPECT_TRUE(testStruct.GetTestFieldString().empty());
   testStruct.SetTestFieldString("value");
-  EXPECT_EQ( testStruct.GetTestFieldString(), "value");
+  EXPECT_EQ(testStruct.GetTestFieldString(), "value");
+  EXPECT_EQ(testStruct, testStruct);
 }
 
 TEST_F(StructTest, UserData) {

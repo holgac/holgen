@@ -7,6 +7,12 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool TestContainerSet::operator==(const TestContainerSet& rhs) const {
+  return
+      mStringContainer == rhs.mStringContainer &&
+      mUnsignedContainer == rhs.mUnsignedContainer;
+}
+
 const std::set<std::string>& TestContainerSet::GetStringContainer() const {
   return mStringContainer;
 }

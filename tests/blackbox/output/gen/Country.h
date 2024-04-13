@@ -13,6 +13,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Country {
 public:
+  bool operator==(const Country& rhs) const;
   const Person& GetLeader() const;
   Person& GetLeader();
   const std::vector<Person>& GetCitizens() const;

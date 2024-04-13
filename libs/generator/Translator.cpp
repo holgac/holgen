@@ -2,6 +2,7 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassEqualsOperatorPlugin.h"
 #include "generator/plugins/ClassFieldGetterPlugin.h"
 #include "generator/plugins/ClassFieldSetterPlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
@@ -28,6 +29,7 @@ namespace holgen {
     AddPlugin<ClassPlugin>();
     AddPlugin<ClassIdFieldPlugin>();
     AddPlugin<ClassFieldPlugin>();
+    AddPlugin<ClassEqualsOperatorPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();
     AddPlugin<ClassFieldSetterPlugin>();
     AddPlugin<LuaFunctionPlugin>();

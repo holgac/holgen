@@ -10,6 +10,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class RaceId {
 public:
+  bool operator==(const RaceId& rhs) const;
   uint32_t GetId() const;
   void SetId(uint32_t val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);

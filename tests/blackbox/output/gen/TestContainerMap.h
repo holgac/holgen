@@ -13,6 +13,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class TestContainerMap {
 public:
+  bool operator==(const TestContainerMap& rhs) const;
   const std::map<uint32_t, TestContainerInnerStructWithId>& GetInnerStructsWithId() const;
   std::map<uint32_t, TestContainerInnerStructWithId>& GetInnerStructsWithId();
   void SetInnerStructsWithId(const std::map<uint32_t, TestContainerInnerStructWithId>& val);

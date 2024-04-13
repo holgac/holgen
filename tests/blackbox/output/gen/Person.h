@@ -10,6 +10,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Person {
 public:
+  bool operator==(const Person& rhs) const;
   uint32_t GetRace() const;
   uint32_t GetCurrentCountry() const;
   uint32_t GetCurrentCity() const;

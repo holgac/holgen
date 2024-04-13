@@ -17,6 +17,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class GameData {
 public:
+  bool operator==(const GameData& rhs) const;
   const std::vector<Boot>& GetBoots() const;
   std::vector<Boot>& GetBoots();
   const std::vector<Armor>& GetArmors() const;

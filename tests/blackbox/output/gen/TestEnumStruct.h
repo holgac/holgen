@@ -11,6 +11,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class TestEnumStruct {
 public:
+  bool operator==(const TestEnumStruct& rhs) const;
   const TestEnum& GetEnumField() const;
   TestEnum& GetEnumField();
   void SetEnumField(const TestEnum& val);

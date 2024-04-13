@@ -12,6 +12,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Calculator {
 public:
+  bool operator==(const Calculator& rhs) const;
   const Number& GetCurVal() const;
   Number& GetCurVal();
   void SetCurVal(const Number& val);

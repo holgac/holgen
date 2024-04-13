@@ -7,6 +7,14 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool Weapon::operator==(const Weapon& rhs) const {
+  return
+      mDamageMin == rhs.mDamageMin &&
+      mDamageMax == rhs.mDamageMax &&
+      mDamageMultipliers == rhs.mDamageMultipliers &&
+      mModifiers == rhs.mModifiers;
+}
+
 uint32_t Weapon::GetDamageMin() const {
   return mDamageMin;
 }

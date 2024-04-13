@@ -12,6 +12,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class TestContainerSet {
 public:
+  bool operator==(const TestContainerSet& rhs) const;
   const std::set<std::string>& GetStringContainer() const;
   std::set<std::string>& GetStringContainer();
   const std::set<uint32_t>& GetUnsignedContainer() const;

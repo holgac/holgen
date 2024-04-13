@@ -13,6 +13,7 @@ struct lua_State;
 namespace holgen_blackbox_test {
 class Weapon {
 public:
+  bool operator==(const Weapon& rhs) const;
   uint32_t GetDamageMin() const;
   uint32_t GetDamageMax() const;
   const std::vector<DamageMultiplier>& GetDamageMultipliers() const;

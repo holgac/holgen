@@ -9,6 +9,13 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool Boot::operator==(const Boot& rhs) const {
+  return
+      mId == rhs.mId &&
+      mName == rhs.mName &&
+      mColor == rhs.mColor;
+}
+
 uint32_t Boot::GetId() const {
   return mId;
 }

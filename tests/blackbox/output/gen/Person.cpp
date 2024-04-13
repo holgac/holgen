@@ -7,6 +7,15 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+bool Person::operator==(const Person& rhs) const {
+  return
+      mRace == rhs.mRace &&
+      mCurrentCountry == rhs.mCurrentCountry &&
+      mCurrentCity == rhs.mCurrentCity &&
+      mHomeCountry == rhs.mHomeCountry &&
+      mPlaceOfBirth == rhs.mPlaceOfBirth;
+}
+
 uint32_t Person::GetRace() const {
   return mRace;
 }
