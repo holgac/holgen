@@ -76,6 +76,7 @@ int run(int argc, char **argv) {
     std::ofstream fout(target);
     fout.write(newContents.c_str(), newContents.size());
   }
+  // TODO: warn if there are files in the directory not created by us in case the schema changed but the dangling files weren't deleted.
   return 0;
 }
 

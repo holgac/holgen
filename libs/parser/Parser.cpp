@@ -129,6 +129,8 @@ namespace holgen {
     fieldDefinition.mName = curToken.mContents;
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
     if (curToken.mType == TokenType::Equals) {
+      // TODO: test this
+      PARSER_THROW_IF(fieldDefinition.mType.mArraySize > 0, "Arrays cannot have default values");
       PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
       if (curToken.mType == TokenType::String) {
         fieldDefinition.mDefaultValue = curToken.mContents;
@@ -151,18 +153,30 @@ namespace holgen {
   void Parser::ParseType(Token &curToken, TypeDefinition &typeDefinition) {
     typeDefinition.mName = curToken.mContents;
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete type definition!")
-    if (curToken.mType != TokenType::AOpen)
-      return;
-    do {
-      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete type definition!")
-      PARSER_THROW_IF(curToken.mType != TokenType::String, "Type definition should start with a string, found \"{}\"",
-                      curToken.mContents)
-      ParseType(curToken, typeDefinition.mTemplateParameters.emplace_back());
-    } while (curToken.mType == TokenType::Comma);
-    PARSER_THROW_IF(curToken.mType != TokenType::AClose,
-                    "Templated type definition should be terminated with a '>', found \"{}\"", curToken.mContents)
+    if (curToken.mType == TokenType::AOpen) {
+      do {
+        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete type definition!")
+        PARSER_THROW_IF(curToken.mType != TokenType::String, "Type definition should start with a string, found \"{}\"",
+                        curToken.mContents)
+        ParseType(curToken, typeDefinition.mTemplateParameters.emplace_back());
+      } while (curToken.mType == TokenType::Comma);
+      PARSER_THROW_IF(curToken.mType != TokenType::AClose,
+                      "Templated type definition should be terminated with a '>', found \"{}\"", curToken.mContents)
 
-    PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
+    }
+    if (curToken.mType == TokenType::BOpen) {
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
+      PARSER_THROW_IF(curToken.mType != TokenType::String || !St::IsIntegral(curToken.mContents),
+                      "Invalid array size specifier, expected an integer, found \"{}\"",
+                      curToken.mContents)
+
+      typeDefinition.mArraySize = std::stoll(std::string(curToken.mContents));
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
+      PARSER_THROW_IF(curToken.mType != TokenType::BClose,
+                      "Array type definition should be terminated with a ']', found \"{}\"", curToken.mContents)
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
+    }
   }
 
   void Parser::ParseEnum(EnumDefinition &enumDefinition) {
@@ -308,4 +322,5 @@ namespace holgen {
       NEXT_OR_THROW(curToken, "Incomplete function definition!");
     }
   }
+
 }

@@ -16,6 +16,8 @@ namespace holgen {
   struct TypeDefinition {
     std::string mName;
     std::vector<TypeDefinition> mTemplateParameters;
+    // positive values indicate array; 0 means a regular value
+    size_t mArraySize = 0;
     bool operator==(const TypeDefinition &rhs) const;
   };
 

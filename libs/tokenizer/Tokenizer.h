@@ -21,12 +21,10 @@ namespace holgen {
     CClose, // }
     AOpen, // <
     AClose, // >
-    Slash, // /
-    At, // @
-    /*
     BOpen, // [
     BClose, // ]
-     */
+    Slash, // /
+    At, // @
   };
 
   struct Token {

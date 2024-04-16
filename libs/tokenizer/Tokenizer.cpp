@@ -17,6 +17,8 @@ namespace holgen {
         {'}', TokenType::CClose},
         {'<', TokenType::AOpen},
         {'>', TokenType::AClose},
+        {'[', TokenType::BOpen},
+        {']', TokenType::BClose},
         {'+', TokenType::Plus},
         {'-', TokenType::Minus},
         {'/', TokenType::Slash},
