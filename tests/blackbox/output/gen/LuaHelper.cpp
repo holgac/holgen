@@ -28,6 +28,9 @@
 #include "TestStructSingleElem.h"
 #include "TestStructSingleElemWithId.h"
 #include "TestStructSingleElemContainer.h"
+#include "TestStructArrayCustomData1.h"
+#include "TestStructArrayCustomData2.h"
+#include "TestStructArray.h"
 
 namespace holgen_blackbox_test {
 void LuaHelper::Push(nullptr_t , lua_State* luaState) {
@@ -194,5 +197,8 @@ void LuaHelper::CreateMetatables(lua_State* luaState) {
   TestStructSingleElem::CreateLuaMetatable(luaState);
   TestStructSingleElemWithId::CreateLuaMetatable(luaState);
   TestStructSingleElemContainer::CreateLuaMetatable(luaState);
+  TestStructArrayCustomData1::CreateLuaMetatable(luaState);
+  TestStructArrayCustomData2::CreateLuaMetatable(luaState);
+  TestStructArray::CreateLuaMetatable(luaState);
 }
 }

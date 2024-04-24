@@ -245,6 +245,39 @@ struct TestData {
   }
 }
 
+TEST_F(ClassFieldPluginTest, Arrays) {
+  auto project = Parse(R"R(
+struct TestData {
+  u32[1] testFieldArray1;
+  u8[16] testFieldArray16;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_NE(cls->mStruct, nullptr);
+  EXPECT_EQ(cls->mEnum, nullptr);
+
+  ASSERT_NE(cls->GetField("mTestFieldArray1"), nullptr);
+  {
+    auto field = ClassField{"mTestFieldArray1", Type{"std::array"}};
+    field.mField = cls->mStruct->GetField("testFieldArray1");
+    field.mType.mTemplateParameters.emplace_back("uint32_t");
+    field.mType.mTemplateParameters.emplace_back("1");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldArray1"), field);
+  }
+
+  ASSERT_NE(cls->GetField("mTestFieldArray16"), nullptr);
+  {
+    auto field = ClassField{"mTestFieldArray16", Type{"std::array"}};
+    field.mField = cls->mStruct->GetField("testFieldArray16");
+    field.mType.mTemplateParameters.emplace_back("uint8_t");
+    field.mType.mTemplateParameters.emplace_back("16");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldArray16"), field);
+  }
+
+}
+
 TEST_F(ClassFieldPluginTest, DuplicateField) {
   ExpectErrorMessage(R"R(
 struct A {

@@ -83,8 +83,7 @@ namespace holgen {
         "lua_State",
         // TODO: properly validate functions and remove this hack
         "std::function",
-        // TODO: support arrays
-        // Support array<Elem, Enum> and array<Elem, count>
+        // TODO: properly validate arrays and remove this hack
         "std::array",
         "nullptr_t",
     };
@@ -152,17 +151,24 @@ namespace holgen {
       } else {
         *this = Type{underlyingClass->mStruct->mName, PassByType::Pointer};
       }
-      return;
-    }
-    auto it = TypeInfo::Get().TypeToCppType.find(typeDefinition.mName);
-    if (it != TypeInfo::Get().TypeToCppType.end()) {
-      mName = it->second;
     } else {
-      mName = typeDefinition.mName;
+      auto it = TypeInfo::Get().TypeToCppType.find(typeDefinition.mName);
+      if (it != TypeInfo::Get().TypeToCppType.end()) {
+        mName = it->second;
+      } else {
+        mName = typeDefinition.mName;
+      }
+      for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
+        mTemplateParameters.emplace_back(project, templateParameter);
+      }
     }
 
-    for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
-      mTemplateParameters.emplace_back(project, templateParameter);
+    if (typeDefinition.mArraySize) {
+      decltype(mTemplateParameters) newTemplateParameters;
+      newTemplateParameters.emplace_back(*this);
+      newTemplateParameters.emplace_back(Type{std::to_string(typeDefinition.mArraySize)});
+      mName = "std::array";
+      mTemplateParameters = std::move(newTemplateParameters);
     }
   }
 

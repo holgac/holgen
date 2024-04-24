@@ -3,6 +3,7 @@
 
 #include "../holgen.h"
 #include <format>
+#include <array>
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "TestEnum.h"

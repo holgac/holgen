@@ -31,7 +31,7 @@ namespace holgen {
                   Constness constness = Constness::NotConst)
         : mName(std::move(name)), mConstness(constness), mType(passByType) {}
 
-    explicit Type(const TranslatedProject &project, const TypeDefinition &typeDefinition,
+    Type(const TranslatedProject &project, const TypeDefinition &typeDefinition,
                   PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
 
     bool operator==(const Type &rhs) const {

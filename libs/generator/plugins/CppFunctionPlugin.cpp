@@ -30,18 +30,24 @@ namespace holgen {
       method.mVisibility = Visibility::Protected;
     }
     method.mUserDefined = true;
-    method.mExposeToLua = true;
+    method.mExposeToLua = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr;
     method.mFunction = &functionDefinition;
 
-    if (mProject.GetClass(method.mReturnType.mName)) {
+    if (auto cls2 = mProject.GetClass(method.mReturnType.mName)) {
       // TODO: attribute specifying whether const
-      method.mReturnType.mType = PassByType::Pointer;
+      if (cls2->mEnum)
+        method.mReturnType.mType = PassByType::Reference;
+      else
+        method.mReturnType.mType = PassByType::Pointer;
     }
     // TODO: ref type for complex types
     for (const auto &funcArg: functionDefinition.mArguments) {
       auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
-      if (mProject.GetClass(arg.mType.mName)) {
-        arg.mType.mType = PassByType::Pointer;
+      if (auto cls2 = mProject.GetClass(arg.mType.mName)) {
+        if (cls2->mEnum)
+          arg.mType.mType = PassByType::Reference;
+        else
+          arg.mType.mType = PassByType::Pointer;
         if (!funcArg.mIsOut)
           arg.mType.mConstness = Constness::Const;
       } else if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {

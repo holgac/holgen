@@ -2,6 +2,7 @@
 #include <gmock/gmock-matchers.h>
 #include "TestStruct.h"
 #include "TestStructSingleElemContainer.h"
+#include "TestStructArray.h"
 #include "JsonHelper.h"
 
 using namespace holgen_blackbox_test;
@@ -73,4 +74,34 @@ TEST_F(StructTest, SingleElemWithId) {
   ASSERT_EQ(container.GetSingleElemStructWithIdCount(), 2);
   EXPECT_EQ(container.GetSingleElemStructWithId(0)->GetName(), "elem1");
   EXPECT_EQ(container.GetSingleElemStructWithId(1)->GetName(), "elem2");
+}
+
+TEST_F(StructTest, ArrayCustomData1) {
+  TestStructArray arr1;
+  arr1.Initialize(TestStructArrayType::Type1);
+  EXPECT_EQ(arr1.GetData1()->GetF1(), 43);
+  EXPECT_FLOAT_EQ(arr1.GetData1()->GetF2(), 44);
+  EXPECT_EQ(arr1.GetData1()->GetF3(), 45);
+  arr1.GetData1()->SetF1(123);
+  arr1.GetData1()->SetF2(4.56);
+  arr1.GetData1()->SetF3(789);
+  EXPECT_EQ(arr1.GetData1()->GetF1(), 123);
+  EXPECT_FLOAT_EQ(arr1.GetData1()->GetF2(), 4.56);
+  EXPECT_EQ(arr1.GetData1()->GetF3(), 789);
+  EXPECT_THROW({ arr1.GetData2(); }, std::runtime_error);
+}
+
+TEST_F(StructTest, ArrayCustomData2) {
+  TestStructArray arr1;
+  arr1.Initialize(TestStructArrayType::Type2);
+  EXPECT_EQ(arr1.GetData2()->GetF1(), 46);
+  EXPECT_FLOAT_EQ(arr1.GetData2()->GetF2(), 47);
+  EXPECT_EQ(arr1.GetData2()->GetF3(), 48);
+  arr1.GetData2()->SetF1(123);
+  arr1.GetData2()->SetF2(4.56);
+  arr1.GetData2()->SetF3(789);
+  EXPECT_EQ(arr1.GetData2()->GetF1(), 123);
+  EXPECT_FLOAT_EQ(arr1.GetData2()->GetF2(), 4.56);
+  EXPECT_EQ(arr1.GetData2()->GetF3(), 789);
+  EXPECT_THROW({ arr1.GetData1(); }, std::runtime_error);
 }

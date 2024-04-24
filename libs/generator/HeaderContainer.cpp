@@ -23,6 +23,7 @@ namespace holgen {
         {"std::set",           "set"},
         {"std::unordered_set", "unordered_set"},
         {"std::function",      "functional"},
+        {"std::array",        "array"},
     };
     std::set<std::string> NoHeaderTypes = {"float", "double", "void", "bool"};
   }
