@@ -28,7 +28,9 @@ namespace holgen {
     stringSwitcherElseCase.Add("return 0;");
     StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
-      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData)
+      // TODO: parse variant
+      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
+          field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
         continue;
       bool isRef = field.mField->mType.mName == "Ref";
       switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
@@ -108,7 +110,9 @@ namespace holgen {
     StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
       // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
-      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData)
+      // TODO: parse variant
+      if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
+          field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
         continue;
       // TODO: Make this work with pointers
       // TODO: Make this work with nested structs

@@ -37,6 +37,11 @@ const char* TestStructArrayType::ToString() const {
   }
 }
 
+TestStructArrayType& TestStructArrayType::operator =(const TestStructArrayType& rhs) {
+  mValue = rhs.mValue;
+  return *this;
+}
+
 TestStructArrayType& TestStructArrayType::operator =(UnderlyingType rhs) {
   mValue = rhs;
   return *this;

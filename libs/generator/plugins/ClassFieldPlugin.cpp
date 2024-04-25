@@ -19,7 +19,11 @@ namespace holgen {
       // Skip ids; they're processed in their own plugin
       if (fieldDefinition.GetAnnotation(Annotations::Id))
         continue;
+      // Skip variants; they're processed in their own plugin
+      if (fieldDefinition.mType.mName == St::Variant)
+        continue;
       // TODO: if @optimize(alignment) (or @packed?), order the fields to minimize padding. Default to it?
+      // ordering should probably be in code generation rather than translator plugins
       if (fieldDefinition.mType.mName == "Ref")
         Validate().RefField(cls, fieldDefinition);
       auto field = ClassField{

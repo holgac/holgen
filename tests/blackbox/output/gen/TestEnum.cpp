@@ -41,6 +41,11 @@ const char* TestEnum::ToString() const {
   }
 }
 
+TestEnum& TestEnum::operator =(const TestEnum& rhs) {
+  mValue = rhs.mValue;
+  return *this;
+}
+
 TestEnum& TestEnum::operator =(UnderlyingType rhs) {
   mValue = rhs;
   return *this;

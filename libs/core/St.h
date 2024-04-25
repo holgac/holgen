@@ -30,6 +30,7 @@ namespace holgen {
     inline static const std::string ParseJson = "ParseJson";
     // userdata is a void*. Use it only for pointer types
     inline static const std::string UserData = "userdata";
+    inline static const std::string Variant = "variant";
     // TODO: move Ref here
     inline static const std::string UserDefinedSectionBegin = "HOLGEN_USER_DEFINED_BEGIN:";
     inline static const std::string UserDefinedSectionEnd = "HOLGEN_USER_DEFINED_END:";

@@ -203,5 +203,35 @@ namespace holgen {
      * }
      */
     inline static const std::string Epsilon = "epsilon";
+
+    /**
+     * Variants are similar to std::variant. They're used as fields and their type is backed by an enum.
+     * A struct with a variant field will have two fields - a type field (backed by the specified enum) and a uint8_t array
+     * with size that can hold the largest variant struct.
+     *
+     * enum DataType {
+     *  Type1;
+     *  Type2;
+     * }
+     * struct DataHolder {
+     *   @variant(typeField=dataType, enum=DataType)
+     *   variant data;
+     * }
+     *
+     * @variant(enum=DataType, entry=Type1)
+     * struct DataType1 {
+     *  u32 f1;
+     * }
+     * @variant(enum=DataType, entry=Type2)
+     * struct DataType2 {
+     *  float f1;
+     * }
+     */
+    inline static const std::string Variant = "variant";
+    inline static const std::string Variant_TypeField = "typeField";
+    inline static const std::string Variant_Enum = "enum";
+    inline static const std::string Variant_Entry = "entry";
+
+
   };
 }

@@ -18,6 +18,7 @@ public:
   UnderlyingType GetValue() const;
   static TestEnum FromString(std::string_view str);
   const char* ToString() const;
+  TestEnum& operator =(const TestEnum& rhs);
   TestEnum& operator =(UnderlyingType rhs);
   bool operator ==(UnderlyingType rhs) const;
   bool operator ==(const TestEnum& rhs) const;

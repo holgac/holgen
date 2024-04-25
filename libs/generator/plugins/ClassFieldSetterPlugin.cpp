@@ -9,6 +9,8 @@ namespace holgen {
       for (auto &field: cls.mFields) {
         if (!field.mField)
           continue;
+        if (field.mField->mType.mName == St::Variant)
+          continue;
         auto method = ClassMethod{
             Naming().FieldSetterNameInCpp(*field.mField), Type{"void"},
             Visibility::Public, Constness::NotConst};

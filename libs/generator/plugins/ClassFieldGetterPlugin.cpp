@@ -10,6 +10,8 @@ namespace holgen {
       for (auto &field: cls.mFields) {
         if (!field.mField)
           continue;
+        if (field.mField->mType.mName == St::Variant)
+          continue;
         ProcessField(cls, field, true);
         ProcessField(cls, field, false);
 

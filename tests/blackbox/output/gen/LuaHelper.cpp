@@ -9,6 +9,9 @@
 #include "Person.h"
 #include "RaceId.h"
 #include "Country.h"
+#include "TestVariantStructCustomData1.h"
+#include "TestVariantStructCustomData2.h"
+#include "TestVariantStruct.h"
 #include "Boot.h"
 #include "Armor.h"
 #include "Character.h"
@@ -178,6 +181,9 @@ void LuaHelper::CreateMetatables(lua_State* luaState) {
   Person::CreateLuaMetatable(luaState);
   RaceId::CreateLuaMetatable(luaState);
   Country::CreateLuaMetatable(luaState);
+  TestVariantStructCustomData1::CreateLuaMetatable(luaState);
+  TestVariantStructCustomData2::CreateLuaMetatable(luaState);
+  TestVariantStruct::CreateLuaMetatable(luaState);
   Boot::CreateLuaMetatable(luaState);
   Armor::CreateLuaMetatable(luaState);
   Character::CreateLuaMetatable(luaState);

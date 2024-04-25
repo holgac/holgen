@@ -16,6 +16,9 @@ namespace holgen {
       for (auto &field: cls.mFields) {
         if (!field.mField)
           continue;
+        // TODO: remove this check once variant parsing is implemented
+        if (field.mField->mType.mName == St::Variant)
+          continue;
         if (field.mField->GetAnnotation(Annotations::Id)) {
           idField = &field;
           continue;
@@ -56,9 +59,10 @@ namespace holgen {
     stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
     StringSwitcher switcher("name", std::move(stringSwitcherElseCase));
     for (const auto &field: cls.mFields) {
-      if (
-          !field.mField || field.mField->GetAnnotation(Annotations::NoJson) ||
-          field.mField->mType.mName == St::UserData)
+      // TODO: parse variant
+      if (!field.mField || field.mField->GetAnnotation(Annotations::NoJson) ||
+          field.mField->mType.mName == St::UserData ||
+          field.mField->mType.mName == St::Variant)
         continue;
       switcher.AddCase(field.mField->mName, [&](CodeBlock &switchBlock) {
         GenerateParseJsonForField(cls, switchBlock, field, "data.value");

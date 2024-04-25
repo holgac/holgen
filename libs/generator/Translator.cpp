@@ -2,6 +2,7 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassFieldVariantPlugin.h"
 #include "generator/plugins/ClassEqualsOperatorPlugin.h"
 #include "generator/plugins/ClassFieldGetterPlugin.h"
 #include "generator/plugins/ClassFieldSetterPlugin.h"
@@ -29,6 +30,7 @@ namespace holgen {
     AddPlugin<ClassPlugin>();
     AddPlugin<ClassIdFieldPlugin>();
     AddPlugin<ClassFieldPlugin>();
+    AddPlugin<ClassFieldVariantPlugin>();
     AddPlugin<ClassEqualsOperatorPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();
     AddPlugin<ClassFieldSetterPlugin>();

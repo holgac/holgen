@@ -9,7 +9,8 @@ namespace holgen {
     void Run() override;
 
   private:
-    void ProcessStructDefinition(Class& cls, ClassDestructor& destructor, const StructDefinition& structDefinition);
+    void ProcessStructDefinition(Class &cls, ClassDestructor &destructor, const StructDefinition &structDefinition);
+    void ProcessVariantField(Class &cls, ClassDestructor &destructor, const FieldDefinition &fieldDefinition);
   };
 }
 

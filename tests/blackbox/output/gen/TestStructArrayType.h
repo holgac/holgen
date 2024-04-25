@@ -18,6 +18,7 @@ public:
   UnderlyingType GetValue() const;
   static TestStructArrayType FromString(std::string_view str);
   const char* ToString() const;
+  TestStructArrayType& operator =(const TestStructArrayType& rhs);
   TestStructArrayType& operator =(UnderlyingType rhs);
   bool operator ==(UnderlyingType rhs) const;
   bool operator ==(const TestStructArrayType& rhs) const;

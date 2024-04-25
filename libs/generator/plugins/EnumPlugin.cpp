@@ -61,6 +61,7 @@ namespace holgen {
   void EnumPlugin::GenerateOperators(Class &cls) {
     // TODO: test these properly. Currently overloads aren't well supported.
     const std::vector<EnumOperator> operators = {
+        {"=",  Constness::NotConst, EnumOperatorReturnType::This,   false},
         {"=",  Constness::NotConst, EnumOperatorReturnType::This,   true},
         {"==", Constness::Const,    EnumOperatorReturnType::Result, true},
         {"==", Constness::Const,    EnumOperatorReturnType::Result, false},
