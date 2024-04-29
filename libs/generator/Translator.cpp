@@ -30,10 +30,10 @@ namespace holgen {
     AddPlugin<ClassPlugin>();
     AddPlugin<ClassIdFieldPlugin>();
     AddPlugin<ClassFieldPlugin>();
-    AddPlugin<ClassFieldVariantPlugin>();
     AddPlugin<ClassEqualsOperatorPlugin>();
     AddPlugin<ClassFieldGetterPlugin>();
     AddPlugin<ClassFieldSetterPlugin>();
+    AddPlugin<ClassFieldVariantPlugin>();
     AddPlugin<LuaFunctionPlugin>();
     AddPlugin<CppFunctionPlugin>();
     AddPlugin<CppDestructorPlugin>();

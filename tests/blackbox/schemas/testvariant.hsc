@@ -1,23 +1,39 @@
-@variant(enum=TestVariantStructType, entry=Type1)
-struct TestVariantStructCustomData1 {
-  u32 f1 = 43;
-  float f2 = 44;
-  u64 f3 = 45;
+@variant(enum=TestVariantStructType, entry=Human)
+struct TestVariantStructHuman {
+  string name = '"Jean"';
+  string nationality = '"Mixed"';
 }
 
-@variant(enum=TestVariantStructType, entry=Type2)
-struct TestVariantStructCustomData2 {
-  u64 f1 = 46;
-  float f2 = 47;
-  u32 f3 = 48;
+@variant(enum=TestVariantStructType, entry=Cat)
+struct TestVariantStructCat {
+  string name = '"Whiskers"';
+  string color = '"orange"';
 }
 
 enum TestVariantStructType {
-  Type1;
-  Type2;
+  Human;
+  Cat;
 }
 
-struct TestVariantStruct {
-  @variant(enum=TestVariantStructType, typeField=customDataType)
-  variant customData;
+struct TestVariantStructDifferentTypes {
+  @variant(enum=TestVariantStructType, typeField=being1Type)
+  variant being1;
+  @variant(enum=TestVariantStructType, typeField=being2Type)
+  variant being2;
+}
+
+struct TestVariantStructSharedType {
+  @variant(enum=TestVariantStructType, typeField=beingType)
+  variant being1;
+  @variant(enum=TestVariantStructType, typeField=beingType)
+  variant being2;
+}
+
+struct TestVariantStructExplicitType {
+  TestVariantStructType type;
+
+  @variant(typeField=type)
+  variant being1;
+  @variant(typeField=type)
+  variant being2;
 }

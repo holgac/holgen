@@ -2,32 +2,32 @@
 #pragma once
 
 #include "../holgen.h"
+#include <string>
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "Converter.h"
 
 struct lua_State;
 namespace holgen_blackbox_test {
-class TestVariantStructCustomData1 {
+class TestVariantStructHuman {
 public:
-  bool operator==(const TestVariantStructCustomData1& rhs) const;
-  uint32_t GetF1() const;
-  float GetF2() const;
-  uint64_t GetF3() const;
-  void SetF1(uint32_t val);
-  void SetF2(float val);
-  void SetF3(uint64_t val);
+  bool operator==(const TestVariantStructHuman& rhs) const;
+  const std::string& GetName() const;
+  std::string& GetName();
+  const std::string& GetNationality() const;
+  std::string& GetNationality();
+  void SetName(const std::string& val);
+  void SetNationality(const std::string& val);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;
   // This only works with negative indices
-  static TestVariantStructCustomData1* ReadFromLua(lua_State* luaState, int32_t idx);
+  static TestVariantStructHuman* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 private:
   static int IndexMetaMethod(lua_State* luaState);
   static int NewIndexMetaMethod(lua_State* luaState);
-  uint32_t mF1 = 43;
-  float mF2 = 44;
-  uint64_t mF3 = 45;
+  std::string mName = "Jean";
+  std::string mNationality = "Mixed";
 };
 }

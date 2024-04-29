@@ -27,15 +27,15 @@ public:
   bool operator <(UnderlyingType rhs) const;
   bool operator <(const TestVariantStructType& rhs) const;
   constexpr static std::array<TestVariantStructType::UnderlyingType, 2> GetEntryValues() {
-    return std::array<TestVariantStructType::UnderlyingType, 2>{Type1Value, Type2Value};
+    return std::array<TestVariantStructType::UnderlyingType, 2>{HumanValue, CatValue};
   }
   static std::array<TestVariantStructType, 2> GetEntries();
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
-  static const TestVariantStructType Type1;
-  static const TestVariantStructType Type2;
-  inline static constexpr const UnderlyingType Type1Value = 0;
-  inline static constexpr const UnderlyingType Type2Value = 1;
+  static const TestVariantStructType Human;
+  static const TestVariantStructType Cat;
+  inline static constexpr const UnderlyingType HumanValue = 0;
+  inline static constexpr const UnderlyingType CatValue = 1;
   inline static constexpr const UnderlyingType Invalid = 2;
 private:
   UnderlyingType mValue;

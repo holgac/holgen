@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
-#include "TestVariantStruct.h"
+#include "TestVariantStructDifferentTypes.h"
+#include "TestVariantStructSharedType.h"
+#include "TestVariantStructExplicitType.h"
 
 using namespace holgen_blackbox_test;
 
@@ -13,35 +15,59 @@ protected:
   }
 };
 
-TEST_F(VariantTest, Type1) {
-  TestVariantStruct tvs;
-  EXPECT_EQ(tvs.GetCustomDataType(), TestVariantStructType::Invalid);
-  tvs.InitializeCustomDataAsType1();
-  EXPECT_EQ(tvs.GetCustomDataType(), TestVariantStructType::Type1);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF1(), 43);
-  EXPECT_FLOAT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF2(), 44);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF3(), 45);
-  tvs.GetCustomDataAsTestVariantStructCustomData1()->SetF1(123);
-  tvs.GetCustomDataAsTestVariantStructCustomData1()->SetF2(4.56);
-  tvs.GetCustomDataAsTestVariantStructCustomData1()->SetF3(789);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF1(), 123);
-  EXPECT_FLOAT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF2(), 4.56);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF3(), 789);
-  EXPECT_THROW({ tvs.GetCustomDataAsTestVariantStructCustomData2(); }, std::runtime_error);
+TEST_F(VariantTest, DifferentTypes) {
+  TestVariantStructDifferentTypes tvs;
+  EXPECT_EQ(tvs.GetBeing1Type(), TestVariantStructType::Invalid);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); }, std::runtime_error);
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); }, std::runtime_error);
+  tvs.SetBeing1Type(TestVariantStructType::Human);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); });
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); }, std::runtime_error);
+  EXPECT_EQ(tvs.GetBeing1AsTestVariantStructHuman()->GetName(), "Jean");
+  tvs.GetBeing1AsTestVariantStructHuman()->SetName("Jeanne");
+  EXPECT_EQ(tvs.GetBeing1AsTestVariantStructHuman()->GetName(), "Jeanne");
+
+  tvs.SetBeing2Type(TestVariantStructType::Cat);
+  EXPECT_EQ(tvs.GetBeing1Type(), TestVariantStructType::Human);
+  EXPECT_EQ(tvs.GetBeing2AsTestVariantStructCat()->GetName(), "Whiskers");
+  tvs.GetBeing2AsTestVariantStructCat()->SetName("Whisky");
+  EXPECT_EQ(tvs.GetBeing2AsTestVariantStructCat()->GetName(), "Whisky");
 }
 
-TEST_F(VariantTest, Type2) {
-  TestVariantStruct tvs;
-  tvs.InitializeCustomDataAsType2();
-  EXPECT_EQ(tvs.GetCustomDataType(), TestVariantStructType::Type2);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF1(), 46);
-  EXPECT_FLOAT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF2(), 47);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF3(), 48);
-  tvs.GetCustomDataAsTestVariantStructCustomData2()->SetF1(123);
-  tvs.GetCustomDataAsTestVariantStructCustomData2()->SetF2(4.56);
-  tvs.GetCustomDataAsTestVariantStructCustomData2()->SetF3(789);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF1(), 123);
-  EXPECT_FLOAT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF2(), 4.56);
-  EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF3(), 789);
-  EXPECT_THROW({ tvs.GetCustomDataAsTestVariantStructCustomData1(); }, std::runtime_error);
+TEST_F(VariantTest, SharedType) {
+  TestVariantStructSharedType tvs;
+  EXPECT_EQ(tvs.GetBeingType(), TestVariantStructType::Invalid);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); }, std::runtime_error);
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); }, std::runtime_error);
+  tvs.SetBeingType(TestVariantStructType::Human);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); });
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); });
+
+  EXPECT_EQ(tvs.GetBeing1AsTestVariantStructHuman()->GetName(), "Jean");
+  tvs.GetBeing1AsTestVariantStructHuman()->SetName("Jeanne");
+  EXPECT_EQ(tvs.GetBeing1AsTestVariantStructHuman()->GetName(), "Jeanne");
+  EXPECT_EQ(tvs.GetBeing2AsTestVariantStructHuman()->GetName(), "Jean");
+}
+
+TEST_F(VariantTest, ExplicitType) {
+  TestVariantStructExplicitType tvs;
+  EXPECT_EQ(tvs.GetType(), TestVariantStructType::Invalid);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); }, std::runtime_error);
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); }, std::runtime_error);
+  tvs.SetType(TestVariantStructType::Human);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); });
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); });
+
+  EXPECT_EQ(tvs.GetBeing1AsTestVariantStructHuman()->GetName(), "Jean");
+  tvs.GetBeing1AsTestVariantStructHuman()->SetName("Jeanne");
+  EXPECT_EQ(tvs.GetBeing1AsTestVariantStructHuman()->GetName(), "Jeanne");
+  EXPECT_EQ(tvs.GetBeing2AsTestVariantStructHuman()->GetName(), "Jean");
 }

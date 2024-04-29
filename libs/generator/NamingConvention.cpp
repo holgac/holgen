@@ -42,7 +42,12 @@ namespace holgen {
         return std::format("Get{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
-    return std::format("Get{}", St::Capitalize(fieldDefinition.mName));
+    return FieldGetterNameInCpp(fieldDefinition.mName);
+  }
+
+  std::string
+  NamingConvention::FieldGetterNameInCpp(const std::string& fieldName) const {
+    return std::format("Get{}", St::Capitalize(fieldName));
   }
 
   std::string NamingConvention::ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition) const {
@@ -95,7 +100,11 @@ namespace holgen {
         return std::format("Set{}Id", St::Capitalize(fieldDefinition.mName));
       }
     }
-    return std::format("Set{}", St::Capitalize(fieldDefinition.mName));
+    return FieldSetterNameInCpp(fieldDefinition.mName);
+  }
+
+  std::string NamingConvention::FieldSetterNameInCpp(const std::string& fieldName) const {
+    return std::format("Set{}", St::Capitalize(fieldName));
   }
 
   std::string NamingConvention::LuaFunctionSetterNameInCpp(const FunctionDefinition &functionDefinition) const {

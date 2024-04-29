@@ -7,8 +7,8 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-const TestVariantStructType TestVariantStructType::Type1(0);
-const TestVariantStructType TestVariantStructType::Type2(1);
+const TestVariantStructType TestVariantStructType::Human(0);
+const TestVariantStructType TestVariantStructType::Cat(1);
 
 TestVariantStructType::TestVariantStructType(TestVariantStructType::UnderlyingType value) :
   mValue(value)
@@ -20,9 +20,9 @@ TestVariantStructType::UnderlyingType TestVariantStructType::GetValue() const {
 }
 
 TestVariantStructType TestVariantStructType::FromString(std::string_view str) {
-  if (str == "Type1") {
+  if (str == "Human") {
     return TestVariantStructType(0);
-  } else if (str == "Type2") {
+  } else if (str == "Cat") {
     return TestVariantStructType(1);
   } else {
     return TestVariantStructType(TestVariantStructType::Invalid);
@@ -31,8 +31,8 @@ TestVariantStructType TestVariantStructType::FromString(std::string_view str) {
 
 const char* TestVariantStructType::ToString() const {
   switch (mValue) {
-    case 0: return "Type1";
-    case 1: return "Type2";
+    case 0: return "Human";
+    case 1: return "Cat";
     default: return "INVALID";
   }
 }
@@ -72,7 +72,7 @@ bool TestVariantStructType::operator <(const TestVariantStructType& rhs) const {
 }
 
 std::array<TestVariantStructType, 2> TestVariantStructType::GetEntries() {
-  return std::array<TestVariantStructType, 2>{Type1, Type2};
+  return std::array<TestVariantStructType, 2>{Human, Cat};
 }
 
 bool TestVariantStructType::ParseJson(const rapidjson::Value& json, const Converter& converter) {
