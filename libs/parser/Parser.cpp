@@ -132,8 +132,12 @@ namespace holgen {
       // TODO: test this
       PARSER_THROW_IF(fieldDefinition.mType.mArraySize > 0, "Arrays cannot have default values");
       PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      if (curToken.mType == TokenType::Minus) {
+        fieldDefinition.mDefaultValue += curToken.mContents;
+        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      }
       if (curToken.mType == TokenType::String) {
-        fieldDefinition.mDefaultValue = curToken.mContents;
+        fieldDefinition.mDefaultValue += curToken.mContents;
         PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
       }
       if (curToken.mType == TokenType::Period) {

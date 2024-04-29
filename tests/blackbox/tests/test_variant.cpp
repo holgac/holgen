@@ -15,7 +15,9 @@ protected:
 
 TEST_F(VariantTest, Type1) {
   TestVariantStruct tvs;
+  EXPECT_EQ(tvs.GetCustomDataType(), TestVariantStructType::Invalid);
   tvs.InitializeCustomDataAsType1();
+  EXPECT_EQ(tvs.GetCustomDataType(), TestVariantStructType::Type1);
   EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF1(), 43);
   EXPECT_FLOAT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF2(), 44);
   EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData1()->GetF3(), 45);
@@ -31,6 +33,7 @@ TEST_F(VariantTest, Type1) {
 TEST_F(VariantTest, Type2) {
   TestVariantStruct tvs;
   tvs.InitializeCustomDataAsType2();
+  EXPECT_EQ(tvs.GetCustomDataType(), TestVariantStructType::Type2);
   EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF1(), 46);
   EXPECT_FLOAT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF2(), 47);
   EXPECT_EQ(tvs.GetCustomDataAsTestVariantStructCustomData2()->GetF3(), 48);

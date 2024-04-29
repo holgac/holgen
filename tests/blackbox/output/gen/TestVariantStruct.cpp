@@ -14,6 +14,11 @@ TestVariantStruct::~TestVariantStruct() {
     GetCustomDataAsTestVariantStructCustomData2()->~TestVariantStructCustomData2();
   }
 }
+const TestVariantStructCustomData1* TestVariantStruct::GetCustomDataAsTestVariantStructCustomData1() const {
+  HOLGEN_FAIL_IF(mCustomDataType != TestVariantStructType::Type1, "Attempting to get TestVariantStruct.customData as TestVariantStructCustomData1 while in reality its type is {}!", mCustomDataType);
+  return reinterpret_cast<const TestVariantStructCustomData1*>(mCustomData.data());
+}
+
 TestVariantStructCustomData1* TestVariantStruct::GetCustomDataAsTestVariantStructCustomData1() {
   HOLGEN_FAIL_IF(mCustomDataType != TestVariantStructType::Type1, "Attempting to get TestVariantStruct.customData as TestVariantStructCustomData1 while in reality its type is {}!", mCustomDataType);
   return reinterpret_cast<TestVariantStructCustomData1*>(mCustomData.data());
@@ -25,6 +30,11 @@ void TestVariantStruct::InitializeCustomDataAsType1() {
   new (mCustomData.data()) TestVariantStructCustomData1();
 }
 
+const TestVariantStructCustomData2* TestVariantStruct::GetCustomDataAsTestVariantStructCustomData2() const {
+  HOLGEN_FAIL_IF(mCustomDataType != TestVariantStructType::Type2, "Attempting to get TestVariantStruct.customData as TestVariantStructCustomData2 while in reality its type is {}!", mCustomDataType);
+  return reinterpret_cast<const TestVariantStructCustomData2*>(mCustomData.data());
+}
+
 TestVariantStructCustomData2* TestVariantStruct::GetCustomDataAsTestVariantStructCustomData2() {
   HOLGEN_FAIL_IF(mCustomDataType != TestVariantStructType::Type2, "Attempting to get TestVariantStruct.customData as TestVariantStructCustomData2 while in reality its type is {}!", mCustomDataType);
   return reinterpret_cast<TestVariantStructCustomData2*>(mCustomData.data());
@@ -34,6 +44,10 @@ void TestVariantStruct::InitializeCustomDataAsType2() {
   HOLGEN_FAIL_IF(mCustomDataType != TestVariantStructType::Invalid, "customData field was already initialized as {}, trying to initialize as {}!,", mCustomDataType, TestVariantStructType::Type2);
   mCustomDataType = TestVariantStructType::Type2;
   new (mCustomData.data()) TestVariantStructCustomData2();
+}
+
+TestVariantStructType TestVariantStruct::GetCustomDataType() const {
+  return mCustomDataType;
 }
 
 bool TestVariantStruct::operator==(const TestVariantStruct& rhs) const {

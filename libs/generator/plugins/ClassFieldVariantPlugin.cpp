@@ -30,14 +30,9 @@ namespace holgen {
     auto type = variantAnnotation->GetAttribute(Annotations::Variant_TypeField);
     auto enumName = variantAnnotation->GetAttribute(Annotations::Variant_Enum);
     THROW_IF(!type || !enumName, "Insufficient variant annotation");
-    auto typeField = ClassField{
-        Naming().FieldNameInCpp(type->mValue.mName),
-        Type{enumName->mValue.mName}};
-
     std::stringstream arraySizeSpecifier;
-    arraySizeSpecifier << "std::max(";
     auto dataField = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{"std::array"}};
-    bool isFirst = true;
+    size_t matchingStructCount = 0;
     // TODO: validate that there are structs matching the given enum
     for (auto &projectStruct: mProject.mProject.mStructs) {
       if (projectStruct.mIsMixin)
@@ -47,48 +42,65 @@ namespace holgen {
       if (!structVariantAnnotation ||
           structVariantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != enumName->mValue.mName)
         continue;
-      if (isFirst)
-        isFirst = false;
-      else
+      if (matchingStructCount != 0)
         arraySizeSpecifier << ", ";
+      ++matchingStructCount;
       cls.mHeaderIncludes.AddLocalHeader(projectStruct.mName + ".h");
       arraySizeSpecifier << "sizeof(" << projectStruct.mName << ")";
       auto entryStr = std::format("{}::{}", enumName->mValue.mName,
                                   structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
+      for (int i=0; i<2; ++i)
       {
-        // TODO: const counterpart?
+        auto constness = i == 0 ? Constness::Const : Constness::NotConst;
         auto method = ClassMethod{Naming().VariantGetterNameInCpp(fieldDefinition, projectStruct),
-                                  Type{projectStruct.mName, PassByType::Pointer}, Visibility::Public,
-                                  Constness::NotConst};
+                                  Type{projectStruct.mName, PassByType::Pointer, constness}, Visibility::Public,
+                                  constness};
         method.mBody.Add(
             R"R(HOLGEN_FAIL_IF({} != {}, "Attempting to get {}.{} as {} while in reality its type is {{}}!", {});)R",
-            typeField.mName, entryStr, cls.mName, fieldDefinition.mName, projectStruct.mName, typeField.mName);
-        method.mBody.Add("return reinterpret_cast<{}*>({}.data());", projectStruct.mName, dataField.mName);
+            Naming().FieldNameInCpp(type->mValue.mName), entryStr, cls.mName, fieldDefinition.mName,
+            projectStruct.mName, Naming().FieldNameInCpp(type->mValue.mName));
+        method.mBody.Add("return reinterpret_cast<{}>({}.data());", method.mReturnType.ToString(), dataField.mName);
         Validate().NewMethod(cls, method);
         cls.mMethods.push_back(std::move(method));
       }
       {
         auto method = ClassMethod{
             std::format("Initialize{}As{}", St::Capitalize(fieldDefinition.mName),
-                        structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName),
+                        St::Capitalize(
+                            structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName)),
             Type{"void"}, Visibility::Public, Constness::NotConst};
         method.mBody.Add(
             R"R(HOLGEN_FAIL_IF({0} != {1}::Invalid, "{2} field was already initialized as {{}}, trying to initialize as {{}}!,", {0}, {3});)R",
-            typeField.mName, enumName->mValue.mName, fieldDefinition.mName, entryStr);
-        method.mBody.Add("{} = {};", typeField.mName, entryStr);
+            Naming().FieldNameInCpp(type->mValue.mName), enumName->mValue.mName, fieldDefinition.mName, entryStr);
+        method.mBody.Add("{} = {};", Naming().FieldNameInCpp(type->mValue.mName), entryStr);
         method.mBody.Add("new ({}.data()) {}();", dataField.mName, projectStruct.mName);
         Validate().NewMethod(cls, method);
         cls.mMethods.push_back(std::move(method));
       }
     }
-    Validate().NewField(cls, typeField);
-    cls.mFields.emplace_back(std::move(typeField));
-    THROW_IF(isFirst, "Variant field with no matching struct");
-    arraySizeSpecifier << ")";
+
+    auto typeGetter = ClassMethod{std::format("Get{}Type", St::Capitalize(fieldDefinition.mName)),
+                                  Type{enumName->mValue.mName}};
+    typeGetter.mBody.Add("return {};", Naming().FieldNameInCpp(type->mValue.mName));
+    Validate().NewMethod(cls, typeGetter);
+    cls.mMethods.emplace_back(std::move(typeGetter));
+
+    if (cls.GetField(Naming().FieldNameInCpp(type->mValue.mName)) == nullptr) {
+      auto typeField = ClassField{
+          Naming().FieldNameInCpp(type->mValue.mName),
+          Type{enumName->mValue.mName}};
+      Validate().NewField(cls, typeField);
+      cls.mFields.emplace_back(std::move(typeField));
+    }
+    THROW_IF(matchingStructCount == 0, "Variant field with no matching struct");
     dataField.mType.mTemplateParameters.emplace_back("uint8_t");
-    dataField.mType.mTemplateParameters.emplace_back(arraySizeSpecifier.str());
+    if (matchingStructCount > 1)
+      dataField.mType.mTemplateParameters.emplace_back("std::max(" + arraySizeSpecifier.str() + ")");
+    else
+      dataField.mType.mTemplateParameters.emplace_back(arraySizeSpecifier.str());
     dataField.mField = &fieldDefinition;
     Validate().NewField(cls, dataField);
     cls.mFields.emplace_back(std::move(dataField));
+
   }
 }

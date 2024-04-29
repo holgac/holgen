@@ -15,10 +15,13 @@ namespace holgen_blackbox_test {
 class TestVariantStruct {
 public:
   ~TestVariantStruct();
+  const TestVariantStructCustomData1* GetCustomDataAsTestVariantStructCustomData1() const;
   TestVariantStructCustomData1* GetCustomDataAsTestVariantStructCustomData1();
   void InitializeCustomDataAsType1();
+  const TestVariantStructCustomData2* GetCustomDataAsTestVariantStructCustomData2() const;
   TestVariantStructCustomData2* GetCustomDataAsTestVariantStructCustomData2();
   void InitializeCustomDataAsType2();
+  TestVariantStructType GetCustomDataType() const;
   bool operator==(const TestVariantStruct& rhs) const;
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
