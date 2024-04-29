@@ -28,6 +28,7 @@ namespace holgen {
     auto variantAnnotation = fieldDefinition.GetAnnotation(Annotations::Variant);
     THROW_IF(!variantAnnotation, "variant fields should have a variant annotation!");
     auto type = variantAnnotation->GetAttribute(Annotations::Variant_TypeField);
+    // TODO: don't need to specify enum if type field is explicitly defined
     auto enumName = variantAnnotation->GetAttribute(Annotations::Variant_Enum);
     THROW_IF(!type || !enumName, "Insufficient variant annotation");
     std::stringstream arraySizeSpecifier;
@@ -64,13 +65,14 @@ namespace holgen {
         cls.mMethods.push_back(std::move(method));
       }
       {
+        // TODO: instead of InitializeAs, just initialize all matching fields in the type setter
         auto method = ClassMethod{
             std::format("Initialize{}As{}", St::Capitalize(fieldDefinition.mName),
                         St::Capitalize(
                             structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName)),
             Type{"void"}, Visibility::Public, Constness::NotConst};
         method.mBody.Add(
-            R"R(HOLGEN_FAIL_IF({0} != {1}::Invalid, "{2} field was already initialized as {{}}, trying to initialize as {{}}!,", {0}, {3});)R",
+            R"R(HOLGEN_FAIL_IF({0} != {1}::Invalid && {0} != {3}, "{2} field was already initialized as {{}}, trying to initialize as {{}}!,", {0}, {3});)R",
             Naming().FieldNameInCpp(type->mValue.mName), enumName->mValue.mName, fieldDefinition.mName, entryStr);
         method.mBody.Add("{} = {};", Naming().FieldNameInCpp(type->mValue.mName), entryStr);
         method.mBody.Add("new ({}.data()) {}();", dataField.mName, projectStruct.mName);
@@ -85,6 +87,7 @@ namespace holgen {
     Validate().NewMethod(cls, typeGetter);
     cls.mMethods.emplace_back(std::move(typeGetter));
 
+    // TODO: else verify that the type matches
     if (cls.GetField(Naming().FieldNameInCpp(type->mValue.mName)) == nullptr) {
       auto typeField = ClassField{
           Naming().FieldNameInCpp(type->mValue.mName),

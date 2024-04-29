@@ -174,9 +174,11 @@ namespace holgen {
      * and callable from cpp and lua.
      *
      * onDestroy: Called when the object is destroyed, use it to free unmanaged resources
+     * const: Specifies whether the function is const
      */
     inline static const std::string CppFunc = "cppFunc";
     inline static const std::string CppFunc_OnDestroy = "onDestroy";
+    inline static const std::string CppFunc_Const = "const";
 
     /**
      * Adds a comment to a struct, field or function.

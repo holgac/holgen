@@ -654,7 +654,7 @@ namespace holgen {
       if (!method.mUserDefined)
         continue;
       codeBlock.Add("{} {{", GenerateFunctionSignature(cls, method, false, false));
-      codeBlock.UserDefined("{}_{}", cls.mName, method.mName);
+      codeBlock.UserDefined("{}_{}{}", cls.mName, method.mName, method.mConstness == Constness::Const ? "_Const" : "");
       codeBlock.Add("}}");
     }
     if (!cls.mNamespace.empty())

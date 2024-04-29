@@ -21,11 +21,11 @@ namespace holgen {
   }
 
   void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &functionDefinition) {
-    // TODO: const attribute
+    auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::CppFunc);
     auto method = ClassMethod{
         functionDefinition.mName,
         Type{mProject, functionDefinition.mReturnType},
-        Visibility::Public, Constness::NotConst};
+        Visibility::Public, funcAnnotation->GetAttribute(Annotations::CppFunc_Const) ? Constness::Const : Constness::NotConst};
     if (functionDefinition.GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
       method.mVisibility = Visibility::Protected;
     }
