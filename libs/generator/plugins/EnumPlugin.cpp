@@ -33,22 +33,37 @@ namespace holgen {
       auto field = ClassField{"mValue", Type{St::Enum_UnderlyingType}};
       Validate().NewField(cls, field);
       cls.mFields.push_back(std::move(field));
-      // TODO: validate ctors
-      ClassConstructor &ctor = cls.mConstructors.emplace_back();
-      ctor.mExplicitness = Explicitness::Explicit;
-      ctor.mArguments.emplace_back("value", Type{St::Enum_UnderlyingType}, "Invalid");
-      ctor.mInitializerList.emplace_back("mValue", "value");
     }
 
+    GenerateIntegralConstructor(cls);
+    GenerateEnumConstructor(cls);
     GenerateGetValue(cls);
-    GenerateEntries(cls);
+    GenerateClassEnum(cls);
+    GenerateInvalidEntry(cls);
     GenerateFromString(cls);
     GenerateToString(cls);
     GenerateOperators(cls);
-    GenerateGetEntries(cls, true);
-    GenerateGetEntries(cls, false);
+    GenerateGetEntries(cls);
     GenerateHash(cls);
-    GenerateFormatter(cls);
+    GenerateFormatter(cls, true);
+    GenerateFormatter(cls, false);
+  }
+
+  void EnumPlugin::GenerateIntegralConstructor(Class &cls) {
+    auto ctor = ClassConstructor{};
+    ctor.mExplicitness = Explicitness::Explicit;
+    ctor.mArguments.emplace_back("value", Type{St::Enum_UnderlyingType}, "Invalid");
+    ctor.mInitializerList.emplace_back("mValue", "value");
+    // TODO: validate ctors
+    cls.mConstructors.push_back(std::move(ctor));
+  }
+
+  void EnumPlugin::GenerateEnumConstructor(Class &cls) {
+    auto ctor = ClassConstructor{};
+    ctor.mArguments.emplace_back("value", Type{"Entry"});
+    ctor.mInitializerList.emplace_back("mValue", "UnderlyingType(value)");
+    // TODO: validate ctors
+    cls.mConstructors.push_back(std::move(ctor));
   }
 
   void EnumPlugin::GenerateGetValue(Class &cls) {
@@ -61,7 +76,6 @@ namespace holgen {
   void EnumPlugin::GenerateOperators(Class &cls) {
     // TODO: test these properly. Currently overloads aren't well supported.
     const std::vector<EnumOperator> operators = {
-        {"=",  Constness::NotConst, EnumOperatorReturnType::This,   false},
         {"=",  Constness::NotConst, EnumOperatorReturnType::This,   true},
         {"==", Constness::Const,    EnumOperatorReturnType::Result, true},
         {"==", Constness::Const,    EnumOperatorReturnType::Result, false},
@@ -101,21 +115,17 @@ namespace holgen {
     }
   }
 
-  void EnumPlugin::GenerateGetEntries(Class &cls, bool forValues) {
+  void EnumPlugin::GenerateGetEntries(Class &cls) {
     auto method = ClassMethod{
-        forValues ? "GetEntryValues" : "GetEntries",
+        "GetEntries",
         Type{"std::array"},
         Visibility::Public,
         Constness::NotConst,
         Staticness::Static
     };
-    if (forValues) {
-      method.mConstexprness = Constexprness::Constexpr;
-      method.mReturnType.mTemplateParameters.emplace_back(
-          std::format("{}::{}", cls.mName, St::Enum_UnderlyingType));
-    } else {
-      method.mReturnType.mTemplateParameters.emplace_back(cls.mName);
-    }
+    method.mConstexprness = Constexprness::Constexpr;
+    method.mReturnType.mTemplateParameters.emplace_back(
+        std::format("{}::Entry", cls.mName));
     method.mReturnType.mTemplateParameters.emplace_back(
         std::format("{}", cls.mEnum->mEntries.size()));
     {
@@ -124,10 +134,7 @@ namespace holgen {
       for (size_t i = 0; i < cls.mEnum->mEntries.size(); ++i) {
         if (i > 0)
           line << ", ";
-        if (forValues)
-          line << cls.mEnum->mEntries[i].mName + "Value";
-        else
-          line << cls.mEnum->mEntries[i].mName;
+        line << cls.mEnum->mEntries[i].mName;
       }
       line << "};";
     }
@@ -135,34 +142,7 @@ namespace holgen {
     cls.mMethods.push_back(std::move(method));
   }
 
-  void EnumPlugin::GenerateEntries(Class &cls) {
-    for (auto &entry: cls.mEnum->mEntries) {
-      auto entryField = ClassField{
-          entry.mName,
-          Type{cls.mName, PassByType::Value, Constness::Const},
-          Visibility::Public,
-          Staticness::Static
-      };
-      entryField.mDefaultConstructorArguments.push_back(entry.mValue);
-      entryField.mEntry = &entry;
-
-      FillComments(entry, entryField.mComments);
-      Validate().NewField(cls, entryField);
-      cls.mFields.push_back(std::move(entryField));
-    }
-    for (auto &entry: cls.mEnum->mEntries) {
-      auto valueField = ClassField{
-          entry.mName + "Value",
-          Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
-          Visibility::Public,
-          Staticness::Static,
-          entry.mValue
-      };
-      valueField.mType.mConstexprness = Constexprness::Constexpr;
-      valueField.mEntry = &entry;
-      Validate().NewField(cls, valueField);
-      cls.mFields.push_back(std::move(valueField));
-    }
+  void EnumPlugin::GenerateInvalidEntry(Class &cls) {
     auto invalidEntry = ClassField{
         "Invalid",
         Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
@@ -240,11 +220,14 @@ namespace holgen {
     cls.mSpecializations.push_back(std::move(hash));
   }
 
-  void EnumPlugin::GenerateFormatter(Class &cls) {
+  void EnumPlugin::GenerateFormatter(Class &cls, bool forNestedEnum) {
     cls.mHeaderIncludes.AddStandardHeader("format");
     auto className = std::format("{}::{}", cls.mNamespace, cls.mName);
     auto formatter = Class{"formatter", "std"};
-    formatter.mTemplateSpecializations.push_back(className);
+    if (forNestedEnum)
+      formatter.mTemplateSpecializations.push_back(className + "::Entry");
+    else
+      formatter.mTemplateSpecializations.push_back(className);
     formatter.mClassType = ClassType::Struct;
     formatter.mBaseClasses.push_back("formatter<string>");
 
@@ -252,8 +235,22 @@ namespace holgen {
     format.mTemplateParameters.emplace_back("typename", "FormatContext");
     format.mArguments.emplace_back("obj", Type{className, PassByType::Reference, Constness::Const});
     format.mArguments.emplace_back("ctx", Type{"FormatContext", PassByType::Reference, Constness::NotConst});
-    format.mBody.Add("return format_to(ctx.out(), \"{{}}\", obj.ToString());");
+    if (forNestedEnum)
+      format.mBody.Add("return format_to(ctx.out(), \"{{}}\", {}(obj).ToString());", className);
+    else
+      format.mBody.Add("return format_to(ctx.out(), \"{{}}\", obj.ToString());");
     formatter.mMethods.push_back(std::move(format));
     cls.mSpecializations.push_back(std::move(formatter));
+  }
+
+  void EnumPlugin::GenerateClassEnum(Class &cls) {
+    auto classEnum = ClassEnum{"Entry", "UnderlyingType"};
+    for (auto &entry: cls.mEnum->mEntries) {
+      auto classEnumEntry = ClassEnumEntry{entry.mName, entry.mValue};
+      classEnumEntry.mEntry = &entry;
+      Validate().NewEnumEntry(cls, classEnum, classEnumEntry);
+      classEnum.mEntries.push_back(std::move(classEnumEntry));
+    }
+    cls.mNestedEnums.emplace_back(std::move(classEnum));
   }
 }

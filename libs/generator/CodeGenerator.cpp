@@ -183,6 +183,7 @@ namespace holgen {
     CodeBlock codeBlockForVisibility;
     if (visibility == Visibility::Public)
       GenerateUsingsForHeader(codeBlockForVisibility, cls);
+    GenerateNestedEnumsForHeader(codeBlockForVisibility, cls, visibility);
     GenerateConstructorsForHeader(codeBlockForVisibility, cls, visibility, true);
     auto dtorCodeBlock = GenerateDestructor(cls, visibility, true);
     if (!dtorCodeBlock.mContents.empty()) {
@@ -660,5 +661,28 @@ namespace holgen {
     if (!cls.mNamespace.empty())
       codeBlock.Add("}}");
     source.mBody = std::move(codeBlock);
+  }
+
+  void CodeGenerator::GenerateNestedEnumsForHeader(
+      CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
+    for(auto& nestedEnum: cls.mNestedEnums) {
+      if (nestedEnum.mVisibility != visibility)
+        continue;
+      AddComments(codeBlock, nestedEnum.mComments);
+      if (nestedEnum.mUnderlyingType.empty())
+        codeBlock.Add("enum {} {{", nestedEnum.mName);
+      else
+        codeBlock.Add("enum {} : {} {{", nestedEnum.mName, nestedEnum.mUnderlyingType);
+      codeBlock.Indent(1);
+      for(auto& entry: nestedEnum.mEntries) {
+        AddComments(codeBlock, entry.mComments);
+        if (entry.mValue.empty())
+          codeBlock.Add("{},", entry.mName);
+        else
+          codeBlock.Add("{} = {},", entry.mName, entry.mValue);
+      }
+      codeBlock.Indent(-1);
+      codeBlock.Add("}};");
+    }
   }
 }

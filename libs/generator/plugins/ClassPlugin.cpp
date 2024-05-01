@@ -8,7 +8,6 @@ namespace holgen {
       if (structDefinition.mIsMixin)
         continue;
       auto cls = Class{structDefinition.mName, mSettings.mNamespace, &structDefinition};
-      // TODO: operator==
       FillComments(structDefinition, cls.mComments);
       Validate().NewClass(cls);
       mProject.mClasses.push_back(std::move(cls));

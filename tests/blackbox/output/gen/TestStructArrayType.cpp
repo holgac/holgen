@@ -7,14 +7,15 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-const TestStructArrayType TestStructArrayType::Type1(0);
-const TestStructArrayType TestStructArrayType::Type2(1);
-
 TestStructArrayType::TestStructArrayType(TestStructArrayType::UnderlyingType value) :
   mValue(value)
 {
 }
 
+TestStructArrayType::TestStructArrayType(Entry value) :
+  mValue(UnderlyingType(value))
+{
+}
 TestStructArrayType::UnderlyingType TestStructArrayType::GetValue() const {
   return mValue;
 }
@@ -35,11 +36,6 @@ const char* TestStructArrayType::ToString() const {
     case 1: return "Type2";
     default: return "INVALID";
   }
-}
-
-TestStructArrayType& TestStructArrayType::operator =(const TestStructArrayType& rhs) {
-  mValue = rhs.mValue;
-  return *this;
 }
 
 TestStructArrayType& TestStructArrayType::operator =(UnderlyingType rhs) {
@@ -69,10 +65,6 @@ bool TestStructArrayType::operator <(UnderlyingType rhs) const {
 
 bool TestStructArrayType::operator <(const TestStructArrayType& rhs) const {
   return mValue < rhs.mValue;
-}
-
-std::array<TestStructArrayType, 2> TestStructArrayType::GetEntries() {
-  return std::array<TestStructArrayType, 2>{Type1, Type2};
 }
 
 bool TestStructArrayType::ParseJson(const rapidjson::Value& json, const Converter& converter) {

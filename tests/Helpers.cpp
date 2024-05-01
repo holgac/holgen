@@ -117,4 +117,9 @@ namespace holgen::helpers {
     EXPECT_EQ(actual.mType, expected.mType);
     EXPECT_EQ(actual.mName, expected.mName);
   }
+
+  void ExpectEqual(const ClassEnumEntry &actual, const ClassEnumEntry &expected) {
+    EXPECT_EQ(actual.mName, expected.mName);
+    EXPECT_EQ(actual.mValue, expected.mValue);
+  }
 }

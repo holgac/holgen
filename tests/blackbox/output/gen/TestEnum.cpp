@@ -7,15 +7,15 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-const TestEnum TestEnum::Entry5(5);
-const TestEnum TestEnum::Entry1(0);
-const TestEnum TestEnum::Entry2(1);
-
 TestEnum::TestEnum(TestEnum::UnderlyingType value) :
   mValue(value)
 {
 }
 
+TestEnum::TestEnum(Entry value) :
+  mValue(UnderlyingType(value))
+{
+}
 TestEnum::UnderlyingType TestEnum::GetValue() const {
   return mValue;
 }
@@ -39,11 +39,6 @@ const char* TestEnum::ToString() const {
     case 1: return "Entry2";
     default: return "INVALID";
   }
-}
-
-TestEnum& TestEnum::operator =(const TestEnum& rhs) {
-  mValue = rhs.mValue;
-  return *this;
 }
 
 TestEnum& TestEnum::operator =(UnderlyingType rhs) {
@@ -73,10 +68,6 @@ bool TestEnum::operator <(UnderlyingType rhs) const {
 
 bool TestEnum::operator <(const TestEnum& rhs) const {
   return mValue < rhs.mValue;
-}
-
-std::array<TestEnum, 3> TestEnum::GetEntries() {
-  return std::array<TestEnum, 3>{Entry5, Entry1, Entry2};
 }
 
 bool TestEnum::ParseJson(const rapidjson::Value& json, const Converter& converter) {

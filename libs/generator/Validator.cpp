@@ -24,11 +24,15 @@ namespace holgen {
       return std::format("{} ({})", structDefinition.mName, structDefinition.mDefinitionSource);
     }
 
+    std::string ToString(const EnumDefinition &enumDefinition) {
+      return std::format("{} ({})", enumDefinition.mName, enumDefinition.mDefinitionSource);
+    }
+
     std::string ToString(const Class &cls) {
       if (cls.mStruct)
         return ToString(*cls.mStruct);
       else if (cls.mEnum)
-        return std::format("{} ({})", cls.mEnum->mName, cls.mEnum->mDefinitionSource);
+        return ToString(*cls.mEnum);
       else
         return std::format("{}", cls.mName);
     }
@@ -37,15 +41,16 @@ namespace holgen {
       return std::format("{}.{} ({})", cls.mName, fieldDefinition.mName, fieldDefinition.mDefinitionSource);
     }
 
-    std::string ToString(const Class &cls, const EnumEntryDefinition &entryDefinition) {
-      return std::format("{}.{} ({})", cls.mName, entryDefinition.mName, entryDefinition.mDefinitionSource);
+    std::string ToString(const Class &cls, const ClassEnumEntry &entry) {
+      if (entry.mEntry)
+        return std::format("{}.{} ({})", cls.mName, entry.mName, entry.mEntry->mDefinitionSource);
+      else
+        return std::format("{}.{}", cls.mName, entry.mName);
     }
 
     std::string ToString(const Class &cls, const ClassField &field) {
       if (field.mField)
         return ToString(cls, *field.mField);
-      else if (field.mEntry)
-        return ToString(cls, *field.mEntry);
       else
         return std::format("{}.{}", cls.mName, field.mName);
     }
@@ -113,16 +118,6 @@ namespace holgen {
     auto dup = cls.GetField(field.mName);
     THROW_IF(dup, "Duplicate field: {} and {}", ToString(cls, *dup), ToString(cls, field));
     ValidateType(field.mType, cls, false, nullptr, ToString(cls, field));
-    if (field.mEntry) {
-      THROW_IF(field.mDefaultValue.empty() && field.mDefaultConstructorArguments.empty(),
-               "Default value for enum entry {} is missing", ToString(cls, field));
-      auto defaultValue = field.mDefaultValue.empty() ? field.mDefaultConstructorArguments.front()
-                                                      : field.mDefaultValue;
-      auto integral = std::atoll(defaultValue.c_str());
-      THROW_IF(defaultValue != std::to_string(integral),
-               "Default value of {} is not integral: {}",
-               ToString(cls, field), defaultValue);
-    }
   }
 
   void Validator::ValidateType(
@@ -360,6 +355,13 @@ namespace holgen {
 
   void Validator::Enum(const Class &cls) const {
     THROW_IF(!cls.mEnum, "{} is not an enum", ToString(cls));
+  }
+
+  void Validator::NewEnumEntry(const Class &cls, const ClassEnum &nestedEnum, const ClassEnumEntry &entry) const {
+    auto existingEntry = nestedEnum.GetEntry(entry.mName);
+    THROW_IF(
+        existingEntry, "Enum {} contains duplicate entries {} and {}",
+        ToString(cls), ToString(cls, *existingEntry), ToString(cls, entry));
   }
 
   namespace {

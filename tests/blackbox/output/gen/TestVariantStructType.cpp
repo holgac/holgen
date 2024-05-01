@@ -7,14 +7,15 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-const TestVariantStructType TestVariantStructType::Human(0);
-const TestVariantStructType TestVariantStructType::Cat(1);
-
 TestVariantStructType::TestVariantStructType(TestVariantStructType::UnderlyingType value) :
   mValue(value)
 {
 }
 
+TestVariantStructType::TestVariantStructType(Entry value) :
+  mValue(UnderlyingType(value))
+{
+}
 TestVariantStructType::UnderlyingType TestVariantStructType::GetValue() const {
   return mValue;
 }
@@ -35,11 +36,6 @@ const char* TestVariantStructType::ToString() const {
     case 1: return "Cat";
     default: return "INVALID";
   }
-}
-
-TestVariantStructType& TestVariantStructType::operator =(const TestVariantStructType& rhs) {
-  mValue = rhs.mValue;
-  return *this;
 }
 
 TestVariantStructType& TestVariantStructType::operator =(UnderlyingType rhs) {
@@ -69,10 +65,6 @@ bool TestVariantStructType::operator <(UnderlyingType rhs) const {
 
 bool TestVariantStructType::operator <(const TestVariantStructType& rhs) const {
   return mValue < rhs.mValue;
-}
-
-std::array<TestVariantStructType, 2> TestVariantStructType::GetEntries() {
-  return std::array<TestVariantStructType, 2>{Human, Cat};
 }
 
 bool TestVariantStructType::ParseJson(const rapidjson::Value& json, const Converter& converter) {

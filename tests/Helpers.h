@@ -13,6 +13,7 @@ namespace holgen::helpers {
 
   void ExpectEqual(const Type &expected, const Type &actual);
   void ExpectEqual(const ClassField &actual, const ClassField &expected);
+  void ExpectEqual(const ClassEnumEntry &actual, const ClassEnumEntry  &expected);
   void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
                    const std::optional<std::string> &expectedBody = std::nullopt);
   void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected);

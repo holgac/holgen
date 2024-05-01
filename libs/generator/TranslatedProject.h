@@ -44,7 +44,6 @@ namespace holgen {
     std::list<std::string> mDefaultConstructorArguments;
     std::list<std::string> mComments;
     const FieldDefinition *mField = nullptr;
-    const EnumEntryDefinition *mEntry = nullptr;
   };
 
   struct ClassMethodArgument {
@@ -142,6 +141,32 @@ namespace holgen {
     Struct,
   };
 
+  struct ClassEnumEntry {
+    std::string mName;
+    std::string mValue;
+    std::list<std::string> mComments;
+    const EnumEntryDefinition *mEntry;
+
+    ClassEnumEntry(
+        std::string name, std::string value, const EnumEntryDefinition *entry = nullptr
+    ) : mName(std::move(name)), mValue(std::move(value)), mEntry(entry) {}
+  };
+
+  struct ClassEnum {
+    std::string mName;
+    Visibility mVisibility = Visibility::Public;
+    std::string mUnderlyingType;
+    std::list<ClassEnumEntry> mEntries;
+    std::list<std::string> mComments;
+
+    ClassEnum(
+        std::string name, std::string underlyingType, Visibility visibility = Visibility::Public
+    ) : mName(std::move(name)), mVisibility(visibility), mUnderlyingType(std::move(underlyingType)) {}
+
+    [[nodiscard]] const ClassEnumEntry *GetEntry(const std::string &name) const;
+
+  };
+
   // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
   struct Class {
     explicit Class(
@@ -167,6 +192,7 @@ namespace holgen {
     std::list<std::string> mTemplateSpecializations;
     std::list<Using> mUsings;
     std::list<Class> mSpecializations;
+    std::list<ClassEnum> mNestedEnums;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
     std::set<ForwardDeclaration> mGlobalForwardDeclarations;

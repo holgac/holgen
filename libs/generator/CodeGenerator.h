@@ -40,6 +40,7 @@ namespace holgen {
         CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
     [[nodiscard]] CodeBlock GenerateDestructor(
         const Class &cls, Visibility visibility = Visibility::Public, bool isHeader = false) const;
+    void GenerateNestedEnumsForHeader(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
     void GenerateMethodsForHeader(
         CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;
     [[nodiscard]] CodeBlock GenerateMethodsForSource(const Class &cls) const;

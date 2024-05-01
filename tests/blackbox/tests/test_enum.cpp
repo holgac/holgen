@@ -16,14 +16,15 @@ protected:
 };
 
 TEST_F(EnumTest, Operators) {
-  auto lType = TestEnum::Entry1;
+  TestEnum lType = TestEnum::Entry1;
   EXPECT_EQ(lType, TestEnum::Entry1);
-  EXPECT_EQ(lType, TestEnum::Entry1Value);
   EXPECT_NE(lType, TestEnum::Entry5);
-  EXPECT_NE(lType, TestEnum::Entry5Value);
 
-  lType = TestEnum::Entry2Value;
+  lType = TestEnum::Entry2;
   EXPECT_EQ(lType, TestEnum::Entry2);
+
+  lType = 5;
+  EXPECT_EQ(lType, TestEnum::Entry5);
 }
 
 TEST_F(EnumTest, JsonString) {
@@ -44,7 +45,6 @@ TEST_F(EnumTest, JsonIntegral) {
 
 TEST_F(EnumTest, GetEntries) {
   EXPECT_THAT(TestEnum::GetEntries(), ::testing::ElementsAre(TestEnum::Entry5, TestEnum::Entry1, TestEnum::Entry2));
-  EXPECT_THAT(TestEnum::GetEntryValues(), ::testing::ElementsAre(5, 0, 1));
 }
 
 TEST_F(EnumTest, StdUnorderedMap) {
@@ -68,11 +68,15 @@ TEST_F(EnumTest, StdMap) {
   EXPECT_EQ(map.at(TestEnum::Entry1), 1001);
   ASSERT_EQ(map.contains(TestEnum::Entry5), true);
   EXPECT_EQ(map.at(TestEnum::Entry5), 1005);
+  ASSERT_EQ(map.contains(TestEnum(5)), true);
+  EXPECT_EQ(map.at(TestEnum(5)), 1005);
   EXPECT_EQ(map.contains(TestEnum::Entry2), false);
 }
 
 TEST_F(EnumTest, Formatter) {
   EXPECT_EQ(std::format("{}", TestEnum::Entry1), "Entry1");
-  EXPECT_EQ(std::format("{}", TestEnum::Entry2), "Entry2");
-  EXPECT_EQ(std::format("{}", TestEnum::Entry5), "Entry5");
+  EXPECT_EQ(std::format("{}", TestEnum(TestEnum::Entry1)), "Entry1");
+  EXPECT_EQ(std::format("{}", TestEnum(TestEnum::Entry2)), "Entry2");
+  EXPECT_EQ(std::format("{}", TestEnum(TestEnum::Entry5)), "Entry5");
+  EXPECT_EQ(std::format("{}", TestEnum(5)), "Entry5");
 }
