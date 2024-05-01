@@ -19,7 +19,7 @@ public:
   };
   explicit TestVariantStructType(UnderlyingType value = Invalid);
   TestVariantStructType(Entry value);
-  UnderlyingType GetValue() const;
+  TestVariantStructType::Entry GetValue() const;
   static TestVariantStructType FromString(std::string_view str);
   const char* ToString() const;
   TestVariantStructType& operator =(UnderlyingType rhs);

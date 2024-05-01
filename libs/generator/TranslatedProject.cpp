@@ -40,6 +40,8 @@ namespace holgen {
 
   GEN_GETTER_BY_NAME(Class, TemplateParameter, GetTemplateParameter, mTemplateParameters)
 
+  GEN_GETTER_BY_NAME(Class, ClassEnum, GetNestedEnum, mNestedEnums)
+
   ClassField *Class::GetFieldFromDefinitionName(const std::string &name) {
     for (auto &field : mFields) {
       if (field.mField && field.mField->mName == name) {

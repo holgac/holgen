@@ -181,6 +181,7 @@ namespace holgen {
       } else {
         method.mArguments.emplace_back("idx", Type{"size_t"});
       }
+      // TODO: @container(unsafe) attribute that avoids bounds checks, can return ref instead of ptr
       if (isKeyedContainer) {
         method.mBody.Add("auto it = {}.find(idx);", field.mName);
         method.mBody.Add("if (it == {}.end())", field.mName);

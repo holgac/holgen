@@ -35,10 +35,10 @@ namespace holgen {
       cls.mFields.push_back(std::move(field));
     }
 
+    GenerateClassEnum(cls);
     GenerateIntegralConstructor(cls);
     GenerateEnumConstructor(cls);
     GenerateGetValue(cls);
-    GenerateClassEnum(cls);
     GenerateInvalidEntry(cls);
     GenerateFromString(cls);
     GenerateToString(cls);
@@ -67,8 +67,8 @@ namespace holgen {
   }
 
   void EnumPlugin::GenerateGetValue(Class &cls) {
-    auto method = ClassMethod{"GetValue", Type{St::Enum_UnderlyingType}};
-    method.mBody.Add("return mValue;");
+    auto method = ClassMethod{"GetValue", Type{cls.mName + "::Entry"}};
+    method.mBody.Add("return Entry(mValue);");
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }

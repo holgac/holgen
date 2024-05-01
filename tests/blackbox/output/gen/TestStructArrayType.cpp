@@ -16,8 +16,8 @@ TestStructArrayType::TestStructArrayType(Entry value) :
   mValue(UnderlyingType(value))
 {
 }
-TestStructArrayType::UnderlyingType TestStructArrayType::GetValue() const {
-  return mValue;
+TestStructArrayType::Entry TestStructArrayType::GetValue() const {
+  return Entry(mValue);
 }
 
 TestStructArrayType TestStructArrayType::FromString(std::string_view str) {

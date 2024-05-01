@@ -16,8 +16,8 @@ TestEnum::TestEnum(Entry value) :
   mValue(UnderlyingType(value))
 {
 }
-TestEnum::UnderlyingType TestEnum::GetValue() const {
-  return mValue;
+TestEnum::Entry TestEnum::GetValue() const {
+  return Entry(mValue);
 }
 
 TestEnum TestEnum::FromString(std::string_view str) {

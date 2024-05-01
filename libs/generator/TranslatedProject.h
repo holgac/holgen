@@ -208,6 +208,7 @@ namespace holgen {
     [[nodiscard]] const Using *GetUsing(const std::string &name) const;
     [[nodiscard]] const ForwardDeclaration *GetForwardDeclaration(const std::string &name) const;
     [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
+    [[nodiscard]] const ClassEnum *GetNestedEnum(const std::string &name) const;
 
     [[nodiscard]] auto GetMethods(const std::string &name) const {
       return NameFilterForEachWrapper(name, mMethods);

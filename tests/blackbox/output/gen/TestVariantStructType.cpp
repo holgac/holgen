@@ -16,8 +16,8 @@ TestVariantStructType::TestVariantStructType(Entry value) :
   mValue(UnderlyingType(value))
 {
 }
-TestVariantStructType::UnderlyingType TestVariantStructType::GetValue() const {
-  return mValue;
+TestVariantStructType::Entry TestVariantStructType::GetValue() const {
+  return Entry(mValue);
 }
 
 TestVariantStructType TestVariantStructType::FromString(std::string_view str) {

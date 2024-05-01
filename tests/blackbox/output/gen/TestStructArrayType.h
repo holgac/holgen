@@ -19,7 +19,7 @@ public:
   };
   explicit TestStructArrayType(UnderlyingType value = Invalid);
   TestStructArrayType(Entry value);
-  UnderlyingType GetValue() const;
+  TestStructArrayType::Entry GetValue() const;
   static TestStructArrayType FromString(std::string_view str);
   const char* ToString() const;
   TestStructArrayType& operator =(UnderlyingType rhs);

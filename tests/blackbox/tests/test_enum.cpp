@@ -18,6 +18,7 @@ protected:
 TEST_F(EnumTest, Operators) {
   TestEnum lType = TestEnum::Entry1;
   EXPECT_EQ(lType, TestEnum::Entry1);
+  EXPECT_EQ(lType.GetValue(), TestEnum::Entry1);
   EXPECT_NE(lType, TestEnum::Entry5);
 
   lType = TestEnum::Entry2;

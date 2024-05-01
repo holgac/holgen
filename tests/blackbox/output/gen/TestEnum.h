@@ -20,7 +20,7 @@ public:
   };
   explicit TestEnum(UnderlyingType value = Invalid);
   TestEnum(Entry value);
-  UnderlyingType GetValue() const;
+  TestEnum::Entry GetValue() const;
   static TestEnum FromString(std::string_view str);
   const char* ToString() const;
   TestEnum& operator =(UnderlyingType rhs);
