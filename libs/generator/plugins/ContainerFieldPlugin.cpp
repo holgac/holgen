@@ -142,7 +142,7 @@ namespace holgen {
     } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
       method.mBody.Add("auto [it, res] = {}.emplace({});", field.mName, elemToInsert);
       method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Attempting to insert duplicate element to {}\");",
-                       field.mName);
+                       field.mField->mName);
       method.mBody.Add("return &(*it);", field.mName);
       method.mReturnType.mConstness = Constness::Const;
     } else {
