@@ -58,7 +58,6 @@ namespace holgen {
     std::stringstream arraySizeSpecifier;
     auto dataField = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{"std::array"}};
     size_t matchingStructCount = 0;
-    // TODO: validate that there are structs matching the given enum
     for (auto &projectStruct: mProject.mProject.mStructs) {
       if (projectStruct.mIsMixin)
         continue;
@@ -89,10 +88,11 @@ namespace holgen {
       }
     }
 
-    THROW_IF(matchingStructCount == 0, "Variant field with no matching struct");
+    THROW_IF(matchingStructCount == 0, "Variant field with no matching struct in {}.{} ({})", cls.mName,
+             fieldDefinition.mName, fieldDefinition.mDefinitionSource);
     dataField.mType.mTemplateParameters.emplace_back("uint8_t");
     if (matchingStructCount > 1)
-      dataField.mType.mTemplateParameters.emplace_back("std::max(" + arraySizeSpecifier.str() + ")");
+      dataField.mType.mTemplateParameters.emplace_back("std::max({" + arraySizeSpecifier.str() + "})");
     else
       dataField.mType.mTemplateParameters.emplace_back(arraySizeSpecifier.str());
     dataField.mField = &fieldDefinition;

@@ -37,7 +37,7 @@ private:
   static int IndexMetaMethod(lua_State* luaState);
   static int NewIndexMetaMethod(lua_State* luaState);
   TestVariantStructType mType;
-  std::array<uint8_t, std::max(sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat))> mBeing1;
-  std::array<uint8_t, std::max(sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat))> mBeing2;
+  std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing1;
+  std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing2;
 };
 }
