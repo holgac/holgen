@@ -22,6 +22,7 @@
 #include "Weapon.h"
 #include "Number.h"
 #include "Calculator.h"
+#include "LuaTestStructContainer.h"
 #include "Human.h"
 #include "HumanManager.h"
 #include "TestContainerInnerStructWithId.h"
@@ -196,6 +197,7 @@ void LuaHelper::CreateMetatables(lua_State* luaState) {
   Weapon::CreateLuaMetatable(luaState);
   Number::CreateLuaMetatable(luaState);
   Calculator::CreateLuaMetatable(luaState);
+  LuaTestStructContainer::CreateLuaMetatable(luaState);
   Human::CreateLuaMetatable(luaState);
   HumanManager::CreateLuaMetatable(luaState);
   TestContainerInnerStructWithId::CreateLuaMetatable(luaState);

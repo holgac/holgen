@@ -55,23 +55,34 @@ namespace holgen {
     }
 
     for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-      auto method = ClassMethod{
-          "Push", Type{"void"},
-          Visibility::Public, Constness::NotConst, Staticness::Static
-      };
-      method.mTemplateParameters.emplace_back("typename", "K");
-      method.mTemplateParameters.emplace_back("typename", "V");
-
-      {
-        auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference});
-        data.mType.mTemplateParameters.emplace_back("K");
-        data.mType.mTemplateParameters.emplace_back("V");
-      }
-      method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-      // TODO: implement
-      Validate().NewMethod(cls, method);
-      cls.mMethods.push_back(std::move(method));
+      GeneratePushForKeyedContainer(cls, container);
     }
+  }
+
+  void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls, const std::string &container) const {
+    auto method = ClassMethod{
+        "Push", Type{"void"},
+        Visibility::Public, Constness::NotConst, Staticness::Static
+    };
+    method.mTemplateParameters.emplace_back("typename", "K");
+    method.mTemplateParameters.emplace_back("typename", "V");
+
+    {
+      auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+      data.mType.mTemplateParameters.emplace_back("K");
+      data.mType.mTemplateParameters.emplace_back("V");
+    }
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    method.mBody.Add("lua_newtable(luaState);");
+    method.mBody.Add("for (auto& [key, value]: data) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("Push(key, luaState);");
+    method.mBody.Add("Push(value, luaState);");
+    method.mBody.Add("lua_settable(luaState, -3);");
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
   void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
@@ -237,7 +248,14 @@ namespace holgen {
       data.mType.mTemplateParameters.emplace_back("T");
     }
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    // TODO: implement with rawseti
+    method.mBody.Add("lua_newtable(luaState);");
+    method.mBody.Add("int index = 0;");
+    method.mBody.Add("for (auto& elem: data) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("Push(elem, luaState);");
+    method.mBody.Add("lua_rawseti(luaState, -2, index++);");
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }

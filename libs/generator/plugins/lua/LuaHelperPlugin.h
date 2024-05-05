@@ -21,6 +21,7 @@ namespace holgen {
     void GenerateReadForPrimitives(Class &cls);
     void GenerateReadForContainers(Class &cls);
     void GenerateCreateMetatables(Class &cls);
+    void GeneratePushForKeyedContainer(Class &cls, const std::string &container) const;
   };
 
 }

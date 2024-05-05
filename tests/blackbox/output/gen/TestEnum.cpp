@@ -86,4 +86,15 @@ bool TestEnum::ParseJson(const rapidjson::Value& json, const Converter& converte
 void TestEnum::PushToLua(lua_State* luaState) const {
   LuaHelper::Push(mValue, luaState);
 }
+
+TestEnum TestEnum::ReadFromLua(lua_State* luaState, int32_t idx) {
+  auto typ = lua_type(luaState, idx);
+  if (typ == LUA_TSTRING) {
+    return FromString(lua_tostring(luaState, idx));
+  } else if (typ == LUA_TNUMBER) {
+    return TestEnum(lua_tonumber(luaState, idx));
+  } else {
+    return TestEnum{Invalid};
+  }
+}
 }

@@ -83,4 +83,15 @@ bool TestStructArrayType::ParseJson(const rapidjson::Value& json, const Converte
 void TestStructArrayType::PushToLua(lua_State* luaState) const {
   LuaHelper::Push(mValue, luaState);
 }
+
+TestStructArrayType TestStructArrayType::ReadFromLua(lua_State* luaState, int32_t idx) {
+  auto typ = lua_type(luaState, idx);
+  if (typ == LUA_TSTRING) {
+    return FromString(lua_tostring(luaState, idx));
+  } else if (typ == LUA_TNUMBER) {
+    return TestStructArrayType(lua_tonumber(luaState, idx));
+  } else {
+    return TestStructArrayType{Invalid};
+  }
+}
 }

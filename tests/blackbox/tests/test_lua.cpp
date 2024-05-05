@@ -9,6 +9,7 @@
 #include "Number.h"
 #include "Calculator.h"
 #include "LuaHelper.h"
+#include "LuaTestStructContainer.h"
 
 using namespace holgen_blackbox_test;
 
@@ -188,5 +189,41 @@ TEST_F(LuaTest, CppFunc) {
   luaL_dostring(mState, "return c:SubtractThenMultiply(15, 12)");
   LuaTestHelper::ExpectStack(mState, {"6"});
   EXPECT_EQ(c.GetCurVal().GetValue(), 6);
+  lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, ContainerVector) {
+  LuaTestStructContainer::CreateLuaMetatable(mState);
+  LuaTestStructContainer c;
+  c.PushGlobalToLua(mState, "c");
+  luaL_dostring(mState, "return c.testVector");
+  LuaTestHelper::ExpectStack(mState, {"{}"});
+  lua_pop(mState, 1);
+  c.AddTestVectorElem(42);
+  c.AddTestVectorElem(35);
+  luaL_dostring(mState, "return c.testVector");
+  LuaTestHelper::ExpectStack(mState, {"{1:35,0:42}"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return c.testVector[0]");
+  LuaTestHelper::ExpectStack(mState, {"42"});
+  lua_pop(mState, 1);
+}
+
+
+TEST_F(LuaTest, ContainerMap) {
+  LuaTestStructContainer::CreateLuaMetatable(mState);
+  LuaTestStructContainer c;
+  c.PushGlobalToLua(mState, "c");
+  luaL_dostring(mState, "return c.testMap");
+  LuaTestHelper::ExpectStack(mState, {"{}"});
+  lua_pop(mState, 1);
+  c.GetTestMap().emplace("test1", 42);
+  c.GetTestMap().emplace("test2", 35);
+
+  luaL_dostring(mState, "return c.testMap");
+  LuaTestHelper::ExpectStack(mState, {"{test1:42,test2:35}"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return c.testMap['test1']");
+  LuaTestHelper::ExpectStack(mState, {"42"});
   lua_pop(mState, 1);
 }

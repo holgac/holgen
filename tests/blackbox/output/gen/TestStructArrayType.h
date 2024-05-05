@@ -34,6 +34,8 @@ public:
   }
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
+  // This only works with negative indices
+  static TestStructArrayType ReadFromLua(lua_State* luaState, int32_t idx);
   inline static constexpr const UnderlyingType Invalid = 2;
 private:
   UnderlyingType mValue;

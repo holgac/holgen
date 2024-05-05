@@ -14,3 +14,10 @@ struct Calculator {
     @cppFunc
     func SubtractThenMultiply(s64 lhs, s64 rhs) -> s64;
 }
+
+struct LuaTestStructContainer {
+  @container(elemName=testVectorElem)
+  vector<u32> testVector;
+
+  map<string, u32> testMap;
+}
