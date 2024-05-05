@@ -160,7 +160,8 @@ namespace holgen {
                "Map type {} used by {} cannot have functional template arguments",
                type.mName, source);
       THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName) &&
-               !isTemplateParameter(type.mTemplateParameters[0].mName),
+               !isTemplateParameter(type.mTemplateParameters[0].mName) &&
+               !mProject.mProject.GetEnum(type.mTemplateParameters[0].mName),
                "Map type {} used by {} should have a keyable first template parameter, found {}",
                type.mName, source, type.mTemplateParameters[0].mName);
       ValidateType(type.mTemplateParameters[1], cls, false, method, source);
@@ -238,6 +239,7 @@ namespace holgen {
     ValidateAttributeCount(annotation, Annotations::Container_ElemName, ToString(cls, field));
     if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
       auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
+      // TODO: why? can't have a container of strings or vectors?
       THROW_IF(underlyingClass == nullptr, "{} is a keyed container of {} which is not a user type",
                ToString(cls, field), field.mType.mTemplateParameters.back().ToString());
       THROW_IF(!underlyingClass->mStruct || !underlyingClass->GetIdField(),

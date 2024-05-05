@@ -138,7 +138,23 @@ namespace holgen {
     method.mComments.push_back("This only works with negative indices");
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
-    if (!ShouldEmbedPointer(cls)) {
+    if (cls.mEnum) {
+      method.mReturnType.mType = PassByType::Value;
+      method.mBody.Add("auto typ = lua_type(luaState, idx);");
+      method.mBody.Add("if (typ == LUA_TSTRING) {{");
+      method.mBody.Indent(1);
+      method.mBody.Add("return FromString(lua_tostring(luaState, idx));");
+      method.mBody.Indent(-1);
+      method.mBody.Add("}} else if (typ == LUA_TNUMBER) {{");
+      method.mBody.Indent(1);
+      method.mBody.Add("return {}(lua_tonumber(luaState, idx));", cls.mName);
+      method.mBody.Indent(-1);
+      method.mBody.Add("}} else {{");
+      method.mBody.Indent(1);
+      method.mBody.Add("return {}{{Invalid}};", cls.mName);
+      method.mBody.Indent(-1);
+      method.mBody.Add("}}");
+    } else if (!ShouldEmbedPointer(cls)) {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
       auto idField = cls.GetIdField();
@@ -238,6 +254,7 @@ namespace holgen {
     method.mBody.Add("{}::{}(mValue, luaState);", St::LuaHelper, St::LuaHelper_Push);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
+    GenerateReadFromLua(cls);
   }
 
   void LuaPlugin::GeneratePushGlobalToLua(Class &cls) {
