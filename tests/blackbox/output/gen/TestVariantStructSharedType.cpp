@@ -80,6 +80,40 @@ TestVariantStructType TestVariantStructSharedType::GetBeingType() const {
 }
 
 bool TestVariantStructSharedType::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructSharedType");
+  for(const auto& data: json.GetObject()) {
+    const auto& name = data.name.GetString();
+    if (0 == strcmp("beingType", name)) {
+      TestVariantStructType temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructSharedType.beingType field");
+      SetBeingType(temp);
+    } else if (0 == strcmp("being1", name)) {
+      bool res;
+      if (mBeingType == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), data.value, converter);
+      } else if (mBeingType == TestVariantStructType::Cat) {
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), data.value, converter);
+      } else {
+        HOLGEN_WARN("Could not json-parse TestVariantStructSharedType.being1 variant field, its type {} is unexpected", mBeingType);
+        return false;
+      }
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructSharedType.being1 variant field of type {}", mBeingType);
+    } else if (0 == strcmp("being2", name)) {
+      bool res;
+      if (mBeingType == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), data.value, converter);
+      } else if (mBeingType == TestVariantStructType::Cat) {
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), data.value, converter);
+      } else {
+        HOLGEN_WARN("Could not json-parse TestVariantStructSharedType.being2 variant field, its type {} is unexpected", mBeingType);
+        return false;
+      }
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructSharedType.being2 variant field of type {}", mBeingType);
+    } else {
+      HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructSharedType: {}", name);
+    }
+  }
   return true;
 }
 

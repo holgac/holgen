@@ -20,6 +20,7 @@ namespace holgen {
       THROW_IF(nextNewLine == std::string::npos, "Invalid section name!");
       auto end = fileContents.find(St::UserDefinedSectionEnd + sectionName + "\n", nextNewLine);
       THROW_IF(end == std::string::npos, "Unterminated user defined section {}", sectionName);
+      // TODO: this removes content if the user has custom code AND the terminator in the same line
       end = fileContents.rfind('\n', end);
       auto sectionContent = fileContents.substr(nextNewLine + 1, end - nextNewLine);
       sections.emplace(std::move(sectionName), std::move(sectionContent));
