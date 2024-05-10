@@ -11,7 +11,6 @@ struct TestJsonTagManager {
   @index(on=name)
   vector<TestJsonTag> tags;
 
-  @cppFunc
   func GetOrInsert(string tag) -> Ref<TestJsonTag>;
 }
 

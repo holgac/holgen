@@ -11,7 +11,6 @@ struct Calculator {
     @luaFunc(table=Ops)
     func Subtract(Number val) -> Number;
 
-    @cppFunc
     func SubtractThenMultiply(s64 lhs, s64 rhs) -> s64;
 }
 

@@ -210,9 +210,7 @@ return 1;
 TEST_F(LuaPluginTest, IndexMetaMethodFunctions) {
   auto project = Parse(R"R(
 struct TestData {
-  @cppFunc
   func functionReturningVoid(s32 a0, string a1) -> void;
-  @cppFunc
   func functionReturningString() -> string;
 }
   )R");

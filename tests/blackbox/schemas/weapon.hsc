@@ -8,6 +8,5 @@ struct Weapon {
     u32 damageMax;
     vector<DamageMultiplier> damageMultipliers;
     vector<string> modifiers;
-    @cppFunc
     func GetAverageDamage() -> u32;
 }

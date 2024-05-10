@@ -154,7 +154,6 @@ void Person::SetGender(float val) {
   struct Market {
     vector<string> instruments;
     map<string, double> prices;
-    @cppFunc
     @comment('Callback when a new trade is executed')
     func OnNewTrade(string instrument, double price);
   }

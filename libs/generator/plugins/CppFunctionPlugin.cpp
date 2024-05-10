@@ -15,7 +15,7 @@ namespace holgen {
       ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
     }
     for (auto &func: structDefinition.mFunctions) {
-      if (func.GetAnnotation(Annotations::CppFunc))
+      if (!func.GetAnnotation(Annotations::LuaFunc))
         AddCppFunction(cls, func);
     }
   }
@@ -25,8 +25,8 @@ namespace holgen {
     auto method = ClassMethod{
         functionDefinition.mName,
         Type{mProject, functionDefinition.mReturnType},
-        Visibility::Public, funcAnnotation->GetAttribute(Annotations::CppFunc_Const) ? Constness::Const : Constness::NotConst};
-    if (functionDefinition.GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
+        Visibility::Public, (funcAnnotation && funcAnnotation->GetAttribute(Annotations::CppFunc_Const)) ? Constness::Const : Constness::NotConst};
+    if (funcAnnotation && funcAnnotation->GetAttribute(Annotations::CppFunc_OnDestroy)) {
       method.mVisibility = Visibility::Protected;
     }
     method.mUserDefined = true;

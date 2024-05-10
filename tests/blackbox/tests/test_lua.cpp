@@ -221,7 +221,11 @@ TEST_F(LuaTest, ContainerMap) {
   c.GetTestMap().emplace("test2", 35);
 
   luaL_dostring(mState, "return c.testMap");
-  LuaTestHelper::ExpectStack(mState, {"{test1:42,test2:35}"});
+  auto res = LuaTestHelper::ElemToString(mState, -1);
+  if (res != "{test1:42,test2:35}" && res != "{test2:35,test1:42}") {
+    FAIL();
+  }
+  EXPECT_EQ(lua_gettop(mState), 1);
   lua_pop(mState, 1);
   luaL_dostring(mState, "return c.testMap['test1']");
   LuaTestHelper::ExpectStack(mState, {"42"});

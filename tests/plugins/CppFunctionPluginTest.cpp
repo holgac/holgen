@@ -16,7 +16,6 @@ TEST_F(CppFunctionPluginTest, FunctionWithArgs) {
   auto project = Parse(R"R(
 struct InnerStruct {}
 struct TestData {
-  @cppFunc
   func TestFunction(s32 a1, string a2, InnerStruct a3) -> string;
 }
   )R");
@@ -38,7 +37,6 @@ TEST_F(CppFunctionPluginTest, FunctionWithOutArgs) {
   auto project = Parse(R"R(
 struct InnerStruct {}
 struct TestData {
-  @cppFunc
   func TestFunction(s32 a1 out, string a2 out, InnerStruct a3 out) -> string;
 }
   )R");
@@ -60,7 +58,6 @@ TEST_F(CppFunctionPluginTest, FunctionReturningStruct) {
   auto project = Parse(R"R(
 struct InnerStruct {}
 struct TestData {
-  @cppFunc
   func TestFunction(s32 a1) -> InnerStruct;
 }
   )R");

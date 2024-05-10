@@ -45,11 +45,8 @@ struct TestStructArray {
   @noLua
   @noJson
   u8[16] customData;
-  @cppFunc
   @noLua
   func Initialize(TestStructArrayType type);
-  @cppFunc
   func GetData1() -> TestStructArrayCustomData1;
-  @cppFunc
   func GetData2() -> TestStructArrayCustomData2;
 }
