@@ -60,13 +60,24 @@ namespace holgen {
      * If it's OK for Lua to modify the container at startup (i.e. when loading a mod where iterator
      * invalidation is no issue) but we want to pass pointers around at runtime, locking is required.
      *
+     * Container methods can be customized, use the operation name as key (add, get, count, delete, has) and a value
+     * of "custom" to define it as a custom function or "none" to remove it altogether.
+     *
      * Example:
      * @container(elemName=country)
+     * vector<Country> countries;
+     * @container(elemName=country, add=custom, delete=none)
      * vector<Country> countries;
      */
     inline static const std::string Container = "container";
     inline static const std::string Container_ElemName = "elemName";
-    inline static const std::string Container_Const = "const";
+    inline static const std::string Container_MethodOption_Custom = "custom";
+    inline static const std::string Container_MethodOption_None = "none";
+    inline static const std::string Container_Add = "add";
+    inline static const std::string Container_Get = "get";
+    inline static const std::string Container_Count = "count";
+    inline static const std::string Container_Delete = "delete";
+    inline static const std::string Container_Has = "has";
 
     /**
      * Indicates that the struct is managed by the given DataManager.

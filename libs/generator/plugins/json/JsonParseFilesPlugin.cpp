@@ -118,6 +118,8 @@ namespace holgen {
                       toType.ToString());
         codeBlock.Indent(1);
         codeBlock.Add("auto elem = {}(key);", Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation));
+        codeBlock.Add("HOLGEN_WARN_AND_RETURN_IF(!elem, uint32_t(-1), \"{{}} {} not found!\", key);",
+                      field.mType.mTemplateParameters.back().ToString());
         codeBlock.Add("return elem->{}();", Naming().FieldGetterNameInCpp(*idField->mField));
         codeBlock.Indent(-1);
         codeBlock.Add("}};"); // converter =

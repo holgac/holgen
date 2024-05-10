@@ -142,6 +142,7 @@ auto converter = converterArg;
 if (converter.innerStruct2NameToId == nullptr) {
   converter.innerStruct2NameToId = [this](const std::string& key) -> uint32_t {
     auto elem = GetInnerStruct2FromName(key);
+    HOLGEN_WARN_AND_RETURN_IF(!elem, uint32_t(-1), "{} InnerStruct2 not found!", key);
     return elem->GetId();
   };
 }

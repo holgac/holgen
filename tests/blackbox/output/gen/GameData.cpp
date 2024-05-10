@@ -239,12 +239,14 @@ bool GameData::ParseFiles(const std::string& rootPath, const Converter& converte
   if (converter.bootNameToId == nullptr) {
     converter.bootNameToId = [this](const std::string& key) -> uint32_t {
       auto elem = GetBootFromName(key);
+      HOLGEN_WARN_AND_RETURN_IF(!elem, uint32_t(-1), "{} Boot not found!", key);
       return elem->GetId();
     };
   }
   if (converter.armorNameToId == nullptr) {
     converter.armorNameToId = [this](const std::string& key) -> uint32_t {
       auto elem = GetArmorFromName(key);
+      HOLGEN_WARN_AND_RETURN_IF(!elem, uint32_t(-1), "{} Armor not found!", key);
       return elem->GetId();
     };
   }

@@ -230,9 +230,9 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{
-      "AddInnerStruct",
-      Type{"InnerStruct", PassByType::Pointer},
-      Visibility::Public, Constness::NotConst};
+        "AddInnerStruct",
+        Type{"InnerStruct", PassByType::Pointer},
+        Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
@@ -608,6 +608,85 @@ if (idx != mInnerStructs.size() - 1) {
 mInnerStructs.pop_back();
     )R");
   }
+}
+
+TEST_F(ContainerFieldPluginTest, DisableUtilFunctions) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  string field;
+}
+struct TestData {
+  @container(elemName=innerStructNoGet, get=none)
+  vector<InnerStruct> innerStructsNoGet;
+
+  @container(elemName=innerStructNoCount, count=none)
+  vector<InnerStruct> innerStructsNoCount;
+
+  @container(elemName=innerStructNoAdd, add=none)
+  vector<InnerStruct> innerStructsNoAdd;
+
+  @container(elemName=innerStructNoDelete, delete=none)
+  vector<InnerStruct> innerStructsNoDelete;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  EXPECT_EQ(cls->GetMethod("GetInnerStructNoGet", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("GetInnerStructNoGet", Constness::NotConst), nullptr);
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoGetCount", Constness::Const), nullptr);
+  EXPECT_NE(cls->GetMethod("AddInnerStructNoGet", Constness::NotConst), nullptr);
+  EXPECT_NE(cls->GetMethod("DeleteInnerStructNoGet", Constness::NotConst), nullptr);
+
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoCount", Constness::Const), nullptr);
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoCount", Constness::NotConst), nullptr);
+  EXPECT_EQ(cls->GetMethod("GetInnerStructNoCountCount", Constness::Const), nullptr);
+  EXPECT_NE(cls->GetMethod("AddInnerStructNoCount", Constness::NotConst), nullptr);
+  EXPECT_NE(cls->GetMethod("DeleteInnerStructNoCount", Constness::NotConst), nullptr);
+
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoAdd", Constness::Const), nullptr);
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoAdd", Constness::NotConst), nullptr);
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoAddCount", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("AddInnerStructNoAdd", Constness::NotConst), nullptr);
+  EXPECT_NE(cls->GetMethod("DeleteInnerStructNoAdd", Constness::NotConst), nullptr);
+
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoDelete", Constness::Const), nullptr);
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoDelete", Constness::NotConst), nullptr);
+  EXPECT_NE(cls->GetMethod("GetInnerStructNoDeleteCount", Constness::Const), nullptr);
+  EXPECT_NE(cls->GetMethod("AddInnerStructNoDelete", Constness::NotConst), nullptr);
+  EXPECT_EQ(cls->GetMethod("DeleteInnerStructNoDelete", Constness::NotConst), nullptr);
+}
+
+TEST_F(ContainerFieldPluginTest, CustomUtilFunctions) {
+  auto project = Parse(R"R(
+struct InnerStruct {
+  string field;
+}
+struct TestData {
+  @container(elemName=innerStructAllCustom, get=custom, add=custom, count=custom, delete=custom)
+  vector<InnerStruct> innerStructAllCustoms;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  EXPECT_EQ(cls->mFields.size(), 1);
+
+  ASSERT_NE(cls->GetMethod("GetInnerStructAllCustom", Constness::Const), nullptr);
+  EXPECT_TRUE(cls->GetMethod("GetInnerStructAllCustom", Constness::Const)->mUserDefined);
+
+  ASSERT_NE(cls->GetMethod("GetInnerStructAllCustom", Constness::NotConst), nullptr);
+  EXPECT_TRUE(cls->GetMethod("GetInnerStructAllCustom", Constness::NotConst)->mUserDefined);
+
+  ASSERT_NE(cls->GetMethod("GetInnerStructAllCustomCount", Constness::Const), nullptr);
+  EXPECT_TRUE(cls->GetMethod("GetInnerStructAllCustomCount", Constness::Const)->mUserDefined);
+
+  ASSERT_NE(cls->GetMethod("AddInnerStructAllCustom", Constness::NotConst), nullptr);
+  EXPECT_TRUE(cls->GetMethod("AddInnerStructAllCustom", Constness::NotConst)->mUserDefined);
+
+  ASSERT_NE(cls->GetMethod("DeleteInnerStructAllCustom", Constness::NotConst), nullptr);
+  EXPECT_TRUE(cls->GetMethod("DeleteInnerStructAllCustom", Constness::NotConst)->mUserDefined);
 }
 
 TEST_F(ContainerFieldPluginTest, InvalidContainerAnnotation) {
