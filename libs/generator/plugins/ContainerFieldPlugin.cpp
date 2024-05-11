@@ -105,9 +105,15 @@ namespace holgen {
     } else {
       method.mArguments.back().mType.PreventCopying();
     }
+    if (underlyingIdField) {
+      method.mArguments.back().mType.mConstness = Constness::NotConst;
+    }
     if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
       method.mUserDefined = true;
     } else {
+      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+        method.mVisibility = Visibility::Private;
+      }
       CodeBlock validators;
       CodeBlock inserters;
       for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
@@ -135,7 +141,6 @@ namespace holgen {
       method.mBody.Add(std::move(inserters));
 
       if (underlyingIdField) {
-        method.mArguments.back().mType.mConstness = Constness::NotConst;
         method.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField->mField));
       }
 
@@ -202,6 +207,9 @@ namespace holgen {
       if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
         method.mUserDefined = true;
       } else {
+        if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+          method.mVisibility = Visibility::Private;
+        }
         // TODO: @container(unsafe) attribute that avoids bounds checks, can return ref instead of ptr
         if (isKeyedContainer) {
           method.mBody.Add("auto it = {}.find(idx);", field.mName);
@@ -241,6 +249,9 @@ namespace holgen {
     if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
       method.mUserDefined = true;
     } else {
+      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+        method.mVisibility = Visibility::Private;
+      }
       method.mBody.Add("return {}.size();", field.mName);
     }
 
@@ -269,6 +280,9 @@ namespace holgen {
     if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
       method.mUserDefined = true;
     } else {
+      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+        method.mVisibility = Visibility::Private;
+      }
       CodeBlock indexDeleters;
       CodeBlock indexReassigners;
       auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
@@ -326,6 +340,9 @@ namespace holgen {
     if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
       method.mUserDefined = true;
     } else {
+      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+        method.mVisibility = Visibility::Private;
+      }
       method.mBody.Add("return {}.contains({});", field.mName, arg.mName);
     }
     Validate().NewMethod(cls, method);

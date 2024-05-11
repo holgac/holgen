@@ -61,7 +61,7 @@ namespace holgen {
      * invalidation is no issue) but we want to pass pointers around at runtime, locking is required.
      *
      * Container methods can be customized, use the operation name as key (add, get, count, delete, has) and a value
-     * of "custom" to define it as a custom function or "none" to remove it altogether.
+     * of "custom" to define it as a custom function, "none" to remove it altogether, or "private" to set its visibility.
      *
      * Example:
      * @container(elemName=country)
@@ -73,6 +73,7 @@ namespace holgen {
     inline static const std::string Container_ElemName = "elemName";
     inline static const std::string Container_MethodOption_Custom = "custom";
     inline static const std::string Container_MethodOption_None = "none";
+    inline static const std::string Container_MethodOption_Private = "private";
     inline static const std::string Container_Add = "add";
     inline static const std::string Container_Get = "get";
     inline static const std::string Container_Count = "count";
