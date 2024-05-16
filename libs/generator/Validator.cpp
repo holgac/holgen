@@ -176,10 +176,6 @@ namespace holgen {
       // all good
     } else if (auto usingStatement = cls.GetUsing(type.mName)) {
       ValidateType(usingStatement->mSourceType, cls, acceptVoid, method, source);
-    } else if (cls.GetForwardDeclaration(type.mName)) {
-      THROW_IF(type.mType == PassByType::Value,
-               "Forward declared type {} used by {} cannot be passed by value",
-               type.mName, source);
     } else if (type.mName.starts_with(cls.mName + "::")) {
       auto rest = type.mName.substr(cls.mName.size() + 2);
       THROW_IF(!cls.GetUsing(rest) && !cls.GetNestedEnum(rest), "Class-defined type {} does not exist in {}",

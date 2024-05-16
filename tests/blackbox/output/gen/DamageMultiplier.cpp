@@ -6,6 +6,7 @@
 #include <lua.hpp>
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool DamageMultiplier::operator==(const DamageMultiplier& rhs) const {

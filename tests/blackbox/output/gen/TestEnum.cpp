@@ -5,6 +5,7 @@
 #include <lua.hpp>
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 TestEnum::TestEnum(TestEnum::UnderlyingType value) :

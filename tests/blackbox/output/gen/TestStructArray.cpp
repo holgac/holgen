@@ -5,6 +5,9 @@
 #include <lua.hpp>
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "TestStructArrayCustomData1.h"
+#include "TestStructArrayCustomData2.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool TestStructArray::operator==(const TestStructArray& rhs) const {

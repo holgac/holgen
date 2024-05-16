@@ -11,9 +11,11 @@
 #include "Boot.h"
 #include "Armor.h"
 #include "Character.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class GameData {
 public:

@@ -6,11 +6,13 @@
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "TestStructArrayType.h"
-#include "TestStructArrayCustomData1.h"
-#include "TestStructArrayCustomData2.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Converter;
+  class TestStructArrayCustomData1;
+  class TestStructArrayCustomData2;
+}
 namespace holgen_blackbox_test {
 class TestStructArray {
 public:

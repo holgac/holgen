@@ -4,6 +4,7 @@
 #include "TestVariantStructDifferentTypes.h"
 #include "TestVariantStructSharedType.h"
 #include "TestVariantStructExplicitType.h"
+#include "Converter.h"
 
 using namespace holgen_blackbox_test;
 

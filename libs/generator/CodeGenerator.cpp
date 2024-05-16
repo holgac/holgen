@@ -92,8 +92,11 @@ namespace holgen {
     mTranslatedProject = &translatedProject;
     std::vector<GeneratedContent> contents;
     for (auto &cls: translatedProject.mClasses) {
-      GenerateClassHeader(contents.emplace_back(), cls);
-      GenerateClassSource(contents.emplace_back(), cls);
+      auto headerHeaders = PrepareIncludes(cls, true);
+      auto sourceHeaders = PrepareIncludes(cls, false);
+      sourceHeaders.Subtract(headerHeaders);
+      GenerateClassHeader(contents.emplace_back(), cls, headerHeaders);
+      GenerateClassSource(contents.emplace_back(), cls, sourceHeaders);
       if (HasUserDefinedMethods(cls)) {
         GenerateClassModifiableSource(contents.emplace_back(), cls);
       }
@@ -106,7 +109,8 @@ namespace holgen {
     return contents;
   }
 
-  void CodeGenerator::GenerateClassHeader(GeneratedContent &header, const Class &cls) const {
+  void
+  CodeGenerator::GenerateClassHeader(GeneratedContent &header, const Class &cls, const HeaderContainer &headers) const {
     header.mType = FileType::CppHeader;
     header.mName = std::format("gen/{}.h", cls.mName);
     CodeBlock codeBlock;
@@ -114,9 +118,7 @@ namespace holgen {
     codeBlock.Add("#pragma once");
     codeBlock.Line();
     codeBlock.Add("#include \"../holgen.h\"");
-    GenerateIncludes(codeBlock, cls, true);
-    for (auto &fwdDecl : cls.mGlobalForwardDeclarations)
-      codeBlock.Add("{} {};", fwdDecl.mType, fwdDecl.mName);
+    headers.Write(codeBlock);
     GenerateClassDefinition(cls, codeBlock);
     for (auto &specialization: cls.mSpecializations) {
       GenerateClassDefinition(specialization, codeBlock);
@@ -317,14 +319,15 @@ namespace holgen {
     }
   }
 
-  void CodeGenerator::GenerateClassSource(GeneratedContent &source, const Class &cls) const {
+  void
+  CodeGenerator::GenerateClassSource(GeneratedContent &source, const Class &cls, const HeaderContainer &headers) const {
     source.mType = FileType::CppSource;
     source.mName = std::format("gen/{}.cpp", cls.mName);
     CodeBlock codeBlock;
     codeBlock.Add("// {}", GenMessage);
     codeBlock.Add("#include \"{}.h\"", cls.mName);
     codeBlock.Line();
-    GenerateIncludes(codeBlock, cls, false);
+    headers.Write(codeBlock);
 
     if (!cls.mNamespace.empty())
       codeBlock.Add("namespace {} {{", cls.mNamespace);
@@ -438,12 +441,13 @@ namespace holgen {
     cmake.mBody = std::move(codeBlock);
   }
 
-  void CodeGenerator::GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const {
+  HeaderContainer CodeGenerator::PrepareIncludes(const Class &cls, bool isHeader) const {
     HeaderContainer headers;
     if (isHeader)
       headers = cls.mHeaderIncludes;
     else
       headers = cls.mSourceIncludes;
+
     for (const auto &field: cls.mFields) {
       headers.IncludeClassField(*mTranslatedProject, cls, field, isHeader);
     }
@@ -453,8 +457,7 @@ namespace holgen {
     for (const auto &usingStatement: cls.mUsings) {
       headers.IncludeUsing(*mTranslatedProject, usingStatement, isHeader);
     }
-
-    headers.Write(codeBlock);
+    return headers;
   }
 
   void CodeGenerator::GenerateClassDeclarationsForHeader(CodeBlock &_codeBlock __attribute__((unused)),
@@ -665,7 +668,7 @@ namespace holgen {
 
   void CodeGenerator::GenerateNestedEnumsForHeader(
       CodeBlock &codeBlock, const Class &cls, Visibility visibility) const {
-    for(auto& nestedEnum: cls.mNestedEnums) {
+    for (auto &nestedEnum: cls.mNestedEnums) {
       if (nestedEnum.mVisibility != visibility)
         continue;
       AddComments(codeBlock, nestedEnum.mComments);
@@ -674,7 +677,7 @@ namespace holgen {
       else
         codeBlock.Add("enum {} : {} {{", nestedEnum.mName, nestedEnum.mUnderlyingType);
       codeBlock.Indent(1);
-      for(auto& entry: nestedEnum.mEntries) {
+      for (auto &entry: nestedEnum.mEntries) {
         AddComments(codeBlock, entry.mComments);
         if (entry.mValue.empty())
           codeBlock.Add("{},", entry.mName);

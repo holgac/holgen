@@ -2,15 +2,18 @@
 #pragma once
 
 #include "../holgen.h"
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "TestVariantStructHuman.h"
 #include "TestVariantStructCat.h"
 #include "TestVariantStructType.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class TestVariantStructDifferentTypes {
 public:

@@ -8,9 +8,11 @@
 #include <string>
 #include <rapidjson/fwd.h>
 #include "Human.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class HumanManager {
 public:

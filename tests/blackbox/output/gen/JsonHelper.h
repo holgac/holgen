@@ -12,8 +12,10 @@
 #include <map>
 #include <unordered_map>
 #include <rapidjson/document.h>
-#include "Converter.h"
 
+namespace holgen_blackbox_test {
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class JsonHelper {
 public:

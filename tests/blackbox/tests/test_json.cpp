@@ -4,6 +4,7 @@
 #include "TestJsonStructWithTags.h"
 #include "TestJsonTag.h"
 #include "JsonHelper.h"
+#include "Converter.h"
 
 using namespace holgen_blackbox_test;
 

@@ -3,6 +3,7 @@
 #include "TestEnum.h"
 #include "TestEnumStruct.h"
 #include "JsonHelper.h"
+#include "Converter.h"
 
 using namespace holgen_blackbox_test;
 

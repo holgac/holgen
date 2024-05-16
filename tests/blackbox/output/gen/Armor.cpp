@@ -7,6 +7,7 @@
 #include "GameData.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool Armor::operator==(const Armor& rhs) const {

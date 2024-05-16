@@ -24,7 +24,7 @@ namespace holgen {
   void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition) {
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
-    cls.mGlobalForwardDeclarations.insert({"struct", "lua_State"});
+    cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
     auto field = ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
     GenerateFunction(cls, functionDefinition, field);
     GenerateFunctionSetter(cls, functionDefinition, field);

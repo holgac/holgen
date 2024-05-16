@@ -5,11 +5,13 @@
 #include <cstdint>
 #include <string>
 #include <rapidjson/fwd.h>
-#include "Boot.h"
-#include "Armor.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Armor;
+  class Boot;
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class Character {
 public:

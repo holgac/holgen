@@ -23,7 +23,7 @@ namespace holgen {
         {"std::set",           "set"},
         {"std::unordered_set", "unordered_set"},
         {"std::function",      "functional"},
-        {"std::array",        "array"},
+        {"std::array",         "array"},
     };
     std::set<std::string> NoHeaderTypes = {"float", "double", "void", "bool"};
   }
@@ -49,7 +49,7 @@ namespace holgen {
     mLocalHeaders.push_back(header);
   }
 
-  void HeaderContainer::Write(CodeBlock &codeBlock) {
+  void HeaderContainer::Write(CodeBlock &codeBlock) const {
     for (const auto &header: mStandardHeaders)
       codeBlock.Line() << "#include <" << header << ">";
     for (const auto &header: mLibHeaders)
@@ -58,6 +58,26 @@ namespace holgen {
       codeBlock.Line() << "#include \"" << header << "\"";
     if (!mHeaders.empty())
       codeBlock.Line();
+    std::map<std::string, std::vector<const ForwardDeclaration *>> fwdDeclarations;
+    for (auto &fwdDeclaration: mForwardDeclarations) {
+      // already included as a header, don't forward declare
+      if (std::find(mLocalHeaders.begin(), mLocalHeaders.end(), fwdDeclaration.mName + ".h") != mLocalHeaders.end())
+        continue;
+      fwdDeclarations[fwdDeclaration.mNamespace].push_back(&fwdDeclaration);
+    }
+    for (auto&[_namespace, declarations]: fwdDeclarations) {
+      if (!_namespace.empty()) {
+        codeBlock.Add("namespace {} {{", _namespace);
+        codeBlock.Indent(1);
+      }
+      for (auto &declaration: declarations) {
+        codeBlock.Add("{} {};", declaration->mType, declaration->mName);
+      }
+      if (!_namespace.empty()) {
+        codeBlock.Indent(-1);
+        codeBlock.Add("}}");
+      }
+    }
   }
 
   void HeaderContainer::IncludeType(const TranslatedProject &project, const Type &type, bool isHeader) {
@@ -71,8 +91,13 @@ namespace holgen {
       if (isHeader) {
         AddStandardHeader(STDHeaders.at(type.mName));
       }
-    } else if (project.GetClass(type.mName) != nullptr) {
+    } else if (auto cls = project.GetClass(type.mName)) {
       if (isHeader) {
+        if (type.mType == PassByType::Value)
+          AddLocalHeader(type.mName + ".h");
+        else
+          AddForwardDeclaration({cls->mNamespace, "class", cls->mName});
+      } else if (type.mType != PassByType::Value) {
         AddLocalHeader(type.mName + ".h");
       }
     }
@@ -137,5 +162,26 @@ namespace holgen {
 
   void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Using &usingStatement, bool isHeader) {
     IncludeType(project, usingStatement.mSourceType, isHeader);
+  }
+
+  void HeaderContainer::AddForwardDeclaration(ForwardDeclaration declaration) {
+    mForwardDeclarations.insert(std::move(declaration));
+  }
+
+  void HeaderContainer::Subtract(const HeaderContainer &rhs, std::vector<std::string> &container) {
+    std::vector<std::string> temp;
+    for (auto &header: container) {
+      if (!rhs.mHeaders.contains(header))
+        temp.push_back(header);
+      else
+        mHeaders.erase(header);
+    }
+    container = std::move(temp);
+  }
+
+  void HeaderContainer::Subtract(const HeaderContainer &rhs) {
+    Subtract(rhs, mStandardHeaders);
+    Subtract(rhs, mLibHeaders);
+    Subtract(rhs, mLocalHeaders);
   }
 }

@@ -11,6 +11,7 @@
 #include "Calculator.h"
 #include "LuaHelper.h"
 #include "LuaTestStructContainer.h"
+#include "Converter.h"
 
 using namespace holgen_blackbox_test;
 

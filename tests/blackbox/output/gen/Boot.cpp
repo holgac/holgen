@@ -7,6 +7,7 @@
 #include "GameData.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool Boot::operator==(const Boot& rhs) const {

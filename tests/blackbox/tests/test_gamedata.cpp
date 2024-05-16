@@ -2,6 +2,7 @@
 #include "GameData.h"
 #include "JsonHelper.h"
 #include "GlobalPointer.h"
+#include "Converter.h"
 
 using namespace holgen_blackbox_test;
 

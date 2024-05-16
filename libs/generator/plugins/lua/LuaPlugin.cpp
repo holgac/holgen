@@ -214,7 +214,7 @@ namespace holgen {
   void LuaPlugin::ProcessStruct(Class &cls) {
     if (cls.mStruct->GetAnnotation(Annotations::NoLua))
       return;
-    cls.mGlobalForwardDeclarations.insert({"struct", "lua_State"});
+    cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
     GeneratePushToLua(cls);
@@ -276,7 +276,7 @@ namespace holgen {
   void LuaPlugin::ProcessEnum(Class &cls) {
     if (cls.mEnum->GetAnnotation(Annotations::NoLua))
       return;
-    cls.mGlobalForwardDeclarations.insert({"struct", "lua_State"});
+    cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
     cls.mSourceIncludes.AddLibHeader("lua.hpp");
     cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
     auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};

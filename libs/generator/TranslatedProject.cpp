@@ -36,8 +36,6 @@ namespace holgen {
 
   GEN_GETTER_BY_NAME(Class, ClassField, GetField, mFields)
 
-  GEN_GETTER_BY_NAME(Class, ForwardDeclaration, GetForwardDeclaration, mGlobalForwardDeclarations)
-
   GEN_GETTER_BY_NAME(Class, TemplateParameter, GetTemplateParameter, mTemplateParameters)
 
   GEN_GETTER_BY_NAME(Class, ClassEnum, GetNestedEnum, mNestedEnums)

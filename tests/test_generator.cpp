@@ -184,8 +184,10 @@ void Person::SetGender(float val) {
 #include <string>
 #include <map>
 #include <rapidjson/fwd.h>
-#include "Converter.h"
 
+namespace generator_test_namespace {
+  class Converter;
+}
 namespace generator_test_namespace {
 class Market {
 public:
@@ -216,6 +218,7 @@ private:
 
 #include <rapidjson/document.h>
 #include "JsonHelper.h"
+#include "Converter.h"
 
 namespace generator_test_namespace {
 bool Market::operator==(const Market& rhs) const {
@@ -306,8 +309,10 @@ bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter)
 #include <string>
 #include <cstdint>
 #include <rapidjson/fwd.h>
-#include "Converter.h"
 
+namespace generator_test_namespace {
+  class Converter;
+}
 namespace generator_test_namespace {
 class Sound {
 public:
@@ -336,6 +341,7 @@ private:
 
 #include <rapidjson/document.h>
 #include "JsonHelper.h"
+#include "Converter.h"
 
 namespace generator_test_namespace {
 bool Sound::operator==(const Sound& rhs) const {
@@ -397,8 +403,10 @@ bool Sound::ParseJson(const rapidjson::Value& json, const Converter& converter) 
 #include <vector>
 #include <rapidjson/fwd.h>
 #include "Sound.h"
-#include "Converter.h"
 
+namespace generator_test_namespace {
+  class Converter;
+}
 namespace generator_test_namespace {
 class Animal {
 public:
@@ -424,6 +432,7 @@ private:
 
 #include <rapidjson/document.h>
 #include "JsonHelper.h"
+#include "Converter.h"
 
 namespace generator_test_namespace {
 bool Animal::operator==(const Animal& rhs) const {
@@ -510,8 +519,10 @@ bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter)
 #include "../holgen.h"
 #include <cstdint>
 #include <rapidjson/fwd.h>
-#include "Converter.h"
 
+namespace generator_test_namespace {
+  class Converter;
+}
 namespace generator_test_namespace {
 class Person {
 public:
@@ -544,6 +555,7 @@ private:
 
 #include <rapidjson/document.h>
 #include "JsonHelper.h"
+#include "Converter.h"
 
 namespace generator_test_namespace {
 bool Person::operator==(const Person& rhs) const {
@@ -631,8 +643,10 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
 #include <string>
 #include <rapidjson/fwd.h>
 #include "Person.h"
-#include "Converter.h"
 
+namespace generator_test_namespace {
+  class Converter;
+}
 namespace generator_test_namespace {
 class Country {
 public:
@@ -661,6 +675,7 @@ private:
 
 #include <rapidjson/document.h>
 #include "JsonHelper.h"
+#include "Converter.h"
 
 namespace generator_test_namespace {
 bool Country::operator==(const Country& rhs) const {

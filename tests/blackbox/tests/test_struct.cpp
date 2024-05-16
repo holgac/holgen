@@ -4,6 +4,9 @@
 #include "TestStructSingleElemContainer.h"
 #include "TestStructArray.h"
 #include "JsonHelper.h"
+#include "Converter.h"
+#include "TestStructArrayCustomData1.h"
+#include "TestStructArrayCustomData2.h"
 
 using namespace holgen_blackbox_test;
 

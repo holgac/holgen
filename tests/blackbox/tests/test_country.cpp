@@ -2,6 +2,7 @@
 #include <map>
 #include "Country.h"
 #include "JsonHelper.h"
+#include "Converter.h"
 
 using namespace holgen_blackbox_test;
 

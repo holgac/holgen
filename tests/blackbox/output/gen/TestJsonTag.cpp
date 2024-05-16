@@ -7,6 +7,7 @@
 #include "TestJsonTagManager.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool TestJsonTag::operator==(const TestJsonTag& rhs) const {

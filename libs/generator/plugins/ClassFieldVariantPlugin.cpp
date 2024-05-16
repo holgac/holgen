@@ -98,6 +98,7 @@ namespace holgen {
     dataField.mField = &fieldDefinition;
     Validate().NewField(cls, dataField);
     cls.mFields.emplace_back(std::move(dataField));
+    cls.mHeaderIncludes.AddStandardHeader("algorithm");
   }
 
   void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &typeFieldName) {

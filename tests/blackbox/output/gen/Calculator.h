@@ -6,9 +6,11 @@
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "Number.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class Calculator {
 public:

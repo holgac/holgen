@@ -3,12 +3,12 @@
 
 #include <filesystem>
 #include <queue>
-#include <vector>
 #include <rapidjson/document.h>
 #include <lua.hpp>
 #include "JsonHelper.h"
 #include "FilesystemHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool GameData::operator==(const GameData& rhs) const {

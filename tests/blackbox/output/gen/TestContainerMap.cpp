@@ -5,6 +5,7 @@
 #include <lua.hpp>
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool TestContainerMap::operator==(const TestContainerMap& rhs) const {

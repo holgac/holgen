@@ -9,9 +9,11 @@
 #include <rapidjson/fwd.h>
 #include "TestContainerInnerStructWithId.h"
 #include "TestContainerInnerStructNoId.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class TestContainerVector {
 public:

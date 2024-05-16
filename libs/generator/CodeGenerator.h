@@ -29,12 +29,12 @@ namespace holgen {
   private:
     void GenerateCMakeLists(GeneratedContent &cmake, const TranslatedProject &translatedProject) const;
     void GenerateHolgenHeader(GeneratedContent &header) const;
-    void GenerateClassHeader(GeneratedContent &header, const Class &cls) const;
-    void GenerateClassSource(GeneratedContent &source, const Class &cls) const;
+    void GenerateClassHeader(GeneratedContent &header, const Class &cls, const HeaderContainer &headers) const;
+    void GenerateClassSource(GeneratedContent &source, const Class &cls, const HeaderContainer &headers) const;
     void GenerateClassModifiableSource(GeneratedContent &source, const Class &cls) const;
     void GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const;
     void GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const;
-    void GenerateIncludes(CodeBlock &codeBlock, const Class &cls, bool isHeader) const;
+    HeaderContainer PrepareIncludes(const Class &cls, bool isHeader) const;
     void GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
     void GenerateConstructorsForHeader(
         CodeBlock &codeBlock, const Class &cls, Visibility visibility, bool isInsideClass) const;

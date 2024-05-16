@@ -7,9 +7,11 @@
 #include <string>
 #include <rapidjson/fwd.h>
 #include "DamageMultiplier.h"
-#include "Converter.h"
 
 struct lua_State;
+namespace holgen_blackbox_test {
+  class Converter;
+}
 namespace holgen_blackbox_test {
 class Weapon {
 public:

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include "Weapon.h"
 #include "JsonHelper.h"
+#include "Converter.h"
 
 using namespace holgen_blackbox_test;
 

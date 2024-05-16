@@ -9,6 +9,7 @@
 #include "JsonHelper.h"
 #include "FilesystemHelper.h"
 #include "LuaHelper.h"
+#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool HumanManager::operator==(const HumanManager& rhs) const {

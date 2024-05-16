@@ -127,15 +127,6 @@ namespace holgen {
     ClassDestructor() = default;
   };
 
-  struct ForwardDeclaration {
-    std::string mType;
-    std::string mName;
-
-    bool operator<(const ForwardDeclaration &other) const {
-      return mName < other.mName;
-    }
-  };
-
   enum class ClassType {
     Class,
     Struct,
@@ -195,7 +186,6 @@ namespace holgen {
     std::list<ClassEnum> mNestedEnums;
     HeaderContainer mHeaderIncludes;
     HeaderContainer mSourceIncludes;
-    std::set<ForwardDeclaration> mGlobalForwardDeclarations;
     ClassType mClassType = ClassType::Class;
     std::string mNamespace;
     std::list<std::string> mBaseClasses;
@@ -206,7 +196,6 @@ namespace holgen {
     [[nodiscard]] const ClassField *GetIdField() const;
     [[nodiscard]] ClassMethod *GetMethod(const std::string &name, Constness constness);
     [[nodiscard]] const Using *GetUsing(const std::string &name) const;
-    [[nodiscard]] const ForwardDeclaration *GetForwardDeclaration(const std::string &name) const;
     [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
     [[nodiscard]] const ClassEnum *GetNestedEnum(const std::string &name) const;
 
