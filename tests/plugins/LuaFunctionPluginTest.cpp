@@ -31,12 +31,12 @@ struct TestData {
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
-HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");
+HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), void(), "Calling unset TestFunction function");
 lua_getglobal(luaState, mLuaFuncHandle_TestFunction.c_str());
 if (lua_isnil(luaState, -1)) {
   HOLGEN_WARN("Calling undefined TestFunction function {}", mLuaFuncHandle_TestFunction);
   lua_pop(luaState, 1);
-  return {};
+  return void();
 }
 LuaHelper::Push(*this, luaState);
 lua_call(luaState, 1, 0);
@@ -59,14 +59,14 @@ struct TestData {
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
-HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");
+HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), void(), "Calling unset TestFunction function");
 lua_getglobal(luaState, "Table");
 lua_pushstring(luaState, mLuaFuncHandle_TestFunction.c_str());
 lua_gettable(luaState, -2);
 if (lua_isnil(luaState, -1)) {
   HOLGEN_WARN("Calling undefined TestFunction function Table.{}", mLuaFuncHandle_TestFunction);
   lua_pop(luaState, 1);
-  return {};
+  return void();
 }
 LuaHelper::Push(*this, luaState);
 lua_call(luaState, 1, 0);

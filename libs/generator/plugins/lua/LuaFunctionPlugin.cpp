@@ -62,9 +62,12 @@ namespace holgen {
     method.mFunction = &functionDefinition;
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     // TODO: this doesn't work if function returns void
+    std::string retVal = "{}";
+    if (functionDefinition.mReturnType.mName == "void")
+      retVal = "void()";
     method.mBody.Add(
-        R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {{}}, "Calling unset {} function");)",
-        functionHandle.mName, functionDefinition.mName);
+        R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)",
+        functionHandle.mName, retVal, functionDefinition.mName);
     auto luaFuncTable = functionDefinition.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
 
     if (luaFuncTable) {
@@ -77,7 +80,7 @@ namespace holgen {
           "HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});",
           functionDefinition.mName, luaFuncTable->mValue.mName, functionHandle.mName);
       method.mBody.Add("lua_pop(luaState, 1);");
-      method.mBody.Add("return {{}};");
+      method.mBody.Add("return {};", retVal);
       method.mBody.Indent(-1);
       method.mBody.Add("}}");
     } else {
@@ -88,7 +91,7 @@ namespace holgen {
           "HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});",
           functionDefinition.mName, functionHandle.mName);
       method.mBody.Add("lua_pop(luaState, 1);");
-      method.mBody.Add("return {{}};");
+      method.mBody.Add("return {};", retVal);
       method.mBody.Indent(-1);
       method.mBody.Add("}}");
     }
