@@ -223,6 +223,7 @@ namespace holgen {
     }
   }
 
+  // TODO: rename to InitializeLua or something
   void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
     auto method = ClassMethod{
         "CreateMetatables", Type{"void"}, Visibility::Public,
@@ -239,6 +240,24 @@ namespace holgen {
         method.mBody.Add("{}::PushEnumToLua(luaState);", other.mName);
       }
     }
+    std::set<std::string> processedFunctionTables;
+    for (auto &other: mProject.mClasses) {
+      if (!other.mStruct)
+        continue;
+      for (auto &func: other.mStruct->mFunctions) {
+        if (!func.GetAnnotation(Annotations::LuaFunc))
+          continue;
+        auto table = func.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
+        if (!table)
+          continue;
+        auto tableName = table->mValue.mName;
+        if (processedFunctionTables.contains(tableName))
+          continue;
+        processedFunctionTables.insert(tableName);
+        method.mBody.Add("lua_newtable(luaState);");
+        method.mBody.Add("lua_setglobal(luaState, \"{}\");", tableName);
+      }
+    }
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
@@ -248,9 +267,14 @@ namespace holgen {
         "Push", Type{"void"},
         Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mTemplateParameters.emplace_back("typename", "T");
+    bool isFixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
+    if (isFixedSize)
+      method.mTemplateParameters.emplace_back("size_t", "C");
     {
       auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference});
       data.mType.mTemplateParameters.emplace_back("T");
+      if (isFixedSize)
+        data.mType.mTemplateParameters.emplace_back("C");
     }
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mBody.Add("lua_newtable(luaState);");
@@ -270,9 +294,14 @@ namespace holgen {
         "Read", Type{"bool"},
         Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mTemplateParameters.emplace_back("typename", "T");
+    bool isFixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
+    if (isFixedSize)
+      method.mTemplateParameters.emplace_back("size_t", "C");
     {
       auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
       data.mType.mTemplateParameters.emplace_back("T");
+      if (isFixedSize)
+        data.mType.mTemplateParameters.emplace_back("C");
     }
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("luaIndex", Type{"int32_t"});

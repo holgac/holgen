@@ -133,7 +133,7 @@ namespace holgen {
                "Primitive type {} used by {} cannot have functional template parameters",
                type.mName, source);
     } else if (TypeInfo::Get().CppIndexedContainers.contains(type.mName)) {
-      THROW_IF(type.mTemplateParameters.size() != 1,
+      THROW_IF(type.mTemplateParameters.size() != 1 && !TypeInfo::Get().CppFixedSizeContainers.contains(type.mName),
                "Container type {} used by {} should have a single template parameter",
                type.mName, source);
       THROW_IF(type.mFunctionalTemplateParameters.size() > 0,

@@ -80,6 +80,8 @@ namespace holgen {
     std::set<std::string> CppBasicTypes;
     // Containers that allow random access
     std::set<std::string> CppIndexedContainers;
+    // std::array
+    std::set<std::string> CppFixedSizeContainers;
     // Map-like containers
     std::set<std::string> CppKeyedContainers;
     // All containers

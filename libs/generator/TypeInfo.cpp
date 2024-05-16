@@ -57,9 +57,13 @@ namespace holgen {
     CppBasicTypes.insert("std::string");
     CppBasicTypes.insert("std::string_view");
 
+    CppFixedSizeContainers = {
+        "std::array",
+    };
     CppIndexedContainers = {
         "std::vector",
         "std::deque",
+        "std::array",
     };
     CppKeyedContainers = {
         "std::map",

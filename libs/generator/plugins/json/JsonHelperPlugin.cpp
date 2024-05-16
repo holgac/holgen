@@ -35,10 +35,18 @@ namespace holgen {
     }
     method.mTemplateParameters.emplace_back("typename", "T");
 
+    bool fixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
+
+    if (fixedSize)
+      method.mTemplateParameters.emplace_back("size_t", "C");
+
     {
       auto &out = method.mArguments.emplace_back("out", Type{container, PassByType::Reference});
       out.mType.mTemplateParameters.emplace_back("T");
+      if (fixedSize)
+        out.mType.mTemplateParameters.emplace_back("C");
     }
+
     method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
     if (withConverter)
@@ -47,19 +55,36 @@ namespace holgen {
     method.mBody.Add(
         R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing {}");)R",
         container);
+    if (fixedSize)
+      method.mBody.Add("size_t writtenItemCount = 0;");
+
     method.mBody.Line() << "for (const auto& data: json.GetArray()) {";
+    if (fixedSize)
+      method.mBody.Add(
+          R"R(HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in {}");)R",
+          container);
     method.mBody.Indent(1);
     if (withConverter)
       method.mBody.Add("SourceType elem;", St::JsonHelper_Parse);
-    else
+    else if (!fixedSize)
       method.mBody.Add("T elem;", St::JsonHelper_Parse);
-    method.mBody.Add("auto res = {}(elem, data, converter);", St::JsonHelper_Parse);
+    if (withConverter || !fixedSize)
+      method.mBody.Add("auto res = {}(elem, data, converter);", St::JsonHelper_Parse);
+    else
+      method.mBody.Add("auto res = {}(out[writtenItemCount], data, converter);", St::JsonHelper_Parse);
+
     method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of {}");)R", container);
     std::string elemString = withConverter ? "elemConverter(elem)" : "elem";
-    if (TypeInfo::Get().CppSets.contains(container))
+    if (TypeInfo::Get().CppSets.contains(container)) {
       method.mBody.Add("out.insert(std::move({}));", elemString);
-    else
+    } else if (fixedSize) {
+      if (withConverter) {
+        method.mBody.Add("out[writtenItemCount] = std::move(elem);");
+      }
+      method.mBody.Add("++writtenItemCount;");
+    } else {
       method.mBody.Add("out.push_back(std::move({}));", elemString);
+    }
     method.mBody.Indent(-1);
     method.mBody.Line() << "}"; // range based for on json.GetArray()
     method.mBody.Line() << "return true;";
