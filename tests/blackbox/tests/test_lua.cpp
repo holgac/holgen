@@ -11,6 +11,7 @@
 #include "Calculator.h"
 #include "LuaHelper.h"
 #include "LuaTestStructContainer.h"
+#include "TestVariantStructSharedType.h"
 #include "Converter.h"
 
 using namespace holgen_blackbox_test;
@@ -236,12 +237,26 @@ TEST_F(LuaTest, ContainerMap) {
 
 TEST_F(LuaTest, Enum) {
   TestEnum::PushEnumToLua(mState);
-  LuaTestStructContainer c;
-  c.PushGlobalToLua(mState, "c");
   luaL_dostring(mState, "return TestEnum.Entry5");
   LuaTestHelper::ExpectStack(mState, {"5"});
   lua_pop(mState, 1);
   luaL_dostring(mState, "return TestEnum[5]");
   LuaTestHelper::ExpectStack(mState, {"Entry5"});
+  lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, Variant) {
+  TestVariantStructSharedType::CreateLuaMetatable(mState);
+  TestVariantStructHuman::CreateLuaMetatable(mState);
+  TestVariantStructSharedType vs;
+  vs.PushGlobalToLua(mState, "vs");
+  luaL_dostring(mState, "return vs.being1");
+  LuaTestHelper::ExpectStack(mState, {"null"});
+  lua_pop(mState, 1);
+
+  vs.SetBeingType(TestVariantStructType::Human);
+  vs.GetBeing1AsTestVariantStructHuman()->SetName("LuaTest");
+  luaL_dostring(mState, "return vs.being1.name");
+  LuaTestHelper::ExpectStack(mState, {"LuaTest"});
   lua_pop(mState, 1);
 }

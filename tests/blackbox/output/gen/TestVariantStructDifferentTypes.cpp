@@ -158,7 +158,35 @@ TestVariantStructDifferentTypes* TestVariantStructDifferentTypes::ReadFromLua(lu
 }
 
 int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State* luaState) {
-  return 0;
+  auto instance = TestVariantStructDifferentTypes::ReadFromLua(luaState, -2);
+  const char* key = lua_tostring(luaState, -1);
+  if (0 == strcmp("being1", key)) {
+    switch (instance->mBeing1Type.GetValue()) {
+    case TestVariantStructType::Human:
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState);
+      break;
+    case TestVariantStructType::Cat:
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState);
+      break;
+    default:
+      lua_pushnil(luaState);
+    }
+  } else if (0 == strcmp("being2", key)) {
+    switch (instance->mBeing2Type.GetValue()) {
+    case TestVariantStructType::Human:
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState);
+      break;
+    case TestVariantStructType::Cat:
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState);
+      break;
+    default:
+      lua_pushnil(luaState);
+    }
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestVariantStructDifferentTypes.{}", key);
+    return 0;
+  }
+  return 1;
 }
 
 int TestVariantStructDifferentTypes::NewIndexMetaMethod(lua_State* luaState) {

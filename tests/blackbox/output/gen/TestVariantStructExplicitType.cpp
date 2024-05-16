@@ -150,6 +150,28 @@ int TestVariantStructExplicitType::IndexMetaMethod(lua_State* luaState) {
   const char* key = lua_tostring(luaState, -1);
   if (0 == strcmp("type", key)) {
     LuaHelper::Push(instance->mType, luaState);
+  } else if (0 == strcmp("being1", key)) {
+    switch (instance->mType.GetValue()) {
+    case TestVariantStructType::Human:
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState);
+      break;
+    case TestVariantStructType::Cat:
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState);
+      break;
+    default:
+      lua_pushnil(luaState);
+    }
+  } else if (0 == strcmp("being2", key)) {
+    switch (instance->mType.GetValue()) {
+    case TestVariantStructType::Human:
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState);
+      break;
+    case TestVariantStructType::Cat:
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState);
+      break;
+    default:
+      lua_pushnil(luaState);
+    }
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructExplicitType.{}", key);
     return 0;

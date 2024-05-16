@@ -20,6 +20,7 @@ namespace holgen {
     void GenerateCreateLuaMetatable(Class &cls);
     void GeneratePushEnumToLua(Class &cls);
     bool ShouldEmbedPointer(Class &cls);
+    void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const;
   };
 
 }
