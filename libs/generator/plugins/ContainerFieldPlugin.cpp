@@ -24,6 +24,7 @@ namespace holgen {
       ProcessIndex(cls, field, annotation);
     }
     GenerateNextIndexField(cls, field);
+    // TODO: support getters for arrays, useful especially enum based arrays
     GenerateAddElem(cls, field, true);
     GenerateAddElem(cls, field, false);
     GenerateGetElem(cls, field);

@@ -46,6 +46,10 @@ void Calculator::SetAddLuaFunc(std::string val) {
   mLuaFuncHandle_Add = val;
 }
 
+bool Calculator::HasAddLuaFunc() {
+  return !mLuaFuncHandle_Add.empty();
+}
+
 Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
   HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Subtract.empty(), {}, "Calling unset Subtract function");
   lua_getglobal(luaState, "Ops");
@@ -66,6 +70,10 @@ Number* Calculator::Subtract(lua_State* luaState, const Number* val) const {
 
 void Calculator::SetSubtractLuaFunc(std::string val) {
   mLuaFuncHandle_Subtract = val;
+}
+
+bool Calculator::HasSubtractLuaFunc() {
+  return !mLuaFuncHandle_Subtract.empty();
 }
 
 bool Calculator::ParseJson(const rapidjson::Value& json, const Converter& converter) {

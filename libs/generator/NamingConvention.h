@@ -33,6 +33,7 @@ namespace holgen {
     virtual std::string FieldSetterNameInCpp(const FieldDefinition &fieldDefinition) const;
     virtual std::string FieldSetterNameInCpp(const std::string& fieldName) const;
     virtual std::string LuaFunctionSetterNameInCpp(const FunctionDefinition &functionDefinition) const;
+    virtual std::string LuaFunctionCheckerNameInCpp(const FunctionDefinition &functionDefinition) const;
     virtual std::string LuaFunctionHandleNameInCpp(const FunctionDefinition &functionDefinition) const;
     virtual std::string LuaMetatableName(const Class &cls) const;
   private:

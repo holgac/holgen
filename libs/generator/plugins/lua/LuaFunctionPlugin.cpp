@@ -28,6 +28,7 @@ namespace holgen {
     auto field = ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
     GenerateFunction(cls, functionDefinition, field);
     GenerateFunctionSetter(cls, functionDefinition, field);
+    GenerateFunctionChecker(cls, functionDefinition, field);
     Validate().NewField(cls, field);
     cls.mFields.push_back(std::move(field));
   }
@@ -40,6 +41,16 @@ namespace holgen {
         arg.mType.mType = PassByType::Pointer;
       method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, arg.mName);
     }
+  }
+
+  void LuaFunctionPlugin::GenerateFunctionChecker(Class &cls, const FunctionDefinition &functionDefinition,
+                                                 ClassField &functionHandle) {
+    auto method = ClassMethod{
+      Naming().LuaFunctionCheckerNameInCpp(functionDefinition), Type{"bool"},
+      Visibility::Public, Constness::Const};
+    method.mBody.Add("return !{}.empty();", functionHandle.mName);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 
   void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition,
