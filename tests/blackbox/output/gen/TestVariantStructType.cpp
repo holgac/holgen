@@ -94,4 +94,19 @@ TestVariantStructType TestVariantStructType::ReadFromLua(lua_State* luaState, in
     return TestVariantStructType{Invalid};
   }
 }
+
+void TestVariantStructType::PushEnumToLua(lua_State* luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "Human");
+  lua_pushnumber(luaState, 0);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "Cat");
+  lua_pushnumber(luaState, 1);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "Human");
+  lua_rawseti(luaState, -2, 0);
+  lua_pushstring(luaState, "Cat");
+  lua_rawseti(luaState, -2, 1);
+  lua_setglobal(luaState, "TestVariantStructType");
+}
 }

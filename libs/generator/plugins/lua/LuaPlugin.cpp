@@ -225,6 +225,36 @@ namespace holgen {
     GenerateCreateLuaMetatable(cls);
   }
 
+
+  void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
+    auto method = ClassMethod{
+        "PushEnumToLua", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    method.mBody.Add("lua_newtable(luaState);");
+
+    for (auto &entry: cls.mEnum->mEntries) {
+      method.mBody.Add("lua_pushstring(luaState, \"{}\");", entry.mName);
+      method.mBody.Add("lua_pushnumber(luaState, {});", entry.mValue);
+      method.mBody.Add("lua_settable(luaState, -3);");
+    }
+    // TODO: use const for invalid entry name
+    method.mBody.Add("lua_pushstring(luaState, \"Invalid\");");
+    method.mBody.Add("lua_pushnumber(luaState, {});", cls.mEnum->mInvalidValue);
+    method.mBody.Add("lua_settable(luaState, -3);");
+
+    for (auto &entry: cls.mEnum->mEntries) {
+      method.mBody.Add("lua_pushstring(luaState, \"{}\");", entry.mName);
+      method.mBody.Add("lua_rawseti(luaState, -2, {});", entry.mValue);
+    }
+
+    method.mBody.Add("lua_pushstring(luaState, \"Invalid\");");
+    method.mBody.Add("lua_rawseti(luaState, -2, {});", cls.mEnum->mInvalidValue);
+
+    method.mBody.Add("lua_setglobal(luaState, \"{}\");", cls.mName);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+  }
+
   void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
     auto method = ClassMethod{
         "CreateLuaMetatable", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
@@ -255,6 +285,7 @@ namespace holgen {
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
     GenerateReadFromLua(cls);
+    GeneratePushEnumToLua(cls);
   }
 
   void LuaPlugin::GeneratePushGlobalToLua(Class &cls) {

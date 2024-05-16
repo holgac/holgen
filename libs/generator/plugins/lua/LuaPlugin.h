@@ -18,6 +18,7 @@ namespace holgen {
     void GenerateIndexMetaMethod(Class &cls);
     void GenerateNewIndexMetaMethod(Class &cls);
     void GenerateCreateLuaMetatable(Class &cls);
+    void GeneratePushEnumToLua(Class &cls);
     bool ShouldEmbedPointer(Class &cls);
   };
 

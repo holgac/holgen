@@ -6,6 +6,7 @@
 #include "GameData.h"
 #include "GlobalPointer.h"
 #include "LuaTestHelper.h"
+#include "TestEnum.h"
 #include "Number.h"
 #include "Calculator.h"
 #include "LuaHelper.h"
@@ -229,5 +230,17 @@ TEST_F(LuaTest, ContainerMap) {
   lua_pop(mState, 1);
   luaL_dostring(mState, "return c.testMap['test1']");
   LuaTestHelper::ExpectStack(mState, {"42"});
+  lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, Enum) {
+  TestEnum::PushEnumToLua(mState);
+  LuaTestStructContainer c;
+  c.PushGlobalToLua(mState, "c");
+  luaL_dostring(mState, "return TestEnum.Entry5");
+  LuaTestHelper::ExpectStack(mState, {"5"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return TestEnum[5]");
+  LuaTestHelper::ExpectStack(mState, {"Entry5"});
   lua_pop(mState, 1);
 }

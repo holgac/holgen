@@ -229,9 +229,14 @@ namespace holgen {
         Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     for (auto &other: mProject.mClasses) {
+      // TODO: use consts for function names
       if (other.GetMethod("CreateLuaMetatable", Constness::NotConst)) {
         cls.mSourceIncludes.AddLocalHeader(other.mName + ".h");
         method.mBody.Add("{}::CreateLuaMetatable(luaState);", other.mName);
+      }
+      if (other.GetMethod("PushEnumToLua", Constness::NotConst)) {
+        cls.mSourceIncludes.AddLocalHeader(other.mName + ".h");
+        method.mBody.Add("{}::PushEnumToLua(luaState);", other.mName);
       }
     }
     Validate().NewMethod(cls, method);

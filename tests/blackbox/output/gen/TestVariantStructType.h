@@ -36,6 +36,7 @@ public:
   void PushToLua(lua_State* luaState) const;
   // This only works with negative indices
   static TestVariantStructType ReadFromLua(lua_State* luaState, int32_t idx);
+  static void PushEnumToLua(lua_State* luaState);
   inline static constexpr const UnderlyingType Invalid = 2;
 private:
   UnderlyingType mValue;

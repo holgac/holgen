@@ -4,6 +4,6 @@ set(src_sources src/TestJsonTagManager.cpp src/Weapon.cpp src/Calculator.cpp src
 set(custom_sources)
 # HOLGEN_USER_DEFINED_BEGIN:CustomSources
 # HOLGEN_USER_DEFINED_END:CustomSources
-add_library(holgen_blackbox_test_lib ${gen_sources} ${src_sources} ${custom_sources})
+add_library(holgen_blackbox_test_lib STATIC ${gen_sources} ${src_sources} ${custom_sources})
 # HOLGEN_USER_DEFINED_BEGIN:CustomDependencies
 # HOLGEN_USER_DEFINED_END:CustomDependencies
