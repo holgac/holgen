@@ -41,8 +41,8 @@ public:
   static void Push(uint32_t data, lua_State* luaState);
   static void Push(uint64_t data, lua_State* luaState);
   static void Push(uint8_t data, lua_State* luaState);
-  template <typename T>
-  static void Push(std::array<T>& data, lua_State* luaState) {
+  template <typename T, size_t C>
+  static void Push(std::array<T, C>& data, lua_State* luaState) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
@@ -121,8 +121,8 @@ public:
   static bool Read(uint32_t& data, lua_State* luaState, int32_t luaIndex);
   static bool Read(uint64_t& data, lua_State* luaState, int32_t luaIndex);
   static bool Read(uint8_t& data, lua_State* luaState, int32_t luaIndex);
-  template <typename T>
-  static bool Read(const std::array<T>& data, lua_State* luaState, int32_t luaIndex) {
+  template <typename T, size_t C>
+  static bool Read(const std::array<T, C>& data, lua_State* luaState, int32_t luaIndex) {
     return false;
   }
   template <typename T>

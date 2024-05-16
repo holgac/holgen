@@ -26,6 +26,7 @@ public:
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
+    HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
       SourceType elem;
       auto res = Parse(elem, data, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::array");
@@ -39,6 +40,7 @@ public:
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
+    HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
       auto res = Parse(out[writtenItemCount], data, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::array");
       ++writtenItemCount;
