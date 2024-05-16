@@ -1,4 +1,5 @@
 #pragma once
+
 #include "holgen.h"
 #include "../TranslatorPlugin.h"
 
@@ -17,7 +18,7 @@ namespace holgen {
     void GenerateIndexMetaMethod(Class &cls);
     void GenerateNewIndexMetaMethod(Class &cls);
     void GenerateCreateLuaMetatable(Class &cls);
-    bool ShouldEmbedPointer(Class& cls);
+    bool ShouldEmbedPointer(Class &cls);
   };
 
 }

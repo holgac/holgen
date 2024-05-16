@@ -61,6 +61,7 @@ namespace holgen {
     };
     method.mFunction = &functionDefinition;
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    // TODO: this doesn't work if function returns void
     method.mBody.Add(
         R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {{}}, "Calling unset {} function");)",
         functionHandle.mName, functionDefinition.mName);

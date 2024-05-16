@@ -430,7 +430,7 @@ namespace holgen {
     }
     codeBlock.Add("set(custom_sources)");
     codeBlock.UserDefined("CustomSources");
-    codeBlock.Add("add_library({} ${{gen_sources}} ${{src_sources}} ${{custom_sources}})",
+    codeBlock.Add("add_library({} STATIC ${{gen_sources}} ${{src_sources}} ${{custom_sources}})",
                   mGeneratorSettings.mCMakeTarget);
     codeBlock.UserDefined("CustomDependencies");
     // TODO: complete lua generator, fix unused parameters and enable this

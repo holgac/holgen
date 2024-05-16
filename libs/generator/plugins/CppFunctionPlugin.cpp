@@ -36,7 +36,7 @@ namespace holgen {
     if (auto cls2 = mProject.GetClass(method.mReturnType.mName)) {
       // TODO: attribute specifying whether const
       if (cls2->mEnum)
-        method.mReturnType.mType = PassByType::Reference;
+        method.mReturnType.mType = PassByType::Value;
       else
         method.mReturnType.mType = PassByType::Pointer;
     }

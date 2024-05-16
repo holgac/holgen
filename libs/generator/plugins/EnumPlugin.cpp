@@ -47,6 +47,7 @@ namespace holgen {
     GenerateHash(cls);
     GenerateFormatter(cls, true);
     GenerateFormatter(cls, false);
+    // TODO: should export to lua (probably in lua plugin instead of here)
   }
 
   void EnumPlugin::GenerateIntegralConstructor(Class &cls) {
