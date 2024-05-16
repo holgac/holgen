@@ -42,7 +42,7 @@ set(src_sources)
 set(custom_sources)
 # HOLGEN_USER_DEFINED_BEGIN:CustomSources
 # HOLGEN_USER_DEFINED_END:CustomSources
-add_library(generator_test_cmake ${gen_sources} ${src_sources} ${custom_sources})
+add_library(generator_test_cmake STATIC ${gen_sources} ${src_sources} ${custom_sources})
 # HOLGEN_USER_DEFINED_BEGIN:CustomDependencies
 # HOLGEN_USER_DEFINED_END:CustomDependencies
 )R"

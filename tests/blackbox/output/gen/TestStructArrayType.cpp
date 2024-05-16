@@ -103,10 +103,15 @@ void TestStructArrayType::PushEnumToLua(lua_State* luaState) {
   lua_pushstring(luaState, "Type2");
   lua_pushnumber(luaState, 1);
   lua_settable(luaState, -3);
+  lua_pushstring(luaState, "Invalid");
+  lua_pushnumber(luaState, 2);
+  lua_settable(luaState, -3);
   lua_pushstring(luaState, "Type1");
   lua_rawseti(luaState, -2, 0);
   lua_pushstring(luaState, "Type2");
   lua_rawseti(luaState, -2, 1);
+  lua_pushstring(luaState, "Invalid");
+  lua_rawseti(luaState, -2, 2);
   lua_setglobal(luaState, "TestStructArrayType");
 }
 }

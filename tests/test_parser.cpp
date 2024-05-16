@@ -47,7 +47,7 @@ protected:
 
   void ExpectField(
       const FieldDefinition &field,size_t line, size_t col, const std::string &name, const std::string &type, size_t annotationCount,
-      const std::string &defaultValue, ssize_t arraySize) {
+      const std::string &defaultValue, const std::string& arraySize) {
     EXPECT_EQ(field.mName, name);
     EXPECT_EQ(field.mType.mName, type) << " in field " << name;
     EXPECT_EQ(field.mType.mArraySize, arraySize) << " in field " << name;
@@ -117,9 +117,23 @@ struct a   {
   })R");
   EXPECT_EQ(proj.mStructs.size(), 1);
   ExpectStruct(proj.mStructs[0], "a", 3, 0, 0, 0);
-  ExpectField(proj.mStructs[0].mFields[0],  1, 2, "f1", "s32", 0, "", 0);
-  ExpectField(proj.mStructs[0].mFields[1],  2, 2, "f2", "float", 0, "", 0);
-  ExpectField(proj.mStructs[0].mFields[2],  3, 2, "arr", "double", 0, "", 5);
+  ExpectField(proj.mStructs[0].mFields[0],  1, 2, "f1", "s32", 0, "", "");
+  ExpectField(proj.mStructs[0].mFields[1],  2, 2, "f2", "float", 0, "", "");
+  ExpectField(proj.mStructs[0].mFields[2],  3, 2, "arr", "double", 0, "", "5");
+}
+
+TEST_F(ParserTest, EnumSizedArray) {
+  auto proj = Parse(R"R(
+enum Enum {
+  Entry0;
+  Entry1;
+}
+struct a   {
+  double[Enum] arr;
+  })R");
+  EXPECT_EQ(proj.mStructs.size(), 1);
+  ExpectStruct(proj.mStructs[0], "a", 1, 0, 4, 0);
+  ExpectField(proj.mStructs[0].mFields[0],  5, 2, "arr", "double", 0, "", "Enum");
 }
 
 TEST_F(ParserTest, StructFieldDefaultValues) {
@@ -132,10 +146,10 @@ struct a   {
   })R");
   EXPECT_EQ(proj.mStructs.size(), 1);
   ExpectStruct(proj.mStructs[0], "a", 4, 0, 0, 0);
-  ExpectField(proj.mStructs[0].mFields[0],  1, 2, "one", "float", 0, "1", 0);
-  ExpectField(proj.mStructs[0].mFields[1],  2, 2, "onePoint", "float", 0, "1", 0);
-  ExpectField(proj.mStructs[0].mFields[2],  3, 2, "pointOne", "float", 0, ".1", 0);
-  ExpectField(proj.mStructs[0].mFields[3],  4, 2, "onePointOne", "float", 0, "1.1", 0);
+  ExpectField(proj.mStructs[0].mFields[0],  1, 2, "one", "float", 0, "1", "");
+  ExpectField(proj.mStructs[0].mFields[1],  2, 2, "onePoint", "float", 0, "1", "");
+  ExpectField(proj.mStructs[0].mFields[2],  3, 2, "pointOne", "float", 0, ".1", "");
+  ExpectField(proj.mStructs[0].mFields[3],  4, 2, "onePointOne", "float", 0, "1.1", "");
 }
 
 TEST_F(ParserTest, FieldAnnotations) {
@@ -151,14 +165,14 @@ struct a   {
   EXPECT_EQ(proj.mStructs.size(), 1);
   auto &s = proj.mStructs[0];
   ExpectStruct(s, "a", 2, 0, 0, 0);
-  ExpectField(s.mFields[0],  4, 2, "f1", "s32", 2, "", 0);
+  ExpectField(s.mFields[0],  4, 2, "f1", "s32", 2, "", "");
   ExpectAnnotation(s.mFields[0].mAnnotations[0], "dec1", 0, 1, 2);
   ExpectAnnotation(s.mFields[0].mAnnotations[1], "dec2", 4, 2, 2);
   ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[0], "a1", "", 2, 8);
   ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[1], "a2", "5", 2, 12);
   ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[2], "a3", "", 3, 4);
   ExpectAnnotationAttribute(s.mFields[0].mAnnotations[1].mAttributes[3], "a4", "long string", 3, 8);
-  ExpectField(s.mFields[1],  6, 2, "f2", "u32", 1, "", 0);
+  ExpectField(s.mFields[1],  6, 2, "f2", "u32", 1, "", "");
   ExpectAnnotation(s.mFields[1].mAnnotations[0], "dec3", 1, 5, 0);
   ExpectAnnotationAttribute(s.mFields[1].mAnnotations[0].mAttributes[0], "a", "", 5, 6);
 }
@@ -173,7 +187,7 @@ struct a   {
   ASSERT_EQ(proj.mStructs.size(), 1);
   ExpectStruct(proj.mStructs[0], "a", 1, 1, 1, 0);
   ExpectAnnotation(proj.mStructs[0].mAnnotations[0], "dec1", 0, 0, 0);
-  ExpectField(proj.mStructs[0].mFields[0],  3, 2, "f1", "s32", 1, "", 0);
+  ExpectField(proj.mStructs[0].mFields[0],  3, 2, "f1", "s32", 1, "", "");
   ExpectAnnotation(proj.mStructs[0].mFields[0].mAnnotations[0], "dec2", 0, 2, 2);
 }
 
@@ -203,7 +217,7 @@ TEST_F(ParserTest, Templates) {
   EXPECT_EQ(proj.mStructs.size(), 1);
   auto &s = proj.mStructs[0];
   ExpectStruct(s, "a", 1, 0, 1, 2);
-  ExpectField(s.mFields[0],  2, 4, "myMap", "map", 0, "", 0);
+  ExpectField(s.mFields[0],  2, 4, "myMap", "map", 0, "", "");
   auto &t = s.mFields[0].mType;
   EXPECT_EQ(t.mName, "map");
   EXPECT_EQ(t.mTemplateParameters.size(), 2);
@@ -231,10 +245,10 @@ struct Animal {
     )R");
   EXPECT_EQ(proj.mStructs.size(), 2);
   ExpectStruct(proj.mStructs[0], "Sound", 2, 0, 0, 0);
-  ExpectField(proj.mStructs[0].mFields[0],  1, 2, "name", "string", 0, "", 0);
-  ExpectField(proj.mStructs[0].mFields[1],  2, 2, "volume", "u32", 0, "", 0);
+  ExpectField(proj.mStructs[0].mFields[0],  1, 2, "name", "string", 0, "", "");
+  ExpectField(proj.mStructs[0].mFields[1],  2, 2, "volume", "u32", 0, "", "");
   ExpectStruct(proj.mStructs[1], "Animal", 1, 0, 4, 0);
-  ExpectField(proj.mStructs[1].mFields[0],  5, 2, "sound", "Sound", 0, "", 0);
+  ExpectField(proj.mStructs[1].mFields[0],  5, 2, "sound", "Sound", 0, "", "");
 }
 
 TEST_F(ParserTest, Enums) {

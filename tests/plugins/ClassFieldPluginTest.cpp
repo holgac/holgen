@@ -247,9 +247,14 @@ struct TestData {
 
 TEST_F(ClassFieldPluginTest, Arrays) {
   auto project = Parse(R"R(
+enum TestEnum {
+  Entry0;
+  Entry1;
+}
 struct TestData {
   u32[1] testFieldArray1;
   u8[16] testFieldArray16;
+  float[TestEnum] testFieldArrayEnum;
 }
   )R");
   Run(project);
@@ -274,6 +279,15 @@ struct TestData {
     field.mType.mTemplateParameters.emplace_back("uint8_t");
     field.mType.mTemplateParameters.emplace_back("16");
     helpers::ExpectEqual(*cls->GetField("mTestFieldArray16"), field);
+  }
+
+  ASSERT_NE(cls->GetField("mTestFieldArrayEnum"), nullptr);
+  {
+    auto field = ClassField{"mTestFieldArrayEnum", Type{"std::array"}};
+    field.mField = cls->mStruct->GetField("testFieldArrayEnum");
+    field.mType.mTemplateParameters.emplace_back("float");
+    field.mType.mTemplateParameters.emplace_back("2");
+    helpers::ExpectEqual(*cls->GetField("mTestFieldArrayEnum"), field);
   }
 
 }

@@ -1,5 +1,6 @@
 #include "TypeInfo.h"
 #include <sstream>
+#include <core/Exception.h>
 #include "parser/Parser.h"
 #include "TranslatedProject.h"
 
@@ -163,10 +164,14 @@ namespace holgen {
       }
     }
 
-    if (typeDefinition.mArraySize) {
+    if (!typeDefinition.mArraySize.empty()) {
+      // TODO: validate this - arraySize should either be an enum name or an integer
       decltype(mTemplateParameters) newTemplateParameters;
       newTemplateParameters.emplace_back(*this);
-      newTemplateParameters.emplace_back(Type{std::to_string(typeDefinition.mArraySize)});
+      if (auto e = project.mProject.GetEnum(typeDefinition.mArraySize))
+        newTemplateParameters.emplace_back(Type{e->mInvalidValue});
+      else
+        newTemplateParameters.emplace_back(Type{typeDefinition.mArraySize});
       mName = "std::array";
       mTemplateParameters = std::move(newTemplateParameters);
     }

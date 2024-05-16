@@ -130,7 +130,7 @@ namespace holgen {
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
     if (curToken.mType == TokenType::Equals) {
       // TODO: test this
-      PARSER_THROW_IF(fieldDefinition.mType.mArraySize > 0, "Arrays cannot have default values");
+      PARSER_THROW_IF(!fieldDefinition.mType.mArraySize.empty(), "Arrays cannot have default values");
       PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
       if (curToken.mType == TokenType::Minus) {
         fieldDefinition.mDefaultValue += curToken.mContents;
@@ -171,11 +171,11 @@ namespace holgen {
     }
     if (curToken.mType == TokenType::BOpen) {
       PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
-      PARSER_THROW_IF(curToken.mType != TokenType::String || !St::IsIntegral(curToken.mContents),
-                      "Invalid array size specifier, expected an integer, found \"{}\"",
+      PARSER_THROW_IF(curToken.mType != TokenType::String,
+                      "Invalid array size specifier, expected an integer or enum name, found \"{}\"",
                       curToken.mContents)
 
-      typeDefinition.mArraySize = std::stoll(std::string(curToken.mContents));
+      typeDefinition.mArraySize =curToken.mContents;
       PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
       PARSER_THROW_IF(curToken.mType != TokenType::BClose,
                       "Array type definition should be terminated with a ']', found \"{}\"", curToken.mContents)
