@@ -111,6 +111,15 @@ int LuaTestStructContainer::IndexMetaMethod(lua_State* luaState) {
     LuaHelper::Push(instance->mTestVector, luaState);
   } else if (0 == strcmp("testMap", key)) {
     LuaHelper::Push(instance->mTestMap, luaState);
+  } else if (0 == strcmp("AddTestVectorElem", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = LuaTestStructContainer::ReadFromLua(lsInner, -2);
+      uint32_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->AddTestVectorElem(arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
   } else if (0 == strcmp("GetTestVectorElem", key)) {
     lua_pushcfunction(luaState, [](lua_State* lsInner) {
       auto instance = LuaTestStructContainer::ReadFromLua(lsInner, -2);

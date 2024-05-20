@@ -110,6 +110,9 @@ namespace holgen {
       method.mArguments.back().mType.mConstness = Constness::NotConst;
     }
 
+    if (!useMoveRef)
+      method.mExposeToLua = true;
+
     if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
       method.mUserDefined = true;
     } else {

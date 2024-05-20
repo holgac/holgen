@@ -164,6 +164,14 @@ int TestJsonTagManager::IndexMetaMethod(lua_State* luaState) {
       LuaHelper::Push(result, lsInner);
       return 1;
     });
+  } else if (0 == strcmp("AddTag", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);
+      auto arg0 = TestJsonTag::ReadFromLua(lsInner, -1);
+      auto result = instance->AddTag(*arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
   } else if (0 == strcmp("GetTag", key)) {
     lua_pushcfunction(luaState, [](lua_State* lsInner) {
       auto instance = TestJsonTagManager::ReadFromLua(lsInner, -2);

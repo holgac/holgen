@@ -145,6 +145,14 @@ int TestContainerMap::IndexMetaMethod(lua_State* luaState) {
       LuaHelper::Push(result, lsInner);
       return 1;
     });
+  } else if (0 == strcmp("AddInnerStructWithId", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      auto arg0 = TestContainerInnerStructWithId::ReadFromLua(lsInner, -1);
+      auto result = instance->AddInnerStructWithId(*arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
   } else if (0 == strcmp("GetInnerStructWithId", key)) {
     lua_pushcfunction(luaState, [](lua_State* lsInner) {
       auto instance = TestContainerMap::ReadFromLua(lsInner, -2);

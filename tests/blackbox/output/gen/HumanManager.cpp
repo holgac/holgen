@@ -158,6 +158,14 @@ int HumanManager::IndexMetaMethod(lua_State* luaState) {
       LuaHelper::Push(result, lsInner);
       return 1;
     });
+  } else if (0 == strcmp("AddHuman", key)) {
+    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+      auto instance = HumanManager::ReadFromLua(lsInner, -2);
+      auto arg0 = Human::ReadFromLua(lsInner, -1);
+      auto result = instance->AddHuman(*arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
   } else if (0 == strcmp("GetHuman", key)) {
     lua_pushcfunction(luaState, [](lua_State* lsInner) {
       auto instance = HumanManager::ReadFromLua(lsInner, -2);

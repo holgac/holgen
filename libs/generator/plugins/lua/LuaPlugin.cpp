@@ -60,10 +60,13 @@ namespace holgen {
         for (auto &arg: luaMethod.mArguments) {
           if (i != 0)
             funcArgs << ", ";
-          funcArgs << "arg" << i;
-          if (mProject.GetClass(arg.mType.mName)) {
+          if (auto argClass = mProject.GetClass(arg.mType.mName)) {
             switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});",
                             i, arg.mType.mName, ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+            if (argClass->mStruct && arg.mType.mType != PassByType::Pointer)
+              funcArgs << "*arg" << i;
+            else
+              funcArgs << "arg" << i;
           } else {
             auto sanitizedType = arg.mType;
             sanitizedType.mType = PassByType::Value;
@@ -73,6 +76,7 @@ namespace holgen {
                 "{}::{}(arg{}, lsInner, {});",
                 St::LuaHelper, St::LuaHelper_Read, i,
                 ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+            funcArgs << "arg" << i;
           }
           ++i;
         }
