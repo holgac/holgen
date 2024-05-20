@@ -2,6 +2,7 @@
 #include "core/Annotations.h"
 #include "core/St.h"
 #include "holgen.h"
+#include <optional>
 
 namespace holgen {
   const FieldDefinition *StructDefinition::GetIdField() const {
@@ -24,7 +25,22 @@ namespace holgen {
     return true;
   }
 
-  GEN_GETTER_BY_NAME(FieldDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
+  GEN_GETTER_BY_NAME(FieldDefinition, AnnotationDefinition, GetAnnotation, mAnnotations)
+
+  const AnnotationAttributeDefinition *FieldDefinition::GetMatchingAttribute(
+      const std::string &annotationName, const std::string &attributeName,
+      std::optional<std::string> attributeValue) const {
+    auto annotation = GetAnnotation(annotationName);
+    if (!annotation)
+      return nullptr;
+    for (auto &attribute: annotation->mAttributes) {
+      if (attribute.mName == attributeName) {
+        if (!attributeValue.has_value() || attribute.mValue.mName == *attributeValue)
+          return &attribute;
+      }
+    }
+    return nullptr;
+  };
 
   GEN_GETTER_BY_NAME(AnnotationDefinition, AnnotationAttributeDefinition, GetAttribute, mAttributes);
 

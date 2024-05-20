@@ -137,10 +137,11 @@ namespace holgen {
     stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
     StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
     for (auto &field: cls.mFields) {
-      // TODO: This can be a bit more nuanced, maybe allow getting but not setting?
       // TODO: parse variant
       if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
           field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
+        continue;
+      if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
         continue;
       // TODO: Make this work with pointers
       // TODO: Make this work with nested structs

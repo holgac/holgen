@@ -46,7 +46,7 @@ void Calculator::SetAddLuaFunc(std::string val) {
   mLuaFuncHandle_Add = val;
 }
 
-bool Calculator::HasAddLuaFunc() {
+bool Calculator::HasAddLuaFunc() const {
   return !mLuaFuncHandle_Add.empty();
 }
 
@@ -72,7 +72,7 @@ void Calculator::SetSubtractLuaFunc(std::string val) {
   mLuaFuncHandle_Subtract = val;
 }
 
-bool Calculator::HasSubtractLuaFunc() {
+bool Calculator::HasSubtractLuaFunc() const {
   return !mLuaFuncHandle_Subtract.empty();
 }
 

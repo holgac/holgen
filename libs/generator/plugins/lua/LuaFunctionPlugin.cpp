@@ -72,7 +72,6 @@ namespace holgen {
     };
     method.mFunction = &functionDefinition;
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    // TODO: this doesn't work if function returns void
     std::string retVal = "{}";
     if (functionDefinition.mReturnType.mName == "void")
       retVal = "void()";

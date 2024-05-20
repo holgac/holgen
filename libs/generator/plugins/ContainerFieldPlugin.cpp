@@ -109,6 +109,7 @@ namespace holgen {
     if (underlyingIdField) {
       method.mArguments.back().mType.mConstness = Constness::NotConst;
     }
+
     if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
       method.mUserDefined = true;
     } else {

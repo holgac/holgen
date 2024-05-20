@@ -20,10 +20,10 @@ public:
   void SetCurVal(const Number& val);
   int64_t Add(lua_State* luaState, int64_t val) const;
   void SetAddLuaFunc(std::string val);
-  bool HasAddLuaFunc();
+  bool HasAddLuaFunc() const;
   Number* Subtract(lua_State* luaState, const Number* val) const;
   void SetSubtractLuaFunc(std::string val);
-  bool HasSubtractLuaFunc();
+  bool HasSubtractLuaFunc() const;
   int64_t SubtractThenMultiply(int64_t lhs, int64_t rhs);
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;

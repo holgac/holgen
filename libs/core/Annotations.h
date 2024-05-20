@@ -249,5 +249,14 @@ namespace holgen {
     inline static const std::string Variant_Entry = "entry";
 
 
+    /**
+     * Field related annotations.
+     *
+     * A field can be const (not an actual const field, but it disables setter in cpp and lua).
+     * @field(const)
+     * u32 fieldWithNoSetter;
+     */
+    inline static const std::string Field = "field";
+    inline static const std::string Field_Const = "const";
   };
 }
