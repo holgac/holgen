@@ -274,8 +274,8 @@ namespace holgen {
           else
             line << ", ";
           line << arg.mType.ToString() << " " << arg.mName;
-          if (!arg.mDefaultValue.empty()) {
-            line << " = " << arg.mDefaultValue;
+          if (isInsideClass && arg.mDefaultValue.has_value()) {
+            line << " = " << *arg.mDefaultValue;
           }
         }
         line << ")";
@@ -602,13 +602,14 @@ namespace holgen {
     if (!isInHeader || !isInsideClass)
       ss << cls.mName << "::";
     ss << method.mName << "(";
-    bool isFirst = true;
+    size_t idx = 0;
     for (auto &arg: method.mArguments) {
-      if (isFirst)
-        isFirst = false;
-      else
+      if (idx != 0)
         ss << ", ";
       ss << arg.mType.ToString() << " " << arg.mName;
+      if (isInHeader && arg.mDefaultValue.has_value())
+        ss << " = " << *arg.mDefaultValue;
+      ++idx;
     }
     ss << ")";
     if (method.mConstness == Constness::Const)

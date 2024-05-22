@@ -131,27 +131,34 @@ namespace holgen {
     if (curToken.mType == TokenType::Equals) {
       // TODO: test this
       PARSER_THROW_IF(!fieldDefinition.mType.mArraySize.empty(), "Arrays cannot have default values");
-      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
-      if (curToken.mType == TokenType::Minus) {
-        fieldDefinition.mDefaultValue += curToken.mContents;
-        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
-      }
-      if (curToken.mType == TokenType::String) {
-        fieldDefinition.mDefaultValue += curToken.mContents;
-        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
-      }
-      if (curToken.mType == TokenType::Period) {
-        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
-        if (curToken.mType == TokenType::String) {
-          fieldDefinition.mDefaultValue = std::format("{}.{}", fieldDefinition.mDefaultValue, curToken.mContents);
-          PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
-        }
-      }
+      NEXT_OR_THROW(curToken, "Incomplete field definition!");
+      fieldDefinition.mDefaultValue = ParseDefaultValue(curToken);
       PARSER_THROW_IF(fieldDefinition.mDefaultValue.empty(), "Invalid default value in field definition!");
     }
     PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
                     "Field definition should be terminated with a ';', found \"{}\"",
                     curToken.mContents);
+  }
+
+  std::string Parser::ParseDefaultValue(Token &curToken) {
+    std::string defaultValue;
+    if (curToken.mType == TokenType::Minus) {
+      defaultValue += curToken.mContents;
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+    }
+    if (curToken.mType == TokenType::String) {
+      defaultValue += curToken.mContents;
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+    }
+    if (curToken.mType == TokenType::Period) {
+      defaultValue += curToken.mContents;
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      if (curToken.mType == TokenType::String) {
+        defaultValue += curToken.mContents;
+        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      }
+    }
+    return defaultValue;
   }
 
   void Parser::ParseType(Token &curToken, TypeDefinition &typeDefinition) {
@@ -321,6 +328,10 @@ namespace holgen {
         THROW("Unknown argument qualifier \"{}\"", curToken.mContents);
       }
       NEXT_OR_THROW(curToken, "Incomplete function definition!");
+    }
+    if (curToken.mType == TokenType::Equals) {
+      NEXT_OR_THROW(curToken, "Incomplete function definition!");
+      arg.mDefaultValue = ParseDefaultValue(curToken);
     }
     if (curToken.mType == TokenType::Comma) {
       NEXT_OR_THROW(curToken, "Incomplete function definition!");

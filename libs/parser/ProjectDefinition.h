@@ -43,6 +43,7 @@ namespace holgen {
     TypeDefinition mType;
     std::string mName;
     std::vector<AnnotationDefinition> mAnnotations;
+    // TODO: std::optional
     std::string mDefaultValue;
     DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
@@ -59,6 +60,7 @@ namespace holgen {
     TypeDefinition mType;
     std::string mName;
     bool mIsOut = false;
+    std::optional<std::string> mDefaultValue = std::nullopt;
     DefinitionSource mDefinitionSource;
   };
 

@@ -26,6 +26,8 @@ namespace holgen {
     void Parse(Tokenizer &tokenizer);
 
     const ProjectDefinition &GetProject() const { return mProject; }
+
+    std::string ParseDefaultValue(Token &curToken);
   };
 
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <utility>
 
 #include "parser/DependencyGraph.h"
 #include "TypeInfo.h"
@@ -50,13 +51,13 @@ namespace holgen {
     ClassMethodArgument(
         std::string name,
         Type type,
-        std::string defaultValue = ""
+        std::optional<std::string> defaultValue = std::nullopt
     ) : mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {
     }
 
     Type mType;
     std::string mName;
-    std::string mDefaultValue;
+    std::optional<std::string> mDefaultValue;
   };
 
   struct TemplateParameter {

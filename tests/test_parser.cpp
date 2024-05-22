@@ -292,11 +292,12 @@ struct Action {
   func func1(Actor actor);
   func func2(s32 i1, vector<s32> i2 out) -> void;
   func func3() -> vector<s32>;
+  func func4(u32 arg=42);
 }
   )R");
   auto action = proj.GetStruct("Action");
   ASSERT_NE(action, nullptr);
-  EXPECT_EQ(action->mFunctions.size(), 3);
+  EXPECT_EQ(action->mFunctions.size(), 4);
   auto func = action->GetFunction("func1");
   ASSERT_NE(func, nullptr);
   ExpectFunction(*func, "func1", "void", 1, 0, 4, 2);
@@ -307,12 +308,18 @@ struct Action {
   ExpectFunction(*func, "func2", "void", 2, 0, 5, 2);
   ExpectFunctionArgument(func->mArguments[0], "i1", "s32", false, 5, 13);
   ExpectFunctionArgument(func->mArguments[1], "i2", "vector", true, 5, 21);
-  ASSERT_EQ(func->mArguments[1].mType.mTemplateParameters[0].mName, "s32");
+  EXPECT_EQ(func->mArguments[1].mType.mTemplateParameters[0].mName, "s32");
 
   func = action->GetFunction("func3");
   ASSERT_NE(func, nullptr);
   ExpectFunction(*func, "func3", "vector", 0, 0, 6, 2);
-  ASSERT_EQ(func->mReturnType.mTemplateParameters[0].mName, "s32");
+  EXPECT_EQ(func->mReturnType.mTemplateParameters[0].mName, "s32");
+
+  func = action->GetFunction("func4");
+  ASSERT_NE(func, nullptr);
+  ExpectFunction(*func, "func4", "void", 1, 0, 7, 2);
+  ASSERT_TRUE(func->mArguments.front().mDefaultValue.has_value());
+  EXPECT_EQ(*func->mArguments.front().mDefaultValue, "42");
 }
 
 TEST_F(ParserTest, Mixin) {

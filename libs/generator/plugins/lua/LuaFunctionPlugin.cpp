@@ -37,6 +37,7 @@ namespace holgen {
     for (auto &funcArg: functionDefinition.mArguments) {
       auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
       arg.mType.PreventCopying();
+      arg.mDefaultValue = funcArg.mDefaultValue;
       if (mProject.GetClass(arg.mType.mName) != nullptr)
         arg.mType.mType = PassByType::Pointer;
       method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, arg.mName);

@@ -65,6 +65,7 @@ namespace holgen {
       } else if (funcArg.mIsOut) {
         arg.mType.mType = PassByType::Reference;
       }
+      arg.mDefaultValue = funcArg.mDefaultValue;
     }
     FillComments(functionDefinition, method.mComments);
     Validate().NewMethod(cls, method);
