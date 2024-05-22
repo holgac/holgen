@@ -32,7 +32,7 @@ namespace holgen {
         Type type,
         Visibility visibility = Visibility::Private,
         Staticness staticness = Staticness::NotStatic,
-        std::string defaultValue = ""
+        std::optional<std::string> defaultValue = std::nullopt
     ) : mType(std::move(type)), mName(std::move(name)), mStaticness(staticness), mVisibility(visibility),
         mDefaultValue(std::move(defaultValue)) {
     }
@@ -41,7 +41,7 @@ namespace holgen {
     std::string mName;
     Staticness mStaticness = Staticness::NotStatic;
     Visibility mVisibility = Visibility::Private;
-    std::string mDefaultValue;
+    std::optional<std::string> mDefaultValue = std::nullopt;
     std::list<std::string> mDefaultConstructorArguments;
     std::list<std::string> mComments;
     const FieldDefinition *mField = nullptr;

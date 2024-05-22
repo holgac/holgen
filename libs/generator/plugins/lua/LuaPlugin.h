@@ -21,6 +21,8 @@ namespace holgen {
     void GeneratePushEnumToLua(Class &cls);
     bool ShouldEmbedPointer(Class &cls);
     void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const;
+    void GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) const;
+    void GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method);
   };
 
 }

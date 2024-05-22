@@ -109,17 +109,20 @@ namespace holgen {
                                         CodeBlock &switchBlock) const {
     if (field.mField->mType.mName == St::Variant) {
       auto enumField = cls.GetField(Naming().FieldNameInCpp(
-          field.mField->GetAnnotation(Annotations::Variant)->GetAttribute(Annotations::Variant_TypeField)->mValue.mName));
+          field.mField->GetAnnotation(Annotations::Variant)->GetAttribute(
+              Annotations::Variant_TypeField)->mValue.mName));
       switchBlock.Add("switch (instance->{}.GetValue()) {{", enumField->mName);
-      for(auto& otherCls: mProject.mClasses) {
+      for (auto &otherCls: mProject.mClasses) {
         if (!otherCls.mStruct || !otherCls.mStruct->GetAnnotation(Annotations::Variant))
           continue;
         auto variantAnnotation = otherCls.mStruct->GetAnnotation(Annotations::Variant);
         if (variantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != enumField->mType.mName)
           continue;
-        switchBlock.Add("case {}::{}:", enumField->mType.ToString(), variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
+        switchBlock.Add("case {}::{}:", enumField->mType.ToString(),
+                        variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
         switchBlock.Indent(1);
-        switchBlock.Add("{}::{}(instance->{}(), luaState);", St::LuaHelper, St::LuaHelper_Push, Naming().VariantGetterNameInCpp(*field.mField, *otherCls.mStruct));
+        switchBlock.Add("{}::{}(instance->{}(), luaState);", St::LuaHelper, St::LuaHelper_Push,
+                        Naming().VariantGetterNameInCpp(*field.mField, *otherCls.mStruct));
         switchBlock.Add("break;");
         switchBlock.Indent(-1);
       }
@@ -172,22 +175,16 @@ namespace holgen {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
     if (cls.mEnum) {
-      method.mReturnType.mType = PassByType::Value;
-      method.mBody.Add("auto typ = lua_type(luaState, idx);");
-      method.mBody.Add("if (typ == LUA_TSTRING) {{");
-      method.mBody.Indent(1);
-      method.mBody.Add("return FromString(lua_tostring(luaState, idx));");
-      method.mBody.Indent(-1);
-      method.mBody.Add("}} else if (typ == LUA_TNUMBER) {{");
-      method.mBody.Indent(1);
-      method.mBody.Add("return {}(lua_tonumber(luaState, idx));", cls.mName);
-      method.mBody.Indent(-1);
-      method.mBody.Add("}} else {{");
-      method.mBody.Indent(1);
-      method.mBody.Add("return {}{{Invalid}};", cls.mName);
-      method.mBody.Indent(-1);
-      method.mBody.Add("}}");
-    } else if (!ShouldEmbedPointer(cls)) {
+      GenerateReadEnumFromLuaBody(cls, method);
+    } else {
+      GenerateReadStructFromLuaBody(cls, method);
+    }
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+  }
+
+  void LuaPlugin::GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method) {
+    if (!ShouldEmbedPointer(cls)) {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
       auto idField = cls.GetIdField();
@@ -206,8 +203,24 @@ namespace holgen {
       method.mBody.Add("lua_pop(luaState, 1);");
       method.mBody.Add("return ptr;");
     }
-    Validate().NewMethod(cls, method);
-    cls.mMethods.push_back(std::move(method));
+  }
+
+  void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) const {
+    method.mReturnType.mType = PassByType::Value;
+    method.mBody.Add("auto typ = lua_type(luaState, idx);");
+    method.mBody.Add("if (typ == LUA_TSTRING) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("return FromString(lua_tostring(luaState, idx));");
+    method.mBody.Indent(-1);
+    method.mBody.Add("}} else if (typ == LUA_TNUMBER) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("return {}(lua_tonumber(luaState, idx));", cls.mName);
+    method.mBody.Indent(-1);
+    method.mBody.Add("}} else {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("return {}{{Invalid}};", cls.mName);
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
   }
 
   void LuaPlugin::GeneratePushToLua(Class &cls) {

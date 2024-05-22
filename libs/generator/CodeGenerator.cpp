@@ -72,8 +72,8 @@ namespace holgen {
           ss << ctorArg;
         }
         ss << ")";
-      } else if (!field.mDefaultValue.empty()) {
-        ss << " = " << field.mDefaultValue;
+      } else if (field.mDefaultValue.has_value()) {
+        ss << " = " << *field.mDefaultValue;
       }
       return ss.str();
     }

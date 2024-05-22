@@ -34,7 +34,7 @@ namespace holgen {
       if (fieldDefinition.mType.mName == St::UserData) {
         field.mType = Type{"void", PassByType::Pointer};
         field.mDefaultValue = "nullptr";
-      } else if (fieldDefinition.mType.mName == "Ref" && field.mDefaultValue.empty()) {
+      } else if (fieldDefinition.mType.mName == "Ref" && !field.mDefaultValue.has_value()) {
         if (field.mType.mType == PassByType::Pointer)
           field.mDefaultValue = "nullptr";
         else

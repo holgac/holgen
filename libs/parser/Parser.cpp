@@ -133,7 +133,6 @@ namespace holgen {
       PARSER_THROW_IF(!fieldDefinition.mType.mArraySize.empty(), "Arrays cannot have default values");
       NEXT_OR_THROW(curToken, "Incomplete field definition!");
       fieldDefinition.mDefaultValue = ParseDefaultValue(curToken);
-      PARSER_THROW_IF(fieldDefinition.mDefaultValue.empty(), "Invalid default value in field definition!");
     }
     PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
                     "Field definition should be terminated with a ';', found \"{}\"",
