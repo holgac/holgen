@@ -260,8 +260,15 @@ namespace holgen {
      * A field can be const (not an actual const field, but it disables setter in cpp and lua).
      * @field(const)
      * u32 fieldWithNoSetter;
+     *
+     * Field setters can be disabled, made private/protected, or custom
+     * @field(set=private, set=custom)
+     * u32 customPrivateSetter;
+     * @field(set=none)
+     * u32 noSetter;
      */
     inline static const std::string Field = "field";
     inline static const std::string Field_Const = "const";
+    inline static const std::string Field_Set = "set";
   };
 }
