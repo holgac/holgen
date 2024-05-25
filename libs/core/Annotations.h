@@ -5,6 +5,14 @@ namespace holgen {
   // This kinda serves as documentation
   class Annotations {
   public:
+    /**
+     * These are possible values for method options
+     */
+    inline static const std::string MethodOption_Custom = "custom";
+    inline static const std::string MethodOption_None = "none";
+    inline static const std::string MethodOption_Private = "private";
+    inline static const std::string MethodOption_Protected = "protected";
+
     /*
      * When reading from json, convert the field data using a converter.
      * Only for fields.
@@ -71,9 +79,6 @@ namespace holgen {
      */
     inline static const std::string Container = "container";
     inline static const std::string Container_ElemName = "elemName";
-    inline static const std::string Container_MethodOption_Custom = "custom";
-    inline static const std::string Container_MethodOption_None = "none";
-    inline static const std::string Container_MethodOption_Private = "private";
     inline static const std::string Container_Add = "add";
     inline static const std::string Container_Get = "get";
     inline static const std::string Container_Count = "count";

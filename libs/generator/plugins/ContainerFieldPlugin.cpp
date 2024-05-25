@@ -84,9 +84,8 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, bool useMoveRef) {
-    auto container = field.mField->GetAnnotation(Annotations::Container);
-    auto methodAttribute = container->GetAttribute(Annotations::Container_Add);
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_None)
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+                                           Annotations::MethodOption_None))
       return;
     auto &underlyingType = field.mType.mTemplateParameters.back();
     if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(underlyingType.mName))
@@ -113,11 +112,16 @@ namespace holgen {
     if (!useMoveRef)
       method.mExposeToLua = true;
 
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+                                           Annotations::MethodOption_Custom)) {
       method.mUserDefined = true;
     } else {
-      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+      if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+                                             Annotations::MethodOption_Private)) {
         method.mVisibility = Visibility::Private;
+      } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+                                                    Annotations::MethodOption_Protected)) {
+        method.mVisibility = Visibility::Protected;
       }
       CodeBlock validators;
       CodeBlock inserters;
@@ -175,9 +179,8 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) {
-    auto container = field.mField->GetAnnotation(Annotations::Container);
-    auto methodAttribute = container->GetAttribute(Annotations::Container_Get);
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_None)
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
+                                           Annotations::MethodOption_None))
       return;
 
     auto &underlyingType = field.mType.mTemplateParameters.back();
@@ -209,11 +212,16 @@ namespace holgen {
         method.mArguments.emplace_back("idx", Type{"size_t"});
       }
 
-      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
+      if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
+                                             Annotations::MethodOption_Custom)) {
         method.mUserDefined = true;
       } else {
-        if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+        if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
+                                               Annotations::MethodOption_Private)) {
           method.mVisibility = Visibility::Private;
+        } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
+                                                      Annotations::MethodOption_Protected)) {
+          method.mVisibility = Visibility::Protected;
         }
         // TODO: @container(unsafe) attribute that avoids bounds checks, can return ref instead of ptr
         if (isKeyedContainer) {
@@ -242,20 +250,24 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field) {
-    auto container = field.mField->GetAnnotation(Annotations::Container);
-    auto methodAttribute = container->GetAttribute(Annotations::Container_Count);
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_None)
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
+                                           Annotations::MethodOption_None))
       return;
     auto method = ClassMethod{
         Naming().ContainerElemCountNameInCpp(*field.mField),
         Type{"size_t"}};
     method.mExposeToLua = true;
 
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
+                                           Annotations::MethodOption_Custom)) {
       method.mUserDefined = true;
     } else {
-      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+      if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
+                                             Annotations::MethodOption_Private)) {
         method.mVisibility = Visibility::Private;
+      } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
+                                                    Annotations::MethodOption_Protected)) {
+        method.mVisibility = Visibility::Protected;
       }
       method.mBody.Add("return {}.size();", field.mName);
     }
@@ -265,9 +277,8 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &field) {
-    auto container = field.mField->GetAnnotation(Annotations::Container);
-    auto methodAttribute = container->GetAttribute(Annotations::Container_Delete);
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_None)
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
+                                           Annotations::MethodOption_None))
       return;
 
     auto method = ClassMethod{
@@ -282,11 +293,16 @@ namespace holgen {
     }
 
     method.mExposeToLua = true;
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
+                                           Annotations::MethodOption_Custom)) {
       method.mUserDefined = true;
     } else {
-      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+      if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
+                                             Annotations::MethodOption_Private)) {
         method.mVisibility = Visibility::Private;
+      } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
+                                                    Annotations::MethodOption_Protected)) {
+        method.mVisibility = Visibility::Protected;
       }
       CodeBlock indexDeleters;
       CodeBlock indexReassigners;
@@ -329,9 +345,8 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) {
-    auto container = field.mField->GetAnnotation(Annotations::Container);
-    auto methodAttribute = container->GetAttribute(Annotations::Container_Has);
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_None)
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
+                                           Annotations::MethodOption_None))
       return;
     auto method = ClassMethod{
         Naming().ContainerElemExistenceCheckerNameInCpp(*field.mField),
@@ -342,11 +357,16 @@ namespace holgen {
       arg.mName = "key";
     }
     arg.mType.PreventCopying();
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Custom) {
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
+                                           Annotations::MethodOption_Custom)) {
       method.mUserDefined = true;
     } else {
-      if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_Private) {
+      if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
+                                             Annotations::MethodOption_Private)) {
         method.mVisibility = Visibility::Private;
+      } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
+                                                    Annotations::MethodOption_Protected)) {
+        method.mVisibility = Visibility::Protected;
       }
       method.mBody.Add("return {}.contains({});", field.mName, arg.mName);
     }
@@ -370,9 +390,8 @@ namespace holgen {
   }
 
   void ContainerFieldPlugin::GenerateNextIndexField(Class &cls, const ClassField &field) {
-    auto container = field.mField->GetAnnotation(Annotations::Container);
-    auto methodAttribute = container->GetAttribute(Annotations::Container_Add);
-    if (methodAttribute && methodAttribute->mValue.mName == Annotations::Container_MethodOption_None)
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+                                           Annotations::MethodOption_None))
       return;
 
     if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {

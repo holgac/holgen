@@ -4,6 +4,22 @@
 #include "holgen.h"
 #include <optional>
 
+#define GEN_GET_MATCHING_ATTRIBUTE(clsName) \
+  const AnnotationAttributeDefinition *clsName::GetMatchingAttribute( \
+      const std::string &annotationName, const std::string &attributeName, \
+      std::optional<std::string> attributeValue) const { \
+    auto annotation = GetAnnotation(annotationName); \
+    if (!annotation) \
+      return nullptr; \
+    for (auto &attribute: annotation->mAttributes) { \
+      if (attribute.mName == attributeName) { \
+        if (!attributeValue.has_value() || attribute.mValue.mName == *attributeValue) \
+          return &attribute; \
+      } \
+    } \
+    return nullptr; \
+  };
+
 namespace holgen {
   const FieldDefinition *StructDefinition::GetIdField() const {
     for (const auto &field: mFields) {
@@ -27,20 +43,9 @@ namespace holgen {
 
   GEN_GETTER_BY_NAME(FieldDefinition, AnnotationDefinition, GetAnnotation, mAnnotations)
 
-  const AnnotationAttributeDefinition *FieldDefinition::GetMatchingAttribute(
-      const std::string &annotationName, const std::string &attributeName,
-      std::optional<std::string> attributeValue) const {
-    auto annotation = GetAnnotation(annotationName);
-    if (!annotation)
-      return nullptr;
-    for (auto &attribute: annotation->mAttributes) {
-      if (attribute.mName == attributeName) {
-        if (!attributeValue.has_value() || attribute.mValue.mName == *attributeValue)
-          return &attribute;
-      }
-    }
-    return nullptr;
-  };
+  GEN_GET_MATCHING_ATTRIBUTE(FieldDefinition);
+
+  GEN_GET_MATCHING_ATTRIBUTE(FunctionDefinition);
 
   GEN_GETTER_BY_NAME(AnnotationDefinition, AnnotationAttributeDefinition, GetAttribute, mAttributes);
 

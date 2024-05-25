@@ -70,6 +70,9 @@ namespace holgen {
     std::vector<AnnotationDefinition> mAnnotations;
     DefinitionSource mDefinitionSource;
     [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
+    [[nodiscard]] const AnnotationAttributeDefinition *GetMatchingAttribute(
+        const std::string &annotationName, const std::string &attributeName,
+        std::optional<std::string> attributeValue = std::nullopt) const;
 
     auto GetAnnotations(const std::string &name) const {
       return NameFilterForEachWrapper(name, mAnnotations);
