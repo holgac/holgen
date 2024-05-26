@@ -30,14 +30,14 @@ struct TestData {
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUnsigned", Constness::Const), method,
                          "return mTestFieldUnsigned;");
   }
-  ASSERT_EQ(cls->GetMethod("GetTestFieldUnsigned", Constness::NotConst), nullptr);
+  EXPECT_EQ(cls->GetMethod("GetTestFieldUnsigned", Constness::NotConst), nullptr);
 
   ASSERT_NE(cls->GetMethod("GetTestFieldDouble", Constness::Const), nullptr);
   {
     auto method = ClassMethod{"GetTestFieldDouble", Type{"double"}, Visibility::Public, Constness::Const};
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldDouble", Constness::Const), method, "return mTestFieldDouble;");
   }
-  ASSERT_EQ(cls->GetMethod("GetTestFieldDouble", Constness::NotConst), nullptr);
+  EXPECT_EQ(cls->GetMethod("GetTestFieldDouble", Constness::NotConst), nullptr);
 }
 
 TEST_F(ClassFieldGetterPluginTest, NonPrimitives) {
@@ -82,6 +82,20 @@ struct TestData {
   }
 }
 
+TEST_F(ClassFieldGetterPluginTest, NoGetter) {
+  auto project = Parse(R"R(
+struct TestData {
+  @field(get=none)
+  u32 testFieldUnsigned = 42;
+  })R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  EXPECT_EQ(cls->GetMethod("GetTestFieldUnsigned", Constness::Const), nullptr);
+  EXPECT_EQ(cls->GetMethod("GetTestFieldUnsigned", Constness::NotConst), nullptr);
+}
+
 TEST_F(ClassFieldGetterPluginTest, UserData) {
   auto project = Parse(R"R(
 struct TestData {
@@ -103,6 +117,31 @@ struct TestData {
     method.mReturnType.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::NotConst), method,
                          "return reinterpret_cast<T*>(mTestFieldUserData);");
+  }
+}
+
+TEST_F(ClassFieldGetterPluginTest, UserDataCustomProtectedGetter) {
+  auto project = Parse(R"R(
+struct TestData {
+  @field(get=custom, get=protected)
+  userdata testFieldUserData;
+  })R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+
+  ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"GetTestFieldUserData", Type{"void", PassByType::Pointer, Constness::Const}, Visibility::Protected, Constness::Const};
+    method.mUserDefined = true;
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::Const), method,
+                         "");
+
+    method.mConstness = Constness::NotConst;
+    method.mReturnType.mConstness = Constness::NotConst;
+    helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::NotConst), method,
+                         "");
   }
 }
 

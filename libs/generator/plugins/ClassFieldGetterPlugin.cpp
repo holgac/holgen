@@ -43,6 +43,9 @@ namespace holgen {
     // non-const getter for non-primitives only
     if (!isConst && TypeInfo::Get().CppPrimitives.contains(field.mType.mName))
       return;
+    if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Get,
+                                           Annotations::MethodOption_None))
+      return;
     auto constness = isConst ? Constness::Const : Constness::NotConst;
     auto method = ClassMethod{
         Naming().FieldGetterNameInCpp(*field.mField), field.mType,
@@ -51,12 +54,28 @@ namespace holgen {
     if (field.mType.mType == PassByType::Pointer)
       method.mReturnType.mType = PassByType::Pointer;
 
-    if (field.mField->mType.mName == St::UserData) {
-      method.mTemplateParameters.emplace_back("typename", "T");
-      method.mReturnType.mName = "T";
-      method.mBody.Add("return reinterpret_cast<{}T*>({});", isConst ? "const " : "", field.mName);
+    if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Get,
+                                           Annotations::MethodOption_Custom)) {
+      method.mUserDefined = true;
+      if (field.mField->mType.mName == St::UserData) {
+        method.mReturnType.mName = "void";
+        method.mReturnType.mType = PassByType::Pointer;
+      }
     } else {
-      method.mBody.Add("return {};", field.mName);
+      if (field.mField->mType.mName == St::UserData) {
+        method.mTemplateParameters.emplace_back("typename", "T");
+        method.mReturnType.mName = "T";
+        method.mBody.Add("return reinterpret_cast<{}T*>({});", isConst ? "const " : "", field.mName);
+      } else {
+        method.mBody.Add("return {};", field.mName);
+      }
+    }
+    if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Get,
+                                           Annotations::MethodOption_Private)) {
+      method.mVisibility = Visibility::Private;
+    } else if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Get,
+                                                  Annotations::MethodOption_Protected)) {
+      method.mVisibility = Visibility::Protected;
     }
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));

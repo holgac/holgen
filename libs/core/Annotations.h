@@ -270,5 +270,6 @@ namespace holgen {
     inline static const std::string Field = "field";
     inline static const std::string Field_Const = "const";
     inline static const std::string Field_Set = "set";
+    inline static const std::string Field_Get = "get";
   };
 }
