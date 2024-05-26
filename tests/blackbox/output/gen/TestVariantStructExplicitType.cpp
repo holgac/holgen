@@ -9,16 +9,8 @@
 
 namespace holgen_blackbox_test {
 TestVariantStructExplicitType::~TestVariantStructExplicitType() {
-  if (mType == TestVariantStructType::Human) {
-    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mType == TestVariantStructType::Cat) {
-    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
-  }
-  if (mType == TestVariantStructType::Human) {
-    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mType == TestVariantStructType::Cat) {
-    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
-  }
+  DestroyBeing1();
+  DestroyBeing2();
 }
 bool TestVariantStructExplicitType::operator==(const TestVariantStructExplicitType& rhs) const {
   return
@@ -65,6 +57,14 @@ TestVariantStructCat* TestVariantStructExplicitType::GetBeing1AsTestVariantStruc
   return reinterpret_cast<TestVariantStructCat*>(mBeing1.data());
 }
 
+void TestVariantStructExplicitType::DestroyBeing1() const {
+  if (mType == TestVariantStructType::Human) {
+    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mType == TestVariantStructType::Cat) {
+    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
+  }
+}
+
 const TestVariantStructHuman* TestVariantStructExplicitType::GetBeing2AsTestVariantStructHuman() const {
   HOLGEN_FAIL_IF(mType != TestVariantStructType::Human, "Attempting to get TestVariantStructExplicitType.being2 as TestVariantStructHuman while its actual type is {}!", mType);
   return reinterpret_cast<const TestVariantStructHuman*>(mBeing2.data());
@@ -83,6 +83,14 @@ const TestVariantStructCat* TestVariantStructExplicitType::GetBeing2AsTestVarian
 TestVariantStructCat* TestVariantStructExplicitType::GetBeing2AsTestVariantStructCat() {
   HOLGEN_FAIL_IF(mType != TestVariantStructType::Cat, "Attempting to get TestVariantStructExplicitType.being2 as TestVariantStructCat while its actual type is {}!", mType);
   return reinterpret_cast<TestVariantStructCat*>(mBeing2.data());
+}
+
+void TestVariantStructExplicitType::DestroyBeing2() const {
+  if (mType == TestVariantStructType::Human) {
+    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mType == TestVariantStructType::Cat) {
+    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
+  }
 }
 
 bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value& json, const Converter& converter) {

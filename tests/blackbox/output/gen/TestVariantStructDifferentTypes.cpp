@@ -9,16 +9,8 @@
 
 namespace holgen_blackbox_test {
 TestVariantStructDifferentTypes::~TestVariantStructDifferentTypes() {
-  if (mBeing1Type == TestVariantStructType::Human) {
-    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mBeing1Type == TestVariantStructType::Cat) {
-    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
-  }
-  if (mBeing2Type == TestVariantStructType::Human) {
-    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mBeing2Type == TestVariantStructType::Cat) {
-    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
-  }
+  DestroyBeing1();
+  DestroyBeing2();
 }
 bool TestVariantStructDifferentTypes::operator==(const TestVariantStructDifferentTypes& rhs) const {
   return true;
@@ -44,6 +36,14 @@ TestVariantStructCat* TestVariantStructDifferentTypes::GetBeing1AsTestVariantStr
   return reinterpret_cast<TestVariantStructCat*>(mBeing1.data());
 }
 
+void TestVariantStructDifferentTypes::DestroyBeing1() const {
+  if (mBeing1Type == TestVariantStructType::Human) {
+    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mBeing1Type == TestVariantStructType::Cat) {
+    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
+  }
+}
+
 const TestVariantStructHuman* TestVariantStructDifferentTypes::GetBeing2AsTestVariantStructHuman() const {
   HOLGEN_FAIL_IF(mBeing2Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being2 as TestVariantStructHuman while its actual type is {}!", mBeing2Type);
   return reinterpret_cast<const TestVariantStructHuman*>(mBeing2.data());
@@ -62,6 +62,14 @@ const TestVariantStructCat* TestVariantStructDifferentTypes::GetBeing2AsTestVari
 TestVariantStructCat* TestVariantStructDifferentTypes::GetBeing2AsTestVariantStructCat() {
   HOLGEN_FAIL_IF(mBeing2Type != TestVariantStructType::Cat, "Attempting to get TestVariantStructDifferentTypes.being2 as TestVariantStructCat while its actual type is {}!", mBeing2Type);
   return reinterpret_cast<TestVariantStructCat*>(mBeing2.data());
+}
+
+void TestVariantStructDifferentTypes::DestroyBeing2() const {
+  if (mBeing2Type == TestVariantStructType::Human) {
+    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mBeing2Type == TestVariantStructType::Cat) {
+    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
+  }
 }
 
 void TestVariantStructDifferentTypes::SetBeing1Type(const TestVariantStructType& val) {

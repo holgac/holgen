@@ -22,6 +22,7 @@ namespace holgen {
     virtual std::string FieldGetterNameInCpp(const std::string &fieldName) const;
     virtual std::string VariantGetterNameInCpp(
         const FieldDefinition &fieldDefinition, const StructDefinition &getAs) const;
+    virtual std::string VariantDestructorNameInCpp(const FieldDefinition &fieldDefinition) const;
     virtual std::string ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition) const;
     virtual std::string ContainerElemAdderNameInCpp(const FieldDefinition &fieldDefinition) const;
     virtual std::string ContainerElemExistenceCheckerNameInCpp(const FieldDefinition &fieldDefinition) const;
@@ -31,7 +32,7 @@ namespace holgen {
                                                       const AnnotationDefinition &indexAnnotation) const;
     virtual std::string ManagedClassIndexGetterNameInCpp(const AnnotationDefinition &indexAnnotation) const;
     virtual std::string FieldSetterNameInCpp(const FieldDefinition &fieldDefinition) const;
-    virtual std::string FieldSetterNameInCpp(const std::string& fieldName) const;
+    virtual std::string FieldSetterNameInCpp(const std::string &fieldName) const;
     virtual std::string LuaFunctionSetterNameInCpp(const FunctionDefinition &functionDefinition) const;
     virtual std::string LuaFunctionCheckerNameInCpp(const FunctionDefinition &functionDefinition) const;
     virtual std::string LuaFunctionHandleNameInCpp(const FunctionDefinition &functionDefinition) const;

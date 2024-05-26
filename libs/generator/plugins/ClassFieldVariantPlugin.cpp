@@ -21,6 +21,7 @@ namespace holgen {
       if (fieldDefinition.mType.mName != St::Variant)
         continue;
       ProcessVariantField(cls, fieldDefinition);
+      ProcessVariantFieldDestructor(cls, fieldDefinition);
       variantTypeFields.insert(
           fieldDefinition.GetAnnotation(Annotations::Variant)->GetAttribute(
               Annotations::Variant_TypeField)->mValue.mName);
@@ -167,5 +168,36 @@ namespace holgen {
     }
     if (!isFirst)
       method.mBody.Add("}}");
+  }
+
+  void ClassFieldVariantPlugin::ProcessVariantFieldDestructor(Class &cls, const FieldDefinition &fieldDefinition) {
+    auto method = ClassMethod{Naming().VariantDestructorNameInCpp(fieldDefinition), Type{"void"}, Visibility::Private};
+    auto typeField = cls.GetField(Naming().FieldNameInCpp(
+        fieldDefinition.GetAnnotation(Annotations::Variant)->GetAttribute(
+            Annotations::Variant_TypeField)->mValue.mName));
+    bool isFirst = true;
+    for (auto &projectStruct: mProject.mProject.mStructs) {
+      if (projectStruct.mIsMixin)
+        continue;
+      auto structVariantAnnotation = projectStruct.GetAnnotation(Annotations::Variant);
+      if (!structVariantAnnotation ||
+          structVariantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != typeField->mType.mName)
+        continue;
+      auto entryAttribute = structVariantAnnotation->GetAttribute(Annotations::Variant_Entry);
+      if (isFirst) {
+        isFirst = false;
+        method.mBody.Add(
+            "if ({} == {}::{}) {{", typeField->mName, typeField->mType.mName, entryAttribute->mValue.mName);
+      } else {
+        method.mBody.Add(
+            "}} else if ({} == {}::{}) {{", typeField->mName, typeField->mType.mName, entryAttribute->mValue.mName);
+      }
+      method.mBody.Indent(1);
+      method.mBody.Add("{}()->~{}();", Naming().VariantGetterNameInCpp(fieldDefinition, projectStruct), projectStruct.mName);
+      method.mBody.Indent(-1);
+    }
+    method.mBody.Add("}}");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
   }
 }

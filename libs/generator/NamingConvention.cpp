@@ -46,7 +46,7 @@ namespace holgen {
   }
 
   std::string
-  NamingConvention::FieldGetterNameInCpp(const std::string& fieldName) const {
+  NamingConvention::FieldGetterNameInCpp(const std::string &fieldName) const {
     return std::format("Get{}", St::Capitalize(fieldName));
   }
 
@@ -103,7 +103,7 @@ namespace holgen {
     return FieldSetterNameInCpp(fieldDefinition.mName);
   }
 
-  std::string NamingConvention::FieldSetterNameInCpp(const std::string& fieldName) const {
+  std::string NamingConvention::FieldSetterNameInCpp(const std::string &fieldName) const {
     return std::format("Set{}", St::Capitalize(fieldName));
   }
 
@@ -130,5 +130,9 @@ namespace holgen {
   std::string NamingConvention::VariantGetterNameInCpp(
       const FieldDefinition &fieldDefinition, const StructDefinition &getAs) const {
     return std::format("Get{}As{}", St::Capitalize(fieldDefinition.mName), St::Capitalize(getAs.mName));
+  }
+
+  std::string NamingConvention::VariantDestructorNameInCpp(const FieldDefinition &fieldDefinition) const {
+    return std::format("Destroy{}", St::Capitalize(fieldDefinition.mName));
   }
 }

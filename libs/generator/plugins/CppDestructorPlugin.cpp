@@ -28,38 +28,9 @@ namespace holgen {
       }
     }
     for (auto &field: structDefinition.mFields) {
-      if (field.mType.mName == St::Variant)
-        ProcessVariantField(cls, destructor, field);
-    }
-  }
-
-  void CppDestructorPlugin::ProcessVariantField(
-      Class &cls, ClassDestructor &destructor, const FieldDefinition &fieldDefinition
-  ) {
-    auto typeField = cls.GetField(Naming().FieldNameInCpp(
-        fieldDefinition.GetAnnotation(Annotations::Variant)->GetAttribute(
-            Annotations::Variant_TypeField)->mValue.mName));
-    bool isFirst = true;
-    for (auto &projectStruct: mProject.mProject.mStructs) {
-      if (projectStruct.mIsMixin)
-        continue;
-      auto structVariantAnnotation = projectStruct.GetAnnotation(Annotations::Variant);
-      if (!structVariantAnnotation ||
-          structVariantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != typeField->mType.mName)
-        continue;
-      auto entryAttribute = structVariantAnnotation->GetAttribute(Annotations::Variant_Entry);
-      if (isFirst) {
-        isFirst = false;
-        destructor.mBody.Add(
-            "if ({} == {}::{}) {{", typeField->mName, typeField->mType.mName, entryAttribute->mValue.mName);
-      } else {
-        destructor.mBody.Add(
-            "}} else if ({} == {}::{}) {{", typeField->mName, typeField->mType.mName, entryAttribute->mValue.mName);
+      if (field.mType.mName == St::Variant) {
+        destructor.mBody.Add("{}();", Naming().VariantDestructorNameInCpp(field));
       }
-      destructor.mBody.Indent(1);
-      destructor.mBody.Add("{}()->~{}();", Naming().VariantGetterNameInCpp(fieldDefinition, projectStruct), projectStruct.mName);
-      destructor.mBody.Indent(-1);
     }
-    destructor.mBody.Add("}}");
   }
 }
