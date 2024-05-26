@@ -27,10 +27,21 @@ namespace holgen {
         destructor.mBody.Add("{}();", func.mName);
       }
     }
+    ProcessVariantFields(destructor, structDefinition);
+  }
+
+  void CppDestructorPlugin::ProcessVariantFields(ClassDestructor &destructor,
+                                                 const StructDefinition &structDefinition) const {
+    std::set<std::string> processedTypeFields;
     for (auto &field: structDefinition.mFields) {
-      if (field.mType.mName == St::Variant) {
-        destructor.mBody.Add("{}();", Naming().VariantDestructorNameInCpp(field));
-      }
+      if (field.mType.mName != St::Variant)
+        continue;
+      auto typeFieldName = field.GetAnnotation(Annotations::Variant)->GetAttribute(
+              Annotations::Variant_TypeField)->mValue.mName;
+      if (processedTypeFields.contains(typeFieldName))
+        continue;
+      processedTypeFields.insert(typeFieldName);
+      destructor.mBody.Add("{}();", Naming().VariantResetterNameInCpp(typeFieldName));
     }
   }
 }

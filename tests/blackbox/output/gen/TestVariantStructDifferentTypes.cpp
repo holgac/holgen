@@ -9,8 +9,8 @@
 
 namespace holgen_blackbox_test {
 TestVariantStructDifferentTypes::~TestVariantStructDifferentTypes() {
-  DestroyBeing1();
-  DestroyBeing2();
+  ResetBeing1Type();
+  ResetBeing2Type();
 }
 bool TestVariantStructDifferentTypes::operator==(const TestVariantStructDifferentTypes& rhs) const {
   return true;
@@ -82,6 +82,18 @@ void TestVariantStructDifferentTypes::SetBeing1Type(const TestVariantStructType&
   }
 }
 
+void TestVariantStructDifferentTypes::ResetBeing1Type() {
+  if (mBeing1Type == TestVariantStructType::Invalid) {
+    return;
+  }
+  if (mBeing1Type == TestVariantStructType::Human) {
+    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mBeing1Type == TestVariantStructType::Cat) {
+    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
+  }
+  mBeing1Type = TestVariantStructType(TestVariantStructType::Invalid);
+}
+
 TestVariantStructType TestVariantStructDifferentTypes::GetBeing1Type() const {
   return mBeing1Type;
 }
@@ -94,6 +106,18 @@ void TestVariantStructDifferentTypes::SetBeing2Type(const TestVariantStructType&
   } else if (val == TestVariantStructType::Cat) {
     new (mBeing2.data()) TestVariantStructCat();
   }
+}
+
+void TestVariantStructDifferentTypes::ResetBeing2Type() {
+  if (mBeing2Type == TestVariantStructType::Invalid) {
+    return;
+  }
+  if (mBeing2Type == TestVariantStructType::Human) {
+    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mBeing2Type == TestVariantStructType::Cat) {
+    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
+  }
+  mBeing2Type = TestVariantStructType(TestVariantStructType::Invalid);
 }
 
 TestVariantStructType TestVariantStructDifferentTypes::GetBeing2Type() const {

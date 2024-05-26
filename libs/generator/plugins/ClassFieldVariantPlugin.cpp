@@ -107,13 +107,21 @@ namespace holgen {
 
     if (auto setter = cls.GetMethod(Naming().FieldSetterNameInCpp(typeFieldName), Constness::NotConst)) {
       setter->mBody = {};
-      ProcessVariantTypeSetter(cls, typeFieldName, *setter);
+      ProcessVariantTypeSetter(cls, typeFieldName, *setter, false);
     } else {
       auto method = ClassMethod{Naming().FieldSetterNameInCpp(typeFieldName), Type{"void"},
                                 Visibility::Public, Constness::NotConst};
       auto &arg = method.mArguments.emplace_back("val", typeField->mType);
       arg.mType.PreventCopying();
-      ProcessVariantTypeSetter(cls, typeFieldName, method);
+      ProcessVariantTypeSetter(cls, typeFieldName, method, false);
+      Validate().NewMethod(cls, method);
+      cls.mMethods.push_back(std::move(method));
+    }
+
+    {
+      auto method = ClassMethod{Naming().VariantResetterNameInCpp(typeFieldName), Type{"void"}, Visibility::Public,
+                                Constness::NotConst};
+      ProcessVariantTypeSetter(cls, typeFieldName, method, true);
       Validate().NewMethod(cls, method);
       cls.mMethods.push_back(std::move(method));
     }
@@ -127,14 +135,22 @@ namespace holgen {
   }
 
   void ClassFieldVariantPlugin::ProcessVariantTypeSetter(
-      Class &cls, const std::string &typeFieldName, ClassMethod &method
+      Class &cls, const std::string &typeFieldName, ClassMethod &method, bool isResetter
   ) {
     auto typeField = cls.GetField(Naming().FieldNameInCpp(typeFieldName));
-    method.mBody.Add(
-        R"R(HOLGEN_FAIL_IF({0} != {1}::Invalid, "{2} field was already initialized (as {{}}), trying to initialize as {{}}!,", {0}, val);)R",
-        typeField->mName, typeField->mType.mName, typeFieldName
-    );
-    method.mBody.Add("{} = val;", typeField->mName);
+    if (isResetter) {
+      method.mBody.Add("if ({} == {}::Invalid) {{", typeField->mName, typeField->mType.mName);
+      method.mBody.Indent(1);
+      method.mBody.Add("return;");
+      method.mBody.Indent(-1);
+      method.mBody.Add("}}");
+    } else {
+      method.mBody.Add(
+          R"R(HOLGEN_FAIL_IF({0} != {1}::Invalid, "{2} field was already initialized (as {{}}), trying to initialize as {{}}!,", {0}, val);)R",
+          typeField->mName, typeField->mType.mName, typeFieldName
+      );
+      method.mBody.Add("{} = val;", typeField->mName);
+    }
     std::vector<ClassField *> matchingFields;
     for (auto &field: cls.mFields) {
       if (!field.mField || field.mField->mType.mName != St::Variant)
@@ -145,6 +161,10 @@ namespace holgen {
       matchingFields.push_back(&field);
     }
     bool isFirst = true;
+    std::string varNameToCheck = "val";
+    if (isResetter) {
+      varNameToCheck = typeField->mName;
+    }
     for (auto &projectStruct: mProject.mProject.mStructs) {
       if (projectStruct.mIsMixin || matchingFields.empty())
         continue;
@@ -154,20 +174,31 @@ namespace holgen {
         continue;
       if (isFirst) {
         isFirst = false;
-        method.mBody.Add("if (val == {}::{}) {{", typeField->mType.mName,
+        method.mBody.Add("if ({} == {}::{}) {{", varNameToCheck, typeField->mType.mName,
                          structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
       } else {
-        method.mBody.Add("}} else if (val == {}::{}) {{", typeField->mType.mName,
+        method.mBody.Add("}} else if ({} == {}::{}) {{", varNameToCheck, typeField->mType.mName,
                          structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
       }
       method.mBody.Indent(1);
       for (auto &field: matchingFields) {
-        method.mBody.Add("new ({}.data()) {}();", field->mName, projectStruct.mName);
+        if (isResetter) {
+          method.mBody.Add("{}()->~{}();", Naming().VariantGetterNameInCpp(*field->mField, projectStruct),
+                           projectStruct.mName);
+        } else {
+          method.mBody.Add("new ({}.data()) {}();", field->mName, projectStruct.mName);
+        }
       }
       method.mBody.Indent(-1);
     }
-    if (!isFirst)
+
+    if (!isFirst) {
       method.mBody.Add("}}");
+    }
+
+    if (isResetter) {
+      method.mBody.Add("{0} = {1}({1}::Invalid);", typeField->mName, typeField->mType.mName);
+    }
   }
 
   void ClassFieldVariantPlugin::ProcessVariantFieldDestructor(Class &cls, const FieldDefinition &fieldDefinition) {
@@ -193,7 +224,8 @@ namespace holgen {
             "}} else if ({} == {}::{}) {{", typeField->mName, typeField->mType.mName, entryAttribute->mValue.mName);
       }
       method.mBody.Indent(1);
-      method.mBody.Add("{}()->~{}();", Naming().VariantGetterNameInCpp(fieldDefinition, projectStruct), projectStruct.mName);
+      method.mBody.Add("{}()->~{}();", Naming().VariantGetterNameInCpp(fieldDefinition, projectStruct),
+                       projectStruct.mName);
       method.mBody.Indent(-1);
     }
     method.mBody.Add("}}");

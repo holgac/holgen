@@ -12,6 +12,6 @@ namespace holgen {
     void ProcessVariantField(Class &cls, const FieldDefinition &fieldDefinition);
     void ProcessVariantFieldDestructor(Class &cls, const FieldDefinition &fieldDefinition);
     void ProcessVariantType(Class &cls, const std::string& typeFieldName);
-    void ProcessVariantTypeSetter(Class &cls, const std::string& typeFieldName, ClassMethod& method);
+    void ProcessVariantTypeSetter(Class &cls, const std::string& typeFieldName, ClassMethod& method, bool isResetter);
   };
 }

@@ -9,8 +9,7 @@
 
 namespace holgen_blackbox_test {
 TestVariantStructExplicitType::~TestVariantStructExplicitType() {
-  DestroyBeing1();
-  DestroyBeing2();
+  ResetType();
 }
 bool TestVariantStructExplicitType::operator==(const TestVariantStructExplicitType& rhs) const {
   return
@@ -91,6 +90,20 @@ void TestVariantStructExplicitType::DestroyBeing2() const {
   } else if (mType == TestVariantStructType::Cat) {
     GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
   }
+}
+
+void TestVariantStructExplicitType::ResetType() {
+  if (mType == TestVariantStructType::Invalid) {
+    return;
+  }
+  if (mType == TestVariantStructType::Human) {
+    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
+    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mType == TestVariantStructType::Cat) {
+    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
+    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
+  }
+  mType = TestVariantStructType(TestVariantStructType::Invalid);
 }
 
 bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value& json, const Converter& converter) {

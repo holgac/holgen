@@ -135,4 +135,8 @@ namespace holgen {
   std::string NamingConvention::VariantDestructorNameInCpp(const FieldDefinition &fieldDefinition) const {
     return std::format("Destroy{}", St::Capitalize(fieldDefinition.mName));
   }
+
+  std::string NamingConvention::VariantResetterNameInCpp(const std::string &fieldName) const {
+    return std::format("Reset{}", St::Capitalize(fieldName));
+  }
 }

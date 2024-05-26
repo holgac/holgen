@@ -30,6 +30,7 @@ public:
   TestVariantStructHuman* GetBeing2AsTestVariantStructHuman();
   const TestVariantStructCat* GetBeing2AsTestVariantStructCat() const;
   TestVariantStructCat* GetBeing2AsTestVariantStructCat();
+  void ResetType();
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
   void PushGlobalToLua(lua_State* luaState, const char* name) const;

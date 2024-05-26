@@ -9,8 +9,7 @@
 
 namespace holgen_blackbox_test {
 TestVariantStructSharedType::~TestVariantStructSharedType() {
-  DestroyBeing1();
-  DestroyBeing2();
+  ResetBeingType();
 }
 bool TestVariantStructSharedType::operator==(const TestVariantStructSharedType& rhs) const {
   return true;
@@ -82,6 +81,20 @@ void TestVariantStructSharedType::SetBeingType(const TestVariantStructType& val)
     new (mBeing1.data()) TestVariantStructCat();
     new (mBeing2.data()) TestVariantStructCat();
   }
+}
+
+void TestVariantStructSharedType::ResetBeingType() {
+  if (mBeingType == TestVariantStructType::Invalid) {
+    return;
+  }
+  if (mBeingType == TestVariantStructType::Human) {
+    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
+    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
+  } else if (mBeingType == TestVariantStructType::Cat) {
+    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
+    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
+  }
+  mBeingType = TestVariantStructType(TestVariantStructType::Invalid);
 }
 
 TestVariantStructType TestVariantStructSharedType::GetBeingType() const {

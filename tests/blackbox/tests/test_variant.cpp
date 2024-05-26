@@ -74,6 +74,23 @@ TEST_F(VariantTest, ExplicitType) {
   EXPECT_EQ(tvs.GetBeing2AsTestVariantStructHuman()->GetName(), "Jean");
 }
 
+TEST_F(VariantTest, Reset) {
+  TestVariantStructExplicitType tvs;
+  tvs.SetType(TestVariantStructType::Human);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); });
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructCat(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); });
+
+  EXPECT_THROW({ tvs.SetType(TestVariantStructType::Cat); }, std::runtime_error);
+  tvs.ResetType();
+  tvs.SetType(TestVariantStructType::Cat);
+  EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing1AsTestVariantStructCat(); });
+  EXPECT_THROW({ tvs.GetBeing2AsTestVariantStructHuman(); }, std::runtime_error);
+  EXPECT_NO_THROW({ tvs.GetBeing2AsTestVariantStructCat(); });
+}
+
 TEST_F(VariantTest, JsonSharedType) {
   TestVariantStructSharedType tvs;
   EXPECT_EQ(tvs.GetBeingType(), TestVariantStructType::Invalid);

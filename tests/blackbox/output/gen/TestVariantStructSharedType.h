@@ -28,6 +28,7 @@ public:
   const TestVariantStructCat* GetBeing2AsTestVariantStructCat() const;
   TestVariantStructCat* GetBeing2AsTestVariantStructCat();
   void SetBeingType(const TestVariantStructType& val);
+  void ResetBeingType();
   TestVariantStructType GetBeingType() const;
   bool ParseJson(const rapidjson::Value& json, const Converter& converter);
   void PushToLua(lua_State* luaState) const;
