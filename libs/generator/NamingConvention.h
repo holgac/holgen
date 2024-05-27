@@ -23,7 +23,6 @@ namespace holgen {
     virtual std::string VariantGetterNameInCpp(
         const FieldDefinition &fieldDefinition, const StructDefinition &getAs) const;
     virtual std::string VariantResetterNameInCpp(const std::string &fieldName) const;
-    virtual std::string VariantDestructorNameInCpp(const FieldDefinition &fieldDefinition) const;
     virtual std::string ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition) const;
     virtual std::string ContainerElemAdderNameInCpp(const FieldDefinition &fieldDefinition) const;
     virtual std::string ContainerElemExistenceCheckerNameInCpp(const FieldDefinition &fieldDefinition) const;

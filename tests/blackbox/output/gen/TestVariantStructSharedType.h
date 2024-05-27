@@ -37,8 +37,6 @@ public:
   static TestVariantStructSharedType* ReadFromLua(lua_State* luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State* luaState);
 private:
-  void DestroyBeing1() const;
-  void DestroyBeing2() const;
   static int IndexMetaMethod(lua_State* luaState);
   static int NewIndexMetaMethod(lua_State* luaState);
   TestVariantStructType mBeingType;

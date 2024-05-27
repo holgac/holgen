@@ -35,14 +35,6 @@ TestVariantStructCat* TestVariantStructSharedType::GetBeing1AsTestVariantStructC
   return reinterpret_cast<TestVariantStructCat*>(mBeing1.data());
 }
 
-void TestVariantStructSharedType::DestroyBeing1() const {
-  if (mBeingType == TestVariantStructType::Human) {
-    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mBeingType == TestVariantStructType::Cat) {
-    GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
-  }
-}
-
 const TestVariantStructHuman* TestVariantStructSharedType::GetBeing2AsTestVariantStructHuman() const {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Human, "Attempting to get TestVariantStructSharedType.being2 as TestVariantStructHuman while its actual type is {}!", mBeingType);
   return reinterpret_cast<const TestVariantStructHuman*>(mBeing2.data());
@@ -61,14 +53,6 @@ const TestVariantStructCat* TestVariantStructSharedType::GetBeing2AsTestVariantS
 TestVariantStructCat* TestVariantStructSharedType::GetBeing2AsTestVariantStructCat() {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Cat, "Attempting to get TestVariantStructSharedType.being2 as TestVariantStructCat while its actual type is {}!", mBeingType);
   return reinterpret_cast<TestVariantStructCat*>(mBeing2.data());
-}
-
-void TestVariantStructSharedType::DestroyBeing2() const {
-  if (mBeingType == TestVariantStructType::Human) {
-    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mBeingType == TestVariantStructType::Cat) {
-    GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
-  }
 }
 
 void TestVariantStructSharedType::SetBeingType(const TestVariantStructType& val) {
