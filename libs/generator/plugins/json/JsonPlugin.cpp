@@ -87,9 +87,9 @@ namespace holgen {
             cls.mName);
       }
 
-      method.mBody.Add("for(const auto& data: json.GetObject()) {{");
+      method.mBody.Add("for (const auto &data: json.GetObject()) {{");
       method.mBody.Indent(1);
-      method.mBody.Add("const auto& name = data.name.GetString();");
+      method.mBody.Add("const auto &name = data.name.GetString();");
       method.mBody.Add(std::move(switcher.Generate()));
       method.mBody.Indent(-1);
       method.mBody.Line() << "}"; // range based for on json.GetObject()
@@ -168,7 +168,7 @@ namespace holgen {
 
   void JsonPlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                                 const std::string &varName, const std::string &rawFieldName) {
-    codeBlock.Add("{} temp;", field.mType.ToString());
+    codeBlock.Add("{}temp;", field.mType.ToString(false));
     codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse, varName);
     codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                   cls.mStruct->mName, rawFieldName);
@@ -183,13 +183,13 @@ namespace holgen {
     auto jsonConvertElem = jsonConvert->GetAttribute(Annotations::JsonConvert_Elem);
     if (jsonConvertElem) {
       codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper, St::JsonHelper_Parse,
-                    Type{mProject, jsonConvertFrom->mValue}.ToString(),
+                    Type{mProject, jsonConvertFrom->mValue}.ToString(true),
                     field.mName, varName, jsonConvertUsing->mValue.mName);
       codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                     cls.mStruct->mName, field.mField->mName);
     } else {
       Type type(mProject, jsonConvertFrom->mValue);
-      codeBlock.Line() << type.ToString() << " temp;";
+      codeBlock.Line() << type.ToString(false) << "temp;";
       codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse, varName);
       codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                     cls.mStruct->mName, field.mField->mName);

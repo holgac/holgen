@@ -169,7 +169,7 @@ namespace holgen {
     method.mBody.Line() << "K key;";
     method.mBody.Add("auto res = {}(key, data.name, converter);", St::JsonHelper_Parse);
     method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R", container);
-    method.mBody.Line() << "auto [it, insertRes] = out.try_emplace(key, V());";
+    method.mBody.Line() << "auto[it, insertRes] = out.try_emplace(key, V());";
     method.mBody.Add(
         R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
         container);

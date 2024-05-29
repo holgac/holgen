@@ -8,7 +8,7 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool Weapon::operator==(const Weapon& rhs) const {
+bool Weapon::operator==(const Weapon &rhs) const {
   return
       mDamageMin == rhs.mDamageMin &&
       mDamageMax == rhs.mDamageMax &&
@@ -24,19 +24,19 @@ uint32_t Weapon::GetDamageMax() const {
   return mDamageMax;
 }
 
-const std::vector<DamageMultiplier>& Weapon::GetDamageMultipliers() const {
+const std::vector<DamageMultiplier> &Weapon::GetDamageMultipliers() const {
   return mDamageMultipliers;
 }
 
-std::vector<DamageMultiplier>& Weapon::GetDamageMultipliers() {
+std::vector<DamageMultiplier> &Weapon::GetDamageMultipliers() {
   return mDamageMultipliers;
 }
 
-const std::vector<std::string>& Weapon::GetModifiers() const {
+const std::vector<std::string> &Weapon::GetModifiers() const {
   return mModifiers;
 }
 
-std::vector<std::string>& Weapon::GetModifiers() {
+std::vector<std::string> &Weapon::GetModifiers() {
   return mModifiers;
 }
 
@@ -48,18 +48,18 @@ void Weapon::SetDamageMax(uint32_t val) {
   mDamageMax = val;
 }
 
-void Weapon::SetDamageMultipliers(const std::vector<DamageMultiplier>& val) {
+void Weapon::SetDamageMultipliers(const std::vector<DamageMultiplier> &val) {
   mDamageMultipliers = val;
 }
 
-void Weapon::SetModifiers(const std::vector<std::string>& val) {
+void Weapon::SetModifiers(const std::vector<std::string> &val) {
   mModifiers = val;
 }
 
-bool Weapon::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Weapon");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("damageMin", name)) {
       auto res = JsonHelper::Parse(mDamageMin, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMin field");
@@ -79,31 +79,31 @@ bool Weapon::ParseJson(const rapidjson::Value& json, const Converter& converter)
   return true;
 }
 
-void Weapon::PushToLua(lua_State* luaState) const {
+void Weapon::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "WeaponMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void Weapon::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void Weapon::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-Weapon* Weapon::ReadFromLua(lua_State* luaState, int32_t idx) {
+Weapon *Weapon::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (Weapon*)lua_touserdata(luaState, -1);
+  auto ptr = (Weapon *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int Weapon::IndexMetaMethod(lua_State* luaState) {
+int Weapon::IndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("damageMin", key)) {
     LuaHelper::Push(instance->mDamageMin, luaState);
   } else if (0 == strcmp("damageMax", key)) {
@@ -113,7 +113,7 @@ int Weapon::IndexMetaMethod(lua_State* luaState) {
   } else if (0 == strcmp("modifiers", key)) {
     LuaHelper::Push(instance->mModifiers, luaState);
   } else if (0 == strcmp("GetAverageDamage", key)) {
-    lua_pushcfunction(luaState, [](lua_State* lsInner) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Weapon::ReadFromLua(lsInner, -1);
       auto result = instance->GetAverageDamage();
       LuaHelper::Push(result, lsInner);
@@ -126,9 +126,9 @@ int Weapon::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int Weapon::NewIndexMetaMethod(lua_State* luaState) {
+int Weapon::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("damageMin", key)) {
     LuaHelper::Read(instance->mDamageMin, luaState, -1);
   } else if (0 == strcmp("damageMax", key)) {
@@ -143,7 +143,7 @@ int Weapon::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void Weapon::CreateLuaMetatable(lua_State* luaState) {
+void Weapon::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, Weapon::IndexMetaMethod);

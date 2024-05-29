@@ -14,7 +14,7 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructType {
 public:
-  using UnderlyingType=int64_t;
+  using UnderlyingType=int64_t ;
   enum Entry : UnderlyingType {
     Human = 0,
     Cat = 1,
@@ -23,22 +23,22 @@ public:
   TestVariantStructType(Entry value);
   TestVariantStructType::Entry GetValue() const;
   static TestVariantStructType FromString(std::string_view str);
-  const char* ToString() const;
-  TestVariantStructType& operator =(UnderlyingType rhs);
-  bool operator ==(UnderlyingType rhs) const;
-  bool operator ==(const TestVariantStructType& rhs) const;
-  bool operator !=(UnderlyingType rhs) const;
-  bool operator !=(const TestVariantStructType& rhs) const;
-  bool operator <(UnderlyingType rhs) const;
-  bool operator <(const TestVariantStructType& rhs) const;
+  const char *ToString() const;
+  TestVariantStructType &operator=(UnderlyingType rhs);
+  bool operator==(UnderlyingType rhs) const;
+  bool operator==(const TestVariantStructType &rhs) const;
+  bool operator!=(UnderlyingType rhs) const;
+  bool operator!=(const TestVariantStructType &rhs) const;
+  bool operator<(UnderlyingType rhs) const;
+  bool operator<(const TestVariantStructType &rhs) const;
   constexpr static std::array<TestVariantStructType::Entry, 2> GetEntries() {
     return std::array<TestVariantStructType::Entry, 2>{Human, Cat};
   }
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-  void PushToLua(lua_State* luaState) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  void PushToLua(lua_State *luaState) const;
   // This only works with negative indices
-  static TestVariantStructType ReadFromLua(lua_State* luaState, int32_t idx);
-  static void PushEnumToLua(lua_State* luaState);
+  static TestVariantStructType ReadFromLua(lua_State *luaState, int32_t idx);
+  static void PushEnumToLua(lua_State *luaState);
   inline static constexpr const UnderlyingType Invalid = 2;
 private:
   UnderlyingType mValue;
@@ -48,7 +48,7 @@ namespace std {
 template <>
 struct hash<holgen_blackbox_test::TestVariantStructType> {
 public:
-  size_t operator()(const holgen_blackbox_test::TestVariantStructType& obj) const {
+  size_t operator()(const holgen_blackbox_test::TestVariantStructType &obj) const {
     return std::hash<holgen_blackbox_test::TestVariantStructType::UnderlyingType>()(obj.GetValue());
   }
 };
@@ -58,7 +58,7 @@ template <>
 struct formatter<holgen_blackbox_test::TestVariantStructType::Entry> : public formatter<string> {
 public:
   template <typename FormatContext>
-  auto format(const holgen_blackbox_test::TestVariantStructType& obj, FormatContext& ctx) const {
+  auto format(const holgen_blackbox_test::TestVariantStructType &obj, FormatContext &ctx) const {
     return format_to(ctx.out(), "{}", holgen_blackbox_test::TestVariantStructType(obj).ToString());
   }
 };
@@ -68,7 +68,7 @@ template <>
 struct formatter<holgen_blackbox_test::TestVariantStructType> : public formatter<string> {
 public:
   template <typename FormatContext>
-  auto format(const holgen_blackbox_test::TestVariantStructType& obj, FormatContext& ctx) const {
+  auto format(const holgen_blackbox_test::TestVariantStructType &obj, FormatContext &ctx) const {
     return format_to(ctx.out(), "{}", obj.ToString());
   }
 };

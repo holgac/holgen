@@ -20,11 +20,11 @@ namespace holgen_blackbox_test {
 class JsonHelper {
 public:
   template <typename T>
-  static bool Parse(T& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(T &out, const rapidjson::Value &json, const Converter &converter) {
     return out.ParseJson(json, converter);
   }
   template <typename SourceType, typename ElemConverter, typename T, size_t C>
-  static bool Parse(std::array<T, C>& out, const rapidjson::Value& json, const Converter& converter, const ElemConverter& elemConverter) {
+  static bool Parse(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
@@ -38,7 +38,7 @@ public:
     return true;
   }
   template <typename T, size_t C>
-  static bool Parse(std::array<T, C>& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
@@ -50,7 +50,7 @@ public:
     return true;
   }
   template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::deque<T>& out, const rapidjson::Value& json, const Converter& converter, const ElemConverter& elemConverter) {
+  static bool Parse(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::deque");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -61,7 +61,7 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::deque<T>& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::deque");
     for (const auto& data: json.GetArray()) {
       T elem;
@@ -72,7 +72,7 @@ public:
     return true;
   }
   template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::vector<T>& out, const rapidjson::Value& json, const Converter& converter, const ElemConverter& elemConverter) {
+  static bool Parse(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::vector");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -83,7 +83,7 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::vector<T>& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::vector");
     for (const auto& data: json.GetArray()) {
       T elem;
@@ -94,7 +94,7 @@ public:
     return true;
   }
   template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::set<T>& out, const rapidjson::Value& json, const Converter& converter, const ElemConverter& elemConverter) {
+  static bool Parse(std::set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::set");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -105,7 +105,7 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::set<T>& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(std::set<T> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::set");
     for (const auto& data: json.GetArray()) {
       T elem;
@@ -116,7 +116,7 @@ public:
     return true;
   }
   template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::unordered_set<T>& out, const rapidjson::Value& json, const Converter& converter, const ElemConverter& elemConverter) {
+  static bool Parse(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_set");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -127,7 +127,7 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::unordered_set<T>& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_set");
     for (const auto& data: json.GetArray()) {
       T elem;
@@ -138,13 +138,13 @@ public:
     return true;
   }
   template <typename K, typename V, typename SourceType, typename ElemConverter>
-  static bool Parse(std::map<K, V>& out, const rapidjson::Value& json, const Converter& converter, const ElemConverter& elemConverter) {
+  static bool Parse(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
     for (const auto& data: json.GetObject()) {
       K key;
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
-      auto [it, insertRes] = out.try_emplace(key, V());
+      auto[it, insertRes] = out.try_emplace(key, V());
       HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
       SourceType valueRaw;
       res = Parse(valueRaw, data.value, converter);
@@ -154,13 +154,13 @@ public:
     return true;
   }
   template <typename K, typename V>
-  static bool Parse(std::map<K, V>& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
     for (const auto& data: json.GetObject()) {
       K key;
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
-      auto [it, insertRes] = out.try_emplace(key, V());
+      auto[it, insertRes] = out.try_emplace(key, V());
       HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
       res = Parse(it->second, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
@@ -168,13 +168,13 @@ public:
     return true;
   }
   template <typename K, typename V, typename SourceType, typename ElemConverter>
-  static bool Parse(std::unordered_map<K, V>& out, const rapidjson::Value& json, const Converter& converter, const ElemConverter& elemConverter) {
+  static bool Parse(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
     for (const auto& data: json.GetObject()) {
       K key;
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
-      auto [it, insertRes] = out.try_emplace(key, V());
+      auto[it, insertRes] = out.try_emplace(key, V());
       HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
       SourceType valueRaw;
       res = Parse(valueRaw, data.value, converter);
@@ -184,13 +184,13 @@ public:
     return true;
   }
   template <typename K, typename V>
-  static bool Parse(std::unordered_map<K, V>& out, const rapidjson::Value& json, const Converter& converter) {
+  static bool Parse(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
     for (const auto& data: json.GetObject()) {
       K key;
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
-      auto [it, insertRes] = out.try_emplace(key, V());
+      auto[it, insertRes] = out.try_emplace(key, V());
       HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
       res = Parse(it->second, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
@@ -199,27 +199,27 @@ public:
   }
 };
 template <>
-bool JsonHelper::Parse(int8_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(int8_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(int16_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(int16_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(int32_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(int32_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(int64_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(int64_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(uint8_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(uint8_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(uint16_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(uint16_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(uint32_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(uint32_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(uint64_t& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(uint64_t &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(float& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(float &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(double& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(double &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(bool& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(bool &out, const rapidjson::Value &json, const Converter &converter);
 template <>
-bool JsonHelper::Parse(std::string& out, const rapidjson::Value& json, const Converter& converter);
+bool JsonHelper::Parse(std::string &out, const rapidjson::Value &json, const Converter &converter);
 }

@@ -82,7 +82,7 @@ namespace holgen {
             R"R(HOLGEN_FAIL_IF({} != {}, "Attempting to get {}.{} as {} while its actual type is {{}}!", {});)R",
             Naming().FieldNameInCpp(type), entryStr, cls.mName, fieldDefinition.mName,
             projectStruct.mName, Naming().FieldNameInCpp(type));
-        method.mBody.Add("return reinterpret_cast<{}>({}.data());", method.mReturnType.ToString(), dataField.mName);
+        method.mBody.Add("return reinterpret_cast<{}>({}.data());", method.mReturnType.ToString(true), dataField.mName);
         Validate().NewMethod(cls, method);
         cls.mMethods.push_back(std::move(method));
       }

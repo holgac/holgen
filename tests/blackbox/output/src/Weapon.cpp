@@ -9,4 +9,5 @@ uint32_t Weapon::GetAverageDamage() {
   return (mDamageMin + mDamageMax) / 2;
 // HOLGEN_USER_DEFINED_END:Weapon_GetAverageDamage
 }
+
 }

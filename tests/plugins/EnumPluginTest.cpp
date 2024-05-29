@@ -125,10 +125,14 @@ enum TestEnum {
   ASSERT_NE(cls->GetMethod("ToString", Constness::Const), nullptr);
   helpers::ExpectEqual(*cls->GetMethod("ToString", Constness::Const), method, R"R(
 switch (mValue) {
-  case 0: return "Entry1";
-  case 3: return "Entry2";
-  case 2: return "Entry3";
-  default: return "INVALID";
+  case 0:
+    return "Entry1";
+  case 3:
+    return "Entry2";
+  case 2:
+    return "Entry3";
+  default:
+    return "INVALID";
 }
   )R");
 }

@@ -12,7 +12,7 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class Person {
 public:
-  bool operator==(const Person& rhs) const;
+  bool operator==(const Person &rhs) const;
   uint32_t GetRace() const;
   uint32_t GetCurrentCountry() const;
   uint32_t GetCurrentCity() const;
@@ -23,15 +23,15 @@ public:
   void SetCurrentCity(uint32_t val);
   void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-  void PushToLua(lua_State* luaState) const;
-  void PushGlobalToLua(lua_State* luaState, const char* name) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  void PushToLua(lua_State *luaState) const;
+  void PushGlobalToLua(lua_State *luaState, const char *name) const;
   // This only works with negative indices
-  static Person* ReadFromLua(lua_State* luaState, int32_t idx);
-  static void CreateLuaMetatable(lua_State* luaState);
+  static Person *ReadFromLua(lua_State *luaState, int32_t idx);
+  static void CreateLuaMetatable(lua_State *luaState);
 private:
-  static int IndexMetaMethod(lua_State* luaState);
-  static int NewIndexMetaMethod(lua_State* luaState);
+  static int IndexMetaMethod(lua_State *luaState);
+  static int NewIndexMetaMethod(lua_State *luaState);
   uint32_t mRace;
   uint32_t mCurrentCountry;
   uint32_t mCurrentCity;

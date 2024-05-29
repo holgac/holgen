@@ -158,13 +158,13 @@ namespace holgen {
         elemToInsert = std::format("std::forward<{}>(elem)", method.mArguments.back().mType.mName);
 
       if (isKeyedContainer) {
-        method.mBody.Add("auto [it, res] = {}.emplace(newId, {});", field.mName, elemToInsert);
+        method.mBody.Add("auto[it, res] = {}.emplace(newId, {});", field.mName, elemToInsert);
         method.mBody.Add(
             "HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Corrupt internal ID counter - was {}.{} modified externally?\");",
             cls.mName, field.mField->mName);
         method.mBody.Add("return &(it->second);", field.mName);
       } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
-        method.mBody.Add("auto [it, res] = {}.emplace({});", field.mName, elemToInsert);
+        method.mBody.Add("auto[it, res] = {}.emplace({});", field.mName, elemToInsert);
         method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Attempting to insert duplicate element to {}\");",
                          field.mField->mName);
         method.mBody.Add("return &(*it);", field.mName);

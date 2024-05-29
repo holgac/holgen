@@ -53,8 +53,8 @@ struct TestData {
     method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 if (json.IsObject()) {
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("testFieldUnsigned", name)) {
       auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
@@ -93,8 +93,8 @@ struct TestData {
     method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
-for(const auto& data: json.GetObject()) {
-  const auto& name = data.name.GetString();
+for (const auto &data: json.GetObject()) {
+  const auto &name = data.name.GetString();
   if (0 == strcmp("testFieldUnsigned", name)) {
     auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
@@ -136,8 +136,8 @@ struct TestData {
     method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
-for(const auto& data: json.GetObject()) {
-  const auto& name = data.name.GetString();
+for (const auto &data: json.GetObject()) {
+  const auto &name = data.name.GetString();
   if (0 == strcmp("testFieldUnsigned", name)) {
     std::string temp;
     auto res = JsonHelper::Parse(temp, data.value, converter);

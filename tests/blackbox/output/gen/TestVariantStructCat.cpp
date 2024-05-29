@@ -8,40 +8,40 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool TestVariantStructCat::operator==(const TestVariantStructCat& rhs) const {
+bool TestVariantStructCat::operator==(const TestVariantStructCat &rhs) const {
   return
       mName == rhs.mName &&
       mColor == rhs.mColor;
 }
 
-const std::string& TestVariantStructCat::GetName() const {
+const std::string &TestVariantStructCat::GetName() const {
   return mName;
 }
 
-std::string& TestVariantStructCat::GetName() {
+std::string &TestVariantStructCat::GetName() {
   return mName;
 }
 
-const std::string& TestVariantStructCat::GetColor() const {
+const std::string &TestVariantStructCat::GetColor() const {
   return mColor;
 }
 
-std::string& TestVariantStructCat::GetColor() {
+std::string &TestVariantStructCat::GetColor() {
   return mColor;
 }
 
-void TestVariantStructCat::SetName(const std::string& val) {
+void TestVariantStructCat::SetName(const std::string &val) {
   mName = val;
 }
 
-void TestVariantStructCat::SetColor(const std::string& val) {
+void TestVariantStructCat::SetColor(const std::string &val) {
   mColor = val;
 }
 
-bool TestVariantStructCat::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestVariantStructCat::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructCat");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("name", name)) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructCat.name field");
@@ -55,31 +55,31 @@ bool TestVariantStructCat::ParseJson(const rapidjson::Value& json, const Convert
   return true;
 }
 
-void TestVariantStructCat::PushToLua(lua_State* luaState) const {
+void TestVariantStructCat::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestVariantStructCatMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void TestVariantStructCat::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void TestVariantStructCat::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-TestVariantStructCat* TestVariantStructCat::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestVariantStructCat *TestVariantStructCat::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestVariantStructCat*)lua_touserdata(luaState, -1);
+  auto ptr = (TestVariantStructCat *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int TestVariantStructCat::IndexMetaMethod(lua_State* luaState) {
+int TestVariantStructCat::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructCat::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("name", key)) {
     LuaHelper::Push(instance->mName, luaState);
   } else if (0 == strcmp("color", key)) {
@@ -91,9 +91,9 @@ int TestVariantStructCat::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int TestVariantStructCat::NewIndexMetaMethod(lua_State* luaState) {
+int TestVariantStructCat::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructCat::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("name", key)) {
     LuaHelper::Read(instance->mName, luaState, -1);
   } else if (0 == strcmp("color", key)) {
@@ -104,7 +104,7 @@ int TestVariantStructCat::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void TestVariantStructCat::CreateLuaMetatable(lua_State* luaState) {
+void TestVariantStructCat::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, TestVariantStructCat::IndexMetaMethod);

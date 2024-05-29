@@ -87,9 +87,8 @@ namespace holgen {
     };
 
     for (auto &op: operators) {
-      // TODO: remove space
       auto method = ClassMethod{
-          "operator " + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness
+          "operator" + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness
       };
       if (op.mReturn == EnumOperatorReturnType::This) {
         method.mReturnType.mName = cls.mName;
@@ -131,7 +130,7 @@ namespace holgen {
         std::format("{}", cls.mEnum->mEntries.size()));
     {
       auto line = method.mBody.Line();
-      line << "return " << method.mReturnType.ToString() << "{";
+      line << "return " << method.mReturnType.ToString(true) << "{";
       for (size_t i = 0; i < cls.mEnum->mEntries.size(); ++i) {
         if (i > 0)
           line << ", ";
@@ -199,9 +198,15 @@ namespace holgen {
     method.mBody.Add("switch (mValue) {{");
     method.mBody.Indent(1);
     for (auto &entry: cls.mEnum->mEntries) {
-      method.mBody.Add("case {}: return \"{}\";", entry.mValue, entry.mName);
+      method.mBody.Add("case {}:", entry.mValue);
+      method.mBody.Indent(1);
+      method.mBody.Add("return \"{}\";", entry.mName);
+      method.mBody.Indent(-1);
     }
-    method.mBody.Add("default: return \"INVALID\";");
+    method.mBody.Add("default:");
+    method.mBody.Indent(1);
+    method.mBody.Add("return \"INVALID\";");
+    method.mBody.Indent(-1);
     method.mBody.Indent(-1);
     method.mBody.Add("}}"); // switch
     Validate().NewMethod(cls, method);

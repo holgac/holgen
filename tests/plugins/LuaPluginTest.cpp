@@ -49,7 +49,7 @@ struct TestData {}
     helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method, R"R(
 lua_newtable(luaState);
 lua_pushstring(luaState, "p");
-lua_pushlightuserdata(luaState, (void*)this);
+lua_pushlightuserdata(luaState, (void *) this);
 lua_settable(luaState, -3);
 lua_getglobal(luaState, "TestDataMeta");
 lua_setmetatable(luaState, -2);
@@ -102,7 +102,7 @@ struct DM {
 lua_newtable(luaState);
 uint64_t id = mId;
 lua_pushstring(luaState, "i");
-lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));
+lua_pushlightuserdata(luaState, reinterpret_cast<void *>(id));
 lua_settable(luaState, -3);
 lua_getglobal(luaState, "TestDataMeta");
 lua_setmetatable(luaState, -2);
@@ -127,7 +127,7 @@ struct TestData {}
     helpers::ExpectEqual(*cls->GetMethod("ReadFromLua", Constness::NotConst), method, R"R(
 lua_pushstring(luaState, "p");
 lua_gettable(luaState, idx - 1);
-auto ptr = (TestData*)lua_touserdata(luaState, -1);
+auto ptr = (TestData *) lua_touserdata(luaState, -1);
 lua_pop(luaState, 1);
 return ptr;
     )R");
@@ -189,7 +189,7 @@ struct TestData {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -2);
-const char* key = lua_tostring(luaState, -1);
+const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testFieldUnsigned", key)) {
   LuaHelper::Push(instance->mTestFieldUnsigned, luaState);
 } else if (0 == strcmp("testFieldString", key)) {
@@ -225,9 +225,9 @@ struct TestData {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -2);
-const char* key = lua_tostring(luaState, -1);
+const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("functionReturningVoid", key)) {
-  lua_pushcfunction(luaState, [](lua_State* lsInner) {
+  lua_pushcfunction(luaState, [](lua_State *lsInner) {
     auto instance = TestData::ReadFromLua(lsInner, -3);
     int32_t arg0;
     LuaHelper::Read(arg0, lsInner, -2);
@@ -237,7 +237,7 @@ if (0 == strcmp("functionReturningVoid", key)) {
     return 0;
   });
 } else if (0 == strcmp("functionReturningString", key)) {
-  lua_pushcfunction(luaState, [](lua_State* lsInner) {
+  lua_pushcfunction(luaState, [](lua_State *lsInner) {
     auto instance = TestData::ReadFromLua(lsInner, -1);
     auto result = instance->functionReturningString();
     LuaHelper::Push(result, lsInner);
@@ -275,7 +275,7 @@ struct TestData {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -2);
-const char* key = lua_tostring(luaState, -1);
+const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testStructWithIdRefId", key)) {
   LuaHelper::Push(instance->mTestStructWithIdRefId, luaState);
 } else if (0 == strcmp("testStructNoIdRef", key)) {
@@ -308,7 +308,7 @@ struct TestData {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -3);
-const char* key = lua_tostring(luaState, -2);
+const char *key = lua_tostring(luaState, -2);
 if (0 == strcmp("testFieldUnsigned", key)) {
   LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
 } else if (0 == strcmp("testFieldString", key)) {
@@ -344,7 +344,7 @@ struct TestData {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -3);
-const char* key = lua_tostring(luaState, -2);
+const char *key = lua_tostring(luaState, -2);
 if (0 == strcmp("testStructRefId", key)) {
   LuaHelper::Read(instance->mTestStructRefId, luaState, -1);
 } else {

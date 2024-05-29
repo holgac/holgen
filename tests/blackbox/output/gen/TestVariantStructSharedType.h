@@ -18,27 +18,27 @@ namespace holgen_blackbox_test {
 class TestVariantStructSharedType {
 public:
   ~TestVariantStructSharedType();
-  bool operator==(const TestVariantStructSharedType& rhs) const;
-  const TestVariantStructHuman* GetBeing1AsTestVariantStructHuman() const;
-  TestVariantStructHuman* GetBeing1AsTestVariantStructHuman();
-  const TestVariantStructCat* GetBeing1AsTestVariantStructCat() const;
-  TestVariantStructCat* GetBeing1AsTestVariantStructCat();
-  const TestVariantStructHuman* GetBeing2AsTestVariantStructHuman() const;
-  TestVariantStructHuman* GetBeing2AsTestVariantStructHuman();
-  const TestVariantStructCat* GetBeing2AsTestVariantStructCat() const;
-  TestVariantStructCat* GetBeing2AsTestVariantStructCat();
-  void SetBeingType(const TestVariantStructType& val);
+  bool operator==(const TestVariantStructSharedType &rhs) const;
+  const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
+  TestVariantStructHuman *GetBeing1AsTestVariantStructHuman();
+  const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
+  TestVariantStructCat *GetBeing1AsTestVariantStructCat();
+  const TestVariantStructHuman *GetBeing2AsTestVariantStructHuman() const;
+  TestVariantStructHuman *GetBeing2AsTestVariantStructHuman();
+  const TestVariantStructCat *GetBeing2AsTestVariantStructCat() const;
+  TestVariantStructCat *GetBeing2AsTestVariantStructCat();
+  void SetBeingType(const TestVariantStructType &val);
   void ResetBeingType();
   TestVariantStructType GetBeingType() const;
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-  void PushToLua(lua_State* luaState) const;
-  void PushGlobalToLua(lua_State* luaState, const char* name) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  void PushToLua(lua_State *luaState) const;
+  void PushGlobalToLua(lua_State *luaState, const char *name) const;
   // This only works with negative indices
-  static TestVariantStructSharedType* ReadFromLua(lua_State* luaState, int32_t idx);
-  static void CreateLuaMetatable(lua_State* luaState);
+  static TestVariantStructSharedType *ReadFromLua(lua_State *luaState, int32_t idx);
+  static void CreateLuaMetatable(lua_State *luaState);
 private:
-  static int IndexMetaMethod(lua_State* luaState);
-  static int NewIndexMetaMethod(lua_State* luaState);
+  static int IndexMetaMethod(lua_State *luaState);
+  static int NewIndexMetaMethod(lua_State *luaState);
   TestVariantStructType mBeingType;
   std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing1;
   std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing2;

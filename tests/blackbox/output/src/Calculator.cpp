@@ -11,4 +11,5 @@ int64_t Calculator::SubtractThenMultiply(int64_t lhs, int64_t rhs) {
   return mCurVal.GetValue();
 // HOLGEN_USER_DEFINED_END:Calculator_SubtractThenMultiply
 }
+
 }

@@ -109,8 +109,8 @@ namespace holgen {
     return contents;
   }
 
-  void
-  CodeGenerator::GenerateClassHeader(GeneratedContent &header, const Class &cls, const HeaderContainer &headers) const {
+  void CodeGenerator::GenerateClassHeader(
+      GeneratedContent &header, const Class &cls, const HeaderContainer &headers) const {
     header.mType = FileType::CppHeader;
     header.mName = std::format("gen/{}.h", cls.mName);
     CodeBlock codeBlock;
@@ -227,7 +227,7 @@ namespace holgen {
           else
             line << "static ";
         }
-        line << field.mType.ToString() << " " << field.mName;
+        line << field.mType.ToString(false) << field.mName;
         if (canDefineInline)
           line << StringifyFieldDefinition(field);
         line << ";";
@@ -273,7 +273,7 @@ namespace holgen {
             isFirst = false;
           else
             line << ", ";
-          line << arg.mType.ToString() << " " << arg.mName;
+          line << arg.mType.ToString(false) <<  arg.mName;
           if (isInsideClass && arg.mDefaultValue.has_value()) {
             line << " = " << *arg.mDefaultValue;
           }
@@ -319,8 +319,8 @@ namespace holgen {
     }
   }
 
-  void
-  CodeGenerator::GenerateClassSource(GeneratedContent &source, const Class &cls, const HeaderContainer &headers) const {
+  void CodeGenerator::GenerateClassSource(
+      GeneratedContent &source, const Class &cls, const HeaderContainer &headers) const {
     source.mType = FileType::CppSource;
     source.mName = std::format("gen/{}.cpp", cls.mName);
     CodeBlock codeBlock;
@@ -345,6 +345,7 @@ namespace holgen {
         if (!previousBlockWasEmpty)
           codeBlock.AddLine();
         codeBlock.Add(std::move(block));
+        previousBlockWasEmpty = false;
       }
     }
 
@@ -376,7 +377,7 @@ namespace holgen {
     CodeBlock codeBlock;
     for (auto &field: cls.mFields) {
       if (field.mStaticness == Staticness::Static && field.mType.mName == cls.mName) {
-        codeBlock.Add("{} {}::{}{};", field.mType.ToString(), cls.mName, field.mName, StringifyFieldDefinition(field));
+        codeBlock.Add("{}{}::{}{};", field.mType.ToString(false), cls.mName, field.mName, StringifyFieldDefinition(field));
       }
     }
     return codeBlock;
@@ -524,7 +525,7 @@ namespace holgen {
 
   void CodeGenerator::GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const {
     for (auto &usingStatement: cls.mUsings) {
-      codeBlock.Add("using {}={};", usingStatement.mTargetType, usingStatement.mSourceType.ToString());
+      codeBlock.Add("using {}={};", usingStatement.mTargetType, usingStatement.mSourceType.ToString(false));
     }
   }
 
@@ -557,7 +558,7 @@ namespace holgen {
             line << ", ";
           if (cls.GetUsing(arg.mType.mName))
             line << cls.mName << "::";
-          line << arg.mType.ToString() << " " << arg.mName;
+          line << arg.mType.ToString(false) << arg.mName;
         }
         line << ")";
         if (ctor.mInitializerList.empty())
@@ -566,7 +567,7 @@ namespace holgen {
           line << " :";
       }
       if (!ctor.mInitializerList.empty()) {
-        codeBlock.Indent(1);
+        codeBlock.Indent(2);
         {
           auto line = codeBlock.Line();
           bool isFirst = true;
@@ -577,9 +578,9 @@ namespace holgen {
               line << ", ";
             line << iElem.mDestination << "(" << iElem.mValue << ")";
           }
+          line << " {";
         }
-        codeBlock.Indent(-1);
-        codeBlock.Add("{{");
+        codeBlock.Indent(-2);
       }
       codeBlock.Indent(1);
       codeBlock.Add(ctor.mBody);
@@ -598,7 +599,7 @@ namespace holgen {
       ss << "static ";
     if (!isInHeader && cls.GetUsing(method.mReturnType.mName))
       ss << cls.mName << "::";
-    ss << method.mReturnType.ToString() << " ";
+    ss << method.mReturnType.ToString(false);
     if (!isInHeader || !isInsideClass)
       ss << cls.mName << "::";
     ss << method.mName << "(";
@@ -606,7 +607,7 @@ namespace holgen {
     for (auto &arg: method.mArguments) {
       if (idx != 0)
         ss << ", ";
-      ss << arg.mType.ToString() << " " << arg.mName;
+      ss << arg.mType.ToString(false) << arg.mName;
       if (isInHeader && arg.mDefaultValue.has_value())
         ss << " = " << *arg.mDefaultValue;
       ++idx;
@@ -661,6 +662,7 @@ namespace holgen {
       codeBlock.Add("{} {{", GenerateFunctionSignature(cls, method, false, false));
       codeBlock.UserDefined("{}_{}{}", cls.mName, method.mName, method.mConstness == Constness::Const ? "_Const" : "");
       codeBlock.Add("}}");
+      codeBlock.AddLine();
     }
     if (!cls.mNamespace.empty())
       codeBlock.Add("}}");

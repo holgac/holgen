@@ -51,7 +51,7 @@ namespace holgen {
         continue;
       switcher.AddCase(luaMethod.mName, [&](CodeBlock &switchBlock) {
         // TODO: LuaHelper::Push should work with functions
-        switchBlock.Add("lua_pushcfunction(luaState, [](lua_State* lsInner) {{");
+        switchBlock.Add("lua_pushcfunction(luaState, [](lua_State *lsInner) {{");
         switchBlock.Indent(1);
         switchBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
                         -ssize_t(luaMethod.mArguments.size()) - 1);
@@ -71,7 +71,7 @@ namespace holgen {
             auto sanitizedType = arg.mType;
             sanitizedType.mType = PassByType::Value;
             sanitizedType.mConstness = Constness::NotConst;
-            switchBlock.Add("{} arg{};", sanitizedType.ToString(), i);
+            switchBlock.Add("{}arg{};", sanitizedType.ToString(false), i);
             switchBlock.Add(
                 "{}::{}(arg{}, lsInner, {});",
                 St::LuaHelper, St::LuaHelper_Read, i,
@@ -95,7 +95,7 @@ namespace holgen {
 
     if (!switcher.IsEmpty()) {
       method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -2);", cls.mName);
-      method.mBody.Add("const char* key = lua_tostring(luaState, -1);");
+      method.mBody.Add("const char *key = lua_tostring(luaState, -1);");
       method.mBody.Add(std::move(switcher.Generate()));
       method.mBody.Line() << "return 1;";
     } else {
@@ -118,7 +118,7 @@ namespace holgen {
         auto variantAnnotation = otherCls.mStruct->GetAnnotation(Annotations::Variant);
         if (variantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != enumField->mType.mName)
           continue;
-        switchBlock.Add("case {}::{}:", enumField->mType.ToString(),
+        switchBlock.Add("case {}::{}:", enumField->mType.ToString(true),
                         variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
         switchBlock.Indent(1);
         switchBlock.Add("{}::{}(instance->{}(), luaState);", St::LuaHelper, St::LuaHelper_Push,
@@ -159,7 +159,7 @@ namespace holgen {
     }
     if (!switcher.IsEmpty()) {
       method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -3);", cls.mName);
-      method.mBody.Add("const char* key = lua_tostring(luaState, -2);");
+      method.mBody.Add("const char *key = lua_tostring(luaState, -2);");
       method.mBody.Add(std::move(switcher.Generate()));
     }
     method.mBody.Line() << "return 0;";
@@ -192,14 +192,14 @@ namespace holgen {
       if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
         tempType = "int64_t";
       }
-      method.mBody.Add("{} id = reinterpret_cast<{}>(lua_touserdata(luaState, -1));", idField->mType.mName, tempType);
+      method.mBody.Add("{} id = reinterpret_cast<{}>(lua_touserdata(luaState, -1));", idField->mType.ToString(true), tempType);
       method.mBody.Add("auto ptr = {}::{}(id);", cls.mName, St::ManagedObject_Getter);
       method.mBody.Add("lua_pop(luaState, 1);");
       method.mBody.Add("return ptr;");
     } else {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
       method.mBody.Add("lua_gettable(luaState, idx - 1);");
-      method.mBody.Add("auto ptr = ({}*)lua_touserdata(luaState, -1);", cls.mName);
+      method.mBody.Add("auto ptr = ({} *) lua_touserdata(luaState, -1);", cls.mName);
       method.mBody.Add("lua_pop(luaState, 1);");
       method.mBody.Add("return ptr;");
     }
@@ -237,10 +237,10 @@ namespace holgen {
       }
       method.mBody.Add("{} id = {};", tempType, idField->mName);
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
-      method.mBody.Add("lua_pushlightuserdata(luaState, reinterpret_cast<void*>(id));");
+      method.mBody.Add("lua_pushlightuserdata(luaState, reinterpret_cast<void *>(id));");
     } else {
       method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Pointer);
-      method.mBody.Add("lua_pushlightuserdata(luaState, (void*)this);");
+      method.mBody.Add("lua_pushlightuserdata(luaState, (void *) this);");
     }
     method.mBody.Add("lua_settable(luaState, -3);");
     /*

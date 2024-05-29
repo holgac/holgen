@@ -94,7 +94,7 @@ namespace generator_test_namespace {
  */
 class Person {
 public:
-  bool operator==(const Person& rhs) const;
+  bool operator==(const Person &rhs) const;
   uint32_t GetAge() const;
   float GetGender() const;
   void SetAge(uint32_t val);
@@ -122,7 +122,7 @@ private:
 #include <cmath>
 
 namespace generator_test_namespace {
-bool Person::operator==(const Person& rhs) const {
+bool Person::operator==(const Person &rhs) const {
   return
       mAge == rhs.mAge &&
       std::fabs(mGender - rhs.mGender) < 0.1;
@@ -191,16 +191,16 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Market {
 public:
-  bool operator==(const Market& rhs) const;
-  const std::vector<std::string>& GetInstruments() const;
-  std::vector<std::string>& GetInstruments();
-  const std::map<std::string, double>& GetPrices() const;
-  std::map<std::string, double>& GetPrices();
-  void SetInstruments(const std::vector<std::string>& val);
-  void SetPrices(const std::map<std::string, double>& val);
+  bool operator==(const Market &rhs) const;
+  const std::vector<std::string> &GetInstruments() const;
+  std::vector<std::string> &GetInstruments();
+  const std::map<std::string, double> &GetPrices() const;
+  std::map<std::string, double> &GetPrices();
+  void SetInstruments(const std::vector<std::string> &val);
+  void SetPrices(const std::map<std::string, double> &val);
   // Callback when a new trade is executed
-  void OnNewTrade(const std::string& instrument, double price);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  void OnNewTrade(const std::string &instrument, double price);
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
 private:
   std::vector<std::string> mInstruments;
   std::map<std::string, double> mPrices;
@@ -221,40 +221,40 @@ private:
 #include "Converter.h"
 
 namespace generator_test_namespace {
-bool Market::operator==(const Market& rhs) const {
+bool Market::operator==(const Market &rhs) const {
   return
       mInstruments == rhs.mInstruments &&
       mPrices == rhs.mPrices;
 }
 
-const std::vector<std::string>& Market::GetInstruments() const {
+const std::vector<std::string> &Market::GetInstruments() const {
   return mInstruments;
 }
 
-std::vector<std::string>& Market::GetInstruments() {
+std::vector<std::string> &Market::GetInstruments() {
   return mInstruments;
 }
 
-const std::map<std::string, double>& Market::GetPrices() const {
+const std::map<std::string, double> &Market::GetPrices() const {
   return mPrices;
 }
 
-std::map<std::string, double>& Market::GetPrices() {
+std::map<std::string, double> &Market::GetPrices() {
   return mPrices;
 }
 
-void Market::SetInstruments(const std::vector<std::string>& val) {
+void Market::SetInstruments(const std::vector<std::string> &val) {
   mInstruments = val;
 }
 
-void Market::SetPrices(const std::map<std::string, double>& val) {
+void Market::SetPrices(const std::map<std::string, double> &val) {
   mPrices = val;
 }
 
-bool Market::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Market::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Market");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("instruments", name)) {
       auto res = JsonHelper::Parse(mInstruments, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Market.instruments field");
@@ -316,13 +316,13 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Sound {
 public:
-  bool operator==(const Sound& rhs) const;
-  const std::string& GetName() const;
-  std::string& GetName();
+  bool operator==(const Sound &rhs) const;
+  const std::string &GetName() const;
+  std::string &GetName();
   uint32_t GetVolume() const;
-  void SetName(const std::string& val);
+  void SetName(const std::string &val);
   void SetVolume(uint32_t val);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
 private:
   std::string mName;
   uint32_t mVolume;
@@ -344,17 +344,17 @@ private:
 #include "Converter.h"
 
 namespace generator_test_namespace {
-bool Sound::operator==(const Sound& rhs) const {
+bool Sound::operator==(const Sound &rhs) const {
   return
       mName == rhs.mName &&
       mVolume == rhs.mVolume;
 }
 
-const std::string& Sound::GetName() const {
+const std::string &Sound::GetName() const {
   return mName;
 }
 
-std::string& Sound::GetName() {
+std::string &Sound::GetName() {
   return mName;
 }
 
@@ -362,7 +362,7 @@ uint32_t Sound::GetVolume() const {
   return mVolume;
 }
 
-void Sound::SetName(const std::string& val) {
+void Sound::SetName(const std::string &val) {
   mName = val;
 }
 
@@ -370,10 +370,10 @@ void Sound::SetVolume(uint32_t val) {
   mVolume = val;
 }
 
-bool Sound::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Sound::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Sound");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("name", name)) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Sound.name field");
@@ -410,11 +410,11 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Animal {
 public:
-  bool operator==(const Animal& rhs) const;
-  const std::vector<Sound>& GetSounds() const;
-  std::vector<Sound>& GetSounds();
-  void SetSounds(const std::vector<Sound>& val);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  bool operator==(const Animal &rhs) const;
+  const std::vector<Sound> &GetSounds() const;
+  std::vector<Sound> &GetSounds();
+  void SetSounds(const std::vector<Sound> &val);
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
 private:
   std::vector<Sound> mSounds;
 };
@@ -435,27 +435,27 @@ private:
 #include "Converter.h"
 
 namespace generator_test_namespace {
-bool Animal::operator==(const Animal& rhs) const {
+bool Animal::operator==(const Animal &rhs) const {
   return
       mSounds == rhs.mSounds;
 }
 
-const std::vector<Sound>& Animal::GetSounds() const {
+const std::vector<Sound> &Animal::GetSounds() const {
   return mSounds;
 }
 
-std::vector<Sound>& Animal::GetSounds() {
+std::vector<Sound> &Animal::GetSounds() {
   return mSounds;
 }
 
-void Animal::SetSounds(const std::vector<Sound>& val) {
+void Animal::SetSounds(const std::vector<Sound> &val) {
   mSounds = val;
 }
 
-bool Animal::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Animal::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   if (json.IsObject()) {
-    for(const auto& data: json.GetObject()) {
-      const auto& name = data.name.GetString();
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
       if (0 == strcmp("sounds", name)) {
         auto res = JsonHelper::Parse(mSounds, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Animal.sounds field");
@@ -526,7 +526,7 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Person {
 public:
-  bool operator==(const Person& rhs) const;
+  bool operator==(const Person &rhs) const;
   uint32_t GetCurrentCountry() const;
   uint32_t GetCurrentCity() const;
   uint32_t GetHomeCountry() const;
@@ -535,7 +535,7 @@ public:
   void SetCurrentCity(uint32_t val);
   void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
 private:
   uint32_t mCurrentCountry;
   uint32_t mCurrentCity;
@@ -558,7 +558,7 @@ private:
 #include "Converter.h"
 
 namespace generator_test_namespace {
-bool Person::operator==(const Person& rhs) const {
+bool Person::operator==(const Person &rhs) const {
   return
       mCurrentCountry == rhs.mCurrentCountry &&
       mCurrentCity == rhs.mCurrentCity &&
@@ -598,10 +598,10 @@ void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;
 }
 
-bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Person");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("currentCountry", name)) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
@@ -650,14 +650,14 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Country {
 public:
-  bool operator==(const Country& rhs) const;
-  const std::string& GetName() const;
-  std::string& GetName();
-  const Person& GetLeader() const;
-  Person& GetLeader();
-  void SetName(const std::string& val);
-  void SetLeader(const Person& val);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
+  bool operator==(const Country &rhs) const;
+  const std::string &GetName() const;
+  std::string &GetName();
+  const Person &GetLeader() const;
+  Person &GetLeader();
+  void SetName(const std::string &val);
+  void SetLeader(const Person &val);
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
 private:
   std::string mName;
   Person mLeader;
@@ -678,40 +678,40 @@ private:
 #include "Converter.h"
 
 namespace generator_test_namespace {
-bool Country::operator==(const Country& rhs) const {
+bool Country::operator==(const Country &rhs) const {
   return
       mName == rhs.mName &&
       mLeader == rhs.mLeader;
 }
 
-const std::string& Country::GetName() const {
+const std::string &Country::GetName() const {
   return mName;
 }
 
-std::string& Country::GetName() {
+std::string &Country::GetName() {
   return mName;
 }
 
-const Person& Country::GetLeader() const {
+const Person &Country::GetLeader() const {
   return mLeader;
 }
 
-Person& Country::GetLeader() {
+Person &Country::GetLeader() {
   return mLeader;
 }
 
-void Country::SetName(const std::string& val) {
+void Country::SetName(const std::string &val) {
   mName = val;
 }
 
-void Country::SetLeader(const Person& val) {
+void Country::SetLeader(const Person &val) {
   mLeader = val;
 }
 
-bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Country::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Country");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("leader", name)) {
       auto res = JsonHelper::Parse(mLeader, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.leader field");
@@ -772,17 +772,17 @@ bool Country::ParseJson(const rapidjson::Value& json, const Converter& converter
 namespace generator_test_namespace {
 class Person {
 public:
-  bool operator==(const Person& rhs) const;
+  bool operator==(const Person &rhs) const;
   uint32_t GetId() const;
-  const std::string& GetName() const;
-  std::string& GetName();
+  const std::string &GetName() const;
+  std::string &GetName();
   uint32_t GetPartnerId() const;
-  const Person* GetPartner() const;
-  Person* GetPartner();
+  const Person *GetPartner() const;
+  Person *GetPartner();
   void SetId(uint32_t val);
-  void SetName(const std::string& val);
+  void SetName(const std::string &val);
   void SetPartnerId(uint32_t val);
-  static Person* Get(uint32_t id);
+  static Person *Get(uint32_t id);
 private:
   uint32_t mId = -1;
   std::string mName;
@@ -804,7 +804,7 @@ private:
 #include "Country.h"
 
 namespace generator_test_namespace {
-bool Person::operator==(const Person& rhs) const {
+bool Person::operator==(const Person &rhs) const {
   return
       mId == rhs.mId &&
       mName == rhs.mName &&
@@ -815,11 +815,11 @@ uint32_t Person::GetId() const {
   return mId;
 }
 
-const std::string& Person::GetName() const {
+const std::string &Person::GetName() const {
   return mName;
 }
 
-std::string& Person::GetName() {
+std::string &Person::GetName() {
   return mName;
 }
 
@@ -827,11 +827,11 @@ uint32_t Person::GetPartnerId() const {
   return mPartnerId;
 }
 
-const Person* Person::GetPartner() const {
+const Person *Person::GetPartner() const {
   return Person::Get(mPartnerId);
 }
 
-Person* Person::GetPartner() {
+Person *Person::GetPartner() {
   return Person::Get(mPartnerId);
 }
 
@@ -839,7 +839,7 @@ void Person::SetId(uint32_t val) {
   mId = val;
 }
 
-void Person::SetName(const std::string& val) {
+void Person::SetName(const std::string &val) {
   mName = val;
 }
 
@@ -847,7 +847,7 @@ void Person::SetPartnerId(uint32_t val) {
   mPartnerId = val;
 }
 
-Person* Person::Get(uint32_t id) {
+Person *Person::Get(uint32_t id) {
   return GlobalPointer<Country>::GetInstance()->GetPerson(id);
 }
 }

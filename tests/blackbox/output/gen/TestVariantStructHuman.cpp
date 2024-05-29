@@ -8,40 +8,40 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool TestVariantStructHuman::operator==(const TestVariantStructHuman& rhs) const {
+bool TestVariantStructHuman::operator==(const TestVariantStructHuman &rhs) const {
   return
       mName == rhs.mName &&
       mNationality == rhs.mNationality;
 }
 
-const std::string& TestVariantStructHuman::GetName() const {
+const std::string &TestVariantStructHuman::GetName() const {
   return mName;
 }
 
-std::string& TestVariantStructHuman::GetName() {
+std::string &TestVariantStructHuman::GetName() {
   return mName;
 }
 
-const std::string& TestVariantStructHuman::GetNationality() const {
+const std::string &TestVariantStructHuman::GetNationality() const {
   return mNationality;
 }
 
-std::string& TestVariantStructHuman::GetNationality() {
+std::string &TestVariantStructHuman::GetNationality() {
   return mNationality;
 }
 
-void TestVariantStructHuman::SetName(const std::string& val) {
+void TestVariantStructHuman::SetName(const std::string &val) {
   mName = val;
 }
 
-void TestVariantStructHuman::SetNationality(const std::string& val) {
+void TestVariantStructHuman::SetNationality(const std::string &val) {
   mNationality = val;
 }
 
-bool TestVariantStructHuman::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestVariantStructHuman::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructHuman");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("name", name)) {
       auto res = JsonHelper::Parse(mName, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructHuman.name field");
@@ -55,31 +55,31 @@ bool TestVariantStructHuman::ParseJson(const rapidjson::Value& json, const Conve
   return true;
 }
 
-void TestVariantStructHuman::PushToLua(lua_State* luaState) const {
+void TestVariantStructHuman::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestVariantStructHumanMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void TestVariantStructHuman::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void TestVariantStructHuman::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-TestVariantStructHuman* TestVariantStructHuman::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestVariantStructHuman *TestVariantStructHuman::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestVariantStructHuman*)lua_touserdata(luaState, -1);
+  auto ptr = (TestVariantStructHuman *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int TestVariantStructHuman::IndexMetaMethod(lua_State* luaState) {
+int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructHuman::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("name", key)) {
     LuaHelper::Push(instance->mName, luaState);
   } else if (0 == strcmp("nationality", key)) {
@@ -91,9 +91,9 @@ int TestVariantStructHuman::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int TestVariantStructHuman::NewIndexMetaMethod(lua_State* luaState) {
+int TestVariantStructHuman::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructHuman::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("name", key)) {
     LuaHelper::Read(instance->mName, luaState, -1);
   } else if (0 == strcmp("nationality", key)) {
@@ -104,7 +104,7 @@ int TestVariantStructHuman::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void TestVariantStructHuman::CreateLuaMetatable(lua_State* luaState) {
+void TestVariantStructHuman::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, TestVariantStructHuman::IndexMetaMethod);

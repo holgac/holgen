@@ -8,7 +8,7 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool TestContainerInnerStructNoId::operator==(const TestContainerInnerStructNoId& rhs) const {
+bool TestContainerInnerStructNoId::operator==(const TestContainerInnerStructNoId &rhs) const {
   return
       mField == rhs.mField &&
       mName == rhs.mName;
@@ -18,11 +18,11 @@ uint32_t TestContainerInnerStructNoId::GetField() const {
   return mField;
 }
 
-const std::string& TestContainerInnerStructNoId::GetName() const {
+const std::string &TestContainerInnerStructNoId::GetName() const {
   return mName;
 }
 
-std::string& TestContainerInnerStructNoId::GetName() {
+std::string &TestContainerInnerStructNoId::GetName() {
   return mName;
 }
 
@@ -30,14 +30,14 @@ void TestContainerInnerStructNoId::SetField(uint32_t val) {
   mField = val;
 }
 
-void TestContainerInnerStructNoId::SetName(const std::string& val) {
+void TestContainerInnerStructNoId::SetName(const std::string &val) {
   mName = val;
 }
 
-bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerInnerStructNoId");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("field", name)) {
       auto res = JsonHelper::Parse(mField, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.field field");
@@ -51,31 +51,31 @@ bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value& json, const
   return true;
 }
 
-void TestContainerInnerStructNoId::PushToLua(lua_State* luaState) const {
+void TestContainerInnerStructNoId::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestContainerInnerStructNoIdMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void TestContainerInnerStructNoId::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void TestContainerInnerStructNoId::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-TestContainerInnerStructNoId* TestContainerInnerStructNoId::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestContainerInnerStructNoId *TestContainerInnerStructNoId::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestContainerInnerStructNoId*)lua_touserdata(luaState, -1);
+  auto ptr = (TestContainerInnerStructNoId *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int TestContainerInnerStructNoId::IndexMetaMethod(lua_State* luaState) {
+int TestContainerInnerStructNoId::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerInnerStructNoId::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("field", key)) {
     LuaHelper::Push(instance->mField, luaState);
   } else if (0 == strcmp("name", key)) {
@@ -87,9 +87,9 @@ int TestContainerInnerStructNoId::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int TestContainerInnerStructNoId::NewIndexMetaMethod(lua_State* luaState) {
+int TestContainerInnerStructNoId::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerInnerStructNoId::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("field", key)) {
     LuaHelper::Read(instance->mField, luaState, -1);
   } else if (0 == strcmp("name", key)) {
@@ -100,7 +100,7 @@ int TestContainerInnerStructNoId::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void TestContainerInnerStructNoId::CreateLuaMetatable(lua_State* luaState) {
+void TestContainerInnerStructNoId::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, TestContainerInnerStructNoId::IndexMetaMethod);

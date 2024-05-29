@@ -34,14 +34,14 @@ namespace generator_test_namespace {
 template <typename T>
 class GlobalPointer {
 public:
-  static T* GetInstance() {
+  static T *GetInstance() {
     return mInstance;
   }
-  static void SetInstance(T* ptr) {
+  static void SetInstance(T *ptr) {
     mInstance = ptr;
   }
 private:
-  inline static T* mInstance = nullptr;
+  inline static T *mInstance = nullptr;
 };
 }
 )R"

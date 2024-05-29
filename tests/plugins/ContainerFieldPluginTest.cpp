@@ -379,7 +379,7 @@ auto newId = mInnerStructsNextId;
 ++mInnerStructsNextId;
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 elem.SetId(newId);
-auto [it, res] = mInnerStructs.emplace(newId, std::forward<InnerStruct>(elem));
+auto[it, res] = mInnerStructs.emplace(newId, std::forward<InnerStruct>(elem));
 HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestData.innerStructs modified externally?");
 return &(it->second);
     )R");

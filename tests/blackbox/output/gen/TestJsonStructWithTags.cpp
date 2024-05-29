@@ -8,27 +8,27 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool TestJsonStructWithTags::operator==(const TestJsonStructWithTags& rhs) const {
+bool TestJsonStructWithTags::operator==(const TestJsonStructWithTags &rhs) const {
   return
       mTags == rhs.mTags;
 }
 
-const std::vector<uint64_t>& TestJsonStructWithTags::GetTags() const {
+const std::vector<uint64_t> &TestJsonStructWithTags::GetTags() const {
   return mTags;
 }
 
-std::vector<uint64_t>& TestJsonStructWithTags::GetTags() {
+std::vector<uint64_t> &TestJsonStructWithTags::GetTags() {
   return mTags;
 }
 
-void TestJsonStructWithTags::SetTags(const std::vector<uint64_t>& val) {
+void TestJsonStructWithTags::SetTags(const std::vector<uint64_t> &val) {
   mTags = val;
 }
 
-bool TestJsonStructWithTags::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   if (json.IsObject()) {
-    for(const auto& data: json.GetObject()) {
-      const auto& name = data.name.GetString();
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
       if (0 == strcmp("tags", name)) {
         auto res = JsonHelper::Parse<std::string>(mTags, data.value, converter, converter.testJsonConvertTag);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
@@ -43,31 +43,31 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value& json, const Conve
   return true;
 }
 
-void TestJsonStructWithTags::PushToLua(lua_State* luaState) const {
+void TestJsonStructWithTags::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestJsonStructWithTagsMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void TestJsonStructWithTags::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void TestJsonStructWithTags::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-TestJsonStructWithTags* TestJsonStructWithTags::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestJsonStructWithTags *TestJsonStructWithTags::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestJsonStructWithTags*)lua_touserdata(luaState, -1);
+  auto ptr = (TestJsonStructWithTags *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int TestJsonStructWithTags::IndexMetaMethod(lua_State* luaState) {
+int TestJsonStructWithTags::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("tags", key)) {
     LuaHelper::Push(instance->mTags, luaState);
   } else {
@@ -77,9 +77,9 @@ int TestJsonStructWithTags::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int TestJsonStructWithTags::NewIndexMetaMethod(lua_State* luaState) {
+int TestJsonStructWithTags::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("tags", key)) {
     LuaHelper::Read(instance->mTags, luaState, -1);
   } else {
@@ -88,7 +88,7 @@ int TestJsonStructWithTags::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void TestJsonStructWithTags::CreateLuaMetatable(lua_State* luaState) {
+void TestJsonStructWithTags::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, TestJsonStructWithTags::IndexMetaMethod);

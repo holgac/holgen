@@ -11,51 +11,51 @@ namespace holgen_blackbox_test {
 TestVariantStructSharedType::~TestVariantStructSharedType() {
   ResetBeingType();
 }
-bool TestVariantStructSharedType::operator==(const TestVariantStructSharedType& rhs) const {
+bool TestVariantStructSharedType::operator==(const TestVariantStructSharedType &rhs) const {
   return true;
 }
 
-const TestVariantStructHuman* TestVariantStructSharedType::GetBeing1AsTestVariantStructHuman() const {
+const TestVariantStructHuman *TestVariantStructSharedType::GetBeing1AsTestVariantStructHuman() const {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Human, "Attempting to get TestVariantStructSharedType.being1 as TestVariantStructHuman while its actual type is {}!", mBeingType);
-  return reinterpret_cast<const TestVariantStructHuman*>(mBeing1.data());
+  return reinterpret_cast<const TestVariantStructHuman *>(mBeing1.data());
 }
 
-TestVariantStructHuman* TestVariantStructSharedType::GetBeing1AsTestVariantStructHuman() {
+TestVariantStructHuman *TestVariantStructSharedType::GetBeing1AsTestVariantStructHuman() {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Human, "Attempting to get TestVariantStructSharedType.being1 as TestVariantStructHuman while its actual type is {}!", mBeingType);
-  return reinterpret_cast<TestVariantStructHuman*>(mBeing1.data());
+  return reinterpret_cast<TestVariantStructHuman *>(mBeing1.data());
 }
 
-const TestVariantStructCat* TestVariantStructSharedType::GetBeing1AsTestVariantStructCat() const {
+const TestVariantStructCat *TestVariantStructSharedType::GetBeing1AsTestVariantStructCat() const {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Cat, "Attempting to get TestVariantStructSharedType.being1 as TestVariantStructCat while its actual type is {}!", mBeingType);
-  return reinterpret_cast<const TestVariantStructCat*>(mBeing1.data());
+  return reinterpret_cast<const TestVariantStructCat *>(mBeing1.data());
 }
 
-TestVariantStructCat* TestVariantStructSharedType::GetBeing1AsTestVariantStructCat() {
+TestVariantStructCat *TestVariantStructSharedType::GetBeing1AsTestVariantStructCat() {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Cat, "Attempting to get TestVariantStructSharedType.being1 as TestVariantStructCat while its actual type is {}!", mBeingType);
-  return reinterpret_cast<TestVariantStructCat*>(mBeing1.data());
+  return reinterpret_cast<TestVariantStructCat *>(mBeing1.data());
 }
 
-const TestVariantStructHuman* TestVariantStructSharedType::GetBeing2AsTestVariantStructHuman() const {
+const TestVariantStructHuman *TestVariantStructSharedType::GetBeing2AsTestVariantStructHuman() const {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Human, "Attempting to get TestVariantStructSharedType.being2 as TestVariantStructHuman while its actual type is {}!", mBeingType);
-  return reinterpret_cast<const TestVariantStructHuman*>(mBeing2.data());
+  return reinterpret_cast<const TestVariantStructHuman *>(mBeing2.data());
 }
 
-TestVariantStructHuman* TestVariantStructSharedType::GetBeing2AsTestVariantStructHuman() {
+TestVariantStructHuman *TestVariantStructSharedType::GetBeing2AsTestVariantStructHuman() {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Human, "Attempting to get TestVariantStructSharedType.being2 as TestVariantStructHuman while its actual type is {}!", mBeingType);
-  return reinterpret_cast<TestVariantStructHuman*>(mBeing2.data());
+  return reinterpret_cast<TestVariantStructHuman *>(mBeing2.data());
 }
 
-const TestVariantStructCat* TestVariantStructSharedType::GetBeing2AsTestVariantStructCat() const {
+const TestVariantStructCat *TestVariantStructSharedType::GetBeing2AsTestVariantStructCat() const {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Cat, "Attempting to get TestVariantStructSharedType.being2 as TestVariantStructCat while its actual type is {}!", mBeingType);
-  return reinterpret_cast<const TestVariantStructCat*>(mBeing2.data());
+  return reinterpret_cast<const TestVariantStructCat *>(mBeing2.data());
 }
 
-TestVariantStructCat* TestVariantStructSharedType::GetBeing2AsTestVariantStructCat() {
+TestVariantStructCat *TestVariantStructSharedType::GetBeing2AsTestVariantStructCat() {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Cat, "Attempting to get TestVariantStructSharedType.being2 as TestVariantStructCat while its actual type is {}!", mBeingType);
-  return reinterpret_cast<TestVariantStructCat*>(mBeing2.data());
+  return reinterpret_cast<TestVariantStructCat *>(mBeing2.data());
 }
 
-void TestVariantStructSharedType::SetBeingType(const TestVariantStructType& val) {
+void TestVariantStructSharedType::SetBeingType(const TestVariantStructType &val) {
   HOLGEN_FAIL_IF(mBeingType != TestVariantStructType::Invalid, "beingType field was already initialized (as {}), trying to initialize as {}!,", mBeingType, val);
   mBeingType = val;
   if (val == TestVariantStructType::Human) {
@@ -85,10 +85,10 @@ TestVariantStructType TestVariantStructSharedType::GetBeingType() const {
   return mBeingType;
 }
 
-bool TestVariantStructSharedType::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestVariantStructSharedType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructSharedType");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("beingType", name)) {
       TestVariantStructType temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
@@ -123,31 +123,31 @@ bool TestVariantStructSharedType::ParseJson(const rapidjson::Value& json, const 
   return true;
 }
 
-void TestVariantStructSharedType::PushToLua(lua_State* luaState) const {
+void TestVariantStructSharedType::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestVariantStructSharedTypeMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void TestVariantStructSharedType::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void TestVariantStructSharedType::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-TestVariantStructSharedType* TestVariantStructSharedType::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestVariantStructSharedType *TestVariantStructSharedType::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestVariantStructSharedType*)lua_touserdata(luaState, -1);
+  auto ptr = (TestVariantStructSharedType *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int TestVariantStructSharedType::IndexMetaMethod(lua_State* luaState) {
+int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructSharedType::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("being1", key)) {
     switch (instance->mBeingType.GetValue()) {
     case TestVariantStructType::Human:
@@ -177,11 +177,11 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int TestVariantStructSharedType::NewIndexMetaMethod(lua_State* luaState) {
+int TestVariantStructSharedType::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
-void TestVariantStructSharedType::CreateLuaMetatable(lua_State* luaState) {
+void TestVariantStructSharedType::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, TestVariantStructSharedType::IndexMetaMethod);

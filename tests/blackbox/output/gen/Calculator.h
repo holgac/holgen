@@ -14,26 +14,26 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class Calculator {
 public:
-  bool operator==(const Calculator& rhs) const;
-  const Number& GetCurVal() const;
-  Number& GetCurVal();
-  void SetCurVal(const Number& val);
-  int64_t Add(lua_State* luaState, int64_t val) const;
+  bool operator==(const Calculator &rhs) const;
+  const Number &GetCurVal() const;
+  Number &GetCurVal();
+  void SetCurVal(const Number &val);
+  int64_t Add(lua_State *luaState, int64_t val) const;
   void SetAddLuaFunc(std::string val);
   bool HasAddLuaFunc() const;
-  Number* Subtract(lua_State* luaState, const Number* val) const;
+  Number *Subtract(lua_State *luaState, const Number *val) const;
   void SetSubtractLuaFunc(std::string val);
   bool HasSubtractLuaFunc() const;
   int64_t SubtractThenMultiply(int64_t lhs, int64_t rhs);
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-  void PushToLua(lua_State* luaState) const;
-  void PushGlobalToLua(lua_State* luaState, const char* name) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  void PushToLua(lua_State *luaState) const;
+  void PushGlobalToLua(lua_State *luaState, const char *name) const;
   // This only works with negative indices
-  static Calculator* ReadFromLua(lua_State* luaState, int32_t idx);
-  static void CreateLuaMetatable(lua_State* luaState);
+  static Calculator *ReadFromLua(lua_State *luaState, int32_t idx);
+  static void CreateLuaMetatable(lua_State *luaState);
 private:
-  static int IndexMetaMethod(lua_State* luaState);
-  static int NewIndexMetaMethod(lua_State* luaState);
+  static int IndexMetaMethod(lua_State *luaState);
+  static int NewIndexMetaMethod(lua_State *luaState);
   Number mCurVal;
   std::string mLuaFuncHandle_Add;
   std::string mLuaFuncHandle_Subtract;

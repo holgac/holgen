@@ -15,33 +15,33 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestStructSingleElemContainer {
 public:
-  bool operator==(const TestStructSingleElemContainer& rhs) const;
-  const std::vector<TestStructSingleElem>& GetSingleElemStructs() const;
-  std::vector<TestStructSingleElem>& GetSingleElemStructs();
-  const std::vector<TestStructSingleElemWithId>& GetSingleElemStructsWithId() const;
-  std::vector<TestStructSingleElemWithId>& GetSingleElemStructsWithId();
-  void SetSingleElemStructs(const std::vector<TestStructSingleElem>& val);
-  void SetSingleElemStructsWithId(const std::vector<TestStructSingleElemWithId>& val);
-  TestStructSingleElem* AddSingleElemStruct(TestStructSingleElem&& elem);
-  TestStructSingleElem* AddSingleElemStruct(const TestStructSingleElem& elem);
-  const TestStructSingleElem* GetSingleElemStruct(size_t idx) const;
-  TestStructSingleElem* GetSingleElemStruct(size_t idx);
+  bool operator==(const TestStructSingleElemContainer &rhs) const;
+  const std::vector<TestStructSingleElem> &GetSingleElemStructs() const;
+  std::vector<TestStructSingleElem> &GetSingleElemStructs();
+  const std::vector<TestStructSingleElemWithId> &GetSingleElemStructsWithId() const;
+  std::vector<TestStructSingleElemWithId> &GetSingleElemStructsWithId();
+  void SetSingleElemStructs(const std::vector<TestStructSingleElem> &val);
+  void SetSingleElemStructsWithId(const std::vector<TestStructSingleElemWithId> &val);
+  TestStructSingleElem *AddSingleElemStruct(TestStructSingleElem &&elem);
+  TestStructSingleElem *AddSingleElemStruct(const TestStructSingleElem &elem);
+  const TestStructSingleElem *GetSingleElemStruct(size_t idx) const;
+  TestStructSingleElem *GetSingleElemStruct(size_t idx);
   void DeleteSingleElemStruct(size_t idx);
   size_t GetSingleElemStructCount() const;
-  TestStructSingleElemWithId* AddSingleElemStructWithId(TestStructSingleElemWithId&& elem);
-  TestStructSingleElemWithId* AddSingleElemStructWithId(TestStructSingleElemWithId& elem);
-  const TestStructSingleElemWithId* GetSingleElemStructWithId(uint32_t idx) const;
-  TestStructSingleElemWithId* GetSingleElemStructWithId(uint32_t idx);
+  TestStructSingleElemWithId *AddSingleElemStructWithId(TestStructSingleElemWithId &&elem);
+  TestStructSingleElemWithId *AddSingleElemStructWithId(TestStructSingleElemWithId &elem);
+  const TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx) const;
+  TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx);
   size_t GetSingleElemStructWithIdCount() const;
-  bool ParseJson(const rapidjson::Value& json, const Converter& converter);
-  void PushToLua(lua_State* luaState) const;
-  void PushGlobalToLua(lua_State* luaState, const char* name) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  void PushToLua(lua_State *luaState) const;
+  void PushGlobalToLua(lua_State *luaState, const char *name) const;
   // This only works with negative indices
-  static TestStructSingleElemContainer* ReadFromLua(lua_State* luaState, int32_t idx);
-  static void CreateLuaMetatable(lua_State* luaState);
+  static TestStructSingleElemContainer *ReadFromLua(lua_State *luaState, int32_t idx);
+  static void CreateLuaMetatable(lua_State *luaState);
 private:
-  static int IndexMetaMethod(lua_State* luaState);
-  static int NewIndexMetaMethod(lua_State* luaState);
+  static int IndexMetaMethod(lua_State *luaState);
+  static int NewIndexMetaMethod(lua_State *luaState);
   std::vector<TestStructSingleElem> mSingleElemStructs;
   std::vector<TestStructSingleElemWithId> mSingleElemStructsWithId;
 };

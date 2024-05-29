@@ -101,7 +101,7 @@ namespace holgen {
     return instance;
   }
 
-  std::string Type::ToString() const {
+  std::string Type::ToString(bool noTrailingSpace) const {
     std::stringstream ss;
 
     if (mConstexprness == Constexprness::Constexpr)
@@ -118,7 +118,7 @@ namespace holgen {
         } else {
           ss << ", ";
         }
-        ss << templateParameter.ToString();
+        ss << templateParameter.ToString(true);
       }
       ss << ">";
     }
@@ -132,16 +132,18 @@ namespace holgen {
         } else {
           ss << ", ";
         }
-        ss << mFunctionalTemplateParameters[i].ToString();
+        ss << mFunctionalTemplateParameters[i].ToString(true);
       }
       ss << ")>";
     }
     if (mType == PassByType::Reference)
-      ss << "&";
+      ss << " &";
     else if (mType == PassByType::Pointer)
-      ss << "*";
+      ss << " *";
     else if (mType == PassByType::MoveReference)
-      ss << "&&";
+      ss << " &&";
+    else if (!noTrailingSpace)
+      ss << " ";
     return ss.str();
   }
 

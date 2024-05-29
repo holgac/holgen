@@ -10,7 +10,7 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool Human::operator==(const Human& rhs) const {
+bool Human::operator==(const Human &rhs) const {
   return
       mId == rhs.mId &&
       mName == rhs.mName;
@@ -20,11 +20,11 @@ uint32_t Human::GetId() const {
   return mId;
 }
 
-const std::string& Human::GetName() const {
+const std::string &Human::GetName() const {
   return mName;
 }
 
-std::string& Human::GetName() {
+std::string &Human::GetName() {
   return mName;
 }
 
@@ -32,22 +32,22 @@ void Human::SetId(uint32_t val) {
   mId = val;
 }
 
-void Human::SetName(const std::string& val) {
+void Human::SetName(const std::string &val) {
   mName = val;
 }
 
-Human* Human::Get(uint32_t id) {
+Human *Human::Get(uint32_t id) {
   return GlobalPointer<HumanManager>::GetInstance()->GetHuman(id);
 }
 
-Human* Human::GetFromName(const std::string& key) {
+Human *Human::GetFromName(const std::string &key) {
   return GlobalPointer<HumanManager>::GetInstance()->GetHumanFromName(key);
 }
 
-bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Human::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   if (json.IsObject()) {
-    for(const auto& data: json.GetObject()) {
-      const auto& name = data.name.GetString();
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
       if (0 == strcmp("id", name)) {
         auto res = JsonHelper::Parse(mId, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.id field");
@@ -65,31 +65,31 @@ bool Human::ParseJson(const rapidjson::Value& json, const Converter& converter) 
   return true;
 }
 
-void Human::PushToLua(lua_State* luaState) const {
+void Human::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "HumanMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void Human::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void Human::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-Human* Human::ReadFromLua(lua_State* luaState, int32_t idx) {
+Human *Human::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (Human*)lua_touserdata(luaState, -1);
+  auto ptr = (Human *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int Human::IndexMetaMethod(lua_State* luaState) {
+int Human::IndexMetaMethod(lua_State *luaState) {
   auto instance = Human::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState);
   } else if (0 == strcmp("name", key)) {
@@ -101,9 +101,9 @@ int Human::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int Human::NewIndexMetaMethod(lua_State* luaState) {
+int Human::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Human::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
     LuaHelper::Read(instance->mId, luaState, -1);
   } else if (0 == strcmp("name", key)) {
@@ -114,7 +114,7 @@ int Human::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void Human::CreateLuaMetatable(lua_State* luaState) {
+void Human::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, Human::IndexMetaMethod);

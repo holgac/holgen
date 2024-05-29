@@ -9,14 +9,13 @@
 
 namespace holgen_blackbox_test {
 TestVariantStructType::TestVariantStructType(TestVariantStructType::UnderlyingType value) :
-  mValue(value)
-{
+    mValue(value) {
 }
 
 TestVariantStructType::TestVariantStructType(Entry value) :
-  mValue(UnderlyingType(value))
-{
+    mValue(UnderlyingType(value)) {
 }
+
 TestVariantStructType::Entry TestVariantStructType::GetValue() const {
   return Entry(mValue);
 }
@@ -31,44 +30,47 @@ TestVariantStructType TestVariantStructType::FromString(std::string_view str) {
   }
 }
 
-const char* TestVariantStructType::ToString() const {
+const char *TestVariantStructType::ToString() const {
   switch (mValue) {
-    case 0: return "Human";
-    case 1: return "Cat";
-    default: return "INVALID";
+    case 0:
+      return "Human";
+    case 1:
+      return "Cat";
+    default:
+      return "INVALID";
   }
 }
 
-TestVariantStructType& TestVariantStructType::operator =(UnderlyingType rhs) {
+TestVariantStructType &TestVariantStructType::operator=(UnderlyingType rhs) {
   mValue = rhs;
   return *this;
 }
 
-bool TestVariantStructType::operator ==(UnderlyingType rhs) const {
+bool TestVariantStructType::operator==(UnderlyingType rhs) const {
   return mValue == rhs;
 }
 
-bool TestVariantStructType::operator ==(const TestVariantStructType& rhs) const {
+bool TestVariantStructType::operator==(const TestVariantStructType &rhs) const {
   return mValue == rhs.mValue;
 }
 
-bool TestVariantStructType::operator !=(UnderlyingType rhs) const {
+bool TestVariantStructType::operator!=(UnderlyingType rhs) const {
   return mValue != rhs;
 }
 
-bool TestVariantStructType::operator !=(const TestVariantStructType& rhs) const {
+bool TestVariantStructType::operator!=(const TestVariantStructType &rhs) const {
   return mValue != rhs.mValue;
 }
 
-bool TestVariantStructType::operator <(UnderlyingType rhs) const {
+bool TestVariantStructType::operator<(UnderlyingType rhs) const {
   return mValue < rhs;
 }
 
-bool TestVariantStructType::operator <(const TestVariantStructType& rhs) const {
+bool TestVariantStructType::operator<(const TestVariantStructType &rhs) const {
   return mValue < rhs.mValue;
 }
 
-bool TestVariantStructType::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestVariantStructType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   if (json.IsString()) {
     *this = TestVariantStructType::FromString(std::string_view(json.GetString(), json.GetStringLength()));
   } else if (json.IsInt64()) {
@@ -81,11 +83,11 @@ bool TestVariantStructType::ParseJson(const rapidjson::Value& json, const Conver
   return true;
 }
 
-void TestVariantStructType::PushToLua(lua_State* luaState) const {
+void TestVariantStructType::PushToLua(lua_State *luaState) const {
   LuaHelper::Push(mValue, luaState);
 }
 
-TestVariantStructType TestVariantStructType::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestVariantStructType TestVariantStructType::ReadFromLua(lua_State *luaState, int32_t idx) {
   auto typ = lua_type(luaState, idx);
   if (typ == LUA_TSTRING) {
     return FromString(lua_tostring(luaState, idx));
@@ -96,7 +98,7 @@ TestVariantStructType TestVariantStructType::ReadFromLua(lua_State* luaState, in
   }
 }
 
-void TestVariantStructType::PushEnumToLua(lua_State* luaState) {
+void TestVariantStructType::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "Human");
   lua_pushnumber(luaState, 0);

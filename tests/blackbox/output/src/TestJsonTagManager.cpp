@@ -4,7 +4,7 @@
 // HOLGEN_USER_DEFINED_END:TestJsonTagManager_CustomIncludes
 
 namespace holgen_blackbox_test {
-uint64_t TestJsonTagManager::GetOrInsert(const std::string& tag) {
+uint64_t TestJsonTagManager::GetOrInsert(const std::string &tag) {
 // HOLGEN_USER_DEFINED_BEGIN:TestJsonTagManager_GetOrInsert
   auto tagPtr = GetTagFromName(tag);
   if (!tagPtr) {
@@ -15,4 +15,5 @@ uint64_t TestJsonTagManager::GetOrInsert(const std::string& tag) {
   return tagPtr->GetId();
 // HOLGEN_USER_DEFINED_END:TestJsonTagManager_GetOrInsert
 }
+
 }

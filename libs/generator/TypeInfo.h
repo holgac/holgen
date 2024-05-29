@@ -59,7 +59,7 @@ namespace holgen {
     // It's converted to string as [0]([1],[2], ...)
     // TODO: Instead of a separate field, Type should natively support function types
     std::vector<Type> mFunctionalTemplateParameters;
-    [[nodiscard]] std::string ToString() const;
+    [[nodiscard]] std::string ToString(bool noTrailingSpace) const;
     void PreventCopying(bool addConst = true);
   };
 

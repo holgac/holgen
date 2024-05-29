@@ -4,7 +4,7 @@
 #include <fstream>
 
 namespace holgen_blackbox_test {
-std::string FilesystemHelper::ReadFile(const std::string& filePath) {
+std::string FilesystemHelper::ReadFile(const std::string &filePath) {
   std::ifstream fin(filePath, std::ios_base::binary);
   fin.seekg(0, std::ios_base::end);
   auto bufferSize = fin.tellg();

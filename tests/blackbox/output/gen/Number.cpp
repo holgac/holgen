@@ -8,7 +8,7 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool Number::operator==(const Number& rhs) const {
+bool Number::operator==(const Number &rhs) const {
   return
       mValue == rhs.mValue;
 }
@@ -21,10 +21,10 @@ void Number::SetValue(int64_t val) {
   mValue = val;
 }
 
-bool Number::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Number::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   if (json.IsObject()) {
-    for(const auto& data: json.GetObject()) {
-      const auto& name = data.name.GetString();
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
       if (0 == strcmp("value", name)) {
         auto res = JsonHelper::Parse(mValue, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Number.value field");
@@ -39,31 +39,31 @@ bool Number::ParseJson(const rapidjson::Value& json, const Converter& converter)
   return true;
 }
 
-void Number::PushToLua(lua_State* luaState) const {
+void Number::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "NumberMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void Number::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void Number::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-Number* Number::ReadFromLua(lua_State* luaState, int32_t idx) {
+Number *Number::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (Number*)lua_touserdata(luaState, -1);
+  auto ptr = (Number *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int Number::IndexMetaMethod(lua_State* luaState) {
+int Number::IndexMetaMethod(lua_State *luaState) {
   auto instance = Number::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("value", key)) {
     LuaHelper::Push(instance->mValue, luaState);
   } else {
@@ -73,9 +73,9 @@ int Number::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int Number::NewIndexMetaMethod(lua_State* luaState) {
+int Number::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Number::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("value", key)) {
     LuaHelper::Read(instance->mValue, luaState, -1);
   } else {
@@ -84,7 +84,7 @@ int Number::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void Number::CreateLuaMetatable(lua_State* luaState) {
+void Number::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, Number::IndexMetaMethod);

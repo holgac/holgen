@@ -9,7 +9,7 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool TestStructArrayCustomData1::operator==(const TestStructArrayCustomData1& rhs) const {
+bool TestStructArrayCustomData1::operator==(const TestStructArrayCustomData1 &rhs) const {
   return
       mF1 == rhs.mF1 &&
       std::fabs(mF2 - rhs.mF2) < 0.00001 &&
@@ -40,10 +40,10 @@ void TestStructArrayCustomData1::SetF3(uint64_t val) {
   mF3 = val;
 }
 
-bool TestStructArrayCustomData1::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestStructArrayCustomData1::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructArrayCustomData1");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("f1", name)) {
       auto res = JsonHelper::Parse(mF1, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f1 field");
@@ -60,31 +60,31 @@ bool TestStructArrayCustomData1::ParseJson(const rapidjson::Value& json, const C
   return true;
 }
 
-void TestStructArrayCustomData1::PushToLua(lua_State* luaState) const {
+void TestStructArrayCustomData1::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestStructArrayCustomData1Meta");
   lua_setmetatable(luaState, -2);
 }
 
-void TestStructArrayCustomData1::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void TestStructArrayCustomData1::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-TestStructArrayCustomData1* TestStructArrayCustomData1::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestStructArrayCustomData1 *TestStructArrayCustomData1::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestStructArrayCustomData1*)lua_touserdata(luaState, -1);
+  auto ptr = (TestStructArrayCustomData1 *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int TestStructArrayCustomData1::IndexMetaMethod(lua_State* luaState) {
+int TestStructArrayCustomData1::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArrayCustomData1::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("f1", key)) {
     LuaHelper::Push(instance->mF1, luaState);
   } else if (0 == strcmp("f2", key)) {
@@ -98,9 +98,9 @@ int TestStructArrayCustomData1::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int TestStructArrayCustomData1::NewIndexMetaMethod(lua_State* luaState) {
+int TestStructArrayCustomData1::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArrayCustomData1::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("f1", key)) {
     LuaHelper::Read(instance->mF1, luaState, -1);
   } else if (0 == strcmp("f2", key)) {
@@ -113,7 +113,7 @@ int TestStructArrayCustomData1::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void TestStructArrayCustomData1::CreateLuaMetatable(lua_State* luaState) {
+void TestStructArrayCustomData1::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, TestStructArrayCustomData1::IndexMetaMethod);

@@ -16,28 +16,28 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class HumanManager {
 public:
-  bool operator==(const HumanManager& rhs) const;
-  const std::unordered_map<uint32_t, Human>& GetHumans() const;
-  std::unordered_map<uint32_t, Human>& GetHumans();
-  void SetHumans(const std::unordered_map<uint32_t, Human>& val);
-  const Human* GetHumanFromName(const std::string& key) const;
-  Human* GetHumanFromName(const std::string& key);
-  Human* AddHuman(Human&& elem);
-  Human* AddHuman(Human& elem);
-  const Human* GetHuman(uint32_t idx) const;
-  Human* GetHuman(uint32_t idx);
+  bool operator==(const HumanManager &rhs) const;
+  const std::unordered_map<uint32_t, Human> &GetHumans() const;
+  std::unordered_map<uint32_t, Human> &GetHumans();
+  void SetHumans(const std::unordered_map<uint32_t, Human> &val);
+  const Human *GetHumanFromName(const std::string &key) const;
+  Human *GetHumanFromName(const std::string &key);
+  Human *AddHuman(Human &&elem);
+  Human *AddHuman(Human &elem);
+  const Human *GetHuman(uint32_t idx) const;
+  Human *GetHuman(uint32_t idx);
   bool HasHuman(uint32_t key) const;
   void DeleteHuman(uint32_t key);
   size_t GetHumanCount() const;
-  bool ParseFiles(const std::string& rootPath, const Converter& converterArg);
-  void PushToLua(lua_State* luaState) const;
-  void PushGlobalToLua(lua_State* luaState, const char* name) const;
+  bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
+  void PushToLua(lua_State *luaState) const;
+  void PushGlobalToLua(lua_State *luaState, const char *name) const;
   // This only works with negative indices
-  static HumanManager* ReadFromLua(lua_State* luaState, int32_t idx);
-  static void CreateLuaMetatable(lua_State* luaState);
+  static HumanManager *ReadFromLua(lua_State *luaState, int32_t idx);
+  static void CreateLuaMetatable(lua_State *luaState);
 private:
-  static int IndexMetaMethod(lua_State* luaState);
-  static int NewIndexMetaMethod(lua_State* luaState);
+  static int IndexMetaMethod(lua_State *luaState);
+  static int NewIndexMetaMethod(lua_State *luaState);
   std::unordered_map<uint32_t, Human> mHumans;
   std::map<std::string, uint32_t> mHumansNameIndex;
   uint32_t mHumansNextId = 0;

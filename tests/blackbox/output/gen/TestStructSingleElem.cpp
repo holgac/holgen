@@ -8,27 +8,27 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool TestStructSingleElem::operator==(const TestStructSingleElem& rhs) const {
+bool TestStructSingleElem::operator==(const TestStructSingleElem &rhs) const {
   return
       mName == rhs.mName;
 }
 
-const std::string& TestStructSingleElem::GetName() const {
+const std::string &TestStructSingleElem::GetName() const {
   return mName;
 }
 
-std::string& TestStructSingleElem::GetName() {
+std::string &TestStructSingleElem::GetName() {
   return mName;
 }
 
-void TestStructSingleElem::SetName(const std::string& val) {
+void TestStructSingleElem::SetName(const std::string &val) {
   mName = val;
 }
 
-bool TestStructSingleElem::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool TestStructSingleElem::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   if (json.IsObject()) {
-    for(const auto& data: json.GetObject()) {
-      const auto& name = data.name.GetString();
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
       if (0 == strcmp("name", name)) {
         auto res = JsonHelper::Parse(mName, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElem.name field");
@@ -43,31 +43,31 @@ bool TestStructSingleElem::ParseJson(const rapidjson::Value& json, const Convert
   return true;
 }
 
-void TestStructSingleElem::PushToLua(lua_State* luaState) const {
+void TestStructSingleElem::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestStructSingleElemMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void TestStructSingleElem::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void TestStructSingleElem::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-TestStructSingleElem* TestStructSingleElem::ReadFromLua(lua_State* luaState, int32_t idx) {
+TestStructSingleElem *TestStructSingleElem::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestStructSingleElem*)lua_touserdata(luaState, -1);
+  auto ptr = (TestStructSingleElem *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int TestStructSingleElem::IndexMetaMethod(lua_State* luaState) {
+int TestStructSingleElem::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructSingleElem::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("name", key)) {
     LuaHelper::Push(instance->mName, luaState);
   } else {
@@ -77,9 +77,9 @@ int TestStructSingleElem::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int TestStructSingleElem::NewIndexMetaMethod(lua_State* luaState) {
+int TestStructSingleElem::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructSingleElem::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("name", key)) {
     LuaHelper::Read(instance->mName, luaState, -1);
   } else {
@@ -88,7 +88,7 @@ int TestStructSingleElem::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void TestStructSingleElem::CreateLuaMetatable(lua_State* luaState) {
+void TestStructSingleElem::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, TestStructSingleElem::IndexMetaMethod);

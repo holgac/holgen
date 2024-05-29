@@ -237,7 +237,7 @@ namespace holgen {
       auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
       // TODO: why? can't have a container of strings or vectors?
       THROW_IF(underlyingClass == nullptr, "{} is a keyed container of {} which is not a user type",
-               ToString(cls, field), field.mType.mTemplateParameters.back().ToString());
+               ToString(cls, field), field.mType.mTemplateParameters.back().ToString(true));
       THROW_IF(!underlyingClass->mStruct || !underlyingClass->GetIdField(),
                "{} is a keyed container of {} which is not a user type with an id field",
                ToString(cls, field), ToString(*underlyingClass));
@@ -308,7 +308,7 @@ namespace holgen {
     }
     auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
     THROW_IF(!underlyingClass, "{} has an index on {} which is not a user defined struct",
-             ToString(cls, field), field.mType.mTemplateParameters.back().ToString());
+             ToString(cls, field), field.mType.mTemplateParameters.back().ToString(true));
     auto indexOn = annotation.GetAttribute(Annotations::Index_On);
     auto indexedField = underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
     THROW_IF(!indexedField, "{} has an index on non-existent field {} of {}",
@@ -395,13 +395,13 @@ namespace holgen {
           THROW_IF(cs.mFromType != it->second.mFromType,
                    "Json converter {} is used by {} and {} with different source types: {} and {}",
                    key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
-                   Type{mProject, it->second.mFromType}.ToString(),
-                   Type{mProject, cs.mFromType}.ToString());
+                   Type{mProject, it->second.mFromType}.ToString(true),
+                   Type{mProject, cs.mFromType}.ToString(true));
           THROW_IF(*cs.mToType != *it->second.mToType,
                    "Json converter {} is used by {} and {} with different target types: {} and {}",
                    key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
-                   Type{mProject, *it->second.mToType}.ToString(),
-                   Type{mProject, *cs.mToType}.ToString());
+                   Type{mProject, *it->second.mToType}.ToString(true),
+                   Type{mProject, *cs.mToType}.ToString(true));
         }
       }
     }
@@ -424,12 +424,12 @@ namespace holgen {
         auto indexField = underlyingClass->GetFieldFromDefinitionName(
             index->GetAttribute(Annotations::Index_On)->mValue.mName);
         auto underlyingIdField = underlyingClass->GetIdField();
-        auto existingFromTypeName = Type{mProject, it->second.mFromType}.ToString();
-        auto existingToTypeName = Type{mProject, *it->second.mToType}.ToString();
-        auto fromTypeName = indexField->mType.ToString();
+        auto existingFromTypeName = Type{mProject, it->second.mFromType}.ToString(true);
+        auto existingToTypeName = Type{mProject, *it->second.mToType}.ToString(true);
+        auto fromTypeName = indexField->mType.ToString(true);
         std::string toTypeName = "size_t";
         if (underlyingIdField)
-          toTypeName = Type{mProject, underlyingIdField->mField->mType}.ToString();
+          toTypeName = Type{mProject, underlyingIdField->mField->mType}.ToString(true);
         // TODO: tolerate mismatches of integral types?
         THROW_IF(fromTypeName != existingFromTypeName,
                  "{} of {} references converter {} with different source type than {}: {} and {}",

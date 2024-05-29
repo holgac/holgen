@@ -75,7 +75,7 @@ namespace holgen {
         method.mBody.Add(
             R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
         Type type(mProject, templateParameter);
-        method.mBody.Add("{} elem;", type.ToString()); // if (!doc.IsArray())
+        method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
         method.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
         method.mBody.Add(
             R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
@@ -114,12 +114,12 @@ namespace holgen {
         fromType.PreventCopying();
         auto idField = underlyingClass.GetIdField();
         Type toType(mProject, idField->mField->mType);
-        codeBlock.Add("converter.{} = [this]({} key) -> {} {{", forConverter->mValue.mName, fromType.ToString(),
-                      toType.ToString());
+        codeBlock.Add("converter.{} = [this]({}key) -> {} {{", forConverter->mValue.mName, fromType.ToString(false),
+                      toType.ToString(true));
         codeBlock.Indent(1);
         codeBlock.Add("auto elem = {}(key);", Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation));
-        codeBlock.Add("HOLGEN_WARN_AND_RETURN_IF(!elem, uint32_t(-1), \"{{}} {} not found!\", key);",
-                      field.mType.mTemplateParameters.back().ToString());
+        codeBlock.Add("HOLGEN_WARN_AND_RETURN_IF(!elem, {}(-1), \"{{}} {} not found!\", key);",
+                      idField->mType.ToString(true), field.mType.mTemplateParameters.back().ToString(true));
         codeBlock.Add("return elem->{}();", Naming().FieldGetterNameInCpp(*idField->mField));
         codeBlock.Indent(-1);
         codeBlock.Add("}};"); // converter =

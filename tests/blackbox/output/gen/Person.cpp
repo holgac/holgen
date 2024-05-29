@@ -8,7 +8,7 @@
 #include "Converter.h"
 
 namespace holgen_blackbox_test {
-bool Person::operator==(const Person& rhs) const {
+bool Person::operator==(const Person &rhs) const {
   return
       mRace == rhs.mRace &&
       mCurrentCountry == rhs.mCurrentCountry &&
@@ -57,10 +57,10 @@ void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;
 }
 
-bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter) {
+bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Person");
-  for(const auto& data: json.GetObject()) {
-    const auto& name = data.name.GetString();
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
     if (0 == strcmp("race", name)) {
       std::string temp;
       auto res = JsonHelper::Parse(temp, data.value, converter);
@@ -93,31 +93,31 @@ bool Person::ParseJson(const rapidjson::Value& json, const Converter& converter)
   return true;
 }
 
-void Person::PushToLua(lua_State* luaState) const {
+void Person::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void*)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_getglobal(luaState, "PersonMeta");
   lua_setmetatable(luaState, -2);
 }
 
-void Person::PushGlobalToLua(lua_State* luaState, const char* name) const {
+void Person::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
 }
 
-Person* Person::ReadFromLua(lua_State* luaState, int32_t idx) {
+Person *Person::ReadFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (Person*)lua_touserdata(luaState, -1);
+  auto ptr = (Person *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-int Person::IndexMetaMethod(lua_State* luaState) {
+int Person::IndexMetaMethod(lua_State *luaState) {
   auto instance = Person::ReadFromLua(luaState, -2);
-  const char* key = lua_tostring(luaState, -1);
+  const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("race", key)) {
     LuaHelper::Push(instance->mRace, luaState);
   } else if (0 == strcmp("currentCountry", key)) {
@@ -135,9 +135,9 @@ int Person::IndexMetaMethod(lua_State* luaState) {
   return 1;
 }
 
-int Person::NewIndexMetaMethod(lua_State* luaState) {
+int Person::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Person::ReadFromLua(luaState, -3);
-  const char* key = lua_tostring(luaState, -2);
+  const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("race", key)) {
     LuaHelper::Read(instance->mRace, luaState, -1);
   } else if (0 == strcmp("currentCountry", key)) {
@@ -154,7 +154,7 @@ int Person::NewIndexMetaMethod(lua_State* luaState) {
   return 0;
 }
 
-void Person::CreateLuaMetatable(lua_State* luaState) {
+void Person::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
   lua_pushcfunction(luaState, Person::IndexMetaMethod);
