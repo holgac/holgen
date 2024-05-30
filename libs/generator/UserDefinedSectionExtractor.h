@@ -5,8 +5,8 @@
 #include "FileType.h"
 
 namespace holgen {
-  class UserDefinedSectionExtractor {
-  public:
-    std::map<std::string, std::string> Extract(const std::string &fileContents) const;
-  };
+class UserDefinedSectionExtractor {
+public:
+  std::map<std::string, std::string> Extract(const std::string &fileContents) const;
+};
 }

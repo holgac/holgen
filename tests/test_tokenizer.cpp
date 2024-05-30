@@ -15,38 +15,38 @@ protected:
 };
 
 namespace {
-  void TestTokenizerResult(const char *text, std::vector<Token> expectedTokens) {
-    Tokenizer tokenizer(text, "TokenizerTest");
-    for (const auto &expected: expectedTokens) {
-      Token actual;
-      EXPECT_TRUE(tokenizer.GetNext(actual));
-      EXPECT_EQ(expected.mType, actual.mType);
-      EXPECT_EQ(expected.mContents, actual.mContents);
-    }
-    Token tmp;
-    EXPECT_FALSE(tokenizer.GetNext(tmp));
-  }
-
-  void TestTokenizerResultNonWhitespace(const char *text, std::vector<Token> expectedTokens) {
-    Tokenizer tokenizer(text, "TokenizerTest");
-    for (const auto &expected: expectedTokens) {
-      Token actual;
-      EXPECT_TRUE(tokenizer.GetNextNonWhitespace(actual));
-      EXPECT_EQ(expected.mType, actual.mType);
-      EXPECT_EQ(expected.mContents, actual.mContents);
-    }
-    Token tmp;
-    EXPECT_FALSE(tokenizer.GetNextNonWhitespace(tmp));
-  }
-
-  void ExpectNext(Tokenizer &tokenizer, size_t line, size_t col, const Token &token) {
+void TestTokenizerResult(const char *text, std::vector<Token> expectedTokens) {
+  Tokenizer tokenizer(text, "TokenizerTest");
+  for (const auto &expected: expectedTokens) {
     Token actual;
-    EXPECT_TRUE(tokenizer.GetNext(actual)) << " expected contents: " << token.mContents;
-    EXPECT_EQ(actual.mType, token.mType) << " expected contents: " << token.mContents;
-    EXPECT_EQ(tokenizer.GetLine(), line) << " expected contents: " << token.mContents;
-    EXPECT_EQ(tokenizer.GetColumn(), col) << " expected contents: " << token.mContents;
-    EXPECT_EQ(actual.mContents, token.mContents);
+    EXPECT_TRUE(tokenizer.GetNext(actual));
+    EXPECT_EQ(expected.mType, actual.mType);
+    EXPECT_EQ(expected.mContents, actual.mContents);
   }
+  Token tmp;
+  EXPECT_FALSE(tokenizer.GetNext(tmp));
+}
+
+void TestTokenizerResultNonWhitespace(const char *text, std::vector<Token> expectedTokens) {
+  Tokenizer tokenizer(text, "TokenizerTest");
+  for (const auto &expected: expectedTokens) {
+    Token actual;
+    EXPECT_TRUE(tokenizer.GetNextNonWhitespace(actual));
+    EXPECT_EQ(expected.mType, actual.mType);
+    EXPECT_EQ(expected.mContents, actual.mContents);
+  }
+  Token tmp;
+  EXPECT_FALSE(tokenizer.GetNextNonWhitespace(tmp));
+}
+
+void ExpectNext(Tokenizer &tokenizer, size_t line, size_t col, const Token &token) {
+  Token actual;
+  EXPECT_TRUE(tokenizer.GetNext(actual)) << " expected contents: " << token.mContents;
+  EXPECT_EQ(actual.mType, token.mType) << " expected contents: " << token.mContents;
+  EXPECT_EQ(tokenizer.GetLine(), line) << " expected contents: " << token.mContents;
+  EXPECT_EQ(tokenizer.GetColumn(), col) << " expected contents: " << token.mContents;
+  EXPECT_EQ(actual.mContents, token.mContents);
+}
 }
 
 TEST_F(TokenizerTest, EmptyString) {

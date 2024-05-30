@@ -1,25 +1,26 @@
 #pragma once
+
 #include <string>
 #include <sstream>
 #include <functional>
 
 namespace holgen {
 
-  class LineWithAction {
-  private:
-    std::stringstream mStream;
-    std::function<void(const std::string &)> mAction;
-  public:
-    LineWithAction(std::function<void(const std::string &)> action) : mAction(std::move(action)) {}
+class LineWithAction {
+private:
+  std::stringstream mStream;
+  std::function<void(const std::string &)> mAction;
+public:
+  LineWithAction(std::function<void(const std::string &)> action) : mAction(std::move(action)) {}
 
-    LineWithAction(LineWithAction &&ll) : mStream(std::move(ll.mStream)), mAction(std::move(ll.mAction)) {}
+  LineWithAction(LineWithAction &&ll) : mStream(std::move(ll.mStream)), mAction(std::move(ll.mAction)) {}
 
-    ~LineWithAction() { mAction(mStream.str()); }
+  ~LineWithAction() { mAction(mStream.str()); }
 
-    template<typename T>
-    LineWithAction &operator<<(const T &val) {
-      mStream << val;
-      return *this;
-    }
-  };
+  template<typename T>
+  LineWithAction &operator<<(const T &val) {
+    mStream << val;
+    return *this;
+  }
+};
 }

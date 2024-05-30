@@ -6,7 +6,7 @@
 
 using namespace holgen_blackbox_test;
 
-class GameDataTest: public ::testing::Test {
+class GameDataTest : public ::testing::Test {
 protected:
   void SetUp() override {
   }

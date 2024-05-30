@@ -108,7 +108,8 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"GetTestFieldUserData", Type{"T", PassByType::Pointer, Constness::Const}, Visibility::Public, Constness::Const};
+    auto method = ClassMethod{"GetTestFieldUserData", Type{"T", PassByType::Pointer, Constness::Const},
+                              Visibility::Public, Constness::Const};
     method.mTemplateParameters.emplace_back("typename", "T");
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::Const), method,
                          "return reinterpret_cast<const T*>(mTestFieldUserData);");
@@ -133,7 +134,8 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("GetTestFieldUserData", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"GetTestFieldUserData", Type{"void", PassByType::Pointer, Constness::Const}, Visibility::Protected, Constness::Const};
+    auto method = ClassMethod{"GetTestFieldUserData", Type{"void", PassByType::Pointer, Constness::Const},
+                              Visibility::Protected, Constness::Const};
     method.mUserDefined = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::Const), method,
                          "");

@@ -4,10 +4,10 @@
 
 namespace holgen {
 
-  class FilesystemHelperPlugin : public TranslatorPlugin {
-  public:
-    using TranslatorPlugin::TranslatorPlugin;
-    void Run() override;
-  };
+class FilesystemHelperPlugin : public TranslatorPlugin {
+public:
+  using TranslatorPlugin::TranslatorPlugin;
+  void Run() override;
+};
 
 }

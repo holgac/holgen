@@ -27,7 +27,7 @@ public:
 class LuaTestHelper {
 public:
 
-  static std::string ElemToString(lua_State* state, int idx) {
+  static std::string ElemToString(lua_State *state, int idx) {
     auto luaType = lua_type(state, idx);
     switch (luaType) {
       case LUA_TNIL:
@@ -74,7 +74,7 @@ public:
     }
   }
 
-  static void ExpectStack(lua_State* state, const std::vector <std::string> &expected) {
+  static void ExpectStack(lua_State *state, const std::vector <std::string> &expected) {
     std::vector <std::string> stack;
     for (int i = 0; i < lua_gettop(state); ++i) {
       stack.push_back(ElemToString(state, i + 1));

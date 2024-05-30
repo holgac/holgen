@@ -10,15 +10,15 @@
 #include "generator/UserDefinedSectionExtractor.h"
 
 namespace {
-  // TODO: this is needed by dataManager's ParseFiles too. Move to FileSystemHelper?
-  std::string ReadFile(const std::string &path) {
-    std::ifstream fin(path, std::ios_base::binary);
-    fin.seekg(0, std::ios_base::end);
-    std::string contents(fin.tellg(), 0);
-    fin.seekg(0, std::ios_base::beg);
-    fin.read(contents.data(), contents.size());
-    return contents;
-  }
+// TODO: this is needed by dataManager's ParseFiles too. Move to FileSystemHelper?
+std::string ReadFile(const std::string &path) {
+  std::ifstream fin(path, std::ios_base::binary);
+  fin.seekg(0, std::ios_base::end);
+  std::string contents(fin.tellg(), 0);
+  fin.seekg(0, std::ios_base::beg);
+  fin.read(contents.data(), contents.size());
+  return contents;
+}
 }
 
 int run(int argc, char **argv) {

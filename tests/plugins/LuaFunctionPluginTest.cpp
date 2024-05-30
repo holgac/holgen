@@ -246,7 +246,7 @@ TEST_F(LuaFunctionPluginTest, InvalidType) {
   ExpectErrorMessage("struct A { @luaFunc func TestFunction() -> u63; }",
                      Run, "Unknown type u63 used by A.TestFunction ({0}:1:21)", Source);
   ExpectErrorMessage("struct A { @luaFunc func TestFunction(u33 arg) -> u64; }",
-                    Run, "Unknown type u33 used by A.TestFunction ({0}:1:21)", Source);
+                     Run, "Unknown type u33 used by A.TestFunction ({0}:1:21)", Source);
   ExpectErrorMessage("struct A { @luaFunc func TestFunction(void arg) -> u64; }",
                      Run, "Invalid void usage in A.TestFunction ({0}:1:21)", Source);
 

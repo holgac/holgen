@@ -24,39 +24,39 @@
 
 namespace holgen {
 
-  Translator::Translator(
-      const TranslatorSettings &translatorSettings
-  ) : mTranslatorSettings(translatorSettings) {
-    // TODO: Users should pick which plugins to run
-    AddPlugin<ClassPlugin>();
-    AddPlugin<ClassNonCopyablePlugin>();
-    AddPlugin<ClassIdFieldPlugin>();
-    AddPlugin<ClassFieldPlugin>();
-    AddPlugin<ClassEqualsOperatorPlugin>();
-    AddPlugin<ClassFieldGetterPlugin>();
-    AddPlugin<ClassFieldSetterPlugin>();
-    AddPlugin<ClassFieldVariantPlugin>();
-    AddPlugin<LuaFunctionPlugin>();
-    AddPlugin<CppFunctionPlugin>();
-    AddPlugin<CppDestructorPlugin>();
-    AddPlugin<ContainerFieldPlugin>();
-    AddPlugin<ManagedClassPlugin>();
-    AddPlugin<EnumPlugin>();
-    AddPlugin<JsonConverterPlugin>();
-    AddPlugin<JsonPlugin>();
-    AddPlugin<JsonParseFilesPlugin>();
-    AddPlugin<JsonHelperPlugin>();
-    AddPlugin<LuaPlugin>();
-    AddPlugin<LuaHelperPlugin>();
-    AddPlugin<GlobalPointerPlugin>();
-    AddPlugin<FilesystemHelperPlugin>();
-  }
+Translator::Translator(
+    const TranslatorSettings &translatorSettings
+) : mTranslatorSettings(translatorSettings) {
+  // TODO: Users should pick which plugins to run
+  AddPlugin<ClassPlugin>();
+  AddPlugin<ClassNonCopyablePlugin>();
+  AddPlugin<ClassIdFieldPlugin>();
+  AddPlugin<ClassFieldPlugin>();
+  AddPlugin<ClassEqualsOperatorPlugin>();
+  AddPlugin<ClassFieldGetterPlugin>();
+  AddPlugin<ClassFieldSetterPlugin>();
+  AddPlugin<ClassFieldVariantPlugin>();
+  AddPlugin<LuaFunctionPlugin>();
+  AddPlugin<CppFunctionPlugin>();
+  AddPlugin<CppDestructorPlugin>();
+  AddPlugin<ContainerFieldPlugin>();
+  AddPlugin<ManagedClassPlugin>();
+  AddPlugin<EnumPlugin>();
+  AddPlugin<JsonConverterPlugin>();
+  AddPlugin<JsonPlugin>();
+  AddPlugin<JsonParseFilesPlugin>();
+  AddPlugin<JsonHelperPlugin>();
+  AddPlugin<LuaPlugin>();
+  AddPlugin<LuaHelperPlugin>();
+  AddPlugin<GlobalPointerPlugin>();
+  AddPlugin<FilesystemHelperPlugin>();
+}
 
-  TranslatedProject Translator::Translate(const ProjectDefinition &project) const {
-    TranslatedProject translatedProject(project);
-    for (const auto &plugin: mPlugins) {
-      plugin(translatedProject);
-    }
-    return translatedProject;
+TranslatedProject Translator::Translate(const ProjectDefinition &project) const {
+  TranslatedProject translatedProject(project);
+  for (const auto &plugin: mPlugins) {
+    plugin(translatedProject);
   }
+  return translatedProject;
+}
 }

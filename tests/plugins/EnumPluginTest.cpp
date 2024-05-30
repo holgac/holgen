@@ -55,10 +55,10 @@ enum TestEnum {
   };
 
   ASSERT_EQ(cls->mNestedEnums.size(), 1);
-  auto& nestedEnum = cls->mNestedEnums.front();
+  auto &nestedEnum = cls->mNestedEnums.front();
 
   EXPECT_EQ(nestedEnum.mEntries.size(), expectedEntries.size());
-  for (auto&expectedEntry: expectedEntries) {
+  for (auto &expectedEntry: expectedEntries) {
     auto actualEntry = nestedEnum.GetEntry(expectedEntry.mName);
     ASSERT_NE(actualEntry, nullptr);
     helpers::ExpectEqual(*actualEntry, expectedEntry);
@@ -166,5 +166,7 @@ enum TestEnum {
   Entry1 = 5;
   Entry1 = 5;
 }
-  )R", Run, "Enum TestEnum ({0}:1:1) contains duplicate entries TestEnum.Entry1 ({0}:2:3) and TestEnum.Entry1 ({0}:3:3)", Source);
+  )R", Run,
+                     "Enum TestEnum ({0}:1:1) contains duplicate entries TestEnum.Entry1 ({0}:2:3) and TestEnum.Entry1 ({0}:3:3)",
+                     Source);
 }

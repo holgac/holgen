@@ -249,7 +249,7 @@ if (0 == strcmp("functionReturningVoid", key)) {
 }
 return 1;
   )R");
-}
+  }
 }
 
 TEST_F(LuaPluginTest, IndexMetaMethodRefs) {

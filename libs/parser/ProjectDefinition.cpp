@@ -21,49 +21,49 @@
   };
 
 namespace holgen {
-  const FieldDefinition *StructDefinition::GetIdField() const {
-    for (const auto &field: mFields) {
-      if (field.GetAnnotation(Annotations::Id))
-        return &field;
-    }
-    return nullptr;
+const FieldDefinition *StructDefinition::GetIdField() const {
+  for (const auto &field: mFields) {
+    if (field.GetAnnotation(Annotations::Id))
+      return &field;
   }
+  return nullptr;
+}
 
-  bool TypeDefinition::operator==(const TypeDefinition &rhs) const {
-    if (mName != rhs.mName)
+bool TypeDefinition::operator==(const TypeDefinition &rhs) const {
+  if (mName != rhs.mName)
+    return false;
+  if (mTemplateParameters.size() != rhs.mTemplateParameters.size())
+    return false;
+  for (size_t i = 0; i < mTemplateParameters.size(); ++i) {
+    if (mTemplateParameters[i] != rhs.mTemplateParameters[i])
       return false;
-    if (mTemplateParameters.size() != rhs.mTemplateParameters.size())
-      return false;
-    for (size_t i = 0; i < mTemplateParameters.size(); ++i) {
-      if (mTemplateParameters[i] != rhs.mTemplateParameters[i])
-        return false;
-    }
-    return true;
   }
+  return true;
+}
 
-  GEN_GETTER_BY_NAME(FieldDefinition, AnnotationDefinition, GetAnnotation, mAnnotations)
+GEN_GETTER_BY_NAME(FieldDefinition, AnnotationDefinition, GetAnnotation, mAnnotations)
 
-  GEN_GET_MATCHING_ATTRIBUTE(FieldDefinition);
+GEN_GET_MATCHING_ATTRIBUTE(FieldDefinition);
 
-  GEN_GET_MATCHING_ATTRIBUTE(FunctionDefinition);
+GEN_GET_MATCHING_ATTRIBUTE(FunctionDefinition);
 
-  GEN_GET_MATCHING_ATTRIBUTE(StructDefinition);
+GEN_GET_MATCHING_ATTRIBUTE(StructDefinition);
 
-  GEN_GETTER_BY_NAME(AnnotationDefinition, AnnotationAttributeDefinition, GetAttribute, mAttributes);
+GEN_GETTER_BY_NAME(AnnotationDefinition, AnnotationAttributeDefinition, GetAttribute, mAttributes);
 
-  GEN_GETTER_BY_NAME(StructDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
+GEN_GETTER_BY_NAME(StructDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
 
-  GEN_GETTER_BY_NAME(StructDefinition, FieldDefinition, GetField, mFields);
+GEN_GETTER_BY_NAME(StructDefinition, FieldDefinition, GetField, mFields);
 
-  GEN_GETTER_BY_NAME(StructDefinition, FunctionDefinition, GetFunction, mFunctions);
+GEN_GETTER_BY_NAME(StructDefinition, FunctionDefinition, GetFunction, mFunctions);
 
-  GEN_GETTER_BY_NAME(ProjectDefinition, EnumDefinition, GetEnum, mEnums);
+GEN_GETTER_BY_NAME(ProjectDefinition, EnumDefinition, GetEnum, mEnums);
 
-  GEN_GETTER_BY_NAME(ProjectDefinition, StructDefinition, GetStruct, mStructs);
+GEN_GETTER_BY_NAME(ProjectDefinition, StructDefinition, GetStruct, mStructs);
 
-  GEN_GETTER_BY_NAME(EnumDefinition, EnumEntryDefinition, GetEnumEntry, mEntries);
+GEN_GETTER_BY_NAME(EnumDefinition, EnumEntryDefinition, GetEnumEntry, mEntries);
 
-  GEN_GETTER_BY_NAME(EnumDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
+GEN_GETTER_BY_NAME(EnumDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
 
-  GEN_GETTER_BY_NAME(FunctionDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
+GEN_GETTER_BY_NAME(FunctionDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
 }

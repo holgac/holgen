@@ -10,12 +10,12 @@
 
 namespace holgen {
 
-  class Exception : std::exception {
-    std::string mMsg;
-  public:
-    explicit Exception(std::string msg) : mMsg(std::move(msg)) {}
+class Exception : std::exception {
+  std::string mMsg;
+public:
+  explicit Exception(std::string msg) : mMsg(std::move(msg)) {}
 
-    const char *what() { return mMsg.c_str(); }
-  };
+  const char *what() { return mMsg.c_str(); }
+};
 
 }
