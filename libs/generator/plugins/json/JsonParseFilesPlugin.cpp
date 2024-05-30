@@ -151,7 +151,7 @@ void JsonParseFilesPlugin::GenerateFilesByName(ClassMethod &method) {
   method.mBody.Indent(-1);
   method.mBody.Add("}} else if (std::filesystem::is_regular_file(entry)) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("std::string filename = entry.path().filename();");
+  method.mBody.Add("std::string filename = entry.path().filename().string();");
   method.mBody.Add("auto dotPosition = filename.rfind('.');");
   method.mBody.Add("if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == \"json\") {{");
   method.mBody.Indent(1);

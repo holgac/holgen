@@ -5,13 +5,13 @@ namespace holgen {
 
 void FilesystemHelperPlugin::Run() {
   auto cls = Class{St::FilesystemHelper, mSettings.mNamespace};
+  cls.mHeaderIncludes.AddStandardHeader("filesystem");
   cls.mSourceIncludes.AddStandardHeader("fstream");
-  // TODO: use std::filesystem::path instead of std::string
   auto method = ClassMethod{
       St::FilesystemHelper_ReadFile, Type{"std::string"}, Visibility::Public,
       Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back(
-      "filePath", Type{"std::string", PassByType::Reference, Constness::Const});
+      "filePath", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
   method.mBody.Add("std::ifstream fin(filePath, std::ios_base::binary);");
   method.mBody.Add("fin.seekg(0, std::ios_base::end);");
   method.mBody.Add("auto bufferSize = fin.tellg();");

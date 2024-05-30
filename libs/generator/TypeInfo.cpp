@@ -90,7 +90,8 @@ TypeInfo::TypeInfo() {
       "std::function",
       // TODO: properly validate arrays and remove this hack
       "std::array",
-      "nullptr_t",
+      "std::nullptr_t",
+      "std::filesystem::path",
   };
   for (auto&[_, cppType] : TypeToCppType)
     CppTypes.insert(cppType);

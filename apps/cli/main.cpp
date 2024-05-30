@@ -11,7 +11,7 @@
 
 namespace {
 // TODO: this is needed by dataManager's ParseFiles too. Move to FileSystemHelper?
-std::string ReadFile(const std::string &path) {
+std::string ReadFile(const std::filesystem::path &path) {
   std::ifstream fin(path, std::ios_base::binary);
   fin.seekg(0, std::ios_base::end);
   std::string contents(fin.tellg(), 0);

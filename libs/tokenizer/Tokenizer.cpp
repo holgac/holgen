@@ -26,7 +26,7 @@ std::map<char, TokenType> SpecialTokens = {
 };
 
 bool IsWhitespace(char c) {
-  return c == ' ' || c == '\n' || c == '\t';
+  return c == ' ' || c == '\n' || c == '\t' || c == '\r';
 }
 }
 

@@ -40,17 +40,17 @@ std::string CodeBlock::ToString(
         ++indentIt;
         break;
       case CodeUnitType::Code:
-        out << indentation << *lineIt << std::endl;
+        out << indentation << *lineIt << St::Newline;
         ++lineIt;
         break;
       case CodeUnitType::UserDefined:
-        out << commentStart << " " << St::UserDefinedSectionBegin << *lineIt << std::endl;
+        out << commentStart << " " << St::UserDefinedSectionBegin << *lineIt << St::Newline;
         auto sectionIt = sections.find(*lineIt);
         if (sectionIt != sections.end()) {
           out << sectionIt->second;
           usedSections.insert(*lineIt);
         }
-        out << commentStart << " " << St::UserDefinedSectionEnd << *lineIt << std::endl;
+        out << commentStart << " " << St::UserDefinedSectionEnd << *lineIt << St::Newline;
         ++lineIt;
         break;
     }

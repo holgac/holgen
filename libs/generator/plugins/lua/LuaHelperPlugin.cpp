@@ -31,6 +31,7 @@ std::map<std::string, LuaTypeUsage> LuaUsage = {
 void LuaHelperPlugin::Run() {
   auto cls = Class{St::LuaHelper, mSettings.mNamespace};
   cls.mHeaderIncludes.AddLibHeader("lua.hpp");
+  cls.mHeaderIncludes.AddStandardHeader("cstddef");
   GeneratePush(cls);
   GenerateRead(cls);
   GenerateCreateMetatables(cls);
@@ -137,7 +138,7 @@ void LuaHelperPlugin::GeneratePushNil(Class &cls) {
   auto method = ClassMethod{
       "Push", Type{"void"},
       Visibility::Public, Constness::NotConst, Staticness::Static};
-  method.mArguments.emplace_back("", Type{"nullptr_t"});
+  method.mArguments.emplace_back("", Type{"std::nullptr_t"});
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Line() << "lua_pushnil(luaState);";
   Validate().NewMethod(cls, method);
