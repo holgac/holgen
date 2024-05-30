@@ -26,6 +26,12 @@ namespace holgen {
     NotExplicit,
   };
 
+  enum class DefaultDelete {
+    Default,
+    Delete,
+    Neither,
+    };
+
   struct ClassField {
     ClassField(
         std::string name,
@@ -73,6 +79,7 @@ namespace holgen {
     std::list<TemplateParameter> mTemplateParameters;
     std::list<std::string> mComments;
     bool mIsTemplateSpecialization = false;
+    DefaultDelete mDefaultDelete = DefaultDelete::Neither;
   protected:
     ClassMethodBase() = default;
   };
@@ -120,7 +127,6 @@ namespace holgen {
     ClassConstructor() = default;
     std::list<ClassConstructorInitializer> mInitializerList;
     Explicitness mExplicitness = Explicitness::NotExplicit;
-    // empty body and empty initializer list means = default.
     // bool isDeleted = false;
   };
 

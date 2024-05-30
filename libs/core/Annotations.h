@@ -253,6 +253,19 @@ namespace holgen {
     inline static const std::string Variant_Enum = "enum";
     inline static const std::string Variant_Entry = "entry";
 
+    /**
+     * Struct related annotations
+     *
+     * A struct can be defined nonCopyable which removes operator= and copy constructor
+     * @struct(nonCopyable)
+     * struct YouCanOnlyMoveThis {
+     *    BigData field;
+     * }
+     */
+    inline static const std::string Struct = "struct";
+    inline static const std::string Struct_NonCopyable = "nonCopyable";
+
+
 
     /**
      * Field related annotations.

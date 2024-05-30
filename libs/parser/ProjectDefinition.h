@@ -95,6 +95,9 @@ namespace holgen {
     auto GetAnnotations(const std::string &name) const {
       return NameFilterForEachWrapper(name, mAnnotations);
     }
+    [[nodiscard]] const AnnotationAttributeDefinition *GetMatchingAttribute(
+        const std::string &annotationName, const std::string &attributeName,
+        std::optional<std::string> attributeValue = std::nullopt) const;
   };
 
   struct EnumEntryDefinition {

@@ -8,6 +8,7 @@
 #include "generator/plugins/ClassFieldSetterPlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
+#include "generator/plugins/ClassNonCopyablePlugin.h"
 #include "generator/plugins/CppDestructorPlugin.h"
 #include "generator/plugins/ContainerFieldPlugin.h"
 #include "generator/plugins/ManagedClassPlugin.h"
@@ -28,6 +29,7 @@ namespace holgen {
   ) : mTranslatorSettings(translatorSettings) {
     // TODO: Users should pick which plugins to run
     AddPlugin<ClassPlugin>();
+    AddPlugin<ClassNonCopyablePlugin>();
     AddPlugin<ClassIdFieldPlugin>();
     AddPlugin<ClassFieldPlugin>();
     AddPlugin<ClassEqualsOperatorPlugin>();

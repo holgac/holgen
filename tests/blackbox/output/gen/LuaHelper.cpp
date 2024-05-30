@@ -37,6 +37,7 @@
 #include "TestStructArrayCustomData1.h"
 #include "TestStructArrayCustomData2.h"
 #include "TestStructArray.h"
+#include "TestStructNonCopyable.h"
 #include "TestEnum.h"
 #include "TestVariantStructType.h"
 #include "TestStructArrayType.h"
@@ -215,6 +216,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestStructArrayCustomData1::CreateLuaMetatable(luaState);
   TestStructArrayCustomData2::CreateLuaMetatable(luaState);
   TestStructArray::CreateLuaMetatable(luaState);
+  TestStructNonCopyable::CreateLuaMetatable(luaState);
   TestEnum::PushEnumToLua(luaState);
   TestVariantStructType::PushEnumToLua(luaState);
   TestStructArrayType::PushEnumToLua(luaState);

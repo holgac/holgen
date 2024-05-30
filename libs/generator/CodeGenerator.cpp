@@ -12,7 +12,8 @@ namespace holgen {
     bool CanBeDefinedInHeader(const Class &cls, const ClassMethodBase &method) {
       return !method.mTemplateParameters.empty()
              || !cls.mTemplateParameters.empty()
-             || !cls.mTemplateSpecializations.empty();
+             || !cls.mTemplateSpecializations.empty()
+             || method.mDefaultDelete != DefaultDelete::Neither;
     }
 
     bool CanBeDefinedInHeader(const Class &cls, const ClassMethod &method) {
@@ -239,6 +240,8 @@ namespace holgen {
     bool ShouldGenerateMethod(const ClassMethodBase &method, Visibility visibility, bool isInsideClass) {
       if (method.mVisibility != visibility)
         return false;
+      if (method.mDefaultDelete != DefaultDelete::Neither)
+        return isInsideClass;
       if (isInsideClass && method.mIsTemplateSpecialization)
         return false;
       if (!isInsideClass && !method.mIsTemplateSpecialization)
@@ -279,7 +282,13 @@ namespace holgen {
           }
         }
         line << ")";
-        if (!willDefine) {
+        if (ctor.mDefaultDelete  == DefaultDelete::Default) {
+          line << " = default;";
+          continue;
+        } else if (ctor.mDefaultDelete  == DefaultDelete::Delete) {
+          line << " = delete;";
+          continue;
+        } else if (!willDefine) {
           line << ";";
           continue;
         } else {
@@ -311,11 +320,17 @@ namespace holgen {
         codeBlock.Line() << signature << ";";
         continue;
       }
-      codeBlock.Line() << signature << " {";
-      codeBlock.Indent(1);
-      codeBlock.Add(method.mBody);
-      codeBlock.Indent(-1);
-      codeBlock.Line() << "}";
+      if (method.mDefaultDelete == DefaultDelete::Default) {
+        codeBlock.Line() << signature << " = default;";
+      } else if (method.mDefaultDelete == DefaultDelete::Delete) {
+        codeBlock.Line() << signature << " = delete;";
+      } else {
+        codeBlock.Line() << signature << " {";
+        codeBlock.Indent(1);
+        codeBlock.Add(method.mBody);
+        codeBlock.Indent(-1);
+        codeBlock.Line() << "}";
+      }
     }
   }
 
@@ -536,7 +551,7 @@ namespace holgen {
     bool isFirstMethod = true;
 
     for (auto &ctor: cls.mConstructors) {
-      if (!ctor.mTemplateParameters.empty()) {
+      if (!ctor.mTemplateParameters.empty() || ctor.mDefaultDelete != DefaultDelete::Neither) {
         // These are defined in the header
         continue;
       }

@@ -50,3 +50,8 @@ struct TestStructArray {
   func GetData1() -> TestStructArrayCustomData1;
   func GetData2() -> TestStructArrayCustomData2;
 }
+
+@struct(nonCopyable)
+struct TestStructNonCopyable {
+  vector<int> bigVector;
+}

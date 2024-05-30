@@ -47,6 +47,8 @@ namespace holgen {
 
   GEN_GET_MATCHING_ATTRIBUTE(FunctionDefinition);
 
+  GEN_GET_MATCHING_ATTRIBUTE(StructDefinition);
+
   GEN_GETTER_BY_NAME(AnnotationDefinition, AnnotationAttributeDefinition, GetAttribute, mAttributes);
 
   GEN_GETTER_BY_NAME(StructDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);

@@ -7,6 +7,7 @@
 #include "Converter.h"
 #include "TestStructArrayCustomData1.h"
 #include "TestStructArrayCustomData2.h"
+#include "TestStructNonCopyable.h"
 
 using namespace holgen_blackbox_test;
 
@@ -107,4 +108,9 @@ TEST_F(StructTest, ArrayCustomData2) {
   EXPECT_FLOAT_EQ(arr1.GetData2()->GetF2(), 4.56);
   EXPECT_EQ(arr1.GetData2()->GetF3(), 789);
   EXPECT_THROW({ arr1.GetData1(); }, std::runtime_error);
+}
+
+TEST_F(StructTest, NonCopyable) {
+  TestStructNonCopyable a1;
+  auto a2 = std::move(a1);
 }
