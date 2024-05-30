@@ -92,8 +92,11 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     return;
   auto underlyingClass = mProject.GetClass(underlyingType.mName);
   const ClassField *underlyingIdField = nullptr;
-  if (underlyingClass && underlyingClass->mStruct)
+  if (underlyingClass && underlyingClass->mStruct) {
+    if (!useMoveRef && underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable))
+      return;
     underlyingIdField = underlyingClass->GetIdField();
+  }
   bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
 
   auto method = ClassMethod{
@@ -109,6 +112,7 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     method.mArguments.back().mType.mConstness = Constness::NotConst;
   }
 
+  // TODO: change to useMoveRef after implementing ReadFromLua
   if (!useMoveRef)
     method.mExposeToLua = true;
 

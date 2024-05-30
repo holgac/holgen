@@ -11,6 +11,7 @@ void ClassNonCopyablePlugin::Run() {
 }
 
 void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+  // TODO: validate: a nonCopyable field makes the class nonCopyable as well
 
   if (structDefinition.GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
     // holgen structs don't have constructors, so doing this here makes sense.

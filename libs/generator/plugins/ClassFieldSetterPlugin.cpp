@@ -38,7 +38,27 @@ void ClassFieldSetterPlugin::Run() {
           arg.mType.mName = "T";
           method.mBody.Add("{} = reinterpret_cast<void*>(val);", field.mName);
         } else {
-          method.mBody.Add("{} = val;", field.mName);
+          auto isNonCopyable = [&](const std::string& name) {
+            auto underlyingClass = mProject.GetClass(name);
+            if (underlyingClass && underlyingClass->mStruct && underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
+              return true;
+            }
+            return false;
+          };
+          bool useMove = isNonCopyable(field.mType.mName);
+          if (!useMove && TypeInfo::Get().CppContainers.contains(field.mType.mName)) {
+            auto* underlyingType = &field.mType.mTemplateParameters.back().mName;
+            if (field.mType.mName == "std::array")
+              underlyingType = &field.mType.mTemplateParameters.front().mName;
+            useMove = isNonCopyable(*underlyingType);
+          }
+          if (useMove) {
+            arg.mType.mType = PassByType::MoveReference;
+            arg.mType.mConstness = Constness::NotConst;
+            method.mBody.Add("{} = std::move(val);", field.mName);
+          } else {
+            method.mBody.Add("{} = val;", field.mName);
+          }
         }
       }
       if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Set,
