@@ -73,7 +73,7 @@ int run(int argc, char **argv) {
     auto newContents = result.mBody.ToString(result.mType, sections);
     if (newContents == existingContents)
       continue;
-    std::ofstream fout(target);
+    std::ofstream fout(target, std::ios::binary);
     fout.write(newContents.c_str(), newContents.size());
   }
   // TODO: warn if there are files in the directory not created by us in case the schema changed but the dangling files
