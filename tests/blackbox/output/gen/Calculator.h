@@ -2,8 +2,8 @@
 #pragma once
 
 #include "../holgen.h"
-#include <string>
 #include <cstdint>
+#include <string>
 #include <rapidjson/fwd.h>
 #include "Number.h"
 

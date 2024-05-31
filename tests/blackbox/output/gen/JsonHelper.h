@@ -2,15 +2,15 @@
 #pragma once
 
 #include "../holgen.h"
-#include <cstdint>
-#include <string>
 #include <array>
+#include <cstdint>
 #include <deque>
-#include <vector>
-#include <set>
-#include <unordered_set>
 #include <map>
+#include <set>
+#include <string>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 #include <rapidjson/document.h>
 
 namespace holgen_blackbox_test {

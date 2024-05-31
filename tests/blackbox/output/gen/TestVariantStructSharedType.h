@@ -6,8 +6,8 @@
 #include <array>
 #include <cstdint>
 #include <rapidjson/fwd.h>
-#include "TestVariantStructHuman.h"
 #include "TestVariantStructCat.h"
+#include "TestVariantStructHuman.h"
 #include "TestVariantStructType.h"
 
 struct lua_State;

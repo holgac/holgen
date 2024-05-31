@@ -2,10 +2,10 @@
 #pragma once
 
 #include "../holgen.h"
-#include <functional>
 #include <cstdint>
-#include <string>
+#include <functional>
 #include <map>
+#include <string>
 
 namespace holgen_blackbox_test {
 class Converter {

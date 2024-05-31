@@ -2,9 +2,9 @@
 #pragma once
 
 #include "../holgen.h"
+#include <cstdint>
 #include <set>
 #include <string>
-#include <cstdint>
 #include <rapidjson/fwd.h>
 
 struct lua_State;

@@ -2,9 +2,9 @@
 #pragma once
 
 #include "../holgen.h"
-#include <vector>
-#include <map>
 #include <cstdint>
+#include <map>
+#include <vector>
 #include <rapidjson/fwd.h>
 #include "Person.h"
 

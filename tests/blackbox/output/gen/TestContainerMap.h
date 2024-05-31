@@ -2,8 +2,8 @@
 #pragma once
 
 #include "../holgen.h"
-#include <map>
 #include <cstdint>
+#include <map>
 #include <string>
 #include <rapidjson/fwd.h>
 #include "TestContainerInnerStructWithId.h"

@@ -2,8 +2,8 @@
 #pragma once
 
 #include "../holgen.h"
-#include <vector>
 #include <cstdint>
+#include <vector>
 #include <rapidjson/fwd.h>
 
 struct lua_State;

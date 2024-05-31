@@ -2,13 +2,13 @@
 #pragma once
 
 #include "../holgen.h"
-#include <vector>
-#include <string>
 #include <cstdint>
 #include <map>
+#include <string>
+#include <vector>
 #include <rapidjson/fwd.h>
-#include "TestContainerInnerStructWithId.h"
 #include "TestContainerInnerStructNoId.h"
+#include "TestContainerInnerStructWithId.h"
 
 struct lua_State;
 namespace holgen_blackbox_test {

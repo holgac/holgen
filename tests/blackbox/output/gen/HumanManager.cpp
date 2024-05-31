@@ -4,12 +4,12 @@
 #include <filesystem>
 #include <queue>
 #include <vector>
-#include <rapidjson/document.h>
 #include <lua.hpp>
-#include "JsonHelper.h"
-#include "FilesystemHelper.h"
-#include "LuaHelper.h"
+#include <rapidjson/document.h>
 #include "Converter.h"
+#include "FilesystemHelper.h"
+#include "JsonHelper.h"
+#include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
 bool HumanManager::operator==(const HumanManager &rhs) const {

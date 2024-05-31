@@ -2,11 +2,11 @@
 #include "DamageMultiplier.h"
 
 #include <cmath>
-#include <rapidjson/document.h>
 #include <lua.hpp>
+#include <rapidjson/document.h>
+#include "Converter.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
-#include "Converter.h"
 
 namespace holgen_blackbox_test {
 bool DamageMultiplier::operator==(const DamageMultiplier &rhs) const {

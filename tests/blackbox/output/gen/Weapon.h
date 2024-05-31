@@ -3,8 +3,8 @@
 
 #include "../holgen.h"
 #include <cstdint>
-#include <vector>
 #include <string>
+#include <vector>
 #include <rapidjson/fwd.h>
 #include "DamageMultiplier.h"
 

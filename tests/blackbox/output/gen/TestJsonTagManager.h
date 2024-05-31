@@ -2,10 +2,10 @@
 #pragma once
 
 #include "../holgen.h"
-#include <vector>
+#include <cstdint>
 #include <map>
 #include <string>
-#include <cstdint>
+#include <vector>
 #include <rapidjson/fwd.h>
 #include "TestJsonTag.h"
 

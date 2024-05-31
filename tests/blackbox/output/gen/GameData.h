@@ -2,14 +2,14 @@
 #pragma once
 
 #include "../holgen.h"
-#include <vector>
-#include <unordered_map>
-#include <string>
 #include <cstdint>
 #include <map>
+#include <string>
+#include <unordered_map>
+#include <vector>
 #include <rapidjson/fwd.h>
-#include "Boot.h"
 #include "Armor.h"
+#include "Boot.h"
 #include "Character.h"
 
 struct lua_State;

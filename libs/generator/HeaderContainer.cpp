@@ -43,12 +43,20 @@ void HeaderContainer::AddLocalHeader(const std::string &header) {
 }
 
 void HeaderContainer::Write(CodeBlock &codeBlock) const {
-  for (const auto &header: mStandardHeaders)
-    codeBlock.Line() << "#include <" << header << ">";
-  for (const auto &header: mLibHeaders)
-    codeBlock.Line() << "#include <" << header << ">";
-  for (const auto &header: mLocalHeaders)
-    codeBlock.Line() << "#include \"" << header << "\"";
+  auto sortAndInclude = [&](auto &container, const bool useQuotes) {
+    std::set<std::string> elems;
+    elems.insert(container.begin(), container.end());
+    for (const auto &elem: elems) {
+      if (useQuotes) {
+        codeBlock.Add("#include \"{}\"", elem);
+      } else {
+        codeBlock.Add("#include <{}>", elem);
+      }
+    }
+  };
+  sortAndInclude(mStandardHeaders, false);
+  sortAndInclude(mLibHeaders, false);
+  sortAndInclude(mLocalHeaders, true);
   if (!mHeaders.empty())
     codeBlock.Line();
   std::map<std::string, std::vector<const ForwardDeclaration *>> fwdDeclarations;

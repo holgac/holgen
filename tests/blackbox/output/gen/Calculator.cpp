@@ -3,9 +3,9 @@
 
 #include <lua.hpp>
 #include <rapidjson/document.h>
-#include "LuaHelper.h"
-#include "JsonHelper.h"
 #include "Converter.h"
+#include "JsonHelper.h"
+#include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
 bool Calculator::operator==(const Calculator &rhs) const {

@@ -3,9 +3,9 @@
 
 #include "../holgen.h"
 #include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
