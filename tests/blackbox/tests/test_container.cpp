@@ -10,11 +10,9 @@ using namespace holgen_blackbox_test;
 
 class ContainerTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 };
 
 TEST_F(ContainerTest, WithIdVector) {
@@ -135,5 +133,6 @@ TEST_F(ContainerTest, UnsignedSet) {
     EXPECT_EQ(tcv.HasUnsignedElem(i), false);
   }
 }
+
 // TODO: test lua
 // TODO: test json

@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 
-
 namespace holgen {
 
 struct TranslatedProject;

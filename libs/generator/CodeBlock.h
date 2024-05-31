@@ -10,7 +10,6 @@
 #include "FileType.h"
 #include "core/LineWithAction.h"
 
-
 namespace holgen {
 enum class CodeUnitType {
   Code,
@@ -41,7 +40,6 @@ struct CodeBlock {
 
   void Add(const CodeBlock &codeBlock);
   void Add(CodeBlock &&codeBlock);
-
 
   template <typename... Args>
   void Add(std::format_string<Args...> fmt, Args &&...args) {

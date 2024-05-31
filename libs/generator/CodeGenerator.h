@@ -4,7 +4,6 @@
 #include "FileType.h"
 #include "Translator.h"
 
-
 namespace holgen {
 struct GeneratedContent {
   FileType mType;

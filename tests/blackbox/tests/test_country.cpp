@@ -46,7 +46,7 @@ TEST(CountryTest, Converters) {
       {"Country3", 3},
   };
   std::map<std::string, uint32_t> raceMap = {
-      {"elf",   0},
+      {"elf", 0},
       {"dwarf", 1},
   };
   Country country;
@@ -56,7 +56,7 @@ TEST(CountryTest, Converters) {
   converter.cityNameToId = [&cityMap](const std::string &str) { return cityMap.at(str); };
   converter.raceU32Map = [&raceMap](const std::map<std::string, uint32_t> &input) {
     std::map<uint32_t, uint32_t> result;
-    for (const auto&[raceStr, value]: input) {
+    for (const auto &[raceStr, value]: input) {
       result.emplace(raceMap.at(raceStr), value);
     }
     return result;
@@ -77,4 +77,3 @@ TEST(CountryTest, Converters) {
   EXPECT_EQ(country.GetPopulation().at(raceMap.at("dwarf")), 17);
   EXPECT_EQ(country.GetPopulation().at(raceMap.at("elf")), 3);
 }
-

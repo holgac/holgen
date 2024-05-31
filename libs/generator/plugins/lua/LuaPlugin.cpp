@@ -264,7 +264,6 @@ void LuaPlugin::ProcessStruct(Class &cls) {
   GenerateCreateLuaMetatable(cls);
 }
 
-
 void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
   auto method = ClassMethod{"PushEnumToLua", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});

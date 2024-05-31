@@ -105,7 +105,6 @@ return result;
   )R");
 }
 
-
 TEST_F(LuaFunctionPluginTest, FunctionInTableNoArgs) {
   auto project = Parse(R"R(
 struct TestData {

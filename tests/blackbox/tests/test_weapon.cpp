@@ -14,7 +14,6 @@ TEST(WeaponTest, SettersAndGetters) {
   EXPECT_EQ(weapon.GetDamageMax(), 30);
 }
 
-
 TEST(WeaponTest, ParseJson) {
   rapidjson::Document doc;
   doc.Parse(R"DELIM(
@@ -62,4 +61,4 @@ TEST(WeaponTest, CppFunc) {
   EXPECT_EQ(weapon.GetAverageDamage(), 30);
 }
 
-}
+} // namespace

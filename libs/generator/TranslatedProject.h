@@ -188,7 +188,9 @@ struct Class {
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
   [[nodiscard]] const ClassEnum *GetNestedEnum(const std::string &name) const;
 
-  [[nodiscard]] auto GetMethods(const std::string &name) const { return NameFilterForEachWrapper(name, mMethods); }
+  [[nodiscard]] auto GetMethods(const std::string &name) const {
+    return NameFilterForEachWrapper(name, mMethods);
+  }
 };
 
 struct TranslatedProject {

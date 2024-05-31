@@ -11,8 +11,9 @@ std::vector<std::string> AnnotationsToCheck = {
 };
 }
 
-DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(project) { Calculate(); }
-
+DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(project) {
+  Calculate();
+}
 
 void DependencyGraph::Calculate() {
   for (const auto &structDefinition: mProject.mStructs) {
@@ -77,5 +78,7 @@ void DependencyGraph::Calculate(const StructDefinition &structDefinition, const 
   }
 }
 
-const std::vector<std::string> &DependencyGraph::GetProcessOrder() const { return mProcessOrder; }
+const std::vector<std::string> &DependencyGraph::GetProcessOrder() const {
+  return mProcessOrder;
+}
 } // namespace holgen

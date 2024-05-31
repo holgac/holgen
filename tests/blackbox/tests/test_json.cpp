@@ -10,19 +10,15 @@ using namespace holgen_blackbox_test;
 
 class JsonTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 };
 
 TEST_F(JsonTest, ElemConverter) {
   TestJsonTagManager tagManager;
   Converter cv;
-  cv.testJsonConvertTag = [&](const std::string &tag) -> uint64_t {
-    return tagManager.GetOrInsert(tag);
-  };
+  cv.testJsonConvertTag = [&](const std::string &tag) -> uint64_t { return tagManager.GetOrInsert(tag); };
   TestJsonStructWithTags testStruct1, testStruct2;
 
   EXPECT_EQ(tagManager.GetTagFromName("tag1"), nullptr);

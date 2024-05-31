@@ -9,11 +9,9 @@ using namespace holgen_blackbox_test;
 
 class EnumTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 };
 
 TEST_F(EnumTest, Operators) {

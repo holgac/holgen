@@ -136,7 +136,9 @@ void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {
 namespace {
 template <typename T>
 struct NameComparator {
-  bool operator()(const T &lhs, const T &rhs) { return lhs.mName < rhs.mName; }
+  bool operator()(const T &lhs, const T &rhs) {
+    return lhs.mName < rhs.mName;
+  }
 };
 } // namespace
 

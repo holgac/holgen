@@ -116,7 +116,9 @@ std::string NamingConvention::LuaFunctionHandleNameInCpp(const FunctionDefinitio
   return "mLuaFuncHandle_" + functionDefinition.mName;
 }
 
-std::string NamingConvention::LuaMetatableName(const Class &cls) const { return cls.mName + "Meta"; }
+std::string NamingConvention::LuaMetatableName(const Class &cls) const {
+  return cls.mName + "Meta";
+}
 
 std::string NamingConvention::FieldNameInCpp(const std::string &fieldName) const {
   return std::format("m{}", St::Capitalize(fieldName));

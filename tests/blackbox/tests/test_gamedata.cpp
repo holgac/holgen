@@ -8,8 +8,7 @@ using namespace holgen_blackbox_test;
 
 class GameDataTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
   void TearDown() override {
     GlobalPointer<GameData>::SetInstance(nullptr);
@@ -92,5 +91,4 @@ TEST_F(GameDataTest, Ref) {
   EXPECT_EQ(gorion->GetArmorId(), robe->GetId());
   EXPECT_EQ(gorion->GetArmor(), robe);
   EXPECT_EQ(robe, Armor::Get(robe->GetId()));
-
 }

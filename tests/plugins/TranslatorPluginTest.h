@@ -9,7 +9,9 @@ using namespace holgen;
 
 class TranslatorPluginTest : public ::testing::Test {
 protected:
-  void SetUp() override { mParser = Parser(); }
+  void SetUp() override {
+    mParser = Parser();
+  }
 
   void TearDown() override {}
 
@@ -42,5 +44,7 @@ protected:
   const char *Source = "TranslatorPluginTest";
 
 private:
-  void Reset() { mParser = {}; }
+  void Reset() {
+    mParser = {};
+  }
 };

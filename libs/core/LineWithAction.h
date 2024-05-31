@@ -16,7 +16,9 @@ public:
 
   LineWithAction(LineWithAction &&ll) : mStream(std::move(ll.mStream)), mAction(std::move(ll.mAction)) {}
 
-  ~LineWithAction() { mAction(mStream.str()); }
+  ~LineWithAction() {
+    mAction(mStream.str());
+  }
 
   template <typename T>
   LineWithAction &operator<<(const T &val) {

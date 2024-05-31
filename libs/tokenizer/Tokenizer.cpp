@@ -13,7 +13,9 @@ std::map<char, TokenType> SpecialTokens = {
     {'@', TokenType::At},
 };
 
-bool IsWhitespace(char c) { return c == ' ' || c == '\n' || c == '\t' || c == '\r'; }
+bool IsWhitespace(char c) {
+  return c == ' ' || c == '\n' || c == '\t' || c == '\r';
+}
 } // namespace
 
 Tokenizer::Tokenizer(std::string_view sv, std::string source) : mData(sv), mSource(source) {}
@@ -114,9 +116,15 @@ bool Tokenizer::GetNextNonWhitespace(Token &tok) {
   }
 }
 
-size_t Tokenizer::GetLine() const { return mLine; }
+size_t Tokenizer::GetLine() const {
+  return mLine;
+}
 
-size_t Tokenizer::GetColumn() const { return mColumn; }
+size_t Tokenizer::GetColumn() const {
+  return mColumn;
+}
 
-std::string Tokenizer::GetSource() const { return mSource; }
+std::string Tokenizer::GetSource() const {
+  return mSource;
+}
 } // namespace holgen

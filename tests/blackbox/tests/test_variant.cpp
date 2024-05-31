@@ -10,11 +10,9 @@ using namespace holgen_blackbox_test;
 
 class VariantTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 };
 
 TEST_F(VariantTest, DifferentTypes) {

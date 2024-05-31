@@ -3,6 +3,7 @@
 #include "tokenizer/Tokenizer.h"
 
 using namespace holgen;
+
 // TODO: some failure cases
 
 class TokenizerTest : public ::testing::Test {
@@ -47,7 +48,9 @@ void ExpectNext(Tokenizer &tokenizer, size_t line, size_t col, const Token &toke
 }
 } // namespace
 
-TEST_F(TokenizerTest, EmptyString) { TestTokenizerResult("", {}); }
+TEST_F(TokenizerTest, EmptyString) {
+  TestTokenizerResult("", {});
+}
 
 TEST_F(TokenizerTest, Comments) {
   TestTokenizerResult("a   =//b+c;\nb / /*aaaaa*/ c;",

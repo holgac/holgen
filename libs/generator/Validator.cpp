@@ -329,7 +329,9 @@ void Validator::EnforceUniqueAnnotation(const Class &cls, const ClassField &fiel
   THROW_IF(count != 1, "{} annotation in {} should be used only once", annotationName, ToString(cls, field));
 }
 
-void Validator::Enum(const Class &cls) const { THROW_IF(!cls.mEnum, "{} is not an enum", ToString(cls)); }
+void Validator::Enum(const Class &cls) const {
+  THROW_IF(!cls.mEnum, "{} is not an enum", ToString(cls));
+}
 
 void Validator::NewEnumEntry(const Class &cls, const ClassEnum &nestedEnum, const ClassEnumEntry &entry) const {
   auto existingEntry = nestedEnum.GetEntry(entry.mName);

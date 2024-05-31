@@ -15,6 +15,7 @@ void EnumPlugin::Run() {
 
 namespace {
 enum class EnumOperatorReturnType { This, Result };
+
 struct EnumOperator {
   std::string mOperator;
   Constness mConstness;

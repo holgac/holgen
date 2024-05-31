@@ -1,6 +1,5 @@
 #pragma once
 
-
 namespace holgen {
 // This kinda serves as documentation
 class Annotations {

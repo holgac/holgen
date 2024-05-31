@@ -19,7 +19,9 @@ class Exception : std::exception {
 public:
   explicit Exception(std::string msg) : mMsg(std::move(msg)) {}
 
-  const char *what() { return mMsg.c_str(); }
+  const char *what() {
+    return mMsg.c_str();
+  }
 };
 
 } // namespace holgen

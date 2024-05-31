@@ -3,7 +3,9 @@
 
 class ClassPluginTest : public TranslatorPluginTest {
 protected:
-  static void Run(TranslatedProject &project) { ClassPlugin(project, {}).Run(); }
+  static void Run(TranslatedProject &project) {
+    ClassPlugin(project, {}).Run();
+  }
 };
 
 TEST_F(ClassPluginTest, Struct) {

@@ -16,8 +16,7 @@
 
 using namespace holgen_blackbox_test;
 
-namespace {
-}
+namespace {}
 
 class LuaTest : public ::testing::Test {
 protected:
@@ -211,7 +210,6 @@ TEST_F(LuaTest, ContainerVector) {
   LuaTestHelper::ExpectStack(mState, {"42"});
   lua_pop(mState, 1);
 }
-
 
 TEST_F(LuaTest, ContainerMap) {
   LuaTestStructContainer::CreateLuaMetatable(mState);

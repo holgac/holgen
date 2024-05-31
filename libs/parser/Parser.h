@@ -26,7 +26,9 @@ public:
   Parser();
   void Parse(Tokenizer &tokenizer);
 
-  const ProjectDefinition &GetProject() const { return mProject; }
+  const ProjectDefinition &GetProject() const {
+    return mProject;
+  }
 
   void PostProcess();
 

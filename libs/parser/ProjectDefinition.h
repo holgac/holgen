@@ -6,7 +6,6 @@
 #include <optional>
 #include "core/Iterators.h"
 
-
 namespace holgen {
 struct DefinitionSource {
   std::string mSource;
@@ -35,7 +34,9 @@ struct AnnotationDefinition {
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationAttributeDefinition *GetAttribute(const std::string &name) const;
 
-  auto GetAttributes(const std::string &name) const { return NameFilterForEachWrapper(name, mAttributes); }
+  auto GetAttributes(const std::string &name) const {
+    return NameFilterForEachWrapper(name, mAttributes);
+  }
 };
 
 struct FieldDefinition {
@@ -46,10 +47,12 @@ struct FieldDefinition {
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   [[nodiscard]] const AnnotationAttributeDefinition *
-  GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
-                       std::optional<std::string> attributeValue = std::nullopt) const;
+      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                           std::optional<std::string> attributeValue = std::nullopt) const;
 
-  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
+  auto GetAnnotations(const std::string &name) const {
+    return NameFilterForEachWrapper(name, mAnnotations);
+  }
 };
 
 struct FunctionArgumentDefinition {
@@ -68,10 +71,12 @@ struct FunctionDefinition {
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   [[nodiscard]] const AnnotationAttributeDefinition *
-  GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
-                       std::optional<std::string> attributeValue = std::nullopt) const;
+      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                           std::optional<std::string> attributeValue = std::nullopt) const;
 
-  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
+  auto GetAnnotations(const std::string &name) const {
+    return NameFilterForEachWrapper(name, mAnnotations);
+  }
 };
 
 struct StructDefinition {
@@ -87,11 +92,13 @@ struct StructDefinition {
   [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
   [[nodiscard]] const FieldDefinition *GetIdField() const;
 
-  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
+  auto GetAnnotations(const std::string &name) const {
+    return NameFilterForEachWrapper(name, mAnnotations);
+  }
 
   [[nodiscard]] const AnnotationAttributeDefinition *
-  GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
-                       std::optional<std::string> attributeValue = std::nullopt) const;
+      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                           std::optional<std::string> attributeValue = std::nullopt) const;
 };
 
 struct EnumEntryDefinition {
@@ -101,7 +108,9 @@ struct EnumEntryDefinition {
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
 
-  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
+  auto GetAnnotations(const std::string &name) const {
+    return NameFilterForEachWrapper(name, mAnnotations);
+  }
 };
 
 struct EnumDefinition {
@@ -113,7 +122,9 @@ struct EnumDefinition {
   [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
 
-  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
+  auto GetAnnotations(const std::string &name) const {
+    return NameFilterForEachWrapper(name, mAnnotations);
+  }
 };
 
 struct ProjectDefinition {

@@ -5,7 +5,9 @@ namespace holgen {
 StringSwitcher::StringSwitcher(std::string sourceStr, CodeBlock elseCase) :
     mSourceStr(std::move(sourceStr)), mElseCase(std::move(elseCase)) {}
 
-void StringSwitcher::AddCase(StringSwitchCase aCase) { mCases.push_back(std::move(aCase)); }
+void StringSwitcher::AddCase(StringSwitchCase aCase) {
+  mCases.push_back(std::move(aCase));
+}
 
 CodeBlock StringSwitcher::Generate() {
   CodeBlock codeBlock;
@@ -33,5 +35,7 @@ CodeBlock StringSwitcher::Generate() {
   return codeBlock;
 }
 
-bool StringSwitcher::IsEmpty() const { return mCases.empty(); }
+bool StringSwitcher::IsEmpty() const {
+  return mCases.empty();
+}
 } // namespace holgen

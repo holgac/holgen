@@ -6,7 +6,7 @@ AlignConsecutiveDeclarations: false
 AlignOperands: false
 AlignTrailingComments: false
 AlwaysBreakTemplateDeclarations: Yes
-BraceWrapping: 
+BraceWrapping:
   AfterCaseLabel: true
   AfterClass: false
   AfterControlStatement: false
@@ -51,3 +51,7 @@ TabWidth: 2
 SpaceBeforeRangeBasedForLoopColon: false
 NamespaceIndentation: None
 SortIncludes: false
+SeparateDefinitionBlocks: Always
+LineEnding: LF
+IndentWrappedFunctionNames: true
+AllowShortFunctionsOnASingleLine: Empty
