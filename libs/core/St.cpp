@@ -1,5 +1,5 @@
-#include <format>
 #include "St.h"
+#include <format>
 
 namespace holgen {
 std::string St::Capitalize(const std::string &str) {
@@ -32,4 +32,4 @@ bool St::IsIntegral(const std::string_view &str) {
   }
   return true;
 }
-}
+} // namespace holgen

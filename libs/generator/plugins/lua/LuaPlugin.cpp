@@ -8,7 +8,7 @@ namespace {
 std::string LuaTableField_Pointer = "p";
 std::string LuaTableField_Index = "i";
 std::string LuaTableField_Type = "t";
-}
+} // namespace
 
 void LuaPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
@@ -20,8 +20,8 @@ void LuaPlugin::Run() {
 }
 
 void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
-  auto method = ClassMethod{"IndexMetaMethod", Type{"int"},
-                            Visibility::Private, Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   CodeBlock stringSwitcherElseCase;
   stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
@@ -29,13 +29,11 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
   for (auto &field: cls.mFields) {
     // TODO: parse variant
-    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
-        field.mField->mType.mName == St::UserData)
+    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData)
       continue;
     bool isRef = field.mField->mType.mName == "Ref";
-    switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
-      GenerateIndexForField(cls, field, switchBlock);
-    });
+    switcher.AddCase(Naming().FieldNameInLua(*field.mField),
+                     [&](CodeBlock &switchBlock) { GenerateIndexForField(cls, field, switchBlock); });
     if (isRef && field.mType.mType != PassByType::Pointer) {
       auto underlyingStruct = mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.front().mName);
       if (underlyingStruct->GetAnnotation(Annotations::Managed)) {
@@ -61,8 +59,8 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
         if (i != 0)
           funcArgs << ", ";
         if (auto argClass = mProject.GetClass(arg.mType.mName)) {
-          switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});",
-                          i, arg.mType.mName, ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+          switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});", i, arg.mType.mName,
+                          ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
           if (argClass->mStruct && arg.mType.mType != PassByType::Pointer)
             funcArgs << "*arg" << i;
           else
@@ -72,10 +70,8 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
           sanitizedType.mType = PassByType::Value;
           sanitizedType.mConstness = Constness::NotConst;
           switchBlock.Add("{}arg{};", sanitizedType.ToString(false), i);
-          switchBlock.Add(
-              "{}::{}(arg{}, lsInner, {});",
-              St::LuaHelper, St::LuaHelper_Read, i,
-              ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+          switchBlock.Add("{}::{}(arg{}, lsInner, {});", St::LuaHelper, St::LuaHelper_Read, i,
+                          ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
           funcArgs << "arg" << i;
         }
         ++i;
@@ -105,12 +101,10 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field,
-                                      CodeBlock &switchBlock) const {
+void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const {
   if (field.mField->mType.mName == St::Variant) {
     auto enumField = cls.GetField(Naming().FieldNameInCpp(
-        field.mField->GetAnnotation(Annotations::Variant)->GetAttribute(
-            Annotations::Variant_TypeField)->mValue.mName));
+        field.mField->GetAnnotation(Annotations::Variant)->GetAttribute(Annotations::Variant_TypeField)->mValue.mName));
     switchBlock.Add("switch (instance->{}.GetValue()) {{", enumField->mName);
     for (auto &otherCls: mProject.mClasses) {
       if (!otherCls.mStruct || !otherCls.mStruct->GetAnnotation(Annotations::Variant))
@@ -137,16 +131,16 @@ void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field,
 }
 
 void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
-  auto method = ClassMethod{
-      "NewIndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   CodeBlock stringSwitcherElseCase;
   stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
   for (auto &field: cls.mFields) {
     // TODO: parse variant
-    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
-        field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
+    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData ||
+        field.mField->mType.mName == St::Variant)
       continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
@@ -168,9 +162,8 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
 }
 
 void LuaPlugin::GenerateReadFromLua(Class &cls) {
-  auto method = ClassMethod{
-      "ReadFromLua", Type{cls.mName, PassByType::Pointer},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"ReadFromLua", Type{cls.mName, PassByType::Pointer}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
   method.mComments.push_back("This only works with negative indices");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mArguments.emplace_back("idx", Type{"int32_t"});
@@ -225,8 +218,7 @@ void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) con
 }
 
 void LuaPlugin::GeneratePushToLua(Class &cls) {
-  auto method = ClassMethod{
-      "PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
+  auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   method.mBody.Add("lua_newtable(luaState);");
@@ -274,8 +266,7 @@ void LuaPlugin::ProcessStruct(Class &cls) {
 
 
 void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
-  auto method = ClassMethod{
-      "PushEnumToLua", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"PushEnumToLua", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add("lua_newtable(luaState);");
 
@@ -303,8 +294,8 @@ void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
 }
 
 void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
-  auto method = ClassMethod{
-      "CreateLuaMetatable", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{"CreateLuaMetatable", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add("lua_newtable(luaState);");
 
@@ -355,4 +346,4 @@ bool LuaPlugin::ShouldEmbedPointer(Class &cls) {
     return true;
   return false;
 }
-}
+} // namespace holgen

@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
 
@@ -28,9 +28,7 @@ enum TestData {}
   {
     auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(
-        *cls->GetMethod("PushToLua", Constness::Const),
-        method, "LuaHelper::Push(mValue, luaState);");
+    helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method, "LuaHelper::Push(mValue, luaState);");
   }
 }
 
@@ -184,8 +182,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("IndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
-                              Constness::NotConst, Staticness::Static};
+    auto method =
+        ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -2);
@@ -220,8 +218,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("IndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
-                              Constness::NotConst, Staticness::Static};
+    auto method =
+        ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -2);
@@ -270,8 +268,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("IndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
-                              Constness::NotConst, Staticness::Static};
+    auto method =
+        ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -2);
@@ -303,8 +301,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private,
-                              Constness::NotConst, Staticness::Static};
+    auto method =
+        ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -3);
@@ -339,8 +337,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private,
-                              Constness::NotConst, Staticness::Static};
+    auto method =
+        ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadFromLua(luaState, -3);
@@ -365,8 +363,8 @@ struct TestData {}
 
   ASSERT_NE(cls->GetMethod("CreateLuaMetatable", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"CreateLuaMetatable", Type{"void"}, Visibility::Public,
-                              Constness::NotConst, Staticness::Static};
+    auto method =
+        ClassMethod{"CreateLuaMetatable", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("CreateLuaMetatable", Constness::NotConst), method, R"R(
 lua_newtable(luaState);

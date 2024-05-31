@@ -1,23 +1,23 @@
 #include "ProjectDefinition.h"
+#include <optional>
 #include "core/Annotations.h"
 #include "core/St.h"
 #include "holgen.h"
-#include <optional>
 
-#define GEN_GET_MATCHING_ATTRIBUTE(clsName) \
-  const AnnotationAttributeDefinition *clsName::GetMatchingAttribute( \
-      const std::string &annotationName, const std::string &attributeName, \
-      std::optional<std::string> attributeValue) const { \
-    auto annotation = GetAnnotation(annotationName); \
-    if (!annotation) \
-      return nullptr; \
-    for (auto &attribute: annotation->mAttributes) { \
-      if (attribute.mName == attributeName) { \
-        if (!attributeValue.has_value() || attribute.mValue.mName == *attributeValue) \
-          return &attribute; \
-      } \
-    } \
-    return nullptr; \
+#define GEN_GET_MATCHING_ATTRIBUTE(clsName)                                                                            \
+  const AnnotationAttributeDefinition *clsName::GetMatchingAttribute(                                                  \
+      const std::string &annotationName, const std::string &attributeName, std::optional<std::string> attributeValue)  \
+      const {                                                                                                          \
+    auto annotation = GetAnnotation(annotationName);                                                                   \
+    if (!annotation)                                                                                                   \
+      return nullptr;                                                                                                  \
+    for (auto &attribute: annotation->mAttributes) {                                                                   \
+      if (attribute.mName == attributeName) {                                                                          \
+        if (!attributeValue.has_value() || attribute.mValue.mName == *attributeValue)                                  \
+          return &attribute;                                                                                           \
+      }                                                                                                                \
+    }                                                                                                                  \
+    return nullptr;                                                                                                    \
   };
 
 namespace holgen {
@@ -66,4 +66,4 @@ GEN_GETTER_BY_NAME(EnumDefinition, EnumEntryDefinition, GetEnumEntry, mEntries);
 GEN_GETTER_BY_NAME(EnumDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
 
 GEN_GETTER_BY_NAME(FunctionDefinition, AnnotationDefinition, GetAnnotation, mAnnotations);
-}
+} // namespace holgen

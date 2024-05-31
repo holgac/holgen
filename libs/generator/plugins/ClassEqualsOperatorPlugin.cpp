@@ -50,4 +50,4 @@ std::string ClassEqualsOperatorPlugin::GetEpsilon(const Class &cls, const ClassF
   }
   return mSettings.mEpsilon;
 }
-}
+} // namespace holgen

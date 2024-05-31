@@ -1,6 +1,6 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/EnumPlugin.h"
 #include "generator/plugins/ClassPlugin.h"
+#include "generator/plugins/EnumPlugin.h"
 
 class EnumPluginTest : public TranslatorPluginTest {
 protected:
@@ -66,13 +66,8 @@ enum TestEnum {
 
   {
     ASSERT_NE(cls->GetField("Invalid"), nullptr);
-    auto field = ClassField{
-        "Invalid",
-        Type{"UnderlyingType", PassByType::Value, Constness::Const},
-        Visibility::Public,
-        Staticness::Static,
-        "2"
-    };
+    auto field = ClassField{"Invalid", Type{"UnderlyingType", PassByType::Value, Constness::Const}, Visibility::Public,
+                            Staticness::Static, "2"};
     field.mType.mConstexprness = Constexprness::Constexpr;
     helpers::ExpectEqual(*cls->GetField("Invalid"), field);
   }
@@ -91,9 +86,8 @@ enum TestEnum {
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{
-      "FromString", Type{"TestEnum"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{"FromString", Type{"TestEnum"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("str", Type{"std::string_view"});
   helpers::ExpectEqual(*cls->GetMethod("FromString", Constness::NotConst), method, R"R(
 if (str == "Entry1") {
@@ -150,8 +144,8 @@ enum TestEnum {
   auto cls = project.GetClass("TestEnum");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public, Constness::NotConst,
-                            Staticness::Static};
+  auto method =
+      ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mReturnType.mTemplateParameters.emplace_back("TestEnum::Entry");
   method.mReturnType.mTemplateParameters.emplace_back("3");
   ASSERT_NE(cls->GetMethod("GetEntries", Constness::NotConst), nullptr);
@@ -161,12 +155,13 @@ return std::array<TestEnum::Entry, 3>{Entry1, Entry2, Entry3};
 }
 
 TEST_F(EnumPluginTest, DuplicateEntry) {
-  ExpectErrorMessage(R"R(
+  ExpectErrorMessage(
+      R"R(
 enum TestEnum {
   Entry1 = 5;
   Entry1 = 5;
 }
-  )R", Run,
-                     "Enum TestEnum ({0}:1:1) contains duplicate entries TestEnum.Entry1 ({0}:2:3) and TestEnum.Entry1 ({0}:3:3)",
-                     Source);
+  )R",
+      Run, "Enum TestEnum ({0}:1:1) contains duplicate entries TestEnum.Entry1 ({0}:2:3) and TestEnum.Entry1 ({0}:3:3)",
+      Source);
 }

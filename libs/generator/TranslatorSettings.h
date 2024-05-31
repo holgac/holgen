@@ -7,4 +7,4 @@ struct TranslatorSettings {
   // unless overridden with an annotation, this is the default when comparing floats
   std::string mEpsilon = "0.00001";
 };
-}
+} // namespace holgen

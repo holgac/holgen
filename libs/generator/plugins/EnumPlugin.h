@@ -7,6 +7,7 @@ class EnumPlugin : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
   void Run() override;
+
 private:
   void GenerateCommon(Class &cls);
   void GenerateOperators(Class &cls);
@@ -21,4 +22,4 @@ private:
   void GenerateIntegralConstructor(Class &cls);
   void GenerateEnumConstructor(Class &cls);
 };
-}
+} // namespace holgen

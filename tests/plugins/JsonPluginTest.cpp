@@ -1,9 +1,9 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
-#include "generator/plugins/json/JsonPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
+#include "generator/plugins/json/JsonPlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
 
 class JsonPluginTest : public TranslatorPluginTest {

@@ -1,17 +1,15 @@
 #include <gtest/gtest.h>
-#include "tokenizer/Tokenizer.h"
-#include "parser/Parser.h"
 #include "Helpers.h"
+#include "parser/Parser.h"
+#include "tokenizer/Tokenizer.h"
 
 using namespace holgen;
 
 class ParserTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 
   ProjectDefinition Parse(const char *text) {
     auto trimmed = helpers::Trim(text);
@@ -21,7 +19,7 @@ protected:
     return parser.GetProject();
   }
 
-  template<typename T>
+  template <typename T>
   void ExpectDefinitionSource(const T &data, size_t line, size_t col) {
     auto &definiitonSource = data.mDefinitionSource;
     EXPECT_EQ(definiitonSource.mSource, Source);
@@ -29,26 +27,23 @@ protected:
     EXPECT_EQ(definiitonSource.mColumn, col);
   }
 
-  void ExpectAnnotationAttribute(
-      const AnnotationAttributeDefinition &annotationAttribute, const std::string &name,
-      const std::string &value, size_t line, size_t col) {
+  void ExpectAnnotationAttribute(const AnnotationAttributeDefinition &annotationAttribute, const std::string &name,
+                                 const std::string &value, size_t line, size_t col) {
     EXPECT_EQ(annotationAttribute.mName, name);
     EXPECT_EQ(annotationAttribute.mValue.mName, value);
     ExpectDefinitionSource(annotationAttribute, line, col);
   }
 
-  void ExpectAnnotation(
-      const AnnotationDefinition &annotation, const std::string &name, size_t attributeCount,
-      size_t line, size_t col) {
+  void ExpectAnnotation(const AnnotationDefinition &annotation, const std::string &name, size_t attributeCount,
+                        size_t line, size_t col) {
     EXPECT_EQ(annotation.mName, name);
     EXPECT_EQ(annotation.mAttributes.size(), attributeCount);
     ExpectDefinitionSource(annotation, line, col);
   }
 
-  void ExpectField(
-      const FieldDefinition &field, size_t line, size_t col, const std::string &name, const std::string &type,
-      size_t annotationCount,
-      const std::optional<std::string> &defaultValue, const std::string &arraySize) {
+  void ExpectField(const FieldDefinition &field, size_t line, size_t col, const std::string &name,
+                   const std::string &type, size_t annotationCount, const std::optional<std::string> &defaultValue,
+                   const std::string &arraySize) {
     EXPECT_EQ(field.mName, name);
     EXPECT_EQ(field.mType.mName, type) << " in field " << name;
     EXPECT_EQ(field.mType.mArraySize, arraySize) << " in field " << name;
@@ -57,16 +52,16 @@ protected:
     ExpectDefinitionSource(field, line, col);
   }
 
-  void ExpectStruct(const StructDefinition &s, const std::string &name, size_t fieldCount,
-                    size_t annotationCount, size_t line, size_t col) {
+  void ExpectStruct(const StructDefinition &s, const std::string &name, size_t fieldCount, size_t annotationCount,
+                    size_t line, size_t col) {
     EXPECT_EQ(s.mName, name);
     EXPECT_EQ(s.mFields.size(), fieldCount);
     EXPECT_EQ(s.mAnnotations.size(), annotationCount);
     ExpectDefinitionSource(s, line, col);
   }
 
-  void ExpectEnum(const EnumDefinition &e, const std::string &name, const std::string &invalidValue,
-                  size_t entryCount, size_t annotationCount, size_t line, size_t col) {
+  void ExpectEnum(const EnumDefinition &e, const std::string &name, const std::string &invalidValue, size_t entryCount,
+                  size_t annotationCount, size_t line, size_t col) {
     EXPECT_EQ(e.mName, name);
     EXPECT_EQ(e.mInvalidValue, invalidValue);
     EXPECT_EQ(e.mEntries.size(), entryCount);
@@ -82,9 +77,8 @@ protected:
     ExpectDefinitionSource(e, line, col);
   }
 
-  void ExpectFunction(const FunctionDefinition &functionDefinition,
-                      const std::string &name, const std::string &returnType,
-                      size_t argCount, size_t annotationCount, size_t line, size_t col) {
+  void ExpectFunction(const FunctionDefinition &functionDefinition, const std::string &name,
+                      const std::string &returnType, size_t argCount, size_t annotationCount, size_t line, size_t col) {
     EXPECT_EQ(functionDefinition.mName, name);
     EXPECT_EQ(functionDefinition.mReturnType.mName, returnType);
     EXPECT_EQ(functionDefinition.mArguments.size(), argCount);

@@ -22,12 +22,10 @@ void CppFunctionPlugin::ProcessStructDefinition(Class &cls, const StructDefiniti
 
 void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::CppFunc);
-  auto method = ClassMethod{
-      functionDefinition.mName,
-      Type{mProject, functionDefinition.mReturnType},
-      Visibility::Public,
-      (funcAnnotation && funcAnnotation->GetAttribute(Annotations::CppFunc_Const)) ? Constness::Const
-                                                                                   : Constness::NotConst};
+  auto method =
+      ClassMethod{functionDefinition.mName, Type{mProject, functionDefinition.mReturnType}, Visibility::Public,
+                  (funcAnnotation && funcAnnotation->GetAttribute(Annotations::CppFunc_Const)) ? Constness::Const
+                                                                                               : Constness::NotConst};
   if (funcAnnotation) {
     if (funcAnnotation->GetAttribute(Annotations::CppFunc_OnDestroy)) {
       method.mVisibility = Visibility::Protected;
@@ -71,4 +69,4 @@ void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &fun
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
-}
+} // namespace holgen

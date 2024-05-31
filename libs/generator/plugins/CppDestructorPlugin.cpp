@@ -1,6 +1,6 @@
 #include "CppDestructorPlugin.h"
-#include "core/St.h"
 #include "core/Annotations.h"
+#include "core/St.h"
 
 namespace holgen {
 void CppDestructorPlugin::Run() {
@@ -36,12 +36,12 @@ void CppDestructorPlugin::ProcessVariantFields(ClassDestructor &destructor,
   for (auto &field: structDefinition.mFields) {
     if (field.mType.mName != St::Variant)
       continue;
-    auto typeFieldName = field.GetAnnotation(Annotations::Variant)->GetAttribute(
-        Annotations::Variant_TypeField)->mValue.mName;
+    auto typeFieldName =
+        field.GetAnnotation(Annotations::Variant)->GetAttribute(Annotations::Variant_TypeField)->mValue.mName;
     if (processedTypeFields.contains(typeFieldName))
       continue;
     processedTypeFields.insert(typeFieldName);
     destructor.mBody.Add("{}();", Naming().VariantResetterNameInCpp(typeFieldName));
   }
 }
-}
+} // namespace holgen

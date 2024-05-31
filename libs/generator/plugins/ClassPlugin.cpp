@@ -23,4 +23,4 @@ void ClassPlugin::AddClass(const StructDefinition &structDefinition) {
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
 }
-}
+} // namespace holgen

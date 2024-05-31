@@ -1,15 +1,15 @@
 #include "JsonParseFilesPlugin.h"
 #include <vector>
-#include "generator/TypeInfo.h"
+#include "../../NamingConvention.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "../../NamingConvention.h"
+#include "generator/TypeInfo.h"
 
 namespace holgen {
 namespace {
 std::string ParseJson = "ParseJson";
 std::string ParseFiles = "ParseFiles";
-}
+} // namespace
 
 void JsonParseFilesPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
@@ -39,7 +39,7 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
   GenerateFilesByName(method);
 
   bool isFirst = true;
-  for (const auto &structToProcess : mProject.mDependencyGraph.GetProcessOrder()) {
+  for (const auto &structToProcess: mProject.mDependencyGraph.GetProcessOrder()) {
     for (const auto &field: cls.mFields) {
       if (!field.mField || !field.mField->GetAnnotation(Annotations::Container))
         continue;
@@ -63,8 +63,7 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
 
       method.mBody.Add("for (const auto& filePath: it->second) {{");
       method.mBody.Indent(1);
-      method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
-                       St::FilesystemHelper_ReadFile);
+      method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper, St::FilesystemHelper_ReadFile);
       method.mBody.Add("rapidjson::Document doc;");
       method.mBody.Add("doc.Parse(contents.c_str());");
       method.mBody.Add(
@@ -77,8 +76,7 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
       Type type(mProject, templateParameter);
       method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
       method.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
-      method.mBody.Add(
-          R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
+      method.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
       method.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
       method.mBody.Indent(-1);
       method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
@@ -102,8 +100,8 @@ void JsonParseFilesPlugin::GenerateConverterPopulators(Class &cls, ClassMethod &
       continue;
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto &underlyingClass = *mProject.GetClass(field.mField->mType.mTemplateParameters.back().mName);
-      auto indexedOnField = underlyingClass.GetFieldFromDefinitionName(
-          annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
+      auto indexedOnField =
+          underlyingClass.GetFieldFromDefinitionName(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
       auto forConverter = annotation.GetAttribute(Annotations::Index_ForConverter);
       if (forConverter == nullptr)
         continue;
@@ -166,4 +164,4 @@ void JsonParseFilesPlugin::GenerateFilesByName(ClassMethod &method) {
   method.mBody.Indent(-1);
   method.mBody.Add("}}"); // while(!paths.empty())
 }
-}
+} // namespace holgen

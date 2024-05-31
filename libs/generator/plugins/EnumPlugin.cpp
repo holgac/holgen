@@ -1,6 +1,6 @@
 #include "EnumPlugin.h"
-#include "core/St.h"
 #include <format>
+#include "core/St.h"
 
 namespace holgen {
 void EnumPlugin::Run() {
@@ -14,17 +14,14 @@ void EnumPlugin::Run() {
 }
 
 namespace {
-enum class EnumOperatorReturnType {
-  This,
-  Result
-};
+enum class EnumOperatorReturnType { This, Result };
 struct EnumOperator {
   std::string mOperator;
   Constness mConstness;
   EnumOperatorReturnType mReturn;
   bool mIntegralArgument;
 };
-}
+} // namespace
 
 void EnumPlugin::GenerateCommon(Class &cls) {
   cls.mUsings.emplace_back(Type{"int64_t"}, St::Enum_UnderlyingType);
@@ -76,20 +73,16 @@ void EnumPlugin::GenerateGetValue(Class &cls) {
 
 void EnumPlugin::GenerateOperators(Class &cls) {
   // TODO: test these properly. Currently overloads aren't well supported.
-  const std::vector<EnumOperator> operators = {
-      {"=",  Constness::NotConst, EnumOperatorReturnType::This,   true},
-      {"==", Constness::Const,    EnumOperatorReturnType::Result, true},
-      {"==", Constness::Const,    EnumOperatorReturnType::Result, false},
-      {"!=", Constness::Const,    EnumOperatorReturnType::Result, true},
-      {"!=", Constness::Const,    EnumOperatorReturnType::Result, false},
-      {"<",  Constness::Const,    EnumOperatorReturnType::Result, true},
-      {"<",  Constness::Const,    EnumOperatorReturnType::Result, false}
-  };
+  const std::vector<EnumOperator> operators = {{"=", Constness::NotConst, EnumOperatorReturnType::This, true},
+                                               {"==", Constness::Const, EnumOperatorReturnType::Result, true},
+                                               {"==", Constness::Const, EnumOperatorReturnType::Result, false},
+                                               {"!=", Constness::Const, EnumOperatorReturnType::Result, true},
+                                               {"!=", Constness::Const, EnumOperatorReturnType::Result, false},
+                                               {"<", Constness::Const, EnumOperatorReturnType::Result, true},
+                                               {"<", Constness::Const, EnumOperatorReturnType::Result, false}};
 
   for (auto &op: operators) {
-    auto method = ClassMethod{
-        "operator" + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness
-    };
+    auto method = ClassMethod{"operator" + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness};
     if (op.mReturn == EnumOperatorReturnType::This) {
       method.mReturnType.mName = cls.mName;
       method.mReturnType.mType = PassByType::Reference;
@@ -116,18 +109,11 @@ void EnumPlugin::GenerateOperators(Class &cls) {
 }
 
 void EnumPlugin::GenerateGetEntries(Class &cls) {
-  auto method = ClassMethod{
-      "GetEntries",
-      Type{"std::array"},
-      Visibility::Public,
-      Constness::NotConst,
-      Staticness::Static
-  };
+  auto method =
+      ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mConstexprness = Constexprness::Constexpr;
-  method.mReturnType.mTemplateParameters.emplace_back(
-      std::format("{}::Entry", cls.mName));
-  method.mReturnType.mTemplateParameters.emplace_back(
-      std::format("{}", cls.mEnum->mEntries.size()));
+  method.mReturnType.mTemplateParameters.emplace_back(std::format("{}::Entry", cls.mName));
+  method.mReturnType.mTemplateParameters.emplace_back(std::format("{}", cls.mEnum->mEntries.size()));
   {
     auto line = method.mBody.Line();
     line << "return " << method.mReturnType.ToString(true) << "{";
@@ -143,13 +129,8 @@ void EnumPlugin::GenerateGetEntries(Class &cls) {
 }
 
 void EnumPlugin::GenerateInvalidEntry(Class &cls) {
-  auto invalidEntry = ClassField{
-      "Invalid",
-      Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
-      Visibility::Public,
-      Staticness::Static,
-      cls.mEnum->mInvalidValue
-  };
+  auto invalidEntry = ClassField{"Invalid", Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
+                                 Visibility::Public, Staticness::Static, cls.mEnum->mInvalidValue};
   invalidEntry.mType.mConstexprness = Constexprness::Constexpr;
   invalidEntry.mDefaultValue = cls.mEnum->mInvalidValue;
   Validate().NewField(cls, invalidEntry);
@@ -157,10 +138,7 @@ void EnumPlugin::GenerateInvalidEntry(Class &cls) {
 }
 
 void EnumPlugin::GenerateFromString(Class &cls) {
-  auto method = ClassMethod{
-      "FromString", Type{cls.mName},
-      Visibility::Public, Constness::NotConst, Staticness::Static
-  };
+  auto method = ClassMethod{"FromString", Type{cls.mName}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("str", Type{"std::string_view"});
   bool isFirst = true;
   for (auto &entry: cls.mEnum->mEntries) {
@@ -189,12 +167,8 @@ void EnumPlugin::GenerateFromString(Class &cls) {
 
 void EnumPlugin::GenerateToString(Class &cls) {
   // TODO: << operator?
-  auto method = ClassMethod{
-      "ToString",
-      Type{"char", PassByType::Pointer, Constness::Const},
-      Visibility::Public,
-      Constness::Const
-  };
+  auto method = ClassMethod{"ToString", Type{"char", PassByType::Pointer, Constness::Const}, Visibility::Public,
+                            Constness::Const};
   method.mBody.Add("switch (mValue) {{");
   method.mBody.Indent(1);
   for (auto &entry: cls.mEnum->mEntries) {
@@ -259,4 +233,4 @@ void EnumPlugin::GenerateClassEnum(Class &cls) {
   }
   cls.mNestedEnums.emplace_back(std::move(classEnum));
 }
-}
+} // namespace holgen

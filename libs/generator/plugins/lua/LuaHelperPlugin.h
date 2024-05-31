@@ -8,6 +8,7 @@ class LuaHelperPlugin : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
   void Run() override;
+
 private:
   void GeneratePush(Class &cls);
   void GenerateBasePush(Class &cls);
@@ -24,4 +25,4 @@ private:
   void GeneratePushForKeyedContainer(Class &cls, const std::string &container) const;
 };
 
-}
+} // namespace holgen

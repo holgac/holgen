@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 
 class ClassFieldPluginTest : public TranslatorPluginTest {
 protected:
@@ -289,7 +289,6 @@ struct TestData {
     field.mType.mTemplateParameters.emplace_back("2");
     helpers::ExpectEqual(*cls->GetField("mTestFieldArrayEnum"), field);
   }
-
 }
 
 TEST_F(ClassFieldPluginTest, DuplicateField) {
@@ -297,30 +296,28 @@ TEST_F(ClassFieldPluginTest, DuplicateField) {
 struct A {
   u32 field;
   u32 field;
-})R", Run,
-                     "Duplicate field: A.field ({0}:2:3) and A.field ({0}:3:3)", Source);
+})R",
+                     Run, "Duplicate field: A.field ({0}:2:3) and A.field ({0}:3:3)", Source);
 }
 
 TEST_F(ClassFieldPluginTest, Vector) {
-  ExpectErrorMessage(
-      "struct A {u32<u32> field;}", Run,
-      "Primitive type uint32_t used by A.field ({0}:1:11) cannot have template parameters", Source);
-  ExpectErrorMessage(
-      "struct A {vector<u32, u32> field;}", Run,
-      "Container type std::vector used by A.field ({0}:1:11) should have a single template parameter", Source);
+  ExpectErrorMessage("struct A {u32<u32> field;}", Run,
+                     "Primitive type uint32_t used by A.field ({0}:1:11) cannot have template parameters", Source);
+  ExpectErrorMessage("struct A {vector<u32, u32> field;}", Run,
+                     "Container type std::vector used by A.field ({0}:1:11) should have a single template parameter",
+                     Source);
 }
 
 TEST_F(ClassFieldPluginTest, Set) {
-  ExpectErrorMessage(
-      "struct A {set<u32, u64, u32> field;}", Run,
-      "Set type std::set used by A.field ({0}:1:11) should have a single template parameter", Source);
+  ExpectErrorMessage("struct A {set<u32, u64, u32> field;}", Run,
+                     "Set type std::set used by A.field ({0}:1:11) should have a single template parameter", Source);
   ExpectErrorMessage(
       "struct A {set<vector<u32>> field;}", Run,
       "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector",
       Source);
-  ExpectErrorMessage(
-      "struct A {set<B> field;} struct B {}", Run,
-      "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found B", Source);
+  ExpectErrorMessage("struct A {set<B> field;} struct B {}", Run,
+                     "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found B",
+                     Source);
 }
 
 TEST_F(ClassFieldPluginTest, Map) {
@@ -328,18 +325,15 @@ TEST_F(ClassFieldPluginTest, Map) {
       "struct A {map<string, set<vector<u32>>> field;}", Run,
       "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector",
       Source);
-  ExpectErrorMessage(
-      "struct A {map field;}", Run,
-      "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
-  ExpectErrorMessage(
-      "struct A {map<u32> field;}", Run,
-      "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
-  ExpectErrorMessage(
-      "struct A {map<u32, u64, u32> field;}", Run,
-      "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
-  ExpectErrorMessage(
-      "struct A {map<u32, vector<u32, u32>> field;}", Run,
-      "Container type std::vector used by A.field ({0}:1:11) should have a single template parameter", Source);
+  ExpectErrorMessage("struct A {map field;}", Run,
+                     "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
+  ExpectErrorMessage("struct A {map<u32> field;}", Run,
+                     "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
+  ExpectErrorMessage("struct A {map<u32, u64, u32> field;}", Run,
+                     "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
+  ExpectErrorMessage("struct A {map<u32, vector<u32, u32>> field;}", Run,
+                     "Container type std::vector used by A.field ({0}:1:11) should have a single template parameter",
+                     Source);
   ExpectErrorMessage(
       "struct A {map<vector<u32>, u32> field;}", Run,
       "Map type std::map used by A.field ({0}:1:11) should have a keyable first template parameter, found std::vector",
@@ -347,26 +341,17 @@ TEST_F(ClassFieldPluginTest, Map) {
 }
 
 TEST_F(ClassFieldPluginTest, InvalidType) {
-  ExpectErrorMessage(
-      "struct A {u12 field;}", Run,
-      "Unknown type u12 used by A.field ({0}:1:11)", Source);
-  ExpectErrorMessage(
-      "struct A {vector<B> field;}", Run,
-      "Unknown type B used by A.field ({0}:1:11)", Source);
-  ExpectErrorMessage(
-      "struct A {map<u32, B> field;}", Run,
-      "Unknown type B used by A.field ({0}:1:11)", Source);
-  ExpectErrorMessage(
-      "struct A {void field;}", Run,
-      "Invalid void usage in A.field ({0}:1:11)", Source);
+  ExpectErrorMessage("struct A {u12 field;}", Run, "Unknown type u12 used by A.field ({0}:1:11)", Source);
+  ExpectErrorMessage("struct A {vector<B> field;}", Run, "Unknown type B used by A.field ({0}:1:11)", Source);
+  ExpectErrorMessage("struct A {map<u32, B> field;}", Run, "Unknown type B used by A.field ({0}:1:11)", Source);
+  ExpectErrorMessage("struct A {void field;}", Run, "Invalid void usage in A.field ({0}:1:11)", Source);
   // TODO: test internal types like JsonHelper
 }
 
 TEST_F(ClassFieldPluginTest, RefType) {
-  ExpectErrorMessage(
-      "struct A {Ref field;}", Run,
-      "Ref field A.field ({0}:1:11) should have a single template parameter", Source);
-  ExpectErrorMessage(
-      "struct A {Ref<u32> field;}", Run,
-      "Ref field A.field ({0}:1:11) references u32 which is not a struct defined in this project", Source);
+  ExpectErrorMessage("struct A {Ref field;}", Run,
+                     "Ref field A.field ({0}:1:11) should have a single template parameter", Source);
+  ExpectErrorMessage("struct A {Ref<u32> field;}", Run,
+                     "Ref field A.field ({0}:1:11) references u32 which is not a struct defined in this project",
+                     Source);
 }

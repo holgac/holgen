@@ -46,9 +46,8 @@ void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method, const Func
 
 void LuaFunctionPlugin::GenerateFunctionChecker(Class &cls, const FunctionDefinition &functionDefinition,
                                                 ClassField &functionHandle) {
-  auto method = ClassMethod{
-      Naming().LuaFunctionCheckerNameInCpp(functionDefinition), Type{"bool"},
-      Visibility::Public, Constness::Const};
+  auto method = ClassMethod{Naming().LuaFunctionCheckerNameInCpp(functionDefinition), Type{"bool"}, Visibility::Public,
+                            Constness::Const};
   method.mBody.Add("return !{}.empty();", functionHandle.mName);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
@@ -56,29 +55,24 @@ void LuaFunctionPlugin::GenerateFunctionChecker(Class &cls, const FunctionDefini
 
 void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition,
                                                ClassField &functionHandle) {
-  auto method = ClassMethod{
-      Naming().LuaFunctionSetterNameInCpp(functionDefinition), Type{"void"},
-      Visibility::Public, Constness::NotConst};
+  auto method = ClassMethod{Naming().LuaFunctionSetterNameInCpp(functionDefinition), Type{"void"}, Visibility::Public,
+                            Constness::NotConst};
   method.mArguments.emplace_back("val", Type{"std::string"});
   method.mBody.Add("{} = val;", functionHandle.mName);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
 
-void LuaFunctionPlugin::GenerateFunction(
-    Class &cls, const FunctionDefinition &functionDefinition, ClassField &functionHandle) {
-  auto method = ClassMethod{
-      St::Capitalize(functionDefinition.mName),
-      Type{mProject, functionDefinition.mReturnType}
-  };
+void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
+                                         ClassField &functionHandle) {
+  auto method = ClassMethod{St::Capitalize(functionDefinition.mName), Type{mProject, functionDefinition.mReturnType}};
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";
   if (functionDefinition.mReturnType.mName == "void")
     retVal = "void()";
-  method.mBody.Add(
-      R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)",
-      functionHandle.mName, retVal, functionDefinition.mName);
+  method.mBody.Add(R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)", functionHandle.mName,
+                   retVal, functionDefinition.mName);
   auto luaFuncTable = functionDefinition.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
 
   if (luaFuncTable) {
@@ -87,9 +81,8 @@ void LuaFunctionPlugin::GenerateFunction(
     method.mBody.Add("lua_gettable(luaState, -2);");
     method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
     method.mBody.Indent(1);
-    method.mBody.Add(
-        "HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});",
-        functionDefinition.mName, luaFuncTable->mValue.mName, functionHandle.mName);
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});", functionDefinition.mName,
+                     luaFuncTable->mValue.mName, functionHandle.mName);
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return {};", retVal);
     method.mBody.Indent(-1);
@@ -98,9 +91,8 @@ void LuaFunctionPlugin::GenerateFunction(
     method.mBody.Add("lua_getglobal(luaState, {}.c_str());", functionHandle.mName);
     method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
     method.mBody.Indent(1);
-    method.mBody.Add(
-        "HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});",
-        functionDefinition.mName, functionHandle.mName);
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});", functionDefinition.mName,
+                     functionHandle.mName);
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return {};", retVal);
     method.mBody.Indent(-1);
@@ -133,4 +125,4 @@ void LuaFunctionPlugin::GenerateFunction(
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
-}
+} // namespace holgen

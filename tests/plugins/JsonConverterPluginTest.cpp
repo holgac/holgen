@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
 
 class JsonConverterPluginTest : public TranslatorPluginTest {
@@ -148,8 +148,10 @@ struct B {
   @jsonConvert(from=s32, using=testConverter)
   u32 unsignedField;
 }
-  )R", Run,
-      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.unsignedField ({0}:7:3) with different source types: std::string and int32_t",
+  )R",
+      Run,
+      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.unsignedField ({0}:7:3) with different "
+      "source types: std::string and int32_t",
       Source);
 }
 
@@ -164,8 +166,10 @@ struct B {
   @jsonConvert(from=string, using=testConverter)
   bool boolField;
 }
-  )R", Run,
-      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.boolField ({0}:7:3) with different target types: uint32_t and bool",
+  )R",
+      Run,
+      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.boolField ({0}:7:3) with different "
+      "target types: uint32_t and bool",
       Source);
 }
 
@@ -181,9 +185,8 @@ struct Country {
   @container(elemName=person)
   vector<Person> people;
 }
-      )R", Run,
-      "index ({0}:6:3) of Country.people ({0}:8:3) references non-existent converter personNameToId",
-      Source);
+      )R",
+      Run, "index ({0}:6:3) of Country.people ({0}:8:3) references non-existent converter personNameToId", Source);
 }
 
 TEST_F(JsonConverterPluginTest, InconsistentSourceTypeInIndex) {
@@ -202,8 +205,10 @@ struct Country {
   @container(elemName=person)
   vector<Person> people;
 }
-  )R", Run,
-      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with different source type than Person.partnerId ({0}:7:3): uint64_t and std::string",
+  )R",
+      Run,
+      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with different source type "
+      "than Person.partnerId ({0}:7:3): uint64_t and std::string",
       Source);
 }
 
@@ -223,7 +228,9 @@ struct Country {
   @container(elemName=person)
   vector<Person> people;
 }
-  )R", Run,
-      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with different target type than Person.gender ({0}:7:3): uint32_t and float",
+  )R",
+      Run,
+      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with different target type "
+      "than Person.gender ({0}:7:3): uint32_t and float",
       Source);
 }

@@ -9,4 +9,4 @@ public:
   void Run() override;
   void AddClass(const StructDefinition &structDefinition);
 };
-}
+} // namespace holgen

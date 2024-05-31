@@ -4,9 +4,8 @@
 
 namespace holgen {
 
-TranslatedProject::TranslatedProject(
-    const ProjectDefinition &projectDefinition
-) : mProject(projectDefinition), mDependencyGraph(mProject) {}
+TranslatedProject::TranslatedProject(const ProjectDefinition &projectDefinition) :
+    mProject(projectDefinition), mDependencyGraph(mProject) {}
 
 ClassMethod *Class::GetMethod(const std::string &name, Constness constness) {
   for (auto &method: mMethods) {
@@ -41,7 +40,7 @@ GEN_GETTER_BY_NAME(Class, TemplateParameter, GetTemplateParameter, mTemplatePara
 GEN_GETTER_BY_NAME(Class, ClassEnum, GetNestedEnum, mNestedEnums)
 
 ClassField *Class::GetFieldFromDefinitionName(const std::string &name) {
-  for (auto &field : mFields) {
+  for (auto &field: mFields) {
     if (field.mField && field.mField->mName == name) {
       return &field;
     }
@@ -50,13 +49,13 @@ ClassField *Class::GetFieldFromDefinitionName(const std::string &name) {
 }
 
 const ClassField *Class::GetIdField() const {
-  for (auto &field : mFields) {
+  for (auto &field: mFields) {
     if (field.mField && field.mField->GetAnnotation(Annotations::Id))
       return &field;
   }
   return nullptr;
 }
 
-TemplateParameter::TemplateParameter(std::string type, std::string name) : mType(std::move(type)),
-                                                                           mName(std::move(name)) {}
-}
+TemplateParameter::TemplateParameter(std::string type, std::string name) :
+    mType(std::move(type)), mName(std::move(name)) {}
+} // namespace holgen

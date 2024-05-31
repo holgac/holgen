@@ -1,8 +1,8 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassFieldVariantPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 
 class ClassFieldVariantPluginTest : public TranslatorPluginTest {
 protected:

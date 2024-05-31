@@ -1,32 +1,30 @@
 #include "Translator.h"
-#include "generator/plugins/ClassPlugin.h"
-#include "generator/plugins/ClassIdFieldPlugin.h"
-#include "generator/plugins/ClassFieldPlugin.h"
-#include "generator/plugins/ClassFieldVariantPlugin.h"
 #include "generator/plugins/ClassEqualsOperatorPlugin.h"
 #include "generator/plugins/ClassFieldGetterPlugin.h"
+#include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassFieldSetterPlugin.h"
-#include "generator/plugins/lua/LuaFunctionPlugin.h"
-#include "generator/plugins/CppFunctionPlugin.h"
+#include "generator/plugins/ClassFieldVariantPlugin.h"
+#include "generator/plugins/ClassIdFieldPlugin.h"
 #include "generator/plugins/ClassNonCopyablePlugin.h"
-#include "generator/plugins/CppDestructorPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ContainerFieldPlugin.h"
-#include "generator/plugins/ManagedClassPlugin.h"
+#include "generator/plugins/CppDestructorPlugin.h"
+#include "generator/plugins/CppFunctionPlugin.h"
 #include "generator/plugins/EnumPlugin.h"
-#include "generator/plugins/json/JsonPlugin.h"
-#include "generator/plugins/json/JsonParseFilesPlugin.h"
-#include "generator/plugins/json/JsonHelperPlugin.h"
-#include "generator/plugins/json/JsonConverterPlugin.h"
-#include "generator/plugins/lua/LuaPlugin.h"
-#include "generator/plugins/lua/LuaHelperPlugin.h"
-#include "generator/plugins/helpers/GlobalPointerPlugin.h"
+#include "generator/plugins/ManagedClassPlugin.h"
 #include "generator/plugins/helpers/FilesystemHelperPlugin.h"
+#include "generator/plugins/helpers/GlobalPointerPlugin.h"
+#include "generator/plugins/json/JsonConverterPlugin.h"
+#include "generator/plugins/json/JsonHelperPlugin.h"
+#include "generator/plugins/json/JsonParseFilesPlugin.h"
+#include "generator/plugins/json/JsonPlugin.h"
+#include "generator/plugins/lua/LuaFunctionPlugin.h"
+#include "generator/plugins/lua/LuaHelperPlugin.h"
+#include "generator/plugins/lua/LuaPlugin.h"
 
 namespace holgen {
 
-Translator::Translator(
-    const TranslatorSettings &translatorSettings
-) : mTranslatorSettings(translatorSettings) {
+Translator::Translator(const TranslatorSettings &translatorSettings) : mTranslatorSettings(translatorSettings) {
   // TODO: Users should pick which plugins to run
   AddPlugin<ClassPlugin>();
   AddPlugin<ClassNonCopyablePlugin>();
@@ -59,4 +57,4 @@ TranslatedProject Translator::Translate(const ProjectDefinition &project) const 
   }
   return translatedProject;
 }
-}
+} // namespace holgen

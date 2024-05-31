@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string_view>
 #include <string>
+#include <string_view>
 
 namespace holgen {
 enum class TokenType {
@@ -42,6 +42,7 @@ public:
   size_t GetLine() const;
   size_t GetColumn() const;
   std::string GetSource() const;
+
 private:
   bool GetNextInner(Token &tok);
   std::string_view mData;
@@ -51,4 +52,4 @@ private:
   size_t mColumn = 0;
   std::string mSource;
 };
-}
+} // namespace holgen

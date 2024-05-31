@@ -227,8 +227,8 @@ public:
 
   /**
    * Variants are similar to std::variant. They're used as fields and their type is backed by an enum.
-   * A struct with a variant field will have two fields - a type field (backed by the specified enum) and a uint8_t array
-   * with size that can hold the largest variant struct.
+   * A struct with a variant field will have two fields - a type field (backed by the specified enum) and a uint8_t
+   * array with size that can hold the largest variant struct.
    *
    * enum DataType {
    *  Type1;
@@ -284,4 +284,4 @@ public:
   inline static const std::string Field_Set = "set";
   inline static const std::string Field_Get = "get";
 };
-}
+} // namespace holgen

@@ -12,5 +12,4 @@ private:
   void ProcessStructDefinition(Class &cls, ClassDestructor &destructor, const StructDefinition &structDefinition);
   void ProcessVariantFields(ClassDestructor &destructor, const StructDefinition &structDefinition) const;
 };
-}
-
+} // namespace holgen

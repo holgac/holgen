@@ -38,8 +38,8 @@ void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls, const StructDef
     // TODO: validate ctors
 
     {
-      auto method = ClassMethod{
-          "operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public, Constness::NotConst};
+      auto method =
+          ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public, Constness::NotConst};
       method.mDefaultDelete = DefaultDelete::Default;
       method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference, Constness::NotConst});
       Validate().NewMethod(cls, method);
@@ -47,8 +47,8 @@ void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls, const StructDef
     }
 
     {
-      auto method = ClassMethod{
-          "operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public, Constness::NotConst};
+      auto method =
+          ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public, Constness::NotConst};
       method.mDefaultDelete = DefaultDelete::Delete;
       method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
       Validate().NewMethod(cls, method);
@@ -56,4 +56,4 @@ void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls, const StructDef
     }
   }
 }
-}
+} // namespace holgen

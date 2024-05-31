@@ -1,13 +1,13 @@
 #pragma once
 
-#include <vector>
 #include <cstdint>
-#include <string>
 #include <format>
 #include <map>
+#include <string>
+#include <vector>
 
-#include "core/LineWithAction.h"
 #include "FileType.h"
+#include "core/LineWithAction.h"
 
 
 namespace holgen {
@@ -24,7 +24,7 @@ struct CodeBlock {
 
   void AddUserDefinedSection(const std::string &name);
 
-  template<typename... Args>
+  template <typename... Args>
   void UserDefined(std::format_string<Args...> fmt, Args &&...args) {
     AddUserDefinedSection(std::format(fmt, std::forward<Args>(args)...));
   }
@@ -42,7 +42,7 @@ struct CodeBlock {
   void Add(CodeBlock &&codeBlock);
 
 
-  template<typename... Args>
+  template <typename... Args>
   void Add(std::format_string<Args...> fmt, Args &&...args) {
     AddLine(std::format(fmt, std::forward<Args>(args)...));
   }
@@ -55,4 +55,4 @@ struct CodeBlock {
   std::string ToString(FileType fileType, const std::map<std::string, std::string> &sections) const;
 };
 
-}
+} // namespace holgen

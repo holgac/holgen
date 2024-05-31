@@ -2,8 +2,8 @@
 
 #include <string>
 #include <vector>
-#include "tokenizer/Tokenizer.h"
 #include "ProjectDefinition.h"
+#include "tokenizer/Tokenizer.h"
 
 namespace holgen {
 class Parser {
@@ -21,6 +21,7 @@ class Parser {
   void ParseField(Token &curToken, FieldDefinition &fieldDefinition);
   void ParseType(Token &curToken, TypeDefinition &typeDefinition);
   void FillDefinitionSource(DefinitionSource &definitionSource);
+
 public:
   Parser();
   void Parse(Tokenizer &tokenizer);
@@ -30,4 +31,4 @@ public:
   std::string ParseDefaultValue(Token &curToken);
 };
 
-}
+} // namespace holgen

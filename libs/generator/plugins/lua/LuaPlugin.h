@@ -1,7 +1,7 @@
 #pragma once
 
-#include "holgen.h"
 #include "../TranslatorPlugin.h"
+#include "holgen.h"
 
 namespace holgen {
 
@@ -9,6 +9,7 @@ class LuaPlugin : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
   void Run() override;
+
 private:
   void ProcessStruct(Class &cls);
   void ProcessEnum(Class &cls);
@@ -25,4 +26,4 @@ private:
   void GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method);
 };
 
-}
+} // namespace holgen

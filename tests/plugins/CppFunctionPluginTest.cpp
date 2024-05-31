@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
-#include "generator/plugins/CppFunctionPlugin.h"
 #include "generator/plugins/CppDestructorPlugin.h"
+#include "generator/plugins/CppFunctionPlugin.h"
 
 class CppFunctionPluginTest : public TranslatorPluginTest {
 protected:
@@ -65,8 +65,8 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
-                            Constness::NotConst};
+  auto method =
+      ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t"});
   method.mUserDefined = true;
@@ -107,25 +107,24 @@ func2();
 }
 
 TEST_F(CppFunctionPluginTest, OnDestroyFunctionWithArgs) {
-  ExpectErrorMessage(R"R(
+  ExpectErrorMessage(
+      R"R(
 struct TestData {
   @cppFunc(onDestroy)
   func func1(s32 val);
 }
 )R",
-                     Run,
-                     "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions with arguments",
-                     Source);
+      Run, "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions with arguments", Source);
 }
 
 TEST_F(CppFunctionPluginTest, OnDestroyFunctionWithReturnType) {
-  ExpectErrorMessage(R"R(
+  ExpectErrorMessage(
+      R"R(
 struct TestData {
   @cppFunc(onDestroy)
   func func1() -> s32;
 }
   )R",
-                     Run,
-                     "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions that return a value",
-                     Source);
+      Run, "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions that return a value",
+      Source);
 }

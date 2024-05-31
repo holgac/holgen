@@ -3,9 +3,7 @@
 
 class ClassPluginTest : public TranslatorPluginTest {
 protected:
-  static void Run(TranslatedProject &project) {
-    ClassPlugin(project, {}).Run();
-  }
+  static void Run(TranslatedProject &project) { ClassPlugin(project, {}).Run(); }
 };
 
 TEST_F(ClassPluginTest, Struct) {
@@ -28,8 +26,8 @@ TEST_F(ClassPluginTest, DuplicateStruct) {
 struct TestData {
 }
 struct TestData {
-  })R", Run,
-      "Duplicate class: TestData ({0}:1:1) and TestData ({0}:3:1)", Source);
+  })R",
+      Run, "Duplicate class: TestData ({0}:1:1) and TestData ({0}:3:1)", Source);
 }
 
 TEST_F(ClassPluginTest, ReservedKeywords) {
@@ -53,20 +51,20 @@ TEST_F(ClassPluginTest, CircularMixin) {
 struct A: B, C {}
 mixin B: C {}
 mixin C: A {}
-  )R", Run,
-                     "Circular or duplicate mixin usage detected in A ({0}:1:1) and C ({0}:3:1)", Source);
+  )R",
+                     Run, "Circular or duplicate mixin usage detected in A ({0}:1:1) and C ({0}:3:1)", Source);
   ExpectErrorMessage(R"R(
 struct A: B {}
 mixin B: C {}
 mixin C: A {}
-  )R", Run,
-                     "Circular or duplicate mixin usage detected in A ({0}:1:1) and C ({0}:3:1)", Source);
+  )R",
+                     Run, "Circular or duplicate mixin usage detected in A ({0}:1:1) and C ({0}:3:1)", Source);
   ExpectErrorMessage(R"R(
 struct A: B {}
 mixin B: C {}
 mixin C: B {}
-)R", Run,
-                     "Circular or duplicate mixin usage detected in A ({0}:1:1) and C ({0}:3:1)", Source);
+)R",
+                     Run, "Circular or duplicate mixin usage detected in A ({0}:1:1) and C ({0}:3:1)", Source);
 }
 
 TEST_F(ClassPluginTest, Enum) {
@@ -89,6 +87,5 @@ enum TestData {
 }
 enum TestData {
 })R",
-                     Run,
-                     "Duplicate class: TestData ({0}:1:1) and TestData ({0}:3:1)", Source);
+                     Run, "Duplicate class: TestData ({0}:1:1) and TestData ({0}:3:1)", Source);
 }

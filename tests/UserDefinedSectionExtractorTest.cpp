@@ -1,22 +1,19 @@
 #include <gtest/gtest.h>
-#include "generator/CodeBlock.h"
-#include "tokenizer/Tokenizer.h"
-#include "parser/Parser.h"
-#include "generator/UserDefinedSectionExtractor.h"
 #include "core/Exception.h"
+#include "generator/CodeBlock.h"
+#include "generator/UserDefinedSectionExtractor.h"
+#include "parser/Parser.h"
+#include "tokenizer/Tokenizer.h"
 
 using namespace holgen;
 
-namespace {
-}
+namespace {}
 
 class UserDefinedSectionExtractorTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 };
 
 TEST_F(UserDefinedSectionExtractorTest, Extract) {

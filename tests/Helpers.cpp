@@ -7,7 +7,7 @@ namespace holgen::helpers {
 std::map<std::string, GeneratedContent> MapByName(const std::vector<GeneratedContent> &contents) {
   std::map<std::string, GeneratedContent> result;
   for (const auto &gc: contents) {
-    auto[it, res] = result.emplace(gc.mName, gc);
+    auto [it, res] = result.emplace(gc.mName, gc);
     EXPECT_TRUE(res);
   }
   return result;
@@ -49,7 +49,8 @@ void ExpectEqual(const ClassField &actual, const ClassField &expected) {
   EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue) << " in field " << actual.mName;
   EXPECT_EQ(actual.mDefaultConstructorArguments.size(), expected.mDefaultConstructorArguments.size());
 
-  for (auto itExpected = expected.mDefaultConstructorArguments.begin(), itActual = actual.mDefaultConstructorArguments.begin();
+  for (auto itExpected = expected.mDefaultConstructorArguments.begin(),
+            itActual = actual.mDefaultConstructorArguments.begin();
        itExpected != expected.mDefaultConstructorArguments.end(); ++itExpected, ++itActual) {
     EXPECT_EQ(*itActual, *itExpected);
   }
@@ -77,7 +78,7 @@ void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected,
 
 void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
                  const std::optional<std::string> &expectedBody) {
-  ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, actual.mName);
+  ExpectEqual((ClassMethodBase &)actual, (ClassMethodBase &)expected, expectedBody, actual.mName);
   EXPECT_EQ(actual.mName, expected.mName);
   ExpectEqual(actual.mReturnType, expected.mReturnType);
   EXPECT_EQ(actual.mStaticness, expected.mStaticness);
@@ -95,12 +96,12 @@ void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &e
 
 void ExpectEqual(const ClassDestructor &actual, const ClassDestructor &expected,
                  const std::optional<std::string> &expectedBody) {
-  ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, "destructor");
+  ExpectEqual((ClassMethodBase &)actual, (ClassMethodBase &)expected, expectedBody, "destructor");
 }
 
 void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expected,
                  const std::optional<std::string> &expectedBody) {
-  ExpectEqual((ClassMethodBase &) actual, (ClassMethodBase &) expected, expectedBody, "constructor");
+  ExpectEqual((ClassMethodBase &)actual, (ClassMethodBase &)expected, expectedBody, "constructor");
   EXPECT_EQ(actual.mExplicitness, expected.mExplicitness);
   for (auto itExpected = expected.mInitializerList.begin(), itActual = actual.mInitializerList.begin();
        itExpected != expected.mInitializerList.end(); ++itExpected, ++itActual) {
@@ -122,4 +123,4 @@ void ExpectEqual(const ClassEnumEntry &actual, const ClassEnumEntry &expected) {
   EXPECT_EQ(actual.mName, expected.mName);
   EXPECT_EQ(actual.mValue, expected.mValue);
 }
-}
+} // namespace holgen::helpers

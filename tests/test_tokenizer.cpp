@@ -1,17 +1,15 @@
 #include <gtest/gtest.h>
-#include "tokenizer/Tokenizer.h"
 #include "Helpers.h"
+#include "tokenizer/Tokenizer.h"
 
 using namespace holgen;
 // TODO: some failure cases
 
 class TokenizerTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 };
 
 namespace {
@@ -47,77 +45,80 @@ void ExpectNext(Tokenizer &tokenizer, size_t line, size_t col, const Token &toke
   EXPECT_EQ(tokenizer.GetColumn(), col) << " expected contents: " << token.mContents;
   EXPECT_EQ(actual.mContents, token.mContents);
 }
-}
+} // namespace
 
-TEST_F(TokenizerTest, EmptyString) {
-  TestTokenizerResult("", {});
-}
+TEST_F(TokenizerTest, EmptyString) { TestTokenizerResult("", {}); }
 
 TEST_F(TokenizerTest, Comments) {
-  TestTokenizerResult("a   =//b+c;\nb / /*aaaaa*/ c;", {
-      Token{TokenType::String, "a"},
-      Token{TokenType::Whitespace, "   "},
-      Token{TokenType::Equals, "="},
-      Token{TokenType::Comment, "//b+c;"},
-      Token{TokenType::Whitespace, "\n"},
-      Token{TokenType::String, "b"},
-      Token{TokenType::Whitespace, " "},
-      Token{TokenType::Slash, "/"},
-      Token{TokenType::Whitespace, " "},
-      Token{TokenType::Comment, "/*aaaaa*/"},
-      Token{TokenType::Whitespace, " "},
-      Token{TokenType::String, "c"},
-      Token{TokenType::SemiColon, ";"},
-  });
+  TestTokenizerResult("a   =//b+c;\nb / /*aaaaa*/ c;",
+                      {
+                          Token{TokenType::String, "a"},
+                          Token{TokenType::Whitespace, "   "},
+                          Token{TokenType::Equals, "="},
+                          Token{TokenType::Comment, "//b+c;"},
+                          Token{TokenType::Whitespace, "\n"},
+                          Token{TokenType::String, "b"},
+                          Token{TokenType::Whitespace, " "},
+                          Token{TokenType::Slash, "/"},
+                          Token{TokenType::Whitespace, " "},
+                          Token{TokenType::Comment, "/*aaaaa*/"},
+                          Token{TokenType::Whitespace, " "},
+                          Token{TokenType::String, "c"},
+                          Token{TokenType::SemiColon, ";"},
+                      });
 }
 
 TEST_F(TokenizerTest, Equation) {
-  TestTokenizerResult("a   =b+c;", {
-      Token{TokenType::String, "a"},
-      Token{TokenType::Whitespace, "   "},
-      Token{TokenType::Equals, "="},
-      Token{TokenType::String, "b"},
-      Token{TokenType::Plus, "+"},
-      Token{TokenType::String, "c"},
-      Token{TokenType::SemiColon, ";"},
-  });
+  TestTokenizerResult("a   =b+c;",
+                      {
+                          Token{TokenType::String, "a"},
+                          Token{TokenType::Whitespace, "   "},
+                          Token{TokenType::Equals, "="},
+                          Token{TokenType::String, "b"},
+                          Token{TokenType::Plus, "+"},
+                          Token{TokenType::String, "c"},
+                          Token{TokenType::SemiColon, ";"},
+                      });
 }
 
 TEST_F(TokenizerTest, EquationNonWhitespace) {
-  TestTokenizerResultNonWhitespace("a /*comment*/  =\nb       +\t\t\t \n\t     \tc;/", {
-      Token{TokenType::String, "a"},
-      Token{TokenType::Equals, "="},
-      Token{TokenType::String, "b"},
-      Token{TokenType::Plus, "+"},
-      Token{TokenType::String, "c"},
-      Token{TokenType::SemiColon, ";"},
-      Token{TokenType::Slash, "/"},
-  });
+  TestTokenizerResultNonWhitespace("a /*comment*/  =\nb       +\t\t\t \n\t     \tc;/",
+                                   {
+                                       Token{TokenType::String, "a"},
+                                       Token{TokenType::Equals, "="},
+                                       Token{TokenType::String, "b"},
+                                       Token{TokenType::Plus, "+"},
+                                       Token{TokenType::String, "c"},
+                                       Token{TokenType::SemiColon, ";"},
+                                       Token{TokenType::Slash, "/"},
+                                   });
 }
 
 TEST_F(TokenizerTest, Quotes) {
-  TestTokenizerResultNonWhitespace("a /*comment*/  = 'hello how are you';", {
-      Token{TokenType::String, "a"},
-      Token{TokenType::Equals, "="},
-      Token{TokenType::String, "hello how are you"},
-      Token{TokenType::SemiColon, ";"},
-  });
+  TestTokenizerResultNonWhitespace("a /*comment*/  = 'hello how are you';",
+                                   {
+                                       Token{TokenType::String, "a"},
+                                       Token{TokenType::Equals, "="},
+                                       Token{TokenType::String, "hello how are you"},
+                                       Token{TokenType::SemiColon, ";"},
+                                   });
 }
 
 TEST_F(TokenizerTest, AngleBrackets) {
-  TestTokenizerResultNonWhitespace("map<int, vector<string>> myMap;", {
-      Token{TokenType::String, "map"},
-      Token{TokenType::AOpen, "<"},
-      Token{TokenType::String, "int"},
-      Token{TokenType::Comma, ","},
-      Token{TokenType::String, "vector"},
-      Token{TokenType::AOpen, "<"},
-      Token{TokenType::String, "string"},
-      Token{TokenType::AClose, ">"},
-      Token{TokenType::AClose, ">"},
-      Token{TokenType::String, "myMap"},
-      Token{TokenType::SemiColon, ";"},
-  });
+  TestTokenizerResultNonWhitespace("map<int, vector<string>> myMap;",
+                                   {
+                                       Token{TokenType::String, "map"},
+                                       Token{TokenType::AOpen, "<"},
+                                       Token{TokenType::String, "int"},
+                                       Token{TokenType::Comma, ","},
+                                       Token{TokenType::String, "vector"},
+                                       Token{TokenType::AOpen, "<"},
+                                       Token{TokenType::String, "string"},
+                                       Token{TokenType::AClose, ">"},
+                                       Token{TokenType::AClose, ">"},
+                                       Token{TokenType::String, "myMap"},
+                                       Token{TokenType::SemiColon, ";"},
+                                   });
 }
 
 TEST_F(TokenizerTest, LineAndColumn) {
@@ -153,4 +154,3 @@ int
   ExpectNext(tokenizer, 5, 2, Token{TokenType::Whitespace, "\n"});
   ExpectNext(tokenizer, 6, 0, Token{TokenType::String, "int"});
 }
-

@@ -1,37 +1,22 @@
 #include "Tokenizer.h"
-#include <map>
 #include <algorithm>
+#include <map>
 #include "core/Exception.h"
 
 namespace holgen {
 namespace {
 std::map<char, TokenType> SpecialTokens = {
-    {'.', TokenType::Period},
-    {',', TokenType::Comma},
-    {':', TokenType::Colon},
-    {';', TokenType::SemiColon},
-    {'=', TokenType::Equals},
-    {'(', TokenType::POpen},
-    {')', TokenType::PClose},
-    {'{', TokenType::COpen},
-    {'}', TokenType::CClose},
-    {'<', TokenType::AOpen},
-    {'>', TokenType::AClose},
-    {'[', TokenType::BOpen},
-    {']', TokenType::BClose},
-    {'+', TokenType::Plus},
-    {'-', TokenType::Minus},
-    {'/', TokenType::Slash},
+    {'.', TokenType::Period}, {',', TokenType::Comma}, {':', TokenType::Colon},  {';', TokenType::SemiColon},
+    {'=', TokenType::Equals}, {'(', TokenType::POpen}, {')', TokenType::PClose}, {'{', TokenType::COpen},
+    {'}', TokenType::CClose}, {'<', TokenType::AOpen}, {'>', TokenType::AClose}, {'[', TokenType::BOpen},
+    {']', TokenType::BClose}, {'+', TokenType::Plus},  {'-', TokenType::Minus},  {'/', TokenType::Slash},
     {'@', TokenType::At},
 };
 
-bool IsWhitespace(char c) {
-  return c == ' ' || c == '\n' || c == '\t' || c == '\r';
-}
-}
+bool IsWhitespace(char c) { return c == ' ' || c == '\n' || c == '\t' || c == '\r'; }
+} // namespace
 
-Tokenizer::Tokenizer(std::string_view sv, std::string source) : mData(sv), mSource(source) {
-}
+Tokenizer::Tokenizer(std::string_view sv, std::string source) : mData(sv), mSource(source) {}
 
 bool Tokenizer::GetNext(Token &tok) {
   std::string_view oldContents(mData.data() + mIndex, mEndIndex - mIndex);
@@ -96,9 +81,8 @@ bool Tokenizer::GetNextInner(Token &tok) {
     ++mEndIndex;
     while (mEndIndex < mData.size() && mData[mEndIndex] != c)
       ++mEndIndex;
-    THROW_IF(mEndIndex == mData.size(),
-             "Malformed string: {} in {}:{}:{}",
-             mData.substr(mIndex + 1), mSource, mLine, mColumn);
+    THROW_IF(mEndIndex == mData.size(), "Malformed string: {} in {}:{}:{}", mData.substr(mIndex + 1), mSource, mLine,
+             mColumn);
     ++mEndIndex;
     tok.mType = TokenType::String;
     // Comment tokens' contents include the comment special chars, but string literals don't, for ease of use
@@ -127,15 +111,9 @@ bool Tokenizer::GetNextNonWhitespace(Token &tok) {
   }
 }
 
-size_t Tokenizer::GetLine() const {
-  return mLine;
-}
+size_t Tokenizer::GetLine() const { return mLine; }
 
-size_t Tokenizer::GetColumn() const {
-  return mColumn;
-}
+size_t Tokenizer::GetColumn() const { return mColumn; }
 
-std::string Tokenizer::GetSource() const {
-  return mSource;
-}
-}
+std::string Tokenizer::GetSource() const { return mSource; }
+} // namespace holgen

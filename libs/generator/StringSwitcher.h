@@ -15,7 +15,7 @@ public:
   StringSwitcher(std::string sourceStr, CodeBlock elseCase = {});
 
 
-  template<typename... Args>
+  template <typename... Args>
   void AddCase(Args... args) {
     AddCase(StringSwitchCase{std::forward<Args>(args)...});
   }
@@ -30,4 +30,4 @@ private:
   CodeBlock mElseCase;
 };
 
-}
+} // namespace holgen

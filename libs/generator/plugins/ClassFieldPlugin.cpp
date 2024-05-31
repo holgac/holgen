@@ -1,6 +1,6 @@
 #include "ClassFieldPlugin.h"
-#include "core/St.h"
 #include "core/Annotations.h"
+#include "core/St.h"
 
 namespace holgen {
 void ClassFieldPlugin::Run() {
@@ -26,10 +26,8 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls, const StructDefinitio
     // ordering should probably be in code generation rather than translator plugins
     if (fieldDefinition.mType.mName == "Ref")
       Validate().RefField(cls, fieldDefinition);
-    auto field = ClassField{
-        Naming().FieldNameInCpp(fieldDefinition),
-        Type{mProject, fieldDefinition.mType},
-        Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
+    auto field = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
+                            Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
     if (fieldDefinition.mType.mName == St::UserData) {
       field.mType = Type{"void", PassByType::Pointer};
@@ -45,4 +43,4 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls, const StructDefinitio
     cls.mFields.push_back(std::move(field));
   }
 }
-}
+} // namespace holgen

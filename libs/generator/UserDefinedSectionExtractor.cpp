@@ -1,12 +1,11 @@
 #include "UserDefinedSectionExtractor.h"
 #include "FileType.h"
-#include "core/St.h"
 #include "core/Exception.h"
+#include "core/St.h"
 
 namespace holgen {
 
-std::map<std::string, std::string>
-UserDefinedSectionExtractor::Extract(const std::string &fileContents) const {
+std::map<std::string, std::string> UserDefinedSectionExtractor::Extract(const std::string &fileContents) const {
   size_t idx = 0;
   std::map<std::string, std::string> sections;
   while (true) {
@@ -29,4 +28,4 @@ UserDefinedSectionExtractor::Extract(const std::string &fileContents) const {
 
   return sections;
 }
-}
+} // namespace holgen

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <set>
 #include <string>
 #include <vector>
-#include <set>
 
 
 namespace holgen {
@@ -35,11 +35,12 @@ public:
   void AddForwardDeclaration(ForwardDeclaration declaration);
   void Write(CodeBlock &codeBlock) const;
   void IncludeUsing(const TranslatedProject &project, const Using &usingStatement, bool isHeader);
-  void IncludeClassField(
-      const TranslatedProject &project, const Class &cls, const ClassField &classField, bool isHeader);
-  void IncludeClassMethod(
-      const TranslatedProject &project, const Class &cls, const ClassMethod &classMethod, bool isHeader);
+  void IncludeClassField(const TranslatedProject &project, const Class &cls, const ClassField &classField,
+                         bool isHeader);
+  void IncludeClassMethod(const TranslatedProject &project, const Class &cls, const ClassMethod &classMethod,
+                          bool isHeader);
   void Subtract(const HeaderContainer &rhs);
+
 private:
   std::set<std::string> mHeaders;
   std::vector<std::string> mStandardHeaders;
@@ -53,4 +54,4 @@ private:
   void IncludeType(const TranslatedProject &project, const Type &type, bool isHeader);
   void Subtract(const HeaderContainer &rhs, std::vector<std::string> &container);
 };
-}
+} // namespace holgen

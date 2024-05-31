@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string>
-#include <sstream>
 #include <functional>
+#include <sstream>
+#include <string>
 
 namespace holgen {
 
@@ -10,6 +10,7 @@ class LineWithAction {
 private:
   std::stringstream mStream;
   std::function<void(const std::string &)> mAction;
+
 public:
   LineWithAction(std::function<void(const std::string &)> action) : mAction(std::move(action)) {}
 
@@ -17,10 +18,10 @@ public:
 
   ~LineWithAction() { mAction(mStream.str()); }
 
-  template<typename T>
+  template <typename T>
   LineWithAction &operator<<(const T &val) {
     mStream << val;
     return *this;
   }
 };
-}
+} // namespace holgen

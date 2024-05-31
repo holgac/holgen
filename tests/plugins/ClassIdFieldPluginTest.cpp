@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 
 class ClassIdFieldPluginTest : public TranslatorPluginTest {
 protected:
@@ -56,12 +56,9 @@ struct TestData : M {}
 }
 
 TEST_F(ClassIdFieldPluginTest, InvalidTypes) {
-  ExpectErrorMessage(
-      "struct A {@id vector<s32> field;}", Run,
-      "A.field ({0}:1:15) uses an invalid type for an id: std::vector", Source);
-  ExpectErrorMessage(
-      "struct A {@id userdata field;}", Run,
-      "Unknown type userdata used by A.field ({0}:1:15)", Source);
+  ExpectErrorMessage("struct A {@id vector<s32> field;}", Run,
+                     "A.field ({0}:1:15) uses an invalid type for an id: std::vector", Source);
+  ExpectErrorMessage("struct A {@id userdata field;}", Run, "Unknown type userdata used by A.field ({0}:1:15)", Source);
 }
 
 TEST_F(ClassIdFieldPluginTest, MultipleIds) {
@@ -73,8 +70,8 @@ struct A {
   @id
   s32 field2;
 }
-)R", Run,
-      "A ({0}:1:1) has multiple id fields: A.field1 ({0}:3:3) and A.field2 ({0}:5:3)", Source);
+)R",
+      Run, "A ({0}:1:1) has multiple id fields: A.field1 ({0}:3:3) and A.field2 ({0}:5:3)", Source);
 }
 
 TEST_F(ClassIdFieldPluginTest, MultipleIdsInMixins) {
@@ -89,6 +86,6 @@ mixin M2 {
   @id
   s32 field2;
 }
-      )R", Run,
-      "A ({0}:1:1) has multiple id fields: A.field1 ({0}:4:3) and A.field2 ({0}:8:3)", Source);
+      )R",
+      Run, "A ({0}:1:1) has multiple id fields: A.field1 ({0}:4:3) and A.field2 ({0}:8:3)", Source);
 }

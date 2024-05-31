@@ -1,6 +1,6 @@
 #include "JsonHelperPlugin.h"
-#include "generator/TypeInfo.h"
 #include "core/St.h"
+#include "generator/TypeInfo.h"
 
 namespace holgen {
 void JsonHelperPlugin::Run() {
@@ -26,9 +26,8 @@ void JsonHelperPlugin::Run() {
 
 void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container,
                                                                bool withConverter) {
-  auto method = ClassMethod{
-      St::JsonHelper_Parse, Type{"bool"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   if (withConverter) {
     method.mTemplateParameters.emplace_back("typename", "SourceType");
     method.mTemplateParameters.emplace_back("typename", "ElemConverter");
@@ -93,9 +92,8 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls, const
 }
 
 void JsonHelperPlugin::GenerateBaseParse(Class &cls) {
-  auto method = ClassMethod{
-      St::JsonHelper_Parse, Type{"bool"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
   method.mArguments.emplace_back("out", Type{"T", PassByType::Reference});
   method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
@@ -107,16 +105,14 @@ void JsonHelperPlugin::GenerateBaseParse(Class &cls) {
 
 void JsonHelperPlugin::GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,
                                                const std::string &getter) {
-  auto method = ClassMethod{
-      St::JsonHelper_Parse, Type{"bool"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mIsTemplateSpecialization = true;
   method.mArguments.emplace_back("out", Type{type, PassByType::Reference});
   method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
-  method.mBody.Add(
-      R"R(HOLGEN_WARN_AND_RETURN_IF(!json.{}(), false, "Found type mismatch in json when parsing {}");)R", validator,
-      type);
+  method.mBody.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!json.{}(), false, "Found type mismatch in json when parsing {}");)R",
+                   validator, type);
   method.mBody.Line() << "out = json." << getter << "();";
   method.mBody.Line() << "return true;";
   Validate().NewMethod(cls, method);
@@ -138,11 +134,10 @@ void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {
   GenerateParseSingleElem(cls, "std::string", "IsString", "GetString");
 }
 
-void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(
-    Class &cls, const std::string &container, bool withConverter) {
-  auto method = ClassMethod{
-      St::JsonHelper_Parse, Type{"bool"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container,
+                                                          bool withConverter) {
+  auto method =
+      ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "K");
   method.mTemplateParameters.emplace_back("typename", "V");
 
@@ -170,9 +165,8 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(
   method.mBody.Add("auto res = {}(key, data.name, converter);", St::JsonHelper_Parse);
   method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R", container);
   method.mBody.Line() << "auto[it, insertRes] = out.try_emplace(key, V());";
-  method.mBody.Add(
-      R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
-      container);
+  method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
+                   container);
   if (withConverter) {
     method.mBody.Add("SourceType valueRaw;");
     method.mBody.Add("res = {}(valueRaw, data.value, converter);", St::JsonHelper_Parse);
@@ -188,4 +182,4 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
-}
+} // namespace holgen

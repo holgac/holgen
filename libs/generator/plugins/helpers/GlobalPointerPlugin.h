@@ -12,4 +12,4 @@ public:
   void GenerateGetInstance(Class &cls) const;
   void GenerateInstanceField(Class &cls) const;
 };
-}
+} // namespace holgen

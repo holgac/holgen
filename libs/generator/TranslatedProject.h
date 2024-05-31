@@ -3,10 +3,10 @@
 #include <list>
 #include <utility>
 
-#include "parser/DependencyGraph.h"
-#include "TypeInfo.h"
 #include "CodeBlock.h"
 #include "HeaderContainer.h"
+#include "TypeInfo.h"
+#include "parser/DependencyGraph.h"
 
 namespace holgen {
 
@@ -33,15 +33,10 @@ enum class DefaultDelete {
 };
 
 struct ClassField {
-  ClassField(
-      std::string name,
-      Type type,
-      Visibility visibility = Visibility::Private,
-      Staticness staticness = Staticness::NotStatic,
-      std::optional<std::string> defaultValue = std::nullopt
-  ) : mType(std::move(type)), mName(std::move(name)), mStaticness(staticness), mVisibility(visibility),
-      mDefaultValue(std::move(defaultValue)) {
-  }
+  ClassField(std::string name, Type type, Visibility visibility = Visibility::Private,
+             Staticness staticness = Staticness::NotStatic, std::optional<std::string> defaultValue = std::nullopt) :
+      mType(std::move(type)), mName(std::move(name)), mStaticness(staticness), mVisibility(visibility),
+      mDefaultValue(std::move(defaultValue)) {}
 
   Type mType;
   std::string mName;
@@ -54,12 +49,8 @@ struct ClassField {
 };
 
 struct ClassMethodArgument {
-  ClassMethodArgument(
-      std::string name,
-      Type type,
-      std::optional<std::string> defaultValue = std::nullopt
-  ) : mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {
-  }
+  ClassMethodArgument(std::string name, Type type, std::optional<std::string> defaultValue = std::nullopt) :
+      mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {}
 
   Type mType;
   std::string mName;
@@ -80,28 +71,25 @@ struct ClassMethodBase {
   std::list<std::string> mComments;
   bool mIsTemplateSpecialization = false;
   DefaultDelete mDefaultDelete = DefaultDelete::Neither;
+
 protected:
   ClassMethodBase() = default;
 };
 
 struct Using {
-  Using(
-      Type sourceType,
-      std::string targetType
-  ) : mSourceType(std::move(sourceType)), mTargetType(std::move(targetType)) {}
+  Using(Type sourceType, std::string targetType) :
+      mSourceType(std::move(sourceType)), mTargetType(std::move(targetType)) {}
 
   Type mSourceType;
   std::string mTargetType;
 };
 
 struct ClassMethod : ClassMethodBase {
-  ClassMethod(
-      std::string name, Type returnType,
-      Visibility visibility = Visibility::Public,
-      Constness constness = Constness::Const,
-      Staticness staticness = Staticness::NotStatic
-  ) : mName(std::move(name)), mReturnType(std::move(returnType)), mConstness(constness),
-      mStaticness(staticness) { mVisibility = visibility; }
+  ClassMethod(std::string name, Type returnType, Visibility visibility = Visibility::Public,
+              Constness constness = Constness::Const, Staticness staticness = Staticness::NotStatic) :
+      mName(std::move(name)), mReturnType(std::move(returnType)), mConstness(constness), mStaticness(staticness) {
+    mVisibility = visibility;
+  }
 
   std::string mName;
   Type mReturnType;
@@ -119,8 +107,8 @@ struct ClassConstructorInitializer {
   std::string mDestination;
   std::string mValue;
 
-  ClassConstructorInitializer(std::string destination, std::string value) : mDestination(std::move(destination)),
-                                                                            mValue(std::move(value)) {}
+  ClassConstructorInitializer(std::string destination, std::string value) :
+      mDestination(std::move(destination)), mValue(std::move(value)) {}
 };
 
 struct ClassConstructor : ClassMethodBase {
@@ -145,9 +133,8 @@ struct ClassEnumEntry {
   std::list<std::string> mComments;
   const EnumEntryDefinition *mEntry;
 
-  ClassEnumEntry(
-      std::string name, std::string value, const EnumEntryDefinition *entry = nullptr
-  ) : mName(std::move(name)), mValue(std::move(value)), mEntry(entry) {}
+  ClassEnumEntry(std::string name, std::string value, const EnumEntryDefinition *entry = nullptr) :
+      mName(std::move(name)), mValue(std::move(value)), mEntry(entry) {}
 };
 
 struct ClassEnum {
@@ -157,27 +144,22 @@ struct ClassEnum {
   std::list<ClassEnumEntry> mEntries;
   std::list<std::string> mComments;
 
-  ClassEnum(
-      std::string name, std::string underlyingType, Visibility visibility = Visibility::Public
-  ) : mName(std::move(name)), mVisibility(visibility), mUnderlyingType(std::move(underlyingType)) {}
+  ClassEnum(std::string name, std::string underlyingType, Visibility visibility = Visibility::Public) :
+      mName(std::move(name)), mVisibility(visibility), mUnderlyingType(std::move(underlyingType)) {}
 
   [[nodiscard]] const ClassEnumEntry *GetEntry(const std::string &name) const;
-
 };
 
 // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
 struct Class {
-  explicit Class(
-      std::string name, std::string _namespace, const StructDefinition *_struct
-  ) : mStruct(_struct), mName(std::move(name)), mNamespace(std::move(_namespace)) {}
+  explicit Class(std::string name, std::string _namespace, const StructDefinition *_struct) :
+      mStruct(_struct), mName(std::move(name)), mNamespace(std::move(_namespace)) {}
 
-  explicit Class(
-      std::string name, std::string _namespace, const EnumDefinition *_enum
-  ) : mEnum(_enum), mName(std::move(name)), mNamespace(std::move(_namespace)) {}
+  explicit Class(std::string name, std::string _namespace, const EnumDefinition *_enum) :
+      mEnum(_enum), mName(std::move(name)), mNamespace(std::move(_namespace)) {}
 
-  explicit Class(
-      std::string name, std::string _namespace
-  ) : mName(std::move(name)), mNamespace(std::move(_namespace)) {}
+  explicit Class(std::string name, std::string _namespace) :
+      mName(std::move(name)), mNamespace(std::move(_namespace)) {}
 
   const StructDefinition *mStruct = nullptr;
   const EnumDefinition *mEnum = nullptr;
@@ -206,9 +188,7 @@ struct Class {
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
   [[nodiscard]] const ClassEnum *GetNestedEnum(const std::string &name) const;
 
-  [[nodiscard]] auto GetMethods(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mMethods);
-  }
+  [[nodiscard]] auto GetMethods(const std::string &name) const { return NameFilterForEachWrapper(name, mMethods); }
 };
 
 struct TranslatedProject {
@@ -221,4 +201,4 @@ public:
   [[nodiscard]] const Class *GetClass(const std::string &name) const;
 };
 
-}
+} // namespace holgen

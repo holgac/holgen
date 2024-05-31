@@ -1,46 +1,28 @@
 #include "TypeInfo.h"
-#include <sstream>
 #include <core/Exception.h>
-#include "parser/Parser.h"
+#include <sstream>
 #include "TranslatedProject.h"
+#include "parser/Parser.h"
 
 namespace holgen {
 TypeInfo::TypeInfo() {
   TypeToCppType = {
-      {"s8",            "int8_t"},
-      {"s16",           "int16_t"},
-      {"s32",           "int32_t"},
-      {"s64",           "int64_t"},
-      {"u8",            "uint8_t"},
-      {"u16",           "uint16_t"},
-      {"u32",           "uint32_t"},
-      {"u64",           "uint64_t"},
-      {"float",         "float"},
-      {"double",        "double"},
-      {"bool",          "bool"},
-      {"string",        "std::string"},
-      {"vector",        "std::vector"},
-      {"deque",         "std::deque"},
-      {"map",           "std::map"},
-      {"unordered_map", "std::unordered_map"},
-      {"set",           "std::set"},
-      {"unordered_set", "std::unordered_set"},
+      {"s8", "int8_t"},          {"s16", "int16_t"},
+      {"s32", "int32_t"},        {"s64", "int64_t"},
+      {"u8", "uint8_t"},         {"u16", "uint16_t"},
+      {"u32", "uint32_t"},       {"u64", "uint64_t"},
+      {"float", "float"},        {"double", "double"},
+      {"bool", "bool"},          {"string", "std::string"},
+      {"vector", "std::vector"}, {"deque", "std::deque"},
+      {"map", "std::map"},       {"unordered_map", "std::unordered_map"},
+      {"set", "std::set"},       {"unordered_set", "std::unordered_set"},
   };
 
   SignedIntegralTypes = {
-      "int8_t",
-      "int16_t",
-      "int32_t",
-      "int64_t",
-      "ssize_t",
-      "int",
+      "int8_t", "int16_t", "int32_t", "int64_t", "ssize_t", "int",
   };
   UnsignedIntegralTypes = {
-      "uint8_t",
-      "uint16_t",
-      "uint32_t",
-      "uint64_t",
-      "size_t",
+      "uint8_t", "uint16_t", "uint32_t", "uint64_t", "size_t",
   };
   FloatingPointTypes = {
       "float",
@@ -93,7 +75,7 @@ TypeInfo::TypeInfo() {
       "std::nullptr_t",
       "std::filesystem::path",
   };
-  for (auto&[_, cppType] : TypeToCppType)
+  for (auto &[_, cppType]: TypeToCppType)
     CppTypes.insert(cppType);
 }
 
@@ -148,9 +130,8 @@ std::string Type::ToString(bool noTrailingSpace) const {
   return ss.str();
 }
 
-Type::Type(
-    const TranslatedProject &project, const TypeDefinition &typeDefinition, PassByType passByType, Constness constness
-) : mConstness(constness), mType(passByType) {
+Type::Type(const TranslatedProject &project, const TypeDefinition &typeDefinition, PassByType passByType,
+           Constness constness) : mConstness(constness), mType(passByType) {
   if (typeDefinition.mName == "Ref") {
     auto underlyingClass = project.GetClass(typeDefinition.mTemplateParameters[0].mName);
     auto idField = underlyingClass->GetIdField();
@@ -191,4 +172,4 @@ void Type::PreventCopying(bool addConst) {
       mConstness = Constness::Const;
   }
 }
-}
+} // namespace holgen

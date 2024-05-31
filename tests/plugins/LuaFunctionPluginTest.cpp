@@ -22,9 +22,8 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
 
   ASSERT_NE(cls->GetField("mLuaFuncHandle_TestFunction"), nullptr);
-  helpers::ExpectEqual(
-      *cls->GetField("mLuaFuncHandle_TestFunction"),
-      ClassField{"mLuaFuncHandle_TestFunction", Type{"std::string"}});
+  helpers::ExpectEqual(*cls->GetField("mLuaFuncHandle_TestFunction"),
+                       ClassField{"mLuaFuncHandle_TestFunction", Type{"std::string"}});
 
   ASSERT_NE(cls->GetMethod("TestFunction", Constness::Const), nullptr);
   auto method = ClassMethod{"TestFunction", Type{"void"}, Visibility::Public, Constness::Const};
@@ -203,8 +202,8 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
 
   ASSERT_NE(cls->GetMethod("TestFunction", Constness::Const), nullptr);
-  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
-                            Constness::Const};
+  auto method =
+      ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
@@ -231,7 +230,8 @@ struct A {
   @luaFunc
   func TestFunction() -> u32;
 }
-  )R", Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
+  )R",
+                     Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
   ExpectErrorMessage(R"R(
 struct A {
   @luaFunc
@@ -239,17 +239,18 @@ struct A {
   @luaFunc
   func TestFunction(string arg) -> u32;
 }
-  )R", Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
+  )R",
+                     Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
 }
 
 TEST_F(LuaFunctionPluginTest, InvalidType) {
-  ExpectErrorMessage("struct A { @luaFunc func TestFunction() -> u63; }",
-                     Run, "Unknown type u63 used by A.TestFunction ({0}:1:21)", Source);
-  ExpectErrorMessage("struct A { @luaFunc func TestFunction(u33 arg) -> u64; }",
-                     Run, "Unknown type u33 used by A.TestFunction ({0}:1:21)", Source);
-  ExpectErrorMessage("struct A { @luaFunc func TestFunction(void arg) -> u64; }",
-                     Run, "Invalid void usage in A.TestFunction ({0}:1:21)", Source);
+  ExpectErrorMessage("struct A { @luaFunc func TestFunction() -> u63; }", Run,
+                     "Unknown type u63 used by A.TestFunction ({0}:1:21)", Source);
+  ExpectErrorMessage("struct A { @luaFunc func TestFunction(u33 arg) -> u64; }", Run,
+                     "Unknown type u33 used by A.TestFunction ({0}:1:21)", Source);
+  ExpectErrorMessage("struct A { @luaFunc func TestFunction(void arg) -> u64; }", Run,
+                     "Invalid void usage in A.TestFunction ({0}:1:21)", Source);
 
-  ExpectErrorMessage("struct A { @luaFunc func TestFunction() -> void<u32>; }",
-                     Run, "Void cannot have template parameters in A.TestFunction ({0}:1:21)", Source);
+  ExpectErrorMessage("struct A { @luaFunc func TestFunction() -> void<u32>; }", Run,
+                     "Void cannot have template parameters in A.TestFunction ({0}:1:21)", Source);
 }

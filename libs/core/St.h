@@ -38,7 +38,7 @@ public:
 #if defined(HOLGEN_WINDOWS)
   inline static const std::string Newline = "\r\n";
 #else
-    inline static const std::string Newline = "\n";
+  inline static const std::string Newline = "\n";
 #endif
 };
-}
+} // namespace holgen

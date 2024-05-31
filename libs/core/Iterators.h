@@ -1,17 +1,13 @@
 #pragma once
 
-#include<string>
+#include <string>
 
 namespace holgen {
-template<class T>
+template <class T>
 struct NameFilterIterator {
-  NameFilterIterator(std::string name, T begin, T end) : mName(std::move(name)), mIterator(begin), mEnd(end) {
-    Next();
-  }
+  NameFilterIterator(std::string name, T begin, T end) : mName(std::move(name)), mIterator(begin), mEnd(end) { Next(); }
 
-  auto &operator*() {
-    return *mIterator;
-  }
+  auto &operator*() { return *mIterator; }
 
   auto operator++() {
     ++mIterator;
@@ -19,9 +15,7 @@ struct NameFilterIterator {
     return *this;
   }
 
-  bool operator!=(const NameFilterIterator &other) const {
-    return mIterator != other.mIterator;
-  }
+  bool operator!=(const NameFilterIterator &other) const { return mIterator != other.mIterator; }
 
 private:
   std::string mName;
@@ -35,20 +29,15 @@ private:
   }
 };
 
-template<class T>
+template <class T>
 struct NameFilterForEachWrapper {
-  NameFilterForEachWrapper(std::string name, T &container) : mName(std::move(name)), mContainer(container) {
-  }
+  NameFilterForEachWrapper(std::string name, T &container) : mName(std::move(name)), mContainer(container) {}
 
-  auto begin() {
-    return NameFilterIterator(mName, mContainer.begin(), mContainer.end());
-  }
+  auto begin() { return NameFilterIterator(mName, mContainer.begin(), mContainer.end()); }
 
-  auto end() {
-    return NameFilterIterator("", mContainer.end(), mContainer.end());
-  }
+  auto end() { return NameFilterIterator("", mContainer.end(), mContainer.end()); }
 
   std::string mName;
   const T &mContainer;
 };
-}
+} // namespace holgen

@@ -9,4 +9,4 @@ class UserDefinedSectionExtractor {
 public:
   std::map<std::string, std::string> Extract(const std::string &fileContents) const;
 };
-}
+} // namespace holgen

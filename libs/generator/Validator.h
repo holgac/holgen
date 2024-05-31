@@ -1,7 +1,7 @@
 #pragma once
 
-#include "TranslatedProject.h"
 #include "NamingConvention.h"
+#include "TranslatedProject.h"
 
 namespace holgen {
 class Validator {
@@ -14,12 +14,13 @@ public:
   void NewMethod(const Class &cls, const ClassMethod &method) const;
   void Enum(const Class &cls) const;
   void NewEnumEntry(const Class &cls, const ClassEnum &nestedEnum, const ClassEnumEntry &entry) const;
-  void ContainerAnnotation(
-      const Class &cls, const ClassField &field, const AnnotationDefinition &annotationDefinition) const;
+  void ContainerAnnotation(const Class &cls, const ClassField &field,
+                           const AnnotationDefinition &annotationDefinition) const;
   void ManagedAnnotation(const Class &cls, const AnnotationDefinition &annotationDefinition) const;
-  void IndexAnnotation(
-      const Class &cls, const ClassField &field, const AnnotationDefinition &annotationDefinition) const;
+  void IndexAnnotation(const Class &cls, const ClassField &field,
+                       const AnnotationDefinition &annotationDefinition) const;
   void JsonConverters() const;
+
 private:
   void ValidateType(const Type &type, const Class &cls, bool acceptVoid, const ClassMethod *method,
                     const std::string &source) const;
@@ -33,4 +34,4 @@ private:
   void ValidateMixins(const StructDefinition &structDefinition,
                       std::map<std::string, const StructDefinition *> &mixinUsage) const;
 };
-}
+} // namespace holgen

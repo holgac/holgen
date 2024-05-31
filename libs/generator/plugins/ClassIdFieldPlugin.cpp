@@ -1,6 +1,6 @@
 #include "ClassIdFieldPlugin.h"
-#include "core/St.h"
 #include "core/Annotations.h"
+#include "core/St.h"
 
 namespace holgen {
 void ClassIdFieldPlugin::Run() {
@@ -18,14 +18,12 @@ void ClassIdFieldPlugin::ProcessStructDefinition(Class &cls, const StructDefinit
   for (auto &fieldDefinition: structDefinition.mFields) {
     if (!fieldDefinition.GetAnnotation(Annotations::Id))
       continue;
-    auto field = ClassField{
-        Naming().FieldNameInCpp(fieldDefinition),
-        Type{mProject, fieldDefinition.mType},
-        Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
+    auto field = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
+                            Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
     field.mDefaultValue = "-1";
     Validate().IdField(cls, field);
     cls.mFields.push_back(std::move(field));
   }
 }
-}
+} // namespace holgen

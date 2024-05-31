@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../TranslatedProject.h"
 #include "../NamingConvention.h"
-#include "../Validator.h"
+#include "../TranslatedProject.h"
 #include "../TranslatorSettings.h"
+#include "../Validator.h"
 #include "core/Annotations.h"
 
 namespace holgen {
@@ -14,11 +14,12 @@ public:
   virtual void Run();
   const NamingConvention &Naming() const;
   const Validator &Validate() const;
+
 protected:
   TranslatedProject &mProject;
   const TranslatorSettings &mSettings;
 
-  template<typename T, typename C>
+  template <typename T, typename C>
   void FillComments(const T &definition, C &container) {
     for (auto &annotation: definition.GetAnnotations(Annotations::Comment)) {
       for (auto &attribute: annotation.mAttributes) {
@@ -32,4 +33,4 @@ private:
   NamingConvention mNamingConvention;
   Validator mValidator;
 };
-}
+} // namespace holgen

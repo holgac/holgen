@@ -1,9 +1,9 @@
 #include "NamingConvention.h"
 #include <format>
-#include "parser/ProjectDefinition.h"
-#include "core/St.h"
 #include "TranslatedProject.h"
 #include "core/Annotations.h"
+#include "core/St.h"
+#include "parser/ProjectDefinition.h"
 
 namespace holgen {
 NamingConvention::NamingConvention(TranslatedProject &project) : mProject(project) {}
@@ -28,14 +28,13 @@ std::string NamingConvention::FieldNameInLua(const FieldDefinition &fieldDefinit
   return fieldDefinition.mName;
 }
 
-std::string NamingConvention::FieldIndexNameInCpp(
-    const FieldDefinition &fieldDefinition, const AnnotationDefinition &indexAnnotation) const {
+std::string NamingConvention::FieldIndexNameInCpp(const FieldDefinition &fieldDefinition,
+                                                  const AnnotationDefinition &indexAnnotation) const {
   auto indexOn = indexAnnotation.GetAttribute(Annotations::Index_On);
   return std::format("{}{}Index", FieldNameInCpp(fieldDefinition), St::Capitalize(indexOn->mValue.mName));
 }
 
-std::string
-NamingConvention::FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) const {
+std::string NamingConvention::FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, bool dereferenceRef) const {
   if (fieldDefinition.mType.mName == "Ref") {
     auto underlyingClass = mProject.GetClass(fieldDefinition.mType.mTemplateParameters[0].mName);
     if (underlyingClass->GetIdField() && !dereferenceRef) {
@@ -45,8 +44,7 @@ NamingConvention::FieldGetterNameInCpp(const FieldDefinition &fieldDefinition, b
   return FieldGetterNameInCpp(fieldDefinition.mName);
 }
 
-std::string
-NamingConvention::FieldGetterNameInCpp(const std::string &fieldName) const {
+std::string NamingConvention::FieldGetterNameInCpp(const std::string &fieldName) const {
   return std::format("Get{}", St::Capitalize(fieldName));
 }
 
@@ -82,8 +80,7 @@ std::string NamingConvention::ContainerElemCountNameInCpp(const FieldDefinition 
 
 std::string NamingConvention::ContainerIndexGetterNameInCpp(const FieldDefinition &fieldDefinition,
                                                             const AnnotationDefinition &indexAnnotation) const {
-  auto elemName = fieldDefinition.GetAnnotation(Annotations::Container)->GetAttribute(
-      Annotations::Container_ElemName);
+  auto elemName = fieldDefinition.GetAnnotation(Annotations::Container)->GetAttribute(Annotations::Container_ElemName);
   auto indexOn = indexAnnotation.GetAttribute(Annotations::Index_On);
   return std::format("Get{}From{}", St::Capitalize(elemName->mValue.mName), St::Capitalize(indexOn->mValue.mName));
 }
@@ -119,20 +116,18 @@ std::string NamingConvention::LuaFunctionHandleNameInCpp(const FunctionDefinitio
   return "mLuaFuncHandle_" + functionDefinition.mName;
 }
 
-std::string NamingConvention::LuaMetatableName(const Class &cls) const {
-  return cls.mName + "Meta";
-}
+std::string NamingConvention::LuaMetatableName(const Class &cls) const { return cls.mName + "Meta"; }
 
 std::string NamingConvention::FieldNameInCpp(const std::string &fieldName) const {
   return std::format("m{}", St::Capitalize(fieldName));
 }
 
-std::string NamingConvention::VariantGetterNameInCpp(
-    const FieldDefinition &fieldDefinition, const StructDefinition &getAs) const {
+std::string NamingConvention::VariantGetterNameInCpp(const FieldDefinition &fieldDefinition,
+                                                     const StructDefinition &getAs) const {
   return std::format("Get{}As{}", St::Capitalize(fieldDefinition.mName), St::Capitalize(getAs.mName));
 }
 
 std::string NamingConvention::VariantResetterNameInCpp(const std::string &fieldName) const {
   return std::format("Reset{}", St::Capitalize(fieldName));
 }
-}
+} // namespace holgen

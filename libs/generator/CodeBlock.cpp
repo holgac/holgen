@@ -18,9 +18,7 @@ void CodeBlock::Add(CodeBlock &&cb) {
                        std::make_move_iterator(cb.mIndentations.end()));
 }
 
-std::string CodeBlock::ToString(
-    FileType fileType, const std::map<std::string, std::string> &sections
-) const {
+std::string CodeBlock::ToString(FileType fileType, const std::map<std::string, std::string> &sections) const {
   std::set<std::string> usedSections;
   const char *commentStart = "//";
   if (fileType == FileType::CMakeFile)
@@ -33,35 +31,34 @@ std::string CodeBlock::ToString(
   std::stringstream out;
   for (; contentIt != mContents.end(); ++contentIt) {
     switch (*contentIt) {
-      case CodeUnitType::Indentation:
-        currentIndentation += *indentIt;
-        THROW_IF(currentIndentation < 0, "Negative indentation!")
-        indentation = std::string(currentIndentation * 2, ' ');
-        ++indentIt;
-        break;
-      case CodeUnitType::Code:
-        out << indentation << *lineIt << St::Newline;
-        ++lineIt;
-        break;
-      case CodeUnitType::UserDefined:
-        out << commentStart << " " << St::UserDefinedSectionBegin << *lineIt << St::Newline;
-        auto sectionIt = sections.find(*lineIt);
-        if (sectionIt != sections.end()) {
-          out << sectionIt->second;
-          usedSections.insert(*lineIt);
-        }
-        out << commentStart << " " << St::UserDefinedSectionEnd << *lineIt << St::Newline;
-        ++lineIt;
-        break;
+    case CodeUnitType::Indentation:
+      currentIndentation += *indentIt;
+      THROW_IF(currentIndentation < 0, "Negative indentation!")
+      indentation = std::string(currentIndentation * 2, ' ');
+      ++indentIt;
+      break;
+    case CodeUnitType::Code:
+      out << indentation << *lineIt << St::Newline;
+      ++lineIt;
+      break;
+    case CodeUnitType::UserDefined:
+      out << commentStart << " " << St::UserDefinedSectionBegin << *lineIt << St::Newline;
+      auto sectionIt = sections.find(*lineIt);
+      if (sectionIt != sections.end()) {
+        out << sectionIt->second;
+        usedSections.insert(*lineIt);
+      }
+      out << commentStart << " " << St::UserDefinedSectionEnd << *lineIt << St::Newline;
+      ++lineIt;
+      break;
     }
   }
   THROW_IF(currentIndentation != 0, "Inconsistent indentation!")
   for (auto &[sectionName, sectionContent]: sections) {
-    THROW_IF(
-        !usedSections.contains(sectionName) && !sectionContent.empty(),
-        "Section {} was removed since the last run. Proceeding would erase the content. "
-        "Please manually remove the section and rerun the generator.",
-        sectionName);
+    THROW_IF(!usedSections.contains(sectionName) && !sectionContent.empty(),
+             "Section {} was removed since the last run. Proceeding would erase the content. "
+             "Please manually remove the section and rerun the generator.",
+             sectionName);
   }
   return out.str();
 }
@@ -70,4 +67,4 @@ void CodeBlock::AddUserDefinedSection(const std::string &name) {
   mContents.push_back(CodeUnitType::UserDefined);
   mLines.push_back(name);
 }
-}
+} // namespace holgen

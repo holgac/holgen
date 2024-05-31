@@ -1,7 +1,7 @@
 #include "JsonConverterPlugin.h"
-#include "generator/TypeInfo.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include "generator/TypeInfo.h"
 
 namespace holgen {
 void JsonConverterPlugin::Run() {
@@ -19,8 +19,7 @@ void JsonConverterPlugin::Run() {
       if (processedConverters.contains(jsonConvertUsing->mValue.mName))
         continue;
       processedConverters.insert(jsonConvertUsing->mValue.mName);
-      auto field = ClassField{jsonConvertUsing->mValue.mName,
-                              Type{"std::function"}, Visibility::Public};
+      auto field = ClassField{jsonConvertUsing->mValue.mName, Type{"std::function"}, Visibility::Public};
 
       if (jsonConvertElem)
         field.mType.mFunctionalTemplateParameters.emplace_back(targetField.mType.mTemplateParameters.back());
@@ -35,4 +34,4 @@ void JsonConverterPlugin::Run() {
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
 }
-}
+} // namespace holgen

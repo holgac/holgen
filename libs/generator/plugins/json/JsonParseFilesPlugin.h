@@ -17,4 +17,4 @@ private:
   void GenerateParseFiles(Class &cls);
   void GenerateFilesByName(ClassMethod &method);
 };
-}
+} // namespace holgen

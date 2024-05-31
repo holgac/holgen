@@ -10,4 +10,4 @@ public:
   void Run() override;
 };
 
-}
+} // namespace holgen

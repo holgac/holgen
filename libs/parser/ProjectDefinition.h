@@ -1,8 +1,8 @@
 #pragma once
 
+#include <format>
 #include <string>
 #include <vector>
-#include <format>
 #include "core/Iterators.h"
 
 
@@ -34,9 +34,7 @@ struct AnnotationDefinition {
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationAttributeDefinition *GetAttribute(const std::string &name) const;
 
-  auto GetAttributes(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAttributes);
-  }
+  auto GetAttributes(const std::string &name) const { return NameFilterForEachWrapper(name, mAttributes); }
 };
 
 struct FieldDefinition {
@@ -46,13 +44,11 @@ struct FieldDefinition {
   std::optional<std::string> mDefaultValue = std::nullopt;
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
-  [[nodiscard]] const AnnotationAttributeDefinition *GetMatchingAttribute(
-      const std::string &annotationName, const std::string &attributeName,
-      std::optional<std::string> attributeValue = std::nullopt) const;
+  [[nodiscard]] const AnnotationAttributeDefinition *
+  GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                       std::optional<std::string> attributeValue = std::nullopt) const;
 
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
+  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
 };
 
 struct FunctionArgumentDefinition {
@@ -70,13 +66,11 @@ struct FunctionDefinition {
   std::vector<AnnotationDefinition> mAnnotations;
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
-  [[nodiscard]] const AnnotationAttributeDefinition *GetMatchingAttribute(
-      const std::string &annotationName, const std::string &attributeName,
-      std::optional<std::string> attributeValue = std::nullopt) const;
+  [[nodiscard]] const AnnotationAttributeDefinition *
+  GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                       std::optional<std::string> attributeValue = std::nullopt) const;
 
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
+  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
 };
 
 struct StructDefinition {
@@ -92,13 +86,11 @@ struct StructDefinition {
   [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
   [[nodiscard]] const FieldDefinition *GetIdField() const;
 
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
+  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
 
-  [[nodiscard]] const AnnotationAttributeDefinition *GetMatchingAttribute(
-      const std::string &annotationName, const std::string &attributeName,
-      std::optional<std::string> attributeValue = std::nullopt) const;
+  [[nodiscard]] const AnnotationAttributeDefinition *
+  GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                       std::optional<std::string> attributeValue = std::nullopt) const;
 };
 
 struct EnumEntryDefinition {
@@ -108,9 +100,7 @@ struct EnumEntryDefinition {
   DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
 
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
+  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
 };
 
 struct EnumDefinition {
@@ -122,9 +112,7 @@ struct EnumDefinition {
   [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
 
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
+  auto GetAnnotations(const std::string &name) const { return NameFilterForEachWrapper(name, mAnnotations); }
 };
 
 struct ProjectDefinition {
@@ -136,16 +124,15 @@ struct ProjectDefinition {
 };
 
 
-}
+} // namespace holgen
 
-template<>
+template <>
 struct std::formatter<holgen::DefinitionSource> : std::formatter<std::string> {
   auto format(const holgen::DefinitionSource &definitionSource, format_context &ctx) const {
-    if (definitionSource.mLine == (decltype(definitionSource.mLine)) (-1) ||
-        definitionSource.mColumn == (decltype(definitionSource.mColumn)) (-1))
+    if (definitionSource.mLine == (decltype(definitionSource.mLine))(-1) ||
+        definitionSource.mColumn == (decltype(definitionSource.mColumn))(-1))
       return std::format_to(ctx.out(), "{}", definitionSource.mSource);
-    return std::format_to(ctx.out(), "{}:{}:{}", definitionSource.mSource,
-                          definitionSource.mLine + 1, definitionSource.mColumn + 1);
+    return std::format_to(ctx.out(), "{}:{}:{}", definitionSource.mSource, definitionSource.mLine + 1,
+                          definitionSource.mColumn + 1);
   }
 };
-

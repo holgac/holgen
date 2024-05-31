@@ -1,21 +1,18 @@
 #include <gtest/gtest.h>
-#include "tokenizer/Tokenizer.h"
-#include "parser/Parser.h"
-#include "parser/DependencyGraph.h"
 #include "core/Exception.h"
+#include "parser/DependencyGraph.h"
+#include "parser/Parser.h"
+#include "tokenizer/Tokenizer.h"
 
 using namespace holgen;
 
-namespace {
-}
+namespace {}
 
 class DependencyGraphTest : public ::testing::Test {
 protected:
-  void SetUp() override {
-  }
+  void SetUp() override {}
 
-  void TearDown() override {
-  }
+  void TearDown() override {}
 
   void ExpectProcessOrder(const std::string &schema, const std::vector<std::string> &expectedProcessOrder) {
     Tokenizer tokenizer(schema, "DependencyGraphTest");
@@ -33,16 +30,18 @@ protected:
     Tokenizer tokenizer(schema, "DependencyGraphTest");
     Parser parser;
     parser.Parse(tokenizer);
-    EXPECT_THROW({
-                   try {
-                     DependencyGraph dg(parser.GetProject());
-                   } catch (Exception &exc) {
-                     std::string actualError = exc.what();
-                     actualError = actualError.substr(actualError.find(" ") + 1);
-                     EXPECT_EQ(actualError, expectedError);
-                     throw;
-                   }
-                 }, Exception);
+    EXPECT_THROW(
+        {
+          try {
+            DependencyGraph dg(parser.GetProject());
+          } catch (Exception &exc) {
+            std::string actualError = exc.what();
+            actualError = actualError.substr(actualError.find(" ") + 1);
+            EXPECT_EQ(actualError, expectedError);
+            throw;
+          }
+        },
+        Exception);
   }
 };
 
@@ -54,7 +53,8 @@ struct A {
 struct B {
   A a;
 }
-  )DELIM", "Circular dependency detected between B and A");
+  )DELIM",
+                     "Circular dependency detected between B and A");
 }
 
 TEST_F(DependencyGraphTest, LoadOrder) {
@@ -72,7 +72,8 @@ struct C {
 struct D {
   C c;
 }
-  )DELIM", {"C", "D", "B", "A"});
+  )DELIM",
+                     {"C", "D", "B", "A"});
 }
 
 TEST_F(DependencyGraphTest, Refs) {
@@ -83,5 +84,6 @@ struct A {
 struct B {
   Ref<A> a;
 }
-  )DELIM", {"A", "B"});
+  )DELIM",
+                     {"A", "B"});
 }

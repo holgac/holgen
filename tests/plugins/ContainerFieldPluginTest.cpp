@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ContainerFieldPlugin.h"
 
 class ContainerFieldPluginTest : public TranslatorPluginTest {
@@ -200,10 +200,8 @@ struct TestData {
   EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "AddInnerStruct",
-        Type{"InnerStruct", PassByType::Pointer},
-        Visibility::Public, Constness::NotConst};
+    auto method = ClassMethod{"AddInnerStruct", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
+                              Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
@@ -229,10 +227,8 @@ struct TestData {
   EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "AddInnerStruct",
-        Type{"InnerStruct", PassByType::Pointer},
-        Visibility::Public, Constness::NotConst};
+    auto method = ClassMethod{"AddInnerStruct", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
+                              Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
@@ -265,10 +261,8 @@ struct TestData {
   EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "AddInnerStruct",
-        Type{"InnerStruct", PassByType::Pointer},
-        Visibility::Public, Constness::NotConst};
+    auto method = ClassMethod{"AddInnerStruct", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
+                              Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 auto newId = mInnerStructs.size();
@@ -300,10 +294,8 @@ struct TestData {
   EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "AddInnerStruct",
-        Type{"InnerStruct", PassByType::Pointer},
-        Visibility::Public, Constness::NotConst};
+    auto method = ClassMethod{"AddInnerStruct", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
+                              Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
@@ -365,10 +357,8 @@ struct TestData {
   EXPECT_EQ(cls->GetMethod("AddInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("AddInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "AddInnerStruct",
-        Type{"InnerStruct", PassByType::Pointer},
-        Visibility::Public, Constness::NotConst};
+    auto method = ClassMethod{"AddInnerStruct", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public,
+                              Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
@@ -403,10 +393,8 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("GetInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "GetInnerStruct",
-        Type{"InnerStruct", PassByType::Pointer, Constness::Const},
-        Visibility::Public, Constness::Const};
+    auto method = ClassMethod{"GetInnerStruct", Type{"InnerStruct", PassByType::Pointer, Constness::Const},
+                              Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("idx", Type{"size_t"});
     method.mExposeToLua = true;
     const char *body = R"R(
@@ -441,10 +429,8 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("GetInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "GetInnerStruct",
-        Type{"InnerStruct", PassByType::Pointer, Constness::Const},
-        Visibility::Public, Constness::Const};
+    auto method = ClassMethod{"GetInnerStruct", Type{"InnerStruct", PassByType::Pointer, Constness::Const},
+                              Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("idx", Type{"int32_t"});
     method.mExposeToLua = true;
     const char *body = R"R(
@@ -478,10 +464,7 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetInnerStructCount", Constness::Const), nullptr);
   EXPECT_EQ(cls->GetMethod("GetInnerStructCount", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "GetInnerStructCount",
-        Type{"size_t"},
-        Visibility::Public, Constness::Const};
+    auto method = ClassMethod{"GetInnerStructCount", Type{"size_t"}, Visibility::Public, Constness::Const};
     method.mExposeToLua = true;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructCount", Constness::Const), method, R"R(
 return mInnerStructs.size();
@@ -507,10 +490,7 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("GetInnerStructCount", Constness::Const), nullptr);
   EXPECT_EQ(cls->GetMethod("GetInnerStructCount", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "GetInnerStructCount",
-        Type{"size_t"},
-        Visibility::Public, Constness::Const};
+    auto method = ClassMethod{"GetInnerStructCount", Type{"size_t"}, Visibility::Public, Constness::Const};
     method.mExposeToLua = true;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructCount", Constness::Const), method, R"R(
 return mInnerStructs.size();
@@ -535,10 +515,7 @@ struct TestData {
   EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("DeleteInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "DeleteInnerStruct",
-        Type{"void"},
-        Visibility::Public, Constness::NotConst};
+    auto method = ClassMethod{"DeleteInnerStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("idx", Type{"size_t"});
     method.mExposeToLua = true;
     helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
@@ -590,10 +567,7 @@ struct TestData {
   EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("DeleteInnerStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{
-        "DeleteInnerStruct",
-        Type{"void"},
-        Visibility::Public, Constness::NotConst};
+    auto method = ClassMethod{"DeleteInnerStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mExposeToLua = true;
     method.mArguments.emplace_back("idx", Type{"size_t"});
     helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
@@ -695,20 +669,24 @@ struct Inner {}
 struct A {
   @container
   vector<Inner> inners;
-})R", Run, "Missing elemName attribute in container ({0}:3:3) annotation of A.inners ({0}:4:3)", Source);
+})R",
+                     Run, "Missing elemName attribute in container ({0}:3:3) annotation of A.inners ({0}:4:3)", Source);
   ExpectErrorMessage(R"R(
 struct Inner {}
 struct A {
   @container(elemName=a)
   @container(elemName=b)
   vector<Inner> inners;
-  })R", Run, "container annotation in A.inners ({}:5:3) should be used only once", Source);
+  })R",
+                     Run, "container annotation in A.inners ({}:5:3) should be used only once", Source);
   ExpectErrorMessage(R"R(
 struct Inner {}
 struct A {
   @container(elemName=inner, elemName=another)
   vector<Inner> inners;
-})R", Run, "Too many elemName attributes in container ({0}:3:3) annotation of A.inners ({0}:4:3)", Source);
+})R",
+                     Run, "Too many elemName attributes in container ({0}:3:3) annotation of A.inners ({0}:4:3)",
+                     Source);
 }
 
 TEST_F(ContainerFieldPluginTest, InvalidContainerField) {
@@ -716,19 +694,23 @@ TEST_F(ContainerFieldPluginTest, InvalidContainerField) {
 struct A {
   @container(elemName=name)
   map<u32, string> inners;
-})R", Run, "A.inners ({0}:3:3) is a keyed container of std::string which is not a user type", Source);
-  ExpectErrorMessage(R"R(
+})R",
+                     Run, "A.inners ({0}:3:3) is a keyed container of std::string which is not a user type", Source);
+  ExpectErrorMessage(
+      R"R(
 struct Inner {}
 struct A {
   @container(elemName=name)
   map<u32, Inner> inners;
-})R", Run, "A.inners ({0}:4:3) is a keyed container of Inner ({0}:1:1) which is not a user type with an id field",
-                     Source);
+})R",
+      Run, "A.inners ({0}:4:3) is a keyed container of Inner ({0}:1:1) which is not a user type with an id field",
+      Source);
   ExpectErrorMessage(R"R(
 struct A {
   @container(elemName=inner)
   u32 inners;
-})R", Run, "A.inners ({0}:3:3) should have a container type, found uint32_t", Source);
+})R",
+                     Run, "A.inners ({0}:3:3) should have a container type, found uint32_t", Source);
   ExpectErrorMessage(
       R"R(
 struct Inner1 {} struct Inner2 {}
@@ -737,7 +719,8 @@ struct A {
   vector<Inner1> inners1;
   @container(elemName=inner)
   vector<Inner2> inners2;
-  })R", Run,
+  })R",
+      Run,
       "A has multiple container fields (A.inners1 ({0}:4:3) and A.inners2 ({0}:6:3)) with identical elemName: inner",
       Source);
 }
@@ -750,29 +733,33 @@ struct A {
   @index
   @container(elemName=inner)
   vector<Inner> inners;
-  })R", Run, "Missing on attribute in index ({0}:3:3) annotation of A.inners ({0}:5:3)", Source);
-  ExpectErrorMessage(R"R(
+  })R",
+                     Run, "Missing on attribute in index ({0}:3:3) annotation of A.inners ({0}:5:3)", Source);
+  ExpectErrorMessage(
+      R"R(
 struct Inner {string field;}
 struct A {
   @index(on=field, using=whatever)
   @container(elemName=inner)
   vector<Inner> inners;
-  })R", Run,
-                     "using attribute of index ({0}:3:3) of A.inners ({0}:5:3) should be a keyed container type, found whatever",
-                     Source);
+  })R",
+      Run, "using attribute of index ({0}:3:3) of A.inners ({0}:5:3) should be a keyed container type, found whatever",
+      Source);
   ExpectErrorMessage(R"R(
 struct A {
   @index(on=field)
   @container(elemName=inner)
   vector<string> inners;
-  })R", Run, "A.inners ({0}:4:3) has an index on std::string which is not a user defined struct", Source);
+  })R",
+                     Run, "A.inners ({0}:4:3) has an index on std::string which is not a user defined struct", Source);
   ExpectErrorMessage(R"R(
 struct Inner {}
 struct A {
   @index(on=someField)
   @container(elemName=inner)
   vector<Inner> inners;
-  })R", Run, "A.inners ({0}:5:3) has an index on non-existent field someField of Inner ({0}:1:1)", Source);
+  })R",
+                     Run, "A.inners ({0}:5:3) has an index on non-existent field someField of Inner ({0}:1:1)", Source);
   ExpectErrorMessage(R"R(
 struct Inner2 {}
 struct Inner {Inner2 someField;}
@@ -780,7 +767,8 @@ struct A {
   @index(on=someField)
   @container(elemName=inner)
   vector<Inner> inners;
-  })R", Run, "A.inners ({0}:6:3) has an index on non-keyable field Inner.someField ({0}:2:15)", Source);
+  })R",
+                     Run, "A.inners ({0}:6:3) has an index on non-keyable field Inner.someField ({0}:2:15)", Source);
   ExpectErrorMessage(
       R"R(
 struct Inner {u32 someField;}
@@ -788,7 +776,7 @@ struct A {
   @index(on=someField, forConverter=someConverter)
   @container(elemName=inner)
   vector<Inner> inners;
-  })R", Run,
-      "A.inners ({0}:5:3) has an index with a converter but the class is missing the dataManager annotation",
+  })R",
+      Run, "A.inners ({0}:5:3) has an index with a converter but the class is missing the dataManager annotation",
       Source);
 }

@@ -1,6 +1,6 @@
 #include "DependencyGraph.h"
-#include <queue>
 #include <algorithm>
+#include <queue>
 #include "core/Annotations.h"
 #include "core/Exception.h"
 
@@ -11,9 +11,7 @@ std::vector<std::string> AnnotationsToCheck = {
 };
 }
 
-DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(project) {
-  Calculate();
-}
+DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(project) { Calculate(); }
 
 
 void DependencyGraph::Calculate() {
@@ -54,9 +52,7 @@ void DependencyGraph::Calculate(const StructDefinition &structDefinition, const 
   if (fieldDefinition.mType.mName == "Ref") {
     bool shouldProcess = std::any_of(
         AnnotationsToCheck.begin(), AnnotationsToCheck.end(),
-        [&fieldDefinition](const std::string &annotation) {
-          return fieldDefinition.GetAnnotation(annotation);
-        });
+        [&fieldDefinition](const std::string &annotation) { return fieldDefinition.GetAnnotation(annotation); });
     if (!shouldProcess)
       return;
   }
@@ -81,7 +77,5 @@ void DependencyGraph::Calculate(const StructDefinition &structDefinition, const 
   }
 }
 
-const std::vector<std::string> &DependencyGraph::GetProcessOrder() const {
-  return mProcessOrder;
-}
-}
+const std::vector<std::string> &DependencyGraph::GetProcessOrder() const { return mProcessOrder; }
+} // namespace holgen

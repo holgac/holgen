@@ -5,28 +5,21 @@
 namespace holgen {
 namespace {
 std::set<std::string> CstdIntTypes = {
-    "int8_t",
-    "int16_t",
-    "int32_t",
-    "int64_t",
-    "uint8_t",
-    "uint16_t",
-    "uint32_t",
-    "uint64_t",
+    "int8_t", "int16_t", "int32_t", "int64_t", "uint8_t", "uint16_t", "uint32_t", "uint64_t",
 };
 std::map<std::string, std::string> STDHeaders = {
-    {"std::string",        "string"},
-    {"std::vector",        "vector"},
-    {"std::deque",         "deque"},
-    {"std::map",           "map"},
+    {"std::string", "string"},
+    {"std::vector", "vector"},
+    {"std::deque", "deque"},
+    {"std::map", "map"},
     {"std::unordered_map", "unordered_map"},
-    {"std::set",           "set"},
+    {"std::set", "set"},
     {"std::unordered_set", "unordered_set"},
-    {"std::function",      "functional"},
-    {"std::array",         "array"},
+    {"std::function", "functional"},
+    {"std::array", "array"},
 };
 std::set<std::string> NoHeaderTypes = {"float", "double", "void", "bool"};
-}
+} // namespace
 
 void HeaderContainer::AddStandardHeader(const std::string &header) {
   if (mHeaders.contains(header))
@@ -65,7 +58,7 @@ void HeaderContainer::Write(CodeBlock &codeBlock) const {
       continue;
     fwdDeclarations[fwdDeclaration.mNamespace].push_back(&fwdDeclaration);
   }
-  for (auto&[_namespace, declarations]: fwdDeclarations) {
+  for (auto &[_namespace, declarations]: fwdDeclarations) {
     if (!_namespace.empty()) {
       codeBlock.Add("namespace {} {{", _namespace);
       codeBlock.Indent(1);
@@ -103,16 +96,13 @@ void HeaderContainer::IncludeType(const TranslatedProject &project, const Type &
   }
 }
 
-void HeaderContainer::IncludeClassField(
-    const TranslatedProject &project, const Class &cls, const ClassField &classField, bool isHeader
-) {
+void HeaderContainer::IncludeClassField(const TranslatedProject &project, const Class &cls,
+                                        const ClassField &classField, bool isHeader) {
   IncludeClassField(project, cls, classField, classField.mType, isHeader);
 }
 
-void HeaderContainer::IncludeClassField(const TranslatedProject &project,
-                                        const Class &cls, const ClassField &classField, const Type &type,
-                                        bool isHeader
-) {
+void HeaderContainer::IncludeClassField(const TranslatedProject &project, const Class &cls,
+                                        const ClassField &classField, const Type &type, bool isHeader) {
   bool isLocalType = false;
   for (const auto &templateParameter: cls.mTemplateParameters) {
     if (templateParameter.mName == type.mName) {
@@ -120,7 +110,7 @@ void HeaderContainer::IncludeClassField(const TranslatedProject &project,
       break;
     }
   }
-  for (const auto &usingStatement : cls.mUsings) {
+  for (const auto &usingStatement: cls.mUsings) {
     if (usingStatement.mTargetType == type.mName) {
       isLocalType = true;
       break;
@@ -144,12 +134,10 @@ void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const
   }
 }
 
-void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls,
-                                         const ClassMethod &method, const Type &type,
-                                         bool isHeader) {
-  bool isLocalType = cls.GetTemplateParameter(type.mName) ||
-                     method.GetTemplateParameter(type.mName) ||
-                     cls.GetUsing(type.mName);
+void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls, const ClassMethod &method,
+                                         const Type &type, bool isHeader) {
+  bool isLocalType =
+      cls.GetTemplateParameter(type.mName) || method.GetTemplateParameter(type.mName) || cls.GetUsing(type.mName);
   if (!isLocalType && type.mName != cls.mName)
     IncludeType(project, type, isHeader);
   for (const auto &templateParameter: type.mTemplateParameters) {
@@ -184,4 +172,4 @@ void HeaderContainer::Subtract(const HeaderContainer &rhs) {
   Subtract(rhs, mLibHeaders);
   Subtract(rhs, mLocalHeaders);
 }
-}
+} // namespace holgen

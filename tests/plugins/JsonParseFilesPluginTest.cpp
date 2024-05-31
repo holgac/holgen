@@ -1,9 +1,9 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassIdFieldPlugin.h"
-#include "generator/plugins/json/JsonParseFilesPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
+#include "generator/plugins/json/JsonParseFilesPlugin.h"
 
 class JsonParseFilesPluginTest : public TranslatorPluginTest {
 protected:
@@ -14,7 +14,6 @@ protected:
     JsonConverterPlugin(project, {}).Run();
     JsonParseFilesPlugin(project, {}).Run();
   }
-
 };
 
 TEST_F(JsonParseFilesPluginTest, SimpleStructs) {

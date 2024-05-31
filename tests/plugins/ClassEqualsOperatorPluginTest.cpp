@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
-#include "generator/plugins/ClassFieldPlugin.h"
 #include "generator/plugins/ClassEqualsOperatorPlugin.h"
+#include "generator/plugins/ClassFieldPlugin.h"
+#include "generator/plugins/ClassPlugin.h"
 
 class ClassFieldEqualsOperatorPluginTest : public TranslatorPluginTest {
 protected:

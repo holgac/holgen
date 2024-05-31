@@ -1,6 +1,6 @@
 #include "ClassFieldSetterPlugin.h"
-#include "core/St.h"
 #include "core/Exception.h"
+#include "core/St.h"
 
 namespace holgen {
 void ClassFieldSetterPlugin::Run() {
@@ -17,9 +17,8 @@ void ClassFieldSetterPlugin::Run() {
       if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Set,
                                              Annotations::MethodOption_None))
         continue;
-      auto method = ClassMethod{
-          Naming().FieldSetterNameInCpp(*field.mField), Type{"void"},
-          Visibility::Public, Constness::NotConst};
+      auto method = ClassMethod{Naming().FieldSetterNameInCpp(*field.mField), Type{"void"}, Visibility::Public,
+                                Constness::NotConst};
       auto &arg = method.mArguments.emplace_back("val", field.mType);
       if (field.mType.mType == PassByType::Pointer)
         arg.mType.mType = PassByType::Pointer;
@@ -38,16 +37,17 @@ void ClassFieldSetterPlugin::Run() {
           arg.mType.mName = "T";
           method.mBody.Add("{} = reinterpret_cast<void*>(val);", field.mName);
         } else {
-          auto isNonCopyable = [&](const std::string& name) {
+          auto isNonCopyable = [&](const std::string &name) {
             auto underlyingClass = mProject.GetClass(name);
-            if (underlyingClass && underlyingClass->mStruct && underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
+            if (underlyingClass && underlyingClass->mStruct &&
+                underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
               return true;
             }
             return false;
           };
           bool useMove = isNonCopyable(field.mType.mName);
           if (!useMove && TypeInfo::Get().CppContainers.contains(field.mType.mName)) {
-            auto* underlyingType = &field.mType.mTemplateParameters.back().mName;
+            auto *underlyingType = &field.mType.mTemplateParameters.back().mName;
             if (field.mType.mName == "std::array")
               underlyingType = &field.mType.mTemplateParameters.front().mName;
             useMove = isNonCopyable(*underlyingType);
@@ -73,4 +73,4 @@ void ClassFieldSetterPlugin::Run() {
     }
   }
 }
-}
+} // namespace holgen

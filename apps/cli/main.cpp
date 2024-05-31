@@ -1,13 +1,13 @@
-#include <iostream>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <queue>
 #include "core/Exception.h"
-#include "tokenizer/Tokenizer.h"
-#include "parser/Parser.h"
-#include "generator/Translator.h"
 #include "generator/CodeGenerator.h"
+#include "generator/Translator.h"
 #include "generator/UserDefinedSectionExtractor.h"
+#include "parser/Parser.h"
+#include "tokenizer/Tokenizer.h"
 
 namespace {
 // TODO: this is needed by dataManager's ParseFiles too. Move to FileSystemHelper?
@@ -19,7 +19,7 @@ std::string ReadFile(const std::filesystem::path &path) {
   fin.read(contents.data(), contents.size());
   return contents;
 }
-}
+} // namespace
 
 int run(int argc, char **argv) {
   if (argc != 6) {
@@ -76,7 +76,8 @@ int run(int argc, char **argv) {
     std::ofstream fout(target);
     fout.write(newContents.c_str(), newContents.size());
   }
-  // TODO: warn if there are files in the directory not created by us in case the schema changed but the dangling files weren't deleted.
+  // TODO: warn if there are files in the directory not created by us in case the schema changed but the dangling files
+  // weren't deleted.
   return 0;
 }
 
