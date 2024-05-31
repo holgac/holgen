@@ -1,4 +1,6 @@
 #include "CodeGenerator.h"
+
+#include <holgen.h>
 #include <sstream>
 #include "HeaderContainer.h"
 
@@ -476,8 +478,8 @@ HeaderContainer CodeGenerator::PrepareIncludes(const Class &cls, bool isHeader) 
   return headers;
 }
 
-void CodeGenerator::GenerateClassDeclarationsForHeader(CodeBlock &_codeBlock __attribute__((unused)),
-                                                       const Class &_cls __attribute__((unused))) const {}
+void CodeGenerator::GenerateClassDeclarationsForHeader(CodeBlock &codeBlock HOLGEN_ATTRIBUTE_UNUSED,
+                                                       const Class &cls HOLGEN_ATTRIBUTE_UNUSED) const {}
 
 void CodeGenerator::GenerateHolgenHeader(GeneratedContent &header) const {
   header.mType = FileType::CppHeader;

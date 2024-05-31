@@ -362,7 +362,7 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
   cls.mMethods.push_back(std::move(method));
 }
 
-bool ContainerFieldPlugin::CanImplementDeleteElem(Class &generatedClass __attribute__((unused)),
+bool ContainerFieldPlugin::CanImplementDeleteElem(Class &generatedClass HOLGEN_ATTRIBUTE_UNUSED,
                                                   const ClassField &field) {
   auto underlyingStruct = mProject.mProject.GetStruct(field.mType.mTemplateParameters.back().mName);
   if (!underlyingStruct || !underlyingStruct->GetIdField())
@@ -372,7 +372,7 @@ bool ContainerFieldPlugin::CanImplementDeleteElem(Class &generatedClass __attrib
   return false;
 }
 
-bool ContainerFieldPlugin::CanImplementHasElem(Class &generatedClass __attribute__((unused)), const ClassField &field) {
+bool ContainerFieldPlugin::CanImplementHasElem(Class &generatedClass HOLGEN_ATTRIBUTE_UNUSED, const ClassField &field) {
   return !TypeInfo::Get().CppIndexedContainers.contains(field.mType.mName);
 }
 

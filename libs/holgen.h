@@ -35,7 +35,7 @@
   }
 
 #ifdef HOLGEN_LINUX
-#define HOLGEN_UNUSED(param) param __attribute__((unused))
+#define HOLGEN_ATTRIBUTE_UNUSED __attribute__((unused))
 #else
-#define HOLGEN_UNUSED(param) param
+#define HOLGEN_ATTRIBUTE_UNUSED
 #endif
