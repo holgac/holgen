@@ -4,7 +4,6 @@
 
 namespace holgen {
 namespace {
-
 struct LuaTypeUsage {
   std::string mValidator;
   std::string mGetter;
@@ -13,20 +12,20 @@ struct LuaTypeUsage {
 };
 
 std::map<std::string, LuaTypeUsage> LuaUsage = {
-    {"int8_t",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"int16_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"int32_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"int64_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"uint8_t",     {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"uint16_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"uint32_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"uint64_t",    {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"float",       {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"double",      {"lua_isnumber",  "lua_tonumber",  "lua_pushnumber",  ""}},
-    {"bool",        {"lua_isboolean", "lua_toboolean", "lua_pushboolean", ""}},
-    {"std::string", {"lua_isstring",  "lua_tostring",  "lua_pushstring",  ".c_str()"}},
+    {"int8_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"int16_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"int32_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"int64_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"uint8_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"uint16_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"uint32_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"uint64_t", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"float", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"double", {"lua_isnumber", "lua_tonumber", "lua_pushnumber", ""}},
+    {"bool", {"lua_isboolean", "lua_toboolean", "lua_pushboolean", ""}},
+    {"std::string", {"lua_isstring", "lua_tostring", "lua_pushstring", ".c_str()"}},
 };
-}
+} // namespace
 
 void LuaHelperPlugin::Run() {
   auto cls = Class{St::LuaHelper, mSettings.mNamespace};
@@ -61,10 +60,7 @@ void LuaHelperPlugin::GeneratePushForContainers(Class &cls) {
 }
 
 void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls, const std::string &container) const {
-  auto method = ClassMethod{
-      "Push", Type{"void"},
-      Visibility::Public, Constness::NotConst, Staticness::Static
-  };
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "K");
   method.mTemplateParameters.emplace_back("typename", "V");
 
@@ -88,9 +84,7 @@ void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls, const std::strin
 
 void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
   for (const auto &[type, usage]: LuaUsage) {
-    auto method = ClassMethod{
-        "Push", Type{"void"},
-        Visibility::Public, Constness::NotConst, Staticness::Static};
+    auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
 
     {
       auto &data = method.mArguments.emplace_back("data", Type{type});
@@ -105,9 +99,7 @@ void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
 }
 
 void LuaHelperPlugin::GenerateBasePush(Class &cls) {
-  auto method = ClassMethod{
-      "Push", Type{"void"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
 
   method.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
@@ -135,9 +127,7 @@ void LuaHelperPlugin::GenerateBasePush(Class &cls) {
 }
 
 void LuaHelperPlugin::GeneratePushNil(Class &cls) {
-  auto method = ClassMethod{
-      "Push", Type{"void"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("", Type{"std::nullptr_t"});
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Line() << "lua_pushnil(luaState);";
@@ -149,14 +139,10 @@ void LuaHelperPlugin::GenerateRead(Class &cls) {
   GenerateBaseRead(cls);
   GenerateReadForPrimitives(cls);
   GenerateReadForContainers(cls);
-
 }
 
 void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
-  auto method = ClassMethod{
-      "Read", Type{"bool"},
-      Visibility::Public, Constness::NotConst, Staticness::Static
-  };
+  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
 
   method.mArguments.emplace_back("data", Type{"T", PassByType::Reference});
@@ -164,8 +150,9 @@ void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
   method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
 
   // TODO: implement reading objects from lua?
-  // DataManager (or container fields) should have a lua ConstructElem method that reads from
-  // a lua table, calls AddElem and returns the new element. Useful for mods for programmatic insertions
+  // DataManager (or container fields) should have a lua ConstructElem method
+  // that reads from a lua table, calls AddElem and returns the new element.
+  // Useful for mods for programmatic insertions
   method.mBody.Line() << "// *data = T::ReadFromLua(luaState, luaIndex);";
   method.mBody.Line() << "return false; //*data != nullptr;";
   Validate().NewMethod(cls, method);
@@ -173,7 +160,6 @@ void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
 }
 
 void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
-
   for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
     GenerateReadForSingleElemContainer(cls, container);
   }
@@ -183,10 +169,7 @@ void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
   }
 
   for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-    auto method = ClassMethod{
-        "Read", Type{"bool"},
-        Visibility::Public, Constness::NotConst, Staticness::Static
-    };
+    auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mTemplateParameters.emplace_back("typename", "K");
     method.mTemplateParameters.emplace_back("typename", "V");
 
@@ -206,10 +189,7 @@ void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
 
 void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
   for (const auto &[type, usage]: LuaUsage) {
-    auto method = ClassMethod{
-        "Read", Type{"bool"},
-        Visibility::Public, Constness::NotConst, Staticness::Static
-    };
+    auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("data", Type{type, PassByType::Reference});
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
@@ -226,19 +206,24 @@ void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
 
 // TODO: rename to InitializeLua or something
 void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
-  auto method = ClassMethod{
-      "CreateMetatables", Type{"void"}, Visibility::Public,
-      Constness::NotConst, Staticness::Static};
+  auto method =
+      ClassMethod{"CreateMetatables", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  std::array<std::set<std::string>, 2> createStatements;
   for (auto &other: mProject.mClasses) {
     // TODO: use consts for function names
     if (other.GetMethod("CreateLuaMetatable", Constness::NotConst)) {
       cls.mSourceIncludes.AddLocalHeader(other.mName + ".h");
-      method.mBody.Add("{}::CreateLuaMetatable(luaState);", other.mName);
+      createStatements[0].insert(std::format("{}::CreateLuaMetatable(luaState);", other.mName));
     }
     if (other.GetMethod("PushEnumToLua", Constness::NotConst)) {
       cls.mSourceIncludes.AddLocalHeader(other.mName + ".h");
-      method.mBody.Add("{}::PushEnumToLua(luaState);", other.mName);
+      createStatements[1].insert(std::format("{}::PushEnumToLua(luaState);", other.mName));
+    }
+  }
+  for (auto &statements: createStatements) {
+    for (auto &statement: statements) {
+      method.mBody.AddLine(statement);
     }
   }
   std::set<std::string> processedFunctionTables;
@@ -264,9 +249,7 @@ void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
 }
 
 void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::string &container) {
-  auto method = ClassMethod{
-      "Push", Type{"void"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
   bool isFixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
   if (isFixedSize)
@@ -291,9 +274,7 @@ void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::
 }
 
 void LuaHelperPlugin::GenerateReadForSingleElemContainer(Class &cls, const std::string &container) {
-  auto method = ClassMethod{
-      "Read", Type{"bool"},
-      Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
   bool isFixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
   if (isFixedSize)
@@ -311,4 +292,4 @@ void LuaHelperPlugin::GenerateReadForSingleElemContainer(Class &cls, const std::
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
-}
+} // namespace holgen
