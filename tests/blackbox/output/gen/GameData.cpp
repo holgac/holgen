@@ -268,23 +268,7 @@ bool GameData::ParseFiles(const std::string &rootPath, const Converter &converte
     }
     pathsQueue.pop();
   }
-  auto it = filesByName.find("boots");
-  if (it != filesByName.end()) {
-    for (const auto& filePath: it->second) {
-      auto contents = FilesystemHelper::ReadFile(filePath);
-      rapidjson::Document doc;
-      doc.Parse(contents.c_str());
-      HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {}: It is supposed to contain a list of Boot entries", filePath.string());
-      for (auto& jsonElem: doc.GetArray()) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
-        Boot elem;
-        auto res = elem.ParseJson(jsonElem, converter);
-        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddBoot(std::move(elem));
-      }
-    }
-  }
-  it = filesByName.find("armors");
+  auto it = filesByName.find("armors");
   if (it != filesByName.end()) {
     for (const auto& filePath: it->second) {
       auto contents = FilesystemHelper::ReadFile(filePath);
@@ -297,6 +281,22 @@ bool GameData::ParseFiles(const std::string &rootPath, const Converter &converte
         auto res = elem.ParseJson(jsonElem, converter);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
         AddArmor(std::move(elem));
+      }
+    }
+  }
+  it = filesByName.find("boots");
+  if (it != filesByName.end()) {
+    for (const auto& filePath: it->second) {
+      auto contents = FilesystemHelper::ReadFile(filePath);
+      rapidjson::Document doc;
+      doc.Parse(contents.c_str());
+      HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {}: It is supposed to contain a list of Boot entries", filePath.string());
+      for (auto& jsonElem: doc.GetArray()) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
+        Boot elem;
+        auto res = elem.ParseJson(jsonElem, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
+        AddBoot(std::move(elem));
       }
     }
   }

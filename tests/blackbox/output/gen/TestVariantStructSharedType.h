@@ -19,14 +19,14 @@ class TestVariantStructSharedType {
 public:
   ~TestVariantStructSharedType();
   bool operator==(const TestVariantStructSharedType &rhs) const;
-  const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
-  TestVariantStructHuman *GetBeing1AsTestVariantStructHuman();
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
-  const TestVariantStructHuman *GetBeing2AsTestVariantStructHuman() const;
-  TestVariantStructHuman *GetBeing2AsTestVariantStructHuman();
+  const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
+  TestVariantStructHuman *GetBeing1AsTestVariantStructHuman();
   const TestVariantStructCat *GetBeing2AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing2AsTestVariantStructCat();
+  const TestVariantStructHuman *GetBeing2AsTestVariantStructHuman() const;
+  TestVariantStructHuman *GetBeing2AsTestVariantStructHuman();
   void SetBeingType(const TestVariantStructType &val);
   void ResetBeingType();
   TestVariantStructType GetBeingType() const;
@@ -40,7 +40,7 @@ private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
   TestVariantStructType mBeingType;
-  std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing1;
-  std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing2;
+  std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing1;
+  std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing2;
 };
 }

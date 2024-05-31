@@ -52,6 +52,7 @@ int run(int argc, char **argv) {
     }
     pathsQueue.pop();
   }
+  parser.PostProcess();
   holgen::TranslatorSettings translatorSettings{argv[3]};
   holgen::Translator translator{translatorSettings};
   auto project = translator.Translate(parser.GetProject());

@@ -28,6 +28,8 @@ public:
 
   const ProjectDefinition &GetProject() const { return mProject; }
 
+  void PostProcess();
+
   std::string ParseDefaultValue(Token &curToken);
 };
 

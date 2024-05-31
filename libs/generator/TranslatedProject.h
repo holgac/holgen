@@ -199,6 +199,8 @@ public:
   std::list<Class> mClasses;
   [[nodiscard]] Class *GetClass(const std::string &name);
   [[nodiscard]] const Class *GetClass(const std::string &name) const;
+  [[nodiscard]] std::vector<std::pair<Class *, const EnumEntryDefinition *>>
+      GetVariantClassesOfEnum(const std::string &enumName);
 };
 
 } // namespace holgen

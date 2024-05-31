@@ -22,14 +22,14 @@ public:
   const TestVariantStructType &GetType() const;
   TestVariantStructType &GetType();
   void SetType(const TestVariantStructType &val);
-  const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
-  TestVariantStructHuman *GetBeing1AsTestVariantStructHuman();
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
-  const TestVariantStructHuman *GetBeing2AsTestVariantStructHuman() const;
-  TestVariantStructHuman *GetBeing2AsTestVariantStructHuman();
+  const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
+  TestVariantStructHuman *GetBeing1AsTestVariantStructHuman();
   const TestVariantStructCat *GetBeing2AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing2AsTestVariantStructCat();
+  const TestVariantStructHuman *GetBeing2AsTestVariantStructHuman() const;
+  TestVariantStructHuman *GetBeing2AsTestVariantStructHuman();
   void ResetType();
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
@@ -41,7 +41,7 @@ private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
   TestVariantStructType mType;
-  std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing1;
-  std::array<uint8_t, std::max({sizeof(TestVariantStructHuman), sizeof(TestVariantStructCat)})> mBeing2;
+  std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing1;
+  std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing2;
 };
 }

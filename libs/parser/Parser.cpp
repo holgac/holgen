@@ -133,6 +133,19 @@ void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {
                   "Field definition should be terminated with a ';', found \"{}\"", curToken.mContents);
 }
 
+namespace {
+template <typename T>
+struct NameComparator {
+  bool operator()(const T &lhs, const T &rhs) { return lhs.mName < rhs.mName; }
+};
+} // namespace
+
+void Parser::PostProcess() {
+  std::sort(mProject.mStructs.begin(), mProject.mStructs.end(), NameComparator<StructDefinition>{});
+  std::sort(mProject.mMixins.begin(), mProject.mMixins.end(), NameComparator<StructDefinition>{});
+  std::sort(mProject.mEnums.begin(), mProject.mEnums.end(), NameComparator<EnumDefinition>{});
+}
+
 std::string Parser::ParseDefaultValue(Token &curToken) {
   std::string defaultValue;
   if (curToken.mType == TokenType::Minus) {

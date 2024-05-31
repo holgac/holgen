@@ -54,22 +54,21 @@ void ClassFieldVariantPlugin::ProcessVariantField(Class &cls, const FieldDefinit
 
   std::stringstream arraySizeSpecifier;
   auto dataField = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{"std::array"}};
-  size_t matchingStructCount = 0;
-  for (auto &projectStruct: mProject.mProject.mStructs) {
-    if (projectStruct.mIsMixin)
-      continue;
+  bool isFirst = true;
+  auto matchingClasses = mProject.GetVariantClassesOfEnum(enumName);
+  THROW_IF(matchingClasses.empty(), "Variant field with no matching struct in {}.{} ({})", cls.mName,
+           fieldDefinition.mName, fieldDefinition.mDefinitionSource);
+  for (auto &[matchingClass, enumEntry]: matchingClasses) {
     // TODO: don't allow variant structs to be inherited from
-    auto structVariantAnnotation = projectStruct.GetAnnotation(Annotations::Variant);
-    if (!structVariantAnnotation ||
-        structVariantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != enumName)
-      continue;
-    if (matchingStructCount != 0)
+    auto &projectStruct = *matchingClass->mStruct;
+    if (isFirst) {
+      isFirst = false;
+    } else {
       arraySizeSpecifier << ", ";
-    ++matchingStructCount;
+    }
     cls.mHeaderIncludes.AddLocalHeader(projectStruct.mName + ".h");
     arraySizeSpecifier << "sizeof(" << projectStruct.mName << ")";
-    auto entryStr = std::format("{}::{}", enumName,
-                                structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
+    auto entryStr = std::format("{}::{}", enumName, enumEntry->mName);
     for (int i = 0; i < 2; ++i) {
       auto constness = i == 0 ? Constness::Const : Constness::NotConst;
       auto method =
@@ -85,10 +84,8 @@ void ClassFieldVariantPlugin::ProcessVariantField(Class &cls, const FieldDefinit
     }
   }
 
-  THROW_IF(matchingStructCount == 0, "Variant field with no matching struct in {}.{} ({})", cls.mName,
-           fieldDefinition.mName, fieldDefinition.mDefinitionSource);
   dataField.mType.mTemplateParameters.emplace_back("uint8_t");
-  if (matchingStructCount > 1)
+  if (matchingClasses.size() > 1)
     dataField.mType.mTemplateParameters.emplace_back("std::max({" + arraySizeSpecifier.str() + "})");
   else
     dataField.mType.mTemplateParameters.emplace_back(arraySizeSpecifier.str());
@@ -149,8 +146,7 @@ void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::st
   for (auto &field: cls.mFields) {
     if (!field.mField || field.mField->mType.mName != St::Variant)
       continue;
-    if (field.mField->GetAnnotation(Annotations::Variant)->GetAttribute(Annotations::Variant_TypeField)->mValue.mName !=
-        typeFieldName)
+    if (!field.mField->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_TypeField, typeFieldName))
       continue;
     matchingFields.push_back(&field);
   }
@@ -159,13 +155,12 @@ void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::st
   if (isResetter) {
     varNameToCheck = typeField->mName;
   }
-  for (auto &projectStruct: mProject.mProject.mStructs) {
+  auto matchingClasses = mProject.GetVariantClassesOfEnum(typeField->mType.mName);
+  for (auto &[matchingClass, enumEntry]: matchingClasses) {
+    auto &projectStruct = *matchingClass->mStruct;
     if (projectStruct.mIsMixin || matchingFields.empty())
       continue;
     auto structVariantAnnotation = projectStruct.GetAnnotation(Annotations::Variant);
-    if (!structVariantAnnotation ||
-        structVariantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != typeField->mType.mName)
-      continue;
     if (isFirst) {
       isFirst = false;
       method.mBody.Add("if ({} == {}::{}) {{", varNameToCheck, typeField->mType.mName,

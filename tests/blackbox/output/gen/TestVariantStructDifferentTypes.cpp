@@ -16,16 +16,6 @@ bool TestVariantStructDifferentTypes::operator==(const TestVariantStructDifferen
   return true;
 }
 
-const TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing1AsTestVariantStructHuman() const {
-  HOLGEN_FAIL_IF(mBeing1Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being1 as TestVariantStructHuman while its actual type is {}!", mBeing1Type);
-  return reinterpret_cast<const TestVariantStructHuman *>(mBeing1.data());
-}
-
-TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing1AsTestVariantStructHuman() {
-  HOLGEN_FAIL_IF(mBeing1Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being1 as TestVariantStructHuman while its actual type is {}!", mBeing1Type);
-  return reinterpret_cast<TestVariantStructHuman *>(mBeing1.data());
-}
-
 const TestVariantStructCat *TestVariantStructDifferentTypes::GetBeing1AsTestVariantStructCat() const {
   HOLGEN_FAIL_IF(mBeing1Type != TestVariantStructType::Cat, "Attempting to get TestVariantStructDifferentTypes.being1 as TestVariantStructCat while its actual type is {}!", mBeing1Type);
   return reinterpret_cast<const TestVariantStructCat *>(mBeing1.data());
@@ -36,14 +26,14 @@ TestVariantStructCat *TestVariantStructDifferentTypes::GetBeing1AsTestVariantStr
   return reinterpret_cast<TestVariantStructCat *>(mBeing1.data());
 }
 
-const TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing2AsTestVariantStructHuman() const {
-  HOLGEN_FAIL_IF(mBeing2Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being2 as TestVariantStructHuman while its actual type is {}!", mBeing2Type);
-  return reinterpret_cast<const TestVariantStructHuman *>(mBeing2.data());
+const TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing1AsTestVariantStructHuman() const {
+  HOLGEN_FAIL_IF(mBeing1Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being1 as TestVariantStructHuman while its actual type is {}!", mBeing1Type);
+  return reinterpret_cast<const TestVariantStructHuman *>(mBeing1.data());
 }
 
-TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing2AsTestVariantStructHuman() {
-  HOLGEN_FAIL_IF(mBeing2Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being2 as TestVariantStructHuman while its actual type is {}!", mBeing2Type);
-  return reinterpret_cast<TestVariantStructHuman *>(mBeing2.data());
+TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing1AsTestVariantStructHuman() {
+  HOLGEN_FAIL_IF(mBeing1Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being1 as TestVariantStructHuman while its actual type is {}!", mBeing1Type);
+  return reinterpret_cast<TestVariantStructHuman *>(mBeing1.data());
 }
 
 const TestVariantStructCat *TestVariantStructDifferentTypes::GetBeing2AsTestVariantStructCat() const {
@@ -56,13 +46,23 @@ TestVariantStructCat *TestVariantStructDifferentTypes::GetBeing2AsTestVariantStr
   return reinterpret_cast<TestVariantStructCat *>(mBeing2.data());
 }
 
+const TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing2AsTestVariantStructHuman() const {
+  HOLGEN_FAIL_IF(mBeing2Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being2 as TestVariantStructHuman while its actual type is {}!", mBeing2Type);
+  return reinterpret_cast<const TestVariantStructHuman *>(mBeing2.data());
+}
+
+TestVariantStructHuman *TestVariantStructDifferentTypes::GetBeing2AsTestVariantStructHuman() {
+  HOLGEN_FAIL_IF(mBeing2Type != TestVariantStructType::Human, "Attempting to get TestVariantStructDifferentTypes.being2 as TestVariantStructHuman while its actual type is {}!", mBeing2Type);
+  return reinterpret_cast<TestVariantStructHuman *>(mBeing2.data());
+}
+
 void TestVariantStructDifferentTypes::SetBeing1Type(const TestVariantStructType &val) {
   HOLGEN_FAIL_IF(mBeing1Type != TestVariantStructType::Invalid, "being1Type field was already initialized (as {}), trying to initialize as {}!,", mBeing1Type, val);
   mBeing1Type = val;
-  if (val == TestVariantStructType::Human) {
-    new (mBeing1.data()) TestVariantStructHuman();
-  } else if (val == TestVariantStructType::Cat) {
+  if (val == TestVariantStructType::Cat) {
     new (mBeing1.data()) TestVariantStructCat();
+  } else if (val == TestVariantStructType::Human) {
+    new (mBeing1.data()) TestVariantStructHuman();
   }
 }
 
@@ -70,10 +70,10 @@ void TestVariantStructDifferentTypes::ResetBeing1Type() {
   if (mBeing1Type == TestVariantStructType::Invalid) {
     return;
   }
-  if (mBeing1Type == TestVariantStructType::Human) {
-    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mBeing1Type == TestVariantStructType::Cat) {
+  if (mBeing1Type == TestVariantStructType::Cat) {
     GetBeing1AsTestVariantStructCat()->~TestVariantStructCat();
+  } else if (mBeing1Type == TestVariantStructType::Human) {
+    GetBeing1AsTestVariantStructHuman()->~TestVariantStructHuman();
   }
   mBeing1Type = TestVariantStructType(TestVariantStructType::Invalid);
 }
@@ -85,10 +85,10 @@ TestVariantStructType TestVariantStructDifferentTypes::GetBeing1Type() const {
 void TestVariantStructDifferentTypes::SetBeing2Type(const TestVariantStructType &val) {
   HOLGEN_FAIL_IF(mBeing2Type != TestVariantStructType::Invalid, "being2Type field was already initialized (as {}), trying to initialize as {}!,", mBeing2Type, val);
   mBeing2Type = val;
-  if (val == TestVariantStructType::Human) {
-    new (mBeing2.data()) TestVariantStructHuman();
-  } else if (val == TestVariantStructType::Cat) {
+  if (val == TestVariantStructType::Cat) {
     new (mBeing2.data()) TestVariantStructCat();
+  } else if (val == TestVariantStructType::Human) {
+    new (mBeing2.data()) TestVariantStructHuman();
   }
 }
 
@@ -96,10 +96,10 @@ void TestVariantStructDifferentTypes::ResetBeing2Type() {
   if (mBeing2Type == TestVariantStructType::Invalid) {
     return;
   }
-  if (mBeing2Type == TestVariantStructType::Human) {
-    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
-  } else if (mBeing2Type == TestVariantStructType::Cat) {
+  if (mBeing2Type == TestVariantStructType::Cat) {
     GetBeing2AsTestVariantStructCat()->~TestVariantStructCat();
+  } else if (mBeing2Type == TestVariantStructType::Human) {
+    GetBeing2AsTestVariantStructHuman()->~TestVariantStructHuman();
   }
   mBeing2Type = TestVariantStructType(TestVariantStructType::Invalid);
 }
@@ -119,10 +119,10 @@ bool TestVariantStructDifferentTypes::ParseJson(const rapidjson::Value &json, co
       SetBeing1Type(temp);
     } else if (0 == strcmp("being1", name)) {
       bool res;
-      if (mBeing1Type == TestVariantStructType::Human) {
-        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), data.value, converter);
-      } else if (mBeing1Type == TestVariantStructType::Cat) {
+      if (mBeing1Type == TestVariantStructType::Cat) {
         res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), data.value, converter);
+      } else if (mBeing1Type == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), data.value, converter);
       } else {
         HOLGEN_WARN("Could not json-parse TestVariantStructDifferentTypes.being1 variant field, its type {} is unexpected", mBeing1Type);
         return false;
@@ -135,10 +135,10 @@ bool TestVariantStructDifferentTypes::ParseJson(const rapidjson::Value &json, co
       SetBeing2Type(temp);
     } else if (0 == strcmp("being2", name)) {
       bool res;
-      if (mBeing2Type == TestVariantStructType::Human) {
-        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), data.value, converter);
-      } else if (mBeing2Type == TestVariantStructType::Cat) {
+      if (mBeing2Type == TestVariantStructType::Cat) {
         res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), data.value, converter);
+      } else if (mBeing2Type == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), data.value, converter);
       } else {
         HOLGEN_WARN("Could not json-parse TestVariantStructDifferentTypes.being2 variant field, its type {} is unexpected", mBeing2Type);
         return false;
@@ -178,22 +178,22 @@ int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("being1", key)) {
     switch (instance->mBeing1Type.GetValue()) {
-    case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState);
-      break;
     case TestVariantStructType::Cat:
       LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState);
+      break;
+    case TestVariantStructType::Human:
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState);
       break;
     default:
       lua_pushnil(luaState);
     }
   } else if (0 == strcmp("being2", key)) {
     switch (instance->mBeing2Type.GetValue()) {
-    case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState);
-      break;
     case TestVariantStructType::Cat:
       LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState);
+      break;
+    case TestVariantStructType::Human:
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState);
       break;
     default:
       lua_pushnil(luaState);
