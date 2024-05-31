@@ -2,11 +2,12 @@
 #pragma once
 
 #include "../holgen.h"
+#include <filesystem>
 #include <string>
 
 namespace holgen_blackbox_test {
 class FilesystemHelper {
 public:
-  static std::string ReadFile(const std::string &filePath);
+  static std::string ReadFile(const std::filesystem::path &filePath);
 };
 }

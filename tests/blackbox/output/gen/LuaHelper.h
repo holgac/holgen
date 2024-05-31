@@ -2,6 +2,7 @@
 #pragma once
 
 #include "../holgen.h"
+#include <cstddef>
 #include <cstdint>
 #include <string>
 #include <array>
@@ -28,7 +29,7 @@ public:
       data.PushToLua(luaState);
     }
   }
-  static void Push(nullptr_t , lua_State *luaState);
+  static void Push(std::nullptr_t , lua_State *luaState);
   static void Push(bool data, lua_State *luaState);
   static void Push(double data, lua_State *luaState);
   static void Push(float data, lua_State *luaState);

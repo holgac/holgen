@@ -91,7 +91,7 @@ bool TestJsonTagManager::ParseFiles(const std::string &rootPath, const Converter
       if (std::filesystem::is_directory(entry)) {
         pathsQueue.push(entry.path());
       } else if (std::filesystem::is_regular_file(entry)) {
-        std::string filename = entry.path().filename();
+        std::string filename = entry.path().filename().string();
         auto dotPosition = filename.rfind('.');
         if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == "json") {
           filesByName[filename.substr(0, dotPosition)].push_back(entry.path());

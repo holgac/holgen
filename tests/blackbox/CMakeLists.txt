@@ -10,6 +10,7 @@ add_subdirectory(x_rapidjson)
 include_directories(x_rapidjson/include)
 add_subdirectory(x_lua)
 include_directories(x_lua/src)
+include_directories(x_lua/include)
 
 add_subdirectory(output)
 include_directories(output/gen)

@@ -50,3 +50,4 @@ SpacesInParentheses: false
 TabWidth: 2
 SpaceBeforeRangeBasedForLoopColon: false
 NamespaceIndentation: None
+SortIncludes: false
