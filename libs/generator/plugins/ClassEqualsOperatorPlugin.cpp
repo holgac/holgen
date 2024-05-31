@@ -18,7 +18,7 @@ void ClassEqualsOperatorPlugin::ProcessClass(Class &cls) {
   } else {
     method.mBody.Add("return");
     method.mBody.Indent(2);
-    ssize_t fieldsLeft = cls.mFields.size() - 1;
+    ptrdiff_t fieldsLeft = cls.mFields.size() - 1;
     for (auto &field: cls.mFields) {
       if (TypeInfo::Get().FloatingPointTypes.contains(field.mType.mName)) {
         cls.mSourceIncludes.AddStandardHeader("cmath");

@@ -52,7 +52,7 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
       switchBlock.Add("lua_pushcfunction(luaState, [](lua_State *lsInner) {{");
       switchBlock.Indent(1);
       switchBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
-                      -ssize_t(luaMethod.mArguments.size()) - 1);
+                      -ptrdiff_t(luaMethod.mArguments.size()) - 1);
       std::stringstream funcArgs;
       size_t i = 0;
       for (auto &arg: luaMethod.mArguments) {
@@ -60,7 +60,7 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
           funcArgs << ", ";
         if (auto argClass = mProject.GetClass(arg.mType.mName)) {
           switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});", i, arg.mType.mName,
-                          ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+                          ptrdiff_t(i) - ptrdiff_t(luaMethod.mArguments.size()));
           if (argClass->mStruct && arg.mType.mType != PassByType::Pointer)
             funcArgs << "*arg" << i;
           else
@@ -71,7 +71,7 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
           sanitizedType.mConstness = Constness::NotConst;
           switchBlock.Add("{}arg{};", sanitizedType.ToString(false), i);
           switchBlock.Add("{}::{}(arg{}, lsInner, {});", St::LuaHelper, St::LuaHelper_Read, i,
-                          ssize_t(i) - ssize_t(luaMethod.mArguments.size()));
+                          ptrdiff_t(i) - ptrdiff_t(luaMethod.mArguments.size()));
           funcArgs << "arg" << i;
         }
         ++i;

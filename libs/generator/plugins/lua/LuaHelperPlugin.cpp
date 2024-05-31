@@ -1,6 +1,7 @@
 #include "LuaHelperPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include <array>
 
 namespace holgen {
 namespace {

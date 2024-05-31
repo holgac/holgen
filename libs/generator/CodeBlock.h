@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 #include <format>
 #include <map>
 #include <string>
@@ -20,7 +21,7 @@ enum class CodeUnitType {
 struct CodeBlock {
   std::vector<CodeUnitType> mContents;
   std::vector<std::string> mLines;
-  std::vector<ssize_t> mIndentations;
+  std::vector<ptrdiff_t> mIndentations;
 
   void AddUserDefinedSection(const std::string &name);
 
@@ -29,7 +30,7 @@ struct CodeBlock {
     AddUserDefinedSection(std::format(fmt, std::forward<Args>(args)...));
   }
 
-  void Indent(ssize_t amount) {
+  void Indent(ptrdiff_t amount) {
     mContents.push_back(CodeUnitType::Indentation);
     mIndentations.push_back(amount);
   }

@@ -23,7 +23,7 @@ std::string CodeBlock::ToString(FileType fileType, const std::map<std::string, s
   const char *commentStart = "//";
   if (fileType == FileType::CMakeFile)
     commentStart = "#";
-  ssize_t currentIndentation = 0;
+  ptrdiff_t currentIndentation = 0;
   auto contentIt = mContents.begin();
   auto lineIt = mLines.begin();
   auto indentIt = mIndentations.begin();

@@ -3,6 +3,7 @@
 #include <format>
 #include <string>
 #include <vector>
+#include <optional>
 #include "core/Iterators.h"
 
 

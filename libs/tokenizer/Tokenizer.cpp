@@ -93,6 +93,9 @@ bool Tokenizer::GetNextInner(Token &tok) {
   }
   while (true) {
     ++mEndIndex;
+    if (mEndIndex == mData.size()) {
+      break;
+    }
     char c = mData[mEndIndex];
     if (IsWhitespace(c) || SpecialTokens.find(c) != SpecialTokens.end())
       break;

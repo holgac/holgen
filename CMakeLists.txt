@@ -5,7 +5,9 @@ set(CMAKE_CXX_STANDARD 20)
 
 add_subdirectory(external)
 # TODO: probably not xplatform
-add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wduplicated-branches -Wduplicated-cond)
+if (UNIX)
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror -Wduplicated-branches -Wduplicated-cond)
+endif()
 add_subdirectory(libs)
 include_directories(libs)
 add_subdirectory(apps)
