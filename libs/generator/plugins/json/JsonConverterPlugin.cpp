@@ -8,6 +8,7 @@ void JsonConverterPlugin::Run() {
   Validate().JsonConverters();
   auto cls = Class{St::Converter, mSettings.mNamespace};
   std::set<std::string> processedConverters;
+  std::map<std::string, ClassField> converterFields;
   for (const auto &targetCls: mProject.mClasses) {
     for (const auto &targetField: targetCls.mFields) {
       if (!targetField.mField || !targetField.mField->GetAnnotation(Annotations::JsonConvert))
@@ -28,8 +29,11 @@ void JsonConverterPlugin::Run() {
       field.mType.mFunctionalTemplateParameters.emplace_back(mProject, jsonConvertFrom->mValue);
       field.mType.mFunctionalTemplateParameters.back().PreventCopying();
       Validate().NewField(cls, field);
-      cls.mFields.push_back(std::move(field));
+      converterFields.emplace(field.mName, field);
     }
+  }
+  for (auto &[fieldName, field]: converterFields) {
+    cls.mFields.push_back(std::move(field));
   }
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
