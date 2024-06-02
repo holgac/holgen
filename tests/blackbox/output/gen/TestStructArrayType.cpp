@@ -26,6 +26,7 @@ TestStructArrayType TestStructArrayType::FromString(std::string_view str) {
   } else if (str == "Type2") {
     return TestStructArrayType(1);
   } else {
+    HOLGEN_WARN("{} is not a valid TestStructArrayType, returning invalid", str);
     return TestStructArrayType(TestStructArrayType::Invalid);
   }
 }

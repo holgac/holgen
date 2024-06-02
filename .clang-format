@@ -50,8 +50,9 @@ SpacesInParentheses: false
 TabWidth: 2
 SpaceBeforeRangeBasedForLoopColon: false
 NamespaceIndentation: None
-SortIncludes: false
+SortIncludes: Never
 SeparateDefinitionBlocks: Always
 LineEnding: LF
 IndentWrappedFunctionNames: true
 AllowShortFunctionsOnASingleLine: Empty
+AllowShortEnumsOnASingleLine: false

@@ -4,7 +4,6 @@
 
 namespace holgen {
 void EnumPlugin::Run() {
-
   for (auto &cls: mProject.mClasses) {
     if (cls.mEnum == nullptr)
       continue;
@@ -14,7 +13,10 @@ void EnumPlugin::Run() {
 }
 
 namespace {
-enum class EnumOperatorReturnType { This, Result };
+enum class EnumOperatorReturnType {
+  This,
+  Result
+};
 
 struct EnumOperator {
   std::string mOperator;
@@ -157,7 +159,8 @@ void EnumPlugin::GenerateFromString(Class &cls) {
     method.mBody.Add("}} else {{");
     method.mBody.Indent(1);
   }
-  method.mBody.Add("return {}({}::Invalid);", cls.mName, cls.mName);
+  method.mBody.Add("HOLGEN_WARN(\"{{}} is not a valid {}, returning invalid\", str);", cls.mName);
+  method.mBody.Add("return {0}({0}::Invalid);", cls.mName);
   if (!cls.mEnum->mEntries.empty()) {
     method.mBody.Indent(-1);
     method.mBody.Add("}}");

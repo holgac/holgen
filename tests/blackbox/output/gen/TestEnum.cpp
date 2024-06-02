@@ -28,6 +28,7 @@ TestEnum TestEnum::FromString(std::string_view str) {
   } else if (str == "Entry2") {
     return TestEnum(1);
   } else {
+    HOLGEN_WARN("{} is not a valid TestEnum, returning invalid", str);
     return TestEnum(TestEnum::Invalid);
   }
 }
