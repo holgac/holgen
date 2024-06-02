@@ -6,4 +6,4 @@ enum class FileType {
   CppSource,
   CMakeFile,
 };
-}
+} // namespace holgen

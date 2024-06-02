@@ -12,7 +12,8 @@ void ClassFieldVariantPlugin::Run() {
   }
 }
 
-void ClassFieldVariantPlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+void ClassFieldVariantPlugin::ProcessStructDefinition(Class &cls,
+                                                      const StructDefinition &structDefinition) {
   for (auto &mixin: structDefinition.mMixins) {
     ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
   }
@@ -30,20 +31,25 @@ void ClassFieldVariantPlugin::ProcessStructDefinition(Class &cls, const StructDe
   }
 }
 
-void ClassFieldVariantPlugin::ProcessVariantField(Class &cls, const FieldDefinition &fieldDefinition) {
+void ClassFieldVariantPlugin::ProcessVariantField(Class &cls,
+                                                  const FieldDefinition &fieldDefinition) {
   // TODO: validate variant annotations
   auto variantAnnotation = fieldDefinition.GetAnnotation(Annotations::Variant);
   THROW_IF(!variantAnnotation, "variant fields should have a variant annotation!");
   auto typeAttribute = variantAnnotation->GetAttribute(Annotations::Variant_TypeField);
-  THROW_IF(!typeAttribute, "Variant annotation missing type in {}", variantAnnotation->mDefinitionSource);
+  THROW_IF(!typeAttribute, "Variant annotation missing type in {}",
+           variantAnnotation->mDefinitionSource);
   auto &type = typeAttribute->mValue.mName;
   auto enumAttribute = variantAnnotation->GetAttribute(Annotations::Variant_Enum);
   auto existingTypeField = cls.GetField(Naming().FieldNameInCpp(type));
-  THROW_IF(!enumAttribute && !existingTypeField, "{} defines an implicit type enum without specifying the type",
+  THROW_IF(!enumAttribute && !existingTypeField,
+           "{} defines an implicit type enum without specifying the type",
            variantAnnotation->mDefinitionSource);
-  THROW_IF(enumAttribute && existingTypeField && enumAttribute->mValue.mName != existingTypeField->mType.mName,
-           "{} uses enum {} for type field {} which was previously defined as {}", variantAnnotation->mDefinitionSource,
-           enumAttribute->mValue.mName, existingTypeField->mName, existingTypeField->mType.mName);
+  THROW_IF(enumAttribute && existingTypeField &&
+               enumAttribute->mValue.mName != existingTypeField->mType.mName,
+           "{} uses enum {} for type field {} which was previously defined as {}",
+           variantAnnotation->mDefinitionSource, enumAttribute->mValue.mName,
+           existingTypeField->mName, existingTypeField->mType.mName);
 
   auto &enumName = enumAttribute ? enumAttribute->mValue.mName : existingTypeField->mType.mName;
   if (!existingTypeField) {
@@ -56,8 +62,8 @@ void ClassFieldVariantPlugin::ProcessVariantField(Class &cls, const FieldDefinit
   auto dataField = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{"std::array"}};
   bool isFirst = true;
   auto matchingClasses = mProject.GetVariantClassesOfEnum(enumName);
-  THROW_IF(matchingClasses.empty(), "Variant field with no matching struct in {}.{} ({})", cls.mName,
-           fieldDefinition.mName, fieldDefinition.mDefinitionSource);
+  THROW_IF(matchingClasses.empty(), "Variant field with no matching struct in {}.{} ({})",
+           cls.mName, fieldDefinition.mName, fieldDefinition.mDefinitionSource);
   for (auto &[matchingClass, enumEntry]: matchingClasses) {
     // TODO: don't allow variant structs to be inherited from
     auto &projectStruct = *matchingClass->mStruct;
@@ -71,14 +77,15 @@ void ClassFieldVariantPlugin::ProcessVariantField(Class &cls, const FieldDefinit
     auto entryStr = std::format("{}::{}", enumName, enumEntry->mName);
     for (int i = 0; i < 2; ++i) {
       auto constness = i == 0 ? Constness::Const : Constness::NotConst;
-      auto method =
-          ClassMethod{Naming().VariantGetterNameInCpp(fieldDefinition, projectStruct),
-                      Type{projectStruct.mName, PassByType::Pointer, constness}, Visibility::Public, constness};
+      auto method = ClassMethod{Naming().VariantGetterNameInCpp(fieldDefinition, projectStruct),
+                                Type{projectStruct.mName, PassByType::Pointer, constness},
+                                Visibility::Public, constness};
       method.mBody.Add(
           R"R(HOLGEN_FAIL_IF({} != {}, "Attempting to get {}.{} as {} while its actual type is {{}}!", {});)R",
-          Naming().FieldNameInCpp(type), entryStr, cls.mName, fieldDefinition.mName, projectStruct.mName,
-          Naming().FieldNameInCpp(type));
-      method.mBody.Add("return reinterpret_cast<{}>({}.data());", method.mReturnType.ToString(true), dataField.mName);
+          Naming().FieldNameInCpp(type), entryStr, cls.mName, fieldDefinition.mName,
+          projectStruct.mName, Naming().FieldNameInCpp(type));
+      method.mBody.Add("return reinterpret_cast<{}>({}.data());", method.mReturnType.ToString(true),
+                       dataField.mName);
       Validate().NewMethod(cls, method);
       cls.mMethods.push_back(std::move(method));
     }
@@ -86,7 +93,8 @@ void ClassFieldVariantPlugin::ProcessVariantField(Class &cls, const FieldDefinit
 
   dataField.mType.mTemplateParameters.emplace_back("uint8_t");
   if (matchingClasses.size() > 1)
-    dataField.mType.mTemplateParameters.emplace_back("std::max({" + arraySizeSpecifier.str() + "})");
+    dataField.mType.mTemplateParameters.emplace_back("std::max({" + arraySizeSpecifier.str() +
+                                                     "})");
   else
     dataField.mType.mTemplateParameters.emplace_back(arraySizeSpecifier.str());
   dataField.mField = &fieldDefinition;
@@ -98,12 +106,13 @@ void ClassFieldVariantPlugin::ProcessVariantField(Class &cls, const FieldDefinit
 void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &typeFieldName) {
   auto typeField = cls.GetField(Naming().FieldNameInCpp(typeFieldName));
 
-  if (auto setter = cls.GetMethod(Naming().FieldSetterNameInCpp(typeFieldName), Constness::NotConst)) {
+  if (auto setter =
+          cls.GetMethod(Naming().FieldSetterNameInCpp(typeFieldName), Constness::NotConst)) {
     setter->mBody = {};
     ProcessVariantTypeSetter(cls, typeFieldName, *setter, false);
   } else {
-    auto method = ClassMethod{Naming().FieldSetterNameInCpp(typeFieldName), Type{"void"}, Visibility::Public,
-                              Constness::NotConst};
+    auto method = ClassMethod{Naming().FieldSetterNameInCpp(typeFieldName), Type{"void"},
+                              Visibility::Public, Constness::NotConst};
     auto &arg = method.mArguments.emplace_back("val", typeField->mType);
     arg.mType.PreventCopying();
     ProcessVariantTypeSetter(cls, typeFieldName, method, false);
@@ -112,8 +121,8 @@ void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &
   }
 
   {
-    auto method = ClassMethod{Naming().VariantResetterNameInCpp(typeFieldName), Type{"void"}, Visibility::Public,
-                              Constness::NotConst};
+    auto method = ClassMethod{Naming().VariantResetterNameInCpp(typeFieldName), Type{"void"},
+                              Visibility::Public, Constness::NotConst};
     ProcessVariantTypeSetter(cls, typeFieldName, method, true);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
@@ -146,7 +155,8 @@ void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::st
   for (auto &field: cls.mFields) {
     if (!field.mField || field.mField->mType.mName != St::Variant)
       continue;
-    if (!field.mField->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_TypeField, typeFieldName))
+    if (!field.mField->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_TypeField,
+                                            typeFieldName))
       continue;
     matchingFields.push_back(&field);
   }
@@ -163,16 +173,19 @@ void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::st
     auto structVariantAnnotation = projectStruct.GetAnnotation(Annotations::Variant);
     if (isFirst) {
       isFirst = false;
-      method.mBody.Add("if ({} == {}::{}) {{", varNameToCheck, typeField->mType.mName,
-                       structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
+      method.mBody.Add(
+          "if ({} == {}::{}) {{", varNameToCheck, typeField->mType.mName,
+          structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
     } else {
-      method.mBody.Add("}} else if ({} == {}::{}) {{", varNameToCheck, typeField->mType.mName,
-                       structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
+      method.mBody.Add(
+          "}} else if ({} == {}::{}) {{", varNameToCheck, typeField->mType.mName,
+          structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
     }
     method.mBody.Indent(1);
     for (auto &field: matchingFields) {
       if (isResetter) {
-        method.mBody.Add("{}()->~{}();", Naming().VariantGetterNameInCpp(*field->mField, projectStruct),
+        method.mBody.Add("{}()->~{}();",
+                         Naming().VariantGetterNameInCpp(*field->mField, projectStruct),
                          projectStruct.mName);
       } else {
         method.mBody.Add("new ({}.data()) {}();", field->mName, projectStruct.mName);

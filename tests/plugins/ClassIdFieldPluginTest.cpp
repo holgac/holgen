@@ -58,7 +58,8 @@ struct TestData : M {}
 TEST_F(ClassIdFieldPluginTest, InvalidTypes) {
   ExpectErrorMessage("struct A {@id vector<s32> field;}", Run,
                      "A.field ({0}:1:15) uses an invalid type for an id: std::vector", Source);
-  ExpectErrorMessage("struct A {@id userdata field;}", Run, "Unknown type userdata used by A.field ({0}:1:15)", Source);
+  ExpectErrorMessage("struct A {@id userdata field;}", Run,
+                     "Unknown type userdata used by A.field ({0}:1:15)", Source);
 }
 
 TEST_F(ClassIdFieldPluginTest, MultipleIds) {

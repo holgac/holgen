@@ -30,7 +30,8 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("operator==", Constness::Const), nullptr);
   {
     auto method = ClassMethod{"operator==", Type{"bool"}, Visibility::Public, Constness::Const};
-    method.mArguments.emplace_back("rhs", Type{"TestData", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("rhs",
+                                   Type{"TestData", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("operator==", Constness::Const), method,
                          R"R(
 return

@@ -10,7 +10,8 @@ void ClassNonCopyablePlugin::Run() {
   }
 }
 
-void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls,
+                                                     const StructDefinition &structDefinition) {
   // TODO: validate: a nonCopyable field makes the class nonCopyable as well
 
   if (structDefinition.GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
@@ -24,7 +25,8 @@ void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls, const StructDef
 
     {
       auto ctor = ClassConstructor{};
-      ctor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference, Constness::NotConst});
+      ctor.mArguments.emplace_back("rhs",
+                                   Type{cls.mName, PassByType::MoveReference, Constness::NotConst});
       ctor.mDefaultDelete = DefaultDelete::Default;
       cls.mConstructors.push_back(std::move(ctor));
     }
@@ -38,19 +40,21 @@ void ClassNonCopyablePlugin::ProcessStructDefinition(Class &cls, const StructDef
     // TODO: validate ctors
 
     {
-      auto method =
-          ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public, Constness::NotConst};
+      auto method = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
+                                Visibility::Public, Constness::NotConst};
       method.mDefaultDelete = DefaultDelete::Default;
-      method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference, Constness::NotConst});
+      method.mArguments.emplace_back(
+          "rhs", Type{cls.mName, PassByType::MoveReference, Constness::NotConst});
       Validate().NewMethod(cls, method);
       cls.mMethods.push_back(std::move(method));
     }
 
     {
-      auto method =
-          ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public, Constness::NotConst};
+      auto method = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
+                                Visibility::Public, Constness::NotConst};
       method.mDefaultDelete = DefaultDelete::Delete;
-      method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
+      method.mArguments.emplace_back("rhs",
+                                     Type{cls.mName, PassByType::Reference, Constness::Const});
       Validate().NewMethod(cls, method);
       cls.mMethods.push_back(std::move(method));
     }

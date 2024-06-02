@@ -72,9 +72,11 @@ TEST_F(ContainerTest, StringVector) {
     ASSERT_NE(tcv.GetStringElem(i), nullptr);
     EXPECT_EQ(*tcv.GetStringElem(i), std::format("test{}", i));
   }
-  EXPECT_THAT(tcv.GetStringContainer(), ::testing::UnorderedElementsAre("test0", "test1", "test2", "test3", "test4"));
+  EXPECT_THAT(tcv.GetStringContainer(),
+              ::testing::UnorderedElementsAre("test0", "test1", "test2", "test3", "test4"));
   tcv.DeleteStringElem(4);
-  EXPECT_THAT(tcv.GetStringContainer(), ::testing::UnorderedElementsAre("test0", "test1", "test2", "test3"));
+  EXPECT_THAT(tcv.GetStringContainer(),
+              ::testing::UnorderedElementsAre("test0", "test1", "test2", "test3"));
   tcv.DeleteStringElem(1);
   EXPECT_THAT(tcv.GetStringContainer(), ::testing::UnorderedElementsAre("test0", "test2", "test3"));
 }

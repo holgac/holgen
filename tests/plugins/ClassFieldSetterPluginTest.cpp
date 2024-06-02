@@ -26,7 +26,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("SetTestFieldUnsigned", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldUnsigned", Type{"void"}, Visibility::Public, Constness::NotConst};
+    auto method =
+        ClassMethod{"SetTestFieldUnsigned", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"uint32_t", PassByType::Value, Constness::NotConst});
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldUnsigned", Constness::NotConst), method,
                          "mTestFieldUnsigned = val;");
@@ -35,9 +36,11 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("SetTestFieldDouble", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldDouble", Type{"void"}, Visibility::Public, Constness::NotConst};
+    auto method =
+        ClassMethod{"SetTestFieldDouble", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"double", PassByType::Value, Constness::NotConst});
-    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldDouble", Constness::NotConst), method, "mTestFieldDouble = val;");
+    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldDouble", Constness::NotConst), method,
+                         "mTestFieldDouble = val;");
   }
   ASSERT_EQ(cls->GetMethod("GetTestFieldDouble", Constness::Const), nullptr);
 }
@@ -55,17 +58,23 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("SetTestFieldString", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldString", Type{"void"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("val", Type{"std::string", PassByType::Reference, Constness::Const});
-    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldString", Constness::NotConst), method, "mTestFieldString = val;");
+    auto method =
+        ClassMethod{"SetTestFieldString", Type{"void"}, Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("val",
+                                   Type{"std::string", PassByType::Reference, Constness::Const});
+    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldString", Constness::NotConst), method,
+                         "mTestFieldString = val;");
   }
   ASSERT_EQ(cls->GetMethod("GetTestFieldString", Constness::Const), nullptr);
 
   ASSERT_NE(cls->GetMethod("SetTestFieldStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("val", Type{"InnerStruct", PassByType::Reference, Constness::Const});
-    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStruct", Constness::NotConst), method, "mTestFieldStruct = val;");
+    auto method =
+        ClassMethod{"SetTestFieldStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("val",
+                                   Type{"InnerStruct", PassByType::Reference, Constness::Const});
+    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStruct", Constness::NotConst), method,
+                         "mTestFieldStruct = val;");
   }
   ASSERT_EQ(cls->GetMethod("GetTestFieldStruct", Constness::Const), nullptr);
 }
@@ -92,7 +101,8 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
   ASSERT_NE(cls->GetMethod("SetTestFieldUserData", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldUserData", Type{"void"}, Visibility::Public, Constness::NotConst};
+    auto method =
+        ClassMethod{"SetTestFieldUserData", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"T", PassByType::Pointer});
     method.mTemplateParameters.emplace_back("typename", "T");
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldUserData", Constness::NotConst), method,
@@ -111,7 +121,8 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
   ASSERT_NE(cls->GetMethod("SetTestFieldUserData", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldUserData", Type{"void"}, Visibility::Protected, Constness::NotConst};
+    auto method = ClassMethod{"SetTestFieldUserData", Type{"void"}, Visibility::Protected,
+                              Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"void", PassByType::Pointer});
     method.mUserDefined = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldUserData", Constness::NotConst), method, "");
@@ -133,7 +144,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("SetTestFieldStructId", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldStructId", Type{"void"}, Visibility::Public, Constness::NotConst};
+    auto method =
+        ClassMethod{"SetTestFieldStructId", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"uint32_t"});
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStructId", Constness::NotConst), method,
                          "mTestFieldStructId = val;");
@@ -162,7 +174,8 @@ struct TestData {
 
   ASSERT_NE(cls->GetMethod("SetTestFieldStructId", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldStructId", Type{"void"}, Visibility::Public, Constness::NotConst};
+    auto method =
+        ClassMethod{"SetTestFieldStructId", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"uint32_t"});
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStructId", Constness::NotConst), method,
                          "mTestFieldStructId = val;");
@@ -188,8 +201,11 @@ struct TestData {
   ASSERT_EQ(cls->GetMethod("SetTestFieldStruct", Constness::Const), nullptr);
   ASSERT_NE(cls->GetMethod("SetTestFieldStruct", Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"SetTestFieldStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("val", Type{"InnerStruct", PassByType::Pointer, Constness::NotConst});
-    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStruct", Constness::NotConst), method, "mTestFieldStruct = val;");
+    auto method =
+        ClassMethod{"SetTestFieldStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
+    method.mArguments.emplace_back("val",
+                                   Type{"InnerStruct", PassByType::Pointer, Constness::NotConst});
+    helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStruct", Constness::NotConst), method,
+                         "mTestFieldStruct = val;");
   }
 }

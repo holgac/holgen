@@ -130,8 +130,8 @@ std::string Type::ToString(bool noTrailingSpace) const {
   return ss.str();
 }
 
-Type::Type(const TranslatedProject &project, const TypeDefinition &typeDefinition, PassByType passByType,
-           Constness constness) : mConstness(constness), mType(passByType) {
+Type::Type(const TranslatedProject &project, const TypeDefinition &typeDefinition,
+           PassByType passByType, Constness constness) : mConstness(constness), mType(passByType) {
   if (typeDefinition.mName == "Ref") {
     auto underlyingClass = project.GetClass(typeDefinition.mTemplateParameters[0].mName);
     auto idField = underlyingClass->GetIdField();

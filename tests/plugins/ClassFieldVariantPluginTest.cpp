@@ -52,7 +52,8 @@ struct TestDataType2 {
   {
     auto field = ClassField{"mData", Type{"std::array"}};
     field.mType.mTemplateParameters.emplace_back("uint8_t");
-    field.mType.mTemplateParameters.emplace_back("std::max({sizeof(TestDataType1), sizeof(TestDataType2)})");
+    field.mType.mTemplateParameters.emplace_back(
+        "std::max({sizeof(TestDataType1), sizeof(TestDataType2)})");
     field.mField = cls->mStruct->GetField("data");
     helpers::ExpectEqual(*cls->GetField("mData"), field);
   }

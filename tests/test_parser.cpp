@@ -27,23 +27,24 @@ protected:
     EXPECT_EQ(definiitonSource.mColumn, col);
   }
 
-  void ExpectAnnotationAttribute(const AnnotationAttributeDefinition &annotationAttribute, const std::string &name,
-                                 const std::string &value, size_t line, size_t col) {
+  void ExpectAnnotationAttribute(const AnnotationAttributeDefinition &annotationAttribute,
+                                 const std::string &name, const std::string &value, size_t line,
+                                 size_t col) {
     EXPECT_EQ(annotationAttribute.mName, name);
     EXPECT_EQ(annotationAttribute.mValue.mName, value);
     ExpectDefinitionSource(annotationAttribute, line, col);
   }
 
-  void ExpectAnnotation(const AnnotationDefinition &annotation, const std::string &name, size_t attributeCount,
-                        size_t line, size_t col) {
+  void ExpectAnnotation(const AnnotationDefinition &annotation, const std::string &name,
+                        size_t attributeCount, size_t line, size_t col) {
     EXPECT_EQ(annotation.mName, name);
     EXPECT_EQ(annotation.mAttributes.size(), attributeCount);
     ExpectDefinitionSource(annotation, line, col);
   }
 
   void ExpectField(const FieldDefinition &field, size_t line, size_t col, const std::string &name,
-                   const std::string &type, size_t annotationCount, const std::optional<std::string> &defaultValue,
-                   const std::string &arraySize) {
+                   const std::string &type, size_t annotationCount,
+                   const std::optional<std::string> &defaultValue, const std::string &arraySize) {
     EXPECT_EQ(field.mName, name);
     EXPECT_EQ(field.mType.mName, type) << " in field " << name;
     EXPECT_EQ(field.mType.mArraySize, arraySize) << " in field " << name;
@@ -52,16 +53,16 @@ protected:
     ExpectDefinitionSource(field, line, col);
   }
 
-  void ExpectStruct(const StructDefinition &s, const std::string &name, size_t fieldCount, size_t annotationCount,
-                    size_t line, size_t col) {
+  void ExpectStruct(const StructDefinition &s, const std::string &name, size_t fieldCount,
+                    size_t annotationCount, size_t line, size_t col) {
     EXPECT_EQ(s.mName, name);
     EXPECT_EQ(s.mFields.size(), fieldCount);
     EXPECT_EQ(s.mAnnotations.size(), annotationCount);
     ExpectDefinitionSource(s, line, col);
   }
 
-  void ExpectEnum(const EnumDefinition &e, const std::string &name, const std::string &invalidValue, size_t entryCount,
-                  size_t annotationCount, size_t line, size_t col) {
+  void ExpectEnum(const EnumDefinition &e, const std::string &name, const std::string &invalidValue,
+                  size_t entryCount, size_t annotationCount, size_t line, size_t col) {
     EXPECT_EQ(e.mName, name);
     EXPECT_EQ(e.mInvalidValue, invalidValue);
     EXPECT_EQ(e.mEntries.size(), entryCount);
@@ -69,8 +70,8 @@ protected:
     ExpectDefinitionSource(e, line, col);
   }
 
-  void ExpectEnumEntry(const EnumEntryDefinition &e, const std::string &name, const std::string &value,
-                       size_t annotationCount, size_t line, size_t col) {
+  void ExpectEnumEntry(const EnumEntryDefinition &e, const std::string &name,
+                       const std::string &value, size_t annotationCount, size_t line, size_t col) {
     EXPECT_EQ(e.mName, name);
     EXPECT_EQ(e.mValue, value);
     EXPECT_EQ(e.mAnnotations.size(), annotationCount);
@@ -78,7 +79,8 @@ protected:
   }
 
   void ExpectFunction(const FunctionDefinition &functionDefinition, const std::string &name,
-                      const std::string &returnType, size_t argCount, size_t annotationCount, size_t line, size_t col) {
+                      const std::string &returnType, size_t argCount, size_t annotationCount,
+                      size_t line, size_t col) {
     EXPECT_EQ(functionDefinition.mName, name);
     EXPECT_EQ(functionDefinition.mReturnType.mName, returnType);
     EXPECT_EQ(functionDefinition.mArguments.size(), argCount);
@@ -86,8 +88,8 @@ protected:
     ExpectDefinitionSource(functionDefinition, line, col);
   }
 
-  void ExpectFunctionArgument(const FunctionArgumentDefinition &arg, const std::string &name, const std::string &type,
-                              bool isOut, size_t line, size_t col) {
+  void ExpectFunctionArgument(const FunctionArgumentDefinition &arg, const std::string &name,
+                              const std::string &type, bool isOut, size_t line, size_t col) {
     EXPECT_EQ(arg.mName, name);
     EXPECT_EQ(arg.mType.mName, type);
     EXPECT_EQ(arg.mIsOut, isOut);
@@ -200,7 +202,8 @@ struct a   {
   ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[0], "a1", "", 1, 6);
   ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[1], "a2", "5", 1, 10);
   ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[2], "a3", "", 1, 16);
-  ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[3], "a4", "long string", 1, 20);
+  ExpectAnnotationAttribute(proj.mStructs[0].mAnnotations[1].mAttributes[3], "a4", "long string", 1,
+                            20);
 }
 
 TEST_F(ParserTest, Templates) {
@@ -225,7 +228,11 @@ TEST_F(ParserTest, Templates) {
   EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mName, "vector");
   EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters.size(), 1);
   EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mName, "float");
-  EXPECT_EQ(t.mTemplateParameters[1].mTemplateParameters[1].mTemplateParameters[0].mTemplateParameters.size(), 0);
+  EXPECT_EQ(t.mTemplateParameters[1]
+                .mTemplateParameters[1]
+                .mTemplateParameters[0]
+                .mTemplateParameters.size(),
+            0);
 }
 
 TEST_F(ParserTest, NestedStructs) {

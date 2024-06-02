@@ -7,7 +7,7 @@ AlignOperands: false
 AlignTrailingComments: false
 AlwaysBreakTemplateDeclarations: Yes
 BraceWrapping:
-  AfterCaseLabel: true
+  AfterCaseLabel: false
   AfterClass: false
   AfterControlStatement: false
   AfterEnum: false
@@ -26,7 +26,7 @@ BraceWrapping:
 BreakBeforeBraces: Custom
 BreakConstructorInitializers: AfterColon
 BreakConstructorInitializersBeforeComma: false
-ColumnLimit: 120
+ColumnLimit: 100
 ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ContinuationIndentWidth: 4
 IncludeCategories:
@@ -56,3 +56,6 @@ LineEnding: LF
 IndentWrappedFunctionNames: true
 AllowShortFunctionsOnASingleLine: Empty
 AllowShortEnumsOnASingleLine: false
+AllowShortCompoundRequirementOnASingleLine: false
+IndentRequiresClause: true
+AlignEscapedNewlines: DontAlign

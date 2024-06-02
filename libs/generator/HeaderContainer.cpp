@@ -62,7 +62,8 @@ void HeaderContainer::Write(CodeBlock &codeBlock) const {
   std::map<std::string, std::vector<const ForwardDeclaration *>> fwdDeclarations;
   for (auto &fwdDeclaration: mForwardDeclarations) {
     // already included as a header, don't forward declare
-    if (std::find(mLocalHeaders.begin(), mLocalHeaders.end(), fwdDeclaration.mName + ".h") != mLocalHeaders.end())
+    if (std::find(mLocalHeaders.begin(), mLocalHeaders.end(), fwdDeclaration.mName + ".h") !=
+        mLocalHeaders.end())
       continue;
     fwdDeclarations[fwdDeclaration.mNamespace].push_back(&fwdDeclaration);
   }
@@ -81,7 +82,8 @@ void HeaderContainer::Write(CodeBlock &codeBlock) const {
   }
 }
 
-void HeaderContainer::IncludeType(const TranslatedProject &project, const Type &type, bool isHeader) {
+void HeaderContainer::IncludeType(const TranslatedProject &project, const Type &type,
+                                  bool isHeader) {
   if (NoHeaderTypes.contains(type.mName)) {
     return;
   } else if (CstdIntTypes.contains(type.mName)) {
@@ -110,7 +112,8 @@ void HeaderContainer::IncludeClassField(const TranslatedProject &project, const 
 }
 
 void HeaderContainer::IncludeClassField(const TranslatedProject &project, const Class &cls,
-                                        const ClassField &classField, const Type &type, bool isHeader) {
+                                        const ClassField &classField, const Type &type,
+                                        bool isHeader) {
   bool isLocalType = false;
   for (const auto &templateParameter: cls.mTemplateParameters) {
     if (templateParameter.mName == type.mName) {
@@ -142,10 +145,11 @@ void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const
   }
 }
 
-void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls, const ClassMethod &method,
-                                         const Type &type, bool isHeader) {
-  bool isLocalType =
-      cls.GetTemplateParameter(type.mName) || method.GetTemplateParameter(type.mName) || cls.GetUsing(type.mName);
+void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const Class &cls,
+                                         const ClassMethod &method, const Type &type,
+                                         bool isHeader) {
+  bool isLocalType = cls.GetTemplateParameter(type.mName) ||
+      method.GetTemplateParameter(type.mName) || cls.GetUsing(type.mName);
   if (!isLocalType && type.mName != cls.mName)
     IncludeType(project, type, isHeader);
   for (const auto &templateParameter: type.mTemplateParameters) {
@@ -156,7 +160,8 @@ void HeaderContainer::IncludeClassMethod(const TranslatedProject &project, const
   }
 }
 
-void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Using &usingStatement, bool isHeader) {
+void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Using &usingStatement,
+                                   bool isHeader) {
   IncludeType(project, usingStatement.mSourceType, isHeader);
 }
 

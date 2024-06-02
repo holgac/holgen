@@ -5,7 +5,8 @@
 namespace holgen {
 template <class T>
 struct NameFilterIterator {
-  NameFilterIterator(std::string name, T begin, T end) : mName(std::move(name)), mIterator(begin), mEnd(end) {
+  NameFilterIterator(std::string name, T begin, T end) :
+      mName(std::move(name)), mIterator(begin), mEnd(end) {
     Next();
   }
 
@@ -37,7 +38,8 @@ private:
 
 template <class T>
 struct NameFilterForEachWrapper {
-  NameFilterForEachWrapper(std::string name, T &container) : mName(std::move(name)), mContainer(container) {}
+  NameFilterForEachWrapper(std::string name, T &container) :
+      mName(std::move(name)), mContainer(container) {}
 
   auto begin() {
     return NameFilterIterator(mName, mContainer.begin(), mContainer.end());

@@ -47,28 +47,36 @@ void JsonPlugin::Run() {
 
 void JsonPlugin::GenerateParseJson(Class &cls) {
   auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
-  method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-  method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("converter",
+                                 Type{St::Converter, PassByType::Reference, Constness::Const});
 
   CodeBlock stringSwitcherElseCase;
-  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
+  stringSwitcherElseCase.Add(
+      R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
   StringSwitcher switcher("name", std::move(stringSwitcherElseCase));
   for (const auto &field: cls.mFields) {
-    if (field.mField && (field.mField->GetAnnotation(Annotations::NoJson) || field.mField->mType.mName == St::UserData))
+    if (field.mField &&
+        (field.mField->GetAnnotation(Annotations::NoJson) ||
+         field.mField->mType.mName == St::UserData))
       continue;
     const std::string *variantRawName = nullptr;
     if (!field.mField && !IsVariantTypeField(cls, field, &variantRawName))
       continue;
     switcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
-                     [&](CodeBlock &switchBlock) { GenerateParseJsonForField(cls, switchBlock, field, "data.value"); });
+                     [&](CodeBlock &switchBlock) {
+                       GenerateParseJsonForField(cls, switchBlock, field, "data.value");
+                     });
   }
 
   for (const auto &luaMethod: cls.mMethods) {
     if (!luaMethod.mFunction || luaMethod.mFunction->GetAnnotation(Annotations::NoJson) ||
         !luaMethod.mFunction->GetAnnotation(Annotations::LuaFunc))
       continue;
-    switcher.AddCase(luaMethod.mFunction->mName,
-                     [&](CodeBlock &switchBlock) { GenerateParseJsonForFunction(cls, switchBlock, luaMethod); });
+    switcher.AddCase(luaMethod.mFunction->mName, [&](CodeBlock &switchBlock) {
+      GenerateParseJsonForFunction(cls, switchBlock, luaMethod);
+    });
   }
 
   if (!switcher.IsEmpty()) {
@@ -102,8 +110,8 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, const ClassField &field,
-                                           const std::string &varName) {
+void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock,
+                                           const ClassField &field, const std::string &varName) {
   const std::string *variantRawName = nullptr;
   if (field.mField && field.mField->GetAnnotation(Annotations::JsonConvert)) {
     GenerateParseJsonJsonConvert(cls, codeBlock, field, varName);
@@ -112,16 +120,20 @@ void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, con
   } else if (field.mField && field.mField->mType.mName == St::Variant) {
     GenerateParseJsonVariant(cls, codeBlock, field, varName);
   } else {
-    codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse, field.mName, varName);
-    codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-                  cls.mStruct->mName, field.mField->mName);
+    codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                  field.mName, varName);
+    codeBlock.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+        cls.mStruct->mName, field.mField->mName);
   }
 }
 
 void JsonPlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                           const std::string &varName) {
-  auto variantTypeField = cls.GetField(Naming().FieldNameInCpp(
-      field.mField->GetAnnotation(Annotations::Variant)->GetAttribute(Annotations::Variant_TypeField)->mValue.mName));
+  auto variantTypeField =
+      cls.GetField(Naming().FieldNameInCpp(field.mField->GetAnnotation(Annotations::Variant)
+                                               ->GetAttribute(Annotations::Variant_TypeField)
+                                               ->mValue.mName));
   // variants with implicit types are not supported
   auto enumName = mProject.mProject.GetEnum(variantTypeField->mType.mName)->mName;
   bool isFirst = true;
@@ -134,8 +146,9 @@ void JsonPlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, cons
     if (!structVariantAnnotation ||
         structVariantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != enumName)
       continue;
-    auto entryStr = std::format("{}::{}", enumName,
-                                structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
+    auto entryStr = std::format(
+        "{}::{}", enumName,
+        structVariantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
     if (isFirst) {
       codeBlock.Add("if ({} == {}) {{", variantTypeField->mName, entryStr);
       isFirst = false;
@@ -149,8 +162,9 @@ void JsonPlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, cons
   }
   codeBlock.Add("}} else {{");
   codeBlock.Indent(1);
-  codeBlock.Add(R"R(HOLGEN_WARN("Could not json-parse {}.{} variant field, its type {{}} is unexpected", {});)R",
-                cls.mStruct->mName, field.mField->mName, variantTypeField->mName);
+  codeBlock.Add(
+      R"R(HOLGEN_WARN("Could not json-parse {}.{} variant field, its type {{}} is unexpected", {});)R",
+      cls.mStruct->mName, field.mField->mName, variantTypeField->mName);
   codeBlock.Add("return false;");
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
@@ -159,37 +173,44 @@ void JsonPlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, cons
       cls.mStruct->mName, field.mField->mName, variantTypeField->mName);
 }
 
-void JsonPlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock, const ClassField &field,
-                                              const std::string &varName, const std::string &rawFieldName) {
+void JsonPlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock,
+                                              const ClassField &field, const std::string &varName,
+                                              const std::string &rawFieldName) {
   codeBlock.Add("{}temp;", field.mType.ToString(false));
-  codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse, varName);
-  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R", cls.mStruct->mName,
-                rawFieldName);
+  codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                varName);
+  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+                cls.mStruct->mName, rawFieldName);
   codeBlock.Add("{}(temp);", Naming().FieldSetterNameInCpp(rawFieldName));
 }
 
-void JsonPlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock, const ClassField &field,
-                                              const std::string &varName) {
+void JsonPlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock,
+                                              const ClassField &field, const std::string &varName) {
   auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
   auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
   auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
   auto jsonConvertElem = jsonConvert->GetAttribute(Annotations::JsonConvert_Elem);
   if (jsonConvertElem) {
-    codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper, St::JsonHelper_Parse,
-                  Type{mProject, jsonConvertFrom->mValue}.ToString(true), field.mName, varName,
-                  jsonConvertUsing->mValue.mName);
-    codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-                  cls.mStruct->mName, field.mField->mName);
+    codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
+                  St::JsonHelper_Parse, Type{mProject, jsonConvertFrom->mValue}.ToString(true),
+                  field.mName, varName, jsonConvertUsing->mValue.mName);
+    codeBlock.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+        cls.mStruct->mName, field.mField->mName);
   } else {
     Type type(mProject, jsonConvertFrom->mValue);
     codeBlock.Line() << type.ToString(false) << "temp;";
-    codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse, varName);
-    codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-                  cls.mStruct->mName, field.mField->mName);
-    if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) || field.mType.mType == PassByType::Pointer)
+    codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                  varName);
+    codeBlock.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+        cls.mStruct->mName, field.mField->mName);
+    if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) ||
+        field.mType.mType == PassByType::Pointer)
       codeBlock.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
     else
-      codeBlock.Add("{} = std::move(converter.{}(temp));", field.mName, jsonConvertUsing->mValue.mName);
+      codeBlock.Add("{} = std::move(converter.{}(temp));", field.mName,
+                    jsonConvertUsing->mValue.mName);
   }
 }
 
@@ -201,8 +222,8 @@ void JsonPlugin::ProcessStruct(Class &cls) {
   cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
   if (cls.mStruct->GetAnnotation(Annotations::DataManager) == nullptr)
     // TODO: currently we iterate over the json obj when deserializing, but this wouldn't work with
-    // dependencies. For DataManager we should have something custom so that a single file can define
-    // everything too. But for now ParseFiles is good enough.
+    // dependencies. For DataManager we should have something custom so that a single file can
+    // define everything too. But for now ParseFiles is good enough.
     GenerateParseJson(cls);
 }
 
@@ -213,11 +234,15 @@ void JsonPlugin::ProcessEnum(Class &cls) {
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
   cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
   auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
-  method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-  method.mArguments.emplace_back("converter", Type{St::Converter, PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("converter",
+                                 Type{St::Converter, PassByType::Reference, Constness::Const});
   method.mBody.Add("if (json.IsString()) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("*this = {}::FromString(std::string_view(json.GetString(), json.GetStringLength()));", cls.mName);
+  method.mBody.Add(
+      "*this = {}::FromString(std::string_view(json.GetString(), json.GetStringLength()));",
+      cls.mName);
   method.mBody.Indent(-1);
   method.mBody.Add("}} else if (json.IsInt64()) {{");
   method.mBody.Indent(1);
@@ -226,7 +251,8 @@ void JsonPlugin::ProcessEnum(Class &cls) {
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
   method.mBody.Add("*this = {}({}::Invalid);", cls.mName, cls.mName);
-  method.mBody.Add(R"R(HOLGEN_WARN("Could not json-parse {} enum: invalid json type");)R", cls.mName);
+  method.mBody.Add(R"R(HOLGEN_WARN("Could not json-parse {} enum: invalid json type");)R",
+                   cls.mName);
   method.mBody.Add("return false;");
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
@@ -235,14 +261,16 @@ void JsonPlugin::ProcessEnum(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void JsonPlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock, const ClassMethod &luaFunction) {
-  codeBlock.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction));
-  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{}");)R", cls.mStruct->mName,
-                luaFunction.mFunction->mName);
+void JsonPlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
+                                              const ClassMethod &luaFunction) {
+  codeBlock.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper,
+                St::JsonHelper_Parse, Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction));
+  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{}");)R",
+                cls.mStruct->mName, luaFunction.mFunction->mName);
 }
 
-bool JsonPlugin::IsVariantTypeField(const Class &cls, const ClassField &field, const std::string **rawName) {
+bool JsonPlugin::IsVariantTypeField(const Class &cls, const ClassField &field,
+                                    const std::string **rawName) {
   for (auto &classField: cls.mFields) {
     if (!classField.mField || !classField.mField->GetAnnotation(Annotations::Variant))
       continue;

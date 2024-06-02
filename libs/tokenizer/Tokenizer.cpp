@@ -6,11 +6,12 @@
 namespace holgen {
 namespace {
 std::map<char, TokenType> SpecialTokens = {
-    {'.', TokenType::Period}, {',', TokenType::Comma}, {':', TokenType::Colon},  {';', TokenType::SemiColon},
-    {'=', TokenType::Equals}, {'(', TokenType::POpen}, {')', TokenType::PClose}, {'{', TokenType::COpen},
-    {'}', TokenType::CClose}, {'<', TokenType::AOpen}, {'>', TokenType::AClose}, {'[', TokenType::BOpen},
-    {']', TokenType::BClose}, {'+', TokenType::Plus},  {'-', TokenType::Minus},  {'/', TokenType::Slash},
-    {'@', TokenType::At},
+    {'.', TokenType::Period},    {',', TokenType::Comma},  {':', TokenType::Colon},
+    {';', TokenType::SemiColon}, {'=', TokenType::Equals}, {'(', TokenType::POpen},
+    {')', TokenType::PClose},    {'{', TokenType::COpen},  {'}', TokenType::CClose},
+    {'<', TokenType::AOpen},     {'>', TokenType::AClose}, {'[', TokenType::BOpen},
+    {']', TokenType::BClose},    {'+', TokenType::Plus},   {'-', TokenType::Minus},
+    {'/', TokenType::Slash},     {'@', TokenType::At},
 };
 
 bool IsWhitespace(char c) {
@@ -44,7 +45,8 @@ bool Tokenizer::GetNextInner(Token &tok) {
       if (mData[mIndex + 1] == '/') {
         // read line comment
         mEndIndex = mIndex + 2;
-        while (mEndIndex < mData.size() && !(mData[mEndIndex] == '\n' && mData[mEndIndex - 1] != '\\')) {
+        while (mEndIndex < mData.size() &&
+               !(mData[mEndIndex] == '\n' && mData[mEndIndex - 1] != '\\')) {
           ++mEndIndex;
         }
         tok.mType = TokenType::Comment;
@@ -53,7 +55,8 @@ bool Tokenizer::GetNextInner(Token &tok) {
       } else if (mData[mIndex + 1] == '*') {
         // read block comment
         mEndIndex = mIndex + 3;
-        while (mEndIndex < mData.size() && !(mData[mEndIndex] == '/' && mData[mEndIndex - 1] == '*')) {
+        while (mEndIndex < mData.size() &&
+               !(mData[mEndIndex] == '/' && mData[mEndIndex - 1] == '*')) {
           ++mEndIndex;
         }
         ++mEndIndex;
@@ -83,13 +86,12 @@ bool Tokenizer::GetNextInner(Token &tok) {
     ++mEndIndex;
     while (mEndIndex < mData.size() && mData[mEndIndex] != c)
       ++mEndIndex;
-    THROW_IF(mEndIndex == mData.size(), "Malformed string: {} in {}:{}:{}", mData.substr(mIndex + 1), mSource, mLine,
-             mColumn);
+    THROW_IF(mEndIndex == mData.size(), "Malformed string: {} in {}:{}:{}",
+             mData.substr(mIndex + 1), mSource, mLine, mColumn);
     ++mEndIndex;
     tok.mType = TokenType::String;
-    // Comment tokens' contents include the comment special chars, but string literals don't, for ease of use
-    // Is that ok?
-    // If this becomes an issue, can have mContents and mActualContents
+    // Comment tokens' contents include the comment special chars, but string literals don't, for
+    // ease of use Is that ok? If this becomes an issue, can have mContents and mActualContents
     tok.mContents = mData.substr(mIndex + 1, mEndIndex - mIndex - 2);
     return true;
   }

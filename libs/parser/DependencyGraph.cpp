@@ -49,24 +49,29 @@ void DependencyGraph::Calculate(const StructDefinition &structDefinition) {
   }
 }
 
-void DependencyGraph::Calculate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition) {
+void DependencyGraph::Calculate(const StructDefinition &structDefinition,
+                                const FieldDefinition &fieldDefinition) {
   if (fieldDefinition.mType.mName == "Ref") {
-    bool shouldProcess = std::any_of(
-        AnnotationsToCheck.begin(), AnnotationsToCheck.end(),
-        [&fieldDefinition](const std::string &annotation) { return fieldDefinition.GetAnnotation(annotation); });
+    bool shouldProcess = std::any_of(AnnotationsToCheck.begin(), AnnotationsToCheck.end(),
+                                     [&fieldDefinition](const std::string &annotation) {
+                                       return fieldDefinition.GetAnnotation(annotation);
+                                     });
     if (!shouldProcess)
       return;
   }
   Calculate(structDefinition, fieldDefinition.mType);
 }
 
-void DependencyGraph::Calculate(const StructDefinition &structDefinition, const TypeDefinition &typeDefinition) {
+void DependencyGraph::Calculate(const StructDefinition &structDefinition,
+                                const TypeDefinition &typeDefinition) {
   auto referencedStruct = mProject.GetStruct(typeDefinition.mName);
   if (referencedStruct) {
     THROW_IF(mInverseDependencies[structDefinition.mName].contains(referencedStruct->mName),
-             "Circular dependency detected between {} and {}", structDefinition.mName, referencedStruct->mName)
+             "Circular dependency detected between {} and {}", structDefinition.mName,
+             referencedStruct->mName)
     THROW_IF(mDependencies[referencedStruct->mName].contains(structDefinition.mName),
-             "Circular dependency detected between {} and {}", structDefinition.mName, referencedStruct->mName)
+             "Circular dependency detected between {} and {}", structDefinition.mName,
+             referencedStruct->mName)
     mDependencies[structDefinition.mName].insert(referencedStruct->mName);
     mInverseDependencies[referencedStruct->mName].insert(structDefinition.mName);
   }

@@ -11,7 +11,8 @@ void LuaFunctionPlugin::Run() {
   }
 }
 
-void LuaFunctionPlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+void LuaFunctionPlugin::ProcessStructDefinition(Class &cls,
+                                                const StructDefinition &structDefinition) {
   for (auto &mixin: structDefinition.mMixins) {
     ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
   }
@@ -21,11 +22,13 @@ void LuaFunctionPlugin::ProcessStructDefinition(Class &cls, const StructDefiniti
   }
 }
 
-void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition) {
+void LuaFunctionPlugin::ProcessLuaFunction(Class &cls,
+                                           const FunctionDefinition &functionDefinition) {
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
-  auto field = ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
+  auto field =
+      ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
   GenerateFunction(cls, functionDefinition, field);
   GenerateFunctionSetter(cls, functionDefinition, field);
   GenerateFunctionChecker(cls, functionDefinition, field);
@@ -33,7 +36,8 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
   cls.mFields.push_back(std::move(field));
 }
 
-void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method, const FunctionDefinition &functionDefinition) {
+void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
+                                                 const FunctionDefinition &functionDefinition) {
   for (auto &funcArg: functionDefinition.mArguments) {
     auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
     arg.mType.PreventCopying();
@@ -44,19 +48,21 @@ void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method, const Func
   }
 }
 
-void LuaFunctionPlugin::GenerateFunctionChecker(Class &cls, const FunctionDefinition &functionDefinition,
+void LuaFunctionPlugin::GenerateFunctionChecker(Class &cls,
+                                                const FunctionDefinition &functionDefinition,
                                                 ClassField &functionHandle) {
-  auto method = ClassMethod{Naming().LuaFunctionCheckerNameInCpp(functionDefinition), Type{"bool"}, Visibility::Public,
-                            Constness::Const};
+  auto method = ClassMethod{Naming().LuaFunctionCheckerNameInCpp(functionDefinition), Type{"bool"},
+                            Visibility::Public, Constness::Const};
   method.mBody.Add("return !{}.empty();", functionHandle.mName);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
 
-void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition,
+void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls,
+                                               const FunctionDefinition &functionDefinition,
                                                ClassField &functionHandle) {
-  auto method = ClassMethod{Naming().LuaFunctionSetterNameInCpp(functionDefinition), Type{"void"}, Visibility::Public,
-                            Constness::NotConst};
+  auto method = ClassMethod{Naming().LuaFunctionSetterNameInCpp(functionDefinition), Type{"void"},
+                            Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("val", Type{"std::string"});
   method.mBody.Add("{} = val;", functionHandle.mName);
   Validate().NewMethod(cls, method);
@@ -65,15 +71,17 @@ void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls, const FunctionDefinit
 
 void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
                                          ClassField &functionHandle) {
-  auto method = ClassMethod{St::Capitalize(functionDefinition.mName), Type{mProject, functionDefinition.mReturnType}};
+  auto method = ClassMethod{St::Capitalize(functionDefinition.mName),
+                            Type{mProject, functionDefinition.mReturnType}};
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";
   if (functionDefinition.mReturnType.mName == "void")
     retVal = "void()";
-  method.mBody.Add(R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)", functionHandle.mName,
-                   retVal, functionDefinition.mName);
-  auto luaFuncTable = functionDefinition.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
+  method.mBody.Add(R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)",
+                   functionHandle.mName, retVal, functionDefinition.mName);
+  auto luaFuncTable = functionDefinition.GetAnnotation(Annotations::LuaFunc)
+                          ->GetAttribute(Annotations::LuaFunc_Table);
 
   if (luaFuncTable) {
     method.mBody.Add("lua_getglobal(luaState, \"{}\");", luaFuncTable->mValue.mName);
@@ -81,8 +89,8 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
     method.mBody.Add("lua_gettable(luaState, -2);");
     method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
     method.mBody.Indent(1);
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});", functionDefinition.mName,
-                     luaFuncTable->mValue.mName, functionHandle.mName);
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});",
+                     functionDefinition.mName, luaFuncTable->mValue.mName, functionHandle.mName);
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return {};", retVal);
     method.mBody.Indent(-1);
@@ -91,8 +99,8 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
     method.mBody.Add("lua_getglobal(luaState, {}.c_str());", functionHandle.mName);
     method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
     method.mBody.Indent(1);
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});", functionDefinition.mName,
-                     functionHandle.mName);
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});",
+                     functionDefinition.mName, functionHandle.mName);
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return {};", retVal);
     method.mBody.Indent(-1);
@@ -103,7 +111,8 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   GenerateFunctionPushArgs(method, functionDefinition);
 
   bool returnsVal = method.mReturnType.mName != "void";
-  method.mBody.Add("lua_call(luaState, {}, {});", 1 + functionDefinition.mArguments.size(), returnsVal ? 1 : 0);
+  method.mBody.Add("lua_call(luaState, {}, {});", 1 + functionDefinition.mArguments.size(),
+                   returnsVal ? 1 : 0);
   if (returnsVal) {
     if (mProject.GetClass(method.mReturnType.mName)) {
       method.mReturnType.mType = PassByType::Pointer;

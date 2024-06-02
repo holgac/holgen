@@ -150,7 +150,8 @@ struct B {
 }
   )R",
       Run,
-      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.unsignedField ({0}:7:3) with different "
+      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.unsignedField "
+      "({0}:7:3) with different "
       "source types: std::string and int32_t",
       Source);
 }
@@ -168,7 +169,8 @@ struct B {
 }
   )R",
       Run,
-      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.boolField ({0}:7:3) with different "
+      "Json converter testConverter is used by A.unsignedField ({0}:3:3) and B.boolField ({0}:7:3) "
+      "with different "
       "target types: uint32_t and bool",
       Source);
 }
@@ -186,7 +188,10 @@ struct Country {
   vector<Person> people;
 }
       )R",
-      Run, "index ({0}:6:3) of Country.people ({0}:8:3) references non-existent converter personNameToId", Source);
+      Run,
+      "index ({0}:6:3) of Country.people ({0}:8:3) references non-existent converter "
+      "personNameToId",
+      Source);
 }
 
 TEST_F(JsonConverterPluginTest, InconsistentSourceTypeInIndex) {
@@ -207,7 +212,8 @@ struct Country {
 }
   )R",
       Run,
-      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with different source type "
+      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with "
+      "different source type "
       "than Person.partnerId ({0}:7:3): uint64_t and std::string",
       Source);
 }
@@ -230,7 +236,8 @@ struct Country {
 }
   )R",
       Run,
-      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with different target type "
+      "index ({0}:10:3) of Country.people ({0}:12:3) references converter personNameToId with "
+      "different target type "
       "than Person.gender ({0}:7:3): uint32_t and float",
       Source);
 }

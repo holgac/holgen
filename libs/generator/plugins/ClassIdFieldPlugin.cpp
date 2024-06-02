@@ -11,15 +11,17 @@ void ClassIdFieldPlugin::Run() {
   }
 }
 
-void ClassIdFieldPlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+void ClassIdFieldPlugin::ProcessStructDefinition(Class &cls,
+                                                 const StructDefinition &structDefinition) {
   for (auto &mixin: structDefinition.mMixins) {
     ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
   }
   for (auto &fieldDefinition: structDefinition.mFields) {
     if (!fieldDefinition.GetAnnotation(Annotations::Id))
       continue;
-    auto field = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
-                            Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
+    auto field =
+        ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
+                   Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
     field.mDefaultValue = "-1";
     Validate().IdField(cls, field);

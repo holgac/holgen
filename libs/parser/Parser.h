@@ -15,9 +15,11 @@ class Parser {
   void ParseFunctionArgument(Token &curToken, FunctionArgumentDefinition &arg);
   void ParseStruct(StructDefinition &structDefinition);
   void ParseEnum(EnumDefinition &enumDefinition);
-  void ParseEnumEntry(Token &curToken, EnumDefinition &enumDefinition, EnumEntryDefinition &enumEntryDefinition);
+  void ParseEnumEntry(Token &curToken, EnumDefinition &enumDefinition,
+                      EnumEntryDefinition &enumEntryDefinition);
   void ParseAnnotation(Token &curToken, AnnotationDefinition &annotationDefinition);
-  void ParseAnnotationAttribute(Token &curToken, AnnotationAttributeDefinition &annotationAttributeDefinition);
+  void ParseAnnotationAttribute(Token &curToken,
+                                AnnotationAttributeDefinition &annotationAttributeDefinition);
   void ParseField(Token &curToken, FieldDefinition &fieldDefinition);
   void ParseType(Token &curToken, TypeDefinition &typeDefinition);
   void FillDefinitionSource(DefinitionSource &definitionSource);

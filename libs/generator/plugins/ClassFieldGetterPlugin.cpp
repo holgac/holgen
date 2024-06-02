@@ -22,16 +22,18 @@ void ClassFieldGetterPlugin::Run() {
 }
 
 void ClassFieldGetterPlugin::ProcessRefField(Class &cls, ClassField &field) const {
-  auto underlyingType = mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.back().mName);
+  auto underlyingType =
+      mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.back().mName);
   if (!underlyingType->GetAnnotation(Annotations::Managed))
     return;
   for (int i = 0; i < 2; ++i) {
     Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
-    auto method =
-        ClassMethod{Naming().FieldGetterNameInCpp(*field.mField, true),
-                    Type{mProject, field.mField->mType.mTemplateParameters[0], PassByType::Pointer, constness},
-                    Visibility::Public, constness};
-    method.mBody.Add("return {}::{}({});", underlyingType->mName, St::ManagedObject_Getter, field.mName);
+    auto method = ClassMethod{
+        Naming().FieldGetterNameInCpp(*field.mField, true),
+        Type{mProject, field.mField->mType.mTemplateParameters[0], PassByType::Pointer, constness},
+        Visibility::Public, constness};
+    method.mBody.Add("return {}::{}({});", underlyingType->mName, St::ManagedObject_Getter,
+                     field.mName);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
@@ -41,10 +43,12 @@ void ClassFieldGetterPlugin::ProcessField(Class &cls, ClassField &field, bool is
   // non-const getter for non-primitives only
   if (!isConst && TypeInfo::Get().CppPrimitives.contains(field.mType.mName))
     return;
-  if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Get, Annotations::MethodOption_None))
+  if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Get,
+                                         Annotations::MethodOption_None))
     return;
   auto constness = isConst ? Constness::Const : Constness::NotConst;
-  auto method = ClassMethod{Naming().FieldGetterNameInCpp(*field.mField), field.mType, Visibility::Public, constness};
+  auto method = ClassMethod{Naming().FieldGetterNameInCpp(*field.mField), field.mType,
+                            Visibility::Public, constness};
   method.mReturnType.PreventCopying(isConst);
   if (field.mType.mType == PassByType::Pointer)
     method.mReturnType.mType = PassByType::Pointer;

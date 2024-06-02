@@ -9,7 +9,8 @@
 namespace holgen {
 class TranslatorPlugin {
 public:
-  TranslatorPlugin(TranslatedProject &translatedProject, const TranslatorSettings &translatorSettings);
+  TranslatorPlugin(TranslatedProject &translatedProject,
+                   const TranslatorSettings &translatorSettings);
   virtual ~TranslatorPlugin();
   virtual void Run();
   const NamingConvention &Naming() const;

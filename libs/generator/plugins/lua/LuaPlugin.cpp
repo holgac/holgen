@@ -20,26 +20,31 @@ void LuaPlugin::Run() {
 }
 
 void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
-  auto method =
-      ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
+                            Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   CodeBlock stringSwitcherElseCase;
-  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
+  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
+                             cls.mStruct->mName);
   stringSwitcherElseCase.Add("return 0;");
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
   for (auto &field: cls.mFields) {
     // TODO: parse variant
-    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData)
+    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
+        field.mField->mType.mName == St::UserData)
       continue;
     bool isRef = field.mField->mType.mName == "Ref";
-    switcher.AddCase(Naming().FieldNameInLua(*field.mField),
-                     [&](CodeBlock &switchBlock) { GenerateIndexForField(cls, field, switchBlock); });
+    switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
+      GenerateIndexForField(cls, field, switchBlock);
+    });
     if (isRef && field.mType.mType != PassByType::Pointer) {
-      auto underlyingStruct = mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.front().mName);
+      auto underlyingStruct =
+          mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.front().mName);
       if (underlyingStruct->GetAnnotation(Annotations::Managed)) {
         switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
-          switchBlock.Add("{}::{}({}::{}(instance->{}), luaState);", St::LuaHelper, St::LuaHelper_Push,
-                          field.mField->mType.mTemplateParameters[0].mName, St::ManagedObject_Getter, field.mName);
+          switchBlock.Add("{}::{}({}::{}(instance->{}), luaState);", St::LuaHelper,
+                          St::LuaHelper_Push, field.mField->mType.mTemplateParameters[0].mName,
+                          St::ManagedObject_Getter, field.mName);
         });
       }
     }
@@ -103,14 +108,17 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
 
 void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const {
   if (field.mField->mType.mName == St::Variant) {
-    auto enumField = cls.GetField(Naming().FieldNameInCpp(
-        field.mField->GetAnnotation(Annotations::Variant)->GetAttribute(Annotations::Variant_TypeField)->mValue.mName));
+    auto enumField =
+        cls.GetField(Naming().FieldNameInCpp(field.mField->GetAnnotation(Annotations::Variant)
+                                                 ->GetAttribute(Annotations::Variant_TypeField)
+                                                 ->mValue.mName));
     switchBlock.Add("switch (instance->{}.GetValue()) {{", enumField->mName);
     for (auto &otherCls: mProject.mClasses) {
       if (!otherCls.mStruct || !otherCls.mStruct->GetAnnotation(Annotations::Variant))
         continue;
       auto variantAnnotation = otherCls.mStruct->GetAnnotation(Annotations::Variant);
-      if (variantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName != enumField->mType.mName)
+      if (variantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName !=
+          enumField->mType.mName)
         continue;
       switchBlock.Add("case {}::{}:", enumField->mType.ToString(true),
                       variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
@@ -126,21 +134,23 @@ void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &
     switchBlock.Indent(-1);
     switchBlock.Add("}}");
   } else {
-    switchBlock.Add("{}::{}(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push, field.mName);
+    switchBlock.Add("{}::{}(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
+                    field.mName);
   }
 }
 
 void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
-  auto method =
-      ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"NewIndexMetaMethod", Type{"int"}, Visibility::Private,
+                            Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   CodeBlock stringSwitcherElseCase;
-  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R", cls.mStruct->mName);
+  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
+                             cls.mStruct->mName);
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
   for (auto &field: cls.mFields) {
     // TODO: parse variant
-    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) || field.mField->mType.mName == St::UserData ||
-        field.mField->mType.mName == St::Variant)
+    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
+        field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
       continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
@@ -148,7 +158,8 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
     // TODO: Make this work with nested structs
     // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
     switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
-      switchBlock.Add("{}::{}(instance->{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read, field.mName);
+      switchBlock.Add("{}::{}(instance->{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read,
+                      field.mName);
     });
   }
   if (!switcher.IsEmpty()) {
@@ -185,8 +196,8 @@ void LuaPlugin::GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method) {
     if (TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName)) {
       tempType = "int64_t";
     }
-    method.mBody.Add("{} id = reinterpret_cast<{}>(lua_touserdata(luaState, -1));", idField->mType.ToString(true),
-                     tempType);
+    method.mBody.Add("{} id = reinterpret_cast<{}>(lua_touserdata(luaState, -1));",
+                     idField->mType.ToString(true), tempType);
     method.mBody.Add("auto ptr = {}::{}(id);", cls.mName, St::ManagedObject_Getter);
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return ptr;");
@@ -265,7 +276,8 @@ void LuaPlugin::ProcessStruct(Class &cls) {
 }
 
 void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
-  auto method = ClassMethod{"PushEnumToLua", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"PushEnumToLua", Type{"void"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add("lua_newtable(luaState);");
 
@@ -293,8 +305,8 @@ void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
 }
 
 void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
-  auto method =
-      ClassMethod{"CreateLuaMetatable", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"CreateLuaMetatable", Type{"void"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add("lua_newtable(luaState);");
 
@@ -340,7 +352,8 @@ bool LuaPlugin::ShouldEmbedPointer(Class &cls) {
   if (!managed)
     return true;
   auto manager = mProject.GetClass(managed->GetAttribute(Annotations::Managed_By)->mValue.mName);
-  auto field = manager->GetFieldFromDefinitionName(managed->GetAttribute(Annotations::Managed_Field)->mValue.mName);
+  auto field = manager->GetFieldFromDefinitionName(
+      managed->GetAttribute(Annotations::Managed_Field)->mValue.mName);
   if (TypeInfo::Get().CppStableContainers.contains(field->mType.mName))
     return true;
   return false;

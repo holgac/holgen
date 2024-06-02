@@ -60,8 +60,10 @@ void LuaHelperPlugin::GeneratePushForContainers(Class &cls) {
   }
 }
 
-void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls, const std::string &container) const {
-  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls,
+                                                    const std::string &container) const {
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "K");
   method.mTemplateParameters.emplace_back("typename", "V");
 
@@ -85,7 +87,8 @@ void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls, const std::strin
 
 void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
   for (const auto &[type, usage]: LuaUsage) {
-    auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+    auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
+                              Staticness::Static};
 
     {
       auto &data = method.mArguments.emplace_back("data", Type{type});
@@ -100,7 +103,8 @@ void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
 }
 
 void LuaHelperPlugin::GenerateBasePush(Class &cls) {
-  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
 
   method.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
@@ -128,7 +132,8 @@ void LuaHelperPlugin::GenerateBasePush(Class &cls) {
 }
 
 void LuaHelperPlugin::GeneratePushNil(Class &cls) {
-  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mArguments.emplace_back("", Type{"std::nullptr_t"});
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Line() << "lua_pushnil(luaState);";
@@ -143,7 +148,8 @@ void LuaHelperPlugin::GenerateRead(Class &cls) {
 }
 
 void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
-  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
 
   method.mArguments.emplace_back("data", Type{"T", PassByType::Reference});
@@ -170,12 +176,14 @@ void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
   }
 
   for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-    auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+    auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst,
+                              Staticness::Static};
     method.mTemplateParameters.emplace_back("typename", "K");
     method.mTemplateParameters.emplace_back("typename", "V");
 
     {
-      auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
+      auto &data = method.mArguments.emplace_back(
+          "data", Type{container, PassByType::Reference, Constness::Const});
       data.mType.mTemplateParameters.emplace_back("K");
       data.mType.mTemplateParameters.emplace_back("V");
     }
@@ -190,7 +198,8 @@ void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
 
 void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
   for (const auto &[type, usage]: LuaUsage) {
-    auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+    auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst,
+                              Staticness::Static};
     method.mArguments.emplace_back("data", Type{type, PassByType::Reference});
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
@@ -207,8 +216,8 @@ void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
 
 // TODO: rename to InitializeLua or something
 void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
-  auto method =
-      ClassMethod{"CreateMetatables", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"CreateMetatables", Type{"void"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   std::array<std::set<std::string>, 2> createStatements;
   for (auto &other: mProject.mClasses) {
@@ -234,7 +243,8 @@ void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
     for (auto &func: other.mStruct->mFunctions) {
       if (!func.GetAnnotation(Annotations::LuaFunc))
         continue;
-      auto table = func.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
+      auto table =
+          func.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
       if (!table)
         continue;
       auto tableName = table->mValue.mName;
@@ -250,7 +260,8 @@ void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
 }
 
 void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::string &container) {
-  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
   bool isFixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
   if (isFixedSize)
@@ -275,13 +286,15 @@ void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::
 }
 
 void LuaHelperPlugin::GenerateReadForSingleElemContainer(Class &cls, const std::string &container) {
-  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mTemplateParameters.emplace_back("typename", "T");
   bool isFixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
   if (isFixedSize)
     method.mTemplateParameters.emplace_back("size_t", "C");
   {
-    auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference, Constness::Const});
+    auto &data = method.mArguments.emplace_back(
+        "data", Type{container, PassByType::Reference, Constness::Const});
     data.mType.mTemplateParameters.emplace_back("T");
     if (isFixedSize)
       data.mType.mTemplateParameters.emplace_back("C");

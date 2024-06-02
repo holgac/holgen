@@ -14,7 +14,8 @@ private:
 public:
   LineWithAction(std::function<void(const std::string &)> action) : mAction(std::move(action)) {}
 
-  LineWithAction(LineWithAction &&ll) : mStream(std::move(ll.mStream)), mAction(std::move(ll.mAction)) {}
+  LineWithAction(LineWithAction &&ll) :
+      mStream(std::move(ll.mStream)), mAction(std::move(ll.mAction)) {}
 
   ~LineWithAction() {
     mAction(mStream.str());

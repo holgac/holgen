@@ -76,16 +76,18 @@ void EnumPlugin::GenerateGetValue(Class &cls) {
 
 void EnumPlugin::GenerateOperators(Class &cls) {
   // TODO: test these properly. Currently overloads aren't well supported.
-  const std::vector<EnumOperator> operators = {{"=", Constness::NotConst, EnumOperatorReturnType::This, true},
-                                               {"==", Constness::Const, EnumOperatorReturnType::Result, true},
-                                               {"==", Constness::Const, EnumOperatorReturnType::Result, false},
-                                               {"!=", Constness::Const, EnumOperatorReturnType::Result, true},
-                                               {"!=", Constness::Const, EnumOperatorReturnType::Result, false},
-                                               {"<", Constness::Const, EnumOperatorReturnType::Result, true},
-                                               {"<", Constness::Const, EnumOperatorReturnType::Result, false}};
+  const std::vector<EnumOperator> operators = {
+      {"=", Constness::NotConst, EnumOperatorReturnType::This, true},
+      {"==", Constness::Const, EnumOperatorReturnType::Result, true},
+      {"==", Constness::Const, EnumOperatorReturnType::Result, false},
+      {"!=", Constness::Const, EnumOperatorReturnType::Result, true},
+      {"!=", Constness::Const, EnumOperatorReturnType::Result, false},
+      {"<", Constness::Const, EnumOperatorReturnType::Result, true},
+      {"<", Constness::Const, EnumOperatorReturnType::Result, false}};
 
   for (auto &op: operators) {
-    auto method = ClassMethod{"operator" + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness};
+    auto method =
+        ClassMethod{"operator" + op.mOperator, Type{"bool"}, Visibility::Public, op.mConstness};
     if (op.mReturn == EnumOperatorReturnType::This) {
       method.mReturnType.mName = cls.mName;
       method.mReturnType.mType = PassByType::Reference;
@@ -93,7 +95,8 @@ void EnumPlugin::GenerateOperators(Class &cls) {
     if (op.mIntegralArgument)
       method.mArguments.emplace_back("rhs", Type{St::Enum_UnderlyingType});
     else
-      method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
+      method.mArguments.emplace_back("rhs",
+                                     Type{cls.mName, PassByType::Reference, Constness::Const});
     {
       auto line = method.mBody.Line();
       if (op.mReturn == EnumOperatorReturnType::Result)
@@ -112,11 +115,12 @@ void EnumPlugin::GenerateOperators(Class &cls) {
 }
 
 void EnumPlugin::GenerateGetEntries(Class &cls) {
-  auto method =
-      ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
   method.mConstexprness = Constexprness::Constexpr;
   method.mReturnType.mTemplateParameters.emplace_back(std::format("{}::Entry", cls.mName));
-  method.mReturnType.mTemplateParameters.emplace_back(std::format("{}", cls.mEnum->mEntries.size()));
+  method.mReturnType.mTemplateParameters.emplace_back(
+      std::format("{}", cls.mEnum->mEntries.size()));
   {
     auto line = method.mBody.Line();
     line << "return " << method.mReturnType.ToString(true) << "{";
@@ -132,8 +136,9 @@ void EnumPlugin::GenerateGetEntries(Class &cls) {
 }
 
 void EnumPlugin::GenerateInvalidEntry(Class &cls) {
-  auto invalidEntry = ClassField{"Invalid", Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
-                                 Visibility::Public, Staticness::Static, cls.mEnum->mInvalidValue};
+  auto invalidEntry =
+      ClassField{"Invalid", Type{St::Enum_UnderlyingType, PassByType::Value, Constness::Const},
+                 Visibility::Public, Staticness::Static, cls.mEnum->mInvalidValue};
   invalidEntry.mType.mConstexprness = Constexprness::Constexpr;
   invalidEntry.mDefaultValue = cls.mEnum->mInvalidValue;
   Validate().NewField(cls, invalidEntry);
@@ -141,7 +146,8 @@ void EnumPlugin::GenerateInvalidEntry(Class &cls) {
 }
 
 void EnumPlugin::GenerateFromString(Class &cls) {
-  auto method = ClassMethod{"FromString", Type{cls.mName}, Visibility::Public, Constness::NotConst, Staticness::Static};
+  auto method = ClassMethod{"FromString", Type{cls.mName}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mArguments.emplace_back("str", Type{"std::string_view"});
   bool isFirst = true;
   for (auto &entry: cls.mEnum->mEntries) {
@@ -171,8 +177,8 @@ void EnumPlugin::GenerateFromString(Class &cls) {
 
 void EnumPlugin::GenerateToString(Class &cls) {
   // TODO: << operator?
-  auto method = ClassMethod{"ToString", Type{"char", PassByType::Pointer, Constness::Const}, Visibility::Public,
-                            Constness::Const};
+  auto method = ClassMethod{"ToString", Type{"char", PassByType::Pointer, Constness::Const},
+                            Visibility::Public, Constness::Const};
   method.mBody.Add("switch (mValue) {{");
   method.mBody.Indent(1);
   for (auto &entry: cls.mEnum->mEntries) {
@@ -218,7 +224,8 @@ void EnumPlugin::GenerateFormatter(Class &cls, bool forNestedEnum) {
   auto format = ClassMethod{"format", Type{"auto"}, Visibility::Public, Constness::Const};
   format.mTemplateParameters.emplace_back("typename", "FormatContext");
   format.mArguments.emplace_back("obj", Type{className, PassByType::Reference, Constness::Const});
-  format.mArguments.emplace_back("ctx", Type{"FormatContext", PassByType::Reference, Constness::NotConst});
+  format.mArguments.emplace_back("ctx",
+                                 Type{"FormatContext", PassByType::Reference, Constness::NotConst});
   if (forNestedEnum)
     format.mBody.Add("return format_to(ctx.out(), \"{{}}\", {}(obj).ToString());", className);
   else

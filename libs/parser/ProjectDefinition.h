@@ -144,7 +144,7 @@ struct std::formatter<holgen::DefinitionSource> : std::formatter<std::string> {
     if (definitionSource.mLine == (decltype(definitionSource.mLine))(-1) ||
         definitionSource.mColumn == (decltype(definitionSource.mColumn))(-1))
       return std::format_to(ctx.out(), "{}", definitionSource.mSource);
-    return std::format_to(ctx.out(), "{}:{}:{}", definitionSource.mSource, definitionSource.mLine + 1,
-                          definitionSource.mColumn + 1);
+    return std::format_to(ctx.out(), "{}:{}:{}", definitionSource.mSource,
+                          definitionSource.mLine + 1, definitionSource.mColumn + 1);
   }
 };

@@ -4,11 +4,12 @@
 #include "core/Exception.h"
 #include "core/St.h"
 
-#define PARSER_THROW_IF(cond, str, ...)                                                                                \
-  THROW_IF(cond, "In {}:{}:{}: " str, mCurTokenizer->GetSource(), mCurTokenizer->GetLine() + 1,                        \
+#define PARSER_THROW_IF(cond, str, ...) \
+  THROW_IF(cond, "In {}:{}:{}: " str, mCurTokenizer->GetSource(), mCurTokenizer->GetLine() + 1, \
            mCurTokenizer->GetColumn() + 1, ##__VA_ARGS__);
 
-#define NEXT_OR_THROW(curToken, ...) PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), __VA_ARGS__);
+#define NEXT_OR_THROW(curToken, ...) \
+  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), __VA_ARGS__);
 
 namespace holgen {
 Parser::Parser() {}
@@ -24,7 +25,8 @@ void Parser::Parse(Tokenizer &tokenizer) {
     while (curToken.mType == TokenType::At) {
       ParseAnnotation(curToken, annotations.emplace_back());
     }
-    PARSER_THROW_IF(curToken.mType != TokenType::String, "Expected a string, received \"{}\"!", curToken.mContents)
+    PARSER_THROW_IF(curToken.mType != TokenType::String, "Expected a string, received \"{}\"!",
+                    curToken.mContents)
     if (curToken.mContents == "struct" || curToken.mContents == "mixin") {
       auto &structDefinition = mProject.mStructs.emplace_back();
       structDefinition.mAnnotations = std::move(annotations);
@@ -45,29 +47,31 @@ void Parser::ParseStruct(StructDefinition &structDefinition) {
   FillDefinitionSource(structDefinition.mDefinitionSource);
   Token curToken;
   PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete struct definition!")
-  PARSER_THROW_IF(curToken.mType != TokenType::String, "Struct name should be a string, found \"{}\"",
-                  curToken.mContents)
+  PARSER_THROW_IF(curToken.mType != TokenType::String,
+                  "Struct name should be a string, found \"{}\"", curToken.mContents)
   structDefinition.mName = curToken.mContents;
 
   PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete struct definition!")
   if (curToken.mType == TokenType::Colon) {
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete struct definition!")
-    PARSER_THROW_IF(curToken.mType != TokenType::String, "Struct mixin should be a string, found \"{}\"",
-                    curToken.mContents)
+    PARSER_THROW_IF(curToken.mType != TokenType::String,
+                    "Struct mixin should be a string, found \"{}\"", curToken.mContents)
     while (true) {
       structDefinition.mMixins.emplace_back(curToken.mContents);
-      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete struct definition!")
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                      "Incomplete struct definition!")
       if (curToken.mType == TokenType::Comma) {
-        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete struct definition!")
-        PARSER_THROW_IF(curToken.mType != TokenType::String, "Struct mixin should be a string, found \"{}\"",
-                        curToken.mContents)
+        PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                        "Incomplete struct definition!")
+        PARSER_THROW_IF(curToken.mType != TokenType::String,
+                        "Struct mixin should be a string, found \"{}\"", curToken.mContents)
       } else {
         break;
       }
     }
   }
-  PARSER_THROW_IF(curToken.mType != TokenType::COpen, "Struct name should be followed by a '{{', found \"{}\"",
-                  curToken.mContents)
+  PARSER_THROW_IF(curToken.mType != TokenType::COpen,
+                  "Struct name should be followed by a '{{', found \"{}\"", curToken.mContents)
 
   std::vector<AnnotationDefinition> annotations;
   PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete struct definition!")
@@ -96,31 +100,37 @@ void Parser::ParseStruct(StructDefinition &structDefinition) {
 
 void Parser::ParseAnnotation(Token &curToken, AnnotationDefinition &annotationDefinition) {
   FillDefinitionSource(annotationDefinition.mDefinitionSource);
-  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete annotation definition!")
-  PARSER_THROW_IF(curToken.mType != TokenType::String, "Annotation name should be a string, found \"{}\"",
-                  curToken.mContents)
+  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                  "Incomplete annotation definition!")
+  PARSER_THROW_IF(curToken.mType != TokenType::String,
+                  "Annotation name should be a string, found \"{}\"", curToken.mContents)
   annotationDefinition.mName = curToken.mContents;
 
-  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete annotation definition!")
+  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                  "Incomplete annotation definition!")
   if (curToken.mType != TokenType::POpen)
     return;
-  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete annotation definition!")
+  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                  "Incomplete annotation definition!")
   while (curToken.mType != TokenType::PClose) {
-    PARSER_THROW_IF(curToken.mType != TokenType::String, "Annotation attribute name should be a string, found \"{}\"!",
+    PARSER_THROW_IF(curToken.mType != TokenType::String,
+                    "Annotation attribute name should be a string, found \"{}\"!",
                     curToken.mContents);
     ParseAnnotationAttribute(curToken, annotationDefinition.mAttributes.emplace_back());
     if (curToken.mType == TokenType::Comma) {
-      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete annotation definition!")
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                      "Incomplete annotation definition!")
     }
   }
-  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete annotation definition!")
+  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                  "Incomplete annotation definition!")
 }
 
 void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {
   FillDefinitionSource(fieldDefinition.mDefinitionSource);
   ParseType(curToken, fieldDefinition.mType);
-  PARSER_THROW_IF(curToken.mType != TokenType::String, "Field name should be a string, found \"{}\"!",
-                  curToken.mContents);
+  PARSER_THROW_IF(curToken.mType != TokenType::String,
+                  "Field name should be a string, found \"{}\"!", curToken.mContents);
   fieldDefinition.mName = curToken.mContents;
   PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
   if (curToken.mType == TokenType::Equals) {
@@ -130,7 +140,8 @@ void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {
     fieldDefinition.mDefaultValue = ParseDefaultValue(curToken);
   }
   PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
-                  "Field definition should be terminated with a ';', found \"{}\"", curToken.mContents);
+                  "Field definition should be terminated with a ';', found \"{}\"",
+                  curToken.mContents);
 }
 
 namespace {
@@ -163,7 +174,8 @@ std::string Parser::ParseDefaultValue(Token &curToken) {
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
     if (curToken.mType == TokenType::String) {
       defaultValue += curToken.mContents;
-      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!");
+      PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                      "Incomplete field definition!");
     }
   }
   return defaultValue;
@@ -175,24 +187,28 @@ void Parser::ParseType(Token &curToken, TypeDefinition &typeDefinition) {
   if (curToken.mType == TokenType::AOpen) {
     do {
       PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete type definition!")
-      PARSER_THROW_IF(curToken.mType != TokenType::String, "Type definition should start with a string, found \"{}\"",
+      PARSER_THROW_IF(curToken.mType != TokenType::String,
+                      "Type definition should start with a string, found \"{}\"",
                       curToken.mContents)
       ParseType(curToken, typeDefinition.mTemplateParameters.emplace_back());
     } while (curToken.mType == TokenType::Comma);
     PARSER_THROW_IF(curToken.mType != TokenType::AClose,
-                    "Templated type definition should be terminated with a '>', found \"{}\"", curToken.mContents)
+                    "Templated type definition should be terminated with a '>', found \"{}\"",
+                    curToken.mContents)
 
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
   }
   if (curToken.mType == TokenType::BOpen) {
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
     PARSER_THROW_IF(curToken.mType != TokenType::String,
-                    "Invalid array size specifier, expected an integer or enum name, found \"{}\"", curToken.mContents)
+                    "Invalid array size specifier, expected an integer or enum name, found \"{}\"",
+                    curToken.mContents)
 
     typeDefinition.mArraySize = curToken.mContents;
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
     PARSER_THROW_IF(curToken.mType != TokenType::BClose,
-                    "Array type definition should be terminated with a ']', found \"{}\"", curToken.mContents)
+                    "Array type definition should be terminated with a ']', found \"{}\"",
+                    curToken.mContents)
     PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete field definition!")
   }
 }
@@ -206,8 +222,8 @@ void Parser::ParseEnum(EnumDefinition &enumDefinition) {
   enumDefinition.mName = curToken.mContents;
   PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete enum definition: {}",
                   enumDefinition.mName);
-  PARSER_THROW_IF(curToken.mType != TokenType::COpen, "Enum name should be followed by a '{{', found \"{}\"",
-                  curToken.mContents);
+  PARSER_THROW_IF(curToken.mType != TokenType::COpen,
+                  "Enum name should be followed by a '{{', found \"{}\"", curToken.mContents);
   std::vector<AnnotationDefinition> annotations;
   PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete enum definition: {}",
                   enumDefinition.mName);
@@ -244,44 +260,52 @@ void Parser::ParseEnum(EnumDefinition &enumDefinition) {
   enumDefinition.mInvalidValue = std::format("{}", nextValue);
 }
 
-void Parser::ParseEnumEntry(Token &curToken, EnumDefinition &enumDefinition, EnumEntryDefinition &enumEntryDefinition) {
+void Parser::ParseEnumEntry(Token &curToken, EnumDefinition &enumDefinition,
+                            EnumEntryDefinition &enumEntryDefinition) {
   FillDefinitionSource(enumEntryDefinition.mDefinitionSource);
   enumEntryDefinition.mName = curToken.mContents;
-  NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName, enumEntryDefinition.mName);
+  NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName,
+                enumEntryDefinition.mName);
   if (curToken.mType == TokenType::SemiColon) {
     return;
   }
-  PARSER_THROW_IF(curToken.mType != TokenType::Equals, "Enum entry name should be followed by a ';' or a '='");
-  NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName, enumEntryDefinition.mName);
+  PARSER_THROW_IF(curToken.mType != TokenType::Equals,
+                  "Enum entry name should be followed by a ';' or a '='");
+  NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName,
+                enumEntryDefinition.mName);
   bool isNegative = false;
   if (curToken.mType == TokenType::Minus) {
     isNegative = true;
-    NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName, enumEntryDefinition.mName);
+    NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName,
+                  enumEntryDefinition.mName);
   }
-  PARSER_THROW_IF(curToken.mType != TokenType::String, "Enum values should be strings, found \"{}\"",
-                  curToken.mContents);
-  PARSER_THROW_IF(!St::IsIntegral(curToken.mContents), "Enum values should be positive integral strings, found \"{}\"",
+  PARSER_THROW_IF(curToken.mType != TokenType::String,
+                  "Enum values should be strings, found \"{}\"", curToken.mContents);
+  PARSER_THROW_IF(!St::IsIntegral(curToken.mContents),
+                  "Enum values should be positive integral strings, found \"{}\"",
                   curToken.mContents);
   if (isNegative)
     enumEntryDefinition.mValue = std::string("-") + std::string(curToken.mContents);
   else
     enumEntryDefinition.mValue = curToken.mContents;
-  NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName, enumEntryDefinition.mName);
+  NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName,
+                enumEntryDefinition.mName);
   PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
-                  "Enum entry definition should be terminated by a ';', found \"{}\"", curToken.mContents);
+                  "Enum entry definition should be terminated by a ';', found \"{}\"",
+                  curToken.mContents);
 }
 
 void Parser::ParseFunction(Token &curToken, FunctionDefinition &fd) {
   FillDefinitionSource(fd.mDefinitionSource);
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
-  PARSER_THROW_IF(curToken.mType != TokenType::String, "Function name should be a string, found \"{}\"",
-                  curToken.mContents);
+  PARSER_THROW_IF(curToken.mType != TokenType::String,
+                  "Function name should be a string, found \"{}\"", curToken.mContents);
   fd.mName = curToken.mContents;
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
   if (curToken.mType == TokenType::SemiColon)
     return;
-  PARSER_THROW_IF(curToken.mType != TokenType::POpen, "Function call should start with a '(', found \"{}\"",
-                  curToken.mContents);
+  PARSER_THROW_IF(curToken.mType != TokenType::POpen,
+                  "Function call should start with a '(', found \"{}\"", curToken.mContents);
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
   while (curToken.mType != TokenType::PClose) {
     ParseFunctionArgument(curToken, fd.mArguments.emplace_back());
@@ -291,25 +315,29 @@ void Parser::ParseFunction(Token &curToken, FunctionDefinition &fd) {
     fd.mReturnType.mName = "void";
     return;
   }
-  PARSER_THROW_IF(curToken.mType != TokenType::Minus, "Missing '-' in function syntax, found \"{}\"",
-                  curToken.mContents);
+  PARSER_THROW_IF(curToken.mType != TokenType::Minus,
+                  "Missing '-' in function syntax, found \"{}\"", curToken.mContents);
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
-  PARSER_THROW_IF(curToken.mType != TokenType::AClose, "Missing '>' in function syntax, found \"{}\"",
-                  curToken.mContents);
+  PARSER_THROW_IF(curToken.mType != TokenType::AClose,
+                  "Missing '>' in function syntax, found \"{}\"", curToken.mContents);
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
   ParseType(curToken, fd.mReturnType);
   PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
-                  "Function definition should be terminated by a ';', found \"{}\"", curToken.mContents);
+                  "Function definition should be terminated by a ';', found \"{}\"",
+                  curToken.mContents);
 }
 
-void Parser::ParseAnnotationAttribute(Token &curToken, AnnotationAttributeDefinition &annotationAttributeDefinition) {
+void Parser::ParseAnnotationAttribute(
+    Token &curToken, AnnotationAttributeDefinition &annotationAttributeDefinition) {
   FillDefinitionSource(annotationAttributeDefinition.mDefinitionSource);
   annotationAttributeDefinition.mName = curToken.mContents;
-  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete annotation attribute definition!")
+  PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                  "Incomplete annotation attribute definition!")
   if (curToken.mType == TokenType::Equals) {
-    PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken), "Incomplete annotation attribute definition!")
-    PARSER_THROW_IF(curToken.mType != TokenType::String, "Annotation attribute should be a string, found \"{}\"",
-                    curToken.mContents)
+    PARSER_THROW_IF(!mCurTokenizer->GetNextNonWhitespace(curToken),
+                    "Incomplete annotation attribute definition!")
+    PARSER_THROW_IF(curToken.mType != TokenType::String,
+                    "Annotation attribute should be a string, found \"{}\"", curToken.mContents)
     ParseType(curToken, annotationAttributeDefinition.mValue);
   }
 }
@@ -323,8 +351,8 @@ void Parser::FillDefinitionSource(DefinitionSource &definitionSource) {
 void Parser::ParseFunctionArgument(Token &curToken, FunctionArgumentDefinition &arg) {
   FillDefinitionSource(arg.mDefinitionSource);
   ParseType(curToken, arg.mType);
-  PARSER_THROW_IF(curToken.mType != TokenType::String, "Function argument names should be strings, found \"{}\"",
-                  curToken.mContents);
+  PARSER_THROW_IF(curToken.mType != TokenType::String,
+                  "Function argument names should be strings, found \"{}\"", curToken.mContents);
   arg.mName = curToken.mContents;
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
   if (curToken.mType == TokenType::String) {

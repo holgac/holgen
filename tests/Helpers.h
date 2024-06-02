@@ -8,8 +8,8 @@ std::map<std::string, GeneratedContent> MapByName(const std::vector<GeneratedCon
 
 std::string_view Trim(const std::string_view &str);
 
-void ExpectGeneratedContent(const GeneratedContent &actual, FileType fileType, const std::string &name,
-                            const std::string &contents);
+void ExpectGeneratedContent(const GeneratedContent &actual, FileType fileType,
+                            const std::string &name, const std::string &contents);
 
 void ExpectEqual(const Type &expected, const Type &actual);
 void ExpectEqual(const ClassField &actual, const ClassField &expected);
@@ -21,6 +21,7 @@ void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expecte
                  const std::optional<std::string> &expectedBody = std::nullopt);
 void ExpectEqual(const ClassDestructor &actual, const ClassDestructor &expected,
                  const std::optional<std::string> &expectedBody = std::nullopt);
-void ExpectEqual(const ClassConstructorInitializer &actual, const ClassConstructorInitializer &expected);
+void ExpectEqual(const ClassConstructorInitializer &actual,
+                 const ClassConstructorInitializer &expected);
 void ExpectEqual(const TemplateParameter &actual, const TemplateParameter &expected);
 } // namespace holgen::helpers

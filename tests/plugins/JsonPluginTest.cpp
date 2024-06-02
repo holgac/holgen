@@ -28,8 +28,10 @@ TEST_F(JsonPluginTest, StructParseJsonEmpty) {
   ASSERT_NE(cls->GetMethod("ParseJson", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseJson", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back(
+        "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter",
+                                   Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 return true;
     )R");
@@ -49,8 +51,10 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("ParseJson", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseJson", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back(
+        "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter",
+                                   Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 if (json.IsObject()) {
   for (const auto &data: json.GetObject()) {
@@ -89,8 +93,10 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("ParseJson", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseJson", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back(
+        "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter",
+                                   Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
 for (const auto &data: json.GetObject()) {
@@ -132,8 +138,10 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("ParseJson", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseJson", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back(
+        "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter",
+                                   Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestData");
 for (const auto &data: json.GetObject()) {
@@ -166,8 +174,10 @@ TEST_F(JsonPluginTest, EnumParseJson) {
   ASSERT_NE(cls->GetMethod("ParseJson", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseJson", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converter", Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back(
+        "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converter",
+                                   Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 if (json.IsString()) {
   *this = TestData::FromString(std::string_view(json.GetString(), json.GetStringLength()));

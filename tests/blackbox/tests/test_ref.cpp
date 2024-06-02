@@ -22,5 +22,6 @@ TEST_F(RefTest, TestAddToContainer) {
   Human bob;
   bob.SetName("Bob");
   humanManager.AddHuman(std::move(bob));
-  EXPECT_EQ(humanManager.GetHumanFromName("Bob")->GetId(), humanManager.GetHumanFromName("Alice")->GetId() + 1);
+  EXPECT_EQ(humanManager.GetHumanFromName("Bob")->GetId(),
+            humanManager.GetHumanFromName("Alice")->GetId() + 1);
 }

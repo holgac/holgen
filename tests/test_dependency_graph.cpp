@@ -14,7 +14,8 @@ protected:
 
   void TearDown() override {}
 
-  void ExpectProcessOrder(const std::string &schema, const std::vector<std::string> &expectedProcessOrder) {
+  void ExpectProcessOrder(const std::string &schema,
+                          const std::vector<std::string> &expectedProcessOrder) {
     Tokenizer tokenizer(schema, "DependencyGraphTest");
     Parser parser;
     parser.Parse(tokenizer);

@@ -16,8 +16,9 @@ public:
 
   template <typename Plugin, typename... Args>
   void AddPlugin(Args &&...args) {
-    mPlugins.push_back(
-        [&](TranslatedProject &project) { Plugin(project, mTranslatorSettings, std::forward<Args>(args)...).Run(); });
+    mPlugins.push_back([&](TranslatedProject &project) {
+      Plugin(project, mTranslatorSettings, std::forward<Args>(args)...).Run();
+    });
   }
 
   [[nodiscard]] TranslatedProject Translate(const ProjectDefinition &project) const;

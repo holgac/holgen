@@ -45,8 +45,10 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("ParseFiles", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseFiles", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("rootPath", Type{"std::string", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converterArg", Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("rootPath",
+                                   Type{"std::string", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converterArg",
+                                   Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseFiles", Constness::NotConst), method, R"R(
 auto &converter = converterArg;
 std::map<std::string, std::vector<std::filesystem::path>> filesByName;
@@ -134,8 +136,10 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("ParseFiles", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseFiles", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("rootPath", Type{"std::string", PassByType::Reference, Constness::Const});
-    method.mArguments.emplace_back("converterArg", Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("rootPath",
+                                   Type{"std::string", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("converterArg",
+                                   Type{"Converter", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("ParseFiles", Constness::NotConst), method, R"R(
 auto converter = converterArg;
 if (converter.innerStruct2NameToId == nullptr) {

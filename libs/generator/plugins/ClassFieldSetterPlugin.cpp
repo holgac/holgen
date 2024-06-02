@@ -17,8 +17,8 @@ void ClassFieldSetterPlugin::Run() {
       if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Set,
                                              Annotations::MethodOption_None))
         continue;
-      auto method = ClassMethod{Naming().FieldSetterNameInCpp(*field.mField), Type{"void"}, Visibility::Public,
-                                Constness::NotConst};
+      auto method = ClassMethod{Naming().FieldSetterNameInCpp(*field.mField), Type{"void"},
+                                Visibility::Public, Constness::NotConst};
       auto &arg = method.mArguments.emplace_back("val", field.mType);
       if (field.mType.mType == PassByType::Pointer)
         arg.mType.mType = PassByType::Pointer;
@@ -40,7 +40,8 @@ void ClassFieldSetterPlugin::Run() {
           auto isNonCopyable = [&](const std::string &name) {
             auto underlyingClass = mProject.GetClass(name);
             if (underlyingClass && underlyingClass->mStruct &&
-                underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
+                underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct,
+                                                               Annotations::Struct_NonCopyable)) {
               return true;
             }
             return false;

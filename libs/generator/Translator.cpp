@@ -24,7 +24,8 @@
 
 namespace holgen {
 
-Translator::Translator(const TranslatorSettings &translatorSettings) : mTranslatorSettings(translatorSettings) {
+Translator::Translator(const TranslatorSettings &translatorSettings) :
+    mTranslatorSettings(translatorSettings) {
   // TODO: Users should pick which plugins to run
   AddPlugin<ClassPlugin>();
   AddPlugin<ClassNonCopyablePlugin>();

@@ -32,8 +32,10 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
   cls.mSourceIncludes.AddStandardHeader("vector");
   cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
   auto method = ClassMethod{ParseFiles, Type{"bool"}, Visibility::Public, Constness::NotConst};
-  method.mArguments.emplace_back("rootPath", Type{"std::string", PassByType::Reference, Constness::Const});
-  method.mArguments.emplace_back("converterArg", Type{St::Converter, PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("rootPath",
+                                 Type{"std::string", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("converterArg",
+                                 Type{St::Converter, PassByType::Reference, Constness::Const});
 
   GenerateConverterPopulators(cls, method);
   GenerateFilesByName(method);
@@ -63,7 +65,8 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
 
       method.mBody.Add("for (const auto& filePath: it->second) {{");
       method.mBody.Indent(1);
-      method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper, St::FilesystemHelper_ReadFile);
+      method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
+                       St::FilesystemHelper_ReadFile);
       method.mBody.Add("rapidjson::Document doc;");
       method.mBody.Add("doc.Parse(contents.c_str());");
       method.mBody.Add(
@@ -75,9 +78,12 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
           R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
       Type type(mProject, templateParameter);
       method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
-      method.mBody.Add("auto res = elem.{}(jsonElem, converter);", ParseJson); // if (!doc.IsArray())
-      method.mBody.Add(R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
-      method.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
+      method.mBody.Add("auto res = elem.{}(jsonElem, converter);",
+                       ParseJson); // if (!doc.IsArray())
+      method.mBody.Add(
+          R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
+      method.mBody.Add("{}(std::move(elem));",
+                       Naming().ContainerElemAdderNameInCpp(fieldDefinition));
       method.mBody.Indent(-1);
       method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
 
@@ -99,9 +105,10 @@ void JsonParseFilesPlugin::GenerateConverterPopulators(Class &cls, ClassMethod &
     if (!field.mField || !field.mField->GetAnnotation(Annotations::Container))
       continue;
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
-      auto &underlyingClass = *mProject.GetClass(field.mField->mType.mTemplateParameters.back().mName);
-      auto indexedOnField =
-          underlyingClass.GetFieldFromDefinitionName(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
+      auto &underlyingClass =
+          *mProject.GetClass(field.mField->mType.mTemplateParameters.back().mName);
+      auto indexedOnField = underlyingClass.GetFieldFromDefinitionName(
+          annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
       auto forConverter = annotation.GetAttribute(Annotations::Index_ForConverter);
       if (forConverter == nullptr)
         continue;
@@ -112,12 +119,14 @@ void JsonParseFilesPlugin::GenerateConverterPopulators(Class &cls, ClassMethod &
       fromType.PreventCopying();
       auto idField = underlyingClass.GetIdField();
       Type toType(mProject, idField->mField->mType);
-      codeBlock.Add("converter.{} = [this]({}key) -> {} {{", forConverter->mValue.mName, fromType.ToString(false),
-                    toType.ToString(true));
+      codeBlock.Add("converter.{} = [this]({}key) -> {} {{", forConverter->mValue.mName,
+                    fromType.ToString(false), toType.ToString(true));
       codeBlock.Indent(1);
-      codeBlock.Add("auto elem = {}(key);", Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation));
+      codeBlock.Add("auto elem = {}(key);",
+                    Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation));
       codeBlock.Add("HOLGEN_WARN_AND_RETURN_IF(!elem, {}(-1), \"{{}} {} not found!\", key);",
-                    idField->mType.ToString(true), field.mType.mTemplateParameters.back().ToString(true));
+                    idField->mType.ToString(true),
+                    field.mType.mTemplateParameters.back().ToString(true));
       codeBlock.Add("return elem->{}();", Naming().FieldGetterNameInCpp(*idField->mField));
       codeBlock.Indent(-1);
       codeBlock.Add("}};"); // converter =
@@ -151,7 +160,8 @@ void JsonParseFilesPlugin::GenerateFilesByName(ClassMethod &method) {
   method.mBody.Indent(1);
   method.mBody.Add("std::string filename = entry.path().filename().string();");
   method.mBody.Add("auto dotPosition = filename.rfind('.');");
-  method.mBody.Add("if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == \"json\") {{");
+  method.mBody.Add(
+      "if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == \"json\") {{");
   method.mBody.Indent(1);
   method.mBody.Add("filesByName[filename.substr(0, dotPosition)].push_back(entry.path());");
   method.mBody.Indent(-1);

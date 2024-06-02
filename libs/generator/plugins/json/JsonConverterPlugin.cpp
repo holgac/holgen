@@ -20,10 +20,12 @@ void JsonConverterPlugin::Run() {
       if (processedConverters.contains(jsonConvertUsing->mValue.mName))
         continue;
       processedConverters.insert(jsonConvertUsing->mValue.mName);
-      auto field = ClassField{jsonConvertUsing->mValue.mName, Type{"std::function"}, Visibility::Public};
+      auto field =
+          ClassField{jsonConvertUsing->mValue.mName, Type{"std::function"}, Visibility::Public};
 
       if (jsonConvertElem)
-        field.mType.mFunctionalTemplateParameters.emplace_back(targetField.mType.mTemplateParameters.back());
+        field.mType.mFunctionalTemplateParameters.emplace_back(
+            targetField.mType.mTemplateParameters.back());
       else
         field.mType.mFunctionalTemplateParameters.emplace_back(targetField.mType);
       field.mType.mFunctionalTemplateParameters.emplace_back(mProject, jsonConvertFrom->mValue);

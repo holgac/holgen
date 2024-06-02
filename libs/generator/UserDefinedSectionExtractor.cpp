@@ -5,7 +5,8 @@
 
 namespace holgen {
 
-std::map<std::string, std::string> UserDefinedSectionExtractor::Extract(const std::string &fileContents) const {
+std::map<std::string, std::string>
+    UserDefinedSectionExtractor::Extract(const std::string &fileContents) const {
   size_t idx = 0;
   std::map<std::string, std::string> sections;
   while (true) {

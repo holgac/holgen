@@ -23,10 +23,12 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::NotConst};
+  auto method =
+      ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t"});
-  method.mArguments.emplace_back("a2", Type{"std::string", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("a2",
+                                 Type{"std::string", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("a3", Type{"InnerStruct", PassByType::Pointer, Constness::Const});
   method.mUserDefined = true;
   method.mExposeToLua = true;
@@ -44,7 +46,8 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::NotConst};
+  auto method =
+      ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t", PassByType::Reference});
   method.mArguments.emplace_back("a2", Type{"std::string", PassByType::Reference});
@@ -65,8 +68,8 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  auto method =
-      ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public, Constness::NotConst};
+  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer},
+                            Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t"});
   method.mUserDefined = true;
@@ -114,7 +117,10 @@ struct TestData {
   func func1(s32 val);
 }
 )R",
-      Run, "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions with arguments", Source);
+      Run,
+      "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions with "
+      "arguments",
+      Source);
 }
 
 TEST_F(CppFunctionPluginTest, OnDestroyFunctionWithReturnType) {
@@ -125,6 +131,8 @@ struct TestData {
   func func1() -> s32;
 }
   )R",
-      Run, "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions that return a value",
+      Run,
+      "TestData.func1 ({0}:3:3) has onDestroy attribute which does not support functions that "
+      "return a value",
       Source);
 }

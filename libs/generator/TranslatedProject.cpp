@@ -66,9 +66,11 @@ std::vector<std::pair<Class *, const EnumEntryDefinition *>>
   for (auto &cls: mClasses) {
     if (!cls.mStruct || cls.mStruct->mIsMixin)
       continue;
-    if (!cls.mStruct->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_Enum, enumName))
+    if (!cls.mStruct->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_Enum,
+                                           enumName))
       continue;
-    auto entry = cls.mStruct->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_Entry)->mValue.mName;
+    auto entry = cls.mStruct->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_Entry)
+                     ->mValue.mName;
     result.emplace_back(&cls, enumDefinition.GetEnumEntry(entry));
     ;
   }

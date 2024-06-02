@@ -34,9 +34,10 @@ enum class DefaultDelete {
 
 struct ClassField {
   ClassField(std::string name, Type type, Visibility visibility = Visibility::Private,
-             Staticness staticness = Staticness::NotStatic, std::optional<std::string> defaultValue = std::nullopt) :
-      mType(std::move(type)), mName(std::move(name)), mStaticness(staticness), mVisibility(visibility),
-      mDefaultValue(std::move(defaultValue)) {}
+             Staticness staticness = Staticness::NotStatic,
+             std::optional<std::string> defaultValue = std::nullopt) :
+      mType(std::move(type)), mName(std::move(name)), mStaticness(staticness),
+      mVisibility(visibility), mDefaultValue(std::move(defaultValue)) {}
 
   Type mType;
   std::string mName;
@@ -49,7 +50,8 @@ struct ClassField {
 };
 
 struct ClassMethodArgument {
-  ClassMethodArgument(std::string name, Type type, std::optional<std::string> defaultValue = std::nullopt) :
+  ClassMethodArgument(std::string name, Type type,
+                      std::optional<std::string> defaultValue = std::nullopt) :
       mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {}
 
   Type mType;
@@ -86,8 +88,10 @@ struct Using {
 
 struct ClassMethod : ClassMethodBase {
   ClassMethod(std::string name, Type returnType, Visibility visibility = Visibility::Public,
-              Constness constness = Constness::Const, Staticness staticness = Staticness::NotStatic) :
-      mName(std::move(name)), mReturnType(std::move(returnType)), mConstness(constness), mStaticness(staticness) {
+              Constness constness = Constness::Const,
+              Staticness staticness = Staticness::NotStatic) :
+      mName(std::move(name)), mReturnType(std::move(returnType)), mConstness(constness),
+      mStaticness(staticness) {
     mVisibility = visibility;
   }
 
@@ -144,7 +148,8 @@ struct ClassEnum {
   std::list<ClassEnumEntry> mEntries;
   std::list<std::string> mComments;
 
-  ClassEnum(std::string name, std::string underlyingType, Visibility visibility = Visibility::Public) :
+  ClassEnum(std::string name, std::string underlyingType,
+            Visibility visibility = Visibility::Public) :
       mName(std::move(name)), mVisibility(visibility), mUnderlyingType(std::move(underlyingType)) {}
 
   [[nodiscard]] const ClassEnumEntry *GetEntry(const std::string &name) const;

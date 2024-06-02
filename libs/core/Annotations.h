@@ -17,8 +17,8 @@ public:
    * Only for fields.
    *
    * Example:
-   *  @jsonConvert(from=string, using=countryConverter) // func(string) -> u8 function added to Converter class
-   *  u8 country;
+   *  @jsonConvert(from=string, using=countryConverter) // func(string) -> u8 function added to
+   * Converter class u8 country;
    *  @jsonConvert(from=string, using=cityConverter) // another func added
    *  u8 city;
    *  @jsonConvert(sameAs=country) // first func reused
@@ -67,8 +67,9 @@ public:
    * If it's OK for Lua to modify the container at startup (i.e. when loading a mod where iterator
    * invalidation is no issue) but we want to pass pointers around at runtime, locking is required.
    *
-   * Container methods can be customized, use the operation name as key (add, get, count, delete, has) and a value
-   * of "custom" to define it as a custom function, "none" to remove it altogether, or "private" to set its visibility.
+   * Container methods can be customized, use the operation name as key (add, get, count, delete,
+   * has) and a value of "custom" to define it as a custom function, "none" to remove it altogether,
+   * or "private" to set its visibility.
    *
    * Example:
    * @container(elemName=country)
@@ -120,9 +121,11 @@ public:
   inline static const std::string Id = "id";
 
   /**
-   * Defines an extra unique index for a container field by creating a map<indexedFieldType, idFieldType> field.
-   * TODO: how to prevent index field modifications? Can remove setter method for lua only. trust cpp?
-   * Maybe the setter of the indexed field can notify data manager? If so, use friend and make it private.
+   * Defines an extra unique index for a container field by creating a map<indexedFieldType,
+   * idFieldType> field.
+   * TODO: how to prevent index field modifications? Can remove setter method for lua only. trust
+   * cpp? Maybe the setter of the indexed field can notify data manager? If so, use friend and make
+   * it private.
    *
    * Parameters:
    *  On: Field to index on (determines map's key)
@@ -155,7 +158,8 @@ public:
   inline static const std::string Index_ForConverter = "forConverter";
 
   /**
-   * Marks the struct as a data manager that has a special method for loading the types from the FS it contains.
+   * Marks the struct as a data manager that has a special method for loading the types from the FS
+   * it contains.
    *
    * Example:
    * struct Plant {
@@ -214,7 +218,8 @@ public:
 
   /**
    * For floating point fields, defines the epsilon value to use when comparing them in operator==.
-   * Can also be defined for a struct to apply to all floating point fields, but the field definition takes precedence.
+   * Can also be defined for a struct to apply to all floating point fields, but the field
+   * definition takes precedence.
    *
    * @epsilon('0.001')
    * struct A {
@@ -225,9 +230,9 @@ public:
   inline static const std::string Epsilon = "epsilon";
 
   /**
-   * Variants are similar to std::variant. They're used as fields and their type is backed by an enum.
-   * A struct with a variant field will have two fields - a type field (backed by the specified enum) and a uint8_t
-   * array with size that can hold the largest variant struct.
+   * Variants are similar to std::variant. They're used as fields and their type is backed by an
+   * enum. A struct with a variant field will have two fields - a type field (backed by the
+   * specified enum) and a uint8_t array with size that can hold the largest variant struct.
    *
    * enum DataType {
    *  Type1;

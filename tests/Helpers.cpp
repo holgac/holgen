@@ -19,8 +19,8 @@ std::string_view Trim(const std::string_view &str) {
   return std::string_view(str.data() + startIdx, endIdx - startIdx);
 }
 
-void ExpectGeneratedContent(const GeneratedContent &actual, FileType fileType, const std::string &name,
-                            const std::string &contents) {
+void ExpectGeneratedContent(const GeneratedContent &actual, FileType fileType,
+                            const std::string &name, const std::string &contents) {
   EXPECT_EQ(actual.mType, fileType);
   EXPECT_EQ(actual.mName, name);
   EXPECT_EQ(Trim(actual.mBody.ToString(fileType, {})), Trim(contents));
@@ -35,7 +35,8 @@ void ExpectEqual(const Type &expected, const Type &actual) {
   for (size_t i = 0; i < actual.mTemplateParameters.size(); ++i) {
     ExpectEqual(expected.mTemplateParameters[i], actual.mTemplateParameters[i]);
   }
-  EXPECT_EQ(actual.mFunctionalTemplateParameters.size(), expected.mFunctionalTemplateParameters.size());
+  EXPECT_EQ(actual.mFunctionalTemplateParameters.size(),
+            expected.mFunctionalTemplateParameters.size());
   for (size_t i = 0; i < actual.mFunctionalTemplateParameters.size(); ++i) {
     ExpectEqual(expected.mFunctionalTemplateParameters[i], actual.mFunctionalTemplateParameters[i]);
   }
@@ -47,7 +48,8 @@ void ExpectEqual(const ClassField &actual, const ClassField &expected) {
   EXPECT_EQ(actual.mVisibility, expected.mVisibility) << " in field " << actual.mName;
   EXPECT_EQ(actual.mStaticness, expected.mStaticness);
   EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue) << " in field " << actual.mName;
-  EXPECT_EQ(actual.mDefaultConstructorArguments.size(), expected.mDefaultConstructorArguments.size());
+  EXPECT_EQ(actual.mDefaultConstructorArguments.size(),
+            expected.mDefaultConstructorArguments.size());
 
   for (auto itExpected = expected.mDefaultConstructorArguments.begin(),
             itActual = actual.mDefaultConstructorArguments.begin();
@@ -63,14 +65,16 @@ void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected,
   if (expectedBody)
     EXPECT_EQ(Trim(actual.mBody.ToString(FileType::CppSource, {})), Trim(*expectedBody));
   else
-    EXPECT_EQ(actual.mBody.ToString(FileType::CppSource, {}), expected.mBody.ToString(FileType::CppSource, {}));
+    EXPECT_EQ(actual.mBody.ToString(FileType::CppSource, {}),
+              expected.mBody.ToString(FileType::CppSource, {}));
   ASSERT_EQ(actual.mArguments.size(), expected.mArguments.size());
   for (auto itExpected = expected.mArguments.begin(), itActual = actual.mArguments.begin();
        itExpected != expected.mArguments.end(); ++itExpected, ++itActual) {
     ExpectEqual(*itActual, *itExpected);
   }
   ASSERT_EQ(actual.mTemplateParameters.size(), expected.mTemplateParameters.size());
-  for (auto itExpected = expected.mTemplateParameters.begin(), itActual = actual.mTemplateParameters.begin();
+  for (auto itExpected = expected.mTemplateParameters.begin(),
+            itActual = actual.mTemplateParameters.begin();
        itExpected != expected.mTemplateParameters.end(); ++itExpected, ++itActual) {
     ExpectEqual(*itActual, *itExpected);
   }
@@ -103,13 +107,15 @@ void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expecte
                  const std::optional<std::string> &expectedBody) {
   ExpectEqual((ClassMethodBase &)actual, (ClassMethodBase &)expected, expectedBody, "constructor");
   EXPECT_EQ(actual.mExplicitness, expected.mExplicitness);
-  for (auto itExpected = expected.mInitializerList.begin(), itActual = actual.mInitializerList.begin();
+  for (auto itExpected = expected.mInitializerList.begin(),
+            itActual = actual.mInitializerList.begin();
        itExpected != expected.mInitializerList.end(); ++itExpected, ++itActual) {
     ExpectEqual(*itActual, *itExpected);
   }
 }
 
-void ExpectEqual(const ClassConstructorInitializer &actual, const ClassConstructorInitializer &expected) {
+void ExpectEqual(const ClassConstructorInitializer &actual,
+                 const ClassConstructorInitializer &expected) {
   EXPECT_EQ(actual.mDestination, expected.mDestination);
   EXPECT_EQ(actual.mValue, expected.mValue);
 }

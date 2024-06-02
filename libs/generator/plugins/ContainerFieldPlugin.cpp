@@ -42,7 +42,8 @@ void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
   auto underlyingClass = mProject.GetClass(underlyingType.mName);
   auto indexOn = annotationDefinition.GetAttribute(Annotations::Index_On);
   auto &fieldIndexedOn = *underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
-  auto indexField = ClassField{Naming().FieldIndexNameInCpp(*field.mField, annotationDefinition), Type{"std::map"}};
+  auto indexField = ClassField{Naming().FieldIndexNameInCpp(*field.mField, annotationDefinition),
+                               Type{"std::map"}};
   auto indexType = annotationDefinition.GetAttribute(Annotations::Index_Using);
   if (indexType != nullptr) {
     indexField.mType = Type{mProject, indexType->mValue};
@@ -58,7 +59,8 @@ void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
     Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
     auto method =
         ClassMethod{Naming().ContainerIndexGetterNameInCpp(*field.mField, annotationDefinition),
-                    Type{mProject, underlyingType, PassByType::Pointer, constness}, Visibility::Public, constness};
+                    Type{mProject, underlyingType, PassByType::Pointer, constness},
+                    Visibility::Public, constness};
     if (i == 0)
       method.mExposeToLua = true;
     method.mArguments.emplace_back("key", Type{mProject, fieldIndexedOn.mField->mType});
@@ -91,14 +93,16 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
   const ClassField *underlyingIdField = nullptr;
   if (underlyingClass && underlyingClass->mStruct) {
     if (!useMoveRef &&
-        underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable))
+        underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct,
+                                                       Annotations::Struct_NonCopyable))
       return;
     underlyingIdField = underlyingClass->GetIdField();
   }
   bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
 
   auto method = ClassMethod{Naming().ContainerElemAdderNameInCpp(*field.mField),
-                            Type{underlyingType.mName, PassByType::Pointer}, Visibility::Public, Constness::NotConst};
+                            Type{underlyingType.mName, PassByType::Pointer}, Visibility::Public,
+                            Constness::NotConst};
   method.mArguments.emplace_back("elem", underlyingType);
   if (useMoveRef) {
     method.mArguments.back().mType.mType = PassByType::MoveReference;
@@ -120,7 +124,8 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
                                            Annotations::MethodOption_Private)) {
       method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                  Annotations::Container_Add,
                                                   Annotations::MethodOption_Protected)) {
       method.mVisibility = Visibility::Protected;
     }
@@ -133,8 +138,8 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
       auto getterMethodName = Naming().FieldGetterNameInCpp(*fieldIndexedOn.mField);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
-      validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists", elem.{}());)", underlyingClass->mName,
-                     indexOn->mValue.mName, getterMethodName);
+      validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists", elem.{}());)",
+                     underlyingClass->mName, indexOn->mValue.mName, getterMethodName);
       validators.Add("return nullptr;");
       validators.Indent(-1);
       validators.Add("}}");
@@ -151,7 +156,8 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     method.mBody.Add(std::move(inserters));
 
     if (underlyingIdField) {
-      method.mBody.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField->mField));
+      method.mBody.Add("elem.{}(newId);",
+                       Naming().FieldSetterNameInCpp(*underlyingIdField->mField));
     }
 
     std::string elemToInsert = "elem";
@@ -160,13 +166,14 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
 
     if (isKeyedContainer) {
       method.mBody.Add("auto[it, res] = {}.emplace(newId, {});", field.mName, elemToInsert);
-      method.mBody.Add(
-          "HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Corrupt internal ID counter - was {}.{} modified externally?\");",
-          cls.mName, field.mField->mName);
+      method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Corrupt internal ID counter - "
+                       "was {}.{} modified externally?\");",
+                       cls.mName, field.mField->mName);
       method.mBody.Add("return &(it->second);", field.mName);
     } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
       method.mBody.Add("auto[it, res] = {}.emplace({});", field.mName, elemToInsert);
-      method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Attempting to insert duplicate element to {}\");",
+      method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Attempting to insert duplicate "
+                       "element to {}\");",
                        field.mField->mName);
       method.mBody.Add("return &(*it);", field.mName);
       method.mReturnType.mConstness = Constness::Const;
@@ -194,15 +201,16 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
   bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
   for (int i = 0; i < 2; ++i) {
     auto constness = i == 0 ? Constness::Const : Constness::NotConst;
-    auto method = ClassMethod{Naming().ContainerElemGetterNameInCpp(*field.mField), underlyingType, Visibility::Public,
-                              constness};
+    auto method = ClassMethod{Naming().ContainerElemGetterNameInCpp(*field.mField), underlyingType,
+                              Visibility::Public, constness};
     method.mReturnType.mType = PassByType::Pointer;
     method.mReturnType.mConstness = constness;
     if (i == 0)
       method.mExposeToLua = true;
     bool isSigned = false;
     if (underlyingIdField) {
-      auto &arg = method.mArguments.emplace_back("idx", Type{mProject, underlyingIdField->mField->mType});
+      auto &arg =
+          method.mArguments.emplace_back("idx", Type{mProject, underlyingIdField->mField->mType});
       if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName))
         isSigned = true;
     } else {
@@ -216,7 +224,8 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
                                              Annotations::MethodOption_Private)) {
         method.mVisibility = Visibility::Private;
-      } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
+      } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                    Annotations::Container_Get,
                                                     Annotations::MethodOption_Protected)) {
         method.mVisibility = Visibility::Protected;
       }
@@ -260,7 +269,8 @@ void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field)
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
                                            Annotations::MethodOption_Private)) {
       method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
+    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                  Annotations::Container_Count,
                                                   Annotations::MethodOption_Protected)) {
       method.mVisibility = Visibility::Protected;
     }
@@ -276,8 +286,8 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
                                          Annotations::MethodOption_None))
     return;
 
-  auto method = ClassMethod{Naming().ContainerElemDeleterNameInCpp(*field.mField), Type{"void"}, Visibility::Public,
-                            Constness::NotConst};
+  auto method = ClassMethod{Naming().ContainerElemDeleterNameInCpp(*field.mField), Type{"void"},
+                            Visibility::Public, Constness::NotConst};
   if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
     method.mArguments.emplace_back("key", field.mType.mTemplateParameters.front());
   } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
@@ -294,7 +304,8 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
                                            Annotations::MethodOption_Private)) {
       method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
+    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                  Annotations::Container_Delete,
                                                   Annotations::MethodOption_Protected)) {
       method.mVisibility = Visibility::Protected;
     }
@@ -304,10 +315,12 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
       auto indexField = underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
-      indexDeleters.Add("{}.erase(ptr->{}());", Naming().FieldIndexNameInCpp(*field.mField, annotation),
+      indexDeleters.Add("{}.erase(ptr->{}());",
+                        Naming().FieldIndexNameInCpp(*field.mField, annotation),
                         Naming().FieldGetterNameInCpp(*indexField->mField));
-      indexReassigners.Add("{}.at({}.back().{}()) = idx;", Naming().FieldIndexNameInCpp(*field.mField, annotation),
-                           field.mName, Naming().FieldGetterNameInCpp(*indexField->mField));
+      indexReassigners.Add("{}.at({}.back().{}()) = idx;",
+                           Naming().FieldIndexNameInCpp(*field.mField, annotation), field.mName,
+                           Naming().FieldGetterNameInCpp(*indexField->mField));
     }
 
     if (!indexDeleters.mContents.empty()) {
@@ -338,7 +351,8 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
                                          Annotations::MethodOption_None))
     return;
-  auto method = ClassMethod{Naming().ContainerElemExistenceCheckerNameInCpp(*field.mField), Type{"bool"}};
+  auto method =
+      ClassMethod{Naming().ContainerElemExistenceCheckerNameInCpp(*field.mField), Type{"bool"}};
   method.mExposeToLua = true;
   auto &arg = method.mArguments.emplace_back("elem", field.mType.mTemplateParameters.front());
   if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
@@ -352,7 +366,8 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
                                            Annotations::MethodOption_Private)) {
       method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
+    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                  Annotations::Container_Has,
                                                   Annotations::MethodOption_Protected)) {
       method.mVisibility = Visibility::Protected;
     }
@@ -372,7 +387,8 @@ bool ContainerFieldPlugin::CanImplementDeleteElem(Class &generatedClass HOLGEN_A
   return false;
 }
 
-bool ContainerFieldPlugin::CanImplementHasElem(Class &generatedClass HOLGEN_ATTRIBUTE_UNUSED, const ClassField &field) {
+bool ContainerFieldPlugin::CanImplementHasElem(Class &generatedClass HOLGEN_ATTRIBUTE_UNUSED,
+                                               const ClassField &field) {
   return !TypeInfo::Get().CppIndexedContainers.contains(field.mType.mName);
 }
 
@@ -382,8 +398,10 @@ void ContainerFieldPlugin::GenerateNextIndexField(Class &cls, const ClassField &
     return;
 
   if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
-    auto underlyingIdField = mProject.GetClass(field.mType.mTemplateParameters.back().mName)->GetIdField();
-    auto nextIdField = ClassField{field.mName + "NextId", Type{mProject, underlyingIdField->mField->mType}};
+    auto underlyingIdField =
+        mProject.GetClass(field.mType.mTemplateParameters.back().mName)->GetIdField();
+    auto nextIdField =
+        ClassField{field.mName + "NextId", Type{mProject, underlyingIdField->mField->mType}};
     nextIdField.mDefaultValue = "0";
     Validate().NewField(cls, nextIdField);
     cls.mFields.push_back(std::move(nextIdField));

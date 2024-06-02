@@ -159,11 +159,13 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
 
   ASSERT_NE(cls->GetMethod("TestFunction", Constness::Const), nullptr);
-  auto method = ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::Const};
+  auto method =
+      ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mArguments.emplace_back("a1", Type{"int32_t"});
-  method.mArguments.emplace_back("a2", Type{"std::string", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("a2",
+                                 Type{"std::string", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("a3", Type{"InnerStruct", PassByType::Pointer, Constness::Const});
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");
@@ -201,8 +203,8 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
 
   ASSERT_NE(cls->GetMethod("TestFunction", Constness::Const), nullptr);
-  auto method =
-      ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer}, Visibility::Public, Constness::Const};
+  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer},
+                            Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
@@ -230,7 +232,8 @@ struct A {
   func TestFunction() -> u32;
 }
   )R",
-                     Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
+                     Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)",
+                     Source);
   ExpectErrorMessage(R"R(
 struct A {
   @luaFunc
@@ -239,7 +242,8 @@ struct A {
   func TestFunction(string arg) -> u32;
 }
   )R",
-                     Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)", Source);
+                     Run, "Duplicate method: A.TestFunction ({0}:3:3) and A.TestFunction ({0}:5:3)",
+                     Source);
 }
 
 TEST_F(LuaFunctionPluginTest, InvalidType) {

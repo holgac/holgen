@@ -3,6 +3,7 @@
 // HOLGEN_USER_DEFINED_BEGIN:TestStructArray_CustomIncludes
 #include "../gen/TestStructArrayCustomData1.h"
 #include "../gen/TestStructArrayCustomData2.h"
+
 // HOLGEN_USER_DEFINED_END:TestStructArray_CustomIncludes
 
 namespace holgen_blackbox_test {

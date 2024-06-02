@@ -34,10 +34,10 @@ public:
   void AddForwardDeclaration(ForwardDeclaration declaration);
   void Write(CodeBlock &codeBlock) const;
   void IncludeUsing(const TranslatedProject &project, const Using &usingStatement, bool isHeader);
-  void IncludeClassField(const TranslatedProject &project, const Class &cls, const ClassField &classField,
-                         bool isHeader);
-  void IncludeClassMethod(const TranslatedProject &project, const Class &cls, const ClassMethod &classMethod,
-                          bool isHeader);
+  void IncludeClassField(const TranslatedProject &project, const Class &cls,
+                         const ClassField &classField, bool isHeader);
+  void IncludeClassMethod(const TranslatedProject &project, const Class &cls,
+                          const ClassMethod &classMethod, bool isHeader);
   void Subtract(const HeaderContainer &rhs);
 
 private:
@@ -46,10 +46,10 @@ private:
   std::vector<std::string> mLibHeaders;
   std::vector<std::string> mLocalHeaders;
   std::set<ForwardDeclaration> mForwardDeclarations;
-  void IncludeClassField(const TranslatedProject &project, const Class &cls, const ClassField &classField,
-                         const Type &type, bool isHeader);
-  void IncludeClassMethod(const TranslatedProject &project, const Class &cls, const ClassMethod &method,
-                          const Type &type, bool isHeader);
+  void IncludeClassField(const TranslatedProject &project, const Class &cls,
+                         const ClassField &classField, const Type &type, bool isHeader);
+  void IncludeClassMethod(const TranslatedProject &project, const Class &cls,
+                          const ClassMethod &method, const Type &type, bool isHeader);
   void IncludeType(const TranslatedProject &project, const Type &type, bool isHeader);
   void Subtract(const HeaderContainer &rhs, std::vector<std::string> &container);
 };

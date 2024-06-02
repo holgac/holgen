@@ -301,57 +301,72 @@ struct A {
 }
 
 TEST_F(ClassFieldPluginTest, Vector) {
-  ExpectErrorMessage("struct A {u32<u32> field;}", Run,
-                     "Primitive type uint32_t used by A.field ({0}:1:11) cannot have template parameters", Source);
+  ExpectErrorMessage(
+      "struct A {u32<u32> field;}", Run,
+      "Primitive type uint32_t used by A.field ({0}:1:11) cannot have template parameters", Source);
   ExpectErrorMessage("struct A {vector<u32, u32> field;}", Run,
-                     "Container type std::vector used by A.field ({0}:1:11) should have a single template parameter",
+                     "Container type std::vector used by A.field ({0}:1:11) should have a single "
+                     "template parameter",
                      Source);
 }
 
 TEST_F(ClassFieldPluginTest, Set) {
-  ExpectErrorMessage("struct A {set<u32, u64, u32> field;}", Run,
-                     "Set type std::set used by A.field ({0}:1:11) should have a single template parameter", Source);
   ExpectErrorMessage(
-      "struct A {set<vector<u32>> field;}", Run,
-      "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector",
+      "struct A {set<u32, u64, u32> field;}", Run,
+      "Set type std::set used by A.field ({0}:1:11) should have a single template parameter",
       Source);
+  ExpectErrorMessage("struct A {set<vector<u32>> field;}", Run,
+                     "Set type std::set used by A.field ({0}:1:11) should have a keyable template "
+                     "parameter, found std::vector",
+                     Source);
   ExpectErrorMessage("struct A {set<B> field;} struct B {}", Run,
-                     "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found B",
+                     "Set type std::set used by A.field ({0}:1:11) should have a keyable template "
+                     "parameter, found B",
                      Source);
 }
 
 TEST_F(ClassFieldPluginTest, Map) {
-  ExpectErrorMessage(
-      "struct A {map<string, set<vector<u32>>> field;}", Run,
-      "Set type std::set used by A.field ({0}:1:11) should have a keyable template parameter, found std::vector",
-      Source);
-  ExpectErrorMessage("struct A {map field;}", Run,
-                     "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
-  ExpectErrorMessage("struct A {map<u32> field;}", Run,
-                     "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
-  ExpectErrorMessage("struct A {map<u32, u64, u32> field;}", Run,
-                     "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
-  ExpectErrorMessage("struct A {map<u32, vector<u32, u32>> field;}", Run,
-                     "Container type std::vector used by A.field ({0}:1:11) should have a single template parameter",
+  ExpectErrorMessage("struct A {map<string, set<vector<u32>>> field;}", Run,
+                     "Set type std::set used by A.field ({0}:1:11) should have a keyable template "
+                     "parameter, found std::vector",
                      Source);
   ExpectErrorMessage(
-      "struct A {map<vector<u32>, u32> field;}", Run,
-      "Map type std::map used by A.field ({0}:1:11) should have a keyable first template parameter, found std::vector",
-      Source);
+      "struct A {map field;}", Run,
+      "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
+  ExpectErrorMessage(
+      "struct A {map<u32> field;}", Run,
+      "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
+  ExpectErrorMessage(
+      "struct A {map<u32, u64, u32> field;}", Run,
+      "Map type std::map used by A.field ({0}:1:11) should have two template parameters", Source);
+  ExpectErrorMessage("struct A {map<u32, vector<u32, u32>> field;}", Run,
+                     "Container type std::vector used by A.field ({0}:1:11) should have a single "
+                     "template parameter",
+                     Source);
+  ExpectErrorMessage("struct A {map<vector<u32>, u32> field;}", Run,
+                     "Map type std::map used by A.field ({0}:1:11) should have a keyable first "
+                     "template parameter, found std::vector",
+                     Source);
 }
 
 TEST_F(ClassFieldPluginTest, InvalidType) {
-  ExpectErrorMessage("struct A {u12 field;}", Run, "Unknown type u12 used by A.field ({0}:1:11)", Source);
-  ExpectErrorMessage("struct A {vector<B> field;}", Run, "Unknown type B used by A.field ({0}:1:11)", Source);
-  ExpectErrorMessage("struct A {map<u32, B> field;}", Run, "Unknown type B used by A.field ({0}:1:11)", Source);
-  ExpectErrorMessage("struct A {void field;}", Run, "Invalid void usage in A.field ({0}:1:11)", Source);
+  ExpectErrorMessage("struct A {u12 field;}", Run, "Unknown type u12 used by A.field ({0}:1:11)",
+                     Source);
+  ExpectErrorMessage("struct A {vector<B> field;}", Run,
+                     "Unknown type B used by A.field ({0}:1:11)", Source);
+  ExpectErrorMessage("struct A {map<u32, B> field;}", Run,
+                     "Unknown type B used by A.field ({0}:1:11)", Source);
+  ExpectErrorMessage("struct A {void field;}", Run, "Invalid void usage in A.field ({0}:1:11)",
+                     Source);
   // TODO: test internal types like JsonHelper
 }
 
 TEST_F(ClassFieldPluginTest, RefType) {
   ExpectErrorMessage("struct A {Ref field;}", Run,
-                     "Ref field A.field ({0}:1:11) should have a single template parameter", Source);
-  ExpectErrorMessage("struct A {Ref<u32> field;}", Run,
-                     "Ref field A.field ({0}:1:11) references u32 which is not a struct defined in this project",
+                     "Ref field A.field ({0}:1:11) should have a single template parameter",
                      Source);
+  ExpectErrorMessage(
+      "struct A {Ref<u32> field;}", Run,
+      "Ref field A.field ({0}:1:11) references u32 which is not a struct defined in this project",
+      Source);
 }

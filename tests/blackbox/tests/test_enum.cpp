@@ -44,7 +44,8 @@ TEST_F(EnumTest, JsonIntegral) {
 }
 
 TEST_F(EnumTest, GetEntries) {
-  EXPECT_THAT(TestEnum::GetEntries(), ::testing::ElementsAre(TestEnum::Entry5, TestEnum::Entry1, TestEnum::Entry2));
+  EXPECT_THAT(TestEnum::GetEntries(),
+              ::testing::ElementsAre(TestEnum::Entry5, TestEnum::Entry1, TestEnum::Entry2));
 }
 
 TEST_F(EnumTest, StdUnorderedMap) {

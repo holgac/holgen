@@ -11,7 +11,8 @@ void ClassFieldPlugin::Run() {
   }
 }
 
-void ClassFieldPlugin::ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition) {
+void ClassFieldPlugin::ProcessStructDefinition(Class &cls,
+                                               const StructDefinition &structDefinition) {
   for (auto &mixin: structDefinition.mMixins) {
     ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
   }
@@ -22,12 +23,13 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls, const StructDefinitio
     // Skip variants; they're processed in their own plugin
     if (fieldDefinition.mType.mName == St::Variant)
       continue;
-    // TODO: if @optimize(alignment) (or @packed?), order the fields to minimize padding. Default to it?
-    // ordering should probably be in code generation rather than translator plugins
+    // TODO: if @optimize(alignment) (or @packed?), order the fields to minimize padding. Default to
+    // it? ordering should probably be in code generation rather than translator plugins
     if (fieldDefinition.mType.mName == "Ref")
       Validate().RefField(cls, fieldDefinition);
-    auto field = ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
-                            Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
+    auto field =
+        ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
+                   Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
     if (fieldDefinition.mType.mName == St::UserData) {
       field.mType = Type{"void", PassByType::Pointer};

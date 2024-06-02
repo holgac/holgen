@@ -36,7 +36,8 @@ struct Type {
 
   bool operator==(const Type &rhs) const {
     if (mName != rhs.mName || mConstness != rhs.mConstness || mType != rhs.mType ||
-        mConstexprness != rhs.mConstexprness || mTemplateParameters.size() != rhs.mTemplateParameters.size() ||
+        mConstexprness != rhs.mConstexprness ||
+        mTemplateParameters.size() != rhs.mTemplateParameters.size() ||
         mFunctionalTemplateParameters.size() != rhs.mFunctionalTemplateParameters.size())
       return false;
     for (size_t i = 0; i < mTemplateParameters.size(); i++) {
