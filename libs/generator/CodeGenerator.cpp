@@ -547,7 +547,7 @@ void CodeGenerator::GenerateHolgenHeader(GeneratedContent &header) const {
 void CodeGenerator::GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const {
   for (auto &usingStatement: cls.mUsings) {
     codeBlock.Add("using {}={};", usingStatement.mTargetType,
-                  usingStatement.mSourceType.ToString(false));
+                  usingStatement.mSourceType.ToString(true));
   }
 }
 

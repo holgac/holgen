@@ -14,7 +14,7 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestEnum {
 public:
-  using UnderlyingType=int64_t ;
+  using UnderlyingType=int64_t;
   enum Entry : UnderlyingType {
     Entry5 = 5,
     Entry1 = 0,
