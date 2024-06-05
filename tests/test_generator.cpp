@@ -42,6 +42,9 @@ set(custom_sources)
 add_library(generator_test_cmake STATIC ${gen_sources} ${src_sources} ${custom_sources})
 # HOLGEN_USER_DEFINED_BEGIN:CustomDependencies
 # HOLGEN_USER_DEFINED_END:CustomDependencies
+if (UNIX)
+  target_compile_options(generator_test_cmake PRIVATE -Wall -Wextra -Wpedantic -Werror -Wno-unused-parameter -Wno-unused-variable)
+endif ()
 )R");
   // TODO: test helpers
 }

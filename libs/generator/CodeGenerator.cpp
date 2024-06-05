@@ -459,8 +459,13 @@ void CodeGenerator::GenerateCMakeLists(GeneratedContent &cmake,
                 mGeneratorSettings.mCMakeTarget);
   codeBlock.UserDefined("CustomDependencies");
   // TODO: complete lua generator, fix unused parameters and enable this
-  // codeBlock.Line() << "target_compile_options(" << mGeneratorSettings.mCMakeTarget << " PRIVATE
-  // -Wall -Wextra -Wpedantic -Werror)";
+  codeBlock.Add("if (UNIX)");
+  codeBlock.Indent(1);
+  codeBlock.Add("target_compile_options({} PRIVATE -Wall -Wextra -Wpedantic -Werror "
+                "-Wno-unused-parameter -Wno-unused-variable)",
+                mGeneratorSettings.mCMakeTarget);
+  codeBlock.Indent(-1);
+  codeBlock.Add("endif ()");
   cmake.mBody = std::move(codeBlock);
 }
 
