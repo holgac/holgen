@@ -113,12 +113,18 @@ struct EnumEntryDefinition {
   }
 };
 
+enum class EnumDefinitionType {
+  Enum,
+  Bitmap,
+};
+
 struct EnumDefinition {
   std::string mName;
   std::string mInvalidValue;
   std::vector<EnumEntryDefinition> mEntries;
   std::vector<AnnotationDefinition> mAnnotations;
   DefinitionSource mDefinitionSource;
+  EnumDefinitionType mType;
   [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
 

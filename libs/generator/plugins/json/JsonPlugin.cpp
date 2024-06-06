@@ -250,7 +250,7 @@ void JsonPlugin::ProcessEnum(Class &cls) {
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
-  method.mBody.Add("*this = {}({}::Invalid);", cls.mName, cls.mName);
+  method.mBody.Add("*this = {}{{}};", cls.mName);
   method.mBody.Add(R"R(HOLGEN_WARN("Could not json-parse {} enum: invalid json type");)R",
                    cls.mName);
   method.mBody.Add("return false;");

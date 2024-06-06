@@ -58,7 +58,7 @@ template <>
 struct formatter<holgen_blackbox_test::TestVariantStructType::Entry> : public formatter<string> {
 public:
   template <typename FormatContext>
-  auto format(const holgen_blackbox_test::TestVariantStructType &obj, FormatContext &ctx) const {
+  auto format(const holgen_blackbox_test::TestVariantStructType::Entry &obj, FormatContext &ctx) const {
     return format_to(ctx.out(), "{}", holgen_blackbox_test::TestVariantStructType(obj).ToString());
   }
 };

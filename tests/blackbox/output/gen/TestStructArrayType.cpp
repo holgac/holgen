@@ -22,20 +22,20 @@ TestStructArrayType::Entry TestStructArrayType::GetValue() const {
 
 TestStructArrayType TestStructArrayType::FromString(std::string_view str) {
   if (str == "Type1") {
-    return TestStructArrayType(0);
+    return TestStructArrayType(TestStructArrayType::Type1);
   } else if (str == "Type2") {
-    return TestStructArrayType(1);
+    return TestStructArrayType(TestStructArrayType::Type2);
   } else {
     HOLGEN_WARN("{} is not a valid TestStructArrayType, returning invalid", str);
-    return TestStructArrayType(TestStructArrayType::Invalid);
+    return TestStructArrayType{};
   }
 }
 
 const char *TestStructArrayType::ToString() const {
   switch (mValue) {
-    case 0:
+    case TestStructArrayType::Type1:
       return "Type1";
-    case 1:
+    case TestStructArrayType::Type2:
       return "Type2";
     default:
       return "INVALID";
@@ -77,7 +77,7 @@ bool TestStructArrayType::ParseJson(const rapidjson::Value &json, const Converte
   } else if (json.IsInt64()) {
     *this = TestStructArrayType(json.GetInt64());
   } else {
-    *this = TestStructArrayType(TestStructArrayType::Invalid);
+    *this = TestStructArrayType{};
     HOLGEN_WARN("Could not json-parse TestStructArrayType enum: invalid json type");
     return false;
   }
@@ -95,7 +95,7 @@ TestStructArrayType TestStructArrayType::ReadFromLua(lua_State *luaState, int32_
   } else if (typ == LUA_TNUMBER) {
     return TestStructArrayType(lua_tonumber(luaState, idx));
   } else {
-    return TestStructArrayType{Invalid};
+    return TestStructArrayType{};
   }
 }
 

@@ -223,7 +223,7 @@ void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) con
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
-  method.mBody.Add("return {}{{Invalid}};", cls.mName);
+  method.mBody.Add("return {}{{}};", cls.mName);
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
 }

@@ -184,7 +184,7 @@ if (json.IsString()) {
 } else if (json.IsInt64()) {
   *this = TestData(json.GetInt64());
 } else {
-  *this = TestData(TestData::Invalid);
+  *this = TestData{};
   HOLGEN_WARN("Could not json-parse TestData enum: invalid json type");
   return false;
 }

@@ -1,6 +1,6 @@
 #include "TranslatorPluginTest.h"
 #include "generator/plugins/ClassPlugin.h"
-#include "generator/plugins/EnumPlugin.h"
+#include "generator/plugins/enum/EnumPlugin.h"
 
 class EnumPluginTest : public TranslatorPluginTest {
 protected:
@@ -91,14 +91,14 @@ enum TestEnum {
   method.mArguments.emplace_back("str", Type{"std::string_view"});
   helpers::ExpectEqual(*cls->GetMethod("FromString", Constness::NotConst), method, R"R(
 if (str == "Entry1") {
-  return TestEnum(0);
+  return TestEnum(TestEnum::Entry1);
 } else if (str == "Entry2") {
-  return TestEnum(3);
+  return TestEnum(TestEnum::Entry2);
 } else if (str == "Entry3") {
-  return TestEnum(2);
+  return TestEnum(TestEnum::Entry3);
 } else {
   HOLGEN_WARN("{} is not a valid TestEnum, returning invalid", str);
-  return TestEnum(TestEnum::Invalid);
+  return TestEnum{};
 }
   )R");
 }
@@ -120,11 +120,11 @@ enum TestEnum {
   ASSERT_NE(cls->GetMethod("ToString", Constness::Const), nullptr);
   helpers::ExpectEqual(*cls->GetMethod("ToString", Constness::Const), method, R"R(
 switch (mValue) {
-  case 0:
+  case TestEnum::Entry1:
     return "Entry1";
-  case 3:
+  case TestEnum::Entry2:
     return "Entry2";
-  case 2:
+  case TestEnum::Entry3:
     return "Entry3";
   default:
     return "INVALID";

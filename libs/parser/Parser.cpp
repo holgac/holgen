@@ -35,6 +35,12 @@ void Parser::Parse() {
     } else if (curToken.mContents == "enum") {
       auto &enumDefinition = mProject.mEnums.emplace_back();
       enumDefinition.mAnnotations = std::move(annotations);
+      enumDefinition.mType = EnumDefinitionType::Enum;
+      ParseEnum(enumDefinition);
+    } else if (curToken.mContents == "bitmap") {
+      auto &enumDefinition = mProject.mEnums.emplace_back();
+      enumDefinition.mAnnotations = std::move(annotations);
+      enumDefinition.mType = EnumDefinitionType::Bitmap;
       ParseEnum(enumDefinition);
     } else {
       THROW("Unexpected token: {}", curToken.mContents);

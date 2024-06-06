@@ -22,24 +22,24 @@ TestEnum::Entry TestEnum::GetValue() const {
 
 TestEnum TestEnum::FromString(std::string_view str) {
   if (str == "Entry5") {
-    return TestEnum(5);
+    return TestEnum(TestEnum::Entry5);
   } else if (str == "Entry1") {
-    return TestEnum(0);
+    return TestEnum(TestEnum::Entry1);
   } else if (str == "Entry2") {
-    return TestEnum(1);
+    return TestEnum(TestEnum::Entry2);
   } else {
     HOLGEN_WARN("{} is not a valid TestEnum, returning invalid", str);
-    return TestEnum(TestEnum::Invalid);
+    return TestEnum{};
   }
 }
 
 const char *TestEnum::ToString() const {
   switch (mValue) {
-    case 5:
+    case TestEnum::Entry5:
       return "Entry5";
-    case 0:
+    case TestEnum::Entry1:
       return "Entry1";
-    case 1:
+    case TestEnum::Entry2:
       return "Entry2";
     default:
       return "INVALID";
@@ -81,7 +81,7 @@ bool TestEnum::ParseJson(const rapidjson::Value &json, const Converter &converte
   } else if (json.IsInt64()) {
     *this = TestEnum(json.GetInt64());
   } else {
-    *this = TestEnum(TestEnum::Invalid);
+    *this = TestEnum{};
     HOLGEN_WARN("Could not json-parse TestEnum enum: invalid json type");
     return false;
   }
@@ -99,7 +99,7 @@ TestEnum TestEnum::ReadFromLua(lua_State *luaState, int32_t idx) {
   } else if (typ == LUA_TNUMBER) {
     return TestEnum(lua_tonumber(luaState, idx));
   } else {
-    return TestEnum{Invalid};
+    return TestEnum{};
   }
 }
 

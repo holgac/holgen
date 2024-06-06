@@ -22,20 +22,20 @@ TestVariantStructType::Entry TestVariantStructType::GetValue() const {
 
 TestVariantStructType TestVariantStructType::FromString(std::string_view str) {
   if (str == "Human") {
-    return TestVariantStructType(0);
+    return TestVariantStructType(TestVariantStructType::Human);
   } else if (str == "Cat") {
-    return TestVariantStructType(1);
+    return TestVariantStructType(TestVariantStructType::Cat);
   } else {
     HOLGEN_WARN("{} is not a valid TestVariantStructType, returning invalid", str);
-    return TestVariantStructType(TestVariantStructType::Invalid);
+    return TestVariantStructType{};
   }
 }
 
 const char *TestVariantStructType::ToString() const {
   switch (mValue) {
-    case 0:
+    case TestVariantStructType::Human:
       return "Human";
-    case 1:
+    case TestVariantStructType::Cat:
       return "Cat";
     default:
       return "INVALID";
@@ -77,7 +77,7 @@ bool TestVariantStructType::ParseJson(const rapidjson::Value &json, const Conver
   } else if (json.IsInt64()) {
     *this = TestVariantStructType(json.GetInt64());
   } else {
-    *this = TestVariantStructType(TestVariantStructType::Invalid);
+    *this = TestVariantStructType{};
     HOLGEN_WARN("Could not json-parse TestVariantStructType enum: invalid json type");
     return false;
   }
@@ -95,7 +95,7 @@ TestVariantStructType TestVariantStructType::ReadFromLua(lua_State *luaState, in
   } else if (typ == LUA_TNUMBER) {
     return TestVariantStructType(lua_tonumber(luaState, idx));
   } else {
-    return TestVariantStructType{Invalid};
+    return TestVariantStructType{};
   }
 }
 

@@ -10,7 +10,8 @@
 #include "generator/plugins/ContainerFieldPlugin.h"
 #include "generator/plugins/CppDestructorPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
-#include "generator/plugins/EnumPlugin.h"
+#include "generator/plugins/enum/EnumPlugin.h"
+#include "generator/plugins/enum/BitmapPlugin.h"
 #include "generator/plugins/ManagedClassPlugin.h"
 #include "generator/plugins/helpers/FilesystemHelperPlugin.h"
 #include "generator/plugins/helpers/GlobalPointerPlugin.h"
@@ -41,6 +42,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<ContainerFieldPlugin>();
   AddPlugin<ManagedClassPlugin>();
   AddPlugin<EnumPlugin>();
+  AddPlugin<BitmapPlugin>();
   AddPlugin<JsonConverterPlugin>();
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();

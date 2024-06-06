@@ -119,7 +119,6 @@ struct ClassConstructor : ClassMethodBase {
   ClassConstructor() = default;
   std::list<ClassConstructorInitializer> mInitializerList;
   Explicitness mExplicitness = Explicitness::NotExplicit;
-  // bool isDeleted = false;
 };
 
 struct ClassDestructor : ClassMethodBase {

@@ -15,6 +15,8 @@
 #include "Person.h"
 #include "Race.h"
 #include "RaceId.h"
+#include "TestBitmap.h"
+#include "TestBitmapStruct.h"
 #include "TestContainerInnerStructNoId.h"
 #include "TestContainerInnerStructWithId.h"
 #include "TestContainerMap.h"
@@ -194,6 +196,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   Person::CreateLuaMetatable(luaState);
   Race::CreateLuaMetatable(luaState);
   RaceId::CreateLuaMetatable(luaState);
+  TestBitmapStruct::CreateLuaMetatable(luaState);
   TestContainerInnerStructNoId::CreateLuaMetatable(luaState);
   TestContainerInnerStructWithId::CreateLuaMetatable(luaState);
   TestContainerMap::CreateLuaMetatable(luaState);
@@ -217,6 +220,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestVariantStructHuman::CreateLuaMetatable(luaState);
   TestVariantStructSharedType::CreateLuaMetatable(luaState);
   Weapon::CreateLuaMetatable(luaState);
+  TestBitmap::PushEnumToLua(luaState);
   TestEnum::PushEnumToLua(luaState);
   TestStructArrayType::PushEnumToLua(luaState);
   TestVariantStructType::PushEnumToLua(luaState);
