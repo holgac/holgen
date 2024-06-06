@@ -29,7 +29,7 @@ int run(int argc, char **argv) {
               << std::endl;
     return -1;
   }
-  holgen::Parser parser;
+  holgen::ProjectDefinition projectDefinition;
   std::queue<std::filesystem::path> pathsQueue;
   pathsQueue.push(argv[1]);
 
@@ -46,7 +46,7 @@ int run(int argc, char **argv) {
       auto contents = ReadFile(entry.path());
       holgen::Tokenizer tokenizer(contents, entry.path().string());
       try {
-        parser.Parse(tokenizer);
+        holgen::Parser{projectDefinition, tokenizer}.Parse();
       } catch (holgen::Exception &exc) {
         std::cerr << "In file " << entry.path() << std::endl;
         throw;
@@ -54,10 +54,10 @@ int run(int argc, char **argv) {
     }
     pathsQueue.pop();
   }
-  parser.PostProcess();
+  holgen::Parser::PostProcess(projectDefinition);
   holgen::TranslatorSettings translatorSettings{argv[3]};
   holgen::Translator translator{translatorSettings};
-  auto project = translator.Translate(parser.GetProject());
+  auto project = translator.Translate(projectDefinition);
   auto generator = holgen::CodeGenerator({argv[4], argv[5]});
   auto results = generator.Generate(project);
   std::filesystem::path outDir(argv[2]);

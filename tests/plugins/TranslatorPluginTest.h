@@ -9,22 +9,24 @@ using namespace holgen;
 
 class TranslatorPluginTest : public ::testing::Test {
 protected:
+  ProjectDefinition mProjectDefinition;
+
   void SetUp() override {
-    mParser = Parser();
+    mProjectDefinition = {};
   }
 
   void TearDown() override {}
 
   TranslatedProject Parse(std::string_view input) {
     Tokenizer tokenizer(input, Source);
-    mParser.Parse(tokenizer);
-    return TranslatedProject(mParser.GetProject());
+    Parser{mProjectDefinition, tokenizer}.Parse();
+    return TranslatedProject(mProjectDefinition);
   }
 
   template <typename... Args>
   void ExpectErrorMessage(const std::string &input, std::function<void(TranslatedProject &)> run,
                           std::format_string<Args...> fmt, Args &&...args) {
-    Reset();
+    mProjectDefinition = {};
     auto project = Parse(helpers::Trim(input));
     EXPECT_THROW(
         {
@@ -40,11 +42,5 @@ protected:
         Exception);
   }
 
-  Parser mParser;
   const char *Source = "TranslatorPluginTest";
-
-private:
-  void Reset() {
-    mParser = {};
-  }
 };

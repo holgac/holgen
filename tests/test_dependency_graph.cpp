@@ -17,9 +17,9 @@ protected:
   void ExpectProcessOrder(const std::string &schema,
                           const std::vector<std::string> &expectedProcessOrder) {
     Tokenizer tokenizer(schema, "DependencyGraphTest");
-    Parser parser;
-    parser.Parse(tokenizer);
-    DependencyGraph dg(parser.GetProject());
+    ProjectDefinition projectDefinition;
+    Parser{projectDefinition, tokenizer}.Parse();
+    DependencyGraph dg(projectDefinition);
     auto &processOrder = dg.GetProcessOrder();
     ASSERT_EQ(processOrder.size(), expectedProcessOrder.size());
     for (size_t i = 0; i < processOrder.size(); ++i) {
@@ -29,12 +29,12 @@ protected:
 
   void ExpectErrorMessage(const std::string &schema, const std::string &expectedError) {
     Tokenizer tokenizer(schema, "DependencyGraphTest");
-    Parser parser;
-    parser.Parse(tokenizer);
+    ProjectDefinition projectDefinition;
+    Parser{projectDefinition, tokenizer}.Parse();
     EXPECT_THROW(
         {
           try {
-            DependencyGraph dg(parser.GetProject());
+            DependencyGraph dg(projectDefinition);
           } catch (Exception &exc) {
             std::string actualError = exc.what();
             actualError = actualError.substr(actualError.find(" ") + 1);

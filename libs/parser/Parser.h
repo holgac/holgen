@@ -7,10 +7,8 @@
 
 namespace holgen {
 class Parser {
-  // TODO: don't store ProjectDefinition here. Instead store a reference to it and pass via ctor
-  ProjectDefinition mProject;
-  // TODO: don't store Tokenizer ptr here. Instead store a reference to it and pass via ctor
-  Tokenizer *mCurTokenizer = nullptr;
+  ProjectDefinition &mProject;
+  Tokenizer &mTokenizer;
   void ParseFunction(Token &curToken, FunctionDefinition &functionDefinition);
   void ParseFunctionArgument(Token &curToken, FunctionArgumentDefinition &arg);
   void ParseStruct(StructDefinition &structDefinition);
@@ -25,14 +23,11 @@ class Parser {
   void FillDefinitionSource(DefinitionSource &definitionSource);
 
 public:
-  Parser();
-  void Parse(Tokenizer &tokenizer);
+  Parser(ProjectDefinition &project, Tokenizer &tokenizer);
+  void Parse();
 
-  const ProjectDefinition &GetProject() const {
-    return mProject;
-  }
-
-  void PostProcess();
+  // TODO: this shouldn't be here
+  static void PostProcess(ProjectDefinition &project);
 
   std::string ParseDefaultValue(Token &curToken);
 };

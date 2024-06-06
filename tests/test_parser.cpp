@@ -14,9 +14,9 @@ protected:
   ProjectDefinition Parse(const char *text) {
     auto trimmed = helpers::Trim(text);
     Tokenizer tokenizer(trimmed, Source);
-    Parser parser;
-    parser.Parse(tokenizer);
-    return parser.GetProject();
+    ProjectDefinition projectDefinition;
+    Parser{projectDefinition, tokenizer}.Parse();
+    return projectDefinition;
   }
 
   template <typename T>

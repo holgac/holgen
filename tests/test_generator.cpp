@@ -19,12 +19,12 @@ TEST(GeneratorTest, Helpers) {
   }
     )R",
                       "GeneratorTest");
-  Parser parser;
-  parser.Parse(tokenizer);
+  ProjectDefinition projectDefinition;
+  Parser{projectDefinition, tokenizer}.Parse();
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
+  auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mCMakeTarget = "generator_test_cmake",
       .mConfigHeader = "",
@@ -64,12 +64,12 @@ TEST(GeneratorTest, ClassWithGetters) {
   }
     )R",
                       "GeneratorTest");
-  Parser parser;
-  parser.Parse(tokenizer);
+  ProjectDefinition projectDefinition;
+  Parser{projectDefinition, tokenizer}.Parse();
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
+  auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mCMakeTarget = "generator_test_cmake",
       .mConfigHeader = "",
@@ -151,12 +151,12 @@ TEST(GeneratorTest, ClassWithContainers) {
   }
     )R",
                       "GeneratorTest");
-  Parser parser;
-  parser.Parse(tokenizer);
+  ProjectDefinition projectDefinition;
+  Parser{projectDefinition, tokenizer}.Parse();
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
+  auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mCMakeTarget = "generator_test_cmake",
       .mConfigHeader = "",
@@ -269,12 +269,12 @@ TEST(GeneratorTest, NestedClasses) {
   }
     )R",
                       "GeneratorTest");
-  Parser parser;
-  parser.Parse(tokenizer);
+  ProjectDefinition projectDefinition;
+  Parser{projectDefinition, tokenizer}.Parse();
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
+  auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mCMakeTarget = "generator_test_cmake",
       .mConfigHeader = "",
@@ -463,12 +463,12 @@ TEST(GeneratorTest, Converters) {
   }
     )R",
                       "GeneratorTest");
-  Parser parser;
-  parser.Parse(tokenizer);
+  ProjectDefinition projectDefinition;
+  Parser{projectDefinition, tokenizer}.Parse();
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
+  auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mCMakeTarget = "generator_test_cmake",
       .mConfigHeader = "",
@@ -695,12 +695,12 @@ TEST(GeneratorTest, DataManager) {
   }
     )R",
                       "GeneratorTest");
-  Parser parser;
-  parser.Parse(tokenizer);
+  ProjectDefinition projectDefinition;
+  Parser{projectDefinition, tokenizer}.Parse();
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
+  auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mCMakeTarget = "generator_test_cmake",
       .mConfigHeader = "",
@@ -807,12 +807,12 @@ TEST(GeneratorTest, NonCopyableStruct) {
   }
     )R",
                       "GeneratorTest");
-  Parser parser;
-  parser.Parse(tokenizer);
+  ProjectDefinition projectDefinition;
+  Parser{projectDefinition, tokenizer}.Parse();
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  auto translatedProject = Translator(translatorSettings).Translate(parser.GetProject());
+  auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mCMakeTarget = "generator_test_cmake",
       .mConfigHeader = "",
