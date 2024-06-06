@@ -141,11 +141,13 @@ void EnumPluginBase::GenerateOperators(Class &cls) {
   }
 }
 
-void EnumPluginBase::GenerateGetEntries(Class &cls) {
-  auto method = ClassMethod{"GetEntries", Type{"std::array"}, Visibility::Public,
-                            Constness::NotConst, Staticness::Static};
+void EnumPluginBase::GenerateGetEntries(Class &cls, const std::string &methodName,
+                                        const std::string &entrySuffix) {
+  auto method = ClassMethod{methodName, Type{"std::array"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
   method.mConstexprness = Constexprness::Constexpr;
-  method.mReturnType.mTemplateParameters.emplace_back(std::format("{}::Entry", cls.mName));
+  method.mReturnType.mTemplateParameters.emplace_back(
+      std::format("{}::Entry{}", cls.mName, entrySuffix));
   method.mReturnType.mTemplateParameters.emplace_back(
       std::format("{}", cls.mEnum->mEntries.size()));
   {
@@ -154,7 +156,7 @@ void EnumPluginBase::GenerateGetEntries(Class &cls) {
     for (size_t i = 0; i < cls.mEnum->mEntries.size(); ++i) {
       if (i > 0)
         line << ", ";
-      line << cls.mEnum->mEntries[i].mName;
+      line << cls.mEnum->mEntries[i].mName << entrySuffix;
     }
     line << "};";
   }

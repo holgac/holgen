@@ -11,7 +11,7 @@ void BitmapPlugin::Run() {
       continue;
     GenerateUnderlyingType(cls);
     GenerateValueField(cls);
-    GenerateClassEnum(cls, "BitPos");
+    GenerateClassEnum(cls, "Index");
     GenerateClassEnumForEntryValues(cls);
     GenerateIntegralConstructor(cls, "0");
     GenerateGetValue(cls);
@@ -23,7 +23,8 @@ void BitmapPlugin::Run() {
     GenerateBitmapOperators(cls);
     GenerateHasMethod(cls, true);
     GenerateHasMethod(cls, false);
-    GenerateGetEntries(cls);
+    GenerateGetEntries(cls, "GetEntries", "");
+    GenerateGetEntries(cls, "GetEntryIndices", "Index");
     GenerateFormatter(cls, true);
     GenerateFormatter(cls, false);
     Validate().Enum(cls);

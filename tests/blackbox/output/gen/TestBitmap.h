@@ -16,11 +16,11 @@ namespace holgen_blackbox_test {
 class TestBitmap {
 public:
   using UnderlyingType=int64_t;
-  enum EntryBitPos : UnderlyingType {
-    Entry5BitPos = 5,
-    Entry1BitPos = 0,
-    Entry2BitPos = 1,
-    Entry3BitPos = 2,
+  enum EntryIndex : UnderlyingType {
+    Entry5Index = 5,
+    Entry1Index = 0,
+    Entry2Index = 1,
+    Entry3Index = 2,
   };
   enum Entry : UnderlyingType {
     Entry5 = 32,
@@ -46,6 +46,9 @@ public:
   bool Has(const TestBitmap::Entry &val) const;
   constexpr static std::array<TestBitmap::Entry, 4> GetEntries() {
     return std::array<TestBitmap::Entry, 4>{Entry5, Entry1, Entry2, Entry3};
+  }
+  constexpr static std::array<TestBitmap::EntryIndex, 4> GetEntryIndices() {
+    return std::array<TestBitmap::EntryIndex, 4>{Entry5Index, Entry1Index, Entry2Index, Entry3Index};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;

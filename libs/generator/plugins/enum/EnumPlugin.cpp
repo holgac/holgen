@@ -17,7 +17,7 @@ void EnumPlugin::Run() {
     GenerateFromStringSingle(cls, "FromString", Visibility::Public);
     GenerateToStringSingle(cls, "ToString", Visibility::Public);
     GenerateOperators(cls);
-    GenerateGetEntries(cls);
+    GenerateGetEntries(cls, "GetEntries", "");
     GenerateHash(cls);
     GenerateFormatter(cls, true);
     GenerateFormatter(cls, false);

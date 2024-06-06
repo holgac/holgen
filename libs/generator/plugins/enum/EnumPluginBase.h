@@ -35,7 +35,8 @@ protected:
   void GenerateToStringSingle(Class &cls, const std::string &methodName, Visibility visibility);
   void GenerateOperator(Class &cls, const EnumOperator &op);
   void GenerateOperators(Class &cls);
-  void GenerateGetEntries(Class &cls);
+  void GenerateGetEntries(Class &cls, const std::string &methodName,
+                          const std::string &entrySuffix);
   void GenerateFormatter(Class &cls, bool forNestedEnum);
 };
 } // namespace holgen
