@@ -27,5 +27,6 @@ private:
                                     const std::string &varName, const std::string &rawFieldName);
   void GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                 const std::string &varName);
+  void GenerateSwitcherLoop(ClassMethod &method, CodeBlock &&codeBlock);
 };
 } // namespace holgen

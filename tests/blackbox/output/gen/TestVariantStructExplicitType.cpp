@@ -91,7 +91,6 @@ void TestVariantStructExplicitType::ResetType() {
 }
 
 bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructExplicitType");
   for (const auto &data: json.GetObject()) {
     const auto &name = data.name.GetString();
     if (0 == strcmp("type", name)) {
@@ -99,6 +98,12 @@ bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, cons
       auto res = JsonHelper::Parse(temp, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.type field");
       SetType(temp);
+    }
+  }
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructExplicitType");
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
+    if (0 == strcmp("type", name)) {
     } else if (0 == strcmp("being1", name)) {
       bool res;
       if (mType == TestVariantStructType::Cat) {

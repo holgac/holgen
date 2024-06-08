@@ -45,12 +45,23 @@ void JsonPlugin::Run() {
   }
 }
 
+void JsonPlugin::GenerateSwitcherLoop(ClassMethod &method, CodeBlock &&codeBlock) {
+  method.mBody.Add("for (const auto &data: json.GetObject()) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("const auto &name = data.name.GetString();");
+  method.mBody.Add(std::move(codeBlock));
+  method.mBody.Indent(-1);
+  method.mBody.Line() << "}"; // range based for on json.GetObject()
+}
+
 void JsonPlugin::GenerateParseJson(Class &cls) {
   auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("json",
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+
+  StringSwitcher variantSwitcher("name", {});
 
   CodeBlock stringSwitcherElseCase;
   stringSwitcherElseCase.Add(
@@ -62,12 +73,22 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
          field.mField->mType.mName == St::UserData))
       continue;
     const std::string *variantRawName = nullptr;
-    if (!field.mField && !IsVariantTypeField(cls, field, &variantRawName))
+    bool isVariantTypeField = IsVariantTypeField(cls, field, &variantRawName);
+    if (!field.mField && !isVariantTypeField)
       continue;
-    switcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
-                     [&](CodeBlock &switchBlock) {
-                       GenerateParseJsonForField(cls, switchBlock, field, "data.value");
-                     });
+    if (isVariantTypeField) {
+      variantSwitcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
+                              [&](CodeBlock &switchBlock) {
+                                GenerateParseJsonForField(cls, switchBlock, field, "data.value");
+                              });
+      switcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
+                       [&](CodeBlock &switchBlock HOLGEN_ATTRIBUTE_UNUSED) {});
+    } else {
+      switcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
+                       [&](CodeBlock &switchBlock) {
+                         GenerateParseJsonForField(cls, switchBlock, field, "data.value");
+                       });
+    }
   }
 
   for (const auto &luaMethod: cls.mMethods) {
@@ -77,6 +98,10 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
     switcher.AddCase(luaMethod.mFunction->mName, [&](CodeBlock &switchBlock) {
       GenerateParseJsonForFunction(cls, switchBlock, luaMethod);
     });
+  }
+
+  if (!variantSwitcher.IsEmpty()) {
+    GenerateSwitcherLoop(method, std::move(variantSwitcher.Generate()));
   }
 
   if (!switcher.IsEmpty()) {
@@ -90,12 +115,7 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
           cls.mName);
     }
 
-    method.mBody.Add("for (const auto &data: json.GetObject()) {{");
-    method.mBody.Indent(1);
-    method.mBody.Add("const auto &name = data.name.GetString();");
-    method.mBody.Add(std::move(switcher.Generate()));
-    method.mBody.Indent(-1);
-    method.mBody.Line() << "}"; // range based for on json.GetObject()
+    GenerateSwitcherLoop(method, std::move(switcher.Generate()));
     if (singleField) {
       method.mBody.Indent(-1);
       method.mBody.Add("}} else {{");

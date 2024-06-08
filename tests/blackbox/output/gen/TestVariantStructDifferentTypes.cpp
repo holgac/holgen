@@ -109,7 +109,6 @@ TestVariantStructType TestVariantStructDifferentTypes::GetBeing2Type() const {
 }
 
 bool TestVariantStructDifferentTypes::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructDifferentTypes");
   for (const auto &data: json.GetObject()) {
     const auto &name = data.name.GetString();
     if (0 == strcmp("being1Type", name)) {
@@ -117,6 +116,17 @@ bool TestVariantStructDifferentTypes::ParseJson(const rapidjson::Value &json, co
       auto res = JsonHelper::Parse(temp, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being1Type field");
       SetBeing1Type(temp);
+    } else if (0 == strcmp("being2Type", name)) {
+      TestVariantStructType temp;
+      auto res = JsonHelper::Parse(temp, data.value, converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being2Type field");
+      SetBeing2Type(temp);
+    }
+  }
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructDifferentTypes");
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
+    if (0 == strcmp("being1Type", name)) {
     } else if (0 == strcmp("being1", name)) {
       bool res;
       if (mBeing1Type == TestVariantStructType::Cat) {
@@ -129,10 +139,6 @@ bool TestVariantStructDifferentTypes::ParseJson(const rapidjson::Value &json, co
       }
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being1 variant field of type {}", mBeing1Type);
     } else if (0 == strcmp("being2Type", name)) {
-      TestVariantStructType temp;
-      auto res = JsonHelper::Parse(temp, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being2Type field");
-      SetBeing2Type(temp);
     } else if (0 == strcmp("being2", name)) {
       bool res;
       if (mBeing2Type == TestVariantStructType::Cat) {

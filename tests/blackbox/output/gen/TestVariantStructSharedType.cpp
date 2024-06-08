@@ -86,7 +86,6 @@ TestVariantStructType TestVariantStructSharedType::GetBeingType() const {
 }
 
 bool TestVariantStructSharedType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructSharedType");
   for (const auto &data: json.GetObject()) {
     const auto &name = data.name.GetString();
     if (0 == strcmp("beingType", name)) {
@@ -94,6 +93,12 @@ bool TestVariantStructSharedType::ParseJson(const rapidjson::Value &json, const 
       auto res = JsonHelper::Parse(temp, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructSharedType.beingType field");
       SetBeingType(temp);
+    }
+  }
+  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructSharedType");
+  for (const auto &data: json.GetObject()) {
+    const auto &name = data.name.GetString();
+    if (0 == strcmp("beingType", name)) {
     } else if (0 == strcmp("being1", name)) {
       bool res;
       if (mBeingType == TestVariantStructType::Cat) {
