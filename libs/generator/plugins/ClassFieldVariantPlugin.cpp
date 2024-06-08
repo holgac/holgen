@@ -1,4 +1,5 @@
 #include "ClassFieldVariantPlugin.h"
+
 #include "core/Annotations.h"
 #include "core/Exception.h"
 #include "core/St.h"
@@ -9,6 +10,100 @@ void ClassFieldVariantPlugin::Run() {
     if (cls.mStruct == nullptr)
       continue;
     ProcessStructDefinition(cls, *cls.mStruct);
+  }
+}
+
+void ClassFieldVariantPlugin::GenerateAssignmentMethod(
+    Class &cls, ClassMethodBase &method, const std::set<std::string> &variantTypeFields,
+    bool isMove) {
+  for (auto &variantTypeField: variantTypeFields) {
+    method.mBody.Add("{}();", Naming().VariantResetterNameInCpp(variantTypeField));
+    method.mBody.Add("{}(rhs.{});", Naming().FieldSetterNameInCpp(variantTypeField),
+                     Naming().FieldNameInCpp(variantTypeField));
+  }
+  for (auto &variantTypeField: variantTypeFields) {
+    ProcessVariantTypeCommon(cls, variantTypeField, method,
+                             isMove ? VariantTypeProcessType::Mover
+                                    : VariantTypeProcessType::Copier);
+  }
+
+  for (auto &field: cls.mFields) {
+    if (field.mField &&
+        (variantTypeFields.contains(field.mField->mName) ||
+         field.mField->GetAnnotation(Annotations::Variant))) {
+      continue;
+    }
+    if (isMove) {
+      method.mBody.Add("{0} = std::move(rhs.{0});", field.mName);
+    } else {
+      method.mBody.Add("{0} = rhs.{0};", field.mName);
+    }
+  }
+  if (isMove) {
+    for (auto &variantTypeField: variantTypeFields) {
+      method.mBody.Add("rhs.{}();", Naming().VariantResetterNameInCpp(variantTypeField));
+    }
+  }
+}
+
+void ClassFieldVariantPlugin::GenerateAssignmentMethods(
+    Class &cls, const std::set<std::string> &variantTypeFields) {
+  auto existingMoveCtor = cls.GetMoveConstructor();
+  if (existingMoveCtor) {
+    THROW_IF(existingMoveCtor->mDefaultDelete == DefaultDelete::Neither,
+             "Cannot touch existing move constructor!");
+    existingMoveCtor->mDefaultDelete = DefaultDelete::Neither;
+    GenerateAssignmentMethod(cls, *existingMoveCtor, variantTypeFields, true);
+  } else {
+    auto ctor = ClassConstructor{};
+    ctor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
+    GenerateAssignmentMethod(cls, ctor, variantTypeFields, true);
+    cls.mConstructors.push_back(std::move(ctor));
+  }
+
+  auto existingMoveOp = cls.GetMoveAssignment();
+  if (existingMoveOp) {
+    THROW_IF(existingMoveOp->mDefaultDelete == DefaultDelete::Neither,
+             "Cannot touch existing move operator!");
+    existingMoveOp->mDefaultDelete = DefaultDelete::Neither;
+    GenerateAssignmentMethod(cls, *existingMoveOp, variantTypeFields, true);
+    existingMoveOp->mBody.Add("return *this;");
+  } else {
+    auto op = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public,
+                          Constness::NotConst};
+    op.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
+    GenerateAssignmentMethod(cls, op, variantTypeFields, true);
+    op.mBody.Add("return *this;");
+    cls.mMethods.push_back(std::move(op));
+  }
+
+  auto existingCopyCtor = cls.GetCopyConstructor();
+  if (existingCopyCtor) {
+    THROW_IF(existingCopyCtor->mDefaultDelete == DefaultDelete::Neither,
+             "Cannot touch existing copy constructor!");
+    existingCopyCtor->mDefaultDelete = DefaultDelete::Neither;
+    GenerateAssignmentMethod(cls, *existingCopyCtor, variantTypeFields, false);
+  } else {
+    auto ctor = ClassConstructor{};
+    ctor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
+    GenerateAssignmentMethod(cls, ctor, variantTypeFields, false);
+    cls.mConstructors.push_back(std::move(ctor));
+  }
+
+  auto existingCopyOp = cls.GetCopyAssignment();
+  if (existingCopyOp) {
+    THROW_IF(existingCopyOp->mDefaultDelete == DefaultDelete::Neither,
+             "Cannot touch existing copy operator!");
+    existingCopyOp->mDefaultDelete = DefaultDelete::Neither;
+    GenerateAssignmentMethod(cls, *existingCopyOp, variantTypeFields, false);
+    existingCopyOp->mBody.Add("return *this;");
+  } else {
+    auto op = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public,
+                          Constness::NotConst};
+    op.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
+    GenerateAssignmentMethod(cls, op, variantTypeFields, false);
+    op.mBody.Add("return *this;");
+    cls.mMethods.push_back(std::move(op));
   }
 }
 
@@ -28,6 +123,10 @@ void ClassFieldVariantPlugin::ProcessStructDefinition(Class &cls,
   }
   for (auto &variantType: variantTypeFields) {
     ProcessVariantType(cls, variantType);
+  }
+
+  if (!variantTypeFields.empty()) {
+    GenerateAssignmentMethods(cls, variantTypeFields);
   }
 }
 
@@ -109,13 +208,13 @@ void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &
   if (auto setter =
           cls.GetMethod(Naming().FieldSetterNameInCpp(typeFieldName), Constness::NotConst)) {
     setter->mBody = {};
-    ProcessVariantTypeSetter(cls, typeFieldName, *setter, false);
+    ProcessVariantTypeCommon(cls, typeFieldName, *setter, VariantTypeProcessType::Setter);
   } else {
     auto method = ClassMethod{Naming().FieldSetterNameInCpp(typeFieldName), Type{"void"},
                               Visibility::Public, Constness::NotConst};
     auto &arg = method.mArguments.emplace_back("val", typeField->mType);
     arg.mType.PreventCopying();
-    ProcessVariantTypeSetter(cls, typeFieldName, method, false);
+    ProcessVariantTypeCommon(cls, typeFieldName, method, VariantTypeProcessType::Setter);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
@@ -123,7 +222,7 @@ void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &
   {
     auto method = ClassMethod{Naming().VariantResetterNameInCpp(typeFieldName), Type{"void"},
                               Visibility::Public, Constness::NotConst};
-    ProcessVariantTypeSetter(cls, typeFieldName, method, true);
+    ProcessVariantTypeCommon(cls, typeFieldName, method, VariantTypeProcessType::Resetter);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
@@ -136,16 +235,17 @@ void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &
   }
 }
 
-void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::string &typeFieldName,
-                                                       ClassMethod &method, bool isResetter) {
+void ClassFieldVariantPlugin::ProcessVariantTypeCommon(Class &cls, const std::string &typeFieldName,
+                                                       ClassMethodBase &method,
+                                                       VariantTypeProcessType processType) {
   auto typeField = cls.GetField(Naming().FieldNameInCpp(typeFieldName));
-  if (isResetter) {
+  if (processType == VariantTypeProcessType::Resetter) {
     method.mBody.Add("if ({} == {}::Invalid) {{", typeField->mName, typeField->mType.mName);
     method.mBody.Indent(1);
     method.mBody.Add("return;");
     method.mBody.Indent(-1);
     method.mBody.Add("}}");
-  } else {
+  } else if (processType == VariantTypeProcessType::Setter) {
     method.mBody.Add(
         R"R(HOLGEN_FAIL_IF({0} != {1}::Invalid, "{2} field was already initialized (as {{}}), trying to initialize as {{}}!,", {0}, val);)R",
         typeField->mName, typeField->mType.mName, typeFieldName);
@@ -162,7 +262,7 @@ void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::st
   }
   bool isFirst = true;
   std::string varNameToCheck = "val";
-  if (isResetter) {
+  if (processType != VariantTypeProcessType::Setter) {
     varNameToCheck = typeField->mName;
   }
   auto matchingClasses = mProject.GetVariantClassesOfEnum(typeField->mType.mName);
@@ -183,12 +283,18 @@ void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::st
     }
     method.mBody.Indent(1);
     for (auto &field: matchingFields) {
-      if (isResetter) {
+      if (processType == VariantTypeProcessType::Resetter) {
         method.mBody.Add("{}()->~{}();",
                          Naming().VariantGetterNameInCpp(*field->mField, projectStruct),
                          projectStruct.mName);
-      } else {
+      } else if (processType == VariantTypeProcessType::Setter) {
         method.mBody.Add("new ({}.data()) {}();", field->mName, projectStruct.mName);
+      } else if (processType == VariantTypeProcessType::Mover) {
+        method.mBody.Add("*{0}() = std::move(*rhs.{0}());",
+                         Naming().VariantGetterNameInCpp(*field->mField, projectStruct));
+      } else {
+        method.mBody.Add("*{0}() = *rhs.{0}();",
+                         Naming().VariantGetterNameInCpp(*field->mField, projectStruct));
       }
     }
     method.mBody.Indent(-1);
@@ -198,7 +304,7 @@ void ClassFieldVariantPlugin::ProcessVariantTypeSetter(Class &cls, const std::st
     method.mBody.Add("}}");
   }
 
-  if (isResetter) {
+  if (processType == VariantTypeProcessType::Resetter) {
     method.mBody.Add("{0} = {1}({1}::Invalid);", typeField->mName, typeField->mType.mName);
   }
 }

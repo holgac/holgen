@@ -3,10 +3,12 @@
 #include "TranslatorPlugin.h"
 
 namespace holgen {
-class ClassFieldSetterPlugin : public TranslatorPlugin {
+class ClassRuleOfFivePlugin : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
-  bool IsNonCopyable(const std::string &structName);
   void Run() override;
+
+private:
+  void ProcessClass(Class &cls);
 };
 } // namespace holgen

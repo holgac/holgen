@@ -39,6 +39,63 @@ GEN_GETTER_BY_NAME(Class, TemplateParameter, GetTemplateParameter, mTemplatePara
 
 GEN_GETTER_BY_NAME(Class, ClassEnum, GetNestedEnum, mNestedEnums)
 
+ClassConstructor *Class::GetMoveConstructor() {
+  for (auto &ctor: mConstructors) {
+    if (ctor.mArguments.size() != 1)
+      continue;
+    if (ctor.mArguments.front().mType != Type{mName, PassByType::MoveReference})
+      continue;
+    return &ctor;
+  }
+  return nullptr;
+}
+
+ClassConstructor *Class::GetCopyConstructor() {
+  for (auto &ctor: mConstructors) {
+    if (ctor.mArguments.size() != 1)
+      continue;
+    if (ctor.mArguments.front().mType != Type{mName, PassByType::Reference, Constness::Const})
+      continue;
+    return &ctor;
+  }
+  return nullptr;
+}
+
+ClassConstructor *Class::GetDefaultConstructor() {
+  for (auto &ctor: mConstructors) {
+    if (ctor.mArguments.size() == 0) {
+      return &ctor;
+    }
+  }
+  return nullptr;
+}
+
+ClassMethod *Class::GetMoveAssignment() {
+  for (auto &method: mMethods) {
+    if (method.mName != "operator=")
+      continue;
+    if (method.mArguments.size() != 1)
+      continue;
+    if (method.mArguments.front().mType != Type{mName, PassByType::MoveReference})
+      continue;
+    return &method;
+  }
+  return nullptr;
+}
+
+ClassMethod *Class::GetCopyAssignment() {
+  for (auto &method: mMethods) {
+    if (method.mName != "operator=")
+      continue;
+    if (method.mArguments.size() != 1)
+      continue;
+    if (method.mArguments.front().mType != Type{mName, PassByType::Reference, Constness::Const})
+      continue;
+    return &method;
+  }
+  return nullptr;
+}
+
 ClassField *Class::GetFieldFromDefinitionName(const std::string &name) {
   for (auto &field: mFields) {
     if (field.mField && field.mField->mName == name) {

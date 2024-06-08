@@ -8,9 +8,37 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+TestVariantStructSharedType::TestVariantStructSharedType(TestVariantStructSharedType &&rhs) {
+  ResetBeingType();
+  SetBeingType(rhs.mBeingType);
+  if (mBeingType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
+    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
+  } else if (mBeingType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
+    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
+  }
+  mBeingType = std::move(rhs.mBeingType);
+  rhs.ResetBeingType();
+}
+
+TestVariantStructSharedType::TestVariantStructSharedType(const TestVariantStructSharedType &rhs) {
+  ResetBeingType();
+  SetBeingType(rhs.mBeingType);
+  if (mBeingType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
+    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
+  } else if (mBeingType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
+    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
+  }
+  mBeingType = rhs.mBeingType;
+}
+
 TestVariantStructSharedType::~TestVariantStructSharedType() {
   ResetBeingType();
 }
+
 bool TestVariantStructSharedType::operator==(const TestVariantStructSharedType &rhs) const {
   return true;
 }
@@ -83,6 +111,35 @@ void TestVariantStructSharedType::ResetBeingType() {
 
 TestVariantStructType TestVariantStructSharedType::GetBeingType() const {
   return mBeingType;
+}
+
+TestVariantStructSharedType &TestVariantStructSharedType::operator=(TestVariantStructSharedType &&rhs) {
+  ResetBeingType();
+  SetBeingType(rhs.mBeingType);
+  if (mBeingType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
+    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
+  } else if (mBeingType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
+    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
+  }
+  mBeingType = std::move(rhs.mBeingType);
+  rhs.ResetBeingType();
+  return *this;
+}
+
+TestVariantStructSharedType &TestVariantStructSharedType::operator=(const TestVariantStructSharedType &rhs) {
+  ResetBeingType();
+  SetBeingType(rhs.mBeingType);
+  if (mBeingType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
+    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
+  } else if (mBeingType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
+    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
+  }
+  mBeingType = rhs.mBeingType;
+  return *this;
 }
 
 bool TestVariantStructSharedType::ParseJson(const rapidjson::Value &json, const Converter &converter) {

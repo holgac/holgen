@@ -17,6 +17,9 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructSharedType {
 public:
+  TestVariantStructSharedType(TestVariantStructSharedType &&rhs);
+  TestVariantStructSharedType(const TestVariantStructSharedType &rhs);
+  TestVariantStructSharedType() = default;
   ~TestVariantStructSharedType();
   bool operator==(const TestVariantStructSharedType &rhs) const;
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
@@ -30,6 +33,8 @@ public:
   void SetBeingType(const TestVariantStructType &val);
   void ResetBeingType();
   TestVariantStructType GetBeingType() const;
+  TestVariantStructSharedType &operator=(TestVariantStructSharedType &&rhs);
+  TestVariantStructSharedType &operator=(const TestVariantStructSharedType &rhs);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

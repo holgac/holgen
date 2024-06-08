@@ -17,6 +17,9 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructDifferentTypes {
 public:
+  TestVariantStructDifferentTypes(TestVariantStructDifferentTypes &&rhs);
+  TestVariantStructDifferentTypes(const TestVariantStructDifferentTypes &rhs);
+  TestVariantStructDifferentTypes() = default;
   ~TestVariantStructDifferentTypes();
   bool operator==(const TestVariantStructDifferentTypes &rhs) const;
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
@@ -33,6 +36,8 @@ public:
   void SetBeing2Type(const TestVariantStructType &val);
   void ResetBeing2Type();
   TestVariantStructType GetBeing2Type() const;
+  TestVariantStructDifferentTypes &operator=(TestVariantStructDifferentTypes &&rhs);
+  TestVariantStructDifferentTypes &operator=(const TestVariantStructDifferentTypes &rhs);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

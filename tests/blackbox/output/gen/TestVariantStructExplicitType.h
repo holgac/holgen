@@ -17,6 +17,9 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructExplicitType {
 public:
+  TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs);
+  TestVariantStructExplicitType(const TestVariantStructExplicitType &rhs);
+  TestVariantStructExplicitType() = default;
   ~TestVariantStructExplicitType();
   bool operator==(const TestVariantStructExplicitType &rhs) const;
   const TestVariantStructType &GetType() const;
@@ -31,6 +34,8 @@ public:
   const TestVariantStructHuman *GetBeing2AsTestVariantStructHuman() const;
   TestVariantStructHuman *GetBeing2AsTestVariantStructHuman();
   void ResetType();
+  TestVariantStructExplicitType &operator=(TestVariantStructExplicitType &&rhs);
+  TestVariantStructExplicitType &operator=(const TestVariantStructExplicitType &rhs);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

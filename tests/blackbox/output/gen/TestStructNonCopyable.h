@@ -16,6 +16,7 @@ public:
   TestStructNonCopyable() = default;
   TestStructNonCopyable(TestStructNonCopyable &&rhs) = default;
   TestStructNonCopyable(const TestStructNonCopyable &rhs) = delete;
+  ~TestStructNonCopyable() = default;
   TestStructNonCopyable &operator=(TestStructNonCopyable &&rhs) = default;
   TestStructNonCopyable &operator=(const TestStructNonCopyable &rhs) = delete;
   bool operator==(const TestStructNonCopyable &rhs) const;

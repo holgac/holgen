@@ -22,6 +22,7 @@
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
 #include "generator/plugins/lua/LuaHelperPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
+#include "generator/plugins/ClassRuleOfFivePlugin.h"
 
 namespace holgen {
 
@@ -51,6 +52,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<LuaHelperPlugin>();
   AddPlugin<GlobalPointerPlugin>();
   AddPlugin<FilesystemHelperPlugin>();
+  AddPlugin<ClassRuleOfFivePlugin>();
 }
 
 TranslatedProject Translator::Translate(const ProjectDefinition &project) const {

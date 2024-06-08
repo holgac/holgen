@@ -832,6 +832,7 @@ public:
   Person() = default;
   Person(Person &&rhs) = default;
   Person(const Person &rhs) = delete;
+  ~Person() = default;
   Person &operator=(Person &&rhs) = default;
   Person &operator=(const Person &rhs) = delete;
   bool operator==(const Person &rhs) const;

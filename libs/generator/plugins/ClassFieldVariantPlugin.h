@@ -12,7 +12,16 @@ private:
   void ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition);
   void ProcessVariantField(Class &cls, const FieldDefinition &fieldDefinition);
   void ProcessVariantType(Class &cls, const std::string &typeFieldName);
-  void ProcessVariantTypeSetter(Class &cls, const std::string &typeFieldName, ClassMethod &method,
-                                bool isResetter);
+  enum class VariantTypeProcessType {
+    Setter,
+    Resetter,
+    Mover,
+    Copier,
+  };
+  void ProcessVariantTypeCommon(Class &cls, const std::string &typeFieldName,
+                                ClassMethodBase &method, VariantTypeProcessType processType);
+  void GenerateAssignmentMethod(Class &cls, ClassMethodBase &method,
+                                const std::set<std::string> &variantTypeFields, bool isMove);
+  void GenerateAssignmentMethods(Class &cls, const std::set<std::string> &variantTypeFields);
 };
 } // namespace holgen

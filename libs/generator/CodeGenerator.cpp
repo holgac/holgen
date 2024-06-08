@@ -656,6 +656,10 @@ CodeBlock CodeGenerator::GenerateDestructor(const Class &cls, Visibility visibil
   if (isHeader) {
     if (!definedInHeader) {
       codeBlock.Add("~{}();", cls.mName);
+    } else if (cls.mDestructor->mDefaultDelete == DefaultDelete::Default) {
+      codeBlock.Add("~{}() = default;", cls.mName);
+    } else if (cls.mDestructor->mDefaultDelete == DefaultDelete::Delete) {
+      codeBlock.Add("~{}() = delete;", cls.mName);
     } else {
       codeBlock.Add("~{}() {{", cls.mName);
       codeBlock.Indent(1);

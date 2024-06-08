@@ -191,6 +191,11 @@ struct Class {
   [[nodiscard]] const Using *GetUsing(const std::string &name) const;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
   [[nodiscard]] const ClassEnum *GetNestedEnum(const std::string &name) const;
+  [[nodiscard]] ClassConstructor *GetMoveConstructor();
+  [[nodiscard]] ClassConstructor *GetCopyConstructor();
+  [[nodiscard]] ClassConstructor *GetDefaultConstructor();
+  [[nodiscard]] ClassMethod *GetMoveAssignment();
+  [[nodiscard]] ClassMethod *GetCopyAssignment();
 
   [[nodiscard]] auto GetMethods(const std::string &name) const {
     return NameFilterForEachWrapper(name, mMethods);
