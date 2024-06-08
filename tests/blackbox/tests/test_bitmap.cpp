@@ -23,7 +23,7 @@ TEST_F(BitmapTest, Operators) {
   lType = TestBitmap::Entry2;
   EXPECT_EQ(lType, TestBitmap::Entry2);
 
-  lType = 32;
+  lType = 16;
   EXPECT_EQ(lType, TestBitmap::Entry5);
 }
 
@@ -48,7 +48,7 @@ TEST_F(BitmapTest, JsonStringMultiple) {
 TEST_F(BitmapTest, JsonIntegral) {
   TestBitmapStruct testBitmapStruct;
   rapidjson::Document doc;
-  doc.Parse(R"R({"bitmapField": 33})R");
+  doc.Parse(R"R({"bitmapField": 17})R");
   testBitmapStruct.ParseJson(doc, {});
   EXPECT_TRUE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry5));
   EXPECT_TRUE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry1));
@@ -57,7 +57,7 @@ TEST_F(BitmapTest, JsonIntegral) {
 
 TEST_F(BitmapTest, GetEntries) {
   EXPECT_THAT(TestBitmap::GetEntries(),
-              ::testing::ElementsAre(TestBitmap::Entry5, TestBitmap::Entry1, TestBitmap::Entry2, TestBitmap::Entry3));
+              ::testing::ElementsAre(TestBitmap::Entry1, TestBitmap::Entry2, TestBitmap::Entry3, TestBitmap::Entry4, TestBitmap::Entry5));
 }
 
 TEST_F(BitmapTest, Formatter) {
@@ -65,7 +65,7 @@ TEST_F(BitmapTest, Formatter) {
   EXPECT_EQ(std::format("{}", TestBitmap(TestBitmap::Entry1)), "Entry1");
   EXPECT_EQ(std::format("{}", TestBitmap(TestBitmap::Entry2)), "Entry2");
   EXPECT_EQ(std::format("{}", TestBitmap(TestBitmap::Entry5)), "Entry5");
-  EXPECT_EQ(std::format("{}", TestBitmap(32)), "Entry5");
+  EXPECT_EQ(std::format("{}", TestBitmap(16)), "Entry5");
 }
 
 TEST_F(BitmapTest, FormatterMultiple) {
@@ -74,6 +74,6 @@ TEST_F(BitmapTest, FormatterMultiple) {
   tb |= TestBitmap::Entry1;
   EXPECT_EQ(std::format("{}", tb), "Entry1");
   tb |= TestBitmap::Entry5;
-  EXPECT_EQ(std::format("{}", tb), "Entry5,Entry1");
+  EXPECT_EQ(std::format("{}", tb), "Entry1,Entry5");
   EXPECT_EQ(std::format("{}", TestBitmap(3)), "Entry1,Entry2");
 }

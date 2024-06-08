@@ -18,14 +18,16 @@ TestBitmap::UnderlyingType TestBitmap::GetValue() const {
 }
 
 TestBitmap TestBitmap::FromStringSingle(std::string_view str) {
-  if (str == "Entry5") {
-    return TestBitmap(TestBitmap::Entry5);
-  } else if (str == "Entry1") {
+  if (str == "Entry1") {
     return TestBitmap(TestBitmap::Entry1);
   } else if (str == "Entry2") {
     return TestBitmap(TestBitmap::Entry2);
   } else if (str == "Entry3") {
     return TestBitmap(TestBitmap::Entry3);
+  } else if (str == "Entry4") {
+    return TestBitmap(TestBitmap::Entry4);
+  } else if (str == "Entry5") {
+    return TestBitmap(TestBitmap::Entry5);
   } else {
     HOLGEN_WARN("{} is not a valid TestBitmap, returning invalid", str);
     return TestBitmap{};
@@ -46,14 +48,16 @@ TestBitmap TestBitmap::FromString(std::string_view str) {
 
 const char *TestBitmap::ToStringSingle() const {
   switch (mValue) {
-    case TestBitmap::Entry5:
-      return "Entry5";
     case TestBitmap::Entry1:
       return "Entry1";
     case TestBitmap::Entry2:
       return "Entry2";
     case TestBitmap::Entry3:
       return "Entry3";
+    case TestBitmap::Entry4:
+      return "Entry4";
+    case TestBitmap::Entry5:
+      return "Entry5";
     default:
       return "INVALID";
   }
@@ -156,9 +160,6 @@ TestBitmap TestBitmap::ReadFromLua(lua_State *luaState, int32_t idx) {
 
 void TestBitmap::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
-  lua_pushstring(luaState, "Entry5");
-  lua_pushnumber(luaState, 5);
-  lua_settable(luaState, -3);
   lua_pushstring(luaState, "Entry1");
   lua_pushnumber(luaState, 0);
   lua_settable(luaState, -3);
@@ -168,19 +169,27 @@ void TestBitmap::PushEnumToLua(lua_State *luaState) {
   lua_pushstring(luaState, "Entry3");
   lua_pushnumber(luaState, 2);
   lua_settable(luaState, -3);
-  lua_pushstring(luaState, "Invalid");
+  lua_pushstring(luaState, "Entry4");
   lua_pushnumber(luaState, 3);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Entry5");
-  lua_rawseti(luaState, -2, 5);
+  lua_pushnumber(luaState, 4);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "Invalid");
+  lua_pushnumber(luaState, 5);
+  lua_settable(luaState, -3);
   lua_pushstring(luaState, "Entry1");
   lua_rawseti(luaState, -2, 0);
   lua_pushstring(luaState, "Entry2");
   lua_rawseti(luaState, -2, 1);
   lua_pushstring(luaState, "Entry3");
   lua_rawseti(luaState, -2, 2);
-  lua_pushstring(luaState, "Invalid");
+  lua_pushstring(luaState, "Entry4");
   lua_rawseti(luaState, -2, 3);
+  lua_pushstring(luaState, "Entry5");
+  lua_rawseti(luaState, -2, 4);
+  lua_pushstring(luaState, "Invalid");
+  lua_rawseti(luaState, -2, 5);
   lua_setglobal(luaState, "TestBitmap");
 }
 }

@@ -17,16 +17,18 @@ class TestBitmap {
 public:
   using UnderlyingType=int64_t;
   enum EntryIndex : UnderlyingType {
-    Entry5Index = 5,
     Entry1Index = 0,
     Entry2Index = 1,
     Entry3Index = 2,
+    Entry4Index = 3,
+    Entry5Index = 4,
   };
   enum Entry : UnderlyingType {
-    Entry5 = 32,
     Entry1 = 1,
     Entry2 = 2,
     Entry3 = 4,
+    Entry4 = 8,
+    Entry5 = 16,
   };
   explicit TestBitmap(UnderlyingType value = 0);
   UnderlyingType GetValue() const;
@@ -44,11 +46,11 @@ public:
   bool operator|(const TestBitmap &rhs) const;
   bool Has(const TestBitmap &val) const;
   bool Has(const TestBitmap::Entry &val) const;
-  constexpr static std::array<TestBitmap::Entry, 4> GetEntries() {
-    return std::array<TestBitmap::Entry, 4>{Entry5, Entry1, Entry2, Entry3};
+  constexpr static std::array<TestBitmap::Entry, 5> GetEntries() {
+    return std::array<TestBitmap::Entry, 5>{Entry1, Entry2, Entry3, Entry4, Entry5};
   }
-  constexpr static std::array<TestBitmap::EntryIndex, 4> GetEntryIndices() {
-    return std::array<TestBitmap::EntryIndex, 4>{Entry5Index, Entry1Index, Entry2Index, Entry3Index};
+  constexpr static std::array<TestBitmap::EntryIndex, 5> GetEntryIndices() {
+    return std::array<TestBitmap::EntryIndex, 5>{Entry1Index, Entry2Index, Entry3Index, Entry4Index, Entry5Index};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;

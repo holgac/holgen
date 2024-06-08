@@ -133,8 +133,6 @@ void Parser::ParseField(Token &curToken, FieldDefinition &fieldDefinition) {
   fieldDefinition.mName = curToken.mContents;
   PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete field definition!");
   if (curToken.mType == TokenType::Equals) {
-    // TODO: test this
-    PARSER_THROW_IF(!fieldDefinition.mType.mArraySize.empty(), "Arrays cannot have default values");
     NEXT_OR_THROW(curToken, "Incomplete field definition!");
     fieldDefinition.mDefaultValue = ParseDefaultValue(curToken);
   }
@@ -267,6 +265,8 @@ void Parser::ParseEnumEntry(Token &curToken, EnumDefinition &enumDefinition,
   if (curToken.mType == TokenType::SemiColon) {
     return;
   }
+  PARSER_THROW_IF(enumDefinition.mType == EnumDefinitionType::Bitmap,
+                  "Bitmaps do not support custom values")
   PARSER_THROW_IF(curToken.mType != TokenType::Equals,
                   "Enum entry name should be followed by a ';' or a '='");
   NEXT_OR_THROW(curToken, "Incomplete enum entry definition: {}.{}", enumDefinition.mName,
