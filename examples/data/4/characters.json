@@ -1,0 +1,10 @@
+[
+  {
+    "name": "knight",
+    "armor": {
+      "dirtAmount": 5,
+      "armor": "plate mail"
+    },
+    "weapon": "short sword"
+  }
+]

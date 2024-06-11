@@ -1,0 +1,4 @@
+[
+  {"name": "short sword", "damageMin": 10, "damageMax":  20},
+  {"name": "long sword", "damageMin": 15, "damageMax":  25}
+]
