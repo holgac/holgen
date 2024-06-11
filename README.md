@@ -12,7 +12,7 @@ changes. A Long Term Support version will be published eventually.
 ## Embedding in your project
 
 Compile holgen cli application and put it in your PATH. Holgen is smart enough that it won't rewrite files if the
-contents so you can integrate it with your build system. Or if you're lazy, just create a bash script like this:
+contents are the same so you can integrate it with your build system. Or if you're lazy, just create a bash script like this:
 
 ```
 #!/usr/bin/env bash

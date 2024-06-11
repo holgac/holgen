@@ -23,8 +23,8 @@ TestVariantStructDifferentTypes::TestVariantStructDifferentTypes(TestVariantStru
   } else if (mBeing2Type == TestVariantStructType::Human) {
     *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
   }
-  mBeing1Type = std::move(rhs.mBeing1Type);
-  mBeing2Type = std::move(rhs.mBeing2Type);
+  mBeing1Type = rhs.mBeing1Type;
+  mBeing2Type = rhs.mBeing2Type;
   rhs.ResetBeing1Type();
   rhs.ResetBeing2Type();
 }
@@ -164,8 +164,8 @@ TestVariantStructDifferentTypes &TestVariantStructDifferentTypes::operator=(Test
   } else if (mBeing2Type == TestVariantStructType::Human) {
     *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
   }
-  mBeing1Type = std::move(rhs.mBeing1Type);
-  mBeing2Type = std::move(rhs.mBeing2Type);
+  mBeing1Type = rhs.mBeing1Type;
+  mBeing2Type = rhs.mBeing2Type;
   rhs.ResetBeing1Type();
   rhs.ResetBeing2Type();
   return *this;

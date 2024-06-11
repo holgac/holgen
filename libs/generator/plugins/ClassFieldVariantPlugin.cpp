@@ -33,8 +33,13 @@ void ClassFieldVariantPlugin::GenerateAssignmentMethod(
          field.mField->GetAnnotation(Annotations::Variant))) {
       continue;
     }
-    if (isMove) {
+    bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(field.mType.mName);
+    if (isMove && isPrimitive) {
       method.mBody.Add("{0} = std::move(rhs.{0});", field.mName);
+    } else if (isMove && field.mType.mName == St::UserData) {
+      // TODO: annotation to specify userdata move behaviour. Userdata could be copyable (if it
+      // points to some common data) or not (if it's allocated). Swap works for both.
+      method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
     } else {
       method.mBody.Add("{0} = rhs.{0};", field.mName);
     }

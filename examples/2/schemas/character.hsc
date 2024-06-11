@@ -38,7 +38,7 @@ struct Weapon : Object {
     u8 damageMax;
     // If we want to set multiple values together to ensure they're consistent, we can disable their setters and write
     // a custom function.
-    // If we don't want this called from lua,
+    // In this example we don't want this called from lua for some reason, so we annotate it with noLua
     @noLua
     func SetDamage(u8 min, u8 max);
 

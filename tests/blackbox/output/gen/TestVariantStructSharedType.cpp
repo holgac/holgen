@@ -18,7 +18,7 @@ TestVariantStructSharedType::TestVariantStructSharedType(TestVariantStructShared
     *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
     *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
   }
-  mBeingType = std::move(rhs.mBeingType);
+  mBeingType = rhs.mBeingType;
   rhs.ResetBeingType();
 }
 
@@ -123,7 +123,7 @@ TestVariantStructSharedType &TestVariantStructSharedType::operator=(TestVariantS
     *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
     *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
   }
-  mBeingType = std::move(rhs.mBeingType);
+  mBeingType = rhs.mBeingType;
   rhs.ResetBeingType();
   return *this;
 }
