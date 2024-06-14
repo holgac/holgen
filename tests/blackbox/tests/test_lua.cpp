@@ -290,7 +290,6 @@ SetTo40AndGetTriple.GetField = function(funcTable, container) return container.f
 
 TEST_F(LuaTest, FuncTableWithSourceTable) {
   const char* script = R"R(
-Scripts = {}
 Scripts.SetTo30AndGetDouble = {}
 Scripts.SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
 Scripts.SetTo30AndGetDouble.GetField = function(funcTable, container) return container.field * 2 end

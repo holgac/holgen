@@ -21,8 +21,10 @@ private:
   void GenerateBaseRead(Class &cls);
   void GenerateReadForPrimitives(Class &cls);
   void GenerateReadForContainers(Class &cls);
-  void GenerateCreateMetatables(Class &cls);
+  void GenerateInitializeLua(Class &cls);
   void GeneratePushForKeyedContainer(Class &cls, const std::string &container) const;
+  void GenerateInitializeClasses(Class &cls, ClassMethod &method);
+  void GenerateInitializeFunctionTables(ClassMethod &method);
 };
 
 } // namespace holgen

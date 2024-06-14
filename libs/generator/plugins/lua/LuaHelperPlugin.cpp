@@ -34,7 +34,7 @@ void LuaHelperPlugin::Run() {
   cls.mHeaderIncludes.AddStandardHeader("cstddef");
   GeneratePush(cls);
   GenerateRead(cls);
-  GenerateCreateMetatables(cls);
+  GenerateInitializeLua(cls);
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
 }
@@ -214,11 +214,7 @@ void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
   }
 }
 
-// TODO: rename to InitializeLua or something
-void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
-  auto method = ClassMethod{"CreateMetatables", Type{"void"}, Visibility::Public,
-                            Constness::NotConst, Staticness::Static};
-  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+void LuaHelperPlugin::GenerateInitializeClasses(Class &cls, ClassMethod &method) {
   std::array<std::set<std::string>, 2> createStatements;
   for (auto &other: mProject.mClasses) {
     // TODO: use consts for function names
@@ -236,25 +232,42 @@ void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
       method.mBody.AddLine(statement);
     }
   }
-  std::set<std::string> processedFunctionTables;
+}
+
+void LuaHelperPlugin::GenerateInitializeFunctionTables(ClassMethod &method) {
+  std::set<std::string> functionTablesToCreate;
   for (auto &other: mProject.mClasses) {
     if (!other.mStruct)
       continue;
+
+    auto attrib = other.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable,
+                                                      Annotations::LuaFuncTable_SourceTable);
+    if (attrib) {
+      functionTablesToCreate.insert(attrib->mValue.mName);
+    }
     for (auto &func: other.mStruct->mFunctions) {
       if (!func.GetAnnotation(Annotations::LuaFunc))
         continue;
-      auto table =
+      attrib =
           func.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_SourceTable);
-      if (!table)
-        continue;
-      auto tableName = table->mValue.mName;
-      if (processedFunctionTables.contains(tableName))
-        continue;
-      processedFunctionTables.insert(tableName);
-      method.mBody.Add("lua_newtable(luaState);");
-      method.mBody.Add("lua_setglobal(luaState, \"{}\");", tableName);
+      if (attrib) {
+        functionTablesToCreate.insert(attrib->mValue.mName);
+      }
     }
   }
+  for (auto &table: functionTablesToCreate) {
+    method.mBody.Add("lua_newtable(luaState);");
+    method.mBody.Add("lua_setglobal(luaState, \"{}\");", table);
+  }
+}
+
+void LuaHelperPlugin::GenerateInitializeLua(Class &cls) {
+  // TODO: rename to InitializeLua or something, and put to St
+  auto method = ClassMethod{"CreateMetatables", Type{"void"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  GenerateInitializeClasses(cls, method);
+  GenerateInitializeFunctionTables(method);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

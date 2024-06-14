@@ -234,5 +234,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestVariantStructType::PushEnumToLua(luaState);
   lua_newtable(luaState);
   lua_setglobal(luaState, "Ops");
+  lua_newtable(luaState);
+  lua_setglobal(luaState, "Scripts");
 }
 }
