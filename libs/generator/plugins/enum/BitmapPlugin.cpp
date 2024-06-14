@@ -117,7 +117,19 @@ void BitmapPlugin::GenerateBitmapOperators(Class &cls) {
   const std::vector<EnumOperator> operators = {
       {"|=", Constness::NotConst, EnumOperatorReturnType::This, EnumOperatorArgumentType::Entry},
       {"|=", Constness::NotConst, EnumOperatorReturnType::This, EnumOperatorArgumentType::Class},
-      {"|", Constness::Const, EnumOperatorReturnType::Result, EnumOperatorArgumentType::Class}};
+      {"|", Constness::Const, EnumOperatorReturnType::Result, EnumOperatorArgumentType::Class},
+      {"|", Constness::Const, EnumOperatorReturnType::Result, EnumOperatorArgumentType::Entry},
+
+      {"&=", Constness::NotConst, EnumOperatorReturnType::This, EnumOperatorArgumentType::Entry},
+      {"&=", Constness::NotConst, EnumOperatorReturnType::This, EnumOperatorArgumentType::Class},
+      {"&", Constness::Const, EnumOperatorReturnType::Result, EnumOperatorArgumentType::Class},
+      {"&", Constness::Const, EnumOperatorReturnType::Result, EnumOperatorArgumentType::Entry},
+
+      {"^=", Constness::NotConst, EnumOperatorReturnType::This, EnumOperatorArgumentType::Entry},
+      {"^=", Constness::NotConst, EnumOperatorReturnType::This, EnumOperatorArgumentType::Class},
+      {"^", Constness::Const, EnumOperatorReturnType::Result, EnumOperatorArgumentType::Class},
+      {"^", Constness::Const, EnumOperatorReturnType::Result, EnumOperatorArgumentType::Entry},
+  };
 
   for (auto &op: operators) {
     GenerateOperator(cls, op);
