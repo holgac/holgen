@@ -21,6 +21,9 @@ private:
                                     const ClassMethod &luaFunction);
   bool IsVariantTypeField(const Class &cls, const ClassField &field,
                           const std::string **rawName = nullptr);
+
+  const AnnotationDefinition *GetConvertElemAnnotation(const FieldDefinition *field);
+  const AnnotationDefinition *GetConvertKeyAnnotation(const FieldDefinition *field);
   void GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                     const std::string &varName);
   void GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock, const ClassField &field,

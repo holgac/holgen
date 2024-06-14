@@ -22,6 +22,9 @@ public:
   inline static const std::string FilesystemHelper_ReadFile = "ReadFile";
   inline static const std::string JsonHelper = "JsonHelper";
   inline static const std::string JsonHelper_Parse = "Parse";
+  inline static const std::string JsonHelper_ParseConvertElem = "ParseConvertElem";
+  inline static const std::string JsonHelper_ParseConvertKey = "ParseConvertKey";
+  inline static const std::string JsonHelper_ParseConvertKeyElem = "ParseConvertKeyElem";
   inline static const std::string LuaHelper = "LuaHelper";
   inline static const std::string LuaHelper_Push = "Push";
   inline static const std::string LuaHelper_Read = "Read";

@@ -16,7 +16,7 @@ private:
   void GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container,
                                                bool withConverter);
   void GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container,
-                                          bool withConverter);
+                                          bool withKeyConverter, bool withElemConverter);
   void GenerateBaseParse(Class &cls);
   void GenerateParseSingleElem(Class &cls);
   void GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,

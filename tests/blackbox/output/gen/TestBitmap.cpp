@@ -122,6 +122,46 @@ bool TestBitmap::operator|(const TestBitmap &rhs) const {
   return mValue | rhs.mValue;
 }
 
+bool TestBitmap::operator|(TestBitmap::Entry rhs) const {
+  return mValue | rhs;
+}
+
+TestBitmap &TestBitmap::operator&=(TestBitmap::Entry rhs) {
+  mValue &= rhs;
+  return *this;
+}
+
+TestBitmap &TestBitmap::operator&=(const TestBitmap &rhs) {
+  mValue &= rhs.mValue;
+  return *this;
+}
+
+bool TestBitmap::operator&(const TestBitmap &rhs) const {
+  return mValue & rhs.mValue;
+}
+
+bool TestBitmap::operator&(TestBitmap::Entry rhs) const {
+  return mValue & rhs;
+}
+
+TestBitmap &TestBitmap::operator^=(TestBitmap::Entry rhs) {
+  mValue ^= rhs;
+  return *this;
+}
+
+TestBitmap &TestBitmap::operator^=(const TestBitmap &rhs) {
+  mValue ^= rhs.mValue;
+  return *this;
+}
+
+bool TestBitmap::operator^(const TestBitmap &rhs) const {
+  return mValue ^ rhs.mValue;
+}
+
+bool TestBitmap::operator^(TestBitmap::Entry rhs) const {
+  return mValue ^ rhs;
+}
+
 bool TestBitmap::Has(const TestBitmap &val) const {
   return (mValue & val.mValue) == val.mValue;
 }

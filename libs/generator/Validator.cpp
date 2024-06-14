@@ -391,7 +391,6 @@ void Validator::JsonConverters() const {
       if (!field.mField || !field.mField->GetAnnotation(Annotations::JsonConvert))
         continue;
       auto converter = field.mField->GetAnnotation(Annotations::JsonConvert);
-      EnforceUniqueAnnotation(cls, field, Annotations::JsonConvert);
       ValidateAttributeCount(*converter, Annotations::JsonConvert_From, ToString(cls, field));
       ValidateAttributeCount(*converter, Annotations::JsonConvert_Using, ToString(cls, field));
       auto cs =
@@ -400,6 +399,9 @@ void Validator::JsonConverters() const {
       auto convertElem = converter->GetAttribute(Annotations::JsonConvert_Elem);
       if (convertElem)
         cs.mToType = &field.mField->mType.mTemplateParameters.back();
+      auto convertKey = converter->GetAttribute(Annotations::JsonConvert_Key);
+      if (convertKey)
+        cs.mToType = &field.mField->mType.mTemplateParameters.front();
       auto key = converter->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName;
       auto [it, res] = converters.try_emplace(key, cs);
       if (!res) {

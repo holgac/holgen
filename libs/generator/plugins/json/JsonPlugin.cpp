@@ -206,19 +206,48 @@ void JsonPlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock,
 
 void JsonPlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock,
                                               const ClassField &field, const std::string &varName) {
-  auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
-  auto jsonConvertFrom = jsonConvert->GetAttribute(Annotations::JsonConvert_From);
-  auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
-  auto jsonConvertElem = jsonConvert->GetAttribute(Annotations::JsonConvert_Elem);
-  if (jsonConvertElem) {
-    codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
-                  St::JsonHelper_Parse, Type{mProject, jsonConvertFrom->mValue}.ToString(true),
-                  field.mName, varName, jsonConvertUsing->mValue.mName);
+  auto convertElemAnnotation = GetConvertElemAnnotation(field.mField);
+  auto convertKeyAnnotation = GetConvertKeyAnnotation(field.mField);
+  if (convertElemAnnotation && convertKeyAnnotation) {
+    codeBlock.Add(
+        "auto res = {}::{}<{}, {}>({}, {}, converter, converter.{}, converter.{});", St::JsonHelper,
+        St::JsonHelper_ParseConvertKeyElem,
+        Type{mProject, convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+            .ToString(true),
+        Type{mProject, convertElemAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+            .ToString(true),
+        field.mName, varName,
+        convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName,
+        convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+    codeBlock.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+        cls.mStruct->mName, field.mField->mName);
+  } else if (convertKeyAnnotation) {
+    codeBlock.Add(
+        "auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
+        St::JsonHelper_ParseConvertKey,
+        Type{mProject, convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+            .ToString(true),
+        field.mName, varName,
+        convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+    codeBlock.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+        cls.mStruct->mName, field.mField->mName);
+  } else if (convertElemAnnotation) {
+    codeBlock.Add(
+        "auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
+        St::JsonHelper_ParseConvertElem,
+        Type{mProject, convertElemAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+            .ToString(true),
+        field.mName, varName,
+        convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
     codeBlock.Add(
         R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
         cls.mStruct->mName, field.mField->mName);
   } else {
-    Type type(mProject, jsonConvertFrom->mValue);
+    auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
+    auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
+    Type type(mProject, jsonConvert->GetAttribute(Annotations::JsonConvert_From)->mValue);
     codeBlock.Line() << type.ToString(false) << "temp;";
     codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
                   varName);
@@ -304,5 +333,23 @@ bool JsonPlugin::IsVariantTypeField(const Class &cls, const ClassField &field,
     }
   }
   return false;
+}
+
+const AnnotationDefinition *JsonPlugin::GetConvertElemAnnotation(const FieldDefinition *field) {
+  for (auto &annotation: field->GetAnnotations(Annotations::JsonConvert)) {
+    if (annotation.GetAttribute(Annotations::JsonConvert_Elem)) {
+      return &annotation;
+    }
+  }
+  return nullptr;
+}
+
+const AnnotationDefinition *JsonPlugin::GetConvertKeyAnnotation(const FieldDefinition *field) {
+  for (auto &annotation: field->GetAnnotations(Annotations::JsonConvert)) {
+    if (annotation.GetAttribute(Annotations::JsonConvert_Key)) {
+      return &annotation;
+    }
+  }
+  return nullptr;
 }
 } // namespace holgen

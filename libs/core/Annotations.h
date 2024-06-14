@@ -18,15 +18,18 @@ public:
    *
    * Example:
    *  @jsonConvert(from=string, using=countryConverter) // func(string) -> u8 function added to
-   * Converter class u8 country;
+   *                                                    // Converter class u8 country;
    *  @jsonConvert(from=string, using=cityConverter) // another func added
    *  u8 city;
-   *  @jsonConvert(sameAs=country) // first func reused
-   *  u8 previousCountry;
+   *
+   *  @jsonConvert(key, from=string, using=cityConverter)
+   *  @jsonConvert(elem, from=string, using=countryConverter)
+   *  map<u8, u8> cityToCountryMap;
    */
   inline static const std::string JsonConvert = "jsonConvert";
   inline static const std::string JsonConvert_From = "from";
   inline static const std::string JsonConvert_Using = "using";
+  inline static const std::string JsonConvert_Key = "key";
   inline static const std::string JsonConvert_Elem = "elem";
 
   /*

@@ -44,6 +44,15 @@ public:
   TestBitmap &operator|=(TestBitmap::Entry rhs);
   TestBitmap &operator|=(const TestBitmap &rhs);
   bool operator|(const TestBitmap &rhs) const;
+  bool operator|(TestBitmap::Entry rhs) const;
+  TestBitmap &operator&=(TestBitmap::Entry rhs);
+  TestBitmap &operator&=(const TestBitmap &rhs);
+  bool operator&(const TestBitmap &rhs) const;
+  bool operator&(TestBitmap::Entry rhs) const;
+  TestBitmap &operator^=(TestBitmap::Entry rhs);
+  TestBitmap &operator^=(const TestBitmap &rhs);
+  bool operator^(const TestBitmap &rhs) const;
+  bool operator^(TestBitmap::Entry rhs) const;
   bool Has(const TestBitmap &val) const;
   bool Has(const TestBitmap::Entry &val) const;
   constexpr static std::array<TestBitmap::Entry, 5> GetEntries() {

@@ -17,8 +17,11 @@ void JsonHelperPlugin::Run() {
     GenerateParseJsonForSingleElemContainer(cls, container, false);
   }
   for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
-    GenerateParseJsonForKeyedContainer(cls, container, true);
-    GenerateParseJsonForKeyedContainer(cls, container, false);
+    for (int withKeyConverter = 0; withKeyConverter < 2; ++withKeyConverter) {
+      for (int withElemConverter = 0; withElemConverter < 2; ++withElemConverter) {
+        GenerateParseJsonForKeyedContainer(cls, container, withKeyConverter, withElemConverter);
+      }
+    }
   }
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
@@ -30,8 +33,8 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,
   auto method = ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public,
                             Constness::NotConst, Staticness::Static};
   if (withConverter) {
+    method.mName = St::JsonHelper_ParseConvertElem;
     method.mTemplateParameters.emplace_back("typename", "SourceType");
-    method.mTemplateParameters.emplace_back("typename", "ElemConverter");
   }
   method.mTemplateParameters.emplace_back("typename", "T");
 
@@ -51,9 +54,11 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
-  if (withConverter)
+  if (withConverter) {
     method.mArguments.emplace_back("elemConverter",
                                    Type{"ElemConverter", PassByType::Reference, Constness::Const});
+    method.mTemplateParameters.emplace_back("typename", "ElemConverter");
+  }
 
   method.mBody.Add(
       R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing {}");)R",
@@ -147,9 +152,21 @@ void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {
 }
 
 void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container,
-                                                          bool withConverter) {
+                                                          bool withKeyConverter,
+                                                          bool withElemConverter) {
   auto method = ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public,
                             Constness::NotConst, Staticness::Static};
+
+  if (withKeyConverter) {
+    method.mName = St::JsonHelper_ParseConvertKey;
+    method.mTemplateParameters.emplace_back("typename", "KeySourceType");
+  }
+  if (withElemConverter) {
+    method.mName = St::JsonHelper_ParseConvertElem;
+    method.mTemplateParameters.emplace_back("typename", "ElemSourceType");
+  }
+
+
   method.mTemplateParameters.emplace_back("typename", "K");
   method.mTemplateParameters.emplace_back("typename", "V");
 
@@ -163,11 +180,19 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std:
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
 
-  if (withConverter) {
-    method.mTemplateParameters.emplace_back("typename", "SourceType");
+  if (withKeyConverter) {
+    method.mTemplateParameters.emplace_back("typename", "KeyConverter");
+    method.mArguments.emplace_back("keyConverter",
+                                   Type{"KeyConverter", PassByType::Reference, Constness::Const});
+  }
+  if (withElemConverter) {
     method.mTemplateParameters.emplace_back("typename", "ElemConverter");
     method.mArguments.emplace_back("elemConverter",
                                    Type{"ElemConverter", PassByType::Reference, Constness::Const});
+  }
+
+  if (withKeyConverter && withElemConverter) {
+    method.mName = St::JsonHelper_ParseConvertKeyElem;
   }
 
   method.mBody.Add(
@@ -176,16 +201,26 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std:
 
   method.mBody.Line() << "for (const auto& data: json.GetObject()) {";
   method.mBody.Indent(1);
-  method.mBody.Line() << "K key;";
-  method.mBody.Add("auto res = {}(key, data.name, converter);", St::JsonHelper_Parse);
-  method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R",
-                   container);
+
+  if (withKeyConverter) {
+    method.mBody.Line() << "KeySourceType keyInJson;";
+    method.mBody.Add("auto res = {}(keyInJson, data.name, converter);", St::JsonHelper_Parse);
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R",
+                     container);
+    method.mBody.Line() << "K key = std::move(keyConverter(keyInJson));";
+  } else {
+    method.mBody.Line() << "K key;";
+    method.mBody.Add("auto res = {}(key, data.name, converter);", St::JsonHelper_Parse);
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R",
+                     container);
+  }
+
   method.mBody.Line() << "auto[it, insertRes] = out.try_emplace(key, V());";
   method.mBody.Add(
       R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
       container);
-  if (withConverter) {
-    method.mBody.Add("SourceType valueRaw;");
+  if (withElemConverter) {
+    method.mBody.Add("ElemSourceType valueRaw;");
     method.mBody.Add("res = {}(valueRaw, data.value, converter);", St::JsonHelper_Parse);
     method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R",
                      container);

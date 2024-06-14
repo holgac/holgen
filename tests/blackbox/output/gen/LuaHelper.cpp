@@ -24,6 +24,7 @@
 #include "TestContainerVector.h"
 #include "TestEnum.h"
 #include "TestEnumStruct.h"
+#include "TestJsonStructMapWithConverters.h"
 #include "TestJsonStructWithTags.h"
 #include "TestJsonTag.h"
 #include "TestJsonTagManager.h"
@@ -203,6 +204,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestContainerSet::CreateLuaMetatable(luaState);
   TestContainerVector::CreateLuaMetatable(luaState);
   TestEnumStruct::CreateLuaMetatable(luaState);
+  TestJsonStructMapWithConverters::CreateLuaMetatable(luaState);
   TestJsonStructWithTags::CreateLuaMetatable(luaState);
   TestJsonTag::CreateLuaMetatable(luaState);
   TestJsonTagManager::CreateLuaMetatable(luaState);

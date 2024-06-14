@@ -18,3 +18,16 @@ struct TestJsonStructWithTags {
   @jsonConvert(elem, from=string, using=testJsonConvertTag)
   vector<Ref<TestJsonTag>> tags;
 }
+
+struct TestJsonStructMapWithConverters {
+  @jsonConvert(elem, from=string, using=testJsonConvertStringToU32)
+  map<string, u32> testMapConvertElem;
+
+  @jsonConvert(key, from=string, using=testJsonConvertStringToU32)
+  map<u32, string> testMapConvertKey;
+
+  @jsonConvert(key, from=string, using=testJsonConvertStringToU32)
+  @jsonConvert(elem, from=string, using=testJsonConvertStringToU32)
+  map<u32, u32> testMapConvertKeyElem;
+}
+

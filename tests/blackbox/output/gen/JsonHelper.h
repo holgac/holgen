@@ -23,8 +23,8 @@ public:
   static bool Parse(T &out, const rapidjson::Value &json, const Converter &converter) {
     return out.ParseJson(json, converter);
   }
-  template <typename SourceType, typename ElemConverter, typename T, size_t C>
-  static bool Parse(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  template <typename SourceType, typename T, size_t C, typename ElemConverter>
+  static bool ParseConvertElem(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
@@ -49,8 +49,8 @@ public:
     }
     return true;
   }
-  template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  template <typename SourceType, typename T, typename ElemConverter>
+  static bool ParseConvertElem(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::deque");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -71,8 +71,8 @@ public:
     }
     return true;
   }
-  template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  template <typename SourceType, typename T, typename ElemConverter>
+  static bool ParseConvertElem(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::vector");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -93,8 +93,8 @@ public:
     }
     return true;
   }
-  template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  template <typename SourceType, typename T, typename ElemConverter>
+  static bool ParseConvertElem(std::set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::set");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -115,8 +115,8 @@ public:
     }
     return true;
   }
-  template <typename SourceType, typename ElemConverter, typename T>
-  static bool Parse(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  template <typename SourceType, typename T, typename ElemConverter>
+  static bool ParseConvertElem(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_set");
     for (const auto& data: json.GetArray()) {
       SourceType elem;
@@ -137,22 +137,6 @@ public:
     }
     return true;
   }
-  template <typename K, typename V, typename SourceType, typename ElemConverter>
-  static bool Parse(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
-    for (const auto& data: json.GetObject()) {
-      K key;
-      auto res = Parse(key, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
-      auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
-      SourceType valueRaw;
-      res = Parse(valueRaw, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
-      it->second = std::move(elemConverter(valueRaw));
-    }
-    return true;
-  }
   template <typename K, typename V>
   static bool Parse(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
@@ -167,18 +151,50 @@ public:
     }
     return true;
   }
-  template <typename K, typename V, typename SourceType, typename ElemConverter>
-  static bool Parse(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+  template <typename ElemSourceType, typename K, typename V, typename ElemConverter>
+  static bool ParseConvertElem(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
     for (const auto& data: json.GetObject()) {
       K key;
       auto res = Parse(key, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
-      SourceType valueRaw;
+      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      ElemSourceType valueRaw;
       res = Parse(valueRaw, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+      it->second = std::move(elemConverter(valueRaw));
+    }
+    return true;
+  }
+  template <typename KeySourceType, typename K, typename V, typename KeyConverter>
+  static bool ParseConvertKey(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
+    for (const auto& data: json.GetObject()) {
+      KeySourceType keyInJson;
+      auto res = Parse(keyInJson, data.name, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+      K key = std::move(keyConverter(keyInJson));
+      auto[it, insertRes] = out.try_emplace(key, V());
+      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      res = Parse(it->second, data.value, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+    }
+    return true;
+  }
+  template <typename KeySourceType, typename ElemSourceType, typename K, typename V, typename KeyConverter, typename ElemConverter>
+  static bool ParseConvertKeyElem(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, const ElemConverter &elemConverter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
+    for (const auto& data: json.GetObject()) {
+      KeySourceType keyInJson;
+      auto res = Parse(keyInJson, data.name, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+      K key = std::move(keyConverter(keyInJson));
+      auto[it, insertRes] = out.try_emplace(key, V());
+      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      ElemSourceType valueRaw;
+      res = Parse(valueRaw, data.value, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
       it->second = std::move(elemConverter(valueRaw));
     }
     return true;
@@ -194,6 +210,54 @@ public:
       HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
       res = Parse(it->second, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+    }
+    return true;
+  }
+  template <typename ElemSourceType, typename K, typename V, typename ElemConverter>
+  static bool ParseConvertElem(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+    for (const auto& data: json.GetObject()) {
+      K key;
+      auto res = Parse(key, data.name, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+      auto[it, insertRes] = out.try_emplace(key, V());
+      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      ElemSourceType valueRaw;
+      res = Parse(valueRaw, data.value, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+      it->second = std::move(elemConverter(valueRaw));
+    }
+    return true;
+  }
+  template <typename KeySourceType, typename K, typename V, typename KeyConverter>
+  static bool ParseConvertKey(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+    for (const auto& data: json.GetObject()) {
+      KeySourceType keyInJson;
+      auto res = Parse(keyInJson, data.name, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+      K key = std::move(keyConverter(keyInJson));
+      auto[it, insertRes] = out.try_emplace(key, V());
+      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      res = Parse(it->second, data.value, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+    }
+    return true;
+  }
+  template <typename KeySourceType, typename ElemSourceType, typename K, typename V, typename KeyConverter, typename ElemConverter>
+  static bool ParseConvertKeyElem(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, const ElemConverter &elemConverter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+    for (const auto& data: json.GetObject()) {
+      KeySourceType keyInJson;
+      auto res = Parse(keyInJson, data.name, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+      K key = std::move(keyConverter(keyInJson));
+      auto[it, insertRes] = out.try_emplace(key, V());
+      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      ElemSourceType valueRaw;
+      res = Parse(valueRaw, data.value, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+      it->second = std::move(elemConverter(valueRaw));
     }
     return true;
   }
