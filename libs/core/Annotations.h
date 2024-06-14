@@ -194,9 +194,17 @@ public:
    * struct AIScript {
    *  func Think(Actor actor);
    * }
+   * The struct above expects something like AIScripts.<table>.Think = function(AIScript, Actor)
+   *
+   * @luaFuncTable(static)
+   * struct AIScript {
+   *  func Think(Actor actor);
+   * }
+   * The struct above expects something like <table>.Think = function(Actor)
    */
   inline static const std::string LuaFuncTable = "luaFuncTable";
   inline static const std::string LuaFuncTable_SourceTable = "sourceTable";
+  inline static const std::string LuaFuncTable_Static = "static";
 
   /**
    * Marks the function below as a custom function implemented in lua

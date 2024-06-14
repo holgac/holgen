@@ -16,6 +16,7 @@ private:
                           bool isFuncTable);
   void GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition,
                               ClassField &functionHandle);
+  // TODO: arg order should be <cls>, <definitions>, <rest>
   void GenerateFunctionGetFunctionFromSourceTable(const FunctionDefinition &functionDefinition,
                                                   const std::string *sourceTable,
                                                   const std::string &functionHandle,
@@ -29,6 +30,6 @@ private:
   void GenerateFunctionPushArgs(ClassMethod &method, const FunctionDefinition &functionDefinition);
   void GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
                         const std::string *sourceTable, const std::string &functionHandle,
-                        bool isFuncTable);
+                        bool isFuncTable, bool isStatic);
 };
 } // namespace holgen

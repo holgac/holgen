@@ -14,7 +14,9 @@ bool TestLuaFuncTableContainer::operator==(const TestLuaFuncTableContainer &rhs)
       mScript1 == rhs.mScript1 &&
       mScript2 == rhs.mScript2 &&
       mScriptWithSourceTable1 == rhs.mScriptWithSourceTable1 &&
-      mScriptWithSourceTable2 == rhs.mScriptWithSourceTable2;
+      mScriptWithSourceTable2 == rhs.mScriptWithSourceTable2 &&
+      mStaticScript1 == rhs.mStaticScript1 &&
+      mStaticScript2 == rhs.mStaticScript2;
 }
 
 int32_t TestLuaFuncTableContainer::GetField() const {
@@ -53,6 +55,22 @@ TestLuaFuncTableWithSourceTable &TestLuaFuncTableContainer::GetScriptWithSourceT
   return mScriptWithSourceTable2;
 }
 
+const TestLuaFuncTableStatic &TestLuaFuncTableContainer::GetStaticScript1() const {
+  return mStaticScript1;
+}
+
+TestLuaFuncTableStatic &TestLuaFuncTableContainer::GetStaticScript1() {
+  return mStaticScript1;
+}
+
+const TestLuaFuncTableStatic &TestLuaFuncTableContainer::GetStaticScript2() const {
+  return mStaticScript2;
+}
+
+TestLuaFuncTableStatic &TestLuaFuncTableContainer::GetStaticScript2() {
+  return mStaticScript2;
+}
+
 void TestLuaFuncTableContainer::SetField(int32_t val) {
   mField = val;
 }
@@ -71,6 +89,14 @@ void TestLuaFuncTableContainer::SetScriptWithSourceTable1(const TestLuaFuncTable
 
 void TestLuaFuncTableContainer::SetScriptWithSourceTable2(const TestLuaFuncTableWithSourceTable &val) {
   mScriptWithSourceTable2 = val;
+}
+
+void TestLuaFuncTableContainer::SetStaticScript1(const TestLuaFuncTableStatic &val) {
+  mStaticScript1 = val;
+}
+
+void TestLuaFuncTableContainer::SetStaticScript2(const TestLuaFuncTableStatic &val) {
+  mStaticScript2 = val;
 }
 
 bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -92,6 +118,12 @@ bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Co
     } else if (0 == strcmp("scriptWithSourceTable2", name)) {
       auto res = JsonHelper::Parse(mScriptWithSourceTable2, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable2 field");
+    } else if (0 == strcmp("staticScript1", name)) {
+      auto res = JsonHelper::Parse(mStaticScript1, data.value, converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript1 field");
+    } else if (0 == strcmp("staticScript2", name)) {
+      auto res = JsonHelper::Parse(mStaticScript2, data.value, converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript2 field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestLuaFuncTableContainer: {}", name);
     }
@@ -134,6 +166,10 @@ int TestLuaFuncTableContainer::IndexMetaMethod(lua_State *luaState) {
     LuaHelper::Push(instance->mScriptWithSourceTable1, luaState);
   } else if (0 == strcmp("scriptWithSourceTable2", key)) {
     LuaHelper::Push(instance->mScriptWithSourceTable2, luaState);
+  } else if (0 == strcmp("staticScript1", key)) {
+    LuaHelper::Push(instance->mStaticScript1, luaState);
+  } else if (0 == strcmp("staticScript2", key)) {
+    LuaHelper::Push(instance->mStaticScript2, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);
     return 0;
@@ -154,6 +190,10 @@ int TestLuaFuncTableContainer::NewIndexMetaMethod(lua_State *luaState) {
     LuaHelper::Read(instance->mScriptWithSourceTable1, luaState, -1);
   } else if (0 == strcmp("scriptWithSourceTable2", key)) {
     LuaHelper::Read(instance->mScriptWithSourceTable2, luaState, -1);
+  } else if (0 == strcmp("staticScript1", key)) {
+    LuaHelper::Read(instance->mStaticScript1, luaState, -1);
+  } else if (0 == strcmp("staticScript2", key)) {
+    LuaHelper::Read(instance->mStaticScript2, luaState, -1);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);
   }

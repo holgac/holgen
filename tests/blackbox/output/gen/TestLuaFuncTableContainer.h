@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "TestLuaFuncTable.h"
+#include "TestLuaFuncTableStatic.h"
 #include "TestLuaFuncTableWithSourceTable.h"
 
 struct lua_State;
@@ -24,11 +25,17 @@ public:
   TestLuaFuncTableWithSourceTable &GetScriptWithSourceTable1();
   const TestLuaFuncTableWithSourceTable &GetScriptWithSourceTable2() const;
   TestLuaFuncTableWithSourceTable &GetScriptWithSourceTable2();
+  const TestLuaFuncTableStatic &GetStaticScript1() const;
+  TestLuaFuncTableStatic &GetStaticScript1();
+  const TestLuaFuncTableStatic &GetStaticScript2() const;
+  TestLuaFuncTableStatic &GetStaticScript2();
   void SetField(int32_t val);
   void SetScript1(const TestLuaFuncTable &val);
   void SetScript2(const TestLuaFuncTable &val);
   void SetScriptWithSourceTable1(const TestLuaFuncTableWithSourceTable &val);
   void SetScriptWithSourceTable2(const TestLuaFuncTableWithSourceTable &val);
+  void SetStaticScript1(const TestLuaFuncTableStatic &val);
+  void SetStaticScript2(const TestLuaFuncTableStatic &val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
@@ -43,5 +50,7 @@ private:
   TestLuaFuncTable mScript2;
   TestLuaFuncTableWithSourceTable mScriptWithSourceTable1;
   TestLuaFuncTableWithSourceTable mScriptWithSourceTable2;
+  TestLuaFuncTableStatic mStaticScript1;
+  TestLuaFuncTableStatic mStaticScript2;
 };
 }

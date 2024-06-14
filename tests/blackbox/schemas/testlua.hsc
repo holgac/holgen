@@ -10,10 +10,18 @@ struct TestLuaFuncTableWithSourceTable {
     func GetField(TestLuaFuncTableContainer container) -> s32;
 }
 
+@luaFuncTable(static)
+struct TestLuaFuncTableStatic {
+    func SetField(TestLuaFuncTableContainer container);
+    func GetField(TestLuaFuncTableContainer container) -> s32;
+}
+
 struct TestLuaFuncTableContainer {
     s32 field;
     TestLuaFuncTable script1;
     TestLuaFuncTable script2;
     TestLuaFuncTableWithSourceTable scriptWithSourceTable1;
     TestLuaFuncTableWithSourceTable scriptWithSourceTable2;
+    TestLuaFuncTableStatic staticScript1;
+    TestLuaFuncTableStatic staticScript2;
 }

@@ -287,6 +287,30 @@ SetTo40AndGetTriple.GetField = function(funcTable, container) return container.f
   EXPECT_EQ(c.GetField(), 40);
 }
 
+TEST_F(LuaTest, StaticFuncTable) {
+  const char* script = R"R(
+SetTo30AndGetDouble = {}
+SetTo30AndGetDouble.SetField = function(container) container.field = 30 end
+SetTo30AndGetDouble.GetField = function(container) return container.field * 2 end
+
+SetTo40AndGetTriple = {}
+SetTo40AndGetTriple.SetField = function(container) container.field = 40 end
+SetTo40AndGetTriple.GetField = function(container) return container.field * 3 end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaFuncTableContainer c;
+  c.GetStaticScript1().SetTable("SetTo30AndGetDouble");
+  c.GetStaticScript2().SetTable("SetTo40AndGetTriple");
+  c.GetStaticScript1().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 30);
+  EXPECT_EQ(c.GetStaticScript1().GetField(mState, &c), 60);
+  EXPECT_EQ(c.GetStaticScript2().GetField(mState, &c), 90);
+
+  c.GetStaticScript2().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 40);
+}
+
 
 TEST_F(LuaTest, FuncTableWithSourceTable) {
   const char* script = R"R(

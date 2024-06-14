@@ -54,7 +54,11 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
       sourceTable = &attrib->mValue.mName;
     }
 
-    GenerateFunction(cls, functionDefinition, sourceTable, functionDefinition.mName, isFuncTable);
+    bool isStatic = cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)
+                        ->GetAttribute(Annotations::LuaFuncTable_Static);
+
+    GenerateFunction(cls, functionDefinition, sourceTable, functionDefinition.mName, isFuncTable,
+                     isStatic);
   } else {
     auto field =
         ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
@@ -63,7 +67,7 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
     if (attrib) {
       sourceTable = &attrib->mValue.mName;
     }
-    GenerateFunction(cls, functionDefinition, sourceTable, field.mName, isFuncTable);
+    GenerateFunction(cls, functionDefinition, sourceTable, field.mName, isFuncTable, false);
     GenerateFunctionSetter(cls, functionDefinition, field);
     GenerateFunctionChecker(cls, functionDefinition, field);
     Validate().NewField(cls, field);
@@ -182,7 +186,8 @@ void LuaFunctionPlugin::GenerateFunctionGetGlobalFunction(
 
 void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
                                          const std::string *sourceTable,
-                                         const std::string &functionHandle, bool isFuncTable) {
+                                         const std::string &functionHandle, bool isFuncTable,
+                                         bool isStatic) {
   auto method = ClassMethod{St::Capitalize(functionDefinition.mName),
                             Type{mProject, functionDefinition.mReturnType}};
   method.mFunction = &functionDefinition;
@@ -208,11 +213,13 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
                                       retVal);
   }
 
-  method.mBody.Add("{}::{}(*this, luaState);", St::LuaHelper, St::LuaHelper_Push);
+  if (!isStatic) {
+    method.mBody.Add("{}::{}(*this, luaState);", St::LuaHelper, St::LuaHelper_Push);
+  }
   GenerateFunctionPushArgs(method, functionDefinition);
 
   bool returnsVal = method.mReturnType.mName != "void";
-  method.mBody.Add("lua_call(luaState, {}, {});", 1 + functionDefinition.mArguments.size(),
+  method.mBody.Add("lua_call(luaState, {}, {});", functionDefinition.mArguments.size() + !isStatic,
                    returnsVal ? 1 : 0);
   int popCount = returnsVal + isFuncTable + !!sourceTable;
   if (returnsVal) {
