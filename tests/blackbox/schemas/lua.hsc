@@ -8,7 +8,7 @@ struct Calculator {
     @luaFunc
     func Add(s64 val) -> s64;
 
-    @luaFunc(table=Ops)
+    @luaFunc(sourceTable=Ops)
     func Subtract(Number val) -> Number;
 
     func SubtractThenMultiply(s64 lhs, s64 rhs) -> s64;

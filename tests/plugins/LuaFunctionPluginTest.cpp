@@ -45,7 +45,7 @@ lua_call(luaState, 1, 0);
 TEST_F(LuaFunctionPluginTest, VoidFunctionInTableNoArgs) {
   auto project = Parse(R"R(
 struct TestData {
-  @luaFunc(table=Table)
+  @luaFunc(sourceTable=Table)
   func TestFunction() -> void;
 }
   )R");
@@ -108,7 +108,7 @@ return result;
 TEST_F(LuaFunctionPluginTest, FunctionInTableNoArgs) {
   auto project = Parse(R"R(
 struct TestData {
-  @luaFunc(table=Table)
+  @luaFunc(sourceTable=Table)
   func TestFunction() -> u32;
 }
   )R");

@@ -49,7 +49,7 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
   const std::string *sourceTable = nullptr;
   if (isFuncTable) {
     auto attrib = cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)
-                      ->GetAttribute(Annotations::LuaFuncTable_Table);
+                      ->GetAttribute(Annotations::LuaFuncTable_SourceTable);
     if (attrib) {
       sourceTable = &attrib->mValue.mName;
     }
@@ -59,7 +59,7 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
     auto field =
         ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
     auto attrib = functionDefinition.GetAnnotation(Annotations::LuaFunc)
-                      ->GetAttribute(Annotations::LuaFunc_Table);
+                      ->GetAttribute(Annotations::LuaFunc_SourceTable);
     if (attrib) {
       sourceTable = &attrib->mValue.mName;
     }
@@ -223,10 +223,14 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
       method.mBody.Add("{} result;", method.mReturnType.mName);
       method.mBody.Add("{}::{}(result, luaState, -1);", St::LuaHelper, St::LuaHelper_Read);
     }
-    method.mBody.Add("lua_pop(luaState, {});", popCount);
+    if (popCount > 0) {
+      method.mBody.Add("lua_pop(luaState, {});", popCount);
+    }
     method.mBody.Add("return result;");
   } else {
-    method.mBody.Add("lua_pop(luaState, {});", popCount);
+    if (popCount > 0) {
+      method.mBody.Add("lua_pop(luaState, {});", popCount);
+    }
   }
   FillComments(functionDefinition, method.mComments);
   Validate().NewMethod(cls, method);

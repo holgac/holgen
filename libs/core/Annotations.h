@@ -190,14 +190,13 @@ public:
    * contains the name of the table. The optional table attribute defines where the function table
    * is stored.
    *
-   * @luaFuncTable(table=AIScripts)
+   * @luaFuncTable(sourceTable=AIScripts)
    * struct AIScript {
    *  func Think(Actor actor);
    * }
    */
   inline static const std::string LuaFuncTable = "luaFuncTable";
-  // TODO: rename it to sourceTable
-  inline static const std::string LuaFuncTable_Table = "table";
+  inline static const std::string LuaFuncTable_SourceTable = "sourceTable";
 
   /**
    * Marks the function below as a custom function implemented in lua
@@ -205,8 +204,7 @@ public:
    * used to store and reference the function
    */
   inline static const std::string LuaFunc = "luaFunc";
-  // TODO: rename it to sourceTable
-  inline static const std::string LuaFunc_Table = "table";
+  inline static const std::string LuaFunc_SourceTable = "sourceTable";
 
   /**
    * Marks the function below as a custom function implemented in cpp

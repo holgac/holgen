@@ -4,7 +4,7 @@ struct TestLuaFuncTable {
     func GetField(TestLuaFuncTableContainer container) -> s32;
 }
 
-@luaFuncTable(table=Scripts)
+@luaFuncTable(sourceTable=Scripts)
 struct TestLuaFuncTableWithSourceTable {
     func SetField(TestLuaFuncTableContainer container);
     func GetField(TestLuaFuncTableContainer container) -> s32;

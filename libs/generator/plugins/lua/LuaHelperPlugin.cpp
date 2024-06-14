@@ -244,7 +244,7 @@ void LuaHelperPlugin::GenerateCreateMetatables(Class &cls) {
       if (!func.GetAnnotation(Annotations::LuaFunc))
         continue;
       auto table =
-          func.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_Table);
+          func.GetAnnotation(Annotations::LuaFunc)->GetAttribute(Annotations::LuaFunc_SourceTable);
       if (!table)
         continue;
       auto tableName = table->mValue.mName;
