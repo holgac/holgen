@@ -28,6 +28,18 @@ private:
                                     const std::string &varName);
   void GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                     const std::string &varName, const std::string &rawFieldName);
+  void GenerateParseJsonJsonConvertKeyElem(Class &cls, CodeBlock &codeBlock,
+                                           const ClassField &field, const std::string &varName,
+                                           const AnnotationDefinition *convertElemAnnotation,
+                                           const AnnotationDefinition *convertKeyAnnotation);
+  void GenerateParseJsonJsonConvertKey(Class &cls, CodeBlock &codeBlock, const ClassField &field,
+                                       const std::string &varName,
+                                       const AnnotationDefinition *convertKeyAnnotation);
+  void GenerateParseJsonJsonConvertElem(Class &cls, CodeBlock &codeBlock, const ClassField &field,
+                                        const std::string &varName,
+                                        const AnnotationDefinition *convertElemAnnotation);
+  void GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &codeBlock, const ClassField &field,
+                                         const std::string &varName);
   void GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                 const std::string &varName);
   void GenerateSwitcherLoop(ClassMethod &method, CodeBlock &&codeBlock);

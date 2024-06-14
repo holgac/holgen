@@ -204,62 +204,85 @@ void JsonPlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock,
   codeBlock.Add("{}(temp);", Naming().FieldSetterNameInCpp(rawFieldName));
 }
 
+void JsonPlugin::GenerateParseJsonJsonConvertKeyElem(
+    Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
+    const AnnotationDefinition *convertElemAnnotation,
+    const AnnotationDefinition *convertKeyAnnotation) {
+  codeBlock.Add(
+      "auto res = {}::{}<{}, {}>({}, {}, converter, converter.{}, converter.{});", St::JsonHelper,
+      St::JsonHelper_ParseConvertKeyElem,
+      Type{mProject, convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+          .ToString(true),
+      Type{mProject, convertElemAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+          .ToString(true),
+      field.mName, varName,
+      convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName,
+      convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+                cls.mStruct->mName, field.mField->mName);
+}
+
+void JsonPlugin::GenerateParseJsonJsonConvertKey(Class &cls, CodeBlock &codeBlock,
+                                                 const ClassField &field,
+                                                 const std::string &varName,
+                                                 const AnnotationDefinition *convertKeyAnnotation) {
+  codeBlock.Add(
+      "auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
+      St::JsonHelper_ParseConvertKey,
+      Type{mProject, convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+          .ToString(true),
+      field.mName, varName,
+      convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+                cls.mStruct->mName, field.mField->mName);
+}
+
+void JsonPlugin::GenerateParseJsonJsonConvertElem(
+    Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
+    const AnnotationDefinition *convertElemAnnotation) {
+  codeBlock.Add(
+      "auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
+      St::JsonHelper_ParseConvertElem,
+      Type{mProject, convertElemAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
+          .ToString(true),
+      field.mName, varName,
+      convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+                cls.mStruct->mName, field.mField->mName);
+}
+
+void JsonPlugin::GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &codeBlock,
+                                                   const ClassField &field,
+                                                   const std::string &varName) {
+  auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
+  auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
+  Type type(mProject, jsonConvert->GetAttribute(Annotations::JsonConvert_From)->mValue);
+  codeBlock.Line() << type.ToString(false) << "temp;";
+  codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                varName);
+  codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
+                cls.mStruct->mName, field.mField->mName);
+  if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) ||
+      field.mType.mType == PassByType::Pointer)
+    codeBlock.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
+  else
+    codeBlock.Add("{} = std::move(converter.{}(temp));", field.mName,
+                  jsonConvertUsing->mValue.mName);
+}
+
 void JsonPlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock,
                                               const ClassField &field, const std::string &varName) {
   auto convertElemAnnotation = GetConvertElemAnnotation(field.mField);
   auto convertKeyAnnotation = GetConvertKeyAnnotation(field.mField);
   if (convertElemAnnotation && convertKeyAnnotation) {
-    codeBlock.Add(
-        "auto res = {}::{}<{}, {}>({}, {}, converter, converter.{}, converter.{});", St::JsonHelper,
-        St::JsonHelper_ParseConvertKeyElem,
-        Type{mProject, convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
-            .ToString(true),
-        Type{mProject, convertElemAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
-            .ToString(true),
-        field.mName, varName,
-        convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName,
-        convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
-    codeBlock.Add(
-        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-        cls.mStruct->mName, field.mField->mName);
+    GenerateParseJsonJsonConvertKeyElem(cls, codeBlock, field, varName, convertElemAnnotation,
+                                        convertKeyAnnotation);
   } else if (convertKeyAnnotation) {
-    codeBlock.Add(
-        "auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
-        St::JsonHelper_ParseConvertKey,
-        Type{mProject, convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
-            .ToString(true),
-        field.mName, varName,
-        convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
-    codeBlock.Add(
-        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-        cls.mStruct->mName, field.mField->mName);
+    GenerateParseJsonJsonConvertKey(cls, codeBlock, field, varName, convertKeyAnnotation);
   } else if (convertElemAnnotation) {
-    codeBlock.Add(
-        "auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
-        St::JsonHelper_ParseConvertElem,
-        Type{mProject, convertElemAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
-            .ToString(true),
-        field.mName, varName,
-        convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
-    codeBlock.Add(
-        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-        cls.mStruct->mName, field.mField->mName);
+    GenerateParseJsonJsonConvertElem(cls, codeBlock, field, varName, convertElemAnnotation);
   } else {
-    auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
-    auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
-    Type type(mProject, jsonConvert->GetAttribute(Annotations::JsonConvert_From)->mValue);
-    codeBlock.Line() << type.ToString(false) << "temp;";
-    codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                  varName);
-    codeBlock.Add(
-        R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-        cls.mStruct->mName, field.mField->mName);
-    if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) ||
-        field.mType.mType == PassByType::Pointer)
-      codeBlock.Add("{} = converter.{}(temp);", field.mName, jsonConvertUsing->mValue.mName);
-    else
-      codeBlock.Add("{} = std::move(converter.{}(temp));", field.mName,
-                    jsonConvertUsing->mValue.mName);
+    GenerateParseJsonJsonConvertField(cls, codeBlock, field, varName);
   }
 }
 
