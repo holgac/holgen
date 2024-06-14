@@ -9,14 +9,26 @@ public:
   void Run() override;
 
 private:
-  void ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition);
-  void ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition);
+  void GenerateTableSetter(Class &cls);
+  void ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition,
+                               bool isFuncTable);
+  void ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition,
+                          bool isFuncTable);
   void GenerateFunctionSetter(Class &cls, const FunctionDefinition &functionDefinition,
                               ClassField &functionHandle);
+  void GenerateFunctionGetFunctionFromSourceTable(const FunctionDefinition &functionDefinition,
+                                                  const std::string *sourceTable,
+                                                  const std::string &functionHandle,
+                                                  bool isFuncTable, ClassMethod &method,
+                                                  const std::string &retVal);
+  void GenerateFunctionGetGlobalFunction(const FunctionDefinition &functionDefinition,
+                                         const std::string &functionHandle, bool isFuncTable,
+                                         ClassMethod &method, const std::string &retVal);
   void GenerateFunctionChecker(Class &cls, const FunctionDefinition &functionDefinition,
                                ClassField &functionHandle);
   void GenerateFunctionPushArgs(ClassMethod &method, const FunctionDefinition &functionDefinition);
   void GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
-                        ClassField &functionHandle);
+                        const std::string *sourceTable, const std::string &functionHandle,
+                        bool isFuncTable);
 };
 } // namespace holgen

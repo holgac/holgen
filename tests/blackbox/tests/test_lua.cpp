@@ -14,6 +14,10 @@
 #include "TestVariantStructSharedType.h"
 #include "Converter.h"
 
+#include <TestLuaFuncTable.h>
+#include <TestLuaFuncTableContainer.h>
+#include <rapidjson/document.h>
+
 using namespace holgen_blackbox_test;
 
 namespace {}
@@ -257,4 +261,81 @@ TEST_F(LuaTest, Variant) {
   luaL_dostring(mState, "return vs.being1.name");
   LuaTestHelper::ExpectStack(mState, {"LuaTest"});
   lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, FuncTable) {
+  const char* script = R"R(
+SetTo30AndGetDouble = {}
+SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
+SetTo30AndGetDouble.GetField = function(funcTable, container) return container.field * 2 end
+
+SetTo40AndGetTriple = {}
+SetTo40AndGetTriple.SetField = function(funcTable, container) container.field = 40 end
+SetTo40AndGetTriple.GetField = function(funcTable, container) return container.field * 3 end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaFuncTableContainer c;
+  c.GetScript1().SetTable("SetTo30AndGetDouble");
+  c.GetScript2().SetTable("SetTo40AndGetTriple");
+  c.GetScript1().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 30);
+  EXPECT_EQ(c.GetScript1().GetField(mState, &c), 60);
+  EXPECT_EQ(c.GetScript2().GetField(mState, &c), 90);
+
+  c.GetScript2().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 40);
+}
+
+
+TEST_F(LuaTest, FuncTableWithSourceTable) {
+  const char* script = R"R(
+Scripts = {}
+Scripts.SetTo30AndGetDouble = {}
+Scripts.SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
+Scripts.SetTo30AndGetDouble.GetField = function(funcTable, container) return container.field * 2 end
+
+Scripts.SetTo40AndGetTriple = {}
+Scripts.SetTo40AndGetTriple.SetField = function(funcTable, container) container.field = 40 end
+Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return container.field * 3 end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaFuncTableContainer c;
+  c.GetScriptWithSourceTable1().SetTable("SetTo30AndGetDouble");
+  c.GetScriptWithSourceTable2().SetTable("SetTo40AndGetTriple");
+  c.GetScriptWithSourceTable1().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 30);
+  EXPECT_EQ(c.GetScriptWithSourceTable1().GetField(mState, &c), 60);
+  EXPECT_EQ(c.GetScriptWithSourceTable2().GetField(mState, &c), 90);
+
+  c.GetScriptWithSourceTable2().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 40);
+}
+
+TEST_F(LuaTest, FuncTableWithSourceTableJson) {
+  const char* script = R"R(
+Scripts = {}
+Scripts.SetTo30AndGetDouble = {}
+Scripts.SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
+Scripts.SetTo30AndGetDouble.GetField = function(funcTable, container) return container.field * 2 end
+
+Scripts.SetTo40AndGetTriple = {}
+Scripts.SetTo40AndGetTriple.SetField = function(funcTable, container) container.field = 40 end
+Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return container.field * 3 end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaFuncTableContainer c;
+  const char* json = R"R({"scriptWithSourceTable1":"SetTo30AndGetDouble", "scriptWithSourceTable2":"SetTo40AndGetTriple"})R";
+  rapidjson::Document doc;
+  doc.Parse(json);
+  c.ParseJson(doc, {});
+  c.GetScriptWithSourceTable1().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 30);
+  EXPECT_EQ(c.GetScriptWithSourceTable1().GetField(mState, &c), 60);
+  EXPECT_EQ(c.GetScriptWithSourceTable2().GetField(mState, &c), 90);
+
+  c.GetScriptWithSourceTable2().SetField(mState, &c);
+  EXPECT_EQ(c.GetField(), 40);
 }

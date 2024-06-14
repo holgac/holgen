@@ -7,33 +7,68 @@ void LuaFunctionPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::NoLua))
       continue;
-    ProcessStructDefinition(cls, *cls.mStruct);
+    bool isFuncTable = false;
+    if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+      isFuncTable = true;
+      auto field =
+          ClassField{Naming().FieldNameInCpp(St::LuaTable_TableField), Type{"std::string"}};
+      Validate().NewField(cls, field);
+      cls.mFields.push_back(std::move(field));
+      GenerateTableSetter(cls);
+    }
+    ProcessStructDefinition(cls, *cls.mStruct, isFuncTable);
   }
+}
+
+void LuaFunctionPlugin::GenerateTableSetter(Class &cls) {
+  auto method = ClassMethod{Naming().FieldSetterNameInCpp(St::LuaTable_TableField), Type{"void"},
+                            Visibility::Public, Constness::NotConst};
+  method.mArguments.emplace_back("val", Type{"std::string"});
+  method.mBody.Add("{} = std::move(val);", Naming().FieldNameInCpp(St::LuaTable_TableField));
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 void LuaFunctionPlugin::ProcessStructDefinition(Class &cls,
-                                                const StructDefinition &structDefinition) {
+                                                const StructDefinition &structDefinition,
+                                                bool isFuncTable) {
   for (auto &mixin: structDefinition.mMixins) {
-    ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
+    ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin), isFuncTable);
   }
   for (auto &func: structDefinition.mFunctions) {
-    if (func.GetAnnotation(Annotations::LuaFunc))
-      ProcessLuaFunction(cls, func);
+    if (isFuncTable || func.GetAnnotation(Annotations::LuaFunc))
+      ProcessLuaFunction(cls, func, isFuncTable);
   }
 }
 
-void LuaFunctionPlugin::ProcessLuaFunction(Class &cls,
-                                           const FunctionDefinition &functionDefinition) {
+void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition,
+                                           bool isFuncTable) {
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
-  auto field =
-      ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
-  GenerateFunction(cls, functionDefinition, field);
-  GenerateFunctionSetter(cls, functionDefinition, field);
-  GenerateFunctionChecker(cls, functionDefinition, field);
-  Validate().NewField(cls, field);
-  cls.mFields.push_back(std::move(field));
+  const std::string *sourceTable = nullptr;
+  if (isFuncTable) {
+    auto attrib = cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)
+                      ->GetAttribute(Annotations::LuaFuncTable_Table);
+    if (attrib) {
+      sourceTable = &attrib->mValue.mName;
+    }
+
+    GenerateFunction(cls, functionDefinition, sourceTable, functionDefinition.mName, isFuncTable);
+  } else {
+    auto field =
+        ClassField{Naming().LuaFunctionHandleNameInCpp(functionDefinition), Type{"std::string"}};
+    auto attrib = functionDefinition.GetAnnotation(Annotations::LuaFunc)
+                      ->GetAttribute(Annotations::LuaFunc_Table);
+    if (attrib) {
+      sourceTable = &attrib->mValue.mName;
+    }
+    GenerateFunction(cls, functionDefinition, sourceTable, field.mName, isFuncTable);
+    GenerateFunctionSetter(cls, functionDefinition, field);
+    GenerateFunctionChecker(cls, functionDefinition, field);
+    Validate().NewField(cls, field);
+    cls.mFields.push_back(std::move(field));
+  }
 }
 
 void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
@@ -69,8 +104,85 @@ void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls,
   cls.mMethods.push_back(std::move(method));
 }
 
+void LuaFunctionPlugin::GenerateFunctionGetFunctionFromSourceTable(
+    const FunctionDefinition &functionDefinition, const std::string *sourceTable,
+    const std::string &functionHandle, bool isFuncTable, ClassMethod &method,
+    const std::string &retVal) {
+  method.mBody.Add("lua_getglobal(luaState, \"{}\");", *sourceTable);
+  if (isFuncTable) {
+    method.mBody.Add("lua_pushstring(luaState, {}.c_str());",
+                     Naming().FieldNameInCpp(St::LuaTable_TableField));
+    method.mBody.Add("lua_gettable(luaState, -2);");
+    method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("HOLGEN_WARN(\"Function table {}.{{}} not found when calling {}\", {});",
+                     *sourceTable, functionDefinition.mName,
+                     Naming().FieldNameInCpp(St::LuaTable_TableField));
+    method.mBody.Add("lua_pop(luaState, 1);");
+    method.mBody.Add("return {};", retVal);
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+    method.mBody.Add("lua_pushstring(luaState, \"{}\");", functionHandle);
+    method.mBody.Add("lua_gettable(luaState, -2);");
+  } else {
+    method.mBody.Add("lua_pushstring(luaState, {}.c_str());", functionHandle);
+    method.mBody.Add("lua_gettable(luaState, -2);");
+  }
+  method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
+  method.mBody.Indent(1);
+  if (isFuncTable) {
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function in {}.{{}}\", {});",
+                     functionDefinition.mName, *sourceTable,
+                     Naming().FieldNameInCpp(St::LuaTable_TableField));
+  } else {
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});",
+                     functionDefinition.mName, *sourceTable, functionHandle);
+  }
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("return {};", retVal);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+}
+
+void LuaFunctionPlugin::GenerateFunctionGetGlobalFunction(
+    const FunctionDefinition &functionDefinition, const std::string &functionHandle,
+    bool isFuncTable, ClassMethod &method, const std::string &retVal) {
+  if (isFuncTable) {
+    method.mBody.Add("lua_getglobal(luaState, {}.c_str());",
+                     Naming().FieldNameInCpp(St::LuaTable_TableField));
+
+    method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("HOLGEN_WARN(\"Function table {{}} not found when calling {}\", {});",
+                     functionDefinition.mName, Naming().FieldNameInCpp(St::LuaTable_TableField));
+    method.mBody.Add("lua_pop(luaState, 1);");
+    method.mBody.Add("return {};", retVal);
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+
+    method.mBody.Add("lua_pushstring(luaState, \"{}\");", functionHandle);
+    method.mBody.Add("lua_gettable(luaState, -2);");
+  } else {
+    method.mBody.Add("lua_getglobal(luaState, {}.c_str());", functionHandle);
+  }
+  method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
+  method.mBody.Indent(1);
+  if (isFuncTable) {
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function in {{}}\", {});",
+                     functionDefinition.mName, Naming().FieldNameInCpp(St::LuaTable_TableField));
+  } else {
+    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});",
+                     functionDefinition.mName, functionHandle);
+  }
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("return {};", retVal);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+}
+
 void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
-                                         ClassField &functionHandle) {
+                                         const std::string *sourceTable,
+                                         const std::string &functionHandle, bool isFuncTable) {
   auto method = ClassMethod{St::Capitalize(functionDefinition.mName),
                             Type{mProject, functionDefinition.mReturnType}};
   method.mFunction = &functionDefinition;
@@ -78,33 +190,22 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   std::string retVal = "{}";
   if (functionDefinition.mReturnType.mName == "void")
     retVal = "void()";
-  method.mBody.Add(R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)",
-                   functionHandle.mName, retVal, functionDefinition.mName);
-  auto luaFuncTable = functionDefinition.GetAnnotation(Annotations::LuaFunc)
-                          ->GetAttribute(Annotations::LuaFunc_Table);
 
-  if (luaFuncTable) {
-    method.mBody.Add("lua_getglobal(luaState, \"{}\");", luaFuncTable->mValue.mName);
-    method.mBody.Add("lua_pushstring(luaState, {}.c_str());", functionHandle.mName);
-    method.mBody.Add("lua_gettable(luaState, -2);");
-    method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
-    method.mBody.Indent(1);
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});",
-                     functionDefinition.mName, luaFuncTable->mValue.mName, functionHandle.mName);
-    method.mBody.Add("lua_pop(luaState, 1);");
-    method.mBody.Add("return {};", retVal);
-    method.mBody.Indent(-1);
-    method.mBody.Add("}}");
+  if (isFuncTable) {
+    method.mBody.Add(
+        R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function from table");)",
+        Naming().FieldNameInCpp(St::LuaTable_TableField), retVal, functionDefinition.mName);
   } else {
-    method.mBody.Add("lua_getglobal(luaState, {}.c_str());", functionHandle.mName);
-    method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
-    method.mBody.Indent(1);
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});",
-                     functionDefinition.mName, functionHandle.mName);
-    method.mBody.Add("lua_pop(luaState, 1);");
-    method.mBody.Add("return {};", retVal);
-    method.mBody.Indent(-1);
-    method.mBody.Add("}}");
+    method.mBody.Add(R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)",
+                     functionHandle, retVal, functionDefinition.mName);
+  }
+
+  if (sourceTable) {
+    GenerateFunctionGetFunctionFromSourceTable(functionDefinition, sourceTable, functionHandle,
+                                               isFuncTable, method, retVal);
+  } else {
+    GenerateFunctionGetGlobalFunction(functionDefinition, functionHandle, isFuncTable, method,
+                                      retVal);
   }
 
   method.mBody.Add("{}::{}(*this, luaState);", St::LuaHelper, St::LuaHelper_Push);
@@ -113,6 +214,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   bool returnsVal = method.mReturnType.mName != "void";
   method.mBody.Add("lua_call(luaState, {}, {});", 1 + functionDefinition.mArguments.size(),
                    returnsVal ? 1 : 0);
+  int popCount = returnsVal + isFuncTable + !!sourceTable;
   if (returnsVal) {
     if (mProject.GetClass(method.mReturnType.mName)) {
       method.mReturnType.mType = PassByType::Pointer;
@@ -121,14 +223,10 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
       method.mBody.Add("{} result;", method.mReturnType.mName);
       method.mBody.Add("{}::{}(result, luaState, -1);", St::LuaHelper, St::LuaHelper_Read);
     }
-    if (luaFuncTable)
-      method.mBody.Add("lua_pop(luaState, 2);", functionHandle.mName);
-    else
-      method.mBody.Add("lua_pop(luaState, 1);", functionHandle.mName);
+    method.mBody.Add("lua_pop(luaState, {});", popCount);
     method.mBody.Add("return result;");
   } else {
-    if (luaFuncTable)
-      method.mBody.Add(R"R(lua_pop(luaState, 1);)R", functionHandle.mName);
+    method.mBody.Add("lua_pop(luaState, {});", popCount);
   }
   FillComments(functionDefinition, method.mComments);
   Validate().NewMethod(cls, method);

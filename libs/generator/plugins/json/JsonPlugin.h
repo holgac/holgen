@@ -12,6 +12,7 @@ public:
   void Run() override;
 
 private:
+  void GenerateParseJsonForLuaFuncTable(Class &cls);
   void ProcessStruct(Class &cls);
   void ProcessEnum(Class &cls);
   void GenerateParseJson(Class &cls);

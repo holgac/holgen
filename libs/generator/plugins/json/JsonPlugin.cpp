@@ -54,6 +54,18 @@ void JsonPlugin::GenerateSwitcherLoop(ClassMethod &method, CodeBlock &&codeBlock
   method.mBody.Line() << "}"; // range based for on json.GetObject()
 }
 
+void JsonPlugin::GenerateParseJsonForLuaFuncTable(Class &cls) {
+  auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("converter",
+                                 Type{St::Converter, PassByType::Reference, Constness::Const});
+  method.mBody.Add("return {}::{}({}, json, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                   Naming().FieldNameInCpp(St::LuaTable_TableField));
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
 void JsonPlugin::GenerateParseJson(Class &cls) {
   auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("json",
@@ -292,11 +304,16 @@ void JsonPlugin::ProcessStruct(Class &cls) {
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
   cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-  if (cls.mStruct->GetAnnotation(Annotations::DataManager) == nullptr)
-    // TODO: currently we iterate over the json obj when deserializing, but this wouldn't work with
+  if (cls.mStruct->GetAnnotation(Annotations::DataManager) == nullptr) {
+    // TODO: currently we iterate over the json obj when deserializing, but this won't work with
     // dependencies. For DataManager we should have something custom so that a single file can
     // define everything too. But for now ParseFiles is good enough.
-    GenerateParseJson(cls);
+    if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+      GenerateParseJsonForLuaFuncTable(cls);
+    } else {
+      GenerateParseJson(cls);
+    }
+  }
 }
 
 void JsonPlugin::ProcessEnum(Class &cls) {
