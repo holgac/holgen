@@ -20,16 +20,7 @@ void LuaPlugin::Run() {
   }
 }
 
-void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
-  auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
-                            Constness::NotConst, Staticness::Static};
-  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  CodeBlock stringSwitcherElseCase;
-  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
-                             cls.mStruct->mName);
-  stringSwitcherElseCase.Add("return 0;");
-  StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
-
+void LuaPlugin::GenerateIndexMetaMethodForFields(Class &cls, StringSwitcher &switcher) {
   for (auto &field: cls.mFields) {
     // TODO: parse variant
     if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
@@ -51,16 +42,17 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
       }
     }
   }
+}
 
+void LuaPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitcher &switcher) {
   bool isLuaFuncTable = false;
   if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
     isLuaFuncTable = true;
   }
-
   for (auto &exposedMethod: cls.mMethods) {
     if (!exposedMethod.mExposeToLua)
       continue;
-    switcher.AddCase(exposedMethod.mName, [&](CodeBlock &switchBlock) {
+    switcher.AddCase(exposedMethod.mName, [&, isLuaFuncTable](CodeBlock &switchBlock) {
       bool isLuaFunc = isLuaFuncTable;
       if (exposedMethod.mFunction && exposedMethod.mFunction->GetAnnotation(Annotations::LuaFunc)) {
         isLuaFunc = true;
@@ -72,56 +64,76 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
       switchBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
                       -ptrdiff_t(exposedMethod.mArguments.size()) - 1 + isLuaFunc);
 
-      std::stringstream funcArgs;
-      size_t i = 0;
-      for (auto &arg: exposedMethod.mArguments) {
-        if (arg.mType.mName == "lua_State") {
-          THROW_IF(i != 0 || !isLuaFunc, "Unexpected lua_State argument!");
-          continue;
-        }
-        if (i != 0)
-          funcArgs << ", ";
-        if (auto argClass = mProject.GetClass(arg.mType.mName)) {
-          switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});", i, arg.mType.mName,
-                          ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()) + isLuaFunc);
-          if (argClass->mStruct && arg.mType.mType != PassByType::Pointer)
-            funcArgs << "*arg" << i;
-          else
-            funcArgs << "arg" << i;
-        } else {
-          auto sanitizedType = arg.mType;
-          sanitizedType.mType = PassByType::Value;
-          sanitizedType.mConstness = Constness::NotConst;
-          switchBlock.Add("{}arg{};", sanitizedType.ToString(false), i);
-          switchBlock.Add("{}::{}(arg{}, lsInner, {});", St::LuaHelper, St::LuaHelper_Read, i,
-                          ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()));
-          funcArgs << "arg" << i;
-        }
-        ++i;
-      }
+      std::string funcArgs =
+          GenerateReadExposedMethodArgsAndGetArgsString(exposedMethod, switchBlock, isLuaFunc);
 
-      std::string luaFuncPrefix;
       if (isLuaFunc) {
-        if (i == 0) {
-          luaFuncPrefix = "lsInner";
+        if (funcArgs.empty()) {
+          funcArgs = "lsInner";
         } else {
-          luaFuncPrefix = "lsInner, ";
+          funcArgs = std::format("lsInner, {}", funcArgs);
         }
       }
 
       if (exposedMethod.mReturnType.mName != "void") {
-        switchBlock.Add("auto result = instance->{}({}{});", exposedMethod.mName, luaFuncPrefix,
-                        funcArgs.str());
+        switchBlock.Add("auto result = instance->{}({});", exposedMethod.mName, funcArgs);
         switchBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
         switchBlock.Add("return 1;");
       } else {
-        switchBlock.Add("instance->{}({}{});", exposedMethod.mName, luaFuncPrefix, funcArgs.str());
+        switchBlock.Add("instance->{}({});", exposedMethod.mName, funcArgs);
         switchBlock.Add("return 0;");
       }
       switchBlock.Indent(-1);
       switchBlock.Add("}});");
     });
   }
+}
+
+std::string LuaPlugin::GenerateReadExposedMethodArgsAndGetArgsString(ClassMethod &exposedMethod,
+                                                                     CodeBlock &switchBlock,
+                                                                     bool isLuaFunc) {
+  std::stringstream funcArgs;
+  size_t i = 0;
+  for (auto &arg: exposedMethod.mArguments) {
+    if (arg.mType.mName == "lua_State") {
+      THROW_IF(i != 0 || !isLuaFunc, "Unexpected lua_State argument!");
+      continue;
+    }
+    if (i != 0)
+      funcArgs << ", ";
+    if (auto argClass = mProject.GetClass(arg.mType.mName)) {
+      switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});", i, arg.mType.mName,
+                      ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()) + isLuaFunc);
+      if (argClass->mStruct && arg.mType.mType != PassByType::Pointer)
+        funcArgs << "*arg" << i;
+      else
+        funcArgs << "arg" << i;
+    } else {
+      auto sanitizedType = arg.mType;
+      sanitizedType.mType = PassByType::Value;
+      sanitizedType.mConstness = Constness::NotConst;
+      switchBlock.Add("{}arg{};", sanitizedType.ToString(false), i);
+      switchBlock.Add("{}::{}(arg{}, lsInner, {});", St::LuaHelper, St::LuaHelper_Read, i,
+                      ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()));
+      funcArgs << "arg" << i;
+    }
+    ++i;
+  }
+  return funcArgs.str();
+}
+
+void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
+  auto method = ClassMethod{"IndexMetaMethod", Type{"int"}, Visibility::Private,
+                            Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  CodeBlock stringSwitcherElseCase;
+  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
+                             cls.mStruct->mName);
+  stringSwitcherElseCase.Add("return 0;");
+  StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
+
+  GenerateIndexMetaMethodForFields(cls, switcher);
+  GenerateIndexMetaMethodForExposedMethods(cls, switcher);
 
   if (!switcher.IsEmpty()) {
     method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -2);", cls.mName);

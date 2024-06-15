@@ -4,6 +4,7 @@
 #include "holgen.h"
 
 namespace holgen {
+class StringSwitcher;
 
 class LuaPlugin : public TranslatorPlugin {
 public:
@@ -24,6 +25,10 @@ private:
   void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const;
   void GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) const;
   void GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method);
+  void GenerateIndexMetaMethodForFields(Class &cls, StringSwitcher &switcher);
+  void GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitcher &switcher);
+  std::string GenerateReadExposedMethodArgsAndGetArgsString(ClassMethod &exposedMethod,
+                                                            CodeBlock &switchBlock, bool isLuaFunc);
 };
 
 } // namespace holgen
