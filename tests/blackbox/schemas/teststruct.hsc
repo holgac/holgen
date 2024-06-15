@@ -47,8 +47,8 @@ struct TestStructArray {
   u8[16] customData;
   @noLua
   func Initialize(TestStructArrayType type);
-  func GetData1() -> TestStructArrayCustomData1;
-  func GetData2() -> TestStructArrayCustomData2;
+  func GetData1() -> TestStructArrayCustomData1 nullable;
+  func GetData2() -> TestStructArrayCustomData2 nullable;
 }
 
 @struct(nonCopyable)

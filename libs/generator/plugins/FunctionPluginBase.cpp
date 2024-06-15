@@ -19,16 +19,24 @@ ClassMethod FunctionPluginBase::NewFunction(const FunctionDefinition &functionDe
       method.mVisibility = Visibility::Private;
     }
   }
+
+  switch (functionDefinition.mReturnType.mCategory) {
+  case FunctionReturnTypeCategory::Pointer:
+    method.mReturnType.mType = PassByType::Pointer;
+    break;
+  case FunctionReturnTypeCategory::Reference:
+    method.mReturnType.mType = PassByType::Reference;
+    break;
+  case FunctionReturnTypeCategory::NewObject:
+    method.mReturnType.mType = PassByType::Value;
+    break;
+  }
+
+  method.mReturnType.mConstness = functionDefinition.mReturnType.mConstness;
+
   method.mExposeToLua = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr;
   method.mFunction = &functionDefinition;
 
-  if (auto cls2 = mProject.GetClass(method.mReturnType.mName)) {
-    // TODO: attribute specifying whether const
-    if (cls2->mEnum)
-      method.mReturnType.mType = PassByType::Value;
-    else
-      method.mReturnType.mType = PassByType::Pointer;
-  }
   for (const auto &funcArg: functionDefinition.mArguments) {
     auto &arg = method.mArguments.emplace_back(
         funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});

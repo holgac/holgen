@@ -76,7 +76,11 @@ void LuaPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitc
       }
 
       if (exposedMethod.mReturnType.mName != "void") {
-        switchBlock.Add("auto result = instance->{}({});", exposedMethod.mName, funcArgs);
+        if (exposedMethod.mReturnType.mType == PassByType::Reference) {
+          switchBlock.Add("auto& result = instance->{}({});", exposedMethod.mName, funcArgs);
+        } else {
+          switchBlock.Add("auto result = instance->{}({});", exposedMethod.mName, funcArgs);
+        }
         switchBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
         switchBlock.Add("return 1;");
       } else {

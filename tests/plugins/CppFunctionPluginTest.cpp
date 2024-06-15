@@ -69,10 +69,63 @@ struct TestData {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer},
-                            Visibility::Public, Constness::NotConst};
+  auto method =
+      ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Value, Constness::NotConst},
+                  Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t", PassByType::Value, Constness::Const});
+  method.mUserDefined = true;
+  method.mExposeToLua = true;
+  helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
+}
+
+TEST_F(CppFunctionPluginTest, FunctionReturnModifierConstRef) {
+  auto project = Parse(R"R(
+struct TestData {
+  func TestFunction() -> string const ref;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  auto method =
+      ClassMethod{"TestFunction", Type{"std::string", PassByType::Reference, Constness::Const},
+                  Visibility::Public, Constness::NotConst};
+  method.mFunction = cls->mStruct->GetFunction("TestFunction");
+  method.mUserDefined = true;
+  method.mExposeToLua = true;
+  helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
+}
+
+TEST_F(CppFunctionPluginTest, FunctionReturnModifierNullable) {
+  auto project = Parse(R"R(
+struct TestData {
+  func TestFunction() -> string nullable;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  auto method = ClassMethod{"TestFunction", Type{"std::string", PassByType::Pointer},
+                            Visibility::Public, Constness::NotConst};
+  method.mFunction = cls->mStruct->GetFunction("TestFunction");
+  method.mUserDefined = true;
+  method.mExposeToLua = true;
+  helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
+}
+
+TEST_F(CppFunctionPluginTest, FunctionReturnModifierNew) {
+  auto project = Parse(R"R(
+struct TestData {
+  func TestFunction() -> string new;
+}
+  )R");
+  Run(project);
+  auto cls = project.GetClass("TestData");
+  ASSERT_NE(cls, nullptr);
+  auto method = ClassMethod{"TestFunction", Type{"std::string", PassByType::Value},
+                            Visibility::Public, Constness::NotConst};
+  method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mUserDefined = true;
   method.mExposeToLua = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
