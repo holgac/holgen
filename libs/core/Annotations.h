@@ -215,17 +215,17 @@ public:
   inline static const std::string LuaFunc_SourceTable = "sourceTable";
 
   /**
-   * Marks the function below as a custom function implemented in cpp
-   * and callable from cpp and lua.
+   * Controls the function below. By default the functions are defined in cpp, but
+   * @luaFunc can be used to change this behaviour.
    *
    * onDestroy: Called when the object is destroyed, use it to free unmanaged resources
    * const: Specifies whether the function is const
    */
-  inline static const std::string CppFunc = "cppFunc";
-  inline static const std::string CppFunc_OnDestroy = "onDestroy";
-  inline static const std::string CppFunc_Const = "const";
-  inline static const std::string CppFunc_Private = "private";
-  inline static const std::string CppFunc_Protected = "protected";
+  inline static const std::string Func = "func";
+  inline static const std::string Func_OnDestroy = "onDestroy";
+  inline static const std::string Func_Const = "const";
+  inline static const std::string Func_Private = "private";
+  inline static const std::string Func_Protected = "protected";
 
   /**
    * Adds a comment to a struct, field or function.

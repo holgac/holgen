@@ -21,9 +21,9 @@ void CppDestructorPlugin::ProcessStructDefinition(Class &cls, ClassDestructor &d
     ProcessStructDefinition(cls, destructor, *mProject.mProject.GetStruct(mixin));
   }
   for (auto &func: structDefinition.mFunctions) {
-    if (!func.GetAnnotation(Annotations::CppFunc))
+    if (!func.GetAnnotation(Annotations::Func))
       continue;
-    if (func.GetAnnotation(Annotations::CppFunc)->GetAttribute(Annotations::CppFunc_OnDestroy)) {
+    if (func.GetAnnotation(Annotations::Func)->GetAttribute(Annotations::Func_OnDestroy)) {
       destructor.mBody.Add("{}();", func.mName);
     }
   }

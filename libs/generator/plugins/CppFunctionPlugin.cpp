@@ -22,20 +22,20 @@ void CppFunctionPlugin::ProcessStructDefinition(Class &cls,
 }
 
 void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &functionDefinition) {
-  auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::CppFunc);
+  auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   auto method = ClassMethod{
       functionDefinition.mName,
       Type{mProject, functionDefinition.mDefinitionSource, functionDefinition.mReturnType},
       Visibility::Public,
-      (funcAnnotation && funcAnnotation->GetAttribute(Annotations::CppFunc_Const))
+      (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Const))
           ? Constness::Const
           : Constness::NotConst};
   if (funcAnnotation) {
-    if (funcAnnotation->GetAttribute(Annotations::CppFunc_OnDestroy)) {
+    if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy)) {
       method.mVisibility = Visibility::Protected;
-    } else if (funcAnnotation->GetAttribute(Annotations::CppFunc_Protected)) {
+    } else if (funcAnnotation->GetAttribute(Annotations::Func_Protected)) {
       method.mVisibility = Visibility::Protected;
-    } else if (funcAnnotation->GetAttribute(Annotations::CppFunc_Private)) {
+    } else if (funcAnnotation->GetAttribute(Annotations::Func_Private)) {
       method.mVisibility = Visibility::Private;
     }
   }

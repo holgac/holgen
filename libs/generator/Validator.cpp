@@ -226,15 +226,15 @@ void Validator::NewMethod(const Class &cls, const ClassMethod &method) const {
   }
   THROW_IF(method.mConstness == Constness::Const && method.mStaticness == Staticness::Static,
            "Const static method: {}", ToString(cls, method));
-  if (method.mFunction && method.mFunction->GetAnnotation(Annotations::CppFunc) &&
-      method.mFunction->GetAnnotation(Annotations::CppFunc)
-          ->GetAttribute(Annotations::CppFunc_OnDestroy)) {
+  if (method.mFunction && method.mFunction->GetAnnotation(Annotations::Func) &&
+      method.mFunction->GetAnnotation(Annotations::Func)
+          ->GetAttribute(Annotations::Func_OnDestroy)) {
     THROW_IF(!method.mArguments.empty(),
              "{} has {} attribute which does not support functions with arguments",
-             ToString(cls, method), Annotations::CppFunc_OnDestroy);
+             ToString(cls, method), Annotations::Func_OnDestroy);
     THROW_IF(method.mReturnType.mName != "void",
              "{} has {} attribute which does not support functions that return a value",
-             ToString(cls, method), Annotations::CppFunc_OnDestroy);
+             ToString(cls, method), Annotations::Func_OnDestroy);
   }
 }
 

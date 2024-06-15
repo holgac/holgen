@@ -91,9 +91,9 @@ struct TestData {
 TEST_F(CppFunctionPluginTest, OnDestroy) {
   auto project = Parse(R"R(
 struct TestData {
-  @cppFunc(onDestroy)
+  @func(onDestroy)
   func func1();
-  @cppFunc(onDestroy)
+  @func(onDestroy)
   func func2();
 }
   )R");
@@ -113,7 +113,7 @@ TEST_F(CppFunctionPluginTest, OnDestroyFunctionWithArgs) {
   ExpectErrorMessage(
       R"R(
 struct TestData {
-  @cppFunc(onDestroy)
+  @func(onDestroy)
   func func1(s32 val);
 }
 )R",
@@ -127,7 +127,7 @@ TEST_F(CppFunctionPluginTest, OnDestroyFunctionWithReturnType) {
   ExpectErrorMessage(
       R"R(
 struct TestData {
-  @cppFunc(onDestroy)
+  @func(onDestroy)
   func func1() -> s32;
 }
   )R",
