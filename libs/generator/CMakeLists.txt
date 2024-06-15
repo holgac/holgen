@@ -47,6 +47,7 @@ set(gen_plugins
     plugins/ClassFieldVariantPlugin.cpp
     plugins/ClassNonCopyablePlugin.cpp
     plugins/ClassRuleOfFivePlugin.cpp
+    plugins/FunctionPluginBase.cpp
 )
 
 add_library(generator

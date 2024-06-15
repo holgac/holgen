@@ -1,11 +1,12 @@
 #pragma once
 
+#include "FunctionPluginBase.h"
 #include "TranslatorPlugin.h"
 
 namespace holgen {
-class CppFunctionPlugin : public TranslatorPlugin {
+class CppFunctionPlugin : public FunctionPluginBase {
 public:
-  using TranslatorPlugin::TranslatorPlugin;
+  using FunctionPluginBase::FunctionPluginBase;
   void Run() override;
 
 private:
