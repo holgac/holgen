@@ -78,13 +78,7 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
 void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
                                                  const FunctionDefinition &functionDefinition) {
   for (auto &funcArg: functionDefinition.mArguments) {
-    auto &arg = method.mArguments.emplace_back(
-        funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
-    arg.mType.PreventCopying();
-    arg.mDefaultValue = funcArg.mDefaultValue;
-    if (mProject.GetClass(arg.mType.mName) != nullptr)
-      arg.mType.mType = PassByType::Pointer;
-    method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, arg.mName);
+    method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, funcArg.mName);
   }
 }
 
@@ -189,11 +183,12 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
                                          const std::string *sourceTable,
                                          const std::string &functionHandle, bool isFuncTable,
                                          bool isStatic) {
-  auto method = ClassMethod{
-      St::Capitalize(functionDefinition.mName),
-      Type{mProject, functionDefinition.mDefinitionSource, functionDefinition.mReturnType}};
+  auto method = NewFunction(functionDefinition);
+  // TODO: enable this after handling value passing
+  method.mExposeToLua = false;
+  method.mConstness = Constness::Const;
   method.mFunction = &functionDefinition;
-  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mArguments.emplace_front("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";
   if (functionDefinition.mReturnType.mName == "void")
     retVal = "void()";

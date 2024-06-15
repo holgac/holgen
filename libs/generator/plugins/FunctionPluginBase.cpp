@@ -1,7 +1,7 @@
 #include "FunctionPluginBase.h"
 
 namespace holgen {
-ClassMethod FunctionPluginBase::AddFunction(const FunctionDefinition &functionDefinition) {
+ClassMethod FunctionPluginBase::NewFunction(const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   auto method = ClassMethod{
       functionDefinition.mName,
@@ -19,7 +19,6 @@ ClassMethod FunctionPluginBase::AddFunction(const FunctionDefinition &functionDe
       method.mVisibility = Visibility::Private;
     }
   }
-  method.mUserDefined = true;
   method.mExposeToLua = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr;
   method.mFunction = &functionDefinition;
 

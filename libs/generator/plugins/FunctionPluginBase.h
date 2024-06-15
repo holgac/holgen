@@ -6,6 +6,6 @@ namespace holgen {
 class FunctionPluginBase : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
-  ClassMethod AddFunction(const FunctionDefinition &functionDefinition);
+  ClassMethod NewFunction(const FunctionDefinition &functionDefinition);
 };
 } // namespace holgen
