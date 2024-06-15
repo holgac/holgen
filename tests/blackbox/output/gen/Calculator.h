@@ -21,15 +21,23 @@ public:
   int64_t Add(lua_State *luaState, const int64_t val) const;
   void SetAddLuaFunc(std::string val);
   bool HasAddLuaFunc() const;
-  Number *Subtract(lua_State *luaState, const Number &val) const;
+  Number *Subtract(lua_State *luaState, Number &val) const;
   void SetSubtractLuaFunc(std::string val);
   bool HasSubtractLuaFunc() const;
   int64_t SubtractThenMultiply(const int64_t lhs, const int64_t rhs);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
-  // This only works with negative indices
-  static Calculator *ReadFromLua(lua_State *luaState, int32_t idx);
+  /*
+   * This only works with negative indices
+   * Reads proxy object (a table with a metatable and an embedded pointer or an index)
+   */
+  static Calculator *ReadProxyFromLua(lua_State *luaState, int32_t idx);
+  /*
+   * This only works with negative indices
+   * Reads a mirror object (a table with entries that mirror the c++ data structure)
+   */
+  static Calculator ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
 private:
   static int IndexMetaMethod(lua_State *luaState);

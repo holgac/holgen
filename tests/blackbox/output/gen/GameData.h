@@ -55,8 +55,16 @@ public:
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
-  // This only works with negative indices
-  static GameData *ReadFromLua(lua_State *luaState, int32_t idx);
+  /*
+   * This only works with negative indices
+   * Reads proxy object (a table with a metatable and an embedded pointer or an index)
+   */
+  static GameData *ReadProxyFromLua(lua_State *luaState, int32_t idx);
+  /*
+   * This only works with negative indices
+   * Reads a mirror object (a table with entries that mirror the c++ data structure)
+   */
+  static GameData ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
 private:
   static int IndexMetaMethod(lua_State *luaState);

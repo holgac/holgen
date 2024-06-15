@@ -61,7 +61,7 @@ void LuaPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitc
       // TODO: LuaHelper::Push should work with functions
       switchBlock.Add("lua_pushcfunction(luaState, [](lua_State *lsInner) {{");
       switchBlock.Indent(1);
-      switchBlock.Add("auto instance = {}::ReadFromLua(lsInner, {});", cls.mName,
+      switchBlock.Add("auto instance = {}::{}(lsInner, {});", cls.mName, St::Lua_ReadProxyObject,
                       -ptrdiff_t(exposedMethod.mArguments.size()) - 1 + isLuaFunc);
 
       std::string funcArgs =
@@ -105,13 +105,54 @@ std::string LuaPlugin::GenerateReadExposedMethodArgsAndGetArgsString(ClassMethod
     }
     if (i != 0)
       funcArgs << ", ";
+    ptrdiff_t stackIdx = ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()) + isLuaFunc;
     if (auto argClass = mProject.GetClass(arg.mType.mName)) {
-      switchBlock.Add("auto arg{} = {}::ReadFromLua(lsInner, {});", i, arg.mType.mName,
-                      ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()) + isLuaFunc);
-      if (argClass->mStruct && arg.mType.mType != PassByType::Pointer)
-        funcArgs << "*arg" << i;
-      else
-        funcArgs << "arg" << i;
+      bool canBeMirror = true;
+      bool canBeProxy = true;
+      if (arg.mType.mType != PassByType::Value && arg.mType.mConstness == Constness::NotConst) {
+        canBeMirror = false;
+      }
+      if (argClass->mEnum) {
+        canBeProxy = false;
+      }
+      if (canBeProxy && canBeMirror) {
+        switchBlock.Add("{} arg{}Mirror;", arg.mType.mName, i);
+        switchBlock.Add("{} *arg{};", arg.mType.mName, i);
+        switchBlock.Add("if (lua_getmetatable(lsInner, {})) {{", stackIdx);
+        switchBlock.Indent(1);
+        switchBlock.Add("lua_pop(lsInner, 1);");
+        switchBlock.Add("arg{} = {}::{}(lsInner, {});", i, arg.mType.mName, St::Lua_ReadProxyObject,
+                        stackIdx);
+        switchBlock.Indent(-1);
+        switchBlock.Add("}} else {{");
+        switchBlock.Indent(1);
+        switchBlock.Add("arg{}Mirror = {}::{}(lsInner, {});", i, arg.mType.mName,
+                        St::Lua_ReadMirrorObject, stackIdx);
+        switchBlock.Add("arg{0} = &arg{0}Mirror;", i);
+        switchBlock.Indent(-1);
+        switchBlock.Add("}}");
+      } else if (canBeProxy) {
+        switchBlock.Add("auto arg{} = {}::{}(lsInner, {});", i, arg.mType.mName,
+                        St::Lua_ReadProxyObject, stackIdx);
+      } else if (canBeMirror) {
+        switchBlock.Add("auto arg{} = {}::{}(lsInner, {});", i, arg.mType.mName,
+                        St::Lua_ReadMirrorObject, stackIdx);
+      } else {
+        THROW("Dont know how to pass {}.{} argument", exposedMethod.mName, arg.mName);
+      }
+      if (canBeProxy) {
+        if (arg.mType.mType == PassByType::Pointer) {
+          funcArgs << "arg" << i;
+        } else {
+          funcArgs << "*arg" << i;
+        }
+      } else {
+        if (arg.mType.mType == PassByType::Pointer) {
+          funcArgs << "&arg" << i;
+        } else {
+          funcArgs << "arg" << i;
+        }
+      }
     } else {
       auto sanitizedType = arg.mType;
       sanitizedType.mType = PassByType::Value;
@@ -142,7 +183,7 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
 
   if (!switcher.IsEmpty()) {
     if (hasFields) {
-      method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -2);", cls.mName);
+      method.mBody.Add("auto instance = {}::{}(luaState, -2);", cls.mName, St::Lua_ReadProxyObject);
     }
     method.mBody.Add("const char *key = lua_tostring(luaState, -1);");
     method.mBody.Add(std::move(switcher.Generate()));
@@ -211,7 +252,7 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
     });
   }
   if (!switcher.IsEmpty()) {
-    method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -3);", cls.mName);
+    method.mBody.Add("auto instance = {}::{}(luaState, -3);", cls.mName, St::Lua_ReadProxyObject);
     method.mBody.Add("const char *key = lua_tostring(luaState, -2);");
     method.mBody.Add(std::move(switcher.Generate()));
   }
@@ -220,22 +261,39 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void LuaPlugin::GenerateReadFromLua(Class &cls) {
-  auto method = ClassMethod{"ReadFromLua", Type{cls.mName, PassByType::Pointer}, Visibility::Public,
-                            Constness::NotConst, Staticness::Static};
-  method.mComments.push_back("This only works with negative indices");
+void LuaPlugin::GenerateReadProxyObjectFromLua(Class &cls) {
+  auto method = ClassMethod{St::Lua_ReadProxyObject, Type{cls.mName, PassByType::Pointer},
+                            Visibility::Public, Constness::NotConst, Staticness::Static};
+  method.mComments.emplace_back("This only works with negative indices");
+  method.mComments.emplace_back(
+      "Reads proxy object (a table with a metatable and an embedded pointer or an index)");
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mArguments.emplace_back("idx", Type{"int32_t"});
+  THROW_IF(cls.mEnum, "Proxy objects only work with structs!")
+  GenerateReadProxyStructFromLuaBody(cls, method);
+
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void LuaPlugin::GenerateReadMirrorObjectFromLua(Class &cls) {
+  auto method = ClassMethod{St::Lua_ReadMirrorObject, Type{cls.mName, PassByType::Value},
+                            Visibility::Public, Constness::NotConst, Staticness::Static};
+  method.mComments.emplace_back("This only works with negative indices");
+  method.mComments.emplace_back(
+      "Reads a mirror object (a table with entries that mirror the c++ data structure)");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mArguments.emplace_back("idx", Type{"int32_t"});
   if (cls.mEnum) {
     GenerateReadEnumFromLuaBody(cls, method);
   } else {
-    GenerateReadStructFromLuaBody(cls, method);
+    GenerateReadMirrorStructFromLuaBody(cls, method);
   }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
 
-void LuaPlugin::GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method) {
+void LuaPlugin::GenerateReadProxyStructFromLuaBody(Class &cls, ClassMethod &method) {
   if (!ShouldEmbedPointer(cls)) {
     method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
     method.mBody.Add("lua_gettable(luaState, idx - 1);");
@@ -256,6 +314,11 @@ void LuaPlugin::GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method) {
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return ptr;");
   }
+}
+
+void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &method) {
+  method.mBody.Add("auto result = {}{{}};", cls.mName);
+  method.mBody.Add("return result;", cls.mName);
 }
 
 void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) const {
@@ -317,7 +380,8 @@ void LuaPlugin::ProcessStruct(Class &cls) {
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   GeneratePushToLua(cls);
   GeneratePushGlobalToLua(cls);
-  GenerateReadFromLua(cls);
+  GenerateReadProxyObjectFromLua(cls);
+  GenerateReadMirrorObjectFromLua(cls);
   GenerateIndexMetaMethod(cls);
   GenerateNewIndexMetaMethod(cls);
   GenerateCreateLuaMetatable(cls);
@@ -381,7 +445,7 @@ void LuaPlugin::ProcessEnum(Class &cls) {
   method.mBody.Add("{}::{}(mValue, luaState);", St::LuaHelper, St::LuaHelper_Push);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
-  GenerateReadFromLua(cls);
+  GenerateReadMirrorObjectFromLua(cls);
   GeneratePushEnumToLua(cls);
 }
 

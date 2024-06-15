@@ -28,6 +28,8 @@ public:
   inline static const std::string LuaHelper = "LuaHelper";
   inline static const std::string LuaHelper_Push = "Push";
   inline static const std::string LuaHelper_Read = "Read";
+  inline static const std::string Lua_ReadProxyObject = "ReadProxyFromLua";
+  inline static const std::string Lua_ReadMirrorObject = "ReadMirrorFromLua";
   inline static const std::string LuaTable_TableField = "table";
   inline static const std::string ManagedObject_Getter = "Get";
   inline static const std::string Enum_UnderlyingType = "UnderlyingType";

@@ -65,7 +65,7 @@ void WeaponTypeBow::PushGlobalToLua(lua_State *luaState, const char *name) const
   lua_setglobal(luaState, name);
 }
 
-WeaponTypeBow *WeaponTypeBow::ReadFromLua(lua_State *luaState, int32_t idx) {
+WeaponTypeBow *WeaponTypeBow::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (WeaponTypeBow *) lua_touserdata(luaState, -1);
@@ -73,8 +73,13 @@ WeaponTypeBow *WeaponTypeBow::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+WeaponTypeBow WeaponTypeBow::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = WeaponTypeBow{};
+  return result;
+}
+
 int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeBow::ReadFromLua(luaState, -2);
+  auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("range", key)) {
     LuaHelper::Push(instance->mRange, luaState);
@@ -88,7 +93,7 @@ int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
 }
 
 int WeaponTypeBow::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeBow::ReadFromLua(luaState, -3);
+  auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("range", key)) {
     LuaHelper::Read(instance->mRange, luaState, -1);

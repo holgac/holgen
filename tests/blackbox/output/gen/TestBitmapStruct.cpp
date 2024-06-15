@@ -53,7 +53,7 @@ void TestBitmapStruct::PushGlobalToLua(lua_State *luaState, const char *name) co
   lua_setglobal(luaState, name);
 }
 
-TestBitmapStruct *TestBitmapStruct::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestBitmapStruct *TestBitmapStruct::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestBitmapStruct *) lua_touserdata(luaState, -1);
@@ -61,8 +61,13 @@ TestBitmapStruct *TestBitmapStruct::ReadFromLua(lua_State *luaState, int32_t idx
   return ptr;
 }
 
+TestBitmapStruct TestBitmapStruct::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestBitmapStruct{};
+  return result;
+}
+
 int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestBitmapStruct::ReadFromLua(luaState, -2);
+  auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("bitmapField", key)) {
     LuaHelper::Push(instance->mBitmapField, luaState);
@@ -74,7 +79,7 @@ int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestBitmapStruct::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestBitmapStruct::ReadFromLua(luaState, -3);
+  auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("bitmapField", key)) {
     LuaHelper::Read(instance->mBitmapField, luaState, -1);

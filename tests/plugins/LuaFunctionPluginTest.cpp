@@ -209,7 +209,7 @@ struct TestData {
   ASSERT_NE(cls, nullptr);
 
   ASSERT_NE(cls->GetMethod("TestFunction", Constness::Const), nullptr);
-  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer},
+  auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Value},
                             Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
@@ -224,9 +224,17 @@ if (lua_isnil(luaState, -1)) {
 }
 LuaHelper::Push(*this, luaState);
 lua_call(luaState, 1, 1);
-auto result = InnerStruct::ReadFromLua(luaState, -1);
+InnerStruct resultMirror;
+InnerStruct *result;
+if (lua_getmetatable(luaState, -1)) {
+  lua_pop(luaState, 1);
+  result = InnerStruct::ReadProxyFromLua(luaState, -1);
+} else {
+  resultMirror = InnerStruct::ReadMirrorFromLua(luaState, -1);
+  result = &resultMirror;
+}
 lua_pop(luaState, 1);
-return result;
+return *result;
   )R");
 }
 

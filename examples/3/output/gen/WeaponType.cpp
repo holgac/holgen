@@ -88,7 +88,7 @@ void WeaponType::PushToLua(lua_State *luaState) const {
   LuaHelper::Push(mValue, luaState);
 }
 
-WeaponType WeaponType::ReadFromLua(lua_State *luaState, int32_t idx) {
+WeaponType WeaponType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto typ = lua_type(luaState, idx);
   if (typ == LUA_TSTRING) {
     return FromString(lua_tostring(luaState, idx));

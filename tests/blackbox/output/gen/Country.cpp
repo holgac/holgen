@@ -87,7 +87,7 @@ void Country::PushGlobalToLua(lua_State *luaState, const char *name) const {
   lua_setglobal(luaState, name);
 }
 
-Country *Country::ReadFromLua(lua_State *luaState, int32_t idx) {
+Country *Country::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (Country *) lua_touserdata(luaState, -1);
@@ -95,8 +95,13 @@ Country *Country::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+Country Country::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = Country{};
+  return result;
+}
+
 int Country::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Country::ReadFromLua(luaState, -2);
+  auto instance = Country::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("leader", key)) {
     LuaHelper::Push(instance->mLeader, luaState);
@@ -112,7 +117,7 @@ int Country::IndexMetaMethod(lua_State *luaState) {
 }
 
 int Country::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = Country::ReadFromLua(luaState, -3);
+  auto instance = Country::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("leader", key)) {
     LuaHelper::Read(instance->mLeader, luaState, -1);

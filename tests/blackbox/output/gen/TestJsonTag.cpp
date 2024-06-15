@@ -80,7 +80,7 @@ void TestJsonTag::PushGlobalToLua(lua_State *luaState, const char *name) const {
   lua_setglobal(luaState, name);
 }
 
-TestJsonTag *TestJsonTag::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestJsonTag *TestJsonTag::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);
   uint64_t id = reinterpret_cast<uint64_t>(lua_touserdata(luaState, -1));
@@ -89,8 +89,13 @@ TestJsonTag *TestJsonTag::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+TestJsonTag TestJsonTag::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestJsonTag{};
+  return result;
+}
+
 int TestJsonTag::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonTag::ReadFromLua(luaState, -2);
+  auto instance = TestJsonTag::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState);
@@ -104,7 +109,7 @@ int TestJsonTag::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestJsonTag::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonTag::ReadFromLua(luaState, -3);
+  auto instance = TestJsonTag::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
     LuaHelper::Read(instance->mId, luaState, -1);

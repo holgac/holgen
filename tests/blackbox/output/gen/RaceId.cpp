@@ -57,7 +57,7 @@ void RaceId::PushGlobalToLua(lua_State *luaState, const char *name) const {
   lua_setglobal(luaState, name);
 }
 
-RaceId *RaceId::ReadFromLua(lua_State *luaState, int32_t idx) {
+RaceId *RaceId::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (RaceId *) lua_touserdata(luaState, -1);
@@ -65,8 +65,13 @@ RaceId *RaceId::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+RaceId RaceId::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = RaceId{};
+  return result;
+}
+
 int RaceId::IndexMetaMethod(lua_State *luaState) {
-  auto instance = RaceId::ReadFromLua(luaState, -2);
+  auto instance = RaceId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState);
@@ -78,7 +83,7 @@ int RaceId::IndexMetaMethod(lua_State *luaState) {
 }
 
 int RaceId::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = RaceId::ReadFromLua(luaState, -3);
+  auto instance = RaceId::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
     LuaHelper::Read(instance->mId, luaState, -1);

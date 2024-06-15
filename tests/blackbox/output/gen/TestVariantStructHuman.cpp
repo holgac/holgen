@@ -69,7 +69,7 @@ void TestVariantStructHuman::PushGlobalToLua(lua_State *luaState, const char *na
   lua_setglobal(luaState, name);
 }
 
-TestVariantStructHuman *TestVariantStructHuman::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestVariantStructHuman *TestVariantStructHuman::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestVariantStructHuman *) lua_touserdata(luaState, -1);
@@ -77,8 +77,13 @@ TestVariantStructHuman *TestVariantStructHuman::ReadFromLua(lua_State *luaState,
   return ptr;
 }
 
+TestVariantStructHuman TestVariantStructHuman::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestVariantStructHuman{};
+  return result;
+}
+
 int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructHuman::ReadFromLua(luaState, -2);
+  auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("name", key)) {
     LuaHelper::Push(instance->mName, luaState);
@@ -92,7 +97,7 @@ int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestVariantStructHuman::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructHuman::ReadFromLua(luaState, -3);
+  auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("name", key)) {
     LuaHelper::Read(instance->mName, luaState, -1);

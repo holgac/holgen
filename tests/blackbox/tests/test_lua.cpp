@@ -144,7 +144,7 @@ TEST_F(LuaTest, Func) {
   Calculator::CreateLuaMetatable(mState);
   Calculator c;
   lua_pushcfunction(mState, [](lua_State *ls) -> int {
-    auto calc = Calculator::ReadFromLua(ls, -2);
+    auto calc = Calculator::ReadProxyFromLua(ls, -2);
     int32_t val;
     LuaHelper::Read(val, ls, -1);
     val += calc->GetCurVal().GetValue();
@@ -166,8 +166,8 @@ TEST_F(LuaTest, Func) {
   lua_newtable(mState);
   lua_pushstring(mState, "calc_subtract");
   lua_pushcfunction(mState, [](lua_State *ls) -> int {
-    auto calc = Calculator::ReadFromLua(ls, -2);
-    auto num = Number::ReadFromLua(ls, -1);
+    auto calc = Calculator::ReadProxyFromLua(ls, -2);
+    auto num = Number::ReadProxyFromLua(ls, -1);
     calc->GetCurVal().SetValue(calc->GetCurVal().GetValue() - num->GetValue());
     LuaHelper::Push(calc->GetCurVal(), ls);
     return 1;

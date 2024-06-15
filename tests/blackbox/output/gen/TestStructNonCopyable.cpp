@@ -57,7 +57,7 @@ void TestStructNonCopyable::PushGlobalToLua(lua_State *luaState, const char *nam
   lua_setglobal(luaState, name);
 }
 
-TestStructNonCopyable *TestStructNonCopyable::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestStructNonCopyable *TestStructNonCopyable::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestStructNonCopyable *) lua_touserdata(luaState, -1);
@@ -65,8 +65,13 @@ TestStructNonCopyable *TestStructNonCopyable::ReadFromLua(lua_State *luaState, i
   return ptr;
 }
 
+TestStructNonCopyable TestStructNonCopyable::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestStructNonCopyable{};
+  return result;
+}
+
 int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructNonCopyable::ReadFromLua(luaState, -2);
+  auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("bigVector", key)) {
     LuaHelper::Push(instance->mBigVector, luaState);
@@ -78,7 +83,7 @@ int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestStructNonCopyable::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructNonCopyable::ReadFromLua(luaState, -3);
+  auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("bigVector", key)) {
     LuaHelper::Read(instance->mBigVector, luaState, -1);

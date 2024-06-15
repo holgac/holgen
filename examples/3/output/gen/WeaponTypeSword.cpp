@@ -62,7 +62,7 @@ void WeaponTypeSword::PushGlobalToLua(lua_State *luaState, const char *name) con
   lua_setglobal(luaState, name);
 }
 
-WeaponTypeSword *WeaponTypeSword::ReadFromLua(lua_State *luaState, int32_t idx) {
+WeaponTypeSword *WeaponTypeSword::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (WeaponTypeSword *) lua_touserdata(luaState, -1);
@@ -70,8 +70,13 @@ WeaponTypeSword *WeaponTypeSword::ReadFromLua(lua_State *luaState, int32_t idx) 
   return ptr;
 }
 
+WeaponTypeSword WeaponTypeSword::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = WeaponTypeSword{};
+  return result;
+}
+
 int WeaponTypeSword::IndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeSword::ReadFromLua(luaState, -2);
+  auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("sharpness", key)) {
     LuaHelper::Push(instance->mSharpness, luaState);
@@ -85,7 +90,7 @@ int WeaponTypeSword::IndexMetaMethod(lua_State *luaState) {
 }
 
 int WeaponTypeSword::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeSword::ReadFromLua(luaState, -3);
+  auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("sharpness", key)) {
     LuaHelper::Read(instance->mSharpness, luaState, -1);

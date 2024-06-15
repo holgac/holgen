@@ -9,7 +9,7 @@ struct Calculator {
     func Add(s64 val) -> s64;
 
     @luaFunc(sourceTable=Ops)
-    func Subtract(Number val) -> Number;
+    func Subtract(Number val ref) -> Number nullable;
 
     func SubtractThenMultiply(s64 lhs, s64 rhs) -> s64;
 }

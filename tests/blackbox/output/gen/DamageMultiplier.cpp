@@ -66,7 +66,7 @@ void DamageMultiplier::PushGlobalToLua(lua_State *luaState, const char *name) co
   lua_setglobal(luaState, name);
 }
 
-DamageMultiplier *DamageMultiplier::ReadFromLua(lua_State *luaState, int32_t idx) {
+DamageMultiplier *DamageMultiplier::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (DamageMultiplier *) lua_touserdata(luaState, -1);
@@ -74,8 +74,13 @@ DamageMultiplier *DamageMultiplier::ReadFromLua(lua_State *luaState, int32_t idx
   return ptr;
 }
 
+DamageMultiplier DamageMultiplier::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = DamageMultiplier{};
+  return result;
+}
+
 int DamageMultiplier::IndexMetaMethod(lua_State *luaState) {
-  auto instance = DamageMultiplier::ReadFromLua(luaState, -2);
+  auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("when", key)) {
     LuaHelper::Push(instance->mWhen, luaState);
@@ -89,7 +94,7 @@ int DamageMultiplier::IndexMetaMethod(lua_State *luaState) {
 }
 
 int DamageMultiplier::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = DamageMultiplier::ReadFromLua(luaState, -3);
+  auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("when", key)) {
     LuaHelper::Read(instance->mWhen, luaState, -1);

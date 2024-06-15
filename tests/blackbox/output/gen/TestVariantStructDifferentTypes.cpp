@@ -254,7 +254,7 @@ void TestVariantStructDifferentTypes::PushGlobalToLua(lua_State *luaState, const
   lua_setglobal(luaState, name);
 }
 
-TestVariantStructDifferentTypes *TestVariantStructDifferentTypes::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestVariantStructDifferentTypes *TestVariantStructDifferentTypes::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestVariantStructDifferentTypes *) lua_touserdata(luaState, -1);
@@ -262,8 +262,13 @@ TestVariantStructDifferentTypes *TestVariantStructDifferentTypes::ReadFromLua(lu
   return ptr;
 }
 
+TestVariantStructDifferentTypes TestVariantStructDifferentTypes::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestVariantStructDifferentTypes{};
+  return result;
+}
+
 int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructDifferentTypes::ReadFromLua(luaState, -2);
+  auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("being1", key)) {
     switch (instance->mBeing1Type.GetValue()) {

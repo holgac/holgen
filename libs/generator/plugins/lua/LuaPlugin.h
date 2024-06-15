@@ -16,7 +16,8 @@ private:
   void ProcessEnum(Class &cls);
   void GeneratePushGlobalToLua(Class &cls);
   void GeneratePushToLua(Class &cls);
-  void GenerateReadFromLua(Class &cls);
+  void GenerateReadProxyObjectFromLua(Class &cls);
+  void GenerateReadMirrorObjectFromLua(Class &cls);
   void GenerateIndexMetaMethod(Class &cls);
   void GenerateNewIndexMetaMethod(Class &cls);
   void GenerateCreateLuaMetatable(Class &cls);
@@ -24,7 +25,8 @@ private:
   bool ShouldEmbedPointer(Class &cls);
   void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const;
   void GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) const;
-  void GenerateReadStructFromLuaBody(Class &cls, ClassMethod &method);
+  void GenerateReadProxyStructFromLuaBody(Class &cls, ClassMethod &method);
+  void GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &method);
   void GenerateIndexMetaMethodForFields(Class &cls, StringSwitcher &switcher);
   void GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitcher &switcher);
   std::string GenerateReadExposedMethodArgsAndGetArgsString(ClassMethod &exposedMethod,

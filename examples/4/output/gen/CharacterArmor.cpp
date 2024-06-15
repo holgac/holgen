@@ -73,7 +73,7 @@ void CharacterArmor::PushGlobalToLua(lua_State *luaState, const char *name) cons
   lua_setglobal(luaState, name);
 }
 
-CharacterArmor *CharacterArmor::ReadFromLua(lua_State *luaState, int32_t idx) {
+CharacterArmor *CharacterArmor::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (CharacterArmor *) lua_touserdata(luaState, -1);
@@ -81,8 +81,13 @@ CharacterArmor *CharacterArmor::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+CharacterArmor CharacterArmor::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = CharacterArmor{};
+  return result;
+}
+
 int CharacterArmor::IndexMetaMethod(lua_State *luaState) {
-  auto instance = CharacterArmor::ReadFromLua(luaState, -2);
+  auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("dirtAmount", key)) {
     LuaHelper::Push(instance->mDirtAmount, luaState);
@@ -98,7 +103,7 @@ int CharacterArmor::IndexMetaMethod(lua_State *luaState) {
 }
 
 int CharacterArmor::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = CharacterArmor::ReadFromLua(luaState, -3);
+  auto instance = CharacterArmor::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("dirtAmount", key)) {
     LuaHelper::Read(instance->mDirtAmount, luaState, -1);

@@ -53,7 +53,7 @@ void TestEnumStruct::PushGlobalToLua(lua_State *luaState, const char *name) cons
   lua_setglobal(luaState, name);
 }
 
-TestEnumStruct *TestEnumStruct::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestEnumStruct *TestEnumStruct::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestEnumStruct *) lua_touserdata(luaState, -1);
@@ -61,8 +61,13 @@ TestEnumStruct *TestEnumStruct::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+TestEnumStruct TestEnumStruct::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestEnumStruct{};
+  return result;
+}
+
 int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestEnumStruct::ReadFromLua(luaState, -2);
+  auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("enumField", key)) {
     LuaHelper::Push(instance->mEnumField, luaState);
@@ -74,7 +79,7 @@ int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestEnumStruct::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestEnumStruct::ReadFromLua(luaState, -3);
+  auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("enumField", key)) {
     LuaHelper::Read(instance->mEnumField, luaState, -1);

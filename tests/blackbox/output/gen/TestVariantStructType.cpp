@@ -88,7 +88,7 @@ void TestVariantStructType::PushToLua(lua_State *luaState) const {
   LuaHelper::Push(mValue, luaState);
 }
 
-TestVariantStructType TestVariantStructType::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestVariantStructType TestVariantStructType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto typ = lua_type(luaState, idx);
   if (typ == LUA_TSTRING) {
     return FromString(lua_tostring(luaState, idx));

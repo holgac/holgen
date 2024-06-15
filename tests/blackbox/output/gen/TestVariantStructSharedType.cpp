@@ -199,7 +199,7 @@ void TestVariantStructSharedType::PushGlobalToLua(lua_State *luaState, const cha
   lua_setglobal(luaState, name);
 }
 
-TestVariantStructSharedType *TestVariantStructSharedType::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestVariantStructSharedType *TestVariantStructSharedType::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestVariantStructSharedType *) lua_touserdata(luaState, -1);
@@ -207,8 +207,13 @@ TestVariantStructSharedType *TestVariantStructSharedType::ReadFromLua(lua_State 
   return ptr;
 }
 
+TestVariantStructSharedType TestVariantStructSharedType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestVariantStructSharedType{};
+  return result;
+}
+
 int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructSharedType::ReadFromLua(luaState, -2);
+  auto instance = TestVariantStructSharedType::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("being1", key)) {
     switch (instance->mBeingType.GetValue()) {

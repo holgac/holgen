@@ -2,6 +2,8 @@
 #include "core/Annotations.h"
 #include "core/St.h"
 
+#include "core/Exception.h"
+
 namespace holgen {
 void LuaFunctionPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
@@ -218,9 +220,46 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
                    returnsVal ? 1 : 0);
   int popCount = returnsVal + isFuncTable + !!sourceTable;
   if (returnsVal) {
-    if (mProject.GetClass(method.mReturnType.mName)) {
-      method.mReturnType.mType = PassByType::Pointer;
-      method.mBody.Add("auto result = {}::ReadFromLua(luaState, -1);", method.mReturnType.mName);
+    std::string returnValue = "result";
+    if (auto returnClass = mProject.GetClass(method.mReturnType.mName)) {
+      bool canBeMirror = true;
+      bool canBeProxy = true;
+      if (method.mReturnType.mType != PassByType::Value) {
+        canBeMirror = false;
+      }
+      if (returnClass->mEnum) {
+        canBeProxy = false;
+      }
+      if (canBeProxy && canBeMirror) {
+        method.mBody.Add("{} resultMirror;", returnClass->mName);
+        method.mBody.Add("{} *result;", returnClass->mName);
+        method.mBody.Add("if (lua_getmetatable(luaState, -1)) {{");
+        method.mBody.Indent(1);
+        method.mBody.Add("lua_pop(luaState, 1);");
+        method.mBody.Add("result = {}::{}(luaState, -1);", returnClass->mName,
+                         St::Lua_ReadProxyObject);
+        method.mBody.Indent(-1);
+        method.mBody.Add("}} else {{");
+        method.mBody.Indent(1);
+        method.mBody.Add("resultMirror = {}::{}(luaState, -1);", returnClass->mName,
+                         St::Lua_ReadMirrorObject);
+        method.mBody.Add("result = &resultMirror;");
+        method.mBody.Indent(-1);
+        method.mBody.Add("}}");
+        // This only works if function returns a value
+        returnValue = "*result";
+      } else if (canBeProxy) {
+        method.mBody.Add("auto result = {}::{}(luaState, -1);", returnClass->mName,
+                         St::Lua_ReadProxyObject);
+        if (method.mReturnType.mType != PassByType::Pointer) {
+          returnValue = "*result";
+        }
+      } else if (canBeMirror) {
+        method.mBody.Add("auto result = {}::{}(luaState, -1);", returnClass->mName,
+                         St::Lua_ReadMirrorObject);
+      } else {
+        THROW("Dont know how to get the return value of {} from lua!", method.mName);
+      }
     } else {
       method.mBody.Add("{} result;", method.mReturnType.mName);
       method.mBody.Add("{}::{}(result, luaState, -1);", St::LuaHelper, St::LuaHelper_Read);
@@ -228,7 +267,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
     if (popCount > 0) {
       method.mBody.Add("lua_pop(luaState, {});", popCount);
     }
-    method.mBody.Add("return result;");
+    method.mBody.Add("return {};", returnValue);
   } else {
     if (popCount > 0) {
       method.mBody.Add("lua_pop(luaState, {});", popCount);

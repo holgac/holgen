@@ -96,7 +96,7 @@ void Weapon::PushGlobalToLua(lua_State *luaState, const char *name) const {
   lua_setglobal(luaState, name);
 }
 
-Weapon *Weapon::ReadFromLua(lua_State *luaState, int32_t idx) {
+Weapon *Weapon::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (Weapon *) lua_touserdata(luaState, -1);
@@ -104,8 +104,13 @@ Weapon *Weapon::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+Weapon Weapon::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = Weapon{};
+  return result;
+}
+
 int Weapon::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Weapon::ReadFromLua(luaState, -2);
+  auto instance = Weapon::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState);
@@ -123,7 +128,7 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
 }
 
 int Weapon::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = Weapon::ReadFromLua(luaState, -3);
+  auto instance = Weapon::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
     LuaHelper::Read(instance->mId, luaState, -1);

@@ -340,7 +340,7 @@ void DataManager::PushGlobalToLua(lua_State *luaState, const char *name) const {
   lua_setglobal(luaState, name);
 }
 
-DataManager *DataManager::ReadFromLua(lua_State *luaState, int32_t idx) {
+DataManager *DataManager::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (DataManager *) lua_touserdata(luaState, -1);
@@ -348,8 +348,13 @@ DataManager *DataManager::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+DataManager DataManager::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = DataManager{};
+  return result;
+}
+
 int DataManager::IndexMetaMethod(lua_State *luaState) {
-  auto instance = DataManager::ReadFromLua(luaState, -2);
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("characters", key)) {
     LuaHelper::Push(instance->mCharacters, luaState);
@@ -359,7 +364,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     LuaHelper::Push(instance->mWeapons, luaState);
   } else if (0 == strcmp("GetCharacterFromName", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetCharacterFromName(arg0);
@@ -368,15 +373,15 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("AddCharacter", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
-      auto arg0 = Character::ReadFromLua(lsInner, -1);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
+      auto arg0 = Character::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddCharacter(*arg0);
       LuaHelper::Push(result, lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetCharacter", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetCharacter(arg0);
@@ -385,7 +390,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("DeleteCharacter", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       size_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       instance->DeleteCharacter(arg0);
@@ -393,14 +398,14 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("GetCharacterCount", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -1);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetCharacterCount();
       LuaHelper::Push(result, lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetArmorFromName", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetArmorFromName(arg0);
@@ -409,15 +414,15 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("AddArmor", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
-      auto arg0 = Armor::ReadFromLua(lsInner, -1);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
+      auto arg0 = Armor::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddArmor(*arg0);
       LuaHelper::Push(result, lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetArmor", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetArmor(arg0);
@@ -426,7 +431,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("DeleteArmor", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       size_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       instance->DeleteArmor(arg0);
@@ -434,14 +439,14 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("GetArmorCount", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -1);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetArmorCount();
       LuaHelper::Push(result, lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetWeaponFromName", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetWeaponFromName(arg0);
@@ -450,15 +455,15 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("AddWeapon", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
-      auto arg0 = Weapon::ReadFromLua(lsInner, -1);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
+      auto arg0 = Weapon::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddWeapon(*arg0);
       LuaHelper::Push(result, lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetWeapon", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetWeapon(arg0);
@@ -467,7 +472,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("DeleteWeapon", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -2);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       size_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       instance->DeleteWeapon(arg0);
@@ -475,7 +480,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("GetWeaponCount", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = DataManager::ReadFromLua(lsInner, -1);
+      auto instance = DataManager::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetWeaponCount();
       LuaHelper::Push(result, lsInner);
       return 1;
@@ -488,7 +493,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
 }
 
 int DataManager::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = DataManager::ReadFromLua(luaState, -3);
+  auto instance = DataManager::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("characters", key)) {
     LuaHelper::Read(instance->mCharacters, luaState, -1);

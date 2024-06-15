@@ -69,7 +69,7 @@ void TestStructSingleElemWithId::PushGlobalToLua(lua_State *luaState, const char
   lua_setglobal(luaState, name);
 }
 
-TestStructSingleElemWithId *TestStructSingleElemWithId::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestStructSingleElemWithId *TestStructSingleElemWithId::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestStructSingleElemWithId *) lua_touserdata(luaState, -1);
@@ -77,8 +77,13 @@ TestStructSingleElemWithId *TestStructSingleElemWithId::ReadFromLua(lua_State *l
   return ptr;
 }
 
+TestStructSingleElemWithId TestStructSingleElemWithId::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestStructSingleElemWithId{};
+  return result;
+}
+
 int TestStructSingleElemWithId::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructSingleElemWithId::ReadFromLua(luaState, -2);
+  auto instance = TestStructSingleElemWithId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState);
@@ -92,7 +97,7 @@ int TestStructSingleElemWithId::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestStructSingleElemWithId::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructSingleElemWithId::ReadFromLua(luaState, -3);
+  auto instance = TestStructSingleElemWithId::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
     LuaHelper::Read(instance->mId, luaState, -1);

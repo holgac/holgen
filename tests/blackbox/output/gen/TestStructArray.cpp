@@ -68,7 +68,7 @@ void TestStructArray::PushGlobalToLua(lua_State *luaState, const char *name) con
   lua_setglobal(luaState, name);
 }
 
-TestStructArray *TestStructArray::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestStructArray *TestStructArray::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestStructArray *) lua_touserdata(luaState, -1);
@@ -76,21 +76,26 @@ TestStructArray *TestStructArray::ReadFromLua(lua_State *luaState, int32_t idx) 
   return ptr;
 }
 
+TestStructArray TestStructArray::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestStructArray{};
+  return result;
+}
+
 int TestStructArray::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructArray::ReadFromLua(luaState, -2);
+  auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("type", key)) {
     LuaHelper::Push(instance->mType, luaState);
   } else if (0 == strcmp("GetData1", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestStructArray::ReadFromLua(lsInner, -1);
+      auto instance = TestStructArray::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetData1();
       LuaHelper::Push(result, lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetData2", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestStructArray::ReadFromLua(lsInner, -1);
+      auto instance = TestStructArray::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetData2();
       LuaHelper::Push(result, lsInner);
       return 1;
@@ -103,7 +108,7 @@ int TestStructArray::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestStructArray::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructArray::ReadFromLua(luaState, -3);
+  auto instance = TestStructArray::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("type", key)) {
     LuaHelper::Read(instance->mType, luaState, -1);

@@ -145,7 +145,7 @@ void TestLuaFuncTableContainer::PushGlobalToLua(lua_State *luaState, const char 
   lua_setglobal(luaState, name);
 }
 
-TestLuaFuncTableContainer *TestLuaFuncTableContainer::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestLuaFuncTableContainer *TestLuaFuncTableContainer::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestLuaFuncTableContainer *) lua_touserdata(luaState, -1);
@@ -153,8 +153,13 @@ TestLuaFuncTableContainer *TestLuaFuncTableContainer::ReadFromLua(lua_State *lua
   return ptr;
 }
 
+TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestLuaFuncTableContainer{};
+  return result;
+}
+
 int TestLuaFuncTableContainer::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaFuncTableContainer::ReadFromLua(luaState, -2);
+  auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("field", key)) {
     LuaHelper::Push(instance->mField, luaState);
@@ -178,7 +183,7 @@ int TestLuaFuncTableContainer::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestLuaFuncTableContainer::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaFuncTableContainer::ReadFromLua(luaState, -3);
+  auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("field", key)) {
     LuaHelper::Read(instance->mField, luaState, -1);

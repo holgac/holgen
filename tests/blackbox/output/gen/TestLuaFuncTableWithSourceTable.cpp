@@ -84,7 +84,7 @@ void TestLuaFuncTableWithSourceTable::PushGlobalToLua(lua_State *luaState, const
   lua_setglobal(luaState, name);
 }
 
-TestLuaFuncTableWithSourceTable *TestLuaFuncTableWithSourceTable::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestLuaFuncTableWithSourceTable *TestLuaFuncTableWithSourceTable::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestLuaFuncTableWithSourceTable *) lua_touserdata(luaState, -1);
@@ -92,19 +92,40 @@ TestLuaFuncTableWithSourceTable *TestLuaFuncTableWithSourceTable::ReadFromLua(lu
   return ptr;
 }
 
+TestLuaFuncTableWithSourceTable TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestLuaFuncTableWithSourceTable{};
+  return result;
+}
+
 int TestLuaFuncTableWithSourceTable::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("SetField", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaFuncTableWithSourceTable::ReadFromLua(lsInner, -2);
-      auto arg0 = TestLuaFuncTableContainer::ReadFromLua(lsInner, -1);
+      auto instance = TestLuaFuncTableWithSourceTable::ReadProxyFromLua(lsInner, -2);
+      TestLuaFuncTableContainer arg0Mirror;
+      TestLuaFuncTableContainer *arg0;
+      if (lua_getmetatable(lsInner, -1)) {
+        lua_pop(lsInner, 1);
+        arg0 = TestLuaFuncTableContainer::ReadProxyFromLua(lsInner, -1);
+      } else {
+        arg0Mirror = TestLuaFuncTableContainer::ReadMirrorFromLua(lsInner, -1);
+        arg0 = &arg0Mirror;
+      }
       instance->SetField(lsInner, *arg0);
       return 0;
     });
   } else if (0 == strcmp("GetField", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaFuncTableWithSourceTable::ReadFromLua(lsInner, -2);
-      auto arg0 = TestLuaFuncTableContainer::ReadFromLua(lsInner, -1);
+      auto instance = TestLuaFuncTableWithSourceTable::ReadProxyFromLua(lsInner, -2);
+      TestLuaFuncTableContainer arg0Mirror;
+      TestLuaFuncTableContainer *arg0;
+      if (lua_getmetatable(lsInner, -1)) {
+        lua_pop(lsInner, 1);
+        arg0 = TestLuaFuncTableContainer::ReadProxyFromLua(lsInner, -1);
+      } else {
+        arg0Mirror = TestLuaFuncTableContainer::ReadMirrorFromLua(lsInner, -1);
+        arg0 = &arg0Mirror;
+      }
       auto result = instance->GetField(lsInner, *arg0);
       LuaHelper::Push(result, lsInner);
       return 1;

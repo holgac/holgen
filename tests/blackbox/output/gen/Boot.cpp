@@ -92,7 +92,7 @@ void Boot::PushGlobalToLua(lua_State *luaState, const char *name) const {
   lua_setglobal(luaState, name);
 }
 
-Boot *Boot::ReadFromLua(lua_State *luaState, int32_t idx) {
+Boot *Boot::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "i");
   lua_gettable(luaState, idx - 1);
   uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(luaState, -1));
@@ -101,8 +101,13 @@ Boot *Boot::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+Boot Boot::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = Boot{};
+  return result;
+}
+
 int Boot::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Boot::ReadFromLua(luaState, -2);
+  auto instance = Boot::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState);
@@ -118,7 +123,7 @@ int Boot::IndexMetaMethod(lua_State *luaState) {
 }
 
 int Boot::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = Boot::ReadFromLua(luaState, -3);
+  auto instance = Boot::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
     LuaHelper::Read(instance->mId, luaState, -1);

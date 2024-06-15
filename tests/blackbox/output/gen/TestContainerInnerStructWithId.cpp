@@ -69,7 +69,7 @@ void TestContainerInnerStructWithId::PushGlobalToLua(lua_State *luaState, const 
   lua_setglobal(luaState, name);
 }
 
-TestContainerInnerStructWithId *TestContainerInnerStructWithId::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestContainerInnerStructWithId *TestContainerInnerStructWithId::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestContainerInnerStructWithId *) lua_touserdata(luaState, -1);
@@ -77,8 +77,13 @@ TestContainerInnerStructWithId *TestContainerInnerStructWithId::ReadFromLua(lua_
   return ptr;
 }
 
+TestContainerInnerStructWithId TestContainerInnerStructWithId::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestContainerInnerStructWithId{};
+  return result;
+}
+
 int TestContainerInnerStructWithId::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerInnerStructWithId::ReadFromLua(luaState, -2);
+  auto instance = TestContainerInnerStructWithId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState);
@@ -92,7 +97,7 @@ int TestContainerInnerStructWithId::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestContainerInnerStructWithId::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerInnerStructWithId::ReadFromLua(luaState, -3);
+  auto instance = TestContainerInnerStructWithId::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
     LuaHelper::Read(instance->mId, luaState, -1);

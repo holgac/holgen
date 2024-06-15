@@ -78,7 +78,7 @@ void TestStruct::PushGlobalToLua(lua_State *luaState, const char *name) const {
   lua_setglobal(luaState, name);
 }
 
-TestStruct *TestStruct::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestStruct *TestStruct::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestStruct *) lua_touserdata(luaState, -1);
@@ -86,8 +86,13 @@ TestStruct *TestStruct::ReadFromLua(lua_State *luaState, int32_t idx) {
   return ptr;
 }
 
+TestStruct TestStruct::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestStruct{};
+  return result;
+}
+
 int TestStruct::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStruct::ReadFromLua(luaState, -2);
+  auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("testFieldBool", key)) {
     LuaHelper::Push(instance->mTestFieldBool, luaState);
@@ -103,7 +108,7 @@ int TestStruct::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestStruct::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStruct::ReadFromLua(luaState, -3);
+  auto instance = TestStruct::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("testFieldBool", key)) {
     LuaHelper::Read(instance->mTestFieldBool, luaState, -1);

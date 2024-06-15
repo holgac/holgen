@@ -74,7 +74,7 @@ void TestStructArrayCustomData1::PushGlobalToLua(lua_State *luaState, const char
   lua_setglobal(luaState, name);
 }
 
-TestStructArrayCustomData1 *TestStructArrayCustomData1::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestStructArrayCustomData1 *TestStructArrayCustomData1::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestStructArrayCustomData1 *) lua_touserdata(luaState, -1);
@@ -82,8 +82,13 @@ TestStructArrayCustomData1 *TestStructArrayCustomData1::ReadFromLua(lua_State *l
   return ptr;
 }
 
+TestStructArrayCustomData1 TestStructArrayCustomData1::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestStructArrayCustomData1{};
+  return result;
+}
+
 int TestStructArrayCustomData1::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructArrayCustomData1::ReadFromLua(luaState, -2);
+  auto instance = TestStructArrayCustomData1::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("f1", key)) {
     LuaHelper::Push(instance->mF1, luaState);
@@ -99,7 +104,7 @@ int TestStructArrayCustomData1::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestStructArrayCustomData1::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructArrayCustomData1::ReadFromLua(luaState, -3);
+  auto instance = TestStructArrayCustomData1::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("f1", key)) {
     LuaHelper::Read(instance->mF1, luaState, -1);

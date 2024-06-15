@@ -187,7 +187,7 @@ void TestBitmap::PushToLua(lua_State *luaState) const {
   LuaHelper::Push(mValue, luaState);
 }
 
-TestBitmap TestBitmap::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestBitmap TestBitmap::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto typ = lua_type(luaState, idx);
   if (typ == LUA_TSTRING) {
     return FromString(lua_tostring(luaState, idx));

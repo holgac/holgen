@@ -57,7 +57,7 @@ void TestJsonStructWithTags::PushGlobalToLua(lua_State *luaState, const char *na
   lua_setglobal(luaState, name);
 }
 
-TestJsonStructWithTags *TestJsonStructWithTags::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestJsonStructWithTags *TestJsonStructWithTags::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestJsonStructWithTags *) lua_touserdata(luaState, -1);
@@ -65,8 +65,13 @@ TestJsonStructWithTags *TestJsonStructWithTags::ReadFromLua(lua_State *luaState,
   return ptr;
 }
 
+TestJsonStructWithTags TestJsonStructWithTags::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestJsonStructWithTags{};
+  return result;
+}
+
 int TestJsonStructWithTags::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -2);
+  auto instance = TestJsonStructWithTags::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("tags", key)) {
     LuaHelper::Push(instance->mTags, luaState);
@@ -78,7 +83,7 @@ int TestJsonStructWithTags::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestJsonStructWithTags::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonStructWithTags::ReadFromLua(luaState, -3);
+  auto instance = TestJsonStructWithTags::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("tags", key)) {
     LuaHelper::Read(instance->mTags, luaState, -1);

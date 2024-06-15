@@ -4,6 +4,7 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
+#include "core/St.h"
 
 class LuaPluginTest : public TranslatorPluginTest {
 protected:
@@ -118,13 +119,13 @@ struct TestData {}
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("ReadFromLua", Constness::NotConst), nullptr);
+  ASSERT_NE(cls->GetMethod(St::Lua_ReadProxyObject, Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"ReadFromLua", Type{"TestData", PassByType::Pointer},
+    auto method = ClassMethod{St::Lua_ReadProxyObject, Type{"TestData", PassByType::Pointer},
                               Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
-    helpers::ExpectEqual(*cls->GetMethod("ReadFromLua", Constness::NotConst), method, R"R(
+    helpers::ExpectEqual(*cls->GetMethod(St::Lua_ReadProxyObject, Constness::NotConst), method, R"R(
 lua_pushstring(luaState, "p");
 lua_gettable(luaState, idx - 1);
 auto ptr = (TestData *) lua_touserdata(luaState, -1);
@@ -151,13 +152,13 @@ struct DM {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("ReadFromLua", Constness::NotConst), nullptr);
+  ASSERT_NE(cls->GetMethod(St::Lua_ReadProxyObject, Constness::NotConst), nullptr);
   {
-    auto method = ClassMethod{"ReadFromLua", Type{"TestData", PassByType::Pointer},
+    auto method = ClassMethod{St::Lua_ReadProxyObject, Type{"TestData", PassByType::Pointer},
                               Visibility::Public, Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
-    helpers::ExpectEqual(*cls->GetMethod("ReadFromLua", Constness::NotConst), method, R"R(
+    helpers::ExpectEqual(*cls->GetMethod(St::Lua_ReadProxyObject, Constness::NotConst), method, R"R(
 lua_pushstring(luaState, "i");
 lua_gettable(luaState, idx - 1);
 uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(luaState, -1));
@@ -188,7 +189,7 @@ struct TestData {
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
-auto instance = TestData::ReadFromLua(luaState, -2);
+auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testFieldUnsigned", key)) {
   LuaHelper::Push(instance->mTestFieldUnsigned, luaState);
@@ -227,7 +228,7 @@ struct TestData {
 const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("functionReturningVoid", key)) {
   lua_pushcfunction(luaState, [](lua_State *lsInner) {
-    auto instance = TestData::ReadFromLua(lsInner, -3);
+    auto instance = TestData::ReadProxyFromLua(lsInner, -3);
     int32_t arg0;
     LuaHelper::Read(arg0, lsInner, -2);
     std::string arg1;
@@ -237,7 +238,7 @@ if (0 == strcmp("functionReturningVoid", key)) {
   });
 } else if (0 == strcmp("functionReturningString", key)) {
   lua_pushcfunction(luaState, [](lua_State *lsInner) {
-    auto instance = TestData::ReadFromLua(lsInner, -1);
+    auto instance = TestData::ReadProxyFromLua(lsInner, -1);
     auto result = instance->functionReturningString();
     LuaHelper::Push(result, lsInner);
     return 1;
@@ -273,7 +274,7 @@ struct TestData {
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
-auto instance = TestData::ReadFromLua(luaState, -2);
+auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testStructWithIdRefId", key)) {
   LuaHelper::Push(instance->mTestStructWithIdRefId, luaState);
@@ -306,7 +307,7 @@ struct TestData {
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
-auto instance = TestData::ReadFromLua(luaState, -3);
+auto instance = TestData::ReadProxyFromLua(luaState, -3);
 const char *key = lua_tostring(luaState, -2);
 if (0 == strcmp("testFieldUnsigned", key)) {
   LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
@@ -342,7 +343,7 @@ struct TestData {
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("NewIndexMetaMethod", Constness::NotConst), method, R"R(
-auto instance = TestData::ReadFromLua(luaState, -3);
+auto instance = TestData::ReadProxyFromLua(luaState, -3);
 const char *key = lua_tostring(luaState, -2);
 if (0 == strcmp("testStructRefId", key)) {
   LuaHelper::Read(instance->mTestStructRefId, luaState, -1);

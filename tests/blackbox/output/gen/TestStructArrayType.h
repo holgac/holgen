@@ -36,8 +36,11 @@ public:
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
-  // This only works with negative indices
-  static TestStructArrayType ReadFromLua(lua_State *luaState, int32_t idx);
+  /*
+   * This only works with negative indices
+   * Reads a mirror object (a table with entries that mirror the c++ data structure)
+   */
+  static TestStructArrayType ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void PushEnumToLua(lua_State *luaState);
   inline static constexpr const UnderlyingType Invalid = 2;
 private:

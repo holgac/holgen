@@ -123,7 +123,7 @@ void TestContainerMap::PushGlobalToLua(lua_State *luaState, const char *name) co
   lua_setglobal(luaState, name);
 }
 
-TestContainerMap *TestContainerMap::ReadFromLua(lua_State *luaState, int32_t idx) {
+TestContainerMap *TestContainerMap::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestContainerMap *) lua_touserdata(luaState, -1);
@@ -131,14 +131,19 @@ TestContainerMap *TestContainerMap::ReadFromLua(lua_State *luaState, int32_t idx
   return ptr;
 }
 
+TestContainerMap TestContainerMap::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = TestContainerMap{};
+  return result;
+}
+
 int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerMap::ReadFromLua(luaState, -2);
+  auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("innerStructsWithId", key)) {
     LuaHelper::Push(instance->mInnerStructsWithId, luaState);
   } else if (0 == strcmp("GetInnerStructWithIdFromName", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      auto instance = TestContainerMap::ReadProxyFromLua(lsInner, -2);
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetInnerStructWithIdFromName(arg0);
@@ -147,15 +152,15 @@ int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("AddInnerStructWithId", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
-      auto arg0 = TestContainerInnerStructWithId::ReadFromLua(lsInner, -1);
+      auto instance = TestContainerMap::ReadProxyFromLua(lsInner, -2);
+      auto arg0 = TestContainerInnerStructWithId::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddInnerStructWithId(*arg0);
       LuaHelper::Push(result, lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetInnerStructWithId", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      auto instance = TestContainerMap::ReadProxyFromLua(lsInner, -2);
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetInnerStructWithId(arg0);
@@ -164,7 +169,7 @@ int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("HasInnerStructWithId", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      auto instance = TestContainerMap::ReadProxyFromLua(lsInner, -2);
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->HasInnerStructWithId(arg0);
@@ -173,7 +178,7 @@ int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("DeleteInnerStructWithId", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerMap::ReadFromLua(lsInner, -2);
+      auto instance = TestContainerMap::ReadProxyFromLua(lsInner, -2);
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       instance->DeleteInnerStructWithId(arg0);
@@ -181,7 +186,7 @@ int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
     });
   } else if (0 == strcmp("GetInnerStructWithIdCount", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerMap::ReadFromLua(lsInner, -1);
+      auto instance = TestContainerMap::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetInnerStructWithIdCount();
       LuaHelper::Push(result, lsInner);
       return 1;
@@ -194,7 +199,7 @@ int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
 }
 
 int TestContainerMap::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerMap::ReadFromLua(luaState, -3);
+  auto instance = TestContainerMap::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("innerStructsWithId", key)) {
     LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);

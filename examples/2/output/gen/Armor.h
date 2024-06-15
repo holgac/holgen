@@ -21,8 +21,16 @@ public:
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
-  // This only works with negative indices
-  static Armor *ReadFromLua(lua_State *luaState, int32_t idx);
+  /*
+   * This only works with negative indices
+   * Reads proxy object (a table with a metatable and an embedded pointer or an index)
+   */
+  static Armor *ReadProxyFromLua(lua_State *luaState, int32_t idx);
+  /*
+   * This only works with negative indices
+   * Reads a mirror object (a table with entries that mirror the c++ data structure)
+   */
+  static Armor ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
 private:
   static int IndexMetaMethod(lua_State *luaState);

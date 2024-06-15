@@ -157,7 +157,7 @@ void WeaponInInventory::PushGlobalToLua(lua_State *luaState, const char *name) c
   lua_setglobal(luaState, name);
 }
 
-WeaponInInventory *WeaponInInventory::ReadFromLua(lua_State *luaState, int32_t idx) {
+WeaponInInventory *WeaponInInventory::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (WeaponInInventory *) lua_touserdata(luaState, -1);
@@ -165,8 +165,13 @@ WeaponInInventory *WeaponInInventory::ReadFromLua(lua_State *luaState, int32_t i
   return ptr;
 }
 
+WeaponInInventory WeaponInInventory::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+  auto result = WeaponInInventory{};
+  return result;
+}
+
 int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponInInventory::ReadFromLua(luaState, -2);
+  auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("type", key)) {
     LuaHelper::Push(instance->mType, luaState);
@@ -189,7 +194,7 @@ int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
 }
 
 int WeaponInInventory::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponInInventory::ReadFromLua(luaState, -3);
+  auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("type", key)) {
     LuaHelper::Read(instance->mType, luaState, -1);
