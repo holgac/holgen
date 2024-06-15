@@ -123,6 +123,23 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("curVal", key)) {
     LuaHelper::Push(instance->mCurVal, luaState);
+  } else if (0 == strcmp("Add", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = Calculator::ReadFromLua(lsInner, -2);
+      int64_t arg0;
+      LuaHelper::Read(arg0, lsInner, -2);
+      auto result = instance->Add(lsInner, arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else if (0 == strcmp("Subtract", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = Calculator::ReadFromLua(lsInner, -2);
+      auto arg0 = Number::ReadFromLua(lsInner, -1);
+      auto result = instance->Subtract(lsInner, arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
   } else if (0 == strcmp("SubtractThenMultiply", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Calculator::ReadFromLua(lsInner, -3);

@@ -184,8 +184,6 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
                                          const std::string &functionHandle, bool isFuncTable,
                                          bool isStatic) {
   auto method = NewFunction(functionDefinition);
-  // TODO: enable this after handling value passing
-  method.mExposeToLua = false;
   method.mConstness = Constness::Const;
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_front("luaState", Type{"lua_State", PassByType::Pointer});

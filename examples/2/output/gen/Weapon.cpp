@@ -106,6 +106,13 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
     LuaHelper::Push(instance->mDamageMin, luaState);
   } else if (0 == strcmp("damageMax", key)) {
     LuaHelper::Push(instance->mDamageMax, luaState);
+  } else if (0 == strcmp("GetAverageDamage", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = Weapon::ReadFromLua(lsInner, -1);
+      auto result = instance->GetAverageDamage(lsInner, );
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
   } else if (0 == strcmp("Initialize", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Weapon::ReadFromLua(lsInner, -1);

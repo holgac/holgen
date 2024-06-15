@@ -87,7 +87,28 @@ TestLuaFuncTableStatic *TestLuaFuncTableStatic::ReadFromLua(lua_State *luaState,
 }
 
 int TestLuaFuncTableStatic::IndexMetaMethod(lua_State *luaState) {
-  return 0;
+  auto instance = TestLuaFuncTableStatic::ReadFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("SetField", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = TestLuaFuncTableStatic::ReadFromLua(lsInner, -2);
+      auto arg0 = TestLuaFuncTableContainer::ReadFromLua(lsInner, -1);
+      instance->SetField(lsInner, arg0);
+      return 0;
+    });
+  } else if (0 == strcmp("GetField", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = TestLuaFuncTableStatic::ReadFromLua(lsInner, -2);
+      auto arg0 = TestLuaFuncTableContainer::ReadFromLua(lsInner, -1);
+      auto result = instance->GetField(lsInner, arg0);
+      LuaHelper::Push(result, lsInner);
+      return 1;
+    });
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableStatic.{}", key);
+    return 0;
+  }
+  return 1;
 }
 
 int TestLuaFuncTableStatic::NewIndexMetaMethod(lua_State *luaState) {
