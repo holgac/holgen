@@ -167,10 +167,11 @@ struct TestData {
       ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mArguments.emplace_back("a1", Type{"int32_t"});
+  method.mArguments.emplace_back("a1", Type{"int32_t", PassByType::Value, Constness::Const});
   method.mArguments.emplace_back("a2",
                                  Type{"std::string", PassByType::Reference, Constness::Const});
-  method.mArguments.emplace_back("a3", Type{"InnerStruct", PassByType::Pointer, Constness::Const});
+  method.mArguments.emplace_back("a3",
+                                 Type{"InnerStruct", PassByType::Reference, Constness::Const});
   method.mExposeToLua = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");

@@ -29,23 +29,16 @@ ClassMethod FunctionPluginBase::NewFunction(const FunctionDefinition &functionDe
     else
       method.mReturnType.mType = PassByType::Pointer;
   }
-  // TODO: ref type for complex types
   for (const auto &funcArg: functionDefinition.mArguments) {
     auto &arg = method.mArguments.emplace_back(
         funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
-    if (auto cls2 = mProject.GetClass(arg.mType.mName)) {
-      if (cls2->mEnum)
-        arg.mType.mType = PassByType::Reference;
-      else
-        arg.mType.mType = PassByType::Pointer;
-      if (!funcArg.mIsOut)
-        arg.mType.mConstness = Constness::Const;
-    } else if (!TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
-      arg.mType.mType = PassByType::Reference;
-      if (!funcArg.mIsOut)
-        arg.mType.mConstness = Constness::Const;
-    } else if (funcArg.mIsOut) {
-      arg.mType.mType = PassByType::Reference;
+    arg.mType.mConstness = funcArg.mConstness;
+    if (TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
+      auto pbt = funcArg.mConstness == Constness::Const ? PassByType::Value : PassByType::Reference;
+      arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer : pbt;
+    } else {
+      arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer
+                                                                      : PassByType::Reference;
     }
     arg.mDefaultValue = funcArg.mDefaultValue;
   }

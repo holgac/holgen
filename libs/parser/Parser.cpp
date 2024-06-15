@@ -3,6 +3,7 @@
 #include <set>
 #include "core/Exception.h"
 #include "core/St.h"
+#include "generator/TypeInfo.h"
 
 #define PARSER_THROW_IF(cond, str, ...) \
   THROW_IF(cond, "In {}:{}:{}: " str, mTokenizer.GetSource(), mTokenizer.GetLine() + 1, \
@@ -353,14 +354,23 @@ void Parser::ParseFunctionArgument(Token &curToken, FunctionArgumentDefinition &
                   "Function argument names should be strings, found \"{}\"", curToken.mContents);
   arg.mName = curToken.mContents;
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
-  if (curToken.mType == TokenType::String) {
-    if (curToken.mContents == "out") {
-      arg.mIsOut = true;
-    } else if (curToken.mContents != "in") {
-      THROW("Unknown argument qualifier \"{}\"", curToken.mContents);
-    }
+
+  std::set<std::string> modifiers;
+  while (curToken.mType == TokenType::String) {
+    modifiers.emplace(curToken.mContents);
     NEXT_OR_THROW(curToken, "Incomplete function definition!");
   }
+
+  for (auto &modifier: modifiers) {
+    if (modifier == "nullable") {
+      arg.mNullability = Nullability::Nullable;
+    } else if (modifier == "ref") {
+      arg.mConstness = Constness::NotConst;
+    } else {
+      PARSER_THROW_IF(true, "Unknown modifier {}", modifier);
+    }
+  }
+
   if (curToken.mType == TokenType::Equals) {
     NEXT_OR_THROW(curToken, "Incomplete function definition!");
     arg.mDefaultValue = ParseDefaultValue(curToken);

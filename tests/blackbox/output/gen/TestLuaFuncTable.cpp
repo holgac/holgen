@@ -17,7 +17,7 @@ void TestLuaFuncTable::SetTable(std::string val) {
   mTable = std::move(val);
 }
 
-void TestLuaFuncTable::SetField(lua_State *luaState, const TestLuaFuncTableContainer *container) const {
+void TestLuaFuncTable::SetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const {
   HOLGEN_WARN_AND_RETURN_IF(mTable.empty(), void(), "Calling unset SetField function from table");
   lua_getglobal(luaState, mTable.c_str());
   if (lua_isnil(luaState, -1)) {
@@ -38,7 +38,7 @@ void TestLuaFuncTable::SetField(lua_State *luaState, const TestLuaFuncTableConta
   lua_pop(luaState, 1);
 }
 
-int32_t TestLuaFuncTable::GetField(lua_State *luaState, const TestLuaFuncTableContainer *container) const {
+int32_t TestLuaFuncTable::GetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const {
   HOLGEN_WARN_AND_RETURN_IF(mTable.empty(), {}, "Calling unset GetField function from table");
   lua_getglobal(luaState, mTable.c_str());
   if (lua_isnil(luaState, -1)) {
@@ -95,14 +95,14 @@ int TestLuaFuncTable::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestLuaFuncTable::ReadFromLua(lsInner, -2);
       auto arg0 = TestLuaFuncTableContainer::ReadFromLua(lsInner, -1);
-      instance->SetField(lsInner, arg0);
+      instance->SetField(lsInner, *arg0);
       return 0;
     });
   } else if (0 == strcmp("GetField", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestLuaFuncTable::ReadFromLua(lsInner, -2);
       auto arg0 = TestLuaFuncTableContainer::ReadFromLua(lsInner, -1);
-      auto result = instance->GetField(lsInner, arg0);
+      auto result = instance->GetField(lsInner, *arg0);
       LuaHelper::Push(result, lsInner);
       return 1;
     });

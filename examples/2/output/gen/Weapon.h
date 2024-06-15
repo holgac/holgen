@@ -22,7 +22,7 @@ public:
   void SetGetAverageDamageLuaFunc(std::string val);
   bool HasGetAverageDamageLuaFunc() const;
   void Initialize();
-  void SetDamage(uint8_t min, uint8_t max);
+  void SetDamage(const uint8_t min, const uint8_t max);
   uint8_t GetDamage();
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;

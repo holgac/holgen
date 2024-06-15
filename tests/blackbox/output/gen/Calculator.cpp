@@ -25,7 +25,7 @@ void Calculator::SetCurVal(const Number &val) {
   mCurVal = val;
 }
 
-int64_t Calculator::Add(lua_State *luaState, int64_t val) const {
+int64_t Calculator::Add(lua_State *luaState, const int64_t val) const {
   HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Add.empty(), {}, "Calling unset Add function");
   lua_getglobal(luaState, mLuaFuncHandle_Add.c_str());
   if (lua_isnil(luaState, -1)) {
@@ -50,7 +50,7 @@ bool Calculator::HasAddLuaFunc() const {
   return !mLuaFuncHandle_Add.empty();
 }
 
-Number *Calculator::Subtract(lua_State *luaState, const Number *val) const {
+Number *Calculator::Subtract(lua_State *luaState, const Number &val) const {
   HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Subtract.empty(), {}, "Calling unset Subtract function");
   lua_getglobal(luaState, "Ops");
   lua_pushstring(luaState, mLuaFuncHandle_Subtract.c_str());
@@ -136,7 +136,7 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Calculator::ReadFromLua(lsInner, -2);
       auto arg0 = Number::ReadFromLua(lsInner, -1);
-      auto result = instance->Subtract(lsInner, arg0);
+      auto result = instance->Subtract(lsInner, *arg0);
       LuaHelper::Push(result, lsInner);
       return 1;
     });

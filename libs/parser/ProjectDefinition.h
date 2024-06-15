@@ -7,6 +7,12 @@
 #include "core/Iterators.h"
 
 namespace holgen {
+
+enum class Constness {
+  Const,
+  NotConst,
+};
+
 struct DefinitionSource {
   std::string mSource;
   size_t mLine = -1;
@@ -55,10 +61,16 @@ struct FieldDefinition {
   }
 };
 
+enum class Nullability {
+  Nullable,
+  NotNullable,
+};
+
 struct FunctionArgumentDefinition {
   TypeDefinition mType;
   std::string mName;
-  bool mIsOut = false;
+  Constness mConstness = Constness::Const;
+  Nullability mNullability = Nullability::NotNullable;
   std::optional<std::string> mDefaultValue = std::nullopt;
   DefinitionSource mDefinitionSource;
 };

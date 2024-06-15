@@ -179,7 +179,7 @@ TEST_F(LuaTest, Func) {
   Number num2;
   num2.SetValue(10);
   LuaTestHelper::ExpectStack(mState, {});
-  auto res = c.Subtract(mState, &num2);
+  auto res = c.Subtract(mState, num2);
   LuaTestHelper::ExpectStack(mState, {});
   ASSERT_NE(res, nullptr);
   EXPECT_EQ(res->GetValue(), 2);
@@ -278,12 +278,12 @@ SetTo40AndGetTriple.GetField = function(funcTable, container) return container.f
   TestLuaFuncTableContainer c;
   c.GetScript1().SetTable("SetTo30AndGetDouble");
   c.GetScript2().SetTable("SetTo40AndGetTriple");
-  c.GetScript1().SetField(mState, &c);
+  c.GetScript1().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 30);
-  EXPECT_EQ(c.GetScript1().GetField(mState, &c), 60);
-  EXPECT_EQ(c.GetScript2().GetField(mState, &c), 90);
+  EXPECT_EQ(c.GetScript1().GetField(mState, c), 60);
+  EXPECT_EQ(c.GetScript2().GetField(mState, c), 90);
 
-  c.GetScript2().SetField(mState, &c);
+  c.GetScript2().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 40);
 }
 
@@ -302,7 +302,7 @@ SetTo40AndGetTriple.GetField = function(funcTable, container) return container.f
   TestLuaFuncTableContainer c;
   c.GetScript1().SetTable("SetTo30AndGetDouble");
   c.GetScript2().SetTable("SetTo40AndGetTriple");
-  c.GetScript1().SetField(mState, &c);
+  c.GetScript1().SetField(mState, c);
   c.PushGlobalToLua(mState, "c");
   luaL_dostring(mState, "return c.field");
   LuaTestHelper::ExpectStack(mState, {"30"});
@@ -330,12 +330,12 @@ SetTo40AndGetTriple.GetField = function(container) return container.field * 3 en
   TestLuaFuncTableContainer c;
   c.GetStaticScript1().SetTable("SetTo30AndGetDouble");
   c.GetStaticScript2().SetTable("SetTo40AndGetTriple");
-  c.GetStaticScript1().SetField(mState, &c);
+  c.GetStaticScript1().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 30);
-  EXPECT_EQ(c.GetStaticScript1().GetField(mState, &c), 60);
-  EXPECT_EQ(c.GetStaticScript2().GetField(mState, &c), 90);
+  EXPECT_EQ(c.GetStaticScript1().GetField(mState, c), 60);
+  EXPECT_EQ(c.GetStaticScript2().GetField(mState, c), 90);
 
-  c.GetStaticScript2().SetField(mState, &c);
+  c.GetStaticScript2().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 40);
 }
 
@@ -355,12 +355,12 @@ Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return con
   TestLuaFuncTableContainer c;
   c.GetScriptWithSourceTable1().SetTable("SetTo30AndGetDouble");
   c.GetScriptWithSourceTable2().SetTable("SetTo40AndGetTriple");
-  c.GetScriptWithSourceTable1().SetField(mState, &c);
+  c.GetScriptWithSourceTable1().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 30);
-  EXPECT_EQ(c.GetScriptWithSourceTable1().GetField(mState, &c), 60);
-  EXPECT_EQ(c.GetScriptWithSourceTable2().GetField(mState, &c), 90);
+  EXPECT_EQ(c.GetScriptWithSourceTable1().GetField(mState, c), 60);
+  EXPECT_EQ(c.GetScriptWithSourceTable2().GetField(mState, c), 90);
 
-  c.GetScriptWithSourceTable2().SetField(mState, &c);
+  c.GetScriptWithSourceTable2().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 40);
 }
 
@@ -382,11 +382,11 @@ Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return con
   rapidjson::Document doc;
   doc.Parse(json);
   c.ParseJson(doc, {});
-  c.GetScriptWithSourceTable1().SetField(mState, &c);
+  c.GetScriptWithSourceTable1().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 30);
-  EXPECT_EQ(c.GetScriptWithSourceTable1().GetField(mState, &c), 60);
-  EXPECT_EQ(c.GetScriptWithSourceTable2().GetField(mState, &c), 90);
+  EXPECT_EQ(c.GetScriptWithSourceTable1().GetField(mState, c), 60);
+  EXPECT_EQ(c.GetScriptWithSourceTable2().GetField(mState, c), 90);
 
-  c.GetScriptWithSourceTable2().SetField(mState, &c);
+  c.GetScriptWithSourceTable2().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 40);
 }

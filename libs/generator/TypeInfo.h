@@ -4,23 +4,15 @@
 #include <set>
 #include <string>
 #include <vector>
+#include "parser/ProjectDefinition.h"
 
 namespace holgen {
 struct TranslatedProject;
-struct FunctionArgumentDefinition;
-struct TypeDefinition;
-struct DefinitionSource;
-
 enum class PassByType {
   Value,
   Reference,
   Pointer,
   MoveReference,
-};
-
-enum class Constness {
-  Const,
-  NotConst,
 };
 
 enum class Constexprness {

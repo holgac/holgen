@@ -109,7 +109,7 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("GetAverageDamage", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Weapon::ReadFromLua(lsInner, -1);
-      auto result = instance->GetAverageDamage(lsInner, );
+      auto result = instance->GetAverageDamage(lsInner);
       LuaHelper::Push(result, lsInner);
       return 1;
     });

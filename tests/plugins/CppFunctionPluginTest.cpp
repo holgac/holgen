@@ -26,20 +26,21 @@ struct TestData {
   auto method =
       ClassMethod{"TestFunction", Type{"std::string"}, Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
-  method.mArguments.emplace_back("a1", Type{"int32_t"});
+  method.mArguments.emplace_back("a1", Type{"int32_t", PassByType::Value, Constness::Const});
   method.mArguments.emplace_back("a2",
                                  Type{"std::string", PassByType::Reference, Constness::Const});
-  method.mArguments.emplace_back("a3", Type{"InnerStruct", PassByType::Pointer, Constness::Const});
+  method.mArguments.emplace_back("a3",
+                                 Type{"InnerStruct", PassByType::Reference, Constness::Const});
   method.mUserDefined = true;
   method.mExposeToLua = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
 }
 
-TEST_F(CppFunctionPluginTest, FunctionWithOutArgs) {
+TEST_F(CppFunctionPluginTest, FunctionArgumentModifierRef) {
   auto project = Parse(R"R(
 struct InnerStruct {}
 struct TestData {
-  func TestFunction(s32 a1 out, string a2 out, InnerStruct a3 out) -> string;
+  func TestFunction(s32 a1 ref, string a2 ref, InnerStruct a3 ref) -> string;
 }
   )R");
   Run(project);
@@ -51,7 +52,7 @@ struct TestData {
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t", PassByType::Reference});
   method.mArguments.emplace_back("a2", Type{"std::string", PassByType::Reference});
-  method.mArguments.emplace_back("a3", Type{"InnerStruct", PassByType::Pointer});
+  method.mArguments.emplace_back("a3", Type{"InnerStruct", PassByType::Reference});
   method.mUserDefined = true;
   method.mExposeToLua = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
@@ -71,7 +72,7 @@ struct TestData {
   auto method = ClassMethod{"TestFunction", Type{"InnerStruct", PassByType::Pointer},
                             Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
-  method.mArguments.emplace_back("a1", Type{"int32_t"});
+  method.mArguments.emplace_back("a1", Type{"int32_t", PassByType::Value, Constness::Const});
   method.mUserDefined = true;
   method.mExposeToLua = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);

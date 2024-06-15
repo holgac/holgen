@@ -188,7 +188,7 @@ public:
   void SetInstruments(const std::vector<std::string> &val);
   void SetPrices(const std::map<std::string, double> &val);
   // Callback when a new trade is executed
-  void OnNewTrade(const std::string &instrument, double price);
+  void OnNewTrade(const std::string &instrument, const double price);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
 private:
   std::vector<std::string> mInstruments;

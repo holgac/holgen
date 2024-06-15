@@ -4,7 +4,7 @@
 // HOLGEN_USER_DEFINED_END:Calculator_CustomIncludes
 
 namespace holgen_blackbox_test {
-int64_t Calculator::SubtractThenMultiply(int64_t lhs, int64_t rhs) {
+int64_t Calculator::SubtractThenMultiply(const int64_t lhs, const int64_t rhs) {
 // HOLGEN_USER_DEFINED_BEGIN:Calculator_SubtractThenMultiply
   auto val = lhs - rhs;
   mCurVal.SetValue(mCurVal.GetValue() * val);

@@ -12,7 +12,7 @@ void Weapon::Initialize() {
 // HOLGEN_USER_DEFINED_END:Weapon_Initialize
 }
 
-void Weapon::SetDamage(uint8_t min, uint8_t max) {
+void Weapon::SetDamage(const uint8_t min, const uint8_t max) {
 // HOLGEN_USER_DEFINED_BEGIN:Weapon_SetDamage
   // This is an invariant set by GetDamage.
   assert(min < max);
