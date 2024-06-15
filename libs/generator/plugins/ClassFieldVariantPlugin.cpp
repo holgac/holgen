@@ -55,10 +55,12 @@ void ClassFieldVariantPlugin::GenerateAssignmentMethods(
     Class &cls, const std::set<std::string> &variantTypeFields) {
   auto existingMoveCtor = cls.GetMoveConstructor();
   if (existingMoveCtor) {
-    THROW_IF(existingMoveCtor->mDefaultDelete == DefaultDelete::Neither,
-             "Cannot touch existing move constructor!");
-    existingMoveCtor->mDefaultDelete = DefaultDelete::Neither;
-    GenerateAssignmentMethod(cls, *existingMoveCtor, variantTypeFields, true);
+    if (existingMoveCtor->mDefaultDelete != DefaultDelete::Delete) {
+      THROW_IF(existingMoveCtor->mDefaultDelete == DefaultDelete::Neither,
+               "Cannot touch existing move constructor!");
+      existingMoveCtor->mDefaultDelete = DefaultDelete::Neither;
+      GenerateAssignmentMethod(cls, *existingMoveCtor, variantTypeFields, true);
+    }
   } else {
     auto ctor = ClassConstructor{};
     ctor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
@@ -68,11 +70,13 @@ void ClassFieldVariantPlugin::GenerateAssignmentMethods(
 
   auto existingMoveOp = cls.GetMoveAssignment();
   if (existingMoveOp) {
-    THROW_IF(existingMoveOp->mDefaultDelete == DefaultDelete::Neither,
-             "Cannot touch existing move operator!");
-    existingMoveOp->mDefaultDelete = DefaultDelete::Neither;
-    GenerateAssignmentMethod(cls, *existingMoveOp, variantTypeFields, true);
-    existingMoveOp->mBody.Add("return *this;");
+    if (existingMoveOp->mDefaultDelete != DefaultDelete::Delete) {
+      THROW_IF(existingMoveOp->mDefaultDelete == DefaultDelete::Neither,
+               "Cannot touch existing move operator!");
+      existingMoveOp->mDefaultDelete = DefaultDelete::Neither;
+      GenerateAssignmentMethod(cls, *existingMoveOp, variantTypeFields, true);
+      existingMoveOp->mBody.Add("return *this;");
+    }
   } else {
     auto op = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public,
                           Constness::NotConst};
@@ -84,10 +88,12 @@ void ClassFieldVariantPlugin::GenerateAssignmentMethods(
 
   auto existingCopyCtor = cls.GetCopyConstructor();
   if (existingCopyCtor) {
-    THROW_IF(existingCopyCtor->mDefaultDelete == DefaultDelete::Neither,
-             "Cannot touch existing copy constructor!");
-    existingCopyCtor->mDefaultDelete = DefaultDelete::Neither;
-    GenerateAssignmentMethod(cls, *existingCopyCtor, variantTypeFields, false);
+    if (existingCopyCtor->mDefaultDelete != DefaultDelete::Delete) {
+      THROW_IF(existingCopyCtor->mDefaultDelete == DefaultDelete::Neither,
+               "Cannot touch existing copy constructor!");
+      existingCopyCtor->mDefaultDelete = DefaultDelete::Neither;
+      GenerateAssignmentMethod(cls, *existingCopyCtor, variantTypeFields, false);
+    }
   } else {
     auto ctor = ClassConstructor{};
     ctor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
@@ -97,11 +103,13 @@ void ClassFieldVariantPlugin::GenerateAssignmentMethods(
 
   auto existingCopyOp = cls.GetCopyAssignment();
   if (existingCopyOp) {
-    THROW_IF(existingCopyOp->mDefaultDelete == DefaultDelete::Neither,
-             "Cannot touch existing copy operator!");
-    existingCopyOp->mDefaultDelete = DefaultDelete::Neither;
-    GenerateAssignmentMethod(cls, *existingCopyOp, variantTypeFields, false);
-    existingCopyOp->mBody.Add("return *this;");
+    if (existingCopyOp->mDefaultDelete != DefaultDelete::Delete) {
+      THROW_IF(existingCopyOp->mDefaultDelete == DefaultDelete::Neither,
+               "Cannot touch existing copy operator!");
+      existingCopyOp->mDefaultDelete = DefaultDelete::Neither;
+      GenerateAssignmentMethod(cls, *existingCopyOp, variantTypeFields, false);
+      existingCopyOp->mBody.Add("return *this;");
+    }
   } else {
     auto op = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public,
                           Constness::NotConst};
