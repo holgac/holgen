@@ -66,6 +66,12 @@ enum class Nullability {
   NotNullable,
 };
 
+enum class FunctionReturnTypeCategory {
+  NewObject,
+  Reference,
+  Pointer,
+};
+
 struct FunctionArgumentDefinition {
   TypeDefinition mType;
   std::string mName;
@@ -77,6 +83,8 @@ struct FunctionArgumentDefinition {
 
 struct FunctionReturnTypeDefinition {
   TypeDefinition mType;
+  Constness mConstness = Constness::NotConst;
+  FunctionReturnTypeCategory mCategory = FunctionReturnTypeCategory::Reference;
 };
 
 struct FunctionDefinition {

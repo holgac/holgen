@@ -321,6 +321,27 @@ void Parser::ParseFunction(Token &curToken, FunctionDefinition &fd) {
                   "Missing '>' in function syntax, found \"{}\"", curToken.mContents);
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
   ParseType(curToken, fd.mReturnType.mType);
+
+  std::set<std::string> modifiers;
+  while (curToken.mType == TokenType::String) {
+    modifiers.emplace(curToken.mContents);
+    NEXT_OR_THROW(curToken, "Incomplete function definition!");
+  }
+  for (auto &modifier: modifiers) {
+    if (modifier == "nullable") {
+      fd.mReturnType.mCategory = FunctionReturnTypeCategory::Pointer;
+    } else if (modifier == "ref") {
+      fd.mReturnType.mCategory = FunctionReturnTypeCategory::Reference;
+    } else if (modifier == "new") {
+      fd.mReturnType.mCategory = FunctionReturnTypeCategory::NewObject;
+    } else if (modifier == "const") {
+      fd.mReturnType.mConstness = Constness::Const;
+    } else {
+      PARSER_THROW_IF(true, "Unknown function return type modifier {}", modifier);
+    }
+  }
+
+
   PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
                   "Function definition should be terminated by a ';', found \"{}\"",
                   curToken.mContents);
@@ -367,7 +388,7 @@ void Parser::ParseFunctionArgument(Token &curToken, FunctionArgumentDefinition &
     } else if (modifier == "ref") {
       arg.mConstness = Constness::NotConst;
     } else {
-      PARSER_THROW_IF(true, "Unknown modifier {}", modifier);
+      PARSER_THROW_IF(true, "Unknown function argument modifier {}", modifier);
     }
   }
 

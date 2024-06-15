@@ -338,6 +338,39 @@ struct Action {
   EXPECT_EQ(*func->mArguments.front().mDefaultValue, "42");
 }
 
+TEST_F(ParserTest, FunctionReturnTypeModifiers) {
+  auto proj = Parse(R"R(
+struct Action {
+  func f() -> s32;
+  func fc() -> s32 const;
+  func fn() -> s32 nullable;
+  func fw() -> s32 new;
+}
+  )R");
+  auto action = proj.GetStruct("Action");
+  ASSERT_NE(action, nullptr);
+  EXPECT_EQ(action->mFunctions.size(), 4);
+  ASSERT_NE(action->GetFunction("f"), nullptr);
+  TypeDefinition s32;
+  s32.mName = "s32";
+  ExpectFunction(
+      *action->GetFunction("f"), "f",
+      FunctionReturnTypeDefinition{s32, Constness::NotConst, FunctionReturnTypeCategory::Reference},
+      0, 0, 1, 2);
+  ExpectFunction(
+      *action->GetFunction("fc"), "fc",
+      FunctionReturnTypeDefinition{s32, Constness::Const, FunctionReturnTypeCategory::Reference}, 0,
+      0, 2, 2);
+  ExpectFunction(
+      *action->GetFunction("fn"), "fn",
+      FunctionReturnTypeDefinition{s32, Constness::NotConst, FunctionReturnTypeCategory::Pointer},
+      0, 0, 3, 2);
+  ExpectFunction(
+      *action->GetFunction("fw"), "fw",
+      FunctionReturnTypeDefinition{s32, Constness::NotConst, FunctionReturnTypeCategory::NewObject},
+      0, 0, 4, 2);
+}
+
 TEST_F(ParserTest, FunctionArgumentModifiers) {
   auto proj = Parse(R"R(
 struct Action {
