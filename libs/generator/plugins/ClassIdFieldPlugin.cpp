@@ -20,7 +20,8 @@ void ClassIdFieldPlugin::ProcessStructDefinition(Class &cls,
     if (!fieldDefinition.GetAnnotation(Annotations::Id))
       continue;
     auto field =
-        ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
+        ClassField{Naming().FieldNameInCpp(fieldDefinition),
+                   Type{mProject, fieldDefinition.mDefinitionSource, fieldDefinition.mType},
                    Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
     field.mDefaultValue = "-1";

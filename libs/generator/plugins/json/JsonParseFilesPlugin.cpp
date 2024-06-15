@@ -76,7 +76,7 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
       method.mBody.Indent(1);
       method.mBody.Add(
           R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
-      Type type(mProject, templateParameter);
+      Type type(mProject, fieldDefinition.mDefinitionSource, templateParameter);
       method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
       method.mBody.Add("auto res = elem.{}(jsonElem, converter);",
                        ParseJson); // if (!doc.IsArray())
@@ -115,10 +115,11 @@ void JsonParseFilesPlugin::GenerateConverterPopulators(Class &cls, ClassMethod &
       codeBlock.Add("if (converter.{} == nullptr) {{", forConverter->mValue.mName);
       codeBlock.Indent(1);
 
-      Type fromType(mProject, indexedOnField->mField->mType);
+      Type fromType(mProject, indexedOnField->mField->mDefinitionSource,
+                    indexedOnField->mField->mType);
       fromType.PreventCopying();
       auto idField = underlyingClass.GetIdField();
-      Type toType(mProject, idField->mField->mType);
+      Type toType(mProject, idField->mField->mDefinitionSource, idField->mField->mType);
       codeBlock.Add("converter.{} = [this]({}key) -> {} {{", forConverter->mValue.mName,
                     fromType.ToString(false), toType.ToString(true));
       codeBlock.Indent(1);

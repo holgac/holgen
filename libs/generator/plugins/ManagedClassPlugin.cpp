@@ -32,7 +32,9 @@ void ManagedClassPlugin::GenerateStaticGetter(Class &cls, const Class &manager,
   auto method = ClassMethod{St::ManagedObject_Getter,
                             Type{cls.mName, PassByType::Pointer, Constness::NotConst},
                             Visibility::Public, Constness::NotConst, Staticness::Static};
-  method.mArguments.emplace_back("id", Type{mProject, cls.GetIdField()->mField->mType});
+  auto idField = cls.GetIdField();
+  method.mArguments.emplace_back(
+      "id", Type{mProject, idField->mField->mDefinitionSource, idField->mField->mType});
   method.mBody.Add("return {}<{}>::GetInstance()->{}(id);", St::GlobalPointer, manager.mName,
                    Naming().ContainerElemGetterNameInCpp(*managerField.mField));
   Validate().NewMethod(cls, method);
@@ -47,8 +49,9 @@ void ManagedClassPlugin::GenerateIndexGetter(Class &cls, const Class &manager,
                             Visibility::Public, Constness::NotConst, Staticness::Static};
   auto indexedOnField =
       cls.GetFieldFromDefinitionName(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
-  ClassMethodArgument &keyArg =
-      method.mArguments.emplace_back("key", Type{mProject, indexedOnField->mField->mType});
+  ClassMethodArgument &keyArg = method.mArguments.emplace_back(
+      "key",
+      Type{mProject, indexedOnField->mField->mDefinitionSource, indexedOnField->mField->mType});
   keyArg.mType.PreventCopying();
   method.mBody.Add("return {}<{}>::GetInstance()->{}(key);", St::GlobalPointer, manager.mName,
                    Naming().ContainerIndexGetterNameInCpp(*managerField.mField, annotation));

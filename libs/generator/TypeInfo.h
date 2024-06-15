@@ -6,8 +6,10 @@
 #include <vector>
 
 namespace holgen {
-struct TypeDefinition;
 struct TranslatedProject;
+struct FunctionArgumentDefinition;
+struct TypeDefinition;
+struct DefinitionSource;
 
 enum class PassByType {
   Value,
@@ -31,8 +33,9 @@ struct Type {
                 Constness constness = Constness::NotConst) :
       mName(std::move(name)), mConstness(constness), mType(passByType) {}
 
-  Type(const TranslatedProject &project, const TypeDefinition &typeDefinition,
-       PassByType passByType = PassByType::Value, Constness constness = Constness::NotConst);
+  Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
+       const TypeDefinition &typeDefinition, PassByType passByType = PassByType::Value,
+       Constness constness = Constness::NotConst);
 
   bool operator==(const Type &rhs) const {
     if (mName != rhs.mName || mConstness != rhs.mConstness || mType != rhs.mType ||

@@ -312,7 +312,7 @@ void Validator::IndexAnnotation(const Class &cls, const ClassField &field,
   ValidateAttributeCount(annotation, Annotations::Index_Using, ToString(cls, field), 0);
   ValidateAttributeCount(annotation, Annotations::Index_ForConverter, ToString(cls, field), 0);
   if (auto indexUsing = annotation.GetAttribute(Annotations::Index_Using)) {
-    auto type = Type{mProject, indexUsing->mValue};
+    auto type = Type{mProject, indexUsing->mDefinitionSource, indexUsing->mValue};
     THROW_IF(!TypeInfo::Get().CppKeyedContainers.contains(type.mName),
              "{} attribute of {} of {} should be a keyed container type, found {}",
              indexUsing->mName, ToString(annotation), ToString(cls, field), type.mName);
@@ -405,16 +405,18 @@ void Validator::JsonConverters() const {
       auto key = converter->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName;
       auto [it, res] = converters.try_emplace(key, cs);
       if (!res) {
-        THROW_IF(cs.mFromType != it->second.mFromType,
-                 "Json converter {} is used by {} and {} with different source types: {} and {}",
-                 key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
-                 Type{mProject, it->second.mFromType}.ToString(true),
-                 Type{mProject, cs.mFromType}.ToString(true));
-        THROW_IF(*cs.mToType != *it->second.mToType,
-                 "Json converter {} is used by {} and {} with different target types: {} and {}",
-                 key, ToString(it->second.mClass, it->second.mField), ToString(cls, field),
-                 Type{mProject, *it->second.mToType}.ToString(true),
-                 Type{mProject, *cs.mToType}.ToString(true));
+        THROW_IF(
+            cs.mFromType != it->second.mFromType,
+            "Json converter {} is used by {} and {} with different source types: {} and {}", key,
+            ToString(it->second.mClass, it->second.mField), ToString(cls, field),
+            Type{mProject, field.mField->mDefinitionSource, it->second.mFromType}.ToString(true),
+            Type{mProject, field.mField->mDefinitionSource, cs.mFromType}.ToString(true));
+        THROW_IF(
+            *cs.mToType != *it->second.mToType,
+            "Json converter {} is used by {} and {} with different target types: {} and {}", key,
+            ToString(it->second.mClass, it->second.mField), ToString(cls, field),
+            Type{mProject, field.mField->mDefinitionSource, *it->second.mToType}.ToString(true),
+            Type{mProject, field.mField->mDefinitionSource, *cs.mToType}.ToString(true));
       }
     }
   }
@@ -439,12 +441,16 @@ void Validator::JsonConverters() const {
       auto indexField = underlyingClass->GetFieldFromDefinitionName(
           index->GetAttribute(Annotations::Index_On)->mValue.mName);
       auto underlyingIdField = underlyingClass->GetIdField();
-      auto existingFromTypeName = Type{mProject, it->second.mFromType}.ToString(true);
-      auto existingToTypeName = Type{mProject, *it->second.mToType}.ToString(true);
+      auto existingFromTypeName =
+          Type{mProject, field.mField->mDefinitionSource, it->second.mFromType}.ToString(true);
+      auto existingToTypeName =
+          Type{mProject, field.mField->mDefinitionSource, *it->second.mToType}.ToString(true);
       auto fromTypeName = indexField->mType.ToString(true);
       std::string toTypeName = "size_t";
       if (underlyingIdField)
-        toTypeName = Type{mProject, underlyingIdField->mField->mType}.ToString(true);
+        toTypeName =
+            Type{mProject, field.mField->mDefinitionSource, underlyingIdField->mField->mType}
+                .ToString(true);
       // TODO: tolerate mismatches of integral types?
       THROW_IF(fromTypeName != existingFromTypeName,
                "{} of {} references converter {} with different source type than {}: {} and {}",

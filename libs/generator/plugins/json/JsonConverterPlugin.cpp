@@ -28,7 +28,8 @@ void JsonConverterPlugin::Run() {
             targetField.mType.mTemplateParameters.back());
       else
         field.mType.mFunctionalTemplateParameters.emplace_back(targetField.mType);
-      field.mType.mFunctionalTemplateParameters.emplace_back(mProject, jsonConvertFrom->mValue);
+      field.mType.mFunctionalTemplateParameters.emplace_back(
+          mProject, jsonConvert->mDefinitionSource, jsonConvertFrom->mValue);
       field.mType.mFunctionalTemplateParameters.back().PreventCopying();
       Validate().NewField(cls, field);
       converterFields.emplace(field.mName, field);

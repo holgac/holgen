@@ -28,7 +28,8 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls,
     if (fieldDefinition.mType.mName == "Ref")
       Validate().RefField(cls, fieldDefinition);
     auto field =
-        ClassField{Naming().FieldNameInCpp(fieldDefinition), Type{mProject, fieldDefinition.mType},
+        ClassField{Naming().FieldNameInCpp(fieldDefinition),
+                   Type{mProject, fieldDefinition.mDefinitionSource, fieldDefinition.mType},
                    Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
     if (fieldDefinition.mType.mName == St::UserData) {

@@ -24,7 +24,9 @@ void CppFunctionPlugin::ProcessStructDefinition(Class &cls,
 void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::CppFunc);
   auto method = ClassMethod{
-      functionDefinition.mName, Type{mProject, functionDefinition.mReturnType}, Visibility::Public,
+      functionDefinition.mName,
+      Type{mProject, functionDefinition.mDefinitionSource, functionDefinition.mReturnType},
+      Visibility::Public,
       (funcAnnotation && funcAnnotation->GetAttribute(Annotations::CppFunc_Const))
           ? Constness::Const
           : Constness::NotConst};
@@ -50,7 +52,8 @@ void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &fun
   }
   // TODO: ref type for complex types
   for (const auto &funcArg: functionDefinition.mArguments) {
-    auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
+    auto &arg = method.mArguments.emplace_back(
+        funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
     if (auto cls2 = mProject.GetClass(arg.mType.mName)) {
       if (cls2->mEnum)
         arg.mType.mType = PassByType::Reference;

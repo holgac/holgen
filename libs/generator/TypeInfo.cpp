@@ -130,10 +130,13 @@ std::string Type::ToString(bool noTrailingSpace) const {
   return ss.str();
 }
 
-Type::Type(const TranslatedProject &project, const TypeDefinition &typeDefinition,
-           PassByType passByType, Constness constness) : mConstness(constness), mType(passByType) {
+Type::Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
+           const TypeDefinition &typeDefinition, PassByType passByType, Constness constness) :
+    mConstness(constness), mType(passByType) {
   if (typeDefinition.mName == "Ref") {
     auto underlyingClass = project.GetClass(typeDefinition.mTemplateParameters[0].mName);
+    THROW_IF(!underlyingClass, "Class {} referenced in {} does not exist!",
+             typeDefinition.mTemplateParameters[0].mName, definitionSource);
     auto idField = underlyingClass->GetIdField();
     if (idField) {
       *this = idField->mType;
@@ -148,7 +151,7 @@ Type::Type(const TranslatedProject &project, const TypeDefinition &typeDefinitio
       mName = typeDefinition.mName;
     }
     for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
-      mTemplateParameters.emplace_back(project, templateParameter);
+      mTemplateParameters.emplace_back(project, definitionSource, templateParameter);
     }
   }
 
@@ -157,9 +160,9 @@ Type::Type(const TranslatedProject &project, const TypeDefinition &typeDefinitio
     decltype(mTemplateParameters) newTemplateParameters;
     newTemplateParameters.emplace_back(*this);
     if (auto e = project.mProject.GetEnum(typeDefinition.mArraySize))
-      newTemplateParameters.emplace_back(Type{e->mInvalidValue});
+      newTemplateParameters.emplace_back(e->mInvalidValue);
     else
-      newTemplateParameters.emplace_back(Type{typeDefinition.mArraySize});
+      newTemplateParameters.emplace_back(typeDefinition.mArraySize);
     mName = "std::array";
     mTemplateParameters = std::move(newTemplateParameters);
   }

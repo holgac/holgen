@@ -78,7 +78,8 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
 void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
                                                  const FunctionDefinition &functionDefinition) {
   for (auto &funcArg: functionDefinition.mArguments) {
-    auto &arg = method.mArguments.emplace_back(funcArg.mName, Type{mProject, funcArg.mType});
+    auto &arg = method.mArguments.emplace_back(
+        funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
     arg.mType.PreventCopying();
     arg.mDefaultValue = funcArg.mDefaultValue;
     if (mProject.GetClass(arg.mType.mName) != nullptr)
@@ -188,8 +189,9 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
                                          const std::string *sourceTable,
                                          const std::string &functionHandle, bool isFuncTable,
                                          bool isStatic) {
-  auto method = ClassMethod{St::Capitalize(functionDefinition.mName),
-                            Type{mProject, functionDefinition.mReturnType}};
+  auto method = ClassMethod{
+      St::Capitalize(functionDefinition.mName),
+      Type{mProject, functionDefinition.mDefinitionSource, functionDefinition.mReturnType}};
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";

@@ -28,10 +28,11 @@ void ClassFieldGetterPlugin::ProcessRefField(Class &cls, ClassField &field) cons
     return;
   for (int i = 0; i < 2; ++i) {
     Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
-    auto method = ClassMethod{
-        Naming().FieldGetterNameInCpp(*field.mField, true),
-        Type{mProject, field.mField->mType.mTemplateParameters[0], PassByType::Pointer, constness},
-        Visibility::Public, constness};
+    auto method = ClassMethod{Naming().FieldGetterNameInCpp(*field.mField, true),
+                              Type{mProject, field.mField->mDefinitionSource,
+                                   field.mField->mType.mTemplateParameters[0], PassByType::Pointer,
+                                   constness},
+                              Visibility::Public, constness};
     method.mBody.Add("return {}::{}({});", underlyingType->mName, St::ManagedObject_Getter,
                      field.mName);
     Validate().NewMethod(cls, method);

@@ -46,12 +46,14 @@ void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
                                Type{"std::map"}};
   auto indexType = annotationDefinition.GetAttribute(Annotations::Index_Using);
   if (indexType != nullptr) {
-    indexField.mType = Type{mProject, indexType->mValue};
+    indexField.mType = Type{mProject, annotationDefinition.mDefinitionSource, indexType->mValue};
   }
 
-  indexField.mType.mTemplateParameters.emplace_back(mProject, fieldIndexedOn.mField->mType);
+  indexField.mType.mTemplateParameters.emplace_back(mProject, field.mField->mDefinitionSource,
+                                                    fieldIndexedOn.mField->mType);
   if (auto underlyingIdField = underlyingClass->GetIdField())
-    indexField.mType.mTemplateParameters.emplace_back(mProject, underlyingIdField->mField->mType);
+    indexField.mType.mTemplateParameters.emplace_back(mProject, field.mField->mDefinitionSource,
+                                                      underlyingIdField->mField->mType);
   else
     indexField.mType.mTemplateParameters.emplace_back("size_t");
 
@@ -59,11 +61,14 @@ void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
     Constness constness = i == 0 ? Constness::Const : Constness::NotConst;
     auto method =
         ClassMethod{Naming().ContainerIndexGetterNameInCpp(*field.mField, annotationDefinition),
-                    Type{mProject, underlyingType, PassByType::Pointer, constness},
+                    Type{mProject, field.mField->mDefinitionSource, underlyingType,
+                         PassByType::Pointer, constness},
                     Visibility::Public, constness};
     if (i == 0)
       method.mExposeToLua = true;
-    method.mArguments.emplace_back("key", Type{mProject, fieldIndexedOn.mField->mType});
+    method.mArguments.emplace_back(
+        "key",
+        Type{mProject, fieldIndexedOn.mField->mDefinitionSource, fieldIndexedOn.mField->mType});
     method.mArguments.back().mType.PreventCopying();
 
     method.mBody.Add("auto it = {}.find(key);", indexField.mName);
@@ -209,8 +214,10 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       method.mExposeToLua = true;
     bool isSigned = false;
     if (underlyingIdField) {
-      auto &arg =
-          method.mArguments.emplace_back("idx", Type{mProject, underlyingIdField->mField->mType});
+      auto &arg = method.mArguments.emplace_back("idx",
+                                                 Type{mProject,
+                                                      underlyingIdField->mField->mDefinitionSource,
+                                                      underlyingIdField->mField->mType});
       if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName))
         isSigned = true;
     } else {
@@ -400,8 +407,9 @@ void ContainerFieldPlugin::GenerateNextIndexField(Class &cls, const ClassField &
   if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
     auto underlyingIdField =
         mProject.GetClass(field.mType.mTemplateParameters.back().mName)->GetIdField();
-    auto nextIdField =
-        ClassField{field.mName + "NextId", Type{mProject, underlyingIdField->mField->mType}};
+    auto nextIdField = ClassField{field.mName + "NextId",
+                                  Type{mProject, underlyingIdField->mField->mDefinitionSource,
+                                       underlyingIdField->mField->mType}};
     nextIdField.mDefaultValue = "0";
     Validate().NewField(cls, nextIdField);
     cls.mFields.push_back(std::move(nextIdField));
