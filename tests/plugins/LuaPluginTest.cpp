@@ -224,7 +224,6 @@ struct TestData {
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
-auto instance = TestData::ReadFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("functionReturningVoid", key)) {
   lua_pushcfunction(luaState, [](lua_State *lsInner) {

@@ -137,10 +137,13 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
 
   GenerateIndexMetaMethodForFields(cls, switcher);
+  bool hasFields = !switcher.IsEmpty();
   GenerateIndexMetaMethodForExposedMethods(cls, switcher);
 
   if (!switcher.IsEmpty()) {
-    method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -2);", cls.mName);
+    if (hasFields) {
+      method.mBody.Add("auto instance = {}::ReadFromLua(luaState, -2);", cls.mName);
+    }
     method.mBody.Add("const char *key = lua_tostring(luaState, -1);");
     method.mBody.Add(std::move(switcher.Generate()));
     method.mBody.Line() << "return 1;";

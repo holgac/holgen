@@ -87,7 +87,6 @@ TestLuaFuncTableStatic *TestLuaFuncTableStatic::ReadFromLua(lua_State *luaState,
 }
 
 int TestLuaFuncTableStatic::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaFuncTableStatic::ReadFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("SetField", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {

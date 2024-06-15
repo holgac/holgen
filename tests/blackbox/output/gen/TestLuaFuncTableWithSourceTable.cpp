@@ -93,7 +93,6 @@ TestLuaFuncTableWithSourceTable *TestLuaFuncTableWithSourceTable::ReadFromLua(lu
 }
 
 int TestLuaFuncTableWithSourceTable::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaFuncTableWithSourceTable::ReadFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("SetField", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
