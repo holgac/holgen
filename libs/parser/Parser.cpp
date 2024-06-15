@@ -311,7 +311,7 @@ void Parser::ParseFunction(Token &curToken, FunctionDefinition &fd) {
   }
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
   if (curToken.mType == TokenType::SemiColon) {
-    fd.mReturnType.mName = "void";
+    fd.mReturnType.mType.mName = "void";
     return;
   }
   PARSER_THROW_IF(curToken.mType != TokenType::Minus,
@@ -320,7 +320,7 @@ void Parser::ParseFunction(Token &curToken, FunctionDefinition &fd) {
   PARSER_THROW_IF(curToken.mType != TokenType::AClose,
                   "Missing '>' in function syntax, found \"{}\"", curToken.mContents);
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
-  ParseType(curToken, fd.mReturnType);
+  ParseType(curToken, fd.mReturnType.mType);
   PARSER_THROW_IF(curToken.mType != TokenType::SemiColon,
                   "Function definition should be terminated by a ';', found \"{}\"",
                   curToken.mContents);

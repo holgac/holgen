@@ -188,7 +188,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_front("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";
-  if (functionDefinition.mReturnType.mName == "void")
+  if (functionDefinition.mReturnType.mType.mName == "void")
     retVal = "void()";
 
   if (isFuncTable) {

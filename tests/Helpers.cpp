@@ -42,8 +42,22 @@ void ExpectEqual(const Type &expected, const Type &actual) {
   }
 }
 
+void ExpectEqual(const TypeDefinition &expected, const TypeDefinition &actual) {
+  EXPECT_EQ(expected.mName, actual.mName);
+  EXPECT_EQ(expected.mArraySize, actual.mArraySize);
+  ASSERT_EQ(expected.mTemplateParameters.size(), actual.mTemplateParameters.size());
+  for (size_t i = 0; i < expected.mTemplateParameters.size(); ++i) {
+    ExpectEqual(expected.mTemplateParameters[i], actual.mTemplateParameters[i]);
+  }
+}
+
+void ExpectEqual(const FunctionReturnTypeDefinition &expected,
+                 const FunctionReturnTypeDefinition &actual) {
+  ExpectEqual(expected.mType, actual.mType);
+}
+
 void ExpectEqual(const ClassField &actual, const ClassField &expected) {
-  helpers::ExpectEqual(expected.mType, actual.mType);
+  ExpectEqual(expected.mType, actual.mType);
   EXPECT_EQ(actual.mName, expected.mName);
   EXPECT_EQ(actual.mVisibility, expected.mVisibility) << " in field " << actual.mName;
   EXPECT_EQ(actual.mStaticness, expected.mStaticness);

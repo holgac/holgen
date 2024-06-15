@@ -75,9 +75,13 @@ struct FunctionArgumentDefinition {
   DefinitionSource mDefinitionSource;
 };
 
+struct FunctionReturnTypeDefinition {
+  TypeDefinition mType;
+};
+
 struct FunctionDefinition {
   std::string mName;
-  TypeDefinition mReturnType;
+  FunctionReturnTypeDefinition mReturnType;
   std::vector<FunctionArgumentDefinition> mArguments;
   std::vector<AnnotationDefinition> mAnnotations;
   DefinitionSource mDefinitionSource;

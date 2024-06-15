@@ -79,10 +79,10 @@ protected:
   }
 
   void ExpectFunction(const FunctionDefinition &functionDefinition, const std::string &name,
-                      const std::string &returnType, size_t argCount, size_t annotationCount,
-                      size_t line, size_t col) {
+                      const FunctionReturnTypeDefinition &returnType, size_t argCount,
+                      size_t annotationCount, size_t line, size_t col) {
     EXPECT_EQ(functionDefinition.mName, name);
-    EXPECT_EQ(functionDefinition.mReturnType.mName, returnType);
+    helpers::ExpectEqual(functionDefinition.mReturnType, returnType);
     EXPECT_EQ(functionDefinition.mArguments.size(), argCount);
     EXPECT_EQ(functionDefinition.mAnnotations.size(), annotationCount);
     ExpectDefinitionSource(functionDefinition, line, col);
@@ -96,6 +96,12 @@ protected:
     EXPECT_EQ(arg.mNullability, nullability);
     EXPECT_EQ(arg.mConstness, constness);
     ExpectDefinitionSource(arg, line, col);
+  }
+
+  FunctionReturnTypeDefinition ReturnType(const std::string &type) {
+    FunctionReturnTypeDefinition frt;
+    frt.mType.mName = type;
+    return frt;
   }
 
   const char *Source = "ParserTest";
@@ -304,13 +310,13 @@ struct Action {
   EXPECT_EQ(action->mFunctions.size(), 4);
   auto func = action->GetFunction("func1");
   ASSERT_NE(func, nullptr);
-  ExpectFunction(*func, "func1", "void", 1, 0, 4, 2);
+  ExpectFunction(*func, "func1", ReturnType("void"), 1, 0, 4, 2);
   ExpectFunctionArgument(func->mArguments[0], "actor", "Actor", Nullability::NotNullable,
                          Constness::Const, 4, 13);
 
   func = action->GetFunction("func2");
   ASSERT_NE(func, nullptr);
-  ExpectFunction(*func, "func2", "void", 2, 0, 5, 2);
+  ExpectFunction(*func, "func2", ReturnType("void"), 2, 0, 5, 2);
   ExpectFunctionArgument(func->mArguments[0], "i1", "s32", Nullability::NotNullable,
                          Constness::Const, 5, 13);
   ExpectFunctionArgument(func->mArguments[1], "i2", "vector", Nullability::NotNullable,
@@ -319,12 +325,15 @@ struct Action {
 
   func = action->GetFunction("func3");
   ASSERT_NE(func, nullptr);
-  ExpectFunction(*func, "func3", "vector", 0, 0, 6, 2);
-  EXPECT_EQ(func->mReturnType.mTemplateParameters[0].mName, "s32");
+  TypeDefinition s32Vector;
+  s32Vector.mName = "vector";
+  s32Vector.mTemplateParameters.emplace_back().mName = "s32";
+  ExpectFunction(*func, "func3", {s32Vector}, 0, 0, 6, 2);
+  EXPECT_EQ(func->mReturnType.mType.mTemplateParameters[0].mName, "s32");
 
   func = action->GetFunction("func4");
   ASSERT_NE(func, nullptr);
-  ExpectFunction(*func, "func4", "void", 1, 0, 7, 2);
+  ExpectFunction(*func, "func4", ReturnType("void"), 1, 0, 7, 2);
   ASSERT_TRUE(func->mArguments.front().mDefaultValue.has_value());
   EXPECT_EQ(*func->mArguments.front().mDefaultValue, "42");
 }
@@ -342,19 +351,19 @@ struct Action {
   ASSERT_NE(action, nullptr);
   EXPECT_EQ(action->mFunctions.size(), 4);
   ASSERT_NE(action->GetFunction("f"), nullptr);
-  ExpectFunction(*action->GetFunction("f"), "f", "void", 1, 0, 1, 2);
+  ExpectFunction(*action->GetFunction("f"), "f", ReturnType("void"), 1, 0, 1, 2);
   ExpectFunctionArgument(action->GetFunction("f")->mArguments[0], "i", "s32",
                          Nullability::NotNullable, Constness::Const, 1, 9);
   ASSERT_NE(action->GetFunction("fr"), nullptr);
-  ExpectFunction(*action->GetFunction("fr"), "fr", "void", 1, 0, 2, 2);
+  ExpectFunction(*action->GetFunction("fr"), "fr", ReturnType("void"), 1, 0, 2, 2);
   ExpectFunctionArgument(action->GetFunction("fr")->mArguments[0], "i", "s32",
                          Nullability::NotNullable, Constness::NotConst, 2, 10);
   ASSERT_NE(action->GetFunction("fn"), nullptr);
-  ExpectFunction(*action->GetFunction("fn"), "fn", "void", 1, 0, 3, 2);
+  ExpectFunction(*action->GetFunction("fn"), "fn", ReturnType("void"), 1, 0, 3, 2);
   ExpectFunctionArgument(action->GetFunction("fn")->mArguments[0], "i", "s32",
                          Nullability::Nullable, Constness::Const, 3, 10);
   ASSERT_NE(action->GetFunction("fnr"), nullptr);
-  ExpectFunction(*action->GetFunction("fnr"), "fnr", "void", 1, 0, 4, 2);
+  ExpectFunction(*action->GetFunction("fnr"), "fnr", ReturnType("void"), 1, 0, 4, 2);
   ExpectFunctionArgument(action->GetFunction("fnr")->mArguments[0], "i", "s32",
                          Nullability::Nullable, Constness::NotConst, 4, 11);
 }

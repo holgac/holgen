@@ -30,8 +30,6 @@ enum class TokenType {
 struct Token {
   TokenType mType;
   std::string_view mContents;
-  // bool operator==(const Token& rhs) const { return mReturnType == rhs.mReturnType && mContents ==
-  // rhs.mContents;}
 };
 
 class Tokenizer {

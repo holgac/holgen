@@ -5,7 +5,7 @@ ClassMethod FunctionPluginBase::NewFunction(const FunctionDefinition &functionDe
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   auto method = ClassMethod{
       functionDefinition.mName,
-      Type{mProject, functionDefinition.mDefinitionSource, functionDefinition.mReturnType},
+      Type{mProject, functionDefinition.mDefinitionSource, functionDefinition.mReturnType.mType},
       Visibility::Public,
       (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Const))
           ? Constness::Const

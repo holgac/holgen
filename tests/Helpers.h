@@ -12,6 +12,9 @@ void ExpectGeneratedContent(const GeneratedContent &actual, FileType fileType,
                             const std::string &name, const std::string &contents);
 
 void ExpectEqual(const Type &expected, const Type &actual);
+void ExpectEqual(const TypeDefinition &expected, const TypeDefinition &actual);
+void ExpectEqual(const FunctionReturnTypeDefinition &expected,
+                 const FunctionReturnTypeDefinition &actual);
 void ExpectEqual(const ClassField &actual, const ClassField &expected);
 void ExpectEqual(const ClassEnumEntry &actual, const ClassEnumEntry &expected);
 void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
