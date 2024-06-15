@@ -1,3 +1,15 @@
-add_executable(cli main.cpp)
-add_dependencies(cli generator parser tokenizer core)
-target_link_libraries(cli generator parser tokenizer core)
+add_executable(cli
+    main.cpp
+)
+add_dependencies(cli
+    generator
+    parser
+    tokenizer
+    core
+)
+target_link_libraries(cli
+    generator
+    parser
+    tokenizer
+    core
+)

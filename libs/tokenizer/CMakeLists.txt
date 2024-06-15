@@ -1,1 +1,3 @@
-add_library(tokenizer Tokenizer.cpp)
+add_library(tokenizer
+    Tokenizer.cpp
+)
