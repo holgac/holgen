@@ -52,6 +52,13 @@ void TestStructSingleElem::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestStructSingleElem::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "name");
+  LuaHelper::Push(mName, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestStructSingleElem::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

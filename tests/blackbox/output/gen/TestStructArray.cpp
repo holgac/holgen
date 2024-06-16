@@ -63,6 +63,13 @@ void TestStructArray::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestStructArray::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "type");
+  LuaHelper::Push(mType, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestStructArray::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -102,14 +109,14 @@ int TestStructArray::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestStructArray::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetData1();
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetData2", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestStructArray::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetData2();
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else {

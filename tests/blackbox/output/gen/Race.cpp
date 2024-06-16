@@ -92,6 +92,22 @@ void Race::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Race::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "id");
+  LuaHelper::Push(mId, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "name");
+  LuaHelper::Push(mName, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "hairColors");
+  LuaHelper::Push(mHairColors, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "names");
+  LuaHelper::Push(mNames, luaState);
+  lua_settable(luaState, -3);
+}
+
 void Race::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

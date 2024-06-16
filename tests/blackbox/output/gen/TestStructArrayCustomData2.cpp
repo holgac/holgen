@@ -69,6 +69,19 @@ void TestStructArrayCustomData2::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestStructArrayCustomData2::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "f1");
+  LuaHelper::Push(mF1, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "f2");
+  LuaHelper::Push(mF2, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "f3");
+  LuaHelper::Push(mF3, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestStructArrayCustomData2::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

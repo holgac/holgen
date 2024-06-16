@@ -82,6 +82,19 @@ void Country::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Country::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "leader");
+  mLeader.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "citizens");
+  LuaHelper::Push(mCitizens, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "population");
+  LuaHelper::Push(mPopulation, luaState);
+  lua_settable(luaState, -3);
+}
+
 void Country::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -102,7 +115,12 @@ Country Country::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   while (lua_next(luaState, -2)) {
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("leader", key)) {
-      LuaHelper::Read(result.mLeader, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mLeader = *Person::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mLeader = Person::ReadMirrorFromLua(luaState, -1);
+      }
     } else if (0 == strcmp("citizens", key)) {
       LuaHelper::Read(result.mCitizens, luaState, -1);
     } else if (0 == strcmp("population", key)) {

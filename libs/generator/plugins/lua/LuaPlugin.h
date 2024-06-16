@@ -16,6 +16,7 @@ private:
   void ProcessEnum(Class &cls);
   void GeneratePushGlobalToLua(Class &cls);
   void GeneratePushToLua(Class &cls);
+  void GeneratePushMirrorStructToLua(Class &cls);
   void GenerateReadProxyObjectFromLua(Class &cls);
   void GenerateReadMirrorObjectFromLua(Class &cls);
   void GenerateIndexMetaMethod(Class &cls);

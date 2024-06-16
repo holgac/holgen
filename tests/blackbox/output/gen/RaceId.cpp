@@ -52,6 +52,13 @@ void RaceId::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void RaceId::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "id");
+  LuaHelper::Push(mId, luaState);
+  lua_settable(luaState, -3);
+}
+
 void RaceId::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

@@ -105,6 +105,13 @@ void Calculator::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Calculator::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "curVal");
+  mCurVal.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+}
+
 void Calculator::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -125,7 +132,12 @@ Calculator Calculator::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   while (lua_next(luaState, -2)) {
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("curVal", key)) {
-      LuaHelper::Read(result.mCurVal, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mCurVal = *Number::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mCurVal = Number::ReadMirrorFromLua(luaState, -1);
+      }
     } else {
       HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
     }
@@ -154,7 +166,7 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
       auto instance = Calculator::ReadProxyFromLua(lsInner, -2);
       auto arg0 = Number::ReadProxyFromLua(lsInner, -1);
       auto result = instance->Subtract(lsInner, *arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("SubtractThenMultiply", key)) {

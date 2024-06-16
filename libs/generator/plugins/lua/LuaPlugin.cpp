@@ -81,7 +81,20 @@ void LuaPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitc
         } else {
           switchBlock.Add("auto result = instance->{}({});", exposedMethod.mName, funcArgs);
         }
-        switchBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
+        std::string accessor = ".";
+        if (exposedMethod.mReturnType.mType == PassByType::Pointer) {
+          accessor = "->";
+        }
+        auto returnedClass = mProject.GetClass(exposedMethod.mReturnType.mName);
+        if (returnedClass && !returnedClass->mEnum) {
+          if (exposedMethod.mReturnType.mType == PassByType::Value) {
+            switchBlock.Add("result{}{}(lsInner);", accessor, St::Lua_PushMirrorObject);
+          } else {
+            switchBlock.Add("result{}PushToLua(lsInner);", accessor);
+          }
+        } else {
+          switchBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
+        }
         switchBlock.Add("return 1;");
       } else {
         switchBlock.Add("instance->{}({});", exposedMethod.mName, funcArgs);
@@ -327,10 +340,43 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
         field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
       continue;
     // TODO: handle refs?
-    switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
-      switchBlock.Add("{}::{}(result.{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read,
-                      field.mName);
-    });
+    auto fieldClass = mProject.GetClass(field.mType.mName);
+    if (fieldClass && fieldClass->mStruct) {
+      switcher.AddCase(
+          Naming().FieldNameInLua(*field.mField), [&, fieldClass](CodeBlock &switchBlock) {
+            bool canBeProxy = !fieldClass->mStruct->GetMatchingAttribute(
+                Annotations::Struct, Annotations::Struct_NonCopyable);
+            if (canBeProxy) {
+              switchBlock.Add("if (lua_getmetatable(luaState, -1)) {{");
+              switchBlock.Indent(1);
+              switchBlock.Add("lua_pop(luaState, 1);");
+              std::string convertOp;
+              if (field.mType.mType != PassByType::Pointer) {
+                convertOp = "*";
+              }
+              switchBlock.Add("result.{} = {}{}::{}(luaState, -1);", field.mName, convertOp,
+                              fieldClass->mName, St::Lua_ReadProxyObject);
+              switchBlock.Indent(-1);
+              switchBlock.Add("}} else {{");
+              switchBlock.Indent(1);
+            }
+            if (field.mType.mType == PassByType::Pointer) {
+              switchBlock.Add("HOLGEN_FAIL(\"Cannot write a mirror object to a pointer!\");");
+            } else {
+              switchBlock.Add("result.{} = {}::{}(luaState, -1);", field.mName, fieldClass->mName,
+                              St::Lua_ReadMirrorObject);
+            }
+            if (canBeProxy) {
+              switchBlock.Indent(-1);
+              switchBlock.Add("}}");
+            }
+          });
+    } else {
+      switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
+        switchBlock.Add("{}::{}(result.{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read,
+                        field.mName);
+      });
+    }
   }
   if (switcher.IsEmpty()) {
     method.mBody.Add("return {}{{}};", cls.mName);
@@ -403,6 +449,31 @@ void LuaPlugin::GeneratePushToLua(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
+void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
+  auto method =
+      ClassMethod{St::Lua_PushMirrorObject, Type{"void"}, Visibility::Public, Constness::Const};
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+
+  method.mBody.Add("lua_newtable(luaState);");
+  for (auto &field: cls.mFields) {
+    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
+        field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant) {
+      continue;
+    }
+    method.mBody.Add("lua_pushstring(luaState, \"{}\");", field.mField->mName);
+    auto fieldClass = mProject.GetClass(field.mType.mName);
+    if (fieldClass && !fieldClass->mEnum) {
+      method.mBody.Add("{}.{}(luaState);", field.mName, St::Lua_PushMirrorObject);
+    } else {
+      method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push,
+                       Naming().FieldNameInCpp(*field.mField, false));
+    }
+    method.mBody.Add("lua_settable(luaState, -3);");
+  }
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
 void LuaPlugin::ProcessStruct(Class &cls) {
   if (cls.mStruct->GetAnnotation(Annotations::NoLua))
     return;
@@ -410,6 +481,7 @@ void LuaPlugin::ProcessStruct(Class &cls) {
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   GeneratePushToLua(cls);
+  GeneratePushMirrorStructToLua(cls);
   GeneratePushGlobalToLua(cls);
   GenerateReadProxyObjectFromLua(cls);
   GenerateReadMirrorObjectFromLua(cls);

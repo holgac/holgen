@@ -194,6 +194,10 @@ void TestVariantStructSharedType::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestVariantStructSharedType::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+}
+
 void TestVariantStructSharedType::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

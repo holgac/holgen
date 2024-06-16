@@ -52,6 +52,13 @@ void TestStructNonCopyable::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestStructNonCopyable::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "bigVector");
+  LuaHelper::Push(mBigVector, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestStructNonCopyable::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

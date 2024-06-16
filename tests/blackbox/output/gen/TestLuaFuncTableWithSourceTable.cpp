@@ -79,6 +79,10 @@ void TestLuaFuncTableWithSourceTable::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestLuaFuncTableWithSourceTable::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+}
+
 void TestLuaFuncTableWithSourceTable::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

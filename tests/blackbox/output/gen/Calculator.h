@@ -27,6 +27,7 @@ public:
   int64_t SubtractThenMultiply(const int64_t lhs, const int64_t rhs);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
+  void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
   /*
    * This only works with negative indices

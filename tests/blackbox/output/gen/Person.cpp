@@ -102,6 +102,25 @@ void Person::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Person::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "race");
+  LuaHelper::Push(mRace, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "currentCountry");
+  LuaHelper::Push(mCurrentCountry, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "currentCity");
+  LuaHelper::Push(mCurrentCity, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "homeCountry");
+  LuaHelper::Push(mHomeCountry, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "placeOfBirth");
+  LuaHelper::Push(mPlaceOfBirth, luaState);
+  lua_settable(luaState, -3);
+}
+
 void Person::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

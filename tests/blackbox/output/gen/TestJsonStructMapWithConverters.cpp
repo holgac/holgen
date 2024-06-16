@@ -80,6 +80,19 @@ void TestJsonStructMapWithConverters::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestJsonStructMapWithConverters::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "testMapConvertElem");
+  LuaHelper::Push(mTestMapConvertElem, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "testMapConvertKey");
+  LuaHelper::Push(mTestMapConvertKey, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "testMapConvertKeyElem");
+  LuaHelper::Push(mTestMapConvertKeyElem, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestJsonStructMapWithConverters::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

@@ -48,6 +48,13 @@ void Number::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Number::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "value");
+  LuaHelper::Push(mValue, luaState);
+  lua_settable(luaState, -3);
+}
+
 void Number::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

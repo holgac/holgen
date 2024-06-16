@@ -26,6 +26,7 @@ public:
   void SetTestMapConvertKeyElem(const std::map<uint32_t, uint32_t> &val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
+  void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
   /*
    * This only works with negative indices

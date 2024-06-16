@@ -68,7 +68,8 @@ void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls,
   method.mTemplateParameters.emplace_back("typename", "V");
 
   {
-    auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+    auto &data = method.mArguments.emplace_back(
+        "data", Type{container, PassByType::Reference, Constness::Const});
     data.mType.mTemplateParameters.emplace_back("K");
     data.mType.mTemplateParameters.emplace_back("V");
   }
@@ -279,7 +280,8 @@ void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::
   if (isFixedSize)
     method.mTemplateParameters.emplace_back("size_t", "C");
   {
-    auto &data = method.mArguments.emplace_back("data", Type{container, PassByType::Reference});
+    auto &data = method.mArguments.emplace_back(
+        "data", Type{container, PassByType::Reference, Constness::Const});
     data.mType.mTemplateParameters.emplace_back("T");
     if (isFixedSize)
       data.mType.mTemplateParameters.emplace_back("C");

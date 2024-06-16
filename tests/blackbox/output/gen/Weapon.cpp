@@ -88,6 +88,22 @@ void Weapon::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Weapon::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "damageMin");
+  LuaHelper::Push(mDamageMin, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "damageMax");
+  LuaHelper::Push(mDamageMax, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "damageMultipliers");
+  LuaHelper::Push(mDamageMultipliers, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "modifiers");
+  LuaHelper::Push(mModifiers, luaState);
+  lua_settable(luaState, -3);
+}
+
 void Weapon::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

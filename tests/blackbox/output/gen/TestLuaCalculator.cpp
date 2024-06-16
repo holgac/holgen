@@ -219,6 +219,13 @@ void TestLuaCalculator::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestLuaCalculator::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "lastValue");
+  mLastValue.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestLuaCalculator::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -239,7 +246,12 @@ TestLuaCalculator TestLuaCalculator::ReadMirrorFromLua(lua_State *luaState, int3
   while (lua_next(luaState, -2)) {
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("lastValue", key)) {
-      LuaHelper::Read(result.mLastValue, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mLastValue = *TestLuaNumber::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mLastValue = TestLuaNumber::ReadMirrorFromLua(luaState, -1);
+      }
     } else {
       HOLGEN_WARN("Unexpected lua field: TestLuaCalculator.{}", key);
     }
@@ -293,7 +305,7 @@ int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
       int32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->ReturnNullable(lsInner, arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("ReturnRef", key)) {
@@ -302,7 +314,7 @@ int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
       int32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto& result = instance->ReturnRef(lsInner, arg0);
-      LuaHelper::Push(result, lsInner);
+      result.PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("ReturnNew", key)) {
@@ -311,7 +323,7 @@ int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
       int32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->ReturnNew(lsInner, arg0);
-      LuaHelper::Push(result, lsInner);
+      result.PushMirrorToLua(lsInner);
       return 1;
     });
   } else {

@@ -128,6 +128,13 @@ void TestJsonTagManager::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestJsonTagManager::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "tags");
+  LuaHelper::Push(mTags, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestJsonTagManager::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -178,7 +185,7 @@ int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetTagFromName(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("AddTag", key)) {
@@ -186,7 +193,7 @@ int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
       auto instance = TestJsonTagManager::ReadProxyFromLua(lsInner, -2);
       auto arg0 = TestJsonTag::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddTag(*arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetTag", key)) {
@@ -195,7 +202,7 @@ int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
       uint64_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetTag(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetTagCount", key)) {

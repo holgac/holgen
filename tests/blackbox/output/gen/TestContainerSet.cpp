@@ -106,6 +106,16 @@ void TestContainerSet::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestContainerSet::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "stringContainer");
+  LuaHelper::Push(mStringContainer, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "unsignedContainer");
+  LuaHelper::Push(mUnsignedContainer, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestContainerSet::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

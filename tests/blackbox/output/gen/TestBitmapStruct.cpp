@@ -48,6 +48,13 @@ void TestBitmapStruct::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestBitmapStruct::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "bitmapField");
+  LuaHelper::Push(mBitmapField, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestBitmapStruct::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

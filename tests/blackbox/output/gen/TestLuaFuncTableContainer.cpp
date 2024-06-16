@@ -140,6 +140,31 @@ void TestLuaFuncTableContainer::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestLuaFuncTableContainer::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "field");
+  LuaHelper::Push(mField, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "script1");
+  mScript1.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "script2");
+  mScript2.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "scriptWithSourceTable1");
+  mScriptWithSourceTable1.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "scriptWithSourceTable2");
+  mScriptWithSourceTable2.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "staticScript1");
+  mStaticScript1.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "staticScript2");
+  mStaticScript2.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestLuaFuncTableContainer::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -162,17 +187,47 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
     if (0 == strcmp("field", key)) {
       LuaHelper::Read(result.mField, luaState, -1);
     } else if (0 == strcmp("script1", key)) {
-      LuaHelper::Read(result.mScript1, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mScript1 = *TestLuaFuncTable::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mScript1 = TestLuaFuncTable::ReadMirrorFromLua(luaState, -1);
+      }
     } else if (0 == strcmp("script2", key)) {
-      LuaHelper::Read(result.mScript2, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mScript2 = *TestLuaFuncTable::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mScript2 = TestLuaFuncTable::ReadMirrorFromLua(luaState, -1);
+      }
     } else if (0 == strcmp("scriptWithSourceTable1", key)) {
-      LuaHelper::Read(result.mScriptWithSourceTable1, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mScriptWithSourceTable1 = *TestLuaFuncTableWithSourceTable::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mScriptWithSourceTable1 = TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(luaState, -1);
+      }
     } else if (0 == strcmp("scriptWithSourceTable2", key)) {
-      LuaHelper::Read(result.mScriptWithSourceTable2, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mScriptWithSourceTable2 = *TestLuaFuncTableWithSourceTable::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mScriptWithSourceTable2 = TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(luaState, -1);
+      }
     } else if (0 == strcmp("staticScript1", key)) {
-      LuaHelper::Read(result.mStaticScript1, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mStaticScript1 = *TestLuaFuncTableStatic::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mStaticScript1 = TestLuaFuncTableStatic::ReadMirrorFromLua(luaState, -1);
+      }
     } else if (0 == strcmp("staticScript2", key)) {
-      LuaHelper::Read(result.mStaticScript2, luaState, -1);
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mStaticScript2 = *TestLuaFuncTableStatic::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mStaticScript2 = TestLuaFuncTableStatic::ReadMirrorFromLua(luaState, -1);
+      }
     } else {
       HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);
     }

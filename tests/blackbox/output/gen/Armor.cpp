@@ -103,6 +103,22 @@ void Armor::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Armor::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "id");
+  LuaHelper::Push(mId, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "name");
+  LuaHelper::Push(mName, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "alternativeName");
+  LuaHelper::Push(mAlternativeName, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "armorClass");
+  LuaHelper::Push(mArmorClass, luaState);
+  lua_settable(luaState, -3);
+}
+
 void Armor::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

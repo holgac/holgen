@@ -91,6 +91,16 @@ void LuaTestStructContainer::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void LuaTestStructContainer::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "testVector");
+  LuaHelper::Push(mTestVector, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "testMap");
+  LuaHelper::Push(mTestMap, luaState);
+  lua_settable(luaState, -3);
+}
+
 void LuaTestStructContainer::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

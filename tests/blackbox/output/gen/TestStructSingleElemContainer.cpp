@@ -123,6 +123,16 @@ void TestStructSingleElemContainer::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestStructSingleElemContainer::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "singleElemStructs");
+  LuaHelper::Push(mSingleElemStructs, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "singleElemStructsWithId");
+  LuaHelper::Push(mSingleElemStructsWithId, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestStructSingleElemContainer::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -175,7 +185,7 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
         arg0 = &arg0Mirror;
       }
       auto result = instance->AddSingleElemStruct(*arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetSingleElemStruct", key)) {
@@ -184,7 +194,7 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
       size_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetSingleElemStruct(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("DeleteSingleElemStruct", key)) {
@@ -207,7 +217,7 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
       auto instance = TestStructSingleElemContainer::ReadProxyFromLua(lsInner, -2);
       auto arg0 = TestStructSingleElemWithId::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddSingleElemStructWithId(*arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetSingleElemStructWithId", key)) {
@@ -216,7 +226,7 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetSingleElemStructWithId(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetSingleElemStructWithIdCount", key)) {

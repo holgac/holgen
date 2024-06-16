@@ -73,6 +73,19 @@ void TestStruct::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestStruct::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "testFieldBool");
+  LuaHelper::Push(mTestFieldBool, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "testFieldUnsigned");
+  LuaHelper::Push(mTestFieldUnsigned, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "testFieldString");
+  LuaHelper::Push(mTestFieldString, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestStruct::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

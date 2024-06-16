@@ -64,6 +64,16 @@ void TestVariantStructHuman::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void TestVariantStructHuman::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "name");
+  LuaHelper::Push(mName, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "nationality");
+  LuaHelper::Push(mNationality, luaState);
+  lua_settable(luaState, -3);
+}
+
 void TestVariantStructHuman::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
