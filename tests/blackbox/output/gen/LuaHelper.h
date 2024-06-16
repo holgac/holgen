@@ -107,8 +107,8 @@ public:
   }
   template <typename T>
   static bool Read(T &data, lua_State *luaState, int32_t luaIndex) {
-    // *data = T::ReadFromLua(luaState, luaIndex);
-    return false; //*data != nullptr;
+    data = T::ReadMirrorFromLua(luaState, luaIndex);
+    return true;
   }
   static bool Read(bool &data, lua_State *luaState, int32_t luaIndex);
   static bool Read(double &data, lua_State *luaState, int32_t luaIndex);
@@ -123,31 +123,31 @@ public:
   static bool Read(uint64_t &data, lua_State *luaState, int32_t luaIndex);
   static bool Read(uint8_t &data, lua_State *luaState, int32_t luaIndex);
   template <typename T, size_t C>
-  static bool Read(const std::array<T, C> &data, lua_State *luaState, int32_t luaIndex) {
+  static bool Read(std::array<T, C> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
   }
   template <typename T>
-  static bool Read(const std::deque<T> &data, lua_State *luaState, int32_t luaIndex) {
+  static bool Read(std::deque<T> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
   }
   template <typename T>
-  static bool Read(const std::vector<T> &data, lua_State *luaState, int32_t luaIndex) {
+  static bool Read(std::vector<T> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
   }
   template <typename T>
-  static bool Read(const std::set<T> &data, lua_State *luaState, int32_t luaIndex) {
+  static bool Read(std::set<T> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
   }
   template <typename T>
-  static bool Read(const std::unordered_set<T> &data, lua_State *luaState, int32_t luaIndex) {
+  static bool Read(std::unordered_set<T> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
   }
   template <typename K, typename V>
-  static bool Read(const std::map<K, V> &data, lua_State *luaState, int32_t luaIndex) {
+  static bool Read(std::map<K, V> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
   }
   template <typename K, typename V>
-  static bool Read(const std::unordered_map<K, V> &data, lua_State *luaState, int32_t luaIndex) {
+  static bool Read(std::unordered_map<K, V> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
   }
   static void CreateMetatables(lua_State *luaState);

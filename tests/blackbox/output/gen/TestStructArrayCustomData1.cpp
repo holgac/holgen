@@ -84,6 +84,22 @@ TestStructArrayCustomData1 *TestStructArrayCustomData1::ReadProxyFromLua(lua_Sta
 
 TestStructArrayCustomData1 TestStructArrayCustomData1::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = TestStructArrayCustomData1{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("f1", key)) {
+      LuaHelper::Read(result.mF1, luaState, -1);
+    } else if (0 == strcmp("f2", key)) {
+      LuaHelper::Read(result.mF2, luaState, -1);
+    } else if (0 == strcmp("f3", key)) {
+      LuaHelper::Read(result.mF3, luaState, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestStructArrayCustomData1.{}", key);
+    }
+    lua_pop(luaState, 1);
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

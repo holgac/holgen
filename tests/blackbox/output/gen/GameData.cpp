@@ -343,6 +343,22 @@ GameData *GameData::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
 
 GameData GameData::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = GameData{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("boots", key)) {
+      LuaHelper::Read(result.mBoots, luaState, -1);
+    } else if (0 == strcmp("armors", key)) {
+      LuaHelper::Read(result.mArmors, luaState, -1);
+    } else if (0 == strcmp("characters", key)) {
+      LuaHelper::Read(result.mCharacters, luaState, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: GameData.{}", key);
+    }
+    lua_pop(luaState, 1);
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

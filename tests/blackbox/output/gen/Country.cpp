@@ -97,6 +97,22 @@ Country *Country::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
 
 Country Country::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = Country{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("leader", key)) {
+      LuaHelper::Read(result.mLeader, luaState, -1);
+    } else if (0 == strcmp("citizens", key)) {
+      LuaHelper::Read(result.mCitizens, luaState, -1);
+    } else if (0 == strcmp("population", key)) {
+      LuaHelper::Read(result.mPopulation, luaState, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Country.{}", key);
+    }
+    lua_pop(luaState, 1);
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

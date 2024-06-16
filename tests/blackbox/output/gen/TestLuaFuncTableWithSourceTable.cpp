@@ -93,8 +93,7 @@ TestLuaFuncTableWithSourceTable *TestLuaFuncTableWithSourceTable::ReadProxyFromL
 }
 
 TestLuaFuncTableWithSourceTable TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
-  auto result = TestLuaFuncTableWithSourceTable{};
-  return result;
+  return TestLuaFuncTableWithSourceTable{};
 }
 
 int TestLuaFuncTableWithSourceTable::IndexMetaMethod(lua_State *luaState) {

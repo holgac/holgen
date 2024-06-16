@@ -133,6 +133,18 @@ TestContainerMap *TestContainerMap::ReadProxyFromLua(lua_State *luaState, int32_
 
 TestContainerMap TestContainerMap::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = TestContainerMap{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("innerStructsWithId", key)) {
+      LuaHelper::Read(result.mInnerStructsWithId, luaState, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
+    }
+    lua_pop(luaState, 1);
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

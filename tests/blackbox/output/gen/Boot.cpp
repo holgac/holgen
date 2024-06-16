@@ -103,6 +103,22 @@ Boot *Boot::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
 
 Boot Boot::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = Boot{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("id", key)) {
+      LuaHelper::Read(result.mId, luaState, -1);
+    } else if (0 == strcmp("name", key)) {
+      LuaHelper::Read(result.mName, luaState, -1);
+    } else if (0 == strcmp("color", key)) {
+      LuaHelper::Read(result.mColor, luaState, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Boot.{}", key);
+    }
+    lua_pop(luaState, 1);
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

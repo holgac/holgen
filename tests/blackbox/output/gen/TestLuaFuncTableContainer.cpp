@@ -155,6 +155,30 @@ TestLuaFuncTableContainer *TestLuaFuncTableContainer::ReadProxyFromLua(lua_State
 
 TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = TestLuaFuncTableContainer{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("field", key)) {
+      LuaHelper::Read(result.mField, luaState, -1);
+    } else if (0 == strcmp("script1", key)) {
+      LuaHelper::Read(result.mScript1, luaState, -1);
+    } else if (0 == strcmp("script2", key)) {
+      LuaHelper::Read(result.mScript2, luaState, -1);
+    } else if (0 == strcmp("scriptWithSourceTable1", key)) {
+      LuaHelper::Read(result.mScriptWithSourceTable1, luaState, -1);
+    } else if (0 == strcmp("scriptWithSourceTable2", key)) {
+      LuaHelper::Read(result.mScriptWithSourceTable2, luaState, -1);
+    } else if (0 == strcmp("staticScript1", key)) {
+      LuaHelper::Read(result.mStaticScript1, luaState, -1);
+    } else if (0 == strcmp("staticScript2", key)) {
+      LuaHelper::Read(result.mStaticScript2, luaState, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);
+    }
+    lua_pop(luaState, 1);
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

@@ -263,8 +263,7 @@ TestVariantStructDifferentTypes *TestVariantStructDifferentTypes::ReadProxyFromL
 }
 
 TestVariantStructDifferentTypes TestVariantStructDifferentTypes::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
-  auto result = TestVariantStructDifferentTypes{};
-  return result;
+  return TestVariantStructDifferentTypes{};
 }
 
 int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {

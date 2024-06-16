@@ -492,3 +492,26 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
   calc.GetLastValue().SetValue(20);
   EXPECT_EQ(num->GetValue(), 20);
 }
+
+TEST_F(LuaTest, FuncReturnModifiersNew) {
+  const char* script = R"R(
+Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return {value=calc.lastValue.value} end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaCalculator calc;
+  calc.PushGlobalToLua(mState, "C");
+  calc.SetReturnNewLuaFunc("Func");
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
+  auto num = calc.ReturnNew(mState, 10);
+  /*
+   *TODO: uncomment the code below once LuaHelper::PushMirror is implemented
+  luaL_dostring(mState, "return C:ReturnNew(10)");
+  LuaTestHelper::ExpectStack(mState, {"{value:10}"});
+  auto num = TestLuaNumber::ReadMirrorFromLua(mState, -1);
+  lua_pop(mState, 1);
+  */
+  EXPECT_EQ(num.GetValue(), 10);
+  calc.GetLastValue().SetValue(20);
+  EXPECT_EQ(num.GetValue(), 10);
+}

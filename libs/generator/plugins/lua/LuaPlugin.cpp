@@ -22,7 +22,7 @@ void LuaPlugin::Run() {
 
 void LuaPlugin::GenerateIndexMetaMethodForFields(Class &cls, StringSwitcher &switcher) {
   for (auto &field: cls.mFields) {
-    // TODO: parse variant
+    // TODO: handle variant type (should call setter instead of direct assignment)
     if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
         field.mField->mType.mName == St::UserData)
       continue;
@@ -317,7 +317,38 @@ void LuaPlugin::GenerateReadProxyStructFromLuaBody(Class &cls, ClassMethod &meth
 }
 
 void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &method) {
+  CodeBlock stringSwitcherElseCase;
+  stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
+                             cls.mStruct->mName);
+  StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
+  for (auto &field: cls.mFields) {
+    // TODO: handle variant type (should call setter instead of direct assignment)
+    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
+        field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
+      continue;
+    // TODO: handle refs?
+    switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
+      switchBlock.Add("{}::{}(result.{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read,
+                      field.mName);
+    });
+  }
+  if (switcher.IsEmpty()) {
+    method.mBody.Add("return {}{{}};", cls.mName);
+    return;
+  }
   method.mBody.Add("auto result = {}{{}};", cls.mName);
+  method.mBody.Add("lua_pushvalue(luaState, idx);", cls.mName);
+  method.mBody.Add("lua_pushnil(luaState);");
+  method.mBody.Add("while (lua_next(luaState, -2)) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("auto key = lua_tostring(luaState, -2);");
+
+  method.mBody.Add(std::move(switcher.Generate()));
+
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Add("lua_pop(luaState, 1);");
   method.mBody.Add("return result;", cls.mName);
 }
 

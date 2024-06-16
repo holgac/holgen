@@ -106,6 +106,20 @@ LuaTestStructContainer *LuaTestStructContainer::ReadProxyFromLua(lua_State *luaS
 
 LuaTestStructContainer LuaTestStructContainer::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = LuaTestStructContainer{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("testVector", key)) {
+      LuaHelper::Read(result.mTestVector, luaState, -1);
+    } else if (0 == strcmp("testMap", key)) {
+      LuaHelper::Read(result.mTestMap, luaState, -1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: LuaTestStructContainer.{}", key);
+    }
+    lua_pop(luaState, 1);
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

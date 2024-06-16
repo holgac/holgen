@@ -208,8 +208,7 @@ TestVariantStructSharedType *TestVariantStructSharedType::ReadProxyFromLua(lua_S
 }
 
 TestVariantStructSharedType TestVariantStructSharedType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
-  auto result = TestVariantStructSharedType{};
-  return result;
+  return TestVariantStructSharedType{};
 }
 
 int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {

@@ -156,12 +156,11 @@ void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
 
-  // TODO: implement reading objects from lua?
   // DataManager (or container fields) should have a lua ConstructElem method
   // that reads from a lua table, calls AddElem and returns the new element.
   // Useful for mods for programmatic insertions
-  method.mBody.Line() << "// *data = T::ReadFromLua(luaState, luaIndex);";
-  method.mBody.Line() << "return false; //*data != nullptr;";
+  method.mBody.Add("data = T::{}(luaState, luaIndex);", St::Lua_ReadMirrorObject);
+  method.mBody.Add("return true;");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -183,7 +182,7 @@ void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
 
     {
       auto &data = method.mArguments.emplace_back(
-          "data", Type{container, PassByType::Reference, Constness::Const});
+          "data", Type{container, PassByType::Reference, Constness::NotConst});
       data.mType.mTemplateParameters.emplace_back("K");
       data.mType.mTemplateParameters.emplace_back("V");
     }
@@ -307,7 +306,7 @@ void LuaHelperPlugin::GenerateReadForSingleElemContainer(Class &cls, const std::
     method.mTemplateParameters.emplace_back("size_t", "C");
   {
     auto &data = method.mArguments.emplace_back(
-        "data", Type{container, PassByType::Reference, Constness::Const});
+        "data", Type{container, PassByType::Reference, Constness::NotConst});
     data.mType.mTemplateParameters.emplace_back("T");
     if (isFixedSize)
       data.mType.mTemplateParameters.emplace_back("C");

@@ -89,8 +89,7 @@ TestLuaFuncTable *TestLuaFuncTable::ReadProxyFromLua(lua_State *luaState, int32_
 }
 
 TestLuaFuncTable TestLuaFuncTable::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
-  auto result = TestLuaFuncTable{};
-  return result;
+  return TestLuaFuncTable{};
 }
 
 int TestLuaFuncTable::IndexMetaMethod(lua_State *luaState) {
