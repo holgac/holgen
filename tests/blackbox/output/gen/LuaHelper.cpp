@@ -28,10 +28,12 @@
 #include "TestJsonStructWithTags.h"
 #include "TestJsonTag.h"
 #include "TestJsonTagManager.h"
+#include "TestLuaCalculator.h"
 #include "TestLuaFuncTable.h"
 #include "TestLuaFuncTableContainer.h"
 #include "TestLuaFuncTableStatic.h"
 #include "TestLuaFuncTableWithSourceTable.h"
+#include "TestLuaNumber.h"
 #include "TestStruct.h"
 #include "TestStructArray.h"
 #include "TestStructArrayCustomData1.h"
@@ -212,10 +214,12 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestJsonStructWithTags::CreateLuaMetatable(luaState);
   TestJsonTag::CreateLuaMetatable(luaState);
   TestJsonTagManager::CreateLuaMetatable(luaState);
+  TestLuaCalculator::CreateLuaMetatable(luaState);
   TestLuaFuncTable::CreateLuaMetatable(luaState);
   TestLuaFuncTableContainer::CreateLuaMetatable(luaState);
   TestLuaFuncTableStatic::CreateLuaMetatable(luaState);
   TestLuaFuncTableWithSourceTable::CreateLuaMetatable(luaState);
+  TestLuaNumber::CreateLuaMetatable(luaState);
   TestStruct::CreateLuaMetatable(luaState);
   TestStructArray::CreateLuaMetatable(luaState);
   TestStructArrayCustomData1::CreateLuaMetatable(luaState);

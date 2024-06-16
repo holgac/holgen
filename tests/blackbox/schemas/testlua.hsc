@@ -25,3 +25,36 @@ struct TestLuaFuncTableContainer {
     TestLuaFuncTableStatic staticScript1;
     TestLuaFuncTableStatic staticScript2;
 }
+
+struct TestLuaNumber {
+    s32 value = 0;
+}
+
+struct TestLuaCalculator {
+    TestLuaNumber lastValue;
+
+    @luaFunc
+    func AddPrimitive(s32 num) -> s32;
+    @luaFunc
+    func AddRef(TestLuaNumber num ref) -> s32;
+    @luaFunc
+    func AddNullable(TestLuaNumber num nullable) -> s32;
+
+    @luaFunc
+    func ReturnNullable(s32 num) -> TestLuaNumber nullable;
+    @luaFunc
+    func ReturnRef(s32 num) -> TestLuaNumber ref;
+    // TODO: implement reading mirror objects
+    @luaFunc
+    func ReturnNew(s32 num) -> TestLuaNumber new;
+
+/*
+    func AddPrimitiveReturnPrimitiveFromCpp(s32 num) -> s32;
+    func AddPrimitiveReturnRefFromCpp(s32 num) -> TestLuaNumber ref;
+    func AddPrimitiveReturnNullableFromCpp(s32 num) -> TestLuaNumber nullable;
+    func AddPrimitiveReturnNewFromCpp(s32 num) -> TestLuaNumber new;
+    func AddRefReturnNewFromCpp(TestLuaNumber num ref) -> TestLuaNumber new;
+    func AddNullableReturnNewFromCpp(TestLuaNumber num nullable) -> TestLuaNumber nullable;
+    func ReturnNullFromCpp() -> TestLuaNumber nullable;
+*/
+}

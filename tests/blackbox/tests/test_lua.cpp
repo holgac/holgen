@@ -14,6 +14,7 @@
 #include "TestVariantStructSharedType.h"
 #include "Converter.h"
 
+#include <TestLuaCalculator.h>
 #include <TestLuaFuncTable.h>
 #include <TestLuaFuncTableContainer.h>
 #include <rapidjson/document.h>
@@ -389,4 +390,105 @@ Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return con
 
   c.GetScriptWithSourceTable2().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 40);
+}
+
+TEST_F(LuaTest, FuncArgModifiersPrimitive) {
+  const char* script = R"R(
+Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue.value end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaCalculator calc;
+  calc.PushGlobalToLua(mState, "C");
+  calc.SetAddPrimitiveLuaFunc("Func");
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
+  luaL_dostring(mState, "return C:AddPrimitive(10)");
+  LuaTestHelper::ExpectStack(mState, {"10"});
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 10);
+  lua_pop(mState, 1);
+  EXPECT_EQ(calc.AddPrimitive(mState, 20), 30);
+}
+
+TEST_F(LuaTest, FuncArgModifiersRef) {
+  const char* script = R"R(
+Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.value; return calc.lastValue.value end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaCalculator calc;
+  calc.PushGlobalToLua(mState, "C");
+  calc.SetAddRefLuaFunc("Func");
+  TestLuaNumber num;
+  num.SetValue(10);
+  num.PushGlobalToLua(mState, "n");
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
+  luaL_dostring(mState, "return C:AddRef(n)");
+  LuaTestHelper::ExpectStack(mState, {"10"});
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 10);
+  lua_pop(mState, 1);
+  TestLuaNumber num2;
+  num2.SetValue(20);
+  EXPECT_EQ(calc.AddRef(mState, num2), 30);
+}
+
+TEST_F(LuaTest, FuncArgModifiersNullable) {
+  const char* script = R"R(
+Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.value; return calc.lastValue.value end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaCalculator calc;
+  calc.PushGlobalToLua(mState, "C");
+  calc.SetAddNullableLuaFunc("Func");
+  TestLuaNumber num;
+  num.SetValue(10);
+  num.PushGlobalToLua(mState, "n");
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
+  luaL_dostring(mState, "return C:AddNullable(n)");
+  LuaTestHelper::ExpectStack(mState, {"10"});
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 10);
+  lua_pop(mState, 1);
+  TestLuaNumber num2;
+  num2.SetValue(20);
+  EXPECT_EQ(calc.AddNullable(mState, &num2), 30);
+}
+
+TEST_F(LuaTest, FuncReturnModifiersNullable) {
+  const char* script = R"R(
+Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaCalculator calc;
+  calc.PushGlobalToLua(mState, "C");
+  calc.SetReturnNullableLuaFunc("Func");
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
+  luaL_dostring(mState, "return C:ReturnNullable(10)");
+  LuaTestHelper::ExpectStack(mState, {"{p:lightuserdata}"});
+  auto num = TestLuaNumber::ReadProxyFromLua(mState, -1);
+  lua_pop(mState, 1);
+  ASSERT_NE(num, nullptr);
+  EXPECT_EQ(num->GetValue(), 10);
+  calc.GetLastValue().SetValue(20);
+  EXPECT_EQ(num->GetValue(), 20);
+}
+
+TEST_F(LuaTest, FuncReturnModifiersRef) {
+  const char* script = R"R(
+Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue end
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaCalculator calc;
+  calc.PushGlobalToLua(mState, "C");
+  calc.SetReturnRefLuaFunc("Func");
+  EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
+  luaL_dostring(mState, "return C:ReturnRef(10)");
+  LuaTestHelper::ExpectStack(mState, {"{p:lightuserdata}"});
+  auto num = TestLuaNumber::ReadProxyFromLua(mState, -1);
+  lua_pop(mState, 1);
+  ASSERT_NE(num, nullptr);
+  EXPECT_EQ(num->GetValue(), 10);
+  calc.GetLastValue().SetValue(20);
+  EXPECT_EQ(num->GetValue(), 20);
 }

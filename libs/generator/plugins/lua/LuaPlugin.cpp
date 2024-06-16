@@ -159,7 +159,7 @@ std::string LuaPlugin::GenerateReadExposedMethodArgsAndGetArgsString(ClassMethod
       sanitizedType.mConstness = Constness::NotConst;
       switchBlock.Add("{}arg{};", sanitizedType.ToString(false), i);
       switchBlock.Add("{}::{}(arg{}, lsInner, {});", St::LuaHelper, St::LuaHelper_Read, i,
-                      ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()));
+                      stackIdx);
       funcArgs << "arg" << i;
     }
     ++i;

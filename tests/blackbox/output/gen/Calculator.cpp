@@ -51,14 +51,14 @@ bool Calculator::HasAddLuaFunc() const {
 }
 
 Number *Calculator::Subtract(lua_State *luaState, Number &val) const {
-  HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Subtract.empty(), {}, "Calling unset Subtract function");
+  HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_Subtract.empty(), nullptr, "Calling unset Subtract function");
   lua_getglobal(luaState, "Ops");
   lua_pushstring(luaState, mLuaFuncHandle_Subtract.c_str());
   lua_gettable(luaState, -2);
   if (lua_isnil(luaState, -1)) {
     HOLGEN_WARN("Calling undefined Subtract function Ops.{}", mLuaFuncHandle_Subtract);
     lua_pop(luaState, 1);
-    return {};
+    return nullptr;
   }
   LuaHelper::Push(*this, luaState);
   LuaHelper::Push(val, luaState);
@@ -132,7 +132,7 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Calculator::ReadProxyFromLua(lsInner, -2);
       int64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -2);
+      LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->Add(lsInner, arg0);
       LuaHelper::Push(result, lsInner);
       return 1;

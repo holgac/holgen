@@ -131,16 +131,21 @@ void LuaFunctionPlugin::GenerateFunctionGetFunctionFromSourceTable(
   }
   method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
   method.mBody.Indent(1);
+  bool throwOnFailure =
+      functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Reference;
+  std::string warnThrowMacro = throwOnFailure ? "HOLGEN_FAIL" : "HOLGEN_WARN";
   if (isFuncTable) {
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function in {}.{{}}\", {});",
+    method.mBody.Add("{}(\"Calling undefined {} function in {}.{{}}\", {});", warnThrowMacro,
                      functionDefinition.mName, *sourceTable,
                      Naming().FieldNameInCpp(St::LuaTable_TableField));
   } else {
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {}.{{}}\", {});",
+    method.mBody.Add("{}(\"Calling undefined {} function {}.{{}}\", {});", warnThrowMacro,
                      functionDefinition.mName, *sourceTable, functionHandle);
   }
-  method.mBody.Add("lua_pop(luaState, 1);");
-  method.mBody.Add("return {};", retVal);
+  if (!throwOnFailure) {
+    method.mBody.Add("lua_pop(luaState, 1);");
+    method.mBody.Add("return {};", retVal);
+  }
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
 }
@@ -168,15 +173,20 @@ void LuaFunctionPlugin::GenerateFunctionGetGlobalFunction(
   }
   method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
   method.mBody.Indent(1);
+  bool throwOnFailure =
+      functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Reference;
+  std::string warnThrowMacro = throwOnFailure ? "HOLGEN_FAIL" : "HOLGEN_WARN";
   if (isFuncTable) {
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function in {{}}\", {});",
+    method.mBody.Add("{}(\"Calling undefined {} function in {{}}\", {});", warnThrowMacro,
                      functionDefinition.mName, Naming().FieldNameInCpp(St::LuaTable_TableField));
   } else {
-    method.mBody.Add("HOLGEN_WARN(\"Calling undefined {} function {{}}\", {});",
+    method.mBody.Add("{}(\"Calling undefined {} function {{}}\", {});", warnThrowMacro,
                      functionDefinition.mName, functionHandle);
   }
-  method.mBody.Add("lua_pop(luaState, 1);");
-  method.mBody.Add("return {};", retVal);
+  if (!throwOnFailure) {
+    method.mBody.Add("lua_pop(luaState, 1);");
+    method.mBody.Add("return {};", retVal);
+  }
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
 }
@@ -190,16 +200,31 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_front("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";
+  if (functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Pointer)
+    retVal = "nullptr";
   if (functionDefinition.mReturnType.mType.mName == "void")
     retVal = "void()";
 
+  bool throwOnFailure =
+      functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Reference;
+
   if (isFuncTable) {
-    method.mBody.Add(
-        R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function from table");)",
-        Naming().FieldNameInCpp(St::LuaTable_TableField), retVal, functionDefinition.mName);
+    if (throwOnFailure) {
+      method.mBody.Add(R"(HOLGEN_FAIL_IF({}.empty(), "Calling unset {} function from table");)",
+                       Naming().FieldNameInCpp(St::LuaTable_TableField), functionDefinition.mName);
+    } else {
+      method.mBody.Add(
+          R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function from table");)",
+          Naming().FieldNameInCpp(St::LuaTable_TableField), retVal, functionDefinition.mName);
+    }
   } else {
-    method.mBody.Add(R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)",
-                     functionHandle, retVal, functionDefinition.mName);
+    if (throwOnFailure) {
+      method.mBody.Add(R"(HOLGEN_FAIL_IF({}.empty(), "Calling unset {} function");)",
+                       functionHandle, functionDefinition.mName);
+    } else {
+      method.mBody.Add(R"(HOLGEN_WARN_AND_RETURN_IF({}.empty(), {}, "Calling unset {} function");)",
+                       functionHandle, retVal, functionDefinition.mName);
+    }
   }
 
   if (sourceTable) {
