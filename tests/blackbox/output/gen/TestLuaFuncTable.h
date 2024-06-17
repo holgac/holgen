@@ -16,6 +16,7 @@ class TestLuaFuncTable {
 public:
   bool operator==(const TestLuaFuncTable &rhs) const;
   void SetTable(std::string val);
+  const std::string &GetTable();
   void SetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const;
   int32_t GetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);

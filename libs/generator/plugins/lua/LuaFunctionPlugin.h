@@ -10,6 +10,7 @@ public:
 
 private:
   void GenerateTableSetter(Class &cls);
+  void GenerateTableGetter(Class &cls);
   void ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition,
                                bool isFuncTable);
   void ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition,

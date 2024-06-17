@@ -17,6 +17,10 @@ void TestLuaFuncTable::SetTable(std::string val) {
   mTable = std::move(val);
 }
 
+const std::string &TestLuaFuncTable::GetTable() {
+  return mTable;
+}
+
 void TestLuaFuncTable::SetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const {
   HOLGEN_WARN_AND_RETURN_IF(mTable.empty(), void(), "Calling unset SetField function from table");
   lua_getglobal(luaState, mTable.c_str());

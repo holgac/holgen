@@ -17,6 +17,7 @@ void LuaFunctionPlugin::Run() {
       Validate().NewField(cls, field);
       cls.mFields.push_back(std::move(field));
       GenerateTableSetter(cls);
+      GenerateTableGetter(cls);
     }
     ProcessStructDefinition(cls, *cls.mStruct, isFuncTable);
   }
@@ -27,6 +28,15 @@ void LuaFunctionPlugin::GenerateTableSetter(Class &cls) {
                             Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("val", Type{"std::string"});
   method.mBody.Add("{} = std::move(val);", Naming().FieldNameInCpp(St::LuaTable_TableField));
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void LuaFunctionPlugin::GenerateTableGetter(Class &cls) {
+  auto method = ClassMethod{Naming().FieldGetterNameInCpp(St::LuaTable_TableField),
+                            Type{"std::string"}, Visibility::Public, Constness::NotConst};
+  method.mReturnType.PreventCopying();
+  method.mBody.Add("return {};", Naming().FieldNameInCpp(St::LuaTable_TableField));
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
