@@ -38,7 +38,7 @@ TestBitmap TestBitmap::FromString(std::string_view str) {
   TestBitmap result;
   size_t curIdx = 0, commaIdx = str.find(',');
   while (commaIdx != std::string::npos) {
-    result |= TestBitmap::FromStringSingle(str.substr(curIdx, commaIdx));
+    result |= TestBitmap::FromStringSingle(str.substr(curIdx, commaIdx - curIdx));
     curIdx = commaIdx + 1;
     commaIdx = str.find(',', curIdx);
   }

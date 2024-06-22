@@ -72,7 +72,8 @@ void BitmapPlugin::GenerateFromString(Class &cls) {
   method.mBody.Add("size_t curIdx = 0, commaIdx = str.find(',');");
   method.mBody.Add("while (commaIdx != std::string::npos) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("result |= {}::FromStringSingle(str.substr(curIdx, commaIdx));", cls.mName);
+  method.mBody.Add("result |= {}::FromStringSingle(str.substr(curIdx, commaIdx - curIdx));",
+                   cls.mName);
   method.mBody.Add("curIdx = commaIdx + 1;");
   method.mBody.Add("commaIdx = str.find(',', curIdx);");
   method.mBody.Indent(-1);
