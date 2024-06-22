@@ -313,7 +313,6 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
       method.mBody.Add("lua_pop(luaState, {});", popCount);
     }
   }
-  FillComments(functionDefinition, method.mComments);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
