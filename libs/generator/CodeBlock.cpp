@@ -65,6 +65,10 @@ std::string CodeBlock::ToString(FileType fileType,
   return out.str();
 }
 
+bool CodeBlock::IsEmpty() const {
+  return mContents.empty();
+}
+
 void CodeBlock::AddUserDefinedSection(const std::string &name) {
   mContents.push_back(CodeUnitType::UserDefined);
   mLines.push_back(name);

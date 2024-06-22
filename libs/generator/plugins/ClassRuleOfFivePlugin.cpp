@@ -12,7 +12,7 @@ void ClassRuleOfFivePlugin::ProcessClass(Class &cls) {
   auto moveOp = cls.GetMoveAssignment();
   auto copyCtor = cls.GetCopyConstructor();
   auto copyOp = cls.GetCopyAssignment();
-  int count = !!moveCtor + !!moveOp + !!copyCtor + !!copyOp + cls.mDestructor.has_value();
+  int count = !!moveCtor + !!moveOp + !!copyCtor + !!copyOp + !cls.mDestructor.IsEmpty();
 
   if (count == 0) {
     return;
@@ -58,9 +58,8 @@ void ClassRuleOfFivePlugin::ProcessClass(Class &cls) {
     cls.mMethods.push_back(std::move(op));
   }
 
-  if (!cls.mDestructor.has_value()) {
-    cls.mDestructor = ClassDestructor{};
-    cls.mDestructor->mDefaultDelete = DefaultDelete::Default;
+  if (cls.mDestructor.IsEmpty()) {
+    cls.mDestructor.mDefaultDelete = DefaultDelete::Default;
   }
 }
 } // namespace holgen

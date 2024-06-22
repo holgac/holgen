@@ -139,7 +139,7 @@ struct TestData {
   Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
-  ASSERT_EQ(cls->mDestructor.has_value(), false);
+  EXPECT_TRUE(cls->mDestructor.IsEmpty());
 }
 
 TEST_F(CppFunctionPluginTest, OnDestroy) {
@@ -154,10 +154,10 @@ struct TestData {
   Run(project);
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
-  ASSERT_EQ(cls->mDestructor.has_value(), true);
+  EXPECT_FALSE(cls->mDestructor.IsEmpty());
 
   auto method = ClassDestructor{};
-  helpers::ExpectEqual(*cls->mDestructor, method, R"R(
+  helpers::ExpectEqual(cls->mDestructor, method, R"R(
 func1();
 func2();
   )R");

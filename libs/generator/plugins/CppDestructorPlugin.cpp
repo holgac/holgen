@@ -7,11 +7,7 @@ void CppDestructorPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct == nullptr)
       continue;
-    ClassDestructor destructor;
-    ProcessStructDefinition(cls, destructor, *cls.mStruct);
-    if (!destructor.mBody.mContents.empty()) {
-      cls.mDestructor = std::move(destructor);
-    }
+    ProcessStructDefinition(cls, cls.mDestructor, *cls.mStruct);
   }
 }
 

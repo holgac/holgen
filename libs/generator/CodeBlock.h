@@ -52,6 +52,7 @@ struct CodeBlock {
   }
 
   std::string ToString(FileType fileType, const std::map<std::string, std::string> &sections) const;
+  bool IsEmpty() const;
 };
 
 } // namespace holgen

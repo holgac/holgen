@@ -123,6 +123,7 @@ struct ClassConstructor : ClassMethodBase {
 
 struct ClassDestructor : ClassMethodBase {
   ClassDestructor() = default;
+  bool IsEmpty() const;
 };
 
 enum class ClassType {
@@ -170,7 +171,7 @@ struct Class {
   std::string mName;
   std::list<ClassMethod> mMethods;
   std::list<ClassConstructor> mConstructors;
-  std::optional<ClassDestructor> mDestructor;
+  ClassDestructor mDestructor;
   std::list<ClassField> mFields;
   std::list<TemplateParameter> mTemplateParameters;
   std::list<std::string> mTemplateSpecializations;

@@ -648,29 +648,27 @@ std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const Cla
 CodeBlock CodeGenerator::GenerateDestructor(const Class &cls, Visibility visibility,
                                             bool isHeader) const {
   CodeBlock codeBlock;
-  if (!cls.mDestructor.has_value())
+  if (cls.mDestructor.IsEmpty() || (isHeader && cls.mDestructor.mVisibility != visibility))
     return {};
-  if (isHeader && cls.mDestructor->mVisibility != visibility)
-    return {};
-  bool definedInHeader = CanBeDefinedInHeader(cls, *cls.mDestructor);
+  bool definedInHeader = CanBeDefinedInHeader(cls, cls.mDestructor);
   if (isHeader) {
     if (!definedInHeader) {
       codeBlock.Add("~{}();", cls.mName);
-    } else if (cls.mDestructor->mDefaultDelete == DefaultDelete::Default) {
+    } else if (cls.mDestructor.mDefaultDelete == DefaultDelete::Default) {
       codeBlock.Add("~{}() = default;", cls.mName);
-    } else if (cls.mDestructor->mDefaultDelete == DefaultDelete::Delete) {
+    } else if (cls.mDestructor.mDefaultDelete == DefaultDelete::Delete) {
       codeBlock.Add("~{}() = delete;", cls.mName);
     } else {
       codeBlock.Add("~{}() {{", cls.mName);
       codeBlock.Indent(1);
-      codeBlock.Add(cls.mDestructor->mBody);
+      codeBlock.Add(cls.mDestructor.mBody);
       codeBlock.Indent(-1);
       codeBlock.Add("}}");
     }
   } else if (!definedInHeader) {
     codeBlock.Add("{0}::~{0}() {{", cls.mName);
     codeBlock.Indent(1);
-    codeBlock.Add(cls.mDestructor->mBody);
+    codeBlock.Add(cls.mDestructor.mBody);
     codeBlock.Indent(-1);
     codeBlock.Add("}}");
   }
