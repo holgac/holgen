@@ -137,12 +137,11 @@ TestLuaRegistryData TestLuaRegistryData::ReadMirrorFromLua(lua_State *luaState, 
   while (lua_next(luaState, -2)) {
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("data", key)) {
-      lua_pushvalue(luaState, -1);
       result.mData = luaL_ref(luaState, LUA_REGISTRYINDEX);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestLuaRegistryData.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

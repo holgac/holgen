@@ -107,14 +107,17 @@ TestStruct TestStruct::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("testFieldBool", key)) {
       LuaHelper::Read(result.mTestFieldBool, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("testFieldUnsigned", key)) {
       LuaHelper::Read(result.mTestFieldUnsigned, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("testFieldString", key)) {
       LuaHelper::Read(result.mTestFieldString, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

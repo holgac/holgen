@@ -49,7 +49,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();
   AddPlugin<JsonHelperPlugin>();
-  // TODO: lua should come before json so that LuaRegistryData can be initialized via json
+  // TODO: lua plugins should run before json so that LuaRegistryData can be initialized via json
   AddPlugin<LuaFieldsPlugin>();
   AddPlugin<LuaPlugin>();
   AddPlugin<LuaHelperPlugin>();

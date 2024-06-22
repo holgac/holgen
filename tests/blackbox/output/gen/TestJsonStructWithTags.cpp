@@ -80,10 +80,11 @@ TestJsonStructWithTags TestJsonStructWithTags::ReadMirrorFromLua(lua_State *luaS
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("tags", key)) {
       LuaHelper::Read(result.mTags, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

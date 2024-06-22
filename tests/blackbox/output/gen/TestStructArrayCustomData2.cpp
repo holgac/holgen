@@ -103,14 +103,17 @@ TestStructArrayCustomData2 TestStructArrayCustomData2::ReadMirrorFromLua(lua_Sta
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("f1", key)) {
       LuaHelper::Read(result.mF1, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("f2", key)) {
       LuaHelper::Read(result.mF2, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("f3", key)) {
       LuaHelper::Read(result.mF3, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestStructArrayCustomData2.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

@@ -142,18 +142,23 @@ Person Person::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("race", key)) {
       LuaHelper::Read(result.mRace, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("currentCountry", key)) {
       LuaHelper::Read(result.mCurrentCountry, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("currentCity", key)) {
       LuaHelper::Read(result.mCurrentCity, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("homeCountry", key)) {
       LuaHelper::Read(result.mHomeCountry, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("placeOfBirth", key)) {
       LuaHelper::Read(result.mPlaceOfBirth, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: Person.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

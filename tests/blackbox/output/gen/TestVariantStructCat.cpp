@@ -95,12 +95,14 @@ TestVariantStructCat TestVariantStructCat::ReadMirrorFromLua(lua_State *luaState
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("name", key)) {
       LuaHelper::Read(result.mName, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("color", key)) {
       LuaHelper::Read(result.mColor, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestVariantStructCat.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

@@ -335,6 +335,19 @@ void DataManager::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void DataManager::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "characters");
+  LuaHelper::Push(mCharacters, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "armors");
+  LuaHelper::Push(mArmors, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "weapons");
+  LuaHelper::Push(mWeapons, luaState);
+  lua_settable(luaState, -3);
+}
+
 void DataManager::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -350,6 +363,25 @@ DataManager *DataManager::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
 
 DataManager DataManager::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = DataManager{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("characters", key)) {
+      LuaHelper::Read(result.mCharacters, luaState, -1);
+      lua_pop(luaState, 1);
+    } else if (0 == strcmp("armors", key)) {
+      LuaHelper::Read(result.mArmors, luaState, -1);
+      lua_pop(luaState, 1);
+    } else if (0 == strcmp("weapons", key)) {
+      LuaHelper::Read(result.mWeapons, luaState, -1);
+      lua_pop(luaState, 1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: DataManager.{}", key);
+      lua_pop(luaState, 1);
+    }
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 
@@ -368,7 +400,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetCharacterFromName(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("AddCharacter", key)) {
@@ -376,7 +408,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       auto arg0 = Character::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddCharacter(*arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetCharacter", key)) {
@@ -385,7 +417,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetCharacter(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("DeleteCharacter", key)) {
@@ -409,7 +441,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetArmorFromName(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("AddArmor", key)) {
@@ -417,7 +449,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       auto arg0 = Armor::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddArmor(*arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetArmor", key)) {
@@ -426,7 +458,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetArmor(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("DeleteArmor", key)) {
@@ -450,7 +482,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       std::string arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetWeaponFromName(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("AddWeapon", key)) {
@@ -458,7 +490,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
       auto arg0 = Weapon::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddWeapon(*arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("GetWeapon", key)) {
@@ -467,7 +499,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->GetWeapon(arg0);
-      LuaHelper::Push(result, lsInner);
+      result->PushToLua(lsInner);
       return 1;
     });
   } else if (0 == strcmp("DeleteWeapon", key)) {

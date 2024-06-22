@@ -49,6 +49,16 @@ void Armor::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Armor::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "id");
+  LuaHelper::Push(mId, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "armorClass");
+  LuaHelper::Push(mArmorClass, luaState);
+  lua_settable(luaState, -3);
+}
+
 void Armor::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -64,6 +74,22 @@ Armor *Armor::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
 
 Armor Armor::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = Armor{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("id", key)) {
+      LuaHelper::Read(result.mId, luaState, -1);
+      lua_pop(luaState, 1);
+    } else if (0 == strcmp("armorClass", key)) {
+      LuaHelper::Read(result.mArmorClass, luaState, -1);
+      lua_pop(luaState, 1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Armor.{}", key);
+      lua_pop(luaState, 1);
+    }
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

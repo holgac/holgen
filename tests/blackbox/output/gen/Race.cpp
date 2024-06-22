@@ -129,16 +129,20 @@ Race Race::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("id", key)) {
       LuaHelper::Read(result.mId, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("name", key)) {
       LuaHelper::Read(result.mName, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("hairColors", key)) {
       LuaHelper::Read(result.mHairColors, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("names", key)) {
       LuaHelper::Read(result.mNames, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: Race.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

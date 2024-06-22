@@ -186,6 +186,7 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("field", key)) {
       LuaHelper::Read(result.mField, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("script1", key)) {
       if (lua_getmetatable(luaState, -1)) {
         lua_pop(luaState, 1);
@@ -193,6 +194,7 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
       } else {
         result.mScript1 = TestLuaFuncTable::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("script2", key)) {
       if (lua_getmetatable(luaState, -1)) {
         lua_pop(luaState, 1);
@@ -200,6 +202,7 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
       } else {
         result.mScript2 = TestLuaFuncTable::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("scriptWithSourceTable1", key)) {
       if (lua_getmetatable(luaState, -1)) {
         lua_pop(luaState, 1);
@@ -207,6 +210,7 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
       } else {
         result.mScriptWithSourceTable1 = TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("scriptWithSourceTable2", key)) {
       if (lua_getmetatable(luaState, -1)) {
         lua_pop(luaState, 1);
@@ -214,6 +218,7 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
       } else {
         result.mScriptWithSourceTable2 = TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("staticScript1", key)) {
       if (lua_getmetatable(luaState, -1)) {
         lua_pop(luaState, 1);
@@ -221,6 +226,7 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
       } else {
         result.mStaticScript1 = TestLuaFuncTableStatic::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("staticScript2", key)) {
       if (lua_getmetatable(luaState, -1)) {
         lua_pop(luaState, 1);
@@ -228,10 +234,11 @@ TestLuaFuncTableContainer TestLuaFuncTableContainer::ReadMirrorFromLua(lua_State
       } else {
         result.mStaticScript2 = TestLuaFuncTableStatic::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

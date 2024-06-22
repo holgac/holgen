@@ -92,12 +92,14 @@ DamageMultiplier DamageMultiplier::ReadMirrorFromLua(lua_State *luaState, int32_
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("when", key)) {
       LuaHelper::Read(result.mWhen, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("value", key)) {
       LuaHelper::Read(result.mValue, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

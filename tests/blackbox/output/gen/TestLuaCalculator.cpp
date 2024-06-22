@@ -252,10 +252,11 @@ TestLuaCalculator TestLuaCalculator::ReadMirrorFromLua(lua_State *luaState, int3
       } else {
         result.mLastValue = TestLuaNumber::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestLuaCalculator.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

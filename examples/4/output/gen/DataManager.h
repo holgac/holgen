@@ -60,6 +60,7 @@ public:
   size_t GetWeaponCount() const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
+  void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
   /*
    * This only works with negative indices

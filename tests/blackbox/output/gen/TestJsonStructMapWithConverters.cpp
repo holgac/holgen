@@ -114,14 +114,17 @@ TestJsonStructMapWithConverters TestJsonStructMapWithConverters::ReadMirrorFromL
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("testMapConvertElem", key)) {
       LuaHelper::Read(result.mTestMapConvertElem, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("testMapConvertKey", key)) {
       LuaHelper::Read(result.mTestMapConvertKey, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("testMapConvertKeyElem", key)) {
       LuaHelper::Read(result.mTestMapConvertKeyElem, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestJsonStructMapWithConverters.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

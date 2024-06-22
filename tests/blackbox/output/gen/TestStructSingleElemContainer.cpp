@@ -154,12 +154,14 @@ TestStructSingleElemContainer TestStructSingleElemContainer::ReadMirrorFromLua(l
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("singleElemStructs", key)) {
       LuaHelper::Read(result.mSingleElemStructs, luaState, -1);
+      lua_pop(luaState, 1);
     } else if (0 == strcmp("singleElemStructsWithId", key)) {
       LuaHelper::Read(result.mSingleElemStructsWithId, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestStructSingleElemContainer.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

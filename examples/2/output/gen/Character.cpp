@@ -105,6 +105,25 @@ void Character::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
+void Character::PushMirrorToLua(lua_State *luaState) const {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "id");
+  LuaHelper::Push(mId, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "name");
+  LuaHelper::Push(mName, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "race");
+  LuaHelper::Push(mRace, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "armor");
+  mArmor.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "weapon");
+  mWeapon.PushMirrorToLua(luaState);
+  lua_settable(luaState, -3);
+}
+
 void Character::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -120,6 +139,41 @@ Character *Character::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
 
 Character Character::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   auto result = Character{};
+  lua_pushvalue(luaState, idx);
+  lua_pushnil(luaState);
+  while (lua_next(luaState, -2)) {
+    auto key = lua_tostring(luaState, -2);
+    if (0 == strcmp("id", key)) {
+      LuaHelper::Read(result.mId, luaState, -1);
+      lua_pop(luaState, 1);
+    } else if (0 == strcmp("name", key)) {
+      LuaHelper::Read(result.mName, luaState, -1);
+      lua_pop(luaState, 1);
+    } else if (0 == strcmp("race", key)) {
+      LuaHelper::Read(result.mRace, luaState, -1);
+      lua_pop(luaState, 1);
+    } else if (0 == strcmp("armor", key)) {
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mArmor = *Armor::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mArmor = Armor::ReadMirrorFromLua(luaState, -1);
+      }
+      lua_pop(luaState, 1);
+    } else if (0 == strcmp("weapon", key)) {
+      if (lua_getmetatable(luaState, -1)) {
+        lua_pop(luaState, 1);
+        result.mWeapon = *Weapon::ReadProxyFromLua(luaState, -1);
+      } else {
+        result.mWeapon = Weapon::ReadMirrorFromLua(luaState, -1);
+      }
+      lua_pop(luaState, 1);
+    } else {
+      HOLGEN_WARN("Unexpected lua field: Character.{}", key);
+      lua_pop(luaState, 1);
+    }
+  }
+  lua_pop(luaState, 1);
   return result;
 }
 

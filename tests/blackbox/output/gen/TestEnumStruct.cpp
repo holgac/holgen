@@ -76,10 +76,11 @@ TestEnumStruct TestEnumStruct::ReadMirrorFromLua(lua_State *luaState, int32_t id
     auto key = lua_tostring(luaState, -2);
     if (0 == strcmp("enumField", key)) {
       LuaHelper::Read(result.mEnumField, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;

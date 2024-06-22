@@ -138,10 +138,11 @@ Calculator Calculator::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
       } else {
         result.mCurVal = Number::ReadMirrorFromLua(luaState, -1);
       }
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
+      lua_pop(luaState, 1);
     }
-    lua_pop(luaState, 1);
   }
   lua_pop(luaState, 1);
   return result;
