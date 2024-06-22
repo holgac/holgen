@@ -530,6 +530,7 @@ Tester = {
   LuaHelper::CreateMetatables(mState);
   luaL_dostring(mState, script);
   TestLuaRegistryData tlrd;
+  tlrd.InitializeLua(mState);
   tlrd.SetTable("Tester");
   tlrd.Init(mState);
   EXPECT_EQ(tlrd.Get(mState), 0);
@@ -537,4 +538,5 @@ Tester = {
   EXPECT_EQ(tlrd.Get(mState), 5);
   tlrd.Add(mState, 5);
   EXPECT_EQ(tlrd.Get(mState), 10);
+  tlrd.UninitializeLua(mState);
 }

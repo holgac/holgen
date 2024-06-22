@@ -34,6 +34,8 @@ public:
   inline static const std::string Lua_PushMirrorObject = "PushMirrorToLua";
   inline static const std::string LuaTable_TableField = "table";
   inline static const std::string Lua_RegistryData = "LuaRegistryData";
+  inline static const std::string Lua_Initialize = "InitializeLua";
+  inline static const std::string Lua_Uninitialize = "UninitializeLua";
   inline static const std::string ManagedObject_Getter = "Get";
   inline static const std::string Enum_UnderlyingType = "UnderlyingType";
   inline static const std::string Converter = "Converter";

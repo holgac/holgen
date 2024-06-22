@@ -7,6 +7,9 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+TestLuaRegistryData::~TestLuaRegistryData() {
+  HOLGEN_WARN_IF(mData != LUA_NOREF, "TestLuaRegistryData.data was not released!");
+}
 bool TestLuaRegistryData::operator==(const TestLuaRegistryData &rhs) const {
   return true;
 }
@@ -87,6 +90,17 @@ bool TestLuaRegistryData::ParseJson(const rapidjson::Value &json, const Converte
   return JsonHelper::Parse(mTable, json, converter);
 }
 
+void TestLuaRegistryData::InitializeLua(lua_State *luaState) {
+  HOLGEN_WARN_IF(mData != LUA_NOREF, "TestLuaRegistryData.data was already initialized!");
+  lua_newtable(luaState);
+  mData = luaL_ref(luaState, LUA_REGISTRYINDEX);
+}
+
+void TestLuaRegistryData::UninitializeLua(lua_State *luaState) {
+  luaL_unref(luaState, LUA_REGISTRYINDEX, mData);
+  mData = LUA_NOREF;
+}
+
 void TestLuaRegistryData::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -138,10 +152,6 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("data", key)) {
-    if (instance->mData == LUA_NOREF) {
-      lua_newtable(luaState);
-      instance->mData = luaL_ref(luaState, LUA_REGISTRYINDEX);
-    }
     lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->mData);
   } else if (0 == strcmp("Init", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {

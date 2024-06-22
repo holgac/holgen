@@ -238,12 +238,6 @@ void LuaPlugin::GenerateIndexForVariantField(Class &cls, ClassField &field,
 }
 
 void LuaPlugin::GenerateIndexForRegistryData(ClassField &field, CodeBlock &switchBlock) {
-  switchBlock.Add("if (instance->{} == LUA_NOREF) {{", field.mName);
-  switchBlock.Indent(1);
-  switchBlock.Add("lua_newtable(luaState);", field.mName);
-  switchBlock.Add("instance->{} = luaL_ref(luaState, LUA_REGISTRYINDEX);", field.mName);
-  switchBlock.Indent(-1);
-  switchBlock.Add("}}");
   switchBlock.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->{});", field.mName);
 }
 

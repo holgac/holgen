@@ -2,11 +2,9 @@
   {
     "name": "Gorion",
     "boot": "Boots of Speed",
-    "armor": "Wizard Robe",
-    "onDamage": "gorion_onDamage"
+    "armor": "Wizard Robe"
   },
   {
-  "name": "CHARNAME",
-  "onDamage": "CHARNAME_onDamage"
-}
+    "name": "CHARNAME"
+  }
 ]
