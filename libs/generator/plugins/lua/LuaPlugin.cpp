@@ -244,7 +244,7 @@ void LuaPlugin::GenerateIndexForRegistryData(ClassField &field, CodeBlock &switc
 void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) {
   if (field.mField->mType.mName == St::Variant) {
     GenerateIndexForVariantField(cls, field, switchBlock);
-  } else if (field.mField->mType.mName == St::Lua_RegistryData) {
+  } else if (field.mField->mType.mName == St::Lua_CustomData) {
     GenerateIndexForRegistryData(field, switchBlock);
   } else {
     switchBlock.Add("{}::{}(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
@@ -260,7 +260,7 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
   stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
                              cls.mStruct->mName);
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
-  const std::set<std::string> NoNewIndexTypes = {St::UserData, St::Variant, St::Lua_RegistryData};
+  const std::set<std::string> NoNewIndexTypes = {St::UserData, St::Variant, St::Lua_CustomData};
   for (auto &field: cls.mFields) {
     // TODO: parse variant
     if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
@@ -385,7 +385,7 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
             }
             switchBlock.Add("lua_pop(luaState, 1);");
           });
-    } else if (field.mField && field.mField->mType.mName == St::Lua_RegistryData) {
+    } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
         switchBlock.Add("result.{} = luaL_ref(luaState, LUA_REGISTRYINDEX);", field.mName);
       });
@@ -482,7 +482,7 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
     auto fieldClass = mProject.GetClass(field.mType.mName);
     if (fieldClass && !fieldClass->mEnum) {
       method.mBody.Add("{}.{}(luaState);", field.mName, St::Lua_PushMirrorObject);
-    } else if (field.mField && field.mField->mType.mName == St::Lua_RegistryData) {
+    } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, {});", field.mName);
     } else {
       method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push,

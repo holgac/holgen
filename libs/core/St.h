@@ -33,8 +33,7 @@ public:
   inline static const std::string Lua_ReadMirrorObject = "ReadMirrorFromLua";
   inline static const std::string Lua_PushMirrorObject = "PushMirrorToLua";
   inline static const std::string LuaTable_TableField = "table";
-  inline static const std::string Lua_CustomData = "LuaCustomData";
-  inline static const std::string Lua_RegistryData = "LuaRegistryData";
+  inline static const std::string Lua_CustomData = "luadata";
   inline static const std::string Lua_Initialize = "InitializeLua";
   inline static const std::string Lua_Uninitialize = "UninitializeLua";
   inline static const std::string ManagedObject_Getter = "Get";

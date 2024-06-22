@@ -49,7 +49,7 @@ void LuaFieldsPlugin::ProcessStruct(Class &cls) {
   if (cls.mStruct->GetAnnotation(Annotations::NoLua))
     return;
   for (auto &field: cls.mStruct->mFields) {
-    if (field.mType.mName == St::Lua_RegistryData) {
+    if (field.mType.mName == St::Lua_CustomData) {
       ProcessRegistryDataField(cls, field);
     }
   }

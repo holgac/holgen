@@ -22,7 +22,7 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls,
       continue;
     // Skip special types; they're processed in their own plugins
     if (fieldDefinition.mType.mName == St::Variant ||
-        fieldDefinition.mType.mName == St::Lua_RegistryData)
+        fieldDefinition.mType.mName == St::Lua_CustomData)
       continue;
     // TODO: if @optimize(alignment) (or @packed?), order the fields to minimize padding. Default to
     // it? ordering should probably be in code generation rather than translator plugins
