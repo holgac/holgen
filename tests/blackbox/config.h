@@ -1,3 +1,3 @@
 #pragma once
 
-#define HOLGEN_WARN(...)
+// #define HOLGEN_WARN(...)

@@ -12,6 +12,7 @@ namespace holgen {
  */
 class St {
 public:
+  // TODO: separate places to put predefined types, generated classes and function names
   static bool IsIntegral(const std::string_view &str);
   static std::string Capitalize(const std::string &str);
   static std::string GetFieldNameInLua(const std::string &fieldName, bool isRef = false);
@@ -32,6 +33,7 @@ public:
   inline static const std::string Lua_ReadMirrorObject = "ReadMirrorFromLua";
   inline static const std::string Lua_PushMirrorObject = "PushMirrorToLua";
   inline static const std::string LuaTable_TableField = "table";
+  inline static const std::string Lua_RegistryData = "LuaRegistryData";
   inline static const std::string ManagedObject_Getter = "Get";
   inline static const std::string Enum_UnderlyingType = "UnderlyingType";
   inline static const std::string Converter = "Converter";

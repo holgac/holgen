@@ -53,6 +53,7 @@ void ClassFieldVariantPlugin::GenerateAssignmentMethod(
 
 void ClassFieldVariantPlugin::GenerateAssignmentMethods(
     Class &cls, const std::set<std::string> &variantTypeFields) {
+  // TODO: move these to ClassConstructorPlugin. LuaRegistryData needs special handling too.
   auto existingMoveCtor = cls.GetMoveConstructor();
   if (existingMoveCtor) {
     if (existingMoveCtor->mDefaultDelete != DefaultDelete::Delete) {

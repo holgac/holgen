@@ -14,9 +14,10 @@
 #include "TestVariantStructSharedType.h"
 #include "Converter.h"
 
-#include <TestLuaCalculator.h>
-#include <TestLuaFuncTable.h>
-#include <TestLuaFuncTableContainer.h>
+#include "TestLuaCalculator.h"
+#include "TestLuaFuncTable.h"
+#include "TestLuaFuncTableContainer.h"
+#include "TestLuaRegistryData.h"
 #include <rapidjson/document.h>
 
 using namespace holgen_blackbox_test;
@@ -265,7 +266,7 @@ TEST_F(LuaTest, Variant) {
 }
 
 TEST_F(LuaTest, FuncTable) {
-  const char* script = R"R(
+  const char *script = R"R(
 SetTo30AndGetDouble = {}
 SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
 SetTo30AndGetDouble.GetField = function(funcTable, container) return container.field * 2 end
@@ -289,7 +290,7 @@ SetTo40AndGetTriple.GetField = function(funcTable, container) return container.f
 }
 
 TEST_F(LuaTest, FuncTableLuaCall) {
-  const char* script = R"R(
+  const char *script = R"R(
 SetTo30AndGetDouble = {}
 SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
 SetTo30AndGetDouble.GetField = function(funcTable, container) return container.field * 2 end
@@ -317,7 +318,7 @@ SetTo40AndGetTriple.GetField = function(funcTable, container) return container.f
 }
 
 TEST_F(LuaTest, StaticFuncTable) {
-  const char* script = R"R(
+  const char *script = R"R(
 SetTo30AndGetDouble = {}
 SetTo30AndGetDouble.SetField = function(container) container.field = 30 end
 SetTo30AndGetDouble.GetField = function(container) return container.field * 2 end
@@ -340,9 +341,8 @@ SetTo40AndGetTriple.GetField = function(container) return container.field * 3 en
   EXPECT_EQ(c.GetField(), 40);
 }
 
-
 TEST_F(LuaTest, FuncTableWithSourceTable) {
-  const char* script = R"R(
+  const char *script = R"R(
 Scripts.SetTo30AndGetDouble = {}
 Scripts.SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
 Scripts.SetTo30AndGetDouble.GetField = function(funcTable, container) return container.field * 2 end
@@ -366,7 +366,7 @@ Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return con
 }
 
 TEST_F(LuaTest, FuncTableWithSourceTableJson) {
-  const char* script = R"R(
+  const char *script = R"R(
 Scripts = {}
 Scripts.SetTo30AndGetDouble = {}
 Scripts.SetTo30AndGetDouble.SetField = function(funcTable, container) container.field = 30 end
@@ -379,7 +379,8 @@ Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return con
   LuaHelper::CreateMetatables(mState);
   luaL_dostring(mState, script);
   TestLuaFuncTableContainer c;
-  const char* json = R"R({"scriptWithSourceTable1":"SetTo30AndGetDouble", "scriptWithSourceTable2":"SetTo40AndGetTriple"})R";
+  const char *json =
+      R"R({"scriptWithSourceTable1":"SetTo30AndGetDouble", "scriptWithSourceTable2":"SetTo40AndGetTriple"})R";
   rapidjson::Document doc;
   doc.Parse(json);
   c.ParseJson(doc, {});
@@ -393,7 +394,7 @@ Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return con
 }
 
 TEST_F(LuaTest, FuncArgModifiersPrimitive) {
-  const char* script = R"R(
+  const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue.value end
 )R";
   LuaHelper::CreateMetatables(mState);
@@ -410,7 +411,7 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
 }
 
 TEST_F(LuaTest, FuncArgModifiersRef) {
-  const char* script = R"R(
+  const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.value; return calc.lastValue.value end
 )R";
   LuaHelper::CreateMetatables(mState);
@@ -432,7 +433,7 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.val
 }
 
 TEST_F(LuaTest, FuncArgModifiersNullable) {
-  const char* script = R"R(
+  const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.value; return calc.lastValue.value end
 )R";
   LuaHelper::CreateMetatables(mState);
@@ -454,7 +455,7 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.val
 }
 
 TEST_F(LuaTest, FuncReturnModifiersNullable) {
-  const char* script = R"R(
+  const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue end
 )R";
   LuaHelper::CreateMetatables(mState);
@@ -474,7 +475,7 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
 }
 
 TEST_F(LuaTest, FuncReturnModifiersRef) {
-  const char* script = R"R(
+  const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue end
 )R";
   LuaHelper::CreateMetatables(mState);
@@ -494,7 +495,7 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
 }
 
 TEST_F(LuaTest, FuncReturnModifiersNew) {
-  const char* script = R"R(
+  const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return {value=calc.lastValue.value} end
 )R";
   LuaHelper::CreateMetatables(mState);
@@ -510,4 +511,30 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
   EXPECT_EQ(num.GetValue(), 10);
   calc.GetLastValue().SetValue(20);
   EXPECT_EQ(num.GetValue(), 10);
+}
+
+TEST_F(LuaTest, RegistryData) {
+  const char *script = R"R(
+Tester = {
+  Init = function(testLuaRegistryData)
+    testLuaRegistryData.data.value = 0
+  end,
+  Get = function(testLuaRegistryData)
+    return testLuaRegistryData.data.value
+  end,
+  Add = function(testLuaRegistryData, val)
+    testLuaRegistryData.data.value = testLuaRegistryData.data.value + val
+  end
+}
+)R";
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, script);
+  TestLuaRegistryData tlrd;
+  tlrd.SetTable("Tester");
+  tlrd.Init(mState);
+  EXPECT_EQ(tlrd.Get(mState), 0);
+  tlrd.Add(mState, 5);
+  EXPECT_EQ(tlrd.Get(mState), 5);
+  tlrd.Add(mState, 5);
+  EXPECT_EQ(tlrd.Get(mState), 10);
 }

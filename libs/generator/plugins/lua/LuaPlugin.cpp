@@ -208,33 +208,50 @@ void LuaPlugin::GenerateIndexMetaMethod(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const {
-  if (field.mField->mType.mName == St::Variant) {
-    auto enumField =
-        cls.GetField(Naming().FieldNameInCpp(field.mField->GetAnnotation(Annotations::Variant)
-                                                 ->GetAttribute(Annotations::Variant_TypeField)
-                                                 ->mValue.mName));
-    switchBlock.Add("switch (instance->{}.GetValue()) {{", enumField->mName);
-    for (auto &otherCls: mProject.mClasses) {
-      if (!otherCls.mStruct || !otherCls.mStruct->GetAnnotation(Annotations::Variant))
-        continue;
-      auto variantAnnotation = otherCls.mStruct->GetAnnotation(Annotations::Variant);
-      if (variantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName !=
-          enumField->mType.mName)
-        continue;
-      switchBlock.Add("case {}::{}:", enumField->mType.ToString(true),
-                      variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
-      switchBlock.Indent(1);
-      switchBlock.Add("{}::{}(instance->{}(), luaState);", St::LuaHelper, St::LuaHelper_Push,
-                      Naming().VariantGetterNameInCpp(*field.mField, *otherCls.mStruct));
-      switchBlock.Add("break;");
-      switchBlock.Indent(-1);
-    }
-    switchBlock.Add("default:");
+void LuaPlugin::GenerateIndexForVariantField(Class &cls, ClassField &field,
+                                             CodeBlock &switchBlock) {
+  auto enumField =
+      cls.GetField(Naming().FieldNameInCpp(field.mField->GetAnnotation(Annotations::Variant)
+                                               ->GetAttribute(Annotations::Variant_TypeField)
+                                               ->mValue.mName));
+  switchBlock.Add("switch (instance->{}.GetValue()) {{", enumField->mName);
+  for (auto &otherCls: mProject.mClasses) {
+    if (!otherCls.mStruct || !otherCls.mStruct->GetAnnotation(Annotations::Variant))
+      continue;
+    auto variantAnnotation = otherCls.mStruct->GetAnnotation(Annotations::Variant);
+    if (variantAnnotation->GetAttribute(Annotations::Variant_Enum)->mValue.mName !=
+        enumField->mType.mName)
+      continue;
+    switchBlock.Add("case {}::{}:", enumField->mType.ToString(true),
+                    variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
     switchBlock.Indent(1);
-    switchBlock.Add("lua_pushnil(luaState);");
+    switchBlock.Add("{}::{}(instance->{}(), luaState);", St::LuaHelper, St::LuaHelper_Push,
+                    Naming().VariantGetterNameInCpp(*field.mField, *otherCls.mStruct));
+    switchBlock.Add("break;");
     switchBlock.Indent(-1);
-    switchBlock.Add("}}");
+  }
+  switchBlock.Add("default:");
+  switchBlock.Indent(1);
+  switchBlock.Add("lua_pushnil(luaState);");
+  switchBlock.Indent(-1);
+  switchBlock.Add("}}");
+}
+
+void LuaPlugin::GenerateIndexForRegistryData(ClassField &field, CodeBlock &switchBlock) {
+  switchBlock.Add("if (instance->{} == LUA_NOREF) {{", field.mName);
+  switchBlock.Indent(1);
+  switchBlock.Add("lua_newtable(luaState);", field.mName);
+  switchBlock.Add("instance->{} = luaL_ref(luaState, LUA_REGISTRYINDEX);", field.mName);
+  switchBlock.Indent(-1);
+  switchBlock.Add("}}");
+  switchBlock.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->{});", field.mName);
+}
+
+void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) {
+  if (field.mField->mType.mName == St::Variant) {
+    GenerateIndexForVariantField(cls, field, switchBlock);
+  } else if (field.mField->mType.mName == St::Lua_RegistryData) {
+    GenerateIndexForRegistryData(field, switchBlock);
   } else {
     switchBlock.Add("{}::{}(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
                     field.mName);
@@ -249,10 +266,11 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
   stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
                              cls.mStruct->mName);
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
+  const std::set<std::string> NoNewIndexTypes = {St::UserData, St::Variant, St::Lua_RegistryData};
   for (auto &field: cls.mFields) {
     // TODO: parse variant
     if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
-        field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
+        NoNewIndexTypes.contains(field.mField->mType.mName))
       continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
@@ -333,6 +351,8 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
   CodeBlock stringSwitcherElseCase;
   stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
                              cls.mStruct->mName);
+  // TODO: uncomment this to remove unnecessary lua_pushvalue for registry data
+  // stringSwitcherElseCase.Add("lua_pop(luaState, 1);");
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
   for (auto &field: cls.mFields) {
     // TODO: handle variant type (should call setter instead of direct assignment)
@@ -370,11 +390,21 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
               switchBlock.Indent(-1);
               switchBlock.Add("}}");
             }
+            // TODO: uncomment this to remove unnecessary lua_pushvalue for registry data
+            // switchBlock.Add("lua_pop(luaState, 1);");
           });
+    } else if (field.mField && field.mField->mType.mName == St::Lua_RegistryData) {
+      switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
+        // TODO: remove this in a separate commit
+        switchBlock.Add("lua_pushvalue(luaState, -1);", field.mName);
+        switchBlock.Add("result.{} = luaL_ref(luaState, LUA_REGISTRYINDEX);", field.mName);
+      });
     } else {
       switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
         switchBlock.Add("{}::{}(result.{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read,
                         field.mName);
+        // TODO: uncomment this to remove unnecessary lua_pushvalue for registry data
+        // switchBlock.Add("lua_pop(luaState, 1);");
       });
     }
   }
@@ -398,7 +428,7 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
   method.mBody.Add("return result;", cls.mName);
 }
 
-void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) const {
+void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) {
   method.mReturnType.mType = PassByType::Value;
   method.mBody.Add("auto typ = lua_type(luaState, idx);");
   method.mBody.Add("if (typ == LUA_TSTRING) {{");
@@ -464,6 +494,8 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
     auto fieldClass = mProject.GetClass(field.mType.mName);
     if (fieldClass && !fieldClass->mEnum) {
       method.mBody.Add("{}.{}(luaState);", field.mName, St::Lua_PushMirrorObject);
+    } else if (field.mField && field.mField->mType.mName == St::Lua_RegistryData) {
+      method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, {});", field.mName);
     } else {
       method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push,
                        Naming().FieldNameInCpp(*field.mField, false));
@@ -477,6 +509,8 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
 void LuaPlugin::ProcessStruct(Class &cls) {
   if (cls.mStruct->GetAnnotation(Annotations::NoLua))
     return;
+  // TODO: just include in header
+  // cls.mHeaderIncludes.AddLibHeader("lua.hpp");
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");

@@ -20,8 +20,9 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls,
     // Skip ids; they're processed in their own plugin
     if (fieldDefinition.GetAnnotation(Annotations::Id))
       continue;
-    // Skip variants; they're processed in their own plugin
-    if (fieldDefinition.mType.mName == St::Variant)
+    // Skip special types; they're processed in their own plugins
+    if (fieldDefinition.mType.mName == St::Variant ||
+        fieldDefinition.mType.mName == St::Lua_RegistryData)
       continue;
     // TODO: if @optimize(alignment) (or @packed?), order the fields to minimize padding. Default to
     // it? ordering should probably be in code generation rather than translator plugins

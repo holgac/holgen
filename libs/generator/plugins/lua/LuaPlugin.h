@@ -24,8 +24,10 @@ private:
   void GenerateCreateLuaMetatable(Class &cls);
   void GeneratePushEnumToLua(Class &cls);
   bool ShouldEmbedPointer(Class &cls);
-  void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock) const;
-  void GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) const;
+  void GenerateIndexForVariantField(Class &cls, ClassField &field, CodeBlock &switchBlock);
+  void GenerateIndexForRegistryData(ClassField &field, CodeBlock &switchBlock);
+  void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock);
+  void GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method);
   void GenerateReadProxyStructFromLuaBody(Class &cls, ClassMethod &method);
   void GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &method);
   void GenerateIndexMetaMethodForFields(Class &cls, StringSwitcher &switcher);

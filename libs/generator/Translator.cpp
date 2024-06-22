@@ -21,6 +21,7 @@
 #include "generator/plugins/json/JsonPlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
 #include "generator/plugins/lua/LuaHelperPlugin.h"
+#include "generator/plugins/lua/LuaFieldsPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
 #include "generator/plugins/ClassRuleOfFivePlugin.h"
 
@@ -48,6 +49,8 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();
   AddPlugin<JsonHelperPlugin>();
+  // TODO: lua should come before json so that LuaRegistryData can be initialized via json
+  AddPlugin<LuaFieldsPlugin>();
   AddPlugin<LuaPlugin>();
   AddPlugin<LuaHelperPlugin>();
   AddPlugin<GlobalPointerPlugin>();

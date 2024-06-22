@@ -58,3 +58,11 @@ struct TestLuaCalculator {
     func ReturnNullFromCpp() -> TestLuaNumber nullable;
 */
 }
+
+@luaFuncTable
+struct TestLuaRegistryData {
+    LuaRegistryData data;
+    func Init();
+    func Get() -> s32;
+    func Add(s32 val);
+}
