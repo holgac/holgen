@@ -22,7 +22,7 @@ const std::string &TestLuaRegistryData::GetTable() {
   return mTable;
 }
 
-void TestLuaRegistryData::Init(lua_State *luaState) const {
+void TestLuaRegistryData::Init(lua_State *luaState, const std::function<void(lua_State *, const TestLuaRegistryData &)> &initData) const {
   HOLGEN_WARN_AND_RETURN_IF(mTable.empty(), void(), "Calling unset Init function from table");
   lua_getglobal(luaState, mTable.c_str());
   if (lua_isnil(luaState, -1)) {
@@ -38,7 +38,8 @@ void TestLuaRegistryData::Init(lua_State *luaState) const {
     return void();
   }
   LuaHelper::Push(*this, luaState);
-  lua_call(luaState, 1, 0);
+  initData(luaState, *this);
+  lua_call(luaState, 2, 0);
   lua_pop(luaState, 1);
 }
 
@@ -154,8 +155,10 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
     lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->mData);
   } else if (0 == strcmp("Init", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaRegistryData::ReadProxyFromLua(lsInner, -1);
-      instance->Init(lsInner);
+      auto instance = TestLuaRegistryData::ReadProxyFromLua(lsInner, -2);
+      std::function<void(lua_State *, const TestLuaRegistryData &)> arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      instance->Init(lsInner, arg0);
       return 0;
     });
   } else if (0 == strcmp("Get", key)) {

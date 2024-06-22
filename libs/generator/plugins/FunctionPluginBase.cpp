@@ -1,7 +1,33 @@
 #include "FunctionPluginBase.h"
 
+#include "core/St.h"
+
 namespace holgen {
-ClassMethod FunctionPluginBase::NewFunction(const FunctionDefinition &functionDefinition) {
+void FunctionPluginBase::ProcessFunctionArgument(Class &cls, ClassMethod &method,
+                                                 const FunctionArgumentDefinition &funcArg) {
+  auto &arg = method.mArguments.emplace_back(
+      funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
+  if (funcArg.mType.mName == St::Lua_CustomData) {
+    arg.mType = Type{"std::function", PassByType::Reference, Constness::Const};
+    arg.mType.mFunctionalTemplateParameters.emplace_back("void");
+    arg.mType.mFunctionalTemplateParameters.emplace_back("lua_State", PassByType::Pointer);
+    arg.mType.mFunctionalTemplateParameters.emplace_back(cls.mName, PassByType::Reference,
+                                                         Constness::Const);
+  } else {
+    arg.mType.mConstness = funcArg.mConstness;
+    if (TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
+      auto pbt = funcArg.mConstness == Constness::Const ? PassByType::Value : PassByType::Reference;
+      arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer : pbt;
+    } else {
+      arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer
+                                                                      : PassByType::Reference;
+    }
+    arg.mDefaultValue = funcArg.mDefaultValue;
+  }
+}
+
+ClassMethod FunctionPluginBase::NewFunction(Class &cls,
+                                            const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   auto method = ClassMethod{
       functionDefinition.mName,
@@ -38,17 +64,7 @@ ClassMethod FunctionPluginBase::NewFunction(const FunctionDefinition &functionDe
   method.mFunction = &functionDefinition;
 
   for (const auto &funcArg: functionDefinition.mArguments) {
-    auto &arg = method.mArguments.emplace_back(
-        funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
-    arg.mType.mConstness = funcArg.mConstness;
-    if (TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
-      auto pbt = funcArg.mConstness == Constness::Const ? PassByType::Value : PassByType::Reference;
-      arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer : pbt;
-    } else {
-      arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer
-                                                                      : PassByType::Reference;
-    }
-    arg.mDefaultValue = funcArg.mDefaultValue;
+    ProcessFunctionArgument(cls, method, funcArg);
   }
   FillComments(functionDefinition, method.mComments);
   return method;

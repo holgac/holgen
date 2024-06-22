@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
@@ -122,6 +123,20 @@ public:
   static bool Read(uint32_t &data, lua_State *luaState, int32_t luaIndex);
   static bool Read(uint64_t &data, lua_State *luaState, int32_t luaIndex);
   static bool Read(uint8_t &data, lua_State *luaState, int32_t luaIndex);
+  /*
+   * BEWARE: This overload assumes that the function will be called before the entry in stack is invalidated.
+   * It was made specifically for forwarding lua parameters back to lua; do not use it for anything else.
+   */
+  template <typename T>
+  static bool Read(std::function<void(lua_State *, const T &)> &data, lua_State *luaState, int32_t luaIndex) {
+    if (luaIndex < 0) {
+      luaIndex = lua_gettop(luaState) + luaIndex + 1;
+    }
+    data = [luaIndex](lua_State *lsInner, const T& obj) {
+      lua_pushvalue(lsInner, luaIndex);
+    };
+    return true;
+  }
   template <typename T, size_t C>
   static bool Read(std::array<T, C> &data, lua_State *luaState, int32_t luaIndex) {
     return false;

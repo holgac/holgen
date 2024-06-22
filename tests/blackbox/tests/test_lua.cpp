@@ -516,8 +516,8 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
 TEST_F(LuaTest, RegistryData) {
   const char *script = R"R(
 Tester = {
-  Init = function(testLuaRegistryData)
-    testLuaRegistryData.data.value = 0
+  Init = function(testLuaRegistryData, initData)
+    testLuaRegistryData.data.value = initData.initialValue
   end,
   Get = function(testLuaRegistryData)
     return testLuaRegistryData.data.value
@@ -532,11 +532,20 @@ Tester = {
   TestLuaRegistryData tlrd;
   tlrd.InitializeLua(mState);
   tlrd.SetTable("Tester");
-  tlrd.Init(mState);
-  EXPECT_EQ(tlrd.Get(mState), 0);
+  tlrd.Init(mState, [](lua_State *innerState, auto &instance) {
+    lua_newtable(innerState);
+    lua_pushstring(innerState, "initialValue");
+    lua_pushnumber(innerState, 12);
+    lua_settable(innerState, -3);
+  });
+  EXPECT_EQ(tlrd.Get(mState), 12);
   tlrd.Add(mState, 5);
-  EXPECT_EQ(tlrd.Get(mState), 5);
+  EXPECT_EQ(tlrd.Get(mState), 17);
   tlrd.Add(mState, 5);
-  EXPECT_EQ(tlrd.Get(mState), 10);
+  EXPECT_EQ(tlrd.Get(mState), 22);
+
+  tlrd.PushGlobalToLua(mState, "tlrd");
+  luaL_dostring(mState, "tlrd:Init({initialValue=32})");
+  EXPECT_EQ(tlrd.Get(mState), 32);
   tlrd.UninitializeLua(mState);
 }

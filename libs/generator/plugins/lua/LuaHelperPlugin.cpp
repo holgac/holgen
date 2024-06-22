@@ -145,6 +145,7 @@ void LuaHelperPlugin::GeneratePushNil(Class &cls) {
 void LuaHelperPlugin::GenerateRead(Class &cls) {
   GenerateBaseRead(cls);
   GenerateReadForPrimitives(cls);
+  GenerateReadFunction(cls);
   GenerateReadForContainers(cls);
 }
 
@@ -194,6 +195,39 @@ void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
+}
+
+void LuaHelperPlugin::GenerateReadFunction(Class &cls) {
+  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
+  method.mComments.emplace_back(
+      "BEWARE: This overload assumes that the function will be called before the "
+      "entry in stack is invalidated.");
+  method.mComments.emplace_back("It was made specifically for forwarding lua parameters back to "
+                                "lua; do not use it for anything else.");
+  method.mTemplateParameters.emplace_back("typename", "T");
+  method.mArguments.emplace_back("data", Type{"std::function", PassByType::Reference});
+  method.mArguments.back().mType.mFunctionalTemplateParameters.emplace_back("void");
+  method.mArguments.back().mType.mFunctionalTemplateParameters.emplace_back("lua_State",
+                                                                            PassByType::Pointer);
+  method.mArguments.back().mType.mFunctionalTemplateParameters.emplace_back(
+      "T", PassByType::Reference, Constness::Const);
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
+  method.mBody.Add("if (luaIndex < 0) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("luaIndex = lua_gettop(luaState) + luaIndex + 1;");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Add("data = [luaIndex](lua_State *lsInner, const T& obj) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_pushvalue(lsInner, luaIndex);");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}};");
+
+  method.mBody.Line() << "return true;";
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {

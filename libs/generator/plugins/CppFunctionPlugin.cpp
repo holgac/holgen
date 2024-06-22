@@ -22,7 +22,7 @@ void CppFunctionPlugin::ProcessStructDefinition(Class &cls,
 }
 
 void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &functionDefinition) {
-  auto method = NewFunction(functionDefinition);
+  auto method = NewFunction(cls, functionDefinition);
   method.mUserDefined = true;
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

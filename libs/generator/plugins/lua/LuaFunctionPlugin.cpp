@@ -90,7 +90,11 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
 void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
                                                  const FunctionDefinition &functionDefinition) {
   for (auto &funcArg: functionDefinition.mArguments) {
-    method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, funcArg.mName);
+    if (funcArg.mType.mName == St::Lua_CustomData) {
+      method.mBody.Add("{}(luaState, *this);", funcArg.mName);
+    } else {
+      method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, funcArg.mName);
+    }
   }
 }
 
@@ -205,15 +209,16 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
                                          const std::string *sourceTable,
                                          const std::string &functionHandle, bool isFuncTable,
                                          bool isStatic) {
-  auto method = NewFunction(functionDefinition);
+  auto method = NewFunction(cls, functionDefinition);
   method.mConstness = Constness::Const;
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_front("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";
-  if (functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Pointer)
+  if (functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Pointer) {
     retVal = "nullptr";
-  if (functionDefinition.mReturnType.mType.mName == "void")
+  } else if (functionDefinition.mReturnType.mType.mName == "void") {
     retVal = "void()";
+  }
 
   bool throwOnFailure =
       functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Reference;

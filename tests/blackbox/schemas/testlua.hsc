@@ -62,7 +62,7 @@ struct TestLuaCalculator {
 @luaFuncTable
 struct TestLuaRegistryData {
     LuaRegistryData data;
-    func Init();
+    func Init(LuaCustomData initData);
     func Get() -> s32;
     func Add(s32 val);
 }
