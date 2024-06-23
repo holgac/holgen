@@ -363,7 +363,7 @@ int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestContainerVector::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetInnerStructWithIdCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("GetInnerStructNoIdFromName", key)) {
@@ -412,7 +412,7 @@ int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestContainerVector::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetInnerStructNoIdCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("AddStringElem", key)) {
@@ -445,7 +445,7 @@ int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestContainerVector::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetStringElemCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("AddUnsignedElem", key)) {
@@ -478,7 +478,7 @@ int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestContainerVector::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetUnsignedElemCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {

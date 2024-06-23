@@ -63,10 +63,10 @@ void WeaponTypeBow::PushToLua(lua_State *luaState) const {
 void WeaponTypeBow::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "range");
-  LuaHelper::Push(mRange, luaState);
+  LuaHelper::Push(mRange, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "material");
-  LuaHelper::Push(mMaterial, luaState);
+  LuaHelper::Push(mMaterial, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -108,9 +108,9 @@ int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("range", key)) {
-    LuaHelper::Push(instance->mRange, luaState);
+    LuaHelper::Push(instance->mRange, luaState, false);
   } else if (0 == strcmp("material", key)) {
-    LuaHelper::Push(instance->mMaterial, luaState);
+    LuaHelper::Push(instance->mMaterial, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponTypeBow.{}", key);
     return 0;

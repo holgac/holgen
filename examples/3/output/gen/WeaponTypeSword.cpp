@@ -60,10 +60,10 @@ void WeaponTypeSword::PushToLua(lua_State *luaState) const {
 void WeaponTypeSword::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "sharpness");
-  LuaHelper::Push(mSharpness, luaState);
+  LuaHelper::Push(mSharpness, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "isShortSword");
-  LuaHelper::Push(mIsShortSword, luaState);
+  LuaHelper::Push(mIsShortSword, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -105,9 +105,9 @@ int WeaponTypeSword::IndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("sharpness", key)) {
-    LuaHelper::Push(instance->mSharpness, luaState);
+    LuaHelper::Push(instance->mSharpness, luaState, false);
   } else if (0 == strcmp("isShortSword", key)) {
-    LuaHelper::Push(instance->mIsShortSword, luaState);
+    LuaHelper::Push(instance->mIsShortSword, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponTypeSword.{}", key);
     return 0;

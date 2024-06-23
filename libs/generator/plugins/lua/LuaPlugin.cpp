@@ -93,7 +93,12 @@ void LuaPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitc
             switchBlock.Add("result{}PushToLua(lsInner);", accessor);
           }
         } else {
-          switchBlock.Add("{}::{}(result, lsInner, false);", St::LuaHelper, St::LuaHelper_Push);
+          std::string mirrorArg = "false";
+          if (exposedMethod.mReturnType.mType == PassByType::Value) {
+            mirrorArg = "true";
+          }
+          switchBlock.Add("{}::{}(result, lsInner, {});", St::LuaHelper, St::LuaHelper_Push,
+                          mirrorArg);
         }
         switchBlock.Add("return 1;");
       } else {

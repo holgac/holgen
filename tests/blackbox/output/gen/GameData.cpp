@@ -417,7 +417,7 @@ int GameData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = GameData::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetBootCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("GetArmorFromName", key)) {
@@ -459,7 +459,7 @@ int GameData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = GameData::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetArmorCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("GetCharacterFromName", key)) {
@@ -492,7 +492,7 @@ int GameData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = GameData::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetCharacterCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {

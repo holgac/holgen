@@ -165,7 +165,7 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestLuaRegistryData::ReadProxyFromLua(lsInner, -1);
       auto result = instance->Get(lsInner);
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("Add", key)) {

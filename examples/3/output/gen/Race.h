@@ -38,6 +38,7 @@ public:
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
+  void PushMirrorToLua(lua_State *luaState) const;
   /*
    * This only works with negative indices
    * Reads a mirror object (a table with entries that mirror the c++ data structure)

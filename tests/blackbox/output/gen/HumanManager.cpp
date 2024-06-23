@@ -206,7 +206,7 @@ int HumanManager::IndexMetaMethod(lua_State *luaState) {
       uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->HasHuman(arg0);
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("DeleteHuman", key)) {
@@ -221,7 +221,7 @@ int HumanManager::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = HumanManager::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetHumanCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {

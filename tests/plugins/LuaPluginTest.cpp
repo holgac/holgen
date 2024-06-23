@@ -240,7 +240,7 @@ if (0 == strcmp("functionReturningVoid", key)) {
   lua_pushcfunction(luaState, [](lua_State *lsInner) {
     auto instance = TestData::ReadProxyFromLua(lsInner, -1);
     auto result = instance->functionReturningString();
-    LuaHelper::Push(result, lsInner, false);
+    LuaHelper::Push(result, lsInner, true);
     return 1;
   });
 } else {

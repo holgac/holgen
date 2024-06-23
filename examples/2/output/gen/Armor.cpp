@@ -52,10 +52,10 @@ void Armor::PushToLua(lua_State *luaState) const {
 void Armor::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState);
+  LuaHelper::Push(mId, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "armorClass");
-  LuaHelper::Push(mArmorClass, luaState);
+  LuaHelper::Push(mArmorClass, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -97,9 +97,9 @@ int Armor::IndexMetaMethod(lua_State *luaState) {
   auto instance = Armor::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState);
+    LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("armorClass", key)) {
-    LuaHelper::Push(instance->mArmorClass, luaState);
+    LuaHelper::Push(instance->mArmorClass, luaState, false);
   } else if (0 == strcmp("Initialize", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Armor::ReadProxyFromLua(lsInner, -1);

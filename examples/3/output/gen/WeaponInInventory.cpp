@@ -155,7 +155,7 @@ void WeaponInInventory::PushToLua(lua_State *luaState) const {
 void WeaponInInventory::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "type");
-  LuaHelper::Push(mType, luaState);
+  LuaHelper::Push(mType, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -194,14 +194,14 @@ int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("type", key)) {
-    LuaHelper::Push(instance->mType, luaState);
+    LuaHelper::Push(instance->mType, luaState, false);
   } else if (0 == strcmp("weapon", key)) {
     switch (instance->mType.GetValue()) {
     case WeaponType::Bow:
-      LuaHelper::Push(instance->GetWeaponAsWeaponTypeBow(), luaState);
+      LuaHelper::Push(instance->GetWeaponAsWeaponTypeBow(), luaState, false);
       break;
     case WeaponType::Sword:
-      LuaHelper::Push(instance->GetWeaponAsWeaponTypeSword(), luaState);
+      LuaHelper::Push(instance->GetWeaponAsWeaponTypeSword(), luaState, false);
       break;
     default:
       lua_pushnil(luaState);

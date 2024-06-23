@@ -134,7 +134,7 @@ int TestLuaFuncTableWithSourceTable::IndexMetaMethod(lua_State *luaState) {
         arg0 = &arg0Mirror;
       }
       auto result = instance->GetField(lsInner, *arg0);
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {

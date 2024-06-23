@@ -159,7 +159,7 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Weapon::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetAverageDamage();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {

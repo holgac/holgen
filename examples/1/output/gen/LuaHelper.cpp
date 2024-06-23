@@ -6,55 +6,55 @@
 #include "Race.h"
 
 namespace ex1_schemas {
-void LuaHelper::Push(std::nullptr_t , lua_State *luaState) {
+void LuaHelper::Push(std::nullptr_t , lua_State *luaState, bool pushMirror) {
   lua_pushnil(luaState);
 }
 
-void LuaHelper::Push(bool data, lua_State *luaState) {
+void LuaHelper::Push(bool data, lua_State *luaState, bool pushMirror) {
   lua_pushboolean(luaState, data);
 }
 
-void LuaHelper::Push(double data, lua_State *luaState) {
+void LuaHelper::Push(double data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(float data, lua_State *luaState) {
+void LuaHelper::Push(float data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(int16_t data, lua_State *luaState) {
+void LuaHelper::Push(int16_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(int32_t data, lua_State *luaState) {
+void LuaHelper::Push(int32_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(int64_t data, lua_State *luaState) {
+void LuaHelper::Push(int64_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(int8_t data, lua_State *luaState) {
+void LuaHelper::Push(int8_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(const std::string &data, lua_State *luaState) {
+void LuaHelper::Push(const std::string &data, lua_State *luaState, bool pushMirror) {
   lua_pushstring(luaState, data.c_str());
 }
 
-void LuaHelper::Push(uint16_t data, lua_State *luaState) {
+void LuaHelper::Push(uint16_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(uint32_t data, lua_State *luaState) {
+void LuaHelper::Push(uint32_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(uint64_t data, lua_State *luaState) {
+void LuaHelper::Push(uint64_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 
-void LuaHelper::Push(uint8_t data, lua_State *luaState) {
+void LuaHelper::Push(uint8_t data, lua_State *luaState, bool pushMirror) {
   lua_pushnumber(luaState, data);
 }
 

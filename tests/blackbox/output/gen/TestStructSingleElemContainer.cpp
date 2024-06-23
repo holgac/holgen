@@ -211,7 +211,7 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestStructSingleElemContainer::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetSingleElemStructCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("AddSingleElemStructWithId", key)) {
@@ -235,7 +235,7 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestStructSingleElemContainer::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetSingleElemStructWithIdCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {

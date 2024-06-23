@@ -159,7 +159,7 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
       int64_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->Add(lsInner, arg0);
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else if (0 == strcmp("Subtract", key)) {
@@ -178,7 +178,7 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
       int64_t arg1;
       LuaHelper::Read(arg1, lsInner, -1);
       auto result = instance->SubtractThenMultiply(arg0, arg1);
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {

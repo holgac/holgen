@@ -172,7 +172,7 @@ int LuaTestStructContainer::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = LuaTestStructContainer::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetTestVectorElemCount();
-      LuaHelper::Push(result, lsInner, false);
+      LuaHelper::Push(result, lsInner, true);
       return 1;
     });
   } else {
