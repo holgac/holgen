@@ -67,10 +67,10 @@ void TestVariantStructHuman::PushToLua(lua_State *luaState) const {
 void TestVariantStructHuman::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState);
+  LuaHelper::Push(mName, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "nationality");
-  LuaHelper::Push(mNationality, luaState);
+  LuaHelper::Push(mNationality, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -112,9 +112,9 @@ int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState);
+    LuaHelper::Push(instance->mName, luaState, false);
   } else if (0 == strcmp("nationality", key)) {
-    LuaHelper::Push(instance->mNationality, luaState);
+    LuaHelper::Push(instance->mNationality, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructHuman.{}", key);
     return 0;

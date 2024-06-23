@@ -55,7 +55,7 @@ void RaceId::PushToLua(lua_State *luaState) const {
 void RaceId::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState);
+  LuaHelper::Push(mId, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -94,7 +94,7 @@ int RaceId::IndexMetaMethod(lua_State *luaState) {
   auto instance = RaceId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState);
+    LuaHelper::Push(instance->mId, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);
     return 0;

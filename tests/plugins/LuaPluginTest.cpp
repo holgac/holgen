@@ -30,7 +30,7 @@ enum TestData {}
     auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method,
-                         "LuaHelper::Push(mValue, luaState);");
+                         "LuaHelper::Push(mValue, luaState, true);");
   }
 }
 
@@ -192,13 +192,13 @@ struct TestData {
 auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testFieldUnsigned", key)) {
-  LuaHelper::Push(instance->mTestFieldUnsigned, luaState);
+  LuaHelper::Push(instance->mTestFieldUnsigned, luaState, false);
 } else if (0 == strcmp("testFieldString", key)) {
-  LuaHelper::Push(instance->mTestFieldString, luaState);
+  LuaHelper::Push(instance->mTestFieldString, luaState, false);
 } else if (0 == strcmp("testFieldBool", key)) {
-  LuaHelper::Push(instance->mTestFieldBool, luaState);
+  LuaHelper::Push(instance->mTestFieldBool, luaState, false);
 } else if (0 == strcmp("testFieldInnerStruct", key)) {
-  LuaHelper::Push(instance->mTestFieldInnerStruct, luaState);
+  LuaHelper::Push(instance->mTestFieldInnerStruct, luaState, false);
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
   return 0;
@@ -240,7 +240,7 @@ if (0 == strcmp("functionReturningVoid", key)) {
   lua_pushcfunction(luaState, [](lua_State *lsInner) {
     auto instance = TestData::ReadProxyFromLua(lsInner, -1);
     auto result = instance->functionReturningString();
-    LuaHelper::Push(result, lsInner);
+    LuaHelper::Push(result, lsInner, false);
     return 1;
   });
 } else {
@@ -277,9 +277,9 @@ struct TestData {
 auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testStructWithIdRefId", key)) {
-  LuaHelper::Push(instance->mTestStructWithIdRefId, luaState);
+  LuaHelper::Push(instance->mTestStructWithIdRefId, luaState, false);
 } else if (0 == strcmp("testStructNoIdRef", key)) {
-  LuaHelper::Push(instance->mTestStructNoIdRef, luaState);
+  LuaHelper::Push(instance->mTestStructNoIdRef, luaState, false);
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
   return 0;

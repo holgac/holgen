@@ -88,10 +88,10 @@ void Country::PushMirrorToLua(lua_State *luaState) const {
   mLeader.PushMirrorToLua(luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "citizens");
-  LuaHelper::Push(mCitizens, luaState);
+  LuaHelper::Push(mCitizens, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "population");
-  LuaHelper::Push(mPopulation, luaState);
+  LuaHelper::Push(mPopulation, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -141,11 +141,11 @@ int Country::IndexMetaMethod(lua_State *luaState) {
   auto instance = Country::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("leader", key)) {
-    LuaHelper::Push(instance->mLeader, luaState);
+    LuaHelper::Push(instance->mLeader, luaState, false);
   } else if (0 == strcmp("citizens", key)) {
-    LuaHelper::Push(instance->mCitizens, luaState);
+    LuaHelper::Push(instance->mCitizens, luaState, false);
   } else if (0 == strcmp("population", key)) {
-    LuaHelper::Push(instance->mPopulation, luaState);
+    LuaHelper::Push(instance->mPopulation, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Country.{}", key);
     return 0;

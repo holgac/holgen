@@ -38,8 +38,8 @@ void TestLuaFuncTableWithSourceTable::SetField(lua_State *luaState, const TestLu
     lua_pop(luaState, 1);
     return void();
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(container, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(container, luaState, false);
   lua_call(luaState, 2, 0);
   lua_pop(luaState, 2);
 }
@@ -61,8 +61,8 @@ int32_t TestLuaFuncTableWithSourceTable::GetField(lua_State *luaState, const Tes
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(container, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(container, luaState, false);
   lua_call(luaState, 2, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -134,7 +134,7 @@ int TestLuaFuncTableWithSourceTable::IndexMetaMethod(lua_State *luaState) {
         arg0 = &arg0Mirror;
       }
       auto result = instance->GetField(lsInner, *arg0);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else {

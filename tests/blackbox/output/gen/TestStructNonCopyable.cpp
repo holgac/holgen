@@ -55,7 +55,7 @@ void TestStructNonCopyable::PushToLua(lua_State *luaState) const {
 void TestStructNonCopyable::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "bigVector");
-  LuaHelper::Push(mBigVector, luaState);
+  LuaHelper::Push(mBigVector, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -94,7 +94,7 @@ int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("bigVector", key)) {
-    LuaHelper::Push(instance->mBigVector, luaState);
+    LuaHelper::Push(instance->mBigVector, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructNonCopyable.{}", key);
     return 0;

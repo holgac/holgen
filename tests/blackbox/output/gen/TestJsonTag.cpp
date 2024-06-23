@@ -78,10 +78,10 @@ void TestJsonTag::PushToLua(lua_State *luaState) const {
 void TestJsonTag::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState);
+  LuaHelper::Push(mId, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState);
+  LuaHelper::Push(mName, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -124,9 +124,9 @@ int TestJsonTag::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonTag::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState);
+    LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState);
+    LuaHelper::Push(instance->mName, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonTag.{}", key);
     return 0;

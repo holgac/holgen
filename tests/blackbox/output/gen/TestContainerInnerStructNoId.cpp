@@ -63,10 +63,10 @@ void TestContainerInnerStructNoId::PushToLua(lua_State *luaState) const {
 void TestContainerInnerStructNoId::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "field");
-  LuaHelper::Push(mField, luaState);
+  LuaHelper::Push(mField, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState);
+  LuaHelper::Push(mName, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -108,9 +108,9 @@ int TestContainerInnerStructNoId::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerInnerStructNoId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("field", key)) {
-    LuaHelper::Push(instance->mField, luaState);
+    LuaHelper::Push(instance->mField, luaState, false);
   } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState);
+    LuaHelper::Push(instance->mName, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestContainerInnerStructNoId.{}", key);
     return 0;

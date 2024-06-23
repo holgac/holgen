@@ -198,7 +198,7 @@ void TestVariantStructExplicitType::PushToLua(lua_State *luaState) const {
 void TestVariantStructExplicitType::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "type");
-  LuaHelper::Push(mType, luaState);
+  LuaHelper::Push(mType, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -237,14 +237,14 @@ int TestVariantStructExplicitType::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructExplicitType::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("type", key)) {
-    LuaHelper::Push(instance->mType, luaState);
+    LuaHelper::Push(instance->mType, luaState, false);
   } else if (0 == strcmp("being1", key)) {
     switch (instance->mType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState);
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState, false);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState);
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState, false);
       break;
     default:
       lua_pushnil(luaState);
@@ -252,10 +252,10 @@ int TestVariantStructExplicitType::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("being2", key)) {
     switch (instance->mType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState);
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState, false);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState);
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState, false);
       break;
     default:
       lua_pushnil(luaState);

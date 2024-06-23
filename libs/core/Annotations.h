@@ -213,6 +213,7 @@ public:
    */
   inline static const std::string LuaFunc = "luaFunc";
   inline static const std::string LuaFunc_SourceTable = "sourceTable";
+  inline static const std::string LuaFunc_Static = "static";
 
   /**
    * Controls the function below. By default the functions are defined in cpp, but

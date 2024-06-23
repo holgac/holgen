@@ -51,7 +51,7 @@ void TestLuaNumber::PushToLua(lua_State *luaState) const {
 void TestLuaNumber::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "value");
-  LuaHelper::Push(mValue, luaState);
+  LuaHelper::Push(mValue, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -90,7 +90,7 @@ int TestLuaNumber::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaNumber::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("value", key)) {
-    LuaHelper::Push(instance->mValue, luaState);
+    LuaHelper::Push(instance->mValue, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaNumber.{}", key);
     return 0;

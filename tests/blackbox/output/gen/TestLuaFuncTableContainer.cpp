@@ -143,7 +143,7 @@ void TestLuaFuncTableContainer::PushToLua(lua_State *luaState) const {
 void TestLuaFuncTableContainer::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "field");
-  LuaHelper::Push(mField, luaState);
+  LuaHelper::Push(mField, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "script1");
   mScript1.PushMirrorToLua(luaState);
@@ -248,19 +248,19 @@ int TestLuaFuncTableContainer::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("field", key)) {
-    LuaHelper::Push(instance->mField, luaState);
+    LuaHelper::Push(instance->mField, luaState, false);
   } else if (0 == strcmp("script1", key)) {
-    LuaHelper::Push(instance->mScript1, luaState);
+    LuaHelper::Push(instance->mScript1, luaState, false);
   } else if (0 == strcmp("script2", key)) {
-    LuaHelper::Push(instance->mScript2, luaState);
+    LuaHelper::Push(instance->mScript2, luaState, false);
   } else if (0 == strcmp("scriptWithSourceTable1", key)) {
-    LuaHelper::Push(instance->mScriptWithSourceTable1, luaState);
+    LuaHelper::Push(instance->mScriptWithSourceTable1, luaState, false);
   } else if (0 == strcmp("scriptWithSourceTable2", key)) {
-    LuaHelper::Push(instance->mScriptWithSourceTable2, luaState);
+    LuaHelper::Push(instance->mScriptWithSourceTable2, luaState, false);
   } else if (0 == strcmp("staticScript1", key)) {
-    LuaHelper::Push(instance->mStaticScript1, luaState);
+    LuaHelper::Push(instance->mStaticScript1, luaState, false);
   } else if (0 == strcmp("staticScript2", key)) {
-    LuaHelper::Push(instance->mStaticScript2, luaState);
+    LuaHelper::Push(instance->mStaticScript2, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);
     return 0;

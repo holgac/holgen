@@ -33,8 +33,8 @@ int32_t TestLuaCalculator::AddPrimitive(lua_State *luaState, const int32_t num) 
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(num, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(num, luaState, false);
   lua_call(luaState, 2, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -58,8 +58,8 @@ int32_t TestLuaCalculator::AddRef(lua_State *luaState, TestLuaNumber &num) const
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(num, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(num, luaState, false);
   lua_call(luaState, 2, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -83,8 +83,8 @@ int32_t TestLuaCalculator::AddNullable(lua_State *luaState, const TestLuaNumber 
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(num, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(num, luaState, false);
   lua_call(luaState, 2, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -108,8 +108,8 @@ TestLuaNumber *TestLuaCalculator::ReturnNullable(lua_State *luaState, const int3
     lua_pop(luaState, 1);
     return nullptr;
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(num, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(num, luaState, false);
   lua_call(luaState, 2, 1);
   auto result = TestLuaNumber::ReadProxyFromLua(luaState, -1);
   lua_pop(luaState, 1);
@@ -130,8 +130,8 @@ TestLuaNumber &TestLuaCalculator::ReturnRef(lua_State *luaState, const int32_t n
   if (lua_isnil(luaState, -1)) {
     HOLGEN_FAIL("Calling undefined ReturnRef function {}", mLuaFuncHandle_ReturnRef);
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(num, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(num, luaState, false);
   lua_call(luaState, 2, 1);
   auto result = TestLuaNumber::ReadProxyFromLua(luaState, -1);
   lua_pop(luaState, 1);
@@ -154,8 +154,8 @@ TestLuaNumber TestLuaCalculator::ReturnNew(lua_State *luaState, const int32_t nu
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(num, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(num, luaState, false);
   lua_call(luaState, 2, 1);
   TestLuaNumber resultMirror;
   TestLuaNumber *result;
@@ -266,14 +266,14 @@ int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("lastValue", key)) {
-    LuaHelper::Push(instance->mLastValue, luaState);
+    LuaHelper::Push(instance->mLastValue, luaState, false);
   } else if (0 == strcmp("AddPrimitive", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
       int32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->AddPrimitive(lsInner, arg0);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else if (0 == strcmp("AddRef", key)) {
@@ -281,7 +281,7 @@ int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
       auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
       auto arg0 = TestLuaNumber::ReadProxyFromLua(lsInner, -1);
       auto result = instance->AddRef(lsInner, *arg0);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else if (0 == strcmp("AddNullable", key)) {
@@ -297,7 +297,7 @@ int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
         arg0 = &arg0Mirror;
       }
       auto result = instance->AddNullable(lsInner, arg0);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else if (0 == strcmp("ReturnNullable", key)) {

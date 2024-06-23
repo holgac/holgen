@@ -38,7 +38,7 @@ if (lua_isnil(luaState, -1)) {
   lua_pop(luaState, 1);
   return void();
 }
-LuaHelper::Push(*this, luaState);
+LuaHelper::Push(*this, luaState, false);
 lua_call(luaState, 1, 0);
   )R");
 }
@@ -69,7 +69,7 @@ if (lua_isnil(luaState, -1)) {
   lua_pop(luaState, 1);
   return void();
 }
-LuaHelper::Push(*this, luaState);
+LuaHelper::Push(*this, luaState, false);
 lua_call(luaState, 1, 0);
 lua_pop(luaState, 1);
 )R");
@@ -99,7 +99,7 @@ if (lua_isnil(luaState, -1)) {
   lua_pop(luaState, 1);
   return {};
 }
-LuaHelper::Push(*this, luaState);
+LuaHelper::Push(*this, luaState, false);
 lua_call(luaState, 1, 1);
 uint32_t result;
 LuaHelper::Read(result, luaState, -1);
@@ -134,7 +134,7 @@ if (lua_isnil(luaState, -1)) {
   lua_pop(luaState, 1);
   return {};
 }
-LuaHelper::Push(*this, luaState);
+LuaHelper::Push(*this, luaState, false);
 lua_call(luaState, 1, 1);
 uint32_t result;
 LuaHelper::Read(result, luaState, -1);
@@ -181,10 +181,10 @@ if (lua_isnil(luaState, -1)) {
   lua_pop(luaState, 1);
   return {};
 }
-LuaHelper::Push(*this, luaState);
-LuaHelper::Push(a1, luaState);
-LuaHelper::Push(a2, luaState);
-LuaHelper::Push(a3, luaState);
+LuaHelper::Push(*this, luaState, false);
+LuaHelper::Push(a1, luaState, false);
+LuaHelper::Push(a2, luaState, false);
+LuaHelper::Push(a3, luaState, false);
 lua_call(luaState, 4, 1);
 std::string result;
 LuaHelper::Read(result, luaState, -1);
@@ -222,7 +222,7 @@ if (lua_isnil(luaState, -1)) {
   lua_pop(luaState, 1);
   return {};
 }
-LuaHelper::Push(*this, luaState);
+LuaHelper::Push(*this, luaState, false);
 lua_call(luaState, 1, 1);
 InnerStruct resultMirror;
 InnerStruct *result;

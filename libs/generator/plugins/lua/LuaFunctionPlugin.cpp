@@ -66,8 +66,9 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
       sourceTable = &attrib->mValue.mName;
     }
 
-    bool isStatic = cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)
-                        ->GetAttribute(Annotations::LuaFuncTable_Static);
+    bool isStatic = cls.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable,
+                                                      Annotations::LuaFuncTable_Static) ||
+        functionDefinition.GetMatchingAttribute(Annotations::LuaFunc, Annotations::LuaFunc_Static);
 
     GenerateFunction(cls, functionDefinition, sourceTable, functionDefinition.mName, isFuncTable,
                      isStatic);
@@ -93,7 +94,9 @@ void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
     if (funcArg.mType.mName == St::Lua_CustomData) {
       method.mBody.Add("{}(luaState, *this);", funcArg.mName);
     } else {
-      method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push, funcArg.mName);
+      // There could be a function modifier specifying whether to push mirror or proxy to lua
+      method.mBody.Add("{}::{}({}, luaState, false);", St::LuaHelper, St::LuaHelper_Push,
+                       funcArg.mName);
     }
   }
 }
@@ -251,7 +254,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   }
 
   if (!isStatic) {
-    method.mBody.Add("{}::{}(*this, luaState);", St::LuaHelper, St::LuaHelper_Push);
+    method.mBody.Add("{}::{}(*this, luaState, false);", St::LuaHelper, St::LuaHelper_Push);
   }
   GenerateFunctionPushArgs(method, functionDefinition);
 

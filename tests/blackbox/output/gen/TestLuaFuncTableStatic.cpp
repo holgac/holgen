@@ -36,7 +36,7 @@ void TestLuaFuncTableStatic::SetField(lua_State *luaState, const TestLuaFuncTabl
     lua_pop(luaState, 1);
     return void();
   }
-  LuaHelper::Push(container, luaState);
+  LuaHelper::Push(container, luaState, false);
   lua_call(luaState, 1, 0);
   lua_pop(luaState, 1);
 }
@@ -56,7 +56,7 @@ int32_t TestLuaFuncTableStatic::GetField(lua_State *luaState, const TestLuaFuncT
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(container, luaState);
+  LuaHelper::Push(container, luaState, false);
   lua_call(luaState, 1, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -128,7 +128,7 @@ int TestLuaFuncTableStatic::IndexMetaMethod(lua_State *luaState) {
         arg0 = &arg0Mirror;
       }
       auto result = instance->GetField(lsInner, *arg0);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else {

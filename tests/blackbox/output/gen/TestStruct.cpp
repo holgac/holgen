@@ -76,13 +76,13 @@ void TestStruct::PushToLua(lua_State *luaState) const {
 void TestStruct::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "testFieldBool");
-  LuaHelper::Push(mTestFieldBool, luaState);
+  LuaHelper::Push(mTestFieldBool, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "testFieldUnsigned");
-  LuaHelper::Push(mTestFieldUnsigned, luaState);
+  LuaHelper::Push(mTestFieldUnsigned, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "testFieldString");
-  LuaHelper::Push(mTestFieldString, luaState);
+  LuaHelper::Push(mTestFieldString, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -127,11 +127,11 @@ int TestStruct::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("testFieldBool", key)) {
-    LuaHelper::Push(instance->mTestFieldBool, luaState);
+    LuaHelper::Push(instance->mTestFieldBool, luaState, false);
   } else if (0 == strcmp("testFieldUnsigned", key)) {
-    LuaHelper::Push(instance->mTestFieldUnsigned, luaState);
+    LuaHelper::Push(instance->mTestFieldUnsigned, luaState, false);
   } else if (0 == strcmp("testFieldString", key)) {
-    LuaHelper::Push(instance->mTestFieldString, luaState);
+    LuaHelper::Push(instance->mTestFieldString, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
     return 0;

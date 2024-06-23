@@ -55,7 +55,7 @@ void TestStructSingleElem::PushToLua(lua_State *luaState) const {
 void TestStructSingleElem::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState);
+  LuaHelper::Push(mName, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -94,7 +94,7 @@ int TestStructSingleElem::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructSingleElem::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState);
+    LuaHelper::Push(instance->mName, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructSingleElem.{}", key);
     return 0;

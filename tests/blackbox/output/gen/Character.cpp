@@ -120,16 +120,16 @@ void Character::PushToLua(lua_State *luaState) const {
 void Character::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState);
+  LuaHelper::Push(mId, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState);
+  LuaHelper::Push(mName, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "boot");
-  LuaHelper::Push(mBootId, luaState);
+  LuaHelper::Push(mBootId, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "armor");
-  LuaHelper::Push(mArmorId, luaState);
+  LuaHelper::Push(mArmorId, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -178,17 +178,17 @@ int Character::IndexMetaMethod(lua_State *luaState) {
   auto instance = Character::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState);
+    LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState);
+    LuaHelper::Push(instance->mName, luaState, false);
   } else if (0 == strcmp("bootId", key)) {
-    LuaHelper::Push(instance->mBootId, luaState);
+    LuaHelper::Push(instance->mBootId, luaState, false);
   } else if (0 == strcmp("boot", key)) {
-    LuaHelper::Push(Boot::Get(instance->mBootId), luaState);
+    LuaHelper::Push(Boot::Get(instance->mBootId), luaState, false);
   } else if (0 == strcmp("armorId", key)) {
-    LuaHelper::Push(instance->mArmorId, luaState);
+    LuaHelper::Push(instance->mArmorId, luaState, false);
   } else if (0 == strcmp("armor", key)) {
-    LuaHelper::Push(Armor::Get(instance->mArmorId), luaState);
+    LuaHelper::Push(Armor::Get(instance->mArmorId), luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Character.{}", key);
     return 0;

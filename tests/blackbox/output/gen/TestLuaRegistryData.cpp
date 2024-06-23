@@ -37,7 +37,7 @@ void TestLuaRegistryData::Init(lua_State *luaState, const std::function<void(lua
     lua_pop(luaState, 1);
     return void();
   }
-  LuaHelper::Push(*this, luaState);
+  LuaHelper::Push(*this, luaState, false);
   initData(luaState, *this);
   lua_call(luaState, 2, 0);
   lua_pop(luaState, 1);
@@ -58,7 +58,7 @@ int32_t TestLuaRegistryData::Get(lua_State *luaState) const {
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState);
+  LuaHelper::Push(*this, luaState, false);
   lua_call(luaState, 1, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -81,8 +81,8 @@ void TestLuaRegistryData::Add(lua_State *luaState, const int32_t val) const {
     lua_pop(luaState, 1);
     return void();
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(val, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(val, luaState, false);
   lua_call(luaState, 2, 0);
   lua_pop(luaState, 1);
 }
@@ -165,7 +165,7 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = TestLuaRegistryData::ReadProxyFromLua(lsInner, -1);
       auto result = instance->Get(lsInner);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else if (0 == strcmp("Add", key)) {

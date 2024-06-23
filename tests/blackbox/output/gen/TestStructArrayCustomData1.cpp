@@ -72,13 +72,13 @@ void TestStructArrayCustomData1::PushToLua(lua_State *luaState) const {
 void TestStructArrayCustomData1::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "f1");
-  LuaHelper::Push(mF1, luaState);
+  LuaHelper::Push(mF1, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "f2");
-  LuaHelper::Push(mF2, luaState);
+  LuaHelper::Push(mF2, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "f3");
-  LuaHelper::Push(mF3, luaState);
+  LuaHelper::Push(mF3, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -123,11 +123,11 @@ int TestStructArrayCustomData1::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArrayCustomData1::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("f1", key)) {
-    LuaHelper::Push(instance->mF1, luaState);
+    LuaHelper::Push(instance->mF1, luaState, false);
   } else if (0 == strcmp("f2", key)) {
-    LuaHelper::Push(instance->mF2, luaState);
+    LuaHelper::Push(instance->mF2, luaState, false);
   } else if (0 == strcmp("f3", key)) {
-    LuaHelper::Push(instance->mF3, luaState);
+    LuaHelper::Push(instance->mF3, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructArrayCustomData1.{}", key);
     return 0;

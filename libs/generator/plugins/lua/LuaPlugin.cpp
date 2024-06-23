@@ -35,7 +35,7 @@ void LuaPlugin::GenerateIndexMetaMethodForFields(Class &cls, StringSwitcher &swi
           mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.front().mName);
       if (underlyingStruct->GetAnnotation(Annotations::Managed)) {
         switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
-          switchBlock.Add("{}::{}({}::{}(instance->{}), luaState);", St::LuaHelper,
+          switchBlock.Add("{}::{}({}::{}(instance->{}), luaState, false);", St::LuaHelper,
                           St::LuaHelper_Push, field.mField->mType.mTemplateParameters[0].mName,
                           St::ManagedObject_Getter, field.mName);
         });
@@ -93,7 +93,7 @@ void LuaPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitc
             switchBlock.Add("result{}PushToLua(lsInner);", accessor);
           }
         } else {
-          switchBlock.Add("{}::{}(result, lsInner);", St::LuaHelper, St::LuaHelper_Push);
+          switchBlock.Add("{}::{}(result, lsInner, false);", St::LuaHelper, St::LuaHelper_Push);
         }
         switchBlock.Add("return 1;");
       } else {
@@ -225,7 +225,7 @@ void LuaPlugin::GenerateIndexForVariantField(Class &cls, ClassField &field,
     switchBlock.Add("case {}::{}:", enumField->mType.ToString(true),
                     variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
     switchBlock.Indent(1);
-    switchBlock.Add("{}::{}(instance->{}(), luaState);", St::LuaHelper, St::LuaHelper_Push,
+    switchBlock.Add("{}::{}(instance->{}(), luaState, false);", St::LuaHelper, St::LuaHelper_Push,
                     Naming().VariantGetterNameInCpp(*field.mField, *otherCls.mStruct));
     switchBlock.Add("break;");
     switchBlock.Indent(-1);
@@ -247,7 +247,7 @@ void LuaPlugin::GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &
   } else if (field.mField->mType.mName == St::Lua_CustomData) {
     GenerateIndexForRegistryData(field, switchBlock);
   } else {
-    switchBlock.Add("{}::{}(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
+    switchBlock.Add("{}::{}(instance->{}, luaState, false);", St::LuaHelper, St::LuaHelper_Push,
                     field.mName);
   }
 }
@@ -485,7 +485,7 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
     } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, {});", field.mName);
     } else {
-      method.mBody.Add("{}::{}({}, luaState);", St::LuaHelper, St::LuaHelper_Push,
+      method.mBody.Add("{}::{}({}, luaState, true);", St::LuaHelper, St::LuaHelper_Push,
                        Naming().FieldNameInCpp(*field.mField, false));
     }
     method.mBody.Add("lua_settable(luaState, -3);");
@@ -565,11 +565,14 @@ void LuaPlugin::ProcessEnum(Class &cls) {
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
-  auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
-  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mBody.Add("{}::{}(mValue, luaState);", St::LuaHelper, St::LuaHelper_Push);
-  Validate().NewMethod(cls, method);
-  cls.mMethods.push_back(std::move(method));
+  // For consistency, all holgen classes have both PushToLua and PushMirrorToLua
+  for (auto &methodName: std::vector<std::string>{"PushToLua", St::Lua_PushMirrorObject}) {
+    auto method = ClassMethod{methodName, Type{"void"}, Visibility::Public, Constness::Const};
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    method.mBody.Add("{}::{}(mValue, luaState, true);", St::LuaHelper, St::LuaHelper_Push);
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+  }
   GenerateReadMirrorObjectFromLua(cls);
   GeneratePushEnumToLua(cls);
 }

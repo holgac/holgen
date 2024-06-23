@@ -51,7 +51,7 @@ void TestEnumStruct::PushToLua(lua_State *luaState) const {
 void TestEnumStruct::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "enumField");
-  LuaHelper::Push(mEnumField, luaState);
+  LuaHelper::Push(mEnumField, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -90,7 +90,7 @@ int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("enumField", key)) {
-    LuaHelper::Push(instance->mEnumField, luaState);
+    LuaHelper::Push(instance->mEnumField, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
     return 0;

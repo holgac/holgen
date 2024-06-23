@@ -33,8 +33,8 @@ int64_t Calculator::Add(lua_State *luaState, const int64_t val) const {
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(val, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(val, luaState, false);
   lua_call(luaState, 2, 1);
   int64_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -60,8 +60,8 @@ Number *Calculator::Subtract(lua_State *luaState, Number &val) const {
     lua_pop(luaState, 1);
     return nullptr;
   }
-  LuaHelper::Push(*this, luaState);
-  LuaHelper::Push(val, luaState);
+  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push(val, luaState, false);
   lua_call(luaState, 2, 1);
   auto result = Number::ReadProxyFromLua(luaState, -1);
   lua_pop(luaState, 2);
@@ -152,14 +152,14 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
   auto instance = Calculator::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("curVal", key)) {
-    LuaHelper::Push(instance->mCurVal, luaState);
+    LuaHelper::Push(instance->mCurVal, luaState, false);
   } else if (0 == strcmp("Add", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Calculator::ReadProxyFromLua(lsInner, -2);
       int64_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       auto result = instance->Add(lsInner, arg0);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else if (0 == strcmp("Subtract", key)) {
@@ -178,7 +178,7 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
       int64_t arg1;
       LuaHelper::Read(arg1, lsInner, -1);
       auto result = instance->SubtractThenMultiply(arg0, arg1);
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else {

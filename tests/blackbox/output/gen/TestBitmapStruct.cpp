@@ -51,7 +51,7 @@ void TestBitmapStruct::PushToLua(lua_State *luaState) const {
 void TestBitmapStruct::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "bitmapField");
-  LuaHelper::Push(mBitmapField, luaState);
+  LuaHelper::Push(mBitmapField, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -90,7 +90,7 @@ int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("bitmapField", key)) {
-    LuaHelper::Push(instance->mBitmapField, luaState);
+    LuaHelper::Push(instance->mBitmapField, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestBitmapStruct.{}", key);
     return 0;

@@ -91,16 +91,16 @@ void Weapon::PushToLua(lua_State *luaState) const {
 void Weapon::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "damageMin");
-  LuaHelper::Push(mDamageMin, luaState);
+  LuaHelper::Push(mDamageMin, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "damageMax");
-  LuaHelper::Push(mDamageMax, luaState);
+  LuaHelper::Push(mDamageMax, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "damageMultipliers");
-  LuaHelper::Push(mDamageMultipliers, luaState);
+  LuaHelper::Push(mDamageMultipliers, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "modifiers");
-  LuaHelper::Push(mModifiers, luaState);
+  LuaHelper::Push(mModifiers, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -148,18 +148,18 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("damageMin", key)) {
-    LuaHelper::Push(instance->mDamageMin, luaState);
+    LuaHelper::Push(instance->mDamageMin, luaState, false);
   } else if (0 == strcmp("damageMax", key)) {
-    LuaHelper::Push(instance->mDamageMax, luaState);
+    LuaHelper::Push(instance->mDamageMax, luaState, false);
   } else if (0 == strcmp("damageMultipliers", key)) {
-    LuaHelper::Push(instance->mDamageMultipliers, luaState);
+    LuaHelper::Push(instance->mDamageMultipliers, luaState, false);
   } else if (0 == strcmp("modifiers", key)) {
-    LuaHelper::Push(instance->mModifiers, luaState);
+    LuaHelper::Push(instance->mModifiers, luaState, false);
   } else if (0 == strcmp("GetAverageDamage", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = Weapon::ReadProxyFromLua(lsInner, -1);
       auto result = instance->GetAverageDamage();
-      LuaHelper::Push(result, lsInner);
+      LuaHelper::Push(result, lsInner, false);
       return 1;
     });
   } else {

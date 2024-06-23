@@ -105,19 +105,19 @@ void Person::PushToLua(lua_State *luaState) const {
 void Person::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "race");
-  LuaHelper::Push(mRace, luaState);
+  LuaHelper::Push(mRace, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "currentCountry");
-  LuaHelper::Push(mCurrentCountry, luaState);
+  LuaHelper::Push(mCurrentCountry, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "currentCity");
-  LuaHelper::Push(mCurrentCity, luaState);
+  LuaHelper::Push(mCurrentCity, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "homeCountry");
-  LuaHelper::Push(mHomeCountry, luaState);
+  LuaHelper::Push(mHomeCountry, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "placeOfBirth");
-  LuaHelper::Push(mPlaceOfBirth, luaState);
+  LuaHelper::Push(mPlaceOfBirth, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -168,15 +168,15 @@ int Person::IndexMetaMethod(lua_State *luaState) {
   auto instance = Person::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("race", key)) {
-    LuaHelper::Push(instance->mRace, luaState);
+    LuaHelper::Push(instance->mRace, luaState, false);
   } else if (0 == strcmp("currentCountry", key)) {
-    LuaHelper::Push(instance->mCurrentCountry, luaState);
+    LuaHelper::Push(instance->mCurrentCountry, luaState, false);
   } else if (0 == strcmp("currentCity", key)) {
-    LuaHelper::Push(instance->mCurrentCity, luaState);
+    LuaHelper::Push(instance->mCurrentCity, luaState, false);
   } else if (0 == strcmp("homeCountry", key)) {
-    LuaHelper::Push(instance->mHomeCountry, luaState);
+    LuaHelper::Push(instance->mHomeCountry, luaState, false);
   } else if (0 == strcmp("placeOfBirth", key)) {
-    LuaHelper::Push(instance->mPlaceOfBirth, luaState);
+    LuaHelper::Push(instance->mPlaceOfBirth, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Person.{}", key);
     return 0;

@@ -221,10 +221,10 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("being1", key)) {
     switch (instance->mBeingType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState);
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState, false);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState);
+      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState, false);
       break;
     default:
       lua_pushnil(luaState);
@@ -232,10 +232,10 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("being2", key)) {
     switch (instance->mBeingType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState);
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState, false);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState);
+      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState, false);
       break;
     default:
       lua_pushnil(luaState);
