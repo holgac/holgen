@@ -9,9 +9,10 @@
 
 namespace holgen_blackbox_test {
 bool TestVariantStructCat::operator==(const TestVariantStructCat &rhs) const {
-  return
-      mName == rhs.mName &&
-      mColor == rhs.mColor;
+  return !(
+      mName != rhs.mName ||
+      mColor != rhs.mColor
+  );
 }
 
 const std::string &TestVariantStructCat::GetName() const {

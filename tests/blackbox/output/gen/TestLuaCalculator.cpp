@@ -9,8 +9,9 @@
 
 namespace holgen_blackbox_test {
 bool TestLuaCalculator::operator==(const TestLuaCalculator &rhs) const {
-  return
-      mLastValue == rhs.mLastValue;
+  return !(
+      mLastValue != rhs.mLastValue
+  );
 }
 
 const TestLuaNumber &TestLuaCalculator::GetLastValue() const {

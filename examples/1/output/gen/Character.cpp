@@ -9,11 +9,12 @@
 
 namespace ex1_schemas {
 bool Character::operator==(const Character &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName &&
-      mRace == rhs.mRace &&
-      mArmor == rhs.mArmor;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mRace != rhs.mRace ||
+      mArmor != rhs.mArmor
+  );
 }
 
 uint32_t Character::GetId() const {

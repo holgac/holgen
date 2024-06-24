@@ -13,6 +13,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestStructSingleElemWithId {
 public:
+  TestStructSingleElemWithId() = default;
+  TestStructSingleElemWithId(const TestStructSingleElemWithId &rhs) = default;
+  TestStructSingleElemWithId(TestStructSingleElemWithId &&rhs) = default;
+  ~TestStructSingleElemWithId() = default;
   bool operator==(const TestStructSingleElemWithId &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
@@ -34,6 +38,8 @@ public:
    */
   static TestStructSingleElemWithId ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestStructSingleElemWithId &operator=(const TestStructSingleElemWithId &rhs) = default;
+  TestStructSingleElemWithId &operator=(TestStructSingleElemWithId &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

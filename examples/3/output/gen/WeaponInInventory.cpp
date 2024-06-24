@@ -8,6 +8,16 @@
 #include "LuaHelper.h"
 
 namespace ex3_schemas {
+WeaponInInventory::WeaponInInventory(const WeaponInInventory &rhs) {
+  ResetType();
+  SetType(rhs.mType);
+  if (mType == WeaponType::Bow) {
+    *GetWeaponAsWeaponTypeBow() = *rhs.GetWeaponAsWeaponTypeBow();
+  } else if (mType == WeaponType::Sword) {
+    *GetWeaponAsWeaponTypeSword() = *rhs.GetWeaponAsWeaponTypeSword();
+  }
+}
+
 WeaponInInventory::WeaponInInventory(WeaponInInventory &&rhs) {
   ResetType();
   SetType(rhs.mType);
@@ -19,41 +29,8 @@ WeaponInInventory::WeaponInInventory(WeaponInInventory &&rhs) {
   rhs.ResetType();
 }
 
-WeaponInInventory::WeaponInInventory(const WeaponInInventory &rhs) {
-  ResetType();
-  SetType(rhs.mType);
-  if (mType == WeaponType::Bow) {
-    *GetWeaponAsWeaponTypeBow() = *rhs.GetWeaponAsWeaponTypeBow();
-  } else if (mType == WeaponType::Sword) {
-    *GetWeaponAsWeaponTypeSword() = *rhs.GetWeaponAsWeaponTypeSword();
-  }
-}
-
 WeaponInInventory::~WeaponInInventory() {
   ResetType();
-}
-
-bool WeaponInInventory::operator==(const WeaponInInventory &rhs) const {
-  return
-      mType == rhs.mType;
-}
-
-const WeaponType &WeaponInInventory::GetType() const {
-  return mType;
-}
-
-WeaponType &WeaponInInventory::GetType() {
-  return mType;
-}
-
-void WeaponInInventory::SetType(const WeaponType &val) {
-  HOLGEN_FAIL_IF(mType != WeaponType::Invalid, "type field was already initialized (as {}), trying to initialize as {}!,", mType, val);
-  mType = val;
-  if (val == WeaponType::Bow) {
-    new (mWeapon.data()) WeaponTypeBow();
-  } else if (val == WeaponType::Sword) {
-    new (mWeapon.data()) WeaponTypeSword();
-  }
 }
 
 const WeaponTypeBow *WeaponInInventory::GetWeaponAsWeaponTypeBow() const {
@@ -76,6 +53,16 @@ WeaponTypeSword *WeaponInInventory::GetWeaponAsWeaponTypeSword() {
   return reinterpret_cast<WeaponTypeSword *>(mWeapon.data());
 }
 
+void WeaponInInventory::SetType(const WeaponType &val) {
+  HOLGEN_FAIL_IF(mType != WeaponType::Invalid, "type field was already initialized (as {}), trying to initialize as {}!,", mType, val);
+  mType = val;
+  if (val == WeaponType::Bow) {
+    new (mWeapon.data()) WeaponTypeBow();
+  } else if (val == WeaponType::Sword) {
+    new (mWeapon.data()) WeaponTypeSword();
+  }
+}
+
 void WeaponInInventory::ResetType() {
   if (mType == WeaponType::Invalid) {
     return;
@@ -88,27 +75,26 @@ void WeaponInInventory::ResetType() {
   mType = WeaponType(WeaponType::Invalid);
 }
 
-WeaponInInventory &WeaponInInventory::operator=(WeaponInInventory &&rhs) {
-  ResetType();
-  SetType(rhs.mType);
-  if (mType == WeaponType::Bow) {
-    *GetWeaponAsWeaponTypeBow() = std::move(*rhs.GetWeaponAsWeaponTypeBow());
-  } else if (mType == WeaponType::Sword) {
-    *GetWeaponAsWeaponTypeSword() = std::move(*rhs.GetWeaponAsWeaponTypeSword());
-  }
-  rhs.ResetType();
-  return *this;
+WeaponType WeaponInInventory::GetType() const {
+  return mType;
 }
 
-WeaponInInventory &WeaponInInventory::operator=(const WeaponInInventory &rhs) {
-  ResetType();
-  SetType(rhs.mType);
-  if (mType == WeaponType::Bow) {
-    *GetWeaponAsWeaponTypeBow() = *rhs.GetWeaponAsWeaponTypeBow();
-  } else if (mType == WeaponType::Sword) {
-    *GetWeaponAsWeaponTypeSword() = *rhs.GetWeaponAsWeaponTypeSword();
+bool WeaponInInventory::operator==(const WeaponInInventory &rhs) const {
+  if (
+      mType != rhs.mType
+  ) {
+    return false;
   }
-  return *this;
+  if (mType == WeaponType::Bow) {
+    if (!(*GetWeaponAsWeaponTypeBow() == *rhs.GetWeaponAsWeaponTypeBow())) {
+      return false;
+    }
+  } else if (mType == WeaponType::Sword) {
+    if (!(*GetWeaponAsWeaponTypeSword() == *rhs.GetWeaponAsWeaponTypeSword())) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -233,5 +219,28 @@ void WeaponInInventory::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, WeaponInInventory::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "WeaponInInventoryMeta");
+}
+
+WeaponInInventory &WeaponInInventory::operator=(const WeaponInInventory &rhs) {
+  ResetType();
+  SetType(rhs.mType);
+  if (mType == WeaponType::Bow) {
+    *GetWeaponAsWeaponTypeBow() = *rhs.GetWeaponAsWeaponTypeBow();
+  } else if (mType == WeaponType::Sword) {
+    *GetWeaponAsWeaponTypeSword() = *rhs.GetWeaponAsWeaponTypeSword();
+  }
+  return *this;
+}
+
+WeaponInInventory &WeaponInInventory::operator=(WeaponInInventory &&rhs) {
+  ResetType();
+  SetType(rhs.mType);
+  if (mType == WeaponType::Bow) {
+    *GetWeaponAsWeaponTypeBow() = std::move(*rhs.GetWeaponAsWeaponTypeBow());
+  } else if (mType == WeaponType::Sword) {
+    *GetWeaponAsWeaponTypeSword() = std::move(*rhs.GetWeaponAsWeaponTypeSword());
+  }
+  rhs.ResetType();
+  return *this;
 }
 }

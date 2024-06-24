@@ -9,8 +9,9 @@
 
 namespace holgen_blackbox_test {
 bool TestBitmapStruct::operator==(const TestBitmapStruct &rhs) const {
-  return
-      mBitmapField == rhs.mBitmapField;
+  return !(
+      mBitmapField != rhs.mBitmapField
+  );
 }
 
 const TestBitmap &TestBitmapStruct::GetBitmapField() const {

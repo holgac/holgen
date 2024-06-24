@@ -10,9 +10,10 @@
 
 namespace holgen_blackbox_test {
 bool DamageMultiplier::operator==(const DamageMultiplier &rhs) const {
-  return
-      mWhen == rhs.mWhen &&
-      std::fabs(mValue - rhs.mValue) < 0.00001;
+  return !(
+      mWhen != rhs.mWhen ||
+      std::fabs(mValue - rhs.mValue) >= 0.00001
+  );
 }
 
 const std::string &DamageMultiplier::GetWhen() const {

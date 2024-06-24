@@ -15,6 +15,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestContainerMap {
 public:
+  TestContainerMap() = default;
+  TestContainerMap(const TestContainerMap &rhs) = default;
+  TestContainerMap(TestContainerMap &&rhs) = default;
+  ~TestContainerMap() = default;
   bool operator==(const TestContainerMap &rhs) const;
   const std::map<uint32_t, TestContainerInnerStructWithId> &GetInnerStructsWithId() const;
   std::map<uint32_t, TestContainerInnerStructWithId> &GetInnerStructsWithId();
@@ -43,6 +47,8 @@ public:
    */
   static TestContainerMap ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestContainerMap &operator=(const TestContainerMap &rhs) = default;
+  TestContainerMap &operator=(TestContainerMap &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

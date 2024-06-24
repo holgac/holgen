@@ -17,11 +17,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructDifferentTypes {
 public:
-  TestVariantStructDifferentTypes(TestVariantStructDifferentTypes &&rhs);
-  TestVariantStructDifferentTypes(const TestVariantStructDifferentTypes &rhs);
   TestVariantStructDifferentTypes() = default;
+  TestVariantStructDifferentTypes(const TestVariantStructDifferentTypes &rhs);
+  TestVariantStructDifferentTypes(TestVariantStructDifferentTypes &&rhs);
   ~TestVariantStructDifferentTypes();
-  bool operator==(const TestVariantStructDifferentTypes &rhs) const;
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
   const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
@@ -36,8 +35,7 @@ public:
   void SetBeing2Type(const TestVariantStructType &val);
   void ResetBeing2Type();
   TestVariantStructType GetBeing2Type() const;
-  TestVariantStructDifferentTypes &operator=(TestVariantStructDifferentTypes &&rhs);
-  TestVariantStructDifferentTypes &operator=(const TestVariantStructDifferentTypes &rhs);
+  bool operator==(const TestVariantStructDifferentTypes &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
@@ -53,6 +51,8 @@ public:
    */
   static TestVariantStructDifferentTypes ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestVariantStructDifferentTypes &operator=(const TestVariantStructDifferentTypes &rhs);
+  TestVariantStructDifferentTypes &operator=(TestVariantStructDifferentTypes &&rhs);
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -8,9 +8,14 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+TestStructNonCopyable::TestStructNonCopyable(TestStructNonCopyable &&rhs) {
+  mBigVector = std::move(rhs.mBigVector);
+}
+
 bool TestStructNonCopyable::operator==(const TestStructNonCopyable &rhs) const {
-  return
-      mBigVector == rhs.mBigVector;
+  return !(
+      mBigVector != rhs.mBigVector
+  );
 }
 
 const std::vector<int> &TestStructNonCopyable::GetBigVector() const {
@@ -122,5 +127,10 @@ void TestStructNonCopyable::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestStructNonCopyable::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructNonCopyableMeta");
+}
+
+TestStructNonCopyable &TestStructNonCopyable::operator=(TestStructNonCopyable &&rhs) {
+  mBigVector = std::move(rhs.mBigVector);
+  return *this;
 }
 }

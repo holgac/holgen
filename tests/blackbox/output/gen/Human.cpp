@@ -11,9 +11,10 @@
 
 namespace holgen_blackbox_test {
 bool Human::operator==(const Human &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName
+  );
 }
 
 uint32_t Human::GetId() const {

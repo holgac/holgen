@@ -9,8 +9,9 @@
 
 namespace holgen_blackbox_test {
 bool TestLuaNumber::operator==(const TestLuaNumber &rhs) const {
-  return
-      mValue == rhs.mValue;
+  return !(
+      mValue != rhs.mValue
+  );
 }
 
 int32_t TestLuaNumber::GetValue() const {

@@ -9,9 +9,10 @@
 
 namespace holgen_blackbox_test {
 bool TestStructSingleElemWithId::operator==(const TestStructSingleElemWithId &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName
+  );
 }
 
 uint32_t TestStructSingleElemWithId::GetId() const {

@@ -13,6 +13,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestBitmapStruct {
 public:
+  TestBitmapStruct() = default;
+  TestBitmapStruct(const TestBitmapStruct &rhs) = default;
+  TestBitmapStruct(TestBitmapStruct &&rhs) = default;
+  ~TestBitmapStruct() = default;
   bool operator==(const TestBitmapStruct &rhs) const;
   const TestBitmap &GetBitmapField() const;
   TestBitmap &GetBitmapField();
@@ -32,6 +36,8 @@ public:
    */
   static TestBitmapStruct ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestBitmapStruct &operator=(const TestBitmapStruct &rhs) = default;
+  TestBitmapStruct &operator=(TestBitmapStruct &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

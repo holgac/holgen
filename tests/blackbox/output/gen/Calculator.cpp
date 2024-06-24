@@ -9,8 +9,9 @@
 
 namespace holgen_blackbox_test {
 bool Calculator::operator==(const Calculator &rhs) const {
-  return
-      mCurVal == rhs.mCurVal;
+  return !(
+      mCurVal != rhs.mCurVal
+  );
 }
 
 const Number &Calculator::GetCurVal() const {

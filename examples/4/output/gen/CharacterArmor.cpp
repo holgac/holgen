@@ -11,9 +11,10 @@
 
 namespace ex4_schemas {
 bool CharacterArmor::operator==(const CharacterArmor &rhs) const {
-  return
-      std::fabs(mDirtAmount - rhs.mDirtAmount) < 0.00001 &&
-      mArmorId == rhs.mArmorId;
+  return !(
+      std::fabs(mDirtAmount - rhs.mDirtAmount) >= 0.00001 ||
+      mArmorId != rhs.mArmorId
+  );
 }
 
 float CharacterArmor::GetDirtAmount() const {

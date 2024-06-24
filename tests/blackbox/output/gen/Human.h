@@ -13,6 +13,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class Human {
 public:
+  Human() = default;
+  Human(const Human &rhs) = default;
+  Human(Human &&rhs) = default;
+  ~Human() = default;
   bool operator==(const Human &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
@@ -36,6 +40,8 @@ public:
    */
   static Human ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  Human &operator=(const Human &rhs) = default;
+  Human &operator=(Human &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

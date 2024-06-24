@@ -17,11 +17,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructSharedType {
 public:
-  TestVariantStructSharedType(TestVariantStructSharedType &&rhs);
-  TestVariantStructSharedType(const TestVariantStructSharedType &rhs);
   TestVariantStructSharedType() = default;
+  TestVariantStructSharedType(const TestVariantStructSharedType &rhs);
+  TestVariantStructSharedType(TestVariantStructSharedType &&rhs);
   ~TestVariantStructSharedType();
-  bool operator==(const TestVariantStructSharedType &rhs) const;
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
   const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
@@ -33,8 +32,7 @@ public:
   void SetBeingType(const TestVariantStructType &val);
   void ResetBeingType();
   TestVariantStructType GetBeingType() const;
-  TestVariantStructSharedType &operator=(TestVariantStructSharedType &&rhs);
-  TestVariantStructSharedType &operator=(const TestVariantStructSharedType &rhs);
+  bool operator==(const TestVariantStructSharedType &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
@@ -50,6 +48,8 @@ public:
    */
   static TestVariantStructSharedType ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestVariantStructSharedType &operator=(const TestVariantStructSharedType &rhs);
+  TestVariantStructSharedType &operator=(TestVariantStructSharedType &&rhs);
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

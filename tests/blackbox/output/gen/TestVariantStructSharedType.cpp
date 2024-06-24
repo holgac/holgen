@@ -8,20 +8,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-TestVariantStructSharedType::TestVariantStructSharedType(TestVariantStructSharedType &&rhs) {
-  ResetBeingType();
-  SetBeingType(rhs.mBeingType);
-  if (mBeingType == TestVariantStructType::Cat) {
-    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
-    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
-  } else if (mBeingType == TestVariantStructType::Human) {
-    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
-    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
-  }
-  mBeingType = rhs.mBeingType;
-  rhs.ResetBeingType();
-}
-
 TestVariantStructSharedType::TestVariantStructSharedType(const TestVariantStructSharedType &rhs) {
   ResetBeingType();
   SetBeingType(rhs.mBeingType);
@@ -35,12 +21,22 @@ TestVariantStructSharedType::TestVariantStructSharedType(const TestVariantStruct
   mBeingType = rhs.mBeingType;
 }
 
-TestVariantStructSharedType::~TestVariantStructSharedType() {
+TestVariantStructSharedType::TestVariantStructSharedType(TestVariantStructSharedType &&rhs) {
   ResetBeingType();
+  SetBeingType(rhs.mBeingType);
+  if (mBeingType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
+    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
+  } else if (mBeingType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
+    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
+  }
+  rhs.ResetBeingType();
+  mBeingType = std::move(rhs.mBeingType);
 }
 
-bool TestVariantStructSharedType::operator==(const TestVariantStructSharedType &rhs) const {
-  return true;
+TestVariantStructSharedType::~TestVariantStructSharedType() {
+  ResetBeingType();
 }
 
 const TestVariantStructCat *TestVariantStructSharedType::GetBeing1AsTestVariantStructCat() const {
@@ -113,33 +109,28 @@ TestVariantStructType TestVariantStructSharedType::GetBeingType() const {
   return mBeingType;
 }
 
-TestVariantStructSharedType &TestVariantStructSharedType::operator=(TestVariantStructSharedType &&rhs) {
-  ResetBeingType();
-  SetBeingType(rhs.mBeingType);
-  if (mBeingType == TestVariantStructType::Cat) {
-    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
-    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
-  } else if (mBeingType == TestVariantStructType::Human) {
-    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
-    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
+bool TestVariantStructSharedType::operator==(const TestVariantStructSharedType &rhs) const {
+  if (
+      mBeingType != rhs.mBeingType
+  ) {
+    return false;
   }
-  mBeingType = rhs.mBeingType;
-  rhs.ResetBeingType();
-  return *this;
-}
-
-TestVariantStructSharedType &TestVariantStructSharedType::operator=(const TestVariantStructSharedType &rhs) {
-  ResetBeingType();
-  SetBeingType(rhs.mBeingType);
   if (mBeingType == TestVariantStructType::Cat) {
-    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
-    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
+    if (!(*GetBeing1AsTestVariantStructCat() == *rhs.GetBeing1AsTestVariantStructCat())) {
+      return false;
+    }
+    if (!(*GetBeing2AsTestVariantStructCat() == *rhs.GetBeing2AsTestVariantStructCat())) {
+      return false;
+    }
   } else if (mBeingType == TestVariantStructType::Human) {
-    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
-    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
+    if (!(*GetBeing1AsTestVariantStructHuman() == *rhs.GetBeing1AsTestVariantStructHuman())) {
+      return false;
+    }
+    if (!(*GetBeing2AsTestVariantStructHuman() == *rhs.GetBeing2AsTestVariantStructHuman())) {
+      return false;
+    }
   }
-  mBeingType = rhs.mBeingType;
-  return *this;
+  return true;
 }
 
 bool TestVariantStructSharedType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -260,5 +251,34 @@ void TestVariantStructSharedType::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestVariantStructSharedType::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestVariantStructSharedTypeMeta");
+}
+
+TestVariantStructSharedType &TestVariantStructSharedType::operator=(const TestVariantStructSharedType &rhs) {
+  ResetBeingType();
+  SetBeingType(rhs.mBeingType);
+  if (mBeingType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
+    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
+  } else if (mBeingType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
+    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
+  }
+  mBeingType = rhs.mBeingType;
+  return *this;
+}
+
+TestVariantStructSharedType &TestVariantStructSharedType::operator=(TestVariantStructSharedType &&rhs) {
+  ResetBeingType();
+  SetBeingType(rhs.mBeingType);
+  if (mBeingType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
+    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
+  } else if (mBeingType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
+    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
+  }
+  rhs.ResetBeingType();
+  mBeingType = std::move(rhs.mBeingType);
+  return *this;
 }
 }

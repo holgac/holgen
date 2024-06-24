@@ -16,6 +16,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class HumanManager {
 public:
+  HumanManager() = default;
+  HumanManager(const HumanManager &rhs) = default;
+  HumanManager(HumanManager &&rhs) = default;
+  ~HumanManager() = default;
   bool operator==(const HumanManager &rhs) const;
   const std::unordered_map<uint32_t, Human> &GetHumans() const;
   std::unordered_map<uint32_t, Human> &GetHumans();
@@ -44,6 +48,8 @@ public:
    */
   static HumanManager ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  HumanManager &operator=(const HumanManager &rhs) = default;
+  HumanManager &operator=(HumanManager &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

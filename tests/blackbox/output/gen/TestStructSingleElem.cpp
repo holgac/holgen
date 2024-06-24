@@ -9,8 +9,9 @@
 
 namespace holgen_blackbox_test {
 bool TestStructSingleElem::operator==(const TestStructSingleElem &rhs) const {
-  return
-      mName == rhs.mName;
+  return !(
+      mName != rhs.mName
+  );
 }
 
 const std::string &TestStructSingleElem::GetName() const {

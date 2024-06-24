@@ -15,6 +15,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class Race {
 public:
+  Race() = default;
+  Race(const Race &rhs) = default;
+  Race(Race &&rhs) = default;
+  ~Race() = default;
   bool operator==(const Race &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
@@ -42,6 +46,8 @@ public:
    */
   static Race ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  Race &operator=(const Race &rhs) = default;
+  Race &operator=(Race &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

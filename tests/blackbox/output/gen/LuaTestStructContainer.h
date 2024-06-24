@@ -15,6 +15,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class LuaTestStructContainer {
 public:
+  LuaTestStructContainer() = default;
+  LuaTestStructContainer(const LuaTestStructContainer &rhs) = default;
+  LuaTestStructContainer(LuaTestStructContainer &&rhs) = default;
+  ~LuaTestStructContainer() = default;
   bool operator==(const LuaTestStructContainer &rhs) const;
   const std::vector<uint32_t> &GetTestVector() const;
   std::vector<uint32_t> &GetTestVector();
@@ -42,6 +46,8 @@ public:
    */
   static LuaTestStructContainer ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  LuaTestStructContainer &operator=(const LuaTestStructContainer &rhs) = default;
+  LuaTestStructContainer &operator=(LuaTestStructContainer &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

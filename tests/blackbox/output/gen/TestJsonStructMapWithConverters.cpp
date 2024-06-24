@@ -9,10 +9,11 @@
 
 namespace holgen_blackbox_test {
 bool TestJsonStructMapWithConverters::operator==(const TestJsonStructMapWithConverters &rhs) const {
-  return
-      mTestMapConvertElem == rhs.mTestMapConvertElem &&
-      mTestMapConvertKey == rhs.mTestMapConvertKey &&
-      mTestMapConvertKeyElem == rhs.mTestMapConvertKeyElem;
+  return !(
+      mTestMapConvertElem != rhs.mTestMapConvertElem ||
+      mTestMapConvertKey != rhs.mTestMapConvertKey ||
+      mTestMapConvertKeyElem != rhs.mTestMapConvertKeyElem
+  );
 }
 
 const std::map<std::string, uint32_t> &TestJsonStructMapWithConverters::GetTestMapConvertElem() const {

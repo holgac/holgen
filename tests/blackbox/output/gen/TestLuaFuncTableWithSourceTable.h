@@ -14,6 +14,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestLuaFuncTableWithSourceTable {
 public:
+  TestLuaFuncTableWithSourceTable() = default;
+  TestLuaFuncTableWithSourceTable(const TestLuaFuncTableWithSourceTable &rhs) = default;
+  TestLuaFuncTableWithSourceTable(TestLuaFuncTableWithSourceTable &&rhs) = default;
+  ~TestLuaFuncTableWithSourceTable() = default;
   bool operator==(const TestLuaFuncTableWithSourceTable &rhs) const;
   void SetTable(std::string val);
   const std::string &GetTable();
@@ -34,6 +38,8 @@ public:
    */
   static TestLuaFuncTableWithSourceTable ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestLuaFuncTableWithSourceTable &operator=(const TestLuaFuncTableWithSourceTable &rhs) = default;
+  TestLuaFuncTableWithSourceTable &operator=(TestLuaFuncTableWithSourceTable &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

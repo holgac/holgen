@@ -19,6 +19,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class GameData {
 public:
+  GameData() = default;
+  GameData(const GameData &rhs) = default;
+  GameData(GameData &&rhs) = default;
+  ~GameData() = default;
   bool operator==(const GameData &rhs) const;
   const std::vector<Boot> &GetBoots() const;
   std::vector<Boot> &GetBoots();
@@ -67,6 +71,8 @@ public:
    */
   static GameData ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  GameData &operator=(const GameData &rhs) = default;
+  GameData &operator=(GameData &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -8,6 +8,18 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+TestVariantStructExplicitType::TestVariantStructExplicitType(const TestVariantStructExplicitType &rhs) {
+  ResetType();
+  SetType(rhs.mType);
+  if (mType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
+    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
+  } else if (mType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
+    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
+  }
+}
+
 TestVariantStructExplicitType::TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs) {
   ResetType();
   SetType(rhs.mType);
@@ -21,45 +33,8 @@ TestVariantStructExplicitType::TestVariantStructExplicitType(TestVariantStructEx
   rhs.ResetType();
 }
 
-TestVariantStructExplicitType::TestVariantStructExplicitType(const TestVariantStructExplicitType &rhs) {
-  ResetType();
-  SetType(rhs.mType);
-  if (mType == TestVariantStructType::Cat) {
-    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
-    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
-  } else if (mType == TestVariantStructType::Human) {
-    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
-    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
-  }
-}
-
 TestVariantStructExplicitType::~TestVariantStructExplicitType() {
   ResetType();
-}
-
-bool TestVariantStructExplicitType::operator==(const TestVariantStructExplicitType &rhs) const {
-  return
-      mType == rhs.mType;
-}
-
-const TestVariantStructType &TestVariantStructExplicitType::GetType() const {
-  return mType;
-}
-
-TestVariantStructType &TestVariantStructExplicitType::GetType() {
-  return mType;
-}
-
-void TestVariantStructExplicitType::SetType(const TestVariantStructType &val) {
-  HOLGEN_FAIL_IF(mType != TestVariantStructType::Invalid, "type field was already initialized (as {}), trying to initialize as {}!,", mType, val);
-  mType = val;
-  if (val == TestVariantStructType::Cat) {
-    new (mBeing1.data()) TestVariantStructCat();
-    new (mBeing2.data()) TestVariantStructCat();
-  } else if (val == TestVariantStructType::Human) {
-    new (mBeing1.data()) TestVariantStructHuman();
-    new (mBeing2.data()) TestVariantStructHuman();
-  }
 }
 
 const TestVariantStructCat *TestVariantStructExplicitType::GetBeing1AsTestVariantStructCat() const {
@@ -102,6 +77,18 @@ TestVariantStructHuman *TestVariantStructExplicitType::GetBeing2AsTestVariantStr
   return reinterpret_cast<TestVariantStructHuman *>(mBeing2.data());
 }
 
+void TestVariantStructExplicitType::SetType(const TestVariantStructType &val) {
+  HOLGEN_FAIL_IF(mType != TestVariantStructType::Invalid, "type field was already initialized (as {}), trying to initialize as {}!,", mType, val);
+  mType = val;
+  if (val == TestVariantStructType::Cat) {
+    new (mBeing1.data()) TestVariantStructCat();
+    new (mBeing2.data()) TestVariantStructCat();
+  } else if (val == TestVariantStructType::Human) {
+    new (mBeing1.data()) TestVariantStructHuman();
+    new (mBeing2.data()) TestVariantStructHuman();
+  }
+}
+
 void TestVariantStructExplicitType::ResetType() {
   if (mType == TestVariantStructType::Invalid) {
     return;
@@ -116,31 +103,32 @@ void TestVariantStructExplicitType::ResetType() {
   mType = TestVariantStructType(TestVariantStructType::Invalid);
 }
 
-TestVariantStructExplicitType &TestVariantStructExplicitType::operator=(TestVariantStructExplicitType &&rhs) {
-  ResetType();
-  SetType(rhs.mType);
-  if (mType == TestVariantStructType::Cat) {
-    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
-    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
-  } else if (mType == TestVariantStructType::Human) {
-    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
-    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
-  }
-  rhs.ResetType();
-  return *this;
+TestVariantStructType TestVariantStructExplicitType::GetType() const {
+  return mType;
 }
 
-TestVariantStructExplicitType &TestVariantStructExplicitType::operator=(const TestVariantStructExplicitType &rhs) {
-  ResetType();
-  SetType(rhs.mType);
-  if (mType == TestVariantStructType::Cat) {
-    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
-    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
-  } else if (mType == TestVariantStructType::Human) {
-    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
-    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
+bool TestVariantStructExplicitType::operator==(const TestVariantStructExplicitType &rhs) const {
+  if (
+      mType != rhs.mType
+  ) {
+    return false;
   }
-  return *this;
+  if (mType == TestVariantStructType::Cat) {
+    if (!(*GetBeing1AsTestVariantStructCat() == *rhs.GetBeing1AsTestVariantStructCat())) {
+      return false;
+    }
+    if (!(*GetBeing2AsTestVariantStructCat() == *rhs.GetBeing2AsTestVariantStructCat())) {
+      return false;
+    }
+  } else if (mType == TestVariantStructType::Human) {
+    if (!(*GetBeing1AsTestVariantStructHuman() == *rhs.GetBeing1AsTestVariantStructHuman())) {
+      return false;
+    }
+    if (!(*GetBeing2AsTestVariantStructHuman() == *rhs.GetBeing2AsTestVariantStructHuman())) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -287,5 +275,32 @@ void TestVariantStructExplicitType::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestVariantStructExplicitType::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestVariantStructExplicitTypeMeta");
+}
+
+TestVariantStructExplicitType &TestVariantStructExplicitType::operator=(const TestVariantStructExplicitType &rhs) {
+  ResetType();
+  SetType(rhs.mType);
+  if (mType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = *rhs.GetBeing1AsTestVariantStructCat();
+    *GetBeing2AsTestVariantStructCat() = *rhs.GetBeing2AsTestVariantStructCat();
+  } else if (mType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = *rhs.GetBeing1AsTestVariantStructHuman();
+    *GetBeing2AsTestVariantStructHuman() = *rhs.GetBeing2AsTestVariantStructHuman();
+  }
+  return *this;
+}
+
+TestVariantStructExplicitType &TestVariantStructExplicitType::operator=(TestVariantStructExplicitType &&rhs) {
+  ResetType();
+  SetType(rhs.mType);
+  if (mType == TestVariantStructType::Cat) {
+    *GetBeing1AsTestVariantStructCat() = std::move(*rhs.GetBeing1AsTestVariantStructCat());
+    *GetBeing2AsTestVariantStructCat() = std::move(*rhs.GetBeing2AsTestVariantStructCat());
+  } else if (mType == TestVariantStructType::Human) {
+    *GetBeing1AsTestVariantStructHuman() = std::move(*rhs.GetBeing1AsTestVariantStructHuman());
+    *GetBeing2AsTestVariantStructHuman() = std::move(*rhs.GetBeing2AsTestVariantStructHuman());
+  }
+  rhs.ResetType();
+  return *this;
 }
 }

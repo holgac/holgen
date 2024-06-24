@@ -16,6 +16,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestJsonTagManager {
 public:
+  TestJsonTagManager() = default;
+  TestJsonTagManager(const TestJsonTagManager &rhs) = default;
+  TestJsonTagManager(TestJsonTagManager &&rhs) = default;
+  ~TestJsonTagManager() = default;
   bool operator==(const TestJsonTagManager &rhs) const;
   const std::vector<TestJsonTag> &GetTags() const;
   std::vector<TestJsonTag> &GetTags();
@@ -43,6 +47,8 @@ public:
    */
   static TestJsonTagManager ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestJsonTagManager &operator=(const TestJsonTagManager &rhs) = default;
+  TestJsonTagManager &operator=(TestJsonTagManager &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

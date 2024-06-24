@@ -12,12 +12,13 @@
 
 namespace ex4_schemas {
 bool Character::operator==(const Character &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName &&
-      mPartnerId == rhs.mPartnerId &&
-      mWeaponId == rhs.mWeaponId &&
-      mArmor == rhs.mArmor;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mPartnerId != rhs.mPartnerId ||
+      mWeaponId != rhs.mWeaponId ||
+      mArmor != rhs.mArmor
+  );
 }
 
 uint32_t Character::GetId() const {

@@ -13,6 +13,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructCat {
 public:
+  TestVariantStructCat() = default;
+  TestVariantStructCat(const TestVariantStructCat &rhs) = default;
+  TestVariantStructCat(TestVariantStructCat &&rhs) = default;
+  ~TestVariantStructCat() = default;
   bool operator==(const TestVariantStructCat &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -35,6 +39,8 @@ public:
    */
   static TestVariantStructCat ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestVariantStructCat &operator=(const TestVariantStructCat &rhs) = default;
+  TestVariantStructCat &operator=(TestVariantStructCat &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -15,6 +15,10 @@ namespace ex4_schemas {
 namespace ex4_schemas {
 class Character {
 public:
+  Character() = default;
+  Character(const Character &rhs) = default;
+  Character(Character &&rhs) = default;
+  ~Character() = default;
   bool operator==(const Character &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
@@ -49,6 +53,8 @@ public:
    */
   static Character ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  Character &operator=(const Character &rhs) = default;
+  Character &operator=(Character &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

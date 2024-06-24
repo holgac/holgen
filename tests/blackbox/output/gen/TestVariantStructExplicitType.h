@@ -17,14 +17,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestVariantStructExplicitType {
 public:
-  TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs);
-  TestVariantStructExplicitType(const TestVariantStructExplicitType &rhs);
   TestVariantStructExplicitType() = default;
+  TestVariantStructExplicitType(const TestVariantStructExplicitType &rhs);
+  TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs);
   ~TestVariantStructExplicitType();
-  bool operator==(const TestVariantStructExplicitType &rhs) const;
-  const TestVariantStructType &GetType() const;
-  TestVariantStructType &GetType();
-  void SetType(const TestVariantStructType &val);
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
   const TestVariantStructHuman *GetBeing1AsTestVariantStructHuman() const;
@@ -33,9 +29,10 @@ public:
   TestVariantStructCat *GetBeing2AsTestVariantStructCat();
   const TestVariantStructHuman *GetBeing2AsTestVariantStructHuman() const;
   TestVariantStructHuman *GetBeing2AsTestVariantStructHuman();
+  void SetType(const TestVariantStructType &val);
   void ResetType();
-  TestVariantStructExplicitType &operator=(TestVariantStructExplicitType &&rhs);
-  TestVariantStructExplicitType &operator=(const TestVariantStructExplicitType &rhs);
+  TestVariantStructType GetType() const;
+  bool operator==(const TestVariantStructExplicitType &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
@@ -51,6 +48,8 @@ public:
    */
   static TestVariantStructExplicitType ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestVariantStructExplicitType &operator=(const TestVariantStructExplicitType &rhs);
+  TestVariantStructExplicitType &operator=(TestVariantStructExplicitType &&rhs);
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

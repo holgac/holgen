@@ -13,6 +13,10 @@ namespace ex3_schemas {
 namespace ex3_schemas {
 class WeaponTypeBow {
 public:
+  WeaponTypeBow() = default;
+  WeaponTypeBow(const WeaponTypeBow &rhs) = default;
+  WeaponTypeBow(WeaponTypeBow &&rhs) = default;
+  ~WeaponTypeBow() = default;
   bool operator==(const WeaponTypeBow &rhs) const;
   uint32_t GetRange() const;
   const std::string &GetMaterial() const;
@@ -34,6 +38,8 @@ public:
    */
   static WeaponTypeBow ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  WeaponTypeBow &operator=(const WeaponTypeBow &rhs) = default;
+  WeaponTypeBow &operator=(WeaponTypeBow &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

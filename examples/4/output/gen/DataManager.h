@@ -19,11 +19,9 @@ namespace ex4_schemas {
 class DataManager {
 public:
   DataManager() = default;
-  DataManager(DataManager &&rhs) = default;
   DataManager(const DataManager &rhs) = delete;
+  DataManager(DataManager &&rhs);
   ~DataManager() = default;
-  DataManager &operator=(DataManager &&rhs) = default;
-  DataManager &operator=(const DataManager &rhs) = delete;
   bool operator==(const DataManager &rhs) const;
   const std::deque<Character> &GetCharacters() const;
   std::deque<Character> &GetCharacters();
@@ -73,6 +71,8 @@ public:
    */
   static DataManager ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  DataManager &operator=(const DataManager &rhs) = delete;
+  DataManager &operator=(DataManager &&rhs);
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -9,8 +9,9 @@
 
 namespace holgen_blackbox_test {
 bool RaceId::operator==(const RaceId &rhs) const {
-  return
-      mId == rhs.mId;
+  return !(
+      mId != rhs.mId
+  );
 }
 
 uint32_t RaceId::GetId() const {

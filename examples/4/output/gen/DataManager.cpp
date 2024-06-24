@@ -12,11 +12,21 @@
 #include "LuaHelper.h"
 
 namespace ex4_schemas {
+DataManager::DataManager(DataManager &&rhs) {
+  mCharacters = std::move(rhs.mCharacters);
+  mArmors = std::move(rhs.mArmors);
+  mWeapons = std::move(rhs.mWeapons);
+  mCharactersNameIndex = std::move(rhs.mCharactersNameIndex);
+  mArmorsNameIndex = std::move(rhs.mArmorsNameIndex);
+  mWeaponsNameIndex = std::move(rhs.mWeaponsNameIndex);
+}
+
 bool DataManager::operator==(const DataManager &rhs) const {
-  return
-      mCharacters == rhs.mCharacters &&
-      mArmors == rhs.mArmors &&
-      mWeapons == rhs.mWeapons;
+  return !(
+      mCharacters != rhs.mCharacters ||
+      mArmors != rhs.mArmors ||
+      mWeapons != rhs.mWeapons
+  );
 }
 
 const std::deque<Character> &DataManager::GetCharacters() const {
@@ -548,5 +558,15 @@ void DataManager::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, DataManager::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "DataManagerMeta");
+}
+
+DataManager &DataManager::operator=(DataManager &&rhs) {
+  mCharacters = std::move(rhs.mCharacters);
+  mArmors = std::move(rhs.mArmors);
+  mWeapons = std::move(rhs.mWeapons);
+  mCharactersNameIndex = std::move(rhs.mCharactersNameIndex);
+  mArmorsNameIndex = std::move(rhs.mArmorsNameIndex);
+  mWeaponsNameIndex = std::move(rhs.mWeaponsNameIndex);
+  return *this;
 }
 }

@@ -11,11 +11,12 @@
 
 namespace ex4_schemas {
 bool Weapon::operator==(const Weapon &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName &&
-      mDamageMin == rhs.mDamageMin &&
-      mDamageMax == rhs.mDamageMax;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mDamageMin != rhs.mDamageMin ||
+      mDamageMax != rhs.mDamageMax
+  );
 }
 
 uint32_t Weapon::GetId() const {

@@ -11,9 +11,10 @@
 
 namespace holgen_blackbox_test {
 bool TestStructArray::operator==(const TestStructArray &rhs) const {
-  return
-      mType == rhs.mType &&
-      mCustomData == rhs.mCustomData;
+  return !(
+      mType != rhs.mType ||
+      mCustomData != rhs.mCustomData
+  );
 }
 
 const TestStructArrayType &TestStructArray::GetType() const {

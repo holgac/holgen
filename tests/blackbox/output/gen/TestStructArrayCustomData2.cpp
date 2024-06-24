@@ -10,10 +10,11 @@
 
 namespace holgen_blackbox_test {
 bool TestStructArrayCustomData2::operator==(const TestStructArrayCustomData2 &rhs) const {
-  return
-      mF1 == rhs.mF1 &&
-      std::fabs(mF2 - rhs.mF2) < 0.00001 &&
-      mF3 == rhs.mF3;
+  return !(
+      mF1 != rhs.mF1 ||
+      std::fabs(mF2 - rhs.mF2) >= 0.00001 ||
+      mF3 != rhs.mF3
+  );
 }
 
 uint64_t TestStructArrayCustomData2::GetF1() const {

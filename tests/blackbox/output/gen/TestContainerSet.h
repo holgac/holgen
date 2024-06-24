@@ -14,6 +14,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestContainerSet {
 public:
+  TestContainerSet() = default;
+  TestContainerSet(const TestContainerSet &rhs) = default;
+  TestContainerSet(TestContainerSet &&rhs) = default;
+  ~TestContainerSet() = default;
   bool operator==(const TestContainerSet &rhs) const;
   const std::set<std::string> &GetStringContainer() const;
   std::set<std::string> &GetStringContainer();
@@ -45,6 +49,8 @@ public:
    */
   static TestContainerSet ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestContainerSet &operator=(const TestContainerSet &rhs) = default;
+  TestContainerSet &operator=(TestContainerSet &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

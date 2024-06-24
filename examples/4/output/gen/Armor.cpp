@@ -11,10 +11,11 @@
 
 namespace ex4_schemas {
 bool Armor::operator==(const Armor &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName &&
-      mArmorClass == rhs.mArmorClass;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mArmorClass != rhs.mArmorClass
+  );
 }
 
 uint32_t Armor::GetId() const {

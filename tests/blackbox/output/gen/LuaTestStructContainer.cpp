@@ -9,9 +9,10 @@
 
 namespace holgen_blackbox_test {
 bool LuaTestStructContainer::operator==(const LuaTestStructContainer &rhs) const {
-  return
-      mTestVector == rhs.mTestVector &&
-      mTestMap == rhs.mTestMap;
+  return !(
+      mTestVector != rhs.mTestVector ||
+      mTestMap != rhs.mTestMap
+  );
 }
 
 const std::vector<uint32_t> &LuaTestStructContainer::GetTestVector() const {

@@ -7,11 +7,38 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+TestLuaRegistryData::TestLuaRegistryData(TestLuaRegistryData &&rhs) {
+  std::swap(mData, rhs.mData);
+  mTable = std::move(rhs.mTable);
+}
+
 TestLuaRegistryData::~TestLuaRegistryData() {
   HOLGEN_WARN_IF(mData != LUA_NOREF, "TestLuaRegistryData.data was not released!");
 }
+
+void TestLuaRegistryData::InitializeLua(lua_State *luaState) {
+  HOLGEN_WARN_IF(mData != LUA_NOREF, "TestLuaRegistryData.data was already initialized!");
+  lua_newtable(luaState);
+  mData = luaL_ref(luaState, LUA_REGISTRYINDEX);
+}
+
+void TestLuaRegistryData::UninitializeLua(lua_State *luaState) {
+  luaL_unref(luaState, LUA_REGISTRYINDEX, mData);
+  mData = LUA_NOREF;
+}
+
 bool TestLuaRegistryData::operator==(const TestLuaRegistryData &rhs) const {
-  return true;
+  return !(
+      mData != rhs.mData
+  );
+}
+
+int TestLuaRegistryData::GetData() const {
+  return mData;
+}
+
+void TestLuaRegistryData::SetData(int val) {
+  mData = val;
 }
 
 void TestLuaRegistryData::SetTable(std::string val) {
@@ -89,17 +116,6 @@ void TestLuaRegistryData::Add(lua_State *luaState, const int32_t val) const {
 
 bool TestLuaRegistryData::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   return JsonHelper::Parse(mTable, json, converter);
-}
-
-void TestLuaRegistryData::InitializeLua(lua_State *luaState) {
-  HOLGEN_WARN_IF(mData != LUA_NOREF, "TestLuaRegistryData.data was already initialized!");
-  lua_newtable(luaState);
-  mData = luaL_ref(luaState, LUA_REGISTRYINDEX);
-}
-
-void TestLuaRegistryData::UninitializeLua(lua_State *luaState) {
-  luaL_unref(luaState, LUA_REGISTRYINDEX, mData);
-  mData = LUA_NOREF;
 }
 
 void TestLuaRegistryData::PushToLua(lua_State *luaState) const {
@@ -196,5 +212,11 @@ void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestLuaRegistryData::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestLuaRegistryDataMeta");
+}
+
+TestLuaRegistryData &TestLuaRegistryData::operator=(TestLuaRegistryData &&rhs) {
+  std::swap(mData, rhs.mData);
+  mTable = std::move(rhs.mTable);
+  return *this;
 }
 }

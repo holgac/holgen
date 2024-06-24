@@ -14,6 +14,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestJsonStructMapWithConverters {
 public:
+  TestJsonStructMapWithConverters() = default;
+  TestJsonStructMapWithConverters(const TestJsonStructMapWithConverters &rhs) = default;
+  TestJsonStructMapWithConverters(TestJsonStructMapWithConverters &&rhs) = default;
+  ~TestJsonStructMapWithConverters() = default;
   bool operator==(const TestJsonStructMapWithConverters &rhs) const;
   const std::map<std::string, uint32_t> &GetTestMapConvertElem() const;
   std::map<std::string, uint32_t> &GetTestMapConvertElem();
@@ -39,6 +43,8 @@ public:
    */
   static TestJsonStructMapWithConverters ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestJsonStructMapWithConverters &operator=(const TestJsonStructMapWithConverters &rhs) = default;
+  TestJsonStructMapWithConverters &operator=(TestJsonStructMapWithConverters &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

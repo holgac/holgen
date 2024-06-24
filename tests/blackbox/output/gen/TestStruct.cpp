@@ -8,12 +8,20 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
+TestStruct::TestStruct(TestStruct &&rhs) {
+  mTestFieldBool = rhs.mTestFieldBool;
+  mTestFieldUnsigned = rhs.mTestFieldUnsigned;
+  mTestFieldString = std::move(rhs.mTestFieldString);
+  std::swap(mTestFieldUserdata, rhs.mTestFieldUserdata);
+}
+
 bool TestStruct::operator==(const TestStruct &rhs) const {
-  return
-      mTestFieldBool == rhs.mTestFieldBool &&
-      mTestFieldUnsigned == rhs.mTestFieldUnsigned &&
-      mTestFieldString == rhs.mTestFieldString &&
-      mTestFieldUserdata == rhs.mTestFieldUserdata;
+  return !(
+      mTestFieldBool != rhs.mTestFieldBool ||
+      mTestFieldUnsigned != rhs.mTestFieldUnsigned ||
+      mTestFieldString != rhs.mTestFieldString ||
+      mTestFieldUserdata != rhs.mTestFieldUserdata
+  );
 }
 
 bool TestStruct::GetTestFieldBool() const {
@@ -163,5 +171,13 @@ void TestStruct::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestStruct::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructMeta");
+}
+
+TestStruct &TestStruct::operator=(TestStruct &&rhs) {
+  mTestFieldBool = rhs.mTestFieldBool;
+  mTestFieldUnsigned = rhs.mTestFieldUnsigned;
+  mTestFieldString = std::move(rhs.mTestFieldString);
+  std::swap(mTestFieldUserdata, rhs.mTestFieldUserdata);
+  return *this;
 }
 }

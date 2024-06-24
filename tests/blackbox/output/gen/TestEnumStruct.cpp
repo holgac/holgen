@@ -9,8 +9,9 @@
 
 namespace holgen_blackbox_test {
 bool TestEnumStruct::operator==(const TestEnumStruct &rhs) const {
-  return
-      mEnumField == rhs.mEnumField;
+  return !(
+      mEnumField != rhs.mEnumField
+  );
 }
 
 const TestEnum &TestEnumStruct::GetEnumField() const {

@@ -13,6 +13,10 @@ namespace ex4_schemas {
 namespace ex4_schemas {
 class CharacterArmor {
 public:
+  CharacterArmor() = default;
+  CharacterArmor(const CharacterArmor &rhs) = default;
+  CharacterArmor(CharacterArmor &&rhs) = default;
+  ~CharacterArmor() = default;
   bool operator==(const CharacterArmor &rhs) const;
   float GetDirtAmount() const;
   uint32_t GetArmorId() const;
@@ -35,6 +39,8 @@ public:
    */
   static CharacterArmor ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  CharacterArmor &operator=(const CharacterArmor &rhs) = default;
+  CharacterArmor &operator=(CharacterArmor &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

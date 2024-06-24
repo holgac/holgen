@@ -14,6 +14,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class Calculator {
 public:
+  Calculator() = default;
+  Calculator(const Calculator &rhs) = default;
+  Calculator(Calculator &&rhs) = default;
+  ~Calculator() = default;
   bool operator==(const Calculator &rhs) const;
   const Number &GetCurVal() const;
   Number &GetCurVal();
@@ -40,6 +44,8 @@ public:
    */
   static Calculator ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  Calculator &operator=(const Calculator &rhs) = default;
+  Calculator &operator=(Calculator &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

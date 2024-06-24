@@ -12,10 +12,11 @@
 
 namespace holgen_blackbox_test {
 bool GameData::operator==(const GameData &rhs) const {
-  return
-      mBoots == rhs.mBoots &&
-      mArmors == rhs.mArmors &&
-      mCharacters == rhs.mCharacters;
+  return !(
+      mBoots != rhs.mBoots ||
+      mArmors != rhs.mArmors ||
+      mCharacters != rhs.mCharacters
+  );
 }
 
 const std::vector<Boot> &GameData::GetBoots() const {

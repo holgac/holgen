@@ -16,6 +16,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestStructArray {
 public:
+  TestStructArray() = default;
+  TestStructArray(const TestStructArray &rhs) = default;
+  TestStructArray(TestStructArray &&rhs) = default;
+  ~TestStructArray() = default;
   bool operator==(const TestStructArray &rhs) const;
   const TestStructArrayType &GetType() const;
   TestStructArrayType &GetType();
@@ -41,6 +45,8 @@ public:
    */
   static TestStructArray ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestStructArray &operator=(const TestStructArray &rhs) = default;
+  TestStructArray &operator=(TestStructArray &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

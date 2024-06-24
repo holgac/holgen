@@ -12,6 +12,10 @@ namespace ex3_schemas {
 namespace ex3_schemas {
 class WeaponTypeSword {
 public:
+  WeaponTypeSword() = default;
+  WeaponTypeSword(const WeaponTypeSword &rhs) = default;
+  WeaponTypeSword(WeaponTypeSword &&rhs) = default;
+  ~WeaponTypeSword() = default;
   bool operator==(const WeaponTypeSword &rhs) const;
   float GetSharpness() const;
   bool GetIsShortSword() const;
@@ -32,6 +36,8 @@ public:
    */
   static WeaponTypeSword ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  WeaponTypeSword &operator=(const WeaponTypeSword &rhs) = default;
+  WeaponTypeSword &operator=(WeaponTypeSword &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

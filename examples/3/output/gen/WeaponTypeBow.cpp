@@ -9,9 +9,10 @@
 
 namespace ex3_schemas {
 bool WeaponTypeBow::operator==(const WeaponTypeBow &rhs) const {
-  return
-      mRange == rhs.mRange &&
-      mMaterial == rhs.mMaterial;
+  return !(
+      mRange != rhs.mRange ||
+      mMaterial != rhs.mMaterial
+  );
 }
 
 uint32_t WeaponTypeBow::GetRange() const {

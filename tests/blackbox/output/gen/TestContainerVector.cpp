@@ -9,11 +9,12 @@
 
 namespace holgen_blackbox_test {
 bool TestContainerVector::operator==(const TestContainerVector &rhs) const {
-  return
-      mInnerStructsWithId == rhs.mInnerStructsWithId &&
-      mInnerStructsNoId == rhs.mInnerStructsNoId &&
-      mStringContainer == rhs.mStringContainer &&
-      mUnsignedContainer == rhs.mUnsignedContainer;
+  return !(
+      mInnerStructsWithId != rhs.mInnerStructsWithId ||
+      mInnerStructsNoId != rhs.mInnerStructsNoId ||
+      mStringContainer != rhs.mStringContainer ||
+      mUnsignedContainer != rhs.mUnsignedContainer
+  );
 }
 
 const std::vector<TestContainerInnerStructWithId> &TestContainerVector::GetInnerStructsWithId() const {

@@ -14,11 +14,9 @@ namespace holgen_blackbox_test {
 class TestStructNonCopyable {
 public:
   TestStructNonCopyable() = default;
-  TestStructNonCopyable(TestStructNonCopyable &&rhs) = default;
   TestStructNonCopyable(const TestStructNonCopyable &rhs) = delete;
+  TestStructNonCopyable(TestStructNonCopyable &&rhs);
   ~TestStructNonCopyable() = default;
-  TestStructNonCopyable &operator=(TestStructNonCopyable &&rhs) = default;
-  TestStructNonCopyable &operator=(const TestStructNonCopyable &rhs) = delete;
   bool operator==(const TestStructNonCopyable &rhs) const;
   const std::vector<int> &GetBigVector() const;
   std::vector<int> &GetBigVector();
@@ -38,6 +36,8 @@ public:
    */
   static TestStructNonCopyable ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestStructNonCopyable &operator=(const TestStructNonCopyable &rhs) = delete;
+  TestStructNonCopyable &operator=(TestStructNonCopyable &&rhs);
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

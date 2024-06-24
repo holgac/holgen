@@ -9,14 +9,15 @@
 
 namespace holgen_blackbox_test {
 bool TestLuaFuncTableContainer::operator==(const TestLuaFuncTableContainer &rhs) const {
-  return
-      mField == rhs.mField &&
-      mScript1 == rhs.mScript1 &&
-      mScript2 == rhs.mScript2 &&
-      mScriptWithSourceTable1 == rhs.mScriptWithSourceTable1 &&
-      mScriptWithSourceTable2 == rhs.mScriptWithSourceTable2 &&
-      mStaticScript1 == rhs.mStaticScript1 &&
-      mStaticScript2 == rhs.mStaticScript2;
+  return !(
+      mField != rhs.mField ||
+      mScript1 != rhs.mScript1 ||
+      mScript2 != rhs.mScript2 ||
+      mScriptWithSourceTable1 != rhs.mScriptWithSourceTable1 ||
+      mScriptWithSourceTable2 != rhs.mScriptWithSourceTable2 ||
+      mStaticScript1 != rhs.mStaticScript1 ||
+      mStaticScript2 != rhs.mStaticScript2
+  );
 }
 
 int32_t TestLuaFuncTableContainer::GetField() const {

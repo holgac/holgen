@@ -13,8 +13,9 @@
 
 namespace holgen_blackbox_test {
 bool HumanManager::operator==(const HumanManager &rhs) const {
-  return
-      mHumans == rhs.mHumans;
+  return !(
+      mHumans != rhs.mHumans
+  );
 }
 
 const std::unordered_map<uint32_t, Human> &HumanManager::GetHumans() const {

@@ -9,9 +9,10 @@
 
 namespace holgen_blackbox_test {
 bool TestContainerInnerStructNoId::operator==(const TestContainerInnerStructNoId &rhs) const {
-  return
-      mField == rhs.mField &&
-      mName == rhs.mName;
+  return !(
+      mField != rhs.mField ||
+      mName != rhs.mName
+  );
 }
 
 uint32_t TestContainerInnerStructNoId::GetField() const {

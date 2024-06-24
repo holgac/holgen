@@ -17,21 +17,18 @@ namespace ex3_schemas {
 namespace ex3_schemas {
 class WeaponInInventory {
 public:
-  WeaponInInventory(WeaponInInventory &&rhs);
-  WeaponInInventory(const WeaponInInventory &rhs);
   WeaponInInventory() = default;
+  WeaponInInventory(const WeaponInInventory &rhs);
+  WeaponInInventory(WeaponInInventory &&rhs);
   ~WeaponInInventory();
-  bool operator==(const WeaponInInventory &rhs) const;
-  const WeaponType &GetType() const;
-  WeaponType &GetType();
-  void SetType(const WeaponType &val);
   const WeaponTypeBow *GetWeaponAsWeaponTypeBow() const;
   WeaponTypeBow *GetWeaponAsWeaponTypeBow();
   const WeaponTypeSword *GetWeaponAsWeaponTypeSword() const;
   WeaponTypeSword *GetWeaponAsWeaponTypeSword();
+  void SetType(const WeaponType &val);
   void ResetType();
-  WeaponInInventory &operator=(WeaponInInventory &&rhs);
-  WeaponInInventory &operator=(const WeaponInInventory &rhs);
+  WeaponType GetType() const;
+  bool operator==(const WeaponInInventory &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
@@ -47,6 +44,8 @@ public:
    */
   static WeaponInInventory ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  WeaponInInventory &operator=(const WeaponInInventory &rhs);
+  WeaponInInventory &operator=(WeaponInInventory &&rhs);
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

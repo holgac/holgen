@@ -13,6 +13,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestEnumStruct {
 public:
+  TestEnumStruct() = default;
+  TestEnumStruct(const TestEnumStruct &rhs) = default;
+  TestEnumStruct(TestEnumStruct &&rhs) = default;
+  ~TestEnumStruct() = default;
   bool operator==(const TestEnumStruct &rhs) const;
   const TestEnum &GetEnumField() const;
   TestEnum &GetEnumField();
@@ -32,6 +36,8 @@ public:
    */
   static TestEnumStruct ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  TestEnumStruct &operator=(const TestEnumStruct &rhs) = default;
+  TestEnumStruct &operator=(TestEnumStruct &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

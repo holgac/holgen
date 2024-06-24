@@ -10,9 +10,10 @@
 
 namespace ex3_schemas {
 bool WeaponTypeSword::operator==(const WeaponTypeSword &rhs) const {
-  return
-      std::fabs(mSharpness - rhs.mSharpness) < 0.00001 &&
-      mIsShortSword == rhs.mIsShortSword;
+  return !(
+      std::fabs(mSharpness - rhs.mSharpness) >= 0.00001 ||
+      mIsShortSword != rhs.mIsShortSword
+  );
 }
 
 float WeaponTypeSword::GetSharpness() const {

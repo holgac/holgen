@@ -13,6 +13,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class DamageMultiplier {
 public:
+  DamageMultiplier() = default;
+  DamageMultiplier(const DamageMultiplier &rhs) = default;
+  DamageMultiplier(DamageMultiplier &&rhs) = default;
+  ~DamageMultiplier() = default;
   bool operator==(const DamageMultiplier &rhs) const;
   const std::string &GetWhen() const;
   std::string &GetWhen();
@@ -34,6 +38,8 @@ public:
    */
   static DamageMultiplier ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  DamageMultiplier &operator=(const DamageMultiplier &rhs) = default;
+  DamageMultiplier &operator=(DamageMultiplier &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

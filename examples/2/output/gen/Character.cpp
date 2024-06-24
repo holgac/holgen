@@ -9,12 +9,13 @@
 
 namespace ex2_schemas {
 bool Character::operator==(const Character &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName &&
-      mRace == rhs.mRace &&
-      mArmor == rhs.mArmor &&
-      mWeapon == rhs.mWeapon;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mRace != rhs.mRace ||
+      mArmor != rhs.mArmor ||
+      mWeapon != rhs.mWeapon
+  );
 }
 
 uint32_t Character::GetId() const {

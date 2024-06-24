@@ -9,9 +9,10 @@
 
 namespace holgen_blackbox_test {
 bool TestVariantStructHuman::operator==(const TestVariantStructHuman &rhs) const {
-  return
-      mName == rhs.mName &&
-      mNationality == rhs.mNationality;
+  return !(
+      mName != rhs.mName ||
+      mNationality != rhs.mNationality
+  );
 }
 
 const std::string &TestVariantStructHuman::GetName() const {

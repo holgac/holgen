@@ -15,6 +15,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class Weapon {
 public:
+  Weapon() = default;
+  Weapon(const Weapon &rhs) = default;
+  Weapon(Weapon &&rhs) = default;
+  ~Weapon() = default;
   bool operator==(const Weapon &rhs) const;
   uint32_t GetDamageMin() const;
   uint32_t GetDamageMax() const;
@@ -42,6 +46,8 @@ public:
    */
   static Weapon ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  Weapon &operator=(const Weapon &rhs) = default;
+  Weapon &operator=(Weapon &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -15,6 +15,10 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class Country {
 public:
+  Country() = default;
+  Country(const Country &rhs) = default;
+  Country(Country &&rhs) = default;
+  ~Country() = default;
   bool operator==(const Country &rhs) const;
   const Person &GetLeader() const;
   Person &GetLeader();
@@ -40,6 +44,8 @@ public:
    */
   static Country ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
+  Country &operator=(const Country &rhs) = default;
+  Country &operator=(Country &&rhs) = default;
 private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
