@@ -1,8 +1,23 @@
 #include "TranslatedProject.h"
-#include "core/Annotations.h"
 #include "holgen.h"
+#include "core/Annotations.h"
+#include "core/St.h"
 
 namespace holgen {
+
+Class::VariantData Class::GetVariantData() {
+  VariantData variantTypeFieldToVariantFields;
+  for (auto &field: mFields) {
+    if (!field.mField || !field.mField->GetAnnotation(Annotations::Variant)) {
+      continue;
+    }
+    auto typeField = field.mField->GetAnnotation(Annotations::Variant)
+                         ->GetAttribute(Annotations::Variant_TypeField)
+                         ->mValue.mName;
+    variantTypeFieldToVariantFields[typeField].push_back(&field);
+  }
+  return variantTypeFieldToVariantFields;
+}
 
 TranslatedProject::TranslatedProject(const ProjectDefinition &projectDefinition) :
     mProject(projectDefinition), mDependencyGraph(mProject) {}

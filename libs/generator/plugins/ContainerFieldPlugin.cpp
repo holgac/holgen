@@ -92,15 +92,15 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
                                          Annotations::MethodOption_None))
     return;
   auto &underlyingType = field.mType.mTemplateParameters.back();
-  if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(underlyingType.mName))
+  if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(underlyingType.mName)) {
     return;
+  }
+  if (!useMoveRef && !field.mType.IsCopyable(mProject)) {
+    return;
+  }
   auto underlyingClass = mProject.GetClass(underlyingType.mName);
   const ClassField *underlyingIdField = nullptr;
-  if (underlyingClass && underlyingClass->mStruct) {
-    if (!useMoveRef &&
-        underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct,
-                                                       Annotations::Struct_NonCopyable))
-      return;
+  if (underlyingClass) {
     underlyingIdField = underlyingClass->GetIdField();
   }
   bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);

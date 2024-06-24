@@ -201,6 +201,10 @@ struct Class {
   [[nodiscard]] auto GetMethods(const std::string &name) const {
     return NameFilterForEachWrapper(name, mMethods);
   }
+
+  using VariantData = std::map<std::string, std::vector<ClassField *>>;
+  // returns a {variant type field name -> [variant field name]} dict
+  [[nodiscard]] VariantData GetVariantData();
 };
 
 struct TranslatedProject {

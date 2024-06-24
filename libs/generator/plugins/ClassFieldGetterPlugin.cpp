@@ -12,6 +12,9 @@ void ClassFieldGetterPlugin::Run() {
         continue;
       if (field.mField->mType.mName == St::Variant)
         continue;
+      if (cls.GetMethod(Naming().FieldSetterNameInCpp(*field.mField), Constness::Const) ||
+          cls.GetMethod(Naming().FieldSetterNameInCpp(*field.mField), Constness::NotConst))
+        continue;
       ProcessField(cls, field, true);
       ProcessField(cls, field, false);
 

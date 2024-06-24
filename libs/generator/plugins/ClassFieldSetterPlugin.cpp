@@ -17,6 +17,11 @@ void ClassFieldSetterPlugin::Run() {
       if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Set,
                                              Annotations::MethodOption_None))
         continue;
+
+      if (cls.GetMethod(Naming().FieldSetterNameInCpp(*field.mField), Constness::NotConst)) {
+        continue;
+      }
+
       auto method = ClassMethod{Naming().FieldSetterNameInCpp(*field.mField), Type{"void"},
                                 Visibility::Public, Constness::NotConst};
       auto &arg = method.mArguments.emplace_back("val", field.mType);
@@ -37,23 +42,7 @@ void ClassFieldSetterPlugin::Run() {
           arg.mType.mName = "T";
           method.mBody.Add("{} = reinterpret_cast<void*>(val);", field.mName);
         } else {
-          auto isNonCopyable = [&](const std::string &name) {
-            auto underlyingClass = mProject.GetClass(name);
-            if (underlyingClass && underlyingClass->mStruct &&
-                underlyingClass->mStruct->GetMatchingAttribute(Annotations::Struct,
-                                                               Annotations::Struct_NonCopyable)) {
-              return true;
-            }
-            return false;
-          };
-          bool useMove = isNonCopyable(field.mType.mName);
-          if (!useMove && TypeInfo::Get().CppContainers.contains(field.mType.mName)) {
-            auto *underlyingType = &field.mType.mTemplateParameters.back().mName;
-            if (field.mType.mName == "std::array")
-              underlyingType = &field.mType.mTemplateParameters.front().mName;
-            useMove = isNonCopyable(*underlyingType);
-          }
-          if (useMove) {
+          if (!field.mType.IsCopyable(mProject)) {
             arg.mType.mType = PassByType::MoveReference;
             arg.mType.mConstness = Constness::NotConst;
             method.mBody.Add("{} = std::move(val);", field.mName);

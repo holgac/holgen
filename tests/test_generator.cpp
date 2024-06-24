@@ -91,11 +91,17 @@ namespace generator_test_namespace {
  */
 class Person {
 public:
+  Person() = default;
+  Person(const Person &rhs) = default;
+  Person(Person &&rhs) = default;
+  ~Person() = default;
   bool operator==(const Person &rhs) const;
   uint32_t GetAge() const;
   float GetGender() const;
   void SetAge(uint32_t val);
   void SetGender(float val);
+  Person &operator=(const Person &rhs) = default;
+  Person &operator=(Person &&rhs) = default;
 private:
   // this is the age of the person
   uint32_t mAge = 0;
@@ -116,9 +122,10 @@ private:
 
 namespace generator_test_namespace {
 bool Person::operator==(const Person &rhs) const {
-  return
-      mAge == rhs.mAge &&
-      std::fabs(mGender - rhs.mGender) < 0.1;
+  return !(
+      mAge != rhs.mAge ||
+      std::fabs(mGender - rhs.mGender) >= 0.1
+  );
 }
 
 uint32_t Person::GetAge() const {
@@ -180,6 +187,10 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Market {
 public:
+  Market() = default;
+  Market(const Market &rhs) = default;
+  Market(Market &&rhs) = default;
+  ~Market() = default;
   bool operator==(const Market &rhs) const;
   const std::vector<std::string> &GetInstruments() const;
   std::vector<std::string> &GetInstruments();
@@ -190,6 +201,8 @@ public:
   // Callback when a new trade is executed
   void OnNewTrade(const std::string &instrument, const double price);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  Market &operator=(const Market &rhs) = default;
+  Market &operator=(Market &&rhs) = default;
 private:
   std::vector<std::string> mInstruments;
   std::map<std::string, double> mPrices;
@@ -207,9 +220,10 @@ private:
 
 namespace generator_test_namespace {
 bool Market::operator==(const Market &rhs) const {
-  return
-      mInstruments == rhs.mInstruments &&
-      mPrices == rhs.mPrices;
+  return !(
+      mInstruments != rhs.mInstruments ||
+      mPrices != rhs.mPrices
+  );
 }
 
 const std::vector<std::string> &Market::GetInstruments() const {
@@ -297,6 +311,10 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Sound {
 public:
+  Sound() = default;
+  Sound(const Sound &rhs) = default;
+  Sound(Sound &&rhs) = default;
+  ~Sound() = default;
   bool operator==(const Sound &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -304,6 +322,8 @@ public:
   void SetName(const std::string &val);
   void SetVolume(uint32_t val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  Sound &operator=(const Sound &rhs) = default;
+  Sound &operator=(Sound &&rhs) = default;
 private:
   std::string mName;
   uint32_t mVolume;
@@ -322,9 +342,10 @@ private:
 
 namespace generator_test_namespace {
 bool Sound::operator==(const Sound &rhs) const {
-  return
-      mName == rhs.mName &&
-      mVolume == rhs.mVolume;
+  return !(
+      mName != rhs.mName ||
+      mVolume != rhs.mVolume
+  );
 }
 
 const std::string &Sound::GetName() const {
@@ -383,11 +404,17 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Animal {
 public:
+  Animal() = default;
+  Animal(const Animal &rhs) = default;
+  Animal(Animal &&rhs) = default;
+  ~Animal() = default;
   bool operator==(const Animal &rhs) const;
   const std::vector<Sound> &GetSounds() const;
   std::vector<Sound> &GetSounds();
   void SetSounds(const std::vector<Sound> &val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  Animal &operator=(const Animal &rhs) = default;
+  Animal &operator=(Animal &&rhs) = default;
 private:
   std::vector<Sound> mSounds;
 };
@@ -405,8 +432,9 @@ private:
 
 namespace generator_test_namespace {
 bool Animal::operator==(const Animal &rhs) const {
-  return
-      mSounds == rhs.mSounds;
+  return !(
+      mSounds != rhs.mSounds
+  );
 }
 
 const std::vector<Sound> &Animal::GetSounds() const {
@@ -490,6 +518,10 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Person {
 public:
+  Person() = default;
+  Person(const Person &rhs) = default;
+  Person(Person &&rhs) = default;
+  ~Person() = default;
   bool operator==(const Person &rhs) const;
   uint32_t GetCurrentCountry() const;
   uint32_t GetCurrentCity() const;
@@ -500,6 +532,8 @@ public:
   void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  Person &operator=(const Person &rhs) = default;
+  Person &operator=(Person &&rhs) = default;
 private:
   uint32_t mCurrentCountry;
   uint32_t mCurrentCity;
@@ -519,11 +553,12 @@ private:
 
 namespace generator_test_namespace {
 bool Person::operator==(const Person &rhs) const {
-  return
-      mCurrentCountry == rhs.mCurrentCountry &&
-      mCurrentCity == rhs.mCurrentCity &&
-      mHomeCountry == rhs.mHomeCountry &&
-      mPlaceOfBirth == rhs.mPlaceOfBirth;
+  return !(
+      mCurrentCountry != rhs.mCurrentCountry ||
+      mCurrentCity != rhs.mCurrentCity ||
+      mHomeCountry != rhs.mHomeCountry ||
+      mPlaceOfBirth != rhs.mPlaceOfBirth
+  );
 }
 
 uint32_t Person::GetCurrentCountry() const {
@@ -606,6 +641,10 @@ namespace generator_test_namespace {
 namespace generator_test_namespace {
 class Country {
 public:
+  Country() = default;
+  Country(const Country &rhs) = default;
+  Country(Country &&rhs) = default;
+  ~Country() = default;
   bool operator==(const Country &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -614,6 +653,8 @@ public:
   void SetName(const std::string &val);
   void SetLeader(const Person &val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  Country &operator=(const Country &rhs) = default;
+  Country &operator=(Country &&rhs) = default;
 private:
   std::string mName;
   Person mLeader;
@@ -631,9 +672,10 @@ private:
 
 namespace generator_test_namespace {
 bool Country::operator==(const Country &rhs) const {
-  return
-      mName == rhs.mName &&
-      mLeader == rhs.mLeader;
+  return !(
+      mName != rhs.mName ||
+      mLeader != rhs.mLeader
+  );
 }
 
 const std::string &Country::GetName() const {
@@ -720,6 +762,10 @@ TEST(GeneratorTest, DataManager) {
 namespace generator_test_namespace {
 class Person {
 public:
+  Person() = default;
+  Person(const Person &rhs) = default;
+  Person(Person &&rhs) = default;
+  ~Person() = default;
   bool operator==(const Person &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
@@ -731,6 +777,8 @@ public:
   void SetName(const std::string &val);
   void SetPartnerId(uint32_t val);
   static Person *Get(uint32_t id);
+  Person &operator=(const Person &rhs) = default;
+  Person &operator=(Person &&rhs) = default;
 private:
   uint32_t mId = -1;
   std::string mName;
@@ -749,10 +797,11 @@ private:
 
 namespace generator_test_namespace {
 bool Person::operator==(const Person &rhs) const {
-  return
-      mId == rhs.mId &&
-      mName == rhs.mName &&
-      mPartnerId == rhs.mPartnerId;
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mPartnerId != rhs.mPartnerId
+  );
 }
 
 uint32_t Person::GetId() const {
@@ -830,12 +879,12 @@ namespace generator_test_namespace {
 class Person {
 public:
   Person() = default;
-  Person(Person &&rhs) = default;
   Person(const Person &rhs) = delete;
+  Person(Person &&rhs);
   ~Person() = default;
-  Person &operator=(Person &&rhs) = default;
-  Person &operator=(const Person &rhs) = delete;
   bool operator==(const Person &rhs) const;
+  Person &operator=(const Person &rhs) = delete;
+  Person &operator=(Person &&rhs);
 };
 }
         )R");
@@ -846,8 +895,15 @@ public:
 #include "Person.h"
 
 namespace generator_test_namespace {
+Person::Person(Person &&rhs) {
+}
+
 bool Person::operator==(const Person &rhs) const {
   return true;
+}
+
+Person &Person::operator=(Person &&rhs) {
+  return *this;
 }
 }
         )R");

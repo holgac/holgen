@@ -362,8 +362,7 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
     if (fieldClass && fieldClass->mStruct) {
       switcher.AddCase(
           Naming().FieldNameInLua(*field.mField), [&, fieldClass](CodeBlock &switchBlock) {
-            bool canBeProxy = !fieldClass->mStruct->GetMatchingAttribute(
-                Annotations::Struct, Annotations::Struct_NonCopyable);
+            bool canBeProxy = field.mType.IsCopyable(mProject);
             if (canBeProxy) {
               switchBlock.Add("if (lua_getmetatable(luaState, -1)) {{");
               switchBlock.Indent(1);

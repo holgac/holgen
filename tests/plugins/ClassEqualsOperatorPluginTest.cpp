@@ -34,11 +34,12 @@ struct TestData {
                                    Type{"TestData", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("operator==", Constness::Const), method,
                          R"R(
-return
-    mTestFieldUnsigned == rhs.mTestFieldUnsigned &&
-    std::fabs(mTestFieldDouble - rhs.mTestFieldDouble) < 0.000001 &&
-    std::fabs(mTestFieldFloat - rhs.mTestFieldFloat) < 0.001 &&
-    mTestFieldInner == rhs.mTestFieldInner;
+return !(
+    mTestFieldUnsigned != rhs.mTestFieldUnsigned ||
+    std::fabs(mTestFieldDouble - rhs.mTestFieldDouble) >= 0.000001 ||
+    std::fabs(mTestFieldFloat - rhs.mTestFieldFloat) >= 0.001 ||
+    mTestFieldInner != rhs.mTestFieldInner
+);
 )R");
   }
 }

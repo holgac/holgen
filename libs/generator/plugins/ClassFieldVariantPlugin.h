@@ -20,8 +20,5 @@ private:
   };
   void ProcessVariantTypeCommon(Class &cls, const std::string &typeFieldName,
                                 ClassMethodBase &method, VariantTypeProcessType processType);
-  void GenerateAssignmentMethod(Class &cls, ClassMethodBase &method,
-                                const std::set<std::string> &variantTypeFields, bool isMove);
-  void GenerateAssignmentMethods(Class &cls, const std::set<std::string> &variantTypeFields);
 };
 } // namespace holgen

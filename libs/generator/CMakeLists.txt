@@ -46,9 +46,8 @@ set(gen_plugins
     plugins/CppDestructorPlugin.cpp
     plugins/ClassEqualsOperatorPlugin.cpp
     plugins/ClassFieldVariantPlugin.cpp
-    plugins/ClassNonCopyablePlugin.cpp
-    plugins/ClassRuleOfFivePlugin.cpp
     plugins/FunctionPluginBase.cpp
+    plugins/ClassCopyMoveDestroyPlugin.cpp
 )
 
 add_library(generator

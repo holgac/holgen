@@ -12,24 +12,81 @@ void ClassEqualsOperatorPlugin::Run() {
 void ClassEqualsOperatorPlugin::ProcessClass(Class &cls) {
   auto method = ClassMethod{"operator==", Type{"bool"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
+  auto variantData = cls.GetVariantData();
+  std::set<std::string> variantFields;
+  for (auto &[_, fields]: variantData) {
+    for (auto &field: fields) {
+      variantFields.insert(field->mName);
+    }
+  }
 
   if (cls.mFields.empty()) {
     method.mBody.Add("return true;");
   } else {
-    method.mBody.Add("return");
+    if (variantData.empty()) {
+      method.mBody.Add("return !(");
+    } else {
+      method.mBody.Add("if (");
+    }
     method.mBody.Indent(2);
-    ptrdiff_t fieldsLeft = cls.mFields.size() - 1;
+    std::vector<std::string> lines;
     for (auto &field: cls.mFields) {
+      if (variantFields.contains(field.mName)) {
+        continue;
+      }
+
       if (TypeInfo::Get().FloatingPointTypes.contains(field.mType.mName)) {
         cls.mSourceIncludes.AddStandardHeader("cmath");
-        method.mBody.Add("std::fabs({0} - rhs.{0}) < {1}{2}", field.mName, GetEpsilon(cls, field),
-                         fieldsLeft == 0 ? ";" : " &&");
+        lines.push_back(
+            std::format("std::fabs({0} - rhs.{0}) >= {1}", field.mName, GetEpsilon(cls, field)));
       } else {
-        method.mBody.Add("{0} == rhs.{0}{1}", field.mName, fieldsLeft == 0 ? ";" : " &&");
+        lines.push_back(std::format("{0} != rhs.{0}", field.mName));
       }
-      fieldsLeft -= 1;
     }
-    method.mBody.Indent(-2);
+    for (size_t i = 0; i < lines.size(); ++i) {
+      method.mBody.Add("{}{}", lines[i], i == lines.size() - 1 ? "" : " ||");
+    }
+    if (variantData.empty()) {
+      method.mBody.Indent(-2);
+      method.mBody.Add(");");
+    } else {
+      method.mBody.Indent(-2);
+      method.mBody.Add(") {{");
+      method.mBody.Indent(1);
+      method.mBody.Add("return false;");
+      method.mBody.Indent(-1);
+      method.mBody.Add("}}");
+
+      for (auto &[typeFieldName, variantFields]: variantData) {
+        bool isFirst = true;
+
+        auto variantTypeField = cls.GetField(Naming().FieldNameInCpp(typeFieldName));
+        auto variantClasses = mProject.GetVariantClassesOfEnum(variantTypeField->mType.mName);
+        for (auto &[variantClass, enumEntry]: variantClasses) {
+          if (isFirst) {
+            method.mBody.Add("if ({} == {}::{}) {{", variantTypeField->mName,
+                             variantTypeField->mType.mName, enumEntry->mName);
+            isFirst = false;
+          } else {
+            method.mBody.Add("}} else if ({} == {}::{}) {{", variantTypeField->mName,
+                             variantTypeField->mType.mName, enumEntry->mName);
+          }
+          method.mBody.Indent(1);
+          for (auto &variantField: variantFields) {
+            method.mBody.Add(
+                "if (!(*{0}() == *rhs.{0}())) {{",
+                Naming().VariantGetterNameInCpp(*variantField->mField, *variantClass->mStruct));
+            method.mBody.Indent(1);
+            method.mBody.Add("return false;");
+            method.mBody.Indent(-1);
+            method.mBody.Add("}}");
+          }
+          method.mBody.Indent(-1);
+        }
+        method.mBody.Add("}}");
+        method.mBody.Add("return true;");
+      }
+    }
   }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

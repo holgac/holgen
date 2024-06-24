@@ -3,6 +3,8 @@
 #include <sstream>
 #include "TranslatedProject.h"
 #include "parser/Parser.h"
+#include "core/Annotations.h"
+#include "core/St.h"
 
 namespace holgen {
 TypeInfo::TypeInfo() {
@@ -174,5 +176,37 @@ void Type::PreventCopying(bool addConst) {
     if (addConst)
       mConstness = Constness::Const;
   }
+}
+
+bool Type::IsCopyable(TranslatedProject &project) const {
+  auto cls = project.GetClass(mName);
+  if (cls) {
+    if (cls->mStruct &&
+        cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
+      return false;
+    }
+    for (auto &field: cls->mFields) {
+      if (!field.mType.IsCopyable(project)) {
+        return false;
+      }
+      if (!field.mField) {
+        continue;
+      }
+      if (field.mField->mType.mName == St::Lua_CustomData) {
+        return false;
+      }
+      if (field.mField->mType.mName == St::UserData) {
+        // TODO: special annotation for userdata to specify copy/move behaviour
+        // For now, assuming they store unique data
+        return false;
+      }
+    }
+  }
+  for (auto &templateParameter: mTemplateParameters) {
+    if (!templateParameter.IsCopyable(project)) {
+      return false;
+    }
+  }
+  return true;
 }
 } // namespace holgen

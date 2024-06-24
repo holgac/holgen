@@ -13,114 +13,6 @@ void ClassFieldVariantPlugin::Run() {
   }
 }
 
-void ClassFieldVariantPlugin::GenerateAssignmentMethod(
-    Class &cls, ClassMethodBase &method, const std::set<std::string> &variantTypeFields,
-    bool isMove) {
-  for (auto &variantTypeField: variantTypeFields) {
-    method.mBody.Add("{}();", Naming().VariantResetterNameInCpp(variantTypeField));
-    method.mBody.Add("{}(rhs.{});", Naming().FieldSetterNameInCpp(variantTypeField),
-                     Naming().FieldNameInCpp(variantTypeField));
-  }
-  for (auto &variantTypeField: variantTypeFields) {
-    ProcessVariantTypeCommon(cls, variantTypeField, method,
-                             isMove ? VariantTypeProcessType::Mover
-                                    : VariantTypeProcessType::Copier);
-  }
-
-  for (auto &field: cls.mFields) {
-    if (field.mField &&
-        (variantTypeFields.contains(field.mField->mName) ||
-         field.mField->GetAnnotation(Annotations::Variant))) {
-      continue;
-    }
-    bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(field.mType.mName);
-    if (isMove && isPrimitive) {
-      method.mBody.Add("{0} = std::move(rhs.{0});", field.mName);
-    } else if (isMove && field.mType.mName == St::UserData) {
-      // TODO: annotation to specify userdata move behaviour. Userdata could be copyable (if it
-      // points to some common data) or not (if it's allocated). Swap works for both.
-      method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
-    } else {
-      method.mBody.Add("{0} = rhs.{0};", field.mName);
-    }
-  }
-  if (isMove) {
-    for (auto &variantTypeField: variantTypeFields) {
-      method.mBody.Add("rhs.{}();", Naming().VariantResetterNameInCpp(variantTypeField));
-    }
-  }
-}
-
-void ClassFieldVariantPlugin::GenerateAssignmentMethods(
-    Class &cls, const std::set<std::string> &variantTypeFields) {
-  // TODO: move these to ClassConstructorPlugin. LuaRegistryData needs special handling too.
-  auto existingMoveCtor = cls.GetMoveConstructor();
-  if (existingMoveCtor) {
-    if (existingMoveCtor->mDefaultDelete != DefaultDelete::Delete) {
-      THROW_IF(existingMoveCtor->mDefaultDelete == DefaultDelete::Neither,
-               "Cannot touch existing move constructor!");
-      existingMoveCtor->mDefaultDelete = DefaultDelete::Neither;
-      GenerateAssignmentMethod(cls, *existingMoveCtor, variantTypeFields, true);
-    }
-  } else {
-    auto ctor = ClassConstructor{};
-    ctor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
-    GenerateAssignmentMethod(cls, ctor, variantTypeFields, true);
-    cls.mConstructors.push_back(std::move(ctor));
-  }
-
-  auto existingMoveOp = cls.GetMoveAssignment();
-  if (existingMoveOp) {
-    if (existingMoveOp->mDefaultDelete != DefaultDelete::Delete) {
-      THROW_IF(existingMoveOp->mDefaultDelete == DefaultDelete::Neither,
-               "Cannot touch existing move operator!");
-      existingMoveOp->mDefaultDelete = DefaultDelete::Neither;
-      GenerateAssignmentMethod(cls, *existingMoveOp, variantTypeFields, true);
-      existingMoveOp->mBody.Add("return *this;");
-    }
-  } else {
-    auto op = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public,
-                          Constness::NotConst};
-    op.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
-    GenerateAssignmentMethod(cls, op, variantTypeFields, true);
-    op.mBody.Add("return *this;");
-    cls.mMethods.push_back(std::move(op));
-  }
-
-  auto existingCopyCtor = cls.GetCopyConstructor();
-  if (existingCopyCtor) {
-    if (existingCopyCtor->mDefaultDelete != DefaultDelete::Delete) {
-      THROW_IF(existingCopyCtor->mDefaultDelete == DefaultDelete::Neither,
-               "Cannot touch existing copy constructor!");
-      existingCopyCtor->mDefaultDelete = DefaultDelete::Neither;
-      GenerateAssignmentMethod(cls, *existingCopyCtor, variantTypeFields, false);
-    }
-  } else {
-    auto ctor = ClassConstructor{};
-    ctor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
-    GenerateAssignmentMethod(cls, ctor, variantTypeFields, false);
-    cls.mConstructors.push_back(std::move(ctor));
-  }
-
-  auto existingCopyOp = cls.GetCopyAssignment();
-  if (existingCopyOp) {
-    if (existingCopyOp->mDefaultDelete != DefaultDelete::Delete) {
-      THROW_IF(existingCopyOp->mDefaultDelete == DefaultDelete::Neither,
-               "Cannot touch existing copy operator!");
-      existingCopyOp->mDefaultDelete = DefaultDelete::Neither;
-      GenerateAssignmentMethod(cls, *existingCopyOp, variantTypeFields, false);
-      existingCopyOp->mBody.Add("return *this;");
-    }
-  } else {
-    auto op = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference}, Visibility::Public,
-                          Constness::NotConst};
-    op.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
-    GenerateAssignmentMethod(cls, op, variantTypeFields, false);
-    op.mBody.Add("return *this;");
-    cls.mMethods.push_back(std::move(op));
-  }
-}
-
 void ClassFieldVariantPlugin::ProcessStructDefinition(Class &cls,
                                                       const StructDefinition &structDefinition) {
   for (auto &mixin: structDefinition.mMixins) {
@@ -137,10 +29,6 @@ void ClassFieldVariantPlugin::ProcessStructDefinition(Class &cls,
   }
   for (auto &variantType: variantTypeFields) {
     ProcessVariantType(cls, variantType);
-  }
-
-  if (!variantTypeFields.empty()) {
-    GenerateAssignmentMethods(cls, variantTypeFields);
   }
 }
 

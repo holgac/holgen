@@ -57,6 +57,7 @@ struct Type {
   std::vector<Type> mFunctionalTemplateParameters;
   [[nodiscard]] std::string ToString(bool noTrailingSpace) const;
   void PreventCopying(bool addConst = true);
+  [[nodiscard]] bool IsCopyable(TranslatedProject &project) const;
 };
 
 enum class TypeUseCase {
