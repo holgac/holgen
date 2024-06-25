@@ -118,6 +118,11 @@ TestBitmap &TestBitmap::operator|=(const TestBitmap &rhs) {
   return *this;
 }
 
+TestBitmap &TestBitmap::operator|=(UnderlyingType rhs) {
+  mValue |= rhs;
+  return *this;
+}
+
 bool TestBitmap::operator|(const TestBitmap &rhs) const {
   return mValue | rhs.mValue;
 }
@@ -136,6 +141,11 @@ TestBitmap &TestBitmap::operator&=(const TestBitmap &rhs) {
   return *this;
 }
 
+TestBitmap &TestBitmap::operator&=(UnderlyingType rhs) {
+  mValue &= rhs;
+  return *this;
+}
+
 bool TestBitmap::operator&(const TestBitmap &rhs) const {
   return mValue & rhs.mValue;
 }
@@ -151,6 +161,11 @@ TestBitmap &TestBitmap::operator^=(TestBitmap::Entry rhs) {
 
 TestBitmap &TestBitmap::operator^=(const TestBitmap &rhs) {
   mValue ^= rhs.mValue;
+  return *this;
+}
+
+TestBitmap &TestBitmap::operator^=(UnderlyingType rhs) {
+  mValue ^= rhs;
   return *this;
 }
 

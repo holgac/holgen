@@ -43,14 +43,17 @@ public:
   bool operator<(const TestBitmap &rhs) const;
   TestBitmap &operator|=(TestBitmap::Entry rhs);
   TestBitmap &operator|=(const TestBitmap &rhs);
+  TestBitmap &operator|=(UnderlyingType rhs);
   bool operator|(const TestBitmap &rhs) const;
   bool operator|(TestBitmap::Entry rhs) const;
   TestBitmap &operator&=(TestBitmap::Entry rhs);
   TestBitmap &operator&=(const TestBitmap &rhs);
+  TestBitmap &operator&=(UnderlyingType rhs);
   bool operator&(const TestBitmap &rhs) const;
   bool operator&(TestBitmap::Entry rhs) const;
   TestBitmap &operator^=(TestBitmap::Entry rhs);
   TestBitmap &operator^=(const TestBitmap &rhs);
+  TestBitmap &operator^=(UnderlyingType rhs);
   bool operator^(const TestBitmap &rhs) const;
   bool operator^(TestBitmap::Entry rhs) const;
   bool Has(const TestBitmap &val) const;
