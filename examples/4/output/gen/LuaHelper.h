@@ -141,23 +141,69 @@ public:
   }
   template <typename T, size_t C>
   static bool Read(std::array<T, C> &data, lua_State *luaState, int32_t luaIndex) {
-    return false;
+    size_t nextIdx = 0;
+    lua_pushvalue(luaState, luaIndex);
+    lua_pushnil(luaState);
+    while (lua_next(luaState, -2)) {
+      bool res = Read(data[nextIdx], luaState, -1);
+      ++nextIdx;
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not read data from lua into a container");
+      lua_pop(luaState, 1);
+    }
+    lua_pop(luaState, 1);
+    return true;
   }
   template <typename T>
   static bool Read(std::deque<T> &data, lua_State *luaState, int32_t luaIndex) {
-    return false;
+    lua_pushvalue(luaState, luaIndex);
+    lua_pushnil(luaState);
+    while (lua_next(luaState, -2)) {
+      bool res = Read(data.emplace_back(), luaState, -1);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not read data from lua into a container");
+      lua_pop(luaState, 1);
+    }
+    lua_pop(luaState, 1);
+    return true;
   }
   template <typename T>
   static bool Read(std::vector<T> &data, lua_State *luaState, int32_t luaIndex) {
-    return false;
+    lua_pushvalue(luaState, luaIndex);
+    lua_pushnil(luaState);
+    while (lua_next(luaState, -2)) {
+      bool res = Read(data.emplace_back(), luaState, -1);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not read data from lua into a container");
+      lua_pop(luaState, 1);
+    }
+    lua_pop(luaState, 1);
+    return true;
   }
   template <typename T>
   static bool Read(std::set<T> &data, lua_State *luaState, int32_t luaIndex) {
-    return false;
+    lua_pushvalue(luaState, luaIndex);
+    lua_pushnil(luaState);
+    while (lua_next(luaState, -2)) {
+      T elem;
+      bool res = Read(elem, luaState, -1);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not read data from lua into a container");
+      data.insert(elem);
+      lua_pop(luaState, 1);
+    }
+    lua_pop(luaState, 1);
+    return true;
   }
   template <typename T>
   static bool Read(std::unordered_set<T> &data, lua_State *luaState, int32_t luaIndex) {
-    return false;
+    lua_pushvalue(luaState, luaIndex);
+    lua_pushnil(luaState);
+    while (lua_next(luaState, -2)) {
+      T elem;
+      bool res = Read(elem, luaState, -1);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not read data from lua into a container");
+      data.insert(elem);
+      lua_pop(luaState, 1);
+    }
+    lua_pop(luaState, 1);
+    return true;
   }
   template <typename K, typename V>
   static bool Read(std::map<K, V> &data, lua_State *luaState, int32_t luaIndex) {

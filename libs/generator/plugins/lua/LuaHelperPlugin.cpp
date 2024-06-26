@@ -246,10 +246,9 @@ void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
     method.mArguments.emplace_back("data", Type{type, PassByType::Reference});
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
-    method.mBody.Line() << "if (!" << usage.mValidator << "(luaState, luaIndex))";
-    method.mBody.Indent(1);
-    method.mBody.Line() << "return false;";
-    method.mBody.Indent(-1);
+    method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!{}(luaState, luaIndex), false, \"Reading from lua "
+                     "failed! Expected {}, got {{}}.\", lua_typename(luaState, luaIndex));",
+                     usage.mValidator, type);
     method.mBody.Line() << "data = " << usage.mGetter << "(luaState, luaIndex);";
     method.mBody.Line() << "return true;";
     Validate().NewMethod(cls, method);
@@ -359,8 +358,32 @@ void LuaHelperPlugin::GenerateReadForSingleElemContainer(Class &cls, const std::
   }
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
-  // TODO: implement with rawseti
-  method.mBody.Add("return false;");
+  if (isFixedSize) {
+    method.mBody.Add("size_t nextIdx = 0;");
+  }
+  method.mBody.Add("lua_pushvalue(luaState, luaIndex);");
+  method.mBody.Add("lua_pushnil(luaState);");
+  method.mBody.Add("while (lua_next(luaState, -2)) {{");
+  method.mBody.Indent(1);
+  if (isFixedSize) {
+    method.mBody.Add("bool res = Read(data[nextIdx], luaState, -1);");
+    method.mBody.Add("++nextIdx;");
+  } else if (TypeInfo::Get().CppSets.contains(container)) {
+    method.mBody.Add("T elem;");
+    method.mBody.Add("bool res = Read(elem, luaState, -1);");
+  } else {
+    method.mBody.Add("bool res = Read(data.emplace_back(), luaState, -1);");
+  }
+  method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, false, \"Could not read data from lua into a "
+                   "container\");");
+  if (TypeInfo::Get().CppSets.contains(container)) {
+    method.mBody.Add("data.insert(elem);");
+  }
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("return true;");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

@@ -18,6 +18,7 @@ public:
   using UnderlyingType=int64_t;
   enum Entry : UnderlyingType {
     Human = 2,
+    // enum entries can have comments too
     Elf = 0,
     Dwarf = 1,
     Hobbit = 3,
