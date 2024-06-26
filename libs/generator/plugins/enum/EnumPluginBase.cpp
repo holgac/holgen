@@ -27,6 +27,7 @@ void EnumPluginBase::GenerateClassEnum(Class &cls, const std::string &entrySuffi
   for (auto &entry: cls.mEnum->mEntries) {
     auto classEnumEntry = ClassEnumEntry{entry.mName + entrySuffix, entry.mValue};
     classEnumEntry.mEntry = &entry;
+    FillComments(entry, classEnumEntry.mComments);
     Validate().NewEnumEntry(cls, classEnum, classEnumEntry);
     classEnum.mEntries.push_back(std::move(classEnumEntry));
   }
