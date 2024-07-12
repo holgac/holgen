@@ -52,4 +52,5 @@ struct NameFilterForEachWrapper {
   std::string mName;
   const T &mContainer;
 };
+
 } // namespace holgen

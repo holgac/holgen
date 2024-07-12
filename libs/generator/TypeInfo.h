@@ -78,6 +78,8 @@ public:
   std::set<std::string> CppBasicTypes;
   // Containers that allow random access
   std::set<std::string> CppIndexedContainers;
+  // std::list
+  std::set<std::string> CppLists;
   // std::array
   std::set<std::string> CppFixedSizeContainers;
   // Map-like containers

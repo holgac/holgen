@@ -18,6 +18,7 @@ TypeInfo::TypeInfo() {
       {"vector", "std::vector"}, {"deque", "std::deque"},
       {"map", "std::map"},       {"unordered_map", "std::unordered_map"},
       {"set", "std::set"},       {"unordered_set", "std::unordered_set"},
+      {"list", "std::list"},
   };
 
   SignedIntegralTypes = {
@@ -57,9 +58,13 @@ TypeInfo::TypeInfo() {
       "std::set",
       "std::unordered_set",
   };
+  CppLists = {
+      "std::list",
+  };
   CppContainers = CppIndexedContainers;
   CppContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
   CppContainers.insert(CppSets.begin(), CppSets.end());
+  CppContainers.insert(CppLists.begin(), CppLists.end());
 
   CppStableContainers = {"std::deque"};
   CppStableContainers.insert(CppSets.begin(), CppSets.end());
