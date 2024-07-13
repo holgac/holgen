@@ -433,6 +433,9 @@ void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) {
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
+  method.mBody.Add(
+      "HOLGEN_WARN(\"Unexpected type when parsing {}: {{}}\", lua_typename(luaState, typ));",
+      cls.mName);
   method.mBody.Add("return {}{{}};", cls.mName);
   method.mBody.Indent(-1);
   method.mBody.Add("}}");

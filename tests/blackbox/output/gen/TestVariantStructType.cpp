@@ -99,6 +99,7 @@ TestVariantStructType TestVariantStructType::ReadMirrorFromLua(lua_State *luaSta
   } else if (typ == LUA_TNUMBER) {
     return TestVariantStructType(lua_tonumber(luaState, idx));
   } else {
+    HOLGEN_WARN("Unexpected type when parsing TestVariantStructType: {}", lua_typename(luaState, typ));
     return TestVariantStructType{};
   }
 }

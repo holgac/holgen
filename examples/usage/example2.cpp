@@ -1,8 +1,8 @@
+#include <rapidjson/document.h>
 #include "2/output/gen/Character.h"
 #include "2/output/gen/Armor.h"
 #include "2/output/gen/Converter.h"
 #include "2/output/gen/LuaHelper.h"
-#include <rapidjson/document.h>
 #include "LuaContext.h"
 
 using namespace ex2_schemas;

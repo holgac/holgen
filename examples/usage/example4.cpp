@@ -1,10 +1,10 @@
 #include <string>
-#include "LuaContext.h"
 #include "4/output/gen/DataManager.h"
 #include "4/output/gen/Character.h"
 #include "4/output/gen/Converter.h"
-#include <4/output/gen/GlobalPointer.h>
-#include <4/output/gen/LuaHelper.h>
+#include "4/output/gen/GlobalPointer.h"
+#include "4/output/gen/LuaHelper.h"
+#include "LuaContext.h"
 
 using namespace ex4_schemas;
 using namespace holgen::usages;

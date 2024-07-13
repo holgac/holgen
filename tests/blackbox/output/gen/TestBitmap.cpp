@@ -213,6 +213,7 @@ TestBitmap TestBitmap::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   } else if (typ == LUA_TNUMBER) {
     return TestBitmap(lua_tonumber(luaState, idx));
   } else {
+    HOLGEN_WARN("Unexpected type when parsing TestBitmap: {}", lua_typename(luaState, typ));
     return TestBitmap{};
   }
 }

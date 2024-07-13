@@ -99,6 +99,7 @@ TestStructArrayType TestStructArrayType::ReadMirrorFromLua(lua_State *luaState, 
   } else if (typ == LUA_TNUMBER) {
     return TestStructArrayType(lua_tonumber(luaState, idx));
   } else {
+    HOLGEN_WARN("Unexpected type when parsing TestStructArrayType: {}", lua_typename(luaState, typ));
     return TestStructArrayType{};
   }
 }

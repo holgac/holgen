@@ -1,9 +1,9 @@
+#include <string>
+#include <rapidjson/document.h>
 #include "3/output/gen/Character.h"
 #include "3/output/gen/Converter.h"
 #include "3/output/gen/LuaHelper.h"
-#include <rapidjson/document.h>
 #include "LuaContext.h"
-#include <string>
 
 using namespace ex3_schemas;
 using namespace holgen::usages;

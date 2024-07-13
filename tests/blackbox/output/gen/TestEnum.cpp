@@ -103,6 +103,7 @@ TestEnum TestEnum::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   } else if (typ == LUA_TNUMBER) {
     return TestEnum(lua_tonumber(luaState, idx));
   } else {
+    HOLGEN_WARN("Unexpected type when parsing TestEnum: {}", lua_typename(luaState, typ));
     return TestEnum{};
   }
 }

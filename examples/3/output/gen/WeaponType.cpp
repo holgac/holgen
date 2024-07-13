@@ -99,6 +99,7 @@ WeaponType WeaponType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   } else if (typ == LUA_TNUMBER) {
     return WeaponType(lua_tonumber(luaState, idx));
   } else {
+    HOLGEN_WARN("Unexpected type when parsing WeaponType: {}", lua_typename(luaState, typ));
     return WeaponType{};
   }
 }
