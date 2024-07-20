@@ -88,7 +88,9 @@ void ClassCopyMoveDestroyPlugin::PopulateMethod(Class &cls, ClassMethodBase &met
       continue;
     }
 
-    if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
+    if (field.mType.mType == PassByType::Pointer) {
+      method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
+    } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       THROW_IF(!isMove, "Lua custom data cannot be copied");
       method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
     } else if (field.mField && field.mField->mType.mName == St::UserData) {
