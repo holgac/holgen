@@ -3,6 +3,7 @@
 #include <queue>
 #include "core/Annotations.h"
 #include "core/Exception.h"
+#include "generator/TypeInfo.h"
 
 namespace holgen {
 namespace {
@@ -17,7 +18,7 @@ DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(pr
 
 void DependencyGraph::Calculate() {
   for (const auto &structDefinition: mProject.mStructs) {
-    Calculate(structDefinition);
+    Calculate(structDefinition, structDefinition);
   }
 
   std::queue<std::string> structsQueue;
@@ -43,9 +44,14 @@ void DependencyGraph::Calculate() {
   }
 }
 
-void DependencyGraph::Calculate(const StructDefinition &structDefinition) {
-  for (const auto &fieldDefinition: structDefinition.mFields) {
+void DependencyGraph::Calculate(const StructDefinition &structDefinition,
+                                const StructDefinition &curStructDefinition) {
+  for (const auto &fieldDefinition: curStructDefinition.mFields) {
     Calculate(structDefinition, fieldDefinition);
+  }
+
+  for (const auto &mixin: curStructDefinition.mMixins) {
+    Calculate(structDefinition, *mProject.GetStruct(mixin));
   }
 }
 
