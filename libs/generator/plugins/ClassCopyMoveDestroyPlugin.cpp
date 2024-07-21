@@ -88,17 +88,25 @@ void ClassCopyMoveDestroyPlugin::PopulateMethod(Class &cls, ClassMethodBase &met
       continue;
     }
 
-    if (field.mType.mType == PassByType::Pointer) {
-      method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
-    } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
+    if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       THROW_IF(!isMove, "Lua custom data cannot be copied");
       method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
     } else if (field.mField && field.mField->mType.mName == St::UserData) {
-      // TODO: special annotation for userdata to specify copy/move behaviour
-      THROW_IF(!isMove, "Userdata cannot be copied");
-      method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
+      auto onCopy =
+          field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_OnCopy);
+      if (isMove || onCopy->mValue.mName == Annotations::Field_OnCopy_Swap) {
+        method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
+      } else if (onCopy && onCopy->mValue.mName == Annotations::Field_OnCopy_Copy) {
+        method.mBody.Add("{0} = rhs.{0};", field.mName);
+      } else {
+        THROW_IF(!isMove, "Userdata {} cannot be copied unless copying is explicitly allowed",
+                 field.mField->mDefinitionSource);
+        method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
+      }
     } else if (isMove && !TypeInfo::Get().CppPrimitives.contains(field.mType.mName)) {
       method.mBody.Add("{0} = std::move(rhs.{0});", field.mName);
+    } else if (isMove && field.mType.mType == PassByType::Pointer) {
+      method.mBody.Add("std::swap({0}, rhs.{0});", field.mName);
     } else {
       method.mBody.Add("{0} = rhs.{0};", field.mName);
     }

@@ -201,9 +201,11 @@ bool Type::IsCopyable(TranslatedProject &project) const {
         return false;
       }
       if (field.mField->mType.mName == St::UserData) {
-        // TODO: special annotation for userdata to specify copy/move behaviour
-        // For now, assuming they store unique data
-        return false;
+        auto onCopy =
+            field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_OnCopy);
+        if (!onCopy || onCopy->mValue.mName != Annotations::Field_OnCopy_Copy) {
+          return false;
+        }
       }
     }
   }

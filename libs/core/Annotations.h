@@ -313,5 +313,8 @@ public:
   inline static const std::string Field_Const = "const";
   inline static const std::string Field_Set = "set";
   inline static const std::string Field_Get = "get";
+  inline static const std::string Field_OnCopy = "onCopy";
+  inline static const std::string Field_OnCopy_Copy = "copy";
+  inline static const std::string Field_OnCopy_Swap = "swap";
 };
 } // namespace holgen
