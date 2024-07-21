@@ -488,7 +488,8 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
     method.mBody.Add("lua_pushstring(luaState, \"{}\");", field.mField->mName);
     auto fieldClass = mProject.GetClass(field.mType.mName);
     if (fieldClass && !fieldClass->mEnum) {
-      method.mBody.Add("{}.{}(luaState);", field.mName, St::Lua_PushMirrorObject);
+      std::string accessOperator = field.mType.mType == PassByType::Pointer ? "->" : ".";
+      method.mBody.Add("{}{}{}(luaState);", field.mName, accessOperator, St::Lua_PushMirrorObject);
     } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, {});", field.mName);
     } else {
