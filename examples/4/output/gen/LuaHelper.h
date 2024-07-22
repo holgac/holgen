@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <deque>
 #include <functional>
+#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -65,6 +66,15 @@ public:
   }
   template <typename T>
   static void Push(const std::vector<T> &data, lua_State *luaState, bool pushMirror) {
+    lua_newtable(luaState);
+    int index = 0;
+    for (auto& elem: data) {
+      Push(elem, luaState, pushMirror);
+      lua_rawseti(luaState, -2, index++);
+    }
+  }
+  template <typename T>
+  static void Push(const std::list<T> &data, lua_State *luaState, bool pushMirror) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
@@ -167,6 +177,18 @@ public:
   }
   template <typename T>
   static bool Read(std::vector<T> &data, lua_State *luaState, int32_t luaIndex) {
+    lua_pushvalue(luaState, luaIndex);
+    lua_pushnil(luaState);
+    while (lua_next(luaState, -2)) {
+      bool res = Read(data.emplace_back(), luaState, -1);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not read data from lua into a container");
+      lua_pop(luaState, 1);
+    }
+    lua_pop(luaState, 1);
+    return true;
+  }
+  template <typename T>
+  static bool Read(std::list<T> &data, lua_State *luaState, int32_t luaIndex) {
     lua_pushvalue(luaState, luaIndex);
     lua_pushnil(luaState);
     while (lua_next(luaState, -2)) {

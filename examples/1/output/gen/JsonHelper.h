@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <deque>
+#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -89,6 +90,28 @@ public:
       T elem;
       auto res = Parse(elem, data, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::vector");
+      out.push_back(std::move(elem));
+    }
+    return true;
+  }
+  template <typename SourceType, typename T, typename ElemConverter>
+  static bool ParseConvertElem(std::list<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::list");
+    for (const auto& data: json.GetArray()) {
+      SourceType elem;
+      auto res = Parse(elem, data, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::list");
+      out.push_back(std::move(elemConverter(elem)));
+    }
+    return true;
+  }
+  template <typename T>
+  static bool Parse(std::list<T> &out, const rapidjson::Value &json, const Converter &converter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::list");
+    for (const auto& data: json.GetArray()) {
+      T elem;
+      auto res = Parse(elem, data, converter);
+      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::list");
       out.push_back(std::move(elem));
     }
     return true;

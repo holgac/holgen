@@ -51,6 +51,10 @@ void LuaHelperPlugin::GeneratePushForContainers(Class &cls) {
     GeneratePushForSingleElemContainer(cls, container);
   }
 
+  for (const auto &container: TypeInfo::Get().CppLists) {
+    GeneratePushForSingleElemContainer(cls, container);
+  }
+
   for (const auto &container: TypeInfo::Get().CppSets) {
     GeneratePushForSingleElemContainer(cls, container);
   }
@@ -178,6 +182,10 @@ void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
 
 void LuaHelperPlugin::GenerateReadForContainers(Class &cls) {
   for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
+    GenerateReadForSingleElemContainer(cls, container);
+  }
+
+  for (const auto &container: TypeInfo::Get().CppLists) {
     GenerateReadForSingleElemContainer(cls, container);
   }
 

@@ -12,6 +12,10 @@ void JsonHelperPlugin::Run() {
     GenerateParseJsonForSingleElemContainer(cls, container, true);
     GenerateParseJsonForSingleElemContainer(cls, container, false);
   }
+  for (const auto &container: TypeInfo::Get().CppLists) {
+    GenerateParseJsonForSingleElemContainer(cls, container, true);
+    GenerateParseJsonForSingleElemContainer(cls, container, false);
+  }
   for (const auto &container: TypeInfo::Get().CppSets) {
     GenerateParseJsonForSingleElemContainer(cls, container, true);
     GenerateParseJsonForSingleElemContainer(cls, container, false);
