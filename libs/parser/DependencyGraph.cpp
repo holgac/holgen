@@ -18,7 +18,8 @@ DependencyGraph::DependencyGraph(const ProjectDefinition &project) : mProject(pr
 
 void DependencyGraph::Calculate() {
   for (const auto &structDefinition: mProject.mStructs) {
-    Calculate(structDefinition, structDefinition);
+    std::set<std::string> processedMixins{structDefinition.mName};
+    Calculate(structDefinition, structDefinition, processedMixins);
   }
 
   std::queue<std::string> structsQueue;
@@ -45,13 +46,22 @@ void DependencyGraph::Calculate() {
 }
 
 void DependencyGraph::Calculate(const StructDefinition &structDefinition,
-                                const StructDefinition &curStructDefinition) {
+                                const StructDefinition &curStructDefinition,
+                                std::set<std::string> &processedMixins) {
   for (const auto &fieldDefinition: curStructDefinition.mFields) {
     Calculate(structDefinition, fieldDefinition);
   }
 
   for (const auto &mixin: curStructDefinition.mMixins) {
-    Calculate(structDefinition, *mProject.GetStruct(mixin));
+    auto mixinDefinition = mProject.GetStruct(mixin);
+    THROW_IF(!mixinDefinition, "{} ({}) uses unrecognized mixin {}", curStructDefinition.mName,
+             curStructDefinition.mDefinitionSource, mixin);
+    THROW_IF(processedMixins.contains(mixin),
+             "Circular or duplicate mixin usage detected in {} ({}) and {} ({})",
+             mixinDefinition->mName, mixinDefinition->mDefinitionSource, curStructDefinition.mName,
+             curStructDefinition.mDefinitionSource);
+    processedMixins.insert(mixin);
+    Calculate(structDefinition, *mixinDefinition, processedMixins);
   }
 }
 

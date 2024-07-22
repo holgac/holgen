@@ -27,10 +27,10 @@ protected:
   void ExpectErrorMessage(const std::string &input, std::function<void(TranslatedProject &)> run,
                           std::format_string<Args...> fmt, Args &&...args) {
     mProjectDefinition = {};
-    auto project = Parse(helpers::Trim(input));
     EXPECT_THROW(
         {
           try {
+            auto project = Parse(helpers::Trim(input));
             run(project);
           } catch (Exception &exc) {
             std::string actualError = exc.what();

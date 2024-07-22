@@ -17,7 +17,8 @@ private:
   void Calculate(const StructDefinition &structDefinition, const TypeDefinition &typeDefinition);
   void Calculate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition);
   void Calculate(const StructDefinition &structDefinition,
-                 const StructDefinition &curStructDefinition);
+                 const StructDefinition &curStructDefinition,
+                 std::set<std::string> &processedMixins);
   const ProjectDefinition &mProject;
   std::map<std::string, std::set<std::string>> mDependencies;
   std::map<std::string, std::set<std::string>> mInverseDependencies;

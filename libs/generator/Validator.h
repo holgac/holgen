@@ -33,8 +33,5 @@ private:
   void EnforceUniqueAnnotation(const Class &cls, const std::string &annotationName) const;
   TranslatedProject &mProject;
   const NamingConvention &mNaming;
-  void ValidateMixins(const StructDefinition &structDefinition) const;
-  void ValidateMixins(const StructDefinition &structDefinition,
-                      std::map<std::string, const StructDefinition *> &mixinUsage) const;
 };
 } // namespace holgen

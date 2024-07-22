@@ -73,7 +73,7 @@ struct A: B {}
 mixin B: C {}
 mixin C: B {}
 )R",
-      Run, "Circular or duplicate mixin usage detected in A ({0}:1:1) and C ({0}:3:1)", Source);
+      Run, "Circular or duplicate mixin usage detected in B ({0}:2:1) and C ({0}:3:1)", Source);
 }
 
 TEST_F(ClassPluginTest, Enum) {

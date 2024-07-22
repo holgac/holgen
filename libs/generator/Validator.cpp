@@ -105,8 +105,6 @@ void Validator::NewClass(const Class &cls) const {
            ToString(cls));
   auto dup = mProject.GetClass(cls.mName);
   THROW_IF(dup, "Duplicate class: {} and {}", ToString(*dup), ToString(cls));
-  if (cls.mStruct)
-    ValidateMixins(*cls.mStruct);
 }
 
 void Validator::IdField(const Class &cls, const ClassField &field) const {
@@ -464,24 +462,6 @@ void Validator::JsonConverters() const {
                converter->mValue.mName, ToString(it->second.mClass, it->second.mField), toTypeName,
                existingToTypeName);
     }
-  }
-}
-
-void Validator::ValidateMixins(const StructDefinition &structDefinition) const {
-  std::map<std::string, const StructDefinition *> mixinUsage{
-      {structDefinition.mName, &structDefinition}};
-  ValidateMixins(structDefinition, mixinUsage);
-}
-
-void Validator::ValidateMixins(const StructDefinition &structDefinition,
-                               std::map<std::string, const StructDefinition *> &mixinUsage) const {
-  for (auto &mixin: structDefinition.mMixins) {
-    THROW_IF(mixinUsage.contains(mixin), "Circular or duplicate mixin usage detected in {} and {}",
-             ToString(*mixinUsage.at(mixin)), ToString(structDefinition));
-    auto mixinStruct = mProject.mProject.GetStruct(mixin);
-    THROW_IF(!mixinStruct, "{} uses unrecognized mixin {}", ToString(structDefinition), mixin);
-    mixinUsage.emplace(mixin, &structDefinition);
-    ValidateMixins(*mixinStruct, mixinUsage);
   }
 }
 
