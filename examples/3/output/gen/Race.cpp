@@ -31,7 +31,7 @@ Race Race::FromString(std::string_view str) {
     return Race(Race::Hobbit);
   } else {
     HOLGEN_WARN("{} is not a valid Race, returning invalid", str);
-    return Race{};
+    return Race{Race::Invalid};
   }
 }
 

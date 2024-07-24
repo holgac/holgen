@@ -23,6 +23,7 @@
 #include "TestContainerSet.h"
 #include "TestContainerVector.h"
 #include "TestEnum.h"
+#include "TestEnumDefaultValue.h"
 #include "TestEnumStruct.h"
 #include "TestJsonStructMapWithConverters.h"
 #include "TestJsonStructWithTags.h"
@@ -226,6 +227,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   Weapon::CreateLuaMetatable(luaState);
   TestBitmap::PushEnumToLua(luaState);
   TestEnum::PushEnumToLua(luaState);
+  TestEnumDefaultValue::PushEnumToLua(luaState);
   TestStructArrayType::PushEnumToLua(luaState);
   TestVariantStructType::PushEnumToLua(luaState);
   lua_newtable(luaState);

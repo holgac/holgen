@@ -135,6 +135,10 @@ struct EnumEntryDefinition {
   auto GetAnnotations(const std::string &name) const {
     return NameFilterForEachWrapper(name, mAnnotations);
   }
+
+  [[nodiscard]] const AnnotationAttributeDefinition *
+      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                           std::optional<std::string> attributeValue = std::nullopt) const;
 };
 
 enum class EnumDefinitionType {
@@ -151,6 +155,7 @@ struct EnumDefinition {
   EnumDefinitionType mType;
   [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
+  [[nodiscard]] const EnumEntryDefinition *GetDefaultEntry() const;
 
   auto GetAnnotations(const std::string &name) const {
     return NameFilterForEachWrapper(name, mAnnotations);

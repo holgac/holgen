@@ -284,6 +284,18 @@ public:
   inline static const std::string Variant_Entry = "entry";
 
   /**
+   * Enum related annotations
+   *
+   * Initial enum value is EnumName::Invalid by default. This can be changed with default attribute:
+   * enum SomeEnum {
+   *  @enum(default)
+   *  Entry1;
+   * }
+   */
+  inline static const std::string Enum = "enum";
+  inline static const std::string Enum_Default = "default";
+
+  /**
    * Struct related annotations
    *
    * A struct can be defined nonCopyable which removes operator= and copy constructor

@@ -2,8 +2,11 @@
 #include <gmock/gmock-matchers.h>
 #include "TestEnum.h"
 #include "TestEnumStruct.h"
+#include "TestEnumDefaultValue.h"
 #include "JsonHelper.h"
 #include "Converter.h"
+#include "LuaTestHelper.h"
+
 
 using namespace holgen_blackbox_test;
 
@@ -80,4 +83,39 @@ TEST_F(EnumTest, Formatter) {
   EXPECT_EQ(std::format("{}", TestEnum(TestEnum::Entry2)), "Entry2");
   EXPECT_EQ(std::format("{}", TestEnum(TestEnum::Entry5)), "Entry5");
   EXPECT_EQ(std::format("{}", TestEnum(5)), "Entry5");
+}
+
+TEST_F(EnumTest, DefaultValue) {
+  TestEnumDefaultValue enumDefaultValue;
+  EXPECT_EQ(enumDefaultValue, TestEnumDefaultValue::DefaultEntry);
+}
+
+TEST_F(EnumTest, DefaultValueJson) {
+  TestEnumStruct testEnumStruct;
+  rapidjson::Document doc;
+  doc.Parse(R"R({})R");
+  testEnumStruct.ParseJson(doc, {});
+  EXPECT_EQ(testEnumStruct.GetEnumDefaultValueField(), TestEnumDefaultValue::DefaultEntry);
+
+  doc.Parse(R"R({"enumDefaultValueField": "some invalid data"})R");
+  testEnumStruct.ParseJson(doc, {});
+  EXPECT_EQ(testEnumStruct.GetEnumDefaultValueField(), TestEnumDefaultValue::Invalid);
+}
+
+TEST_F(EnumTest, DefaultValueLua) {
+  LuaState luaContext;
+  luaContext.Init();
+
+  lua_newtable(luaContext);
+  auto testEnumStruct = TestEnumStruct::ReadMirrorFromLua(luaContext, -1);
+  EXPECT_EQ(testEnumStruct.GetEnumDefaultValueField(), TestEnumDefaultValue::DefaultEntry);
+  lua_pop(luaContext, 1);
+
+  lua_newtable(luaContext);
+  lua_pushstring(luaContext, "enumDefaultValueField");
+  lua_pushstring(luaContext, "some invalid data");
+  lua_settable(luaContext, -3);
+  testEnumStruct = TestEnumStruct::ReadMirrorFromLua(luaContext, -1);
+  EXPECT_EQ(testEnumStruct.GetEnumDefaultValueField(), TestEnumDefaultValue::Invalid);
+  lua_pop(luaContext, 1);
 }

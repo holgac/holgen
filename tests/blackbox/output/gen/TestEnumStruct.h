@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <rapidjson/fwd.h>
 #include "TestEnum.h"
+#include "TestEnumDefaultValue.h"
 
 struct lua_State;
 namespace holgen_blackbox_test {
@@ -20,7 +21,10 @@ public:
   bool operator==(const TestEnumStruct &rhs) const;
   const TestEnum &GetEnumField() const;
   TestEnum &GetEnumField();
+  const TestEnumDefaultValue &GetEnumDefaultValueField() const;
+  TestEnumDefaultValue &GetEnumDefaultValueField();
   void SetEnumField(const TestEnum &val);
+  void SetEnumDefaultValueField(const TestEnumDefaultValue &val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
@@ -42,5 +46,6 @@ private:
   static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
   TestEnum mEnumField;
+  TestEnumDefaultValue mEnumDefaultValueField;
 };
 }

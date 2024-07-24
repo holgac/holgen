@@ -4,6 +4,14 @@ enum TestEnum {
     Entry2;
 }
 
+enum TestEnumDefaultValue {
+    SomeEntry;
+    @enum(default)
+    DefaultEntry;
+    AnotherEntry;
+}
+
 struct TestEnumStruct {
     TestEnum enumField;
+    TestEnumDefaultValue enumDefaultValueField;
 }

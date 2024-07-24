@@ -31,7 +31,8 @@ protected:
   void GenerateUnderlyingType(Class &cls);
   void GenerateValueField(Class &cls);
   void GenerateClassEnum(Class &cls, const std::string &entrySuffix = "");
-  void GenerateFromStringSingle(Class &cls, const std::string &methodName, Visibility visibility);
+  void GenerateFromStringSingle(Class &cls, const std::string &methodName, Visibility visibility,
+                                const std::string &valueOnFailure = "");
   void GenerateToStringSingle(Class &cls, const std::string &methodName, Visibility visibility);
   void GenerateOperator(Class &cls, const EnumOperator &op);
   void GenerateOperators(Class &cls);

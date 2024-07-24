@@ -12,5 +12,6 @@ private:
   void GenerateGetValue(Class &cls);
   void GenerateEnumConstructor(Class &cls);
   void GenerateHash(Class &cls);
+  void GenerateIntegralConstructor(Class &cls);
 };
 } // namespace holgen

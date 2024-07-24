@@ -27,7 +27,7 @@ WeaponType WeaponType::FromString(std::string_view str) {
     return WeaponType(WeaponType::Bow);
   } else {
     HOLGEN_WARN("{} is not a valid WeaponType, returning invalid", str);
-    return WeaponType{};
+    return WeaponType{WeaponType::Invalid};
   }
 }
 

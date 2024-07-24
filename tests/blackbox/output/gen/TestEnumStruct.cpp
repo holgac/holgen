@@ -10,7 +10,8 @@
 namespace holgen_blackbox_test {
 bool TestEnumStruct::operator==(const TestEnumStruct &rhs) const {
   return !(
-      mEnumField != rhs.mEnumField
+      mEnumField != rhs.mEnumField ||
+      mEnumDefaultValueField != rhs.mEnumDefaultValueField
   );
 }
 
@@ -22,8 +23,20 @@ TestEnum &TestEnumStruct::GetEnumField() {
   return mEnumField;
 }
 
+const TestEnumDefaultValue &TestEnumStruct::GetEnumDefaultValueField() const {
+  return mEnumDefaultValueField;
+}
+
+TestEnumDefaultValue &TestEnumStruct::GetEnumDefaultValueField() {
+  return mEnumDefaultValueField;
+}
+
 void TestEnumStruct::SetEnumField(const TestEnum &val) {
   mEnumField = val;
+}
+
+void TestEnumStruct::SetEnumDefaultValueField(const TestEnumDefaultValue &val) {
+  mEnumDefaultValueField = val;
 }
 
 bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -33,6 +46,9 @@ bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &co
     if (0 == strcmp("enumField", name)) {
       auto res = JsonHelper::Parse(mEnumField, data.value, converter);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumField field");
+    } else if (0 == strcmp("enumDefaultValueField", name)) {
+      auto res = JsonHelper::Parse(mEnumDefaultValueField, data.value, converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumDefaultValueField field");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestEnumStruct: {}", name);
     }
@@ -53,6 +69,9 @@ void TestEnumStruct::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "enumField");
   LuaHelper::Push(mEnumField, luaState, true);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "enumDefaultValueField");
+  LuaHelper::Push(mEnumDefaultValueField, luaState, true);
   lua_settable(luaState, -3);
 }
 
@@ -78,6 +97,9 @@ TestEnumStruct TestEnumStruct::ReadMirrorFromLua(lua_State *luaState, int32_t id
     if (0 == strcmp("enumField", key)) {
       LuaHelper::Read(result.mEnumField, luaState, -1);
       lua_pop(luaState, 1);
+    } else if (0 == strcmp("enumDefaultValueField", key)) {
+      LuaHelper::Read(result.mEnumDefaultValueField, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
       lua_pop(luaState, 1);
@@ -92,6 +114,8 @@ int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("enumField", key)) {
     LuaHelper::Push(instance->mEnumField, luaState, false);
+  } else if (0 == strcmp("enumDefaultValueField", key)) {
+    LuaHelper::Push(instance->mEnumDefaultValueField, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
     return 0;
@@ -104,6 +128,8 @@ int TestEnumStruct::NewIndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("enumField", key)) {
     LuaHelper::Read(instance->mEnumField, luaState, -1);
+  } else if (0 == strcmp("enumDefaultValueField", key)) {
+    LuaHelper::Read(instance->mEnumDefaultValueField, luaState, -1);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
   }

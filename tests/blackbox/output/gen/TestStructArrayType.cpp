@@ -27,7 +27,7 @@ TestStructArrayType TestStructArrayType::FromString(std::string_view str) {
     return TestStructArrayType(TestStructArrayType::Type2);
   } else {
     HOLGEN_WARN("{} is not a valid TestStructArrayType, returning invalid", str);
-    return TestStructArrayType{};
+    return TestStructArrayType{TestStructArrayType::Invalid};
   }
 }
 

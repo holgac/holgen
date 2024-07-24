@@ -35,7 +35,8 @@ void EnumPluginBase::GenerateClassEnum(Class &cls, const std::string &entrySuffi
 }
 
 void EnumPluginBase::GenerateFromStringSingle(Class &cls, const std::string &methodName,
-                                              Visibility visibility) {
+                                              Visibility visibility,
+                                              const std::string &valueOnFailure) {
   auto method =
       ClassMethod{methodName, Type{cls.mName}, visibility, Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("str", Type{"std::string_view"});
@@ -56,7 +57,7 @@ void EnumPluginBase::GenerateFromStringSingle(Class &cls, const std::string &met
     method.mBody.Indent(1);
   }
   method.mBody.Add("HOLGEN_WARN(\"{{}} is not a valid {}, returning invalid\", str);", cls.mName);
-  method.mBody.Add("return {}{{}};", cls.mName);
+  method.mBody.Add("return {}{{{}}};", cls.mName, valueOnFailure);
   if (!cls.mEnum->mEntries.empty()) {
     method.mBody.Indent(-1);
     method.mBody.Add("}}");

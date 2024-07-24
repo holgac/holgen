@@ -1,4 +1,5 @@
 #pragma once
+#include <lua.hpp>
 
 class LuaState {
 public:
@@ -9,12 +10,16 @@ public:
   ~LuaState() {}
 
   void Init() {
+    EXPECT_EQ(mState, nullptr);
     mState = luaL_newstate();
     luaL_openlibs(mState);
   }
 
   void Destroy() {
-    lua_close(mState);
+    if (mState != nullptr) {
+      lua_close(mState);
+      mState = nullptr;
+    }
   }
 
   operator lua_State *() {

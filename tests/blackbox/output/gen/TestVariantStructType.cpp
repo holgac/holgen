@@ -27,7 +27,7 @@ TestVariantStructType TestVariantStructType::FromString(std::string_view str) {
     return TestVariantStructType(TestVariantStructType::Cat);
   } else {
     HOLGEN_WARN("{} is not a valid TestVariantStructType, returning invalid", str);
-    return TestVariantStructType{};
+    return TestVariantStructType{TestVariantStructType::Invalid};
   }
 }
 

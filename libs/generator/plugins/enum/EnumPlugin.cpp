@@ -1,6 +1,7 @@
 #include "EnumPlugin.h"
 #include <format>
 #include "core/St.h"
+#include "core/Exception.h"
 
 namespace holgen {
 void EnumPlugin::Run() {
@@ -10,11 +11,12 @@ void EnumPlugin::Run() {
     GenerateUnderlyingType(cls);
     GenerateValueField(cls);
     GenerateClassEnum(cls);
-    GenerateIntegralConstructor(cls, "Invalid");
+    GenerateIntegralConstructor(cls);
     GenerateEnumConstructor(cls);
     GenerateGetValue(cls);
     GenerateInvalidEntry(cls);
-    GenerateFromStringSingle(cls, "FromString", Visibility::Public);
+    GenerateFromStringSingle(cls, "FromString", Visibility::Public,
+                             std::format("{}::Invalid", cls.mName));
     GenerateToStringSingle(cls, "ToString", Visibility::Public);
     GenerateOperators(cls);
     GenerateGetEntries(cls, "GetEntries", "");
@@ -61,6 +63,14 @@ void EnumPlugin::GenerateHash(Class &cls) {
   hasher.mBody.Add("return std::hash<{}::UnderlyingType>()(obj.GetValue());", className);
   hash.mMethods.push_back(std::move(hasher));
   cls.mSpecializations.push_back(std::move(hash));
+}
+
+void EnumPlugin::GenerateIntegralConstructor(Class &cls) {
+  if (auto defaultEntry = cls.mEnum->GetDefaultEntry()) {
+    EnumPluginBase::GenerateIntegralConstructor(cls, std::format("Entry::{}", defaultEntry->mName));
+  } else {
+    EnumPluginBase::GenerateIntegralConstructor(cls, "Invalid");
+  }
 }
 
 } // namespace holgen

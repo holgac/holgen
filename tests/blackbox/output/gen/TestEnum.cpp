@@ -29,7 +29,7 @@ TestEnum TestEnum::FromString(std::string_view str) {
     return TestEnum(TestEnum::Entry2);
   } else {
     HOLGEN_WARN("{} is not a valid TestEnum, returning invalid", str);
-    return TestEnum{};
+    return TestEnum{TestEnum::Invalid};
   }
 }
 
