@@ -9,11 +9,11 @@
 
 namespace holgen_blackbox_test {
 TestStructArrayType::TestStructArrayType(TestStructArrayType::UnderlyingType value) :
-    mValue(value) {
+    mValue(TestStructArrayType::Entry(value)) {
 }
 
 TestStructArrayType::TestStructArrayType(Entry value) :
-    mValue(UnderlyingType(value)) {
+    mValue(value) {
 }
 
 TestStructArrayType::Entry TestStructArrayType::GetValue() const {
@@ -43,12 +43,12 @@ const char *TestStructArrayType::ToString() const {
 }
 
 TestStructArrayType &TestStructArrayType::operator=(UnderlyingType rhs) {
-  mValue = rhs;
+  mValue = TestStructArrayType::Entry(rhs);
   return *this;
 }
 
 bool TestStructArrayType::operator==(UnderlyingType rhs) const {
-  return mValue == rhs;
+  return mValue == TestStructArrayType::Entry(rhs);
 }
 
 bool TestStructArrayType::operator==(const TestStructArrayType &rhs) const {
@@ -56,7 +56,7 @@ bool TestStructArrayType::operator==(const TestStructArrayType &rhs) const {
 }
 
 bool TestStructArrayType::operator!=(UnderlyingType rhs) const {
-  return mValue != rhs;
+  return mValue != TestStructArrayType::Entry(rhs);
 }
 
 bool TestStructArrayType::operator!=(const TestStructArrayType &rhs) const {
@@ -64,7 +64,7 @@ bool TestStructArrayType::operator!=(const TestStructArrayType &rhs) const {
 }
 
 bool TestStructArrayType::operator<(UnderlyingType rhs) const {
-  return mValue < rhs;
+  return mValue < TestStructArrayType::Entry(rhs);
 }
 
 bool TestStructArrayType::operator<(const TestStructArrayType &rhs) const {
@@ -85,11 +85,11 @@ bool TestStructArrayType::ParseJson(const rapidjson::Value &json, const Converte
 }
 
 void TestStructArrayType::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestStructArrayType::UnderlyingType(mValue), luaState, true);
 }
 
 void TestStructArrayType::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestStructArrayType::UnderlyingType(mValue), luaState, true);
 }
 
 TestStructArrayType TestStructArrayType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

@@ -9,11 +9,11 @@
 
 namespace holgen_blackbox_test {
 TestEnum::TestEnum(TestEnum::UnderlyingType value) :
-    mValue(value) {
+    mValue(TestEnum::Entry(value)) {
 }
 
 TestEnum::TestEnum(Entry value) :
-    mValue(UnderlyingType(value)) {
+    mValue(value) {
 }
 
 TestEnum::Entry TestEnum::GetValue() const {
@@ -47,12 +47,12 @@ const char *TestEnum::ToString() const {
 }
 
 TestEnum &TestEnum::operator=(UnderlyingType rhs) {
-  mValue = rhs;
+  mValue = TestEnum::Entry(rhs);
   return *this;
 }
 
 bool TestEnum::operator==(UnderlyingType rhs) const {
-  return mValue == rhs;
+  return mValue == TestEnum::Entry(rhs);
 }
 
 bool TestEnum::operator==(const TestEnum &rhs) const {
@@ -60,7 +60,7 @@ bool TestEnum::operator==(const TestEnum &rhs) const {
 }
 
 bool TestEnum::operator!=(UnderlyingType rhs) const {
-  return mValue != rhs;
+  return mValue != TestEnum::Entry(rhs);
 }
 
 bool TestEnum::operator!=(const TestEnum &rhs) const {
@@ -68,7 +68,7 @@ bool TestEnum::operator!=(const TestEnum &rhs) const {
 }
 
 bool TestEnum::operator<(UnderlyingType rhs) const {
-  return mValue < rhs;
+  return mValue < TestEnum::Entry(rhs);
 }
 
 bool TestEnum::operator<(const TestEnum &rhs) const {
@@ -89,11 +89,11 @@ bool TestEnum::ParseJson(const rapidjson::Value &json, const Converter &converte
 }
 
 void TestEnum::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestEnum::UnderlyingType(mValue), luaState, true);
 }
 
 void TestEnum::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestEnum::UnderlyingType(mValue), luaState, true);
 }
 
 TestEnum TestEnum::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

@@ -9,11 +9,11 @@
 
 namespace holgen_blackbox_test {
 TestVariantStructType::TestVariantStructType(TestVariantStructType::UnderlyingType value) :
-    mValue(value) {
+    mValue(TestVariantStructType::Entry(value)) {
 }
 
 TestVariantStructType::TestVariantStructType(Entry value) :
-    mValue(UnderlyingType(value)) {
+    mValue(value) {
 }
 
 TestVariantStructType::Entry TestVariantStructType::GetValue() const {
@@ -43,12 +43,12 @@ const char *TestVariantStructType::ToString() const {
 }
 
 TestVariantStructType &TestVariantStructType::operator=(UnderlyingType rhs) {
-  mValue = rhs;
+  mValue = TestVariantStructType::Entry(rhs);
   return *this;
 }
 
 bool TestVariantStructType::operator==(UnderlyingType rhs) const {
-  return mValue == rhs;
+  return mValue == TestVariantStructType::Entry(rhs);
 }
 
 bool TestVariantStructType::operator==(const TestVariantStructType &rhs) const {
@@ -56,7 +56,7 @@ bool TestVariantStructType::operator==(const TestVariantStructType &rhs) const {
 }
 
 bool TestVariantStructType::operator!=(UnderlyingType rhs) const {
-  return mValue != rhs;
+  return mValue != TestVariantStructType::Entry(rhs);
 }
 
 bool TestVariantStructType::operator!=(const TestVariantStructType &rhs) const {
@@ -64,7 +64,7 @@ bool TestVariantStructType::operator!=(const TestVariantStructType &rhs) const {
 }
 
 bool TestVariantStructType::operator<(UnderlyingType rhs) const {
-  return mValue < rhs;
+  return mValue < TestVariantStructType::Entry(rhs);
 }
 
 bool TestVariantStructType::operator<(const TestVariantStructType &rhs) const {
@@ -85,11 +85,11 @@ bool TestVariantStructType::ParseJson(const rapidjson::Value &json, const Conver
 }
 
 void TestVariantStructType::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestVariantStructType::UnderlyingType(mValue), luaState, true);
 }
 
 void TestVariantStructType::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestVariantStructType::UnderlyingType(mValue), luaState, true);
 }
 
 TestVariantStructType TestVariantStructType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

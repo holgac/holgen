@@ -46,7 +46,7 @@ public:
   static void PushEnumToLua(lua_State *luaState);
   inline static constexpr const UnderlyingType Invalid = 3;
 private:
-  UnderlyingType mValue;
+  TestEnumDefaultValue::Entry mValue;
 };
 }
 namespace std {

@@ -10,7 +10,7 @@
 
 namespace holgen_blackbox_test {
 TestBitmap::TestBitmap(TestBitmap::UnderlyingType value) :
-    mValue(value) {
+    mValue(UnderlyingType(value)) {
 }
 
 TestBitmap::UnderlyingType TestBitmap::GetValue() const {

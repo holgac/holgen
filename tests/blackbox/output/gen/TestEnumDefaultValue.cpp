@@ -9,11 +9,11 @@
 
 namespace holgen_blackbox_test {
 TestEnumDefaultValue::TestEnumDefaultValue(TestEnumDefaultValue::UnderlyingType value) :
-    mValue(value) {
+    mValue(TestEnumDefaultValue::Entry(value)) {
 }
 
 TestEnumDefaultValue::TestEnumDefaultValue(Entry value) :
-    mValue(UnderlyingType(value)) {
+    mValue(value) {
 }
 
 TestEnumDefaultValue::Entry TestEnumDefaultValue::GetValue() const {
@@ -47,12 +47,12 @@ const char *TestEnumDefaultValue::ToString() const {
 }
 
 TestEnumDefaultValue &TestEnumDefaultValue::operator=(UnderlyingType rhs) {
-  mValue = rhs;
+  mValue = TestEnumDefaultValue::Entry(rhs);
   return *this;
 }
 
 bool TestEnumDefaultValue::operator==(UnderlyingType rhs) const {
-  return mValue == rhs;
+  return mValue == TestEnumDefaultValue::Entry(rhs);
 }
 
 bool TestEnumDefaultValue::operator==(const TestEnumDefaultValue &rhs) const {
@@ -60,7 +60,7 @@ bool TestEnumDefaultValue::operator==(const TestEnumDefaultValue &rhs) const {
 }
 
 bool TestEnumDefaultValue::operator!=(UnderlyingType rhs) const {
-  return mValue != rhs;
+  return mValue != TestEnumDefaultValue::Entry(rhs);
 }
 
 bool TestEnumDefaultValue::operator!=(const TestEnumDefaultValue &rhs) const {
@@ -68,7 +68,7 @@ bool TestEnumDefaultValue::operator!=(const TestEnumDefaultValue &rhs) const {
 }
 
 bool TestEnumDefaultValue::operator<(UnderlyingType rhs) const {
-  return mValue < rhs;
+  return mValue < TestEnumDefaultValue::Entry(rhs);
 }
 
 bool TestEnumDefaultValue::operator<(const TestEnumDefaultValue &rhs) const {
@@ -89,11 +89,11 @@ bool TestEnumDefaultValue::ParseJson(const rapidjson::Value &json, const Convert
 }
 
 void TestEnumDefaultValue::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestEnumDefaultValue::UnderlyingType(mValue), luaState, true);
 }
 
 void TestEnumDefaultValue::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(TestEnumDefaultValue::UnderlyingType(mValue), luaState, true);
 }
 
 TestEnumDefaultValue TestEnumDefaultValue::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

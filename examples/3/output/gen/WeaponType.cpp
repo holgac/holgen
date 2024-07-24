@@ -9,11 +9,11 @@
 
 namespace ex3_schemas {
 WeaponType::WeaponType(WeaponType::UnderlyingType value) :
-    mValue(value) {
+    mValue(WeaponType::Entry(value)) {
 }
 
 WeaponType::WeaponType(Entry value) :
-    mValue(UnderlyingType(value)) {
+    mValue(value) {
 }
 
 WeaponType::Entry WeaponType::GetValue() const {
@@ -43,12 +43,12 @@ const char *WeaponType::ToString() const {
 }
 
 WeaponType &WeaponType::operator=(UnderlyingType rhs) {
-  mValue = rhs;
+  mValue = WeaponType::Entry(rhs);
   return *this;
 }
 
 bool WeaponType::operator==(UnderlyingType rhs) const {
-  return mValue == rhs;
+  return mValue == WeaponType::Entry(rhs);
 }
 
 bool WeaponType::operator==(const WeaponType &rhs) const {
@@ -56,7 +56,7 @@ bool WeaponType::operator==(const WeaponType &rhs) const {
 }
 
 bool WeaponType::operator!=(UnderlyingType rhs) const {
-  return mValue != rhs;
+  return mValue != WeaponType::Entry(rhs);
 }
 
 bool WeaponType::operator!=(const WeaponType &rhs) const {
@@ -64,7 +64,7 @@ bool WeaponType::operator!=(const WeaponType &rhs) const {
 }
 
 bool WeaponType::operator<(UnderlyingType rhs) const {
-  return mValue < rhs;
+  return mValue < WeaponType::Entry(rhs);
 }
 
 bool WeaponType::operator<(const WeaponType &rhs) const {
@@ -85,11 +85,11 @@ bool WeaponType::ParseJson(const rapidjson::Value &json, const Converter &conver
 }
 
 void WeaponType::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(WeaponType::UnderlyingType(mValue), luaState, true);
 }
 
 void WeaponType::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(WeaponType::UnderlyingType(mValue), luaState, true);
 }
 
 WeaponType WeaponType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

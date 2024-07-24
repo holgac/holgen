@@ -9,11 +9,11 @@
 
 namespace ex3_schemas {
 Race::Race(Race::UnderlyingType value) :
-    mValue(value) {
+    mValue(Race::Entry(value)) {
 }
 
 Race::Race(Entry value) :
-    mValue(UnderlyingType(value)) {
+    mValue(value) {
 }
 
 Race::Entry Race::GetValue() const {
@@ -51,12 +51,12 @@ const char *Race::ToString() const {
 }
 
 Race &Race::operator=(UnderlyingType rhs) {
-  mValue = rhs;
+  mValue = Race::Entry(rhs);
   return *this;
 }
 
 bool Race::operator==(UnderlyingType rhs) const {
-  return mValue == rhs;
+  return mValue == Race::Entry(rhs);
 }
 
 bool Race::operator==(const Race &rhs) const {
@@ -64,7 +64,7 @@ bool Race::operator==(const Race &rhs) const {
 }
 
 bool Race::operator!=(UnderlyingType rhs) const {
-  return mValue != rhs;
+  return mValue != Race::Entry(rhs);
 }
 
 bool Race::operator!=(const Race &rhs) const {
@@ -72,7 +72,7 @@ bool Race::operator!=(const Race &rhs) const {
 }
 
 bool Race::operator<(UnderlyingType rhs) const {
-  return mValue < rhs;
+  return mValue < Race::Entry(rhs);
 }
 
 bool Race::operator<(const Race &rhs) const {
@@ -93,11 +93,11 @@ bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
 }
 
 void Race::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(Race::UnderlyingType(mValue), luaState, true);
 }
 
 void Race::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push(Race::UnderlyingType(mValue), luaState, true);
 }
 
 Race Race::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
