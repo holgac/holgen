@@ -10,7 +10,7 @@ void BitmapPlugin::Run() {
     if (cls.mEnum == nullptr || cls.mEnum->mType != EnumDefinitionType::Bitmap)
       continue;
     GenerateUnderlyingType(cls);
-    GenerateValueField(cls);
+    GenerateValueField(cls, "UnderlyingType");
     GenerateClassEnum(cls, "Index");
     GenerateClassEnumForEntryValues(cls);
     GenerateIntegralConstructor(cls, "0");

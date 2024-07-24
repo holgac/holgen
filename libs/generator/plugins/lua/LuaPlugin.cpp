@@ -582,7 +582,13 @@ void LuaPlugin::ProcessEnum(Class &cls) {
   for (auto &methodName: std::vector<std::string>{"PushToLua", St::Lua_PushMirrorObject}) {
     auto method = ClassMethod{methodName, Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    method.mBody.Add("{}::{}(mValue, luaState, true);", St::LuaHelper, St::LuaHelper_Push);
+    std::string valueToPush;
+    if (cls.GetField("mValue")->mType.mName == "UnderlyingType")
+      valueToPush = "mValue";
+    else
+      valueToPush = std::format("{}::UnderlyingType(mValue)", cls.mName);
+
+    method.mBody.Add("{}::{}({}, luaState, true);", St::LuaHelper, St::LuaHelper_Push, valueToPush);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }

@@ -9,8 +9,8 @@ void EnumPlugin::Run() {
     if (cls.mEnum == nullptr || cls.mEnum->mType != EnumDefinitionType::Enum)
       continue;
     GenerateUnderlyingType(cls);
-    GenerateValueField(cls);
     GenerateClassEnum(cls);
+    GenerateValueField(cls, std::format("{}::Entry", cls.mName));
     GenerateIntegralConstructor(cls);
     GenerateEnumConstructor(cls);
     GenerateGetValue(cls);
@@ -30,7 +30,7 @@ void EnumPlugin::Run() {
 void EnumPlugin::GenerateEnumConstructor(Class &cls) {
   auto ctor = ClassConstructor{};
   ctor.mArguments.emplace_back("value", Type{"Entry"});
-  ctor.mInitializerList.emplace_back("mValue", "UnderlyingType(value)");
+  ctor.mInitializerList.emplace_back("mValue", "value");
   // TODO: validate ctors
   cls.mConstructors.push_back(std::move(ctor));
 }

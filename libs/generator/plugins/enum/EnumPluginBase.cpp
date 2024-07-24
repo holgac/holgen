@@ -7,7 +7,8 @@ void EnumPluginBase::GenerateIntegralConstructor(Class &cls, const std::string &
   auto ctor = ClassConstructor{};
   ctor.mExplicitness = Explicitness::Explicit;
   ctor.mArguments.emplace_back("value", Type{St::Enum_UnderlyingType}, defaultValue);
-  ctor.mInitializerList.emplace_back("mValue", "value");
+  auto valueField = cls.GetField("mValue");
+  ctor.mInitializerList.emplace_back("mValue", std::format("{}(value)", valueField->mType.mName));
   // TODO: validate ctors
   cls.mConstructors.push_back(std::move(ctor));
 }
@@ -16,8 +17,8 @@ void EnumPluginBase::GenerateUnderlyingType(Class &cls) {
   cls.mUsings.emplace_back(Type{"int64_t"}, St::Enum_UnderlyingType);
 }
 
-void EnumPluginBase::GenerateValueField(Class &cls) {
-  auto field = ClassField{"mValue", Type{St::Enum_UnderlyingType}};
+void EnumPluginBase::GenerateValueField(Class &cls, const std::string &type) {
+  auto field = ClassField{"mValue", Type{type}};
   Validate().NewField(cls, field);
   cls.mFields.push_back(std::move(field));
 }
@@ -96,6 +97,7 @@ void EnumPluginBase::GenerateOperator(Class &cls, const EnumOperator &op) {
     method.mReturnType.mName = cls.mName;
     method.mReturnType.mType = PassByType::Reference;
   }
+  auto valueField = cls.GetField("mValue");
   switch (op.mArgumentType) {
   case EnumOperatorArgumentType::UnderlyingType:
     method.mArguments.emplace_back("rhs", Type{St::Enum_UnderlyingType});
@@ -111,10 +113,18 @@ void EnumPluginBase::GenerateOperator(Class &cls, const EnumOperator &op) {
     auto line = method.mBody.Line();
     if (op.mReturn == EnumOperatorReturnType::Result)
       line << "return ";
-    line << "mValue";
-    line << " " << op.mOperator << " rhs";
+    line << "mValue " << op.mOperator << " ";
+    // TODO: put "UnderlyingType" in St.
+    bool needsCast = op.mArgumentType == EnumOperatorArgumentType::UnderlyingType &&
+        valueField->mType.mName != "UnderlyingType";
+    if (needsCast)
+      line << valueField->mType.mName << "(";
+
+    line << "rhs";
     if (op.mArgumentType == EnumOperatorArgumentType::Class)
       line << ".mValue";
+    if (needsCast)
+      line << ")";
     line << ";";
   }
   if (op.mReturn == EnumOperatorReturnType::This)
