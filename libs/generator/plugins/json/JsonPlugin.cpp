@@ -339,6 +339,20 @@ void JsonPlugin::ProcessEnum(Class &cls) {
   method.mBody.Indent(1);
   method.mBody.Add("*this = {}(json.GetInt64());", cls.mName);
   method.mBody.Indent(-1);
+
+  if (cls.mEnum->mType == EnumDefinitionType::Bitmap) {
+    method.mBody.Add("}} else if (json.IsArray()) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("for (auto &data: json.GetArray()) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("{} parsedData;", cls.mName);
+    method.mBody.Add("parsedData.{}(data, converter);", St::ParseJson);
+    method.mBody.Add("Add(parsedData);");
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+    method.mBody.Indent(-1);
+  }
+
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
   method.mBody.Add("*this = {}{{}};", cls.mName);
