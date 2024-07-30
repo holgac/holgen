@@ -98,7 +98,7 @@ if (str == "Entry1") {
   return TestEnum(TestEnum::Entry3);
 } else {
   HOLGEN_WARN("{} is not a valid TestEnum, returning invalid", str);
-  return TestEnum{};
+  return TestEnum{TestEnum::Invalid};
 }
   )R");
 }

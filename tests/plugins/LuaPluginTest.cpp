@@ -4,12 +4,14 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
+#include "generator/plugins/enum/EnumPlugin.h"
 #include "core/St.h"
 
 class LuaPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
     ClassPlugin(project, {}).Run();
+    EnumPlugin(project, {}).Run();
     ClassIdFieldPlugin(project, {}).Run();
     ClassFieldPlugin(project, {}).Run();
     CppFunctionPlugin(project, {}).Run();
@@ -30,7 +32,7 @@ enum TestData {}
     auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method,
-                         "LuaHelper::Push(mValue, luaState, true);");
+                         "LuaHelper::Push(TestData::UnderlyingType(mValue), luaState, true);");
   }
 }
 
