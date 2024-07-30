@@ -181,8 +181,24 @@ bool TestBitmap::Has(const TestBitmap &val) const {
   return (mValue & val.mValue) == val.mValue;
 }
 
+void TestBitmap::Add(const TestBitmap &val) {
+  mValue |= val.mValue;
+}
+
+void TestBitmap::Remove(const TestBitmap &val) {
+  mValue &= ~(val.mValue);
+}
+
 bool TestBitmap::Has(const TestBitmap::Entry &val) const {
   return (mValue & val) == val;
+}
+
+void TestBitmap::Add(const TestBitmap::Entry &val) {
+  mValue |= val;
+}
+
+void TestBitmap::Remove(const TestBitmap::Entry &val) {
+  mValue &= ~(val);
 }
 
 bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -190,6 +206,12 @@ bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &conver
     *this = TestBitmap::FromString(std::string_view(json.GetString(), json.GetStringLength()));
   } else if (json.IsInt64()) {
     *this = TestBitmap(json.GetInt64());
+  } else if (json.IsArray()) {
+    for (auto &data: json.GetArray()) {
+      TestBitmap parsedData;
+      parsedData.ParseJson(data, converter);
+      Add(parsedData);
+    }
   } else {
     *this = TestBitmap{};
     HOLGEN_WARN("Could not json-parse TestBitmap enum: invalid json type");
