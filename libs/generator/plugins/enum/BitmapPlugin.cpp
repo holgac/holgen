@@ -21,8 +21,11 @@ void BitmapPlugin::Run() {
     GenerateToString(cls);
     GenerateOperators(cls);
     GenerateBitmapOperators(cls);
-    GenerateHasMethod(cls, true);
-    GenerateHasMethod(cls, false);
+    for (const auto forNestedEnum: {true, false}) {
+      GenerateHasMethod(cls, forNestedEnum);
+      GenerateMutator(cls, "Add", "|=", forNestedEnum);
+      GenerateMutator(cls, "Remove", "&=", forNestedEnum, "~");
+    }
     GenerateGetEntries(cls, "GetEntries", "");
     GenerateGetEntries(cls, "GetEntryIndices", "Index");
     GenerateFormatter(cls, true);
@@ -40,6 +43,22 @@ void BitmapPlugin::GenerateHasMethod(Class &cls, bool forNestedEnum) {
     method.mBody.Add("return (mValue & val.mValue) == val.mValue;");
   else
     method.mBody.Add("return (mValue & val) == val;");
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void BitmapPlugin::GenerateMutator(Class &cls, const std::string &name,
+                                   const std::string &operation, bool forNestedEnum,
+                                   const std::string &operationOnRhs) {
+  auto method = ClassMethod{name, Type{"void"}, Visibility::Public, Constness::NotConst};
+  method.mArguments.emplace_back(
+      "val", Type{forNestedEnum ? cls.mName : std::format("{}::Entry", cls.mName)});
+  method.mArguments.front().mType.PreventCopying();
+  std::string rhs = forNestedEnum ? "val.mValue" : "val";
+  if (!operationOnRhs.empty()) {
+    rhs = std::format("{}({})", operationOnRhs, rhs);
+  }
+  method.mBody.Add("mValue {} {};", operation, rhs);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

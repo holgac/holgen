@@ -14,5 +14,7 @@ private:
   void GenerateToString(Class &cls);
   void GenerateBitmapOperators(Class &cls);
   void GenerateHasMethod(Class &cls, bool forNestedEnum);
+  void GenerateMutator(Class &cls, const std::string &name, const std::string &operation,
+                       bool forNestedEnum, const std::string &operationOnRhs = "");
 };
 } // namespace holgen
