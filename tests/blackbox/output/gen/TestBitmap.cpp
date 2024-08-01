@@ -189,6 +189,10 @@ void TestBitmap::Remove(const TestBitmap &val) {
   mValue &= ~(val.mValue);
 }
 
+void TestBitmap::Toggle(const TestBitmap &val) {
+  mValue ^= val.mValue;
+}
+
 bool TestBitmap::Has(const TestBitmap::Entry &val) const {
   return (mValue & val) == val;
 }
@@ -199,6 +203,10 @@ void TestBitmap::Add(const TestBitmap::Entry &val) {
 
 void TestBitmap::Remove(const TestBitmap::Entry &val) {
   mValue &= ~(val);
+}
+
+void TestBitmap::Toggle(const TestBitmap::Entry &val) {
+  mValue ^= val;
 }
 
 bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &converter) {

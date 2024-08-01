@@ -25,6 +25,7 @@ void BitmapPlugin::Run() {
       GenerateHasMethod(cls, forNestedEnum);
       GenerateMutator(cls, "Add", "|=", forNestedEnum);
       GenerateMutator(cls, "Remove", "&=", forNestedEnum, "~");
+      GenerateMutator(cls, "Toggle", "^=", forNestedEnum);
     }
     GenerateGetEntries(cls, "GetEntries", "");
     GenerateGetEntries(cls, "GetEntryIndices", "Index");

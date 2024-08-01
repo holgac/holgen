@@ -59,9 +59,11 @@ public:
   bool Has(const TestBitmap &val) const;
   void Add(const TestBitmap &val);
   void Remove(const TestBitmap &val);
+  void Toggle(const TestBitmap &val);
   bool Has(const TestBitmap::Entry &val) const;
   void Add(const TestBitmap::Entry &val);
   void Remove(const TestBitmap::Entry &val);
+  void Toggle(const TestBitmap::Entry &val);
   constexpr static std::array<TestBitmap::Entry, 5> GetEntries() {
     return std::array<TestBitmap::Entry, 5>{Entry1, Entry2, Entry3, Entry4, Entry5};
   }
