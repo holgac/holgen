@@ -91,6 +91,16 @@ TypeInfo &TypeInfo::Get() {
   return instance;
 }
 
+std::string TypeInfo::GetUnsigned(const std::string &signedType) {
+  THROW_IF(!SignedIntegralTypes.contains(signedType), "{} is not a signed integer type",
+           signedType);
+  if (signedType == "ssize_t" || signedType == "ptrdiff_t")
+    return "size_t";
+  if (signedType == "int")
+    return "uint32_t";
+  return "u" + signedType;
+}
+
 std::string Type::ToString(bool noTrailingSpace) const {
   std::stringstream ss;
 

@@ -212,14 +212,16 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
     method.mReturnType.mConstness = constness;
     if (i == 0)
       method.mExposeToLua = true;
-    bool isSigned = false;
+    std::string idxVariable = "idx";
     if (underlyingIdField) {
       auto &arg = method.mArguments.emplace_back("idx",
                                                  Type{mProject,
                                                       underlyingIdField->mField->mDefinitionSource,
                                                       underlyingIdField->mField->mType});
-      if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName))
-        isSigned = true;
+      if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName)) {
+        // double cast to avoid sign extension; zero padding should be slightly faster
+        idxVariable = std::format("size_t({}(idx))", TypeInfo::Get().GetUnsigned(arg.mType.mName));
+      }
     } else {
       method.mArguments.emplace_back("idx", Type{"size_t"});
     }
@@ -241,12 +243,7 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
         method.mBody.Add("auto it = {}.find(idx);", field.mName);
         method.mBody.Add("if (it == {}.end())", field.mName);
       } else {
-        auto line = method.mBody.Line();
-        line << "if (idx >= " << field.mName << ".size()";
-        if (isSigned) {
-          line << " || idx < 0";
-        }
-        line << ")";
+        method.mBody.Add("if ({} >= {}.size())", idxVariable, field.mName);
       }
       method.mBody.Indent(1);
       method.mBody.Line() << "return nullptr;";
@@ -254,7 +251,7 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       if (isKeyedContainer) {
         method.mBody.Add("return &it->second;");
       } else {
-        method.mBody.Line() << "return &" << field.mName << "[idx];";
+        method.mBody.Add("return &{}[{}];", field.mName, idxVariable);
       }
     }
     Validate().NewMethod(cls, method);

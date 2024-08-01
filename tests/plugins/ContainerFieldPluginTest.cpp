@@ -442,9 +442,9 @@ struct TestData {
     method.mArguments.emplace_back("idx", Type{"int32_t"});
     method.mExposeToLua = true;
     const char *body = R"R(
-if (idx >= mInnerStructs.size() || idx < 0)
+if (size_t(uint32_t(idx)) >= mInnerStructs.size())
   return nullptr;
-return &mInnerStructs[idx];
+return &mInnerStructs[size_t(uint32_t(idx))];
     )R";
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStruct", Constness::Const), method, body);
     method.mReturnType.mConstness = Constness::NotConst;

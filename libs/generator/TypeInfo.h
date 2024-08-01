@@ -92,6 +92,7 @@ public:
   std::set<std::string> CppTypes;
   // Types that are valid but require no validation
   std::set<std::string> AllowlistedTypes;
+  std::string GetUnsigned(const std::string &signedType);
 };
 
 } // namespace holgen
