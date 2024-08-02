@@ -212,15 +212,15 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
     method.mReturnType.mConstness = constness;
     if (i == 0)
       method.mExposeToLua = true;
-    std::string idxVariable = "idx";
+    std::string idxExpression = "idx";
     if (underlyingIdField) {
-      auto &arg = method.mArguments.emplace_back("idx",
-                                                 Type{mProject,
-                                                      underlyingIdField->mField->mDefinitionSource,
-                                                      underlyingIdField->mField->mType});
-      if (TypeInfo::Get().SignedIntegralTypes.contains(arg.mType.mName)) {
+      method.mArguments.emplace_back("idx",
+                                     Type{mProject, underlyingIdField->mField->mDefinitionSource,
+                                          underlyingIdField->mField->mType});
+      if (TypeInfo::Get().SignedIntegralTypes.contains(underlyingIdField->mType.mName)) {
         // double cast to avoid sign extension; zero padding should be slightly faster
-        idxVariable = std::format("size_t({}(idx))", TypeInfo::Get().GetUnsigned(arg.mType.mName));
+        idxExpression = std::format("size_t({}(idx))",
+                                    TypeInfo::Get().GetUnsigned(underlyingIdField->mType.mName));
       }
     } else {
       method.mArguments.emplace_back("idx", Type{"size_t"});
@@ -243,7 +243,7 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
         method.mBody.Add("auto it = {}.find(idx);", field.mName);
         method.mBody.Add("if (it == {}.end())", field.mName);
       } else {
-        method.mBody.Add("if ({} >= {}.size())", idxVariable, field.mName);
+        method.mBody.Add("if ({} >= {}.size())", idxExpression, field.mName);
       }
       method.mBody.Indent(1);
       method.mBody.Line() << "return nullptr;";
@@ -251,7 +251,7 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       if (isKeyedContainer) {
         method.mBody.Add("return &it->second;");
       } else {
-        method.mBody.Add("return &{}[{}];", field.mName, idxVariable);
+        method.mBody.Add("return &{}[{}];", field.mName, idxExpression);
       }
     }
     Validate().NewMethod(cls, method);
@@ -290,6 +290,12 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
                                          Annotations::MethodOption_None))
     return;
 
+  auto &underlyingType = field.mType.mTemplateParameters.back();
+  auto underlyingClass = mProject.GetClass(underlyingType.mName);
+  const ClassField *underlyingIdField = nullptr;
+  if (underlyingClass && underlyingClass->mStruct)
+    underlyingIdField = underlyingClass->GetIdField();
+
   auto method = ClassMethod{Naming().ContainerElemDeleterNameInCpp(*field.mField), Type{"void"},
                             Visibility::Public, Constness::NotConst};
   if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
@@ -297,7 +303,10 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
   } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
     method.mArguments.emplace_back("elem", field.mType.mTemplateParameters.front());
   } else {
-    method.mArguments.emplace_back("idx", Type{"size_t"});
+    if (underlyingIdField)
+      method.mArguments.emplace_back("idx", underlyingIdField->mType);
+    else
+      method.mArguments.emplace_back("idx", Type{"size_t"});
   }
 
   method.mExposeToLua = true;
@@ -338,10 +347,17 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
     } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
       method.mBody.Add("{}.erase(elem);", field.mName);
     } else {
-      method.mBody.Add("if (idx != {}.size() - 1) {{", field.mName);
+      std::string idxExpression = "idx";
+      if (underlyingIdField &&
+          TypeInfo::Get().SignedIntegralTypes.contains(underlyingIdField->mType.mName)) {
+        // double cast to avoid sign extension; zero padding should be slightly faster
+        idxExpression = std::format("size_t({}(idx))",
+                                    TypeInfo::Get().GetUnsigned(underlyingIdField->mType.mName));
+      }
+      method.mBody.Add("if ({} != {}.size() - 1) {{", idxExpression, field.mName);
       method.mBody.Indent(1);
       method.mBody.Add(std::move(indexReassigners));
-      method.mBody.Add("{0}[idx] = std::move({0}.back());", field.mName);
+      method.mBody.Add("{0}[{1}] = std::move({0}.back());", field.mName, idxExpression);
       method.mBody.Indent(-1);
       method.mBody.Add("}}");
       method.mBody.Add("{}.pop_back();", field.mName);
