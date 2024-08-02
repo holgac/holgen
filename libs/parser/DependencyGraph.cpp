@@ -67,7 +67,13 @@ void DependencyGraph::Calculate(const StructDefinition &structDefinition,
 
 void DependencyGraph::Calculate(const StructDefinition &structDefinition,
                                 const FieldDefinition &fieldDefinition) {
-  if (fieldDefinition.mType.mName == "Ref") {
+  Calculate(structDefinition, fieldDefinition, fieldDefinition.mType);
+}
+
+void DependencyGraph::Calculate(const StructDefinition &structDefinition,
+                                const FieldDefinition &fieldDefinition,
+                                const TypeDefinition &typeDefinition) {
+  if (typeDefinition.mName == "Ref") {
     bool shouldProcess = std::any_of(AnnotationsToCheck.begin(), AnnotationsToCheck.end(),
                                      [&fieldDefinition](const std::string &annotation) {
                                        return fieldDefinition.GetAnnotation(annotation);
@@ -75,11 +81,6 @@ void DependencyGraph::Calculate(const StructDefinition &structDefinition,
     if (!shouldProcess)
       return;
   }
-  Calculate(structDefinition, fieldDefinition.mType);
-}
-
-void DependencyGraph::Calculate(const StructDefinition &structDefinition,
-                                const TypeDefinition &typeDefinition) {
   auto referencedStruct = mProject.GetStruct(typeDefinition.mName);
   if (referencedStruct) {
     THROW_IF(mInverseDependencies[structDefinition.mName].contains(referencedStruct->mName),
@@ -95,7 +96,7 @@ void DependencyGraph::Calculate(const StructDefinition &structDefinition,
   for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
     // This is overly strict - figure out how to handle this better
     if (templateParameter.mName != structDefinition.mName)
-      Calculate(structDefinition, templateParameter);
+      Calculate(structDefinition, fieldDefinition, templateParameter);
   }
 }
 

@@ -14,7 +14,8 @@ public:
 
 private:
   void Calculate();
-  void Calculate(const StructDefinition &structDefinition, const TypeDefinition &typeDefinition);
+  void Calculate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition,
+                 const TypeDefinition &typeDefinition);
   void Calculate(const StructDefinition &structDefinition, const FieldDefinition &fieldDefinition);
   void Calculate(const StructDefinition &structDefinition,
                  const StructDefinition &curStructDefinition,
