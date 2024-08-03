@@ -38,7 +38,7 @@ public:
   Character *AddCharacter(Character &elem);
   const Character *GetCharacter(uint32_t idx) const;
   Character *GetCharacter(uint32_t idx);
-  void DeleteCharacter(size_t idx);
+  void DeleteCharacter(uint32_t idx);
   size_t GetCharacterCount() const;
   const Armor *GetArmorFromName(const std::string &key) const;
   Armor *GetArmorFromName(const std::string &key);
@@ -46,7 +46,7 @@ public:
   Armor *AddArmor(Armor &elem);
   const Armor *GetArmor(uint32_t idx) const;
   Armor *GetArmor(uint32_t idx);
-  void DeleteArmor(size_t idx);
+  void DeleteArmor(uint32_t idx);
   size_t GetArmorCount() const;
   const Weapon *GetWeaponFromName(const std::string &key) const;
   Weapon *GetWeaponFromName(const std::string &key);
@@ -54,7 +54,7 @@ public:
   Weapon *AddWeapon(Weapon &elem);
   const Weapon *GetWeapon(uint32_t idx) const;
   Weapon *GetWeapon(uint32_t idx);
-  void DeleteWeapon(size_t idx);
+  void DeleteWeapon(uint32_t idx);
   size_t GetWeaponCount() const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;

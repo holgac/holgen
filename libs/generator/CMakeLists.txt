@@ -15,6 +15,7 @@ set(gen_enum_plugins
     plugins/enum/EnumPluginBase.cpp
     plugins/enum/EnumPlugin.cpp
     plugins/enum/BitmapPlugin.cpp
+    plugins/enum/BitmapFieldPlugin.cpp
 )
 
 set(gen_json_plugins

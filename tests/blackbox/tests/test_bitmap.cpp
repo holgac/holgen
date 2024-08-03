@@ -27,6 +27,20 @@ TEST_F(BitmapTest, Operators) {
   EXPECT_EQ(lType, TestBitmap::Entry5);
 }
 
+TEST_F(BitmapTest, StructMethods) {
+  TestBitmapStruct tbs;
+  EXPECT_FALSE(tbs.HasBitmapField(TestBitmap::Entry1));
+  tbs.AddBitmapField(TestBitmap::Entry1);
+  EXPECT_TRUE(tbs.HasBitmapField(TestBitmap::Entry1));
+  tbs.RemoveBitmapField(TestBitmap::Entry1);
+  EXPECT_FALSE(tbs.HasBitmapField(TestBitmap::Entry1));
+
+  tbs.ToggleBitmapField(TestBitmap::Entry2);
+  EXPECT_TRUE(tbs.HasBitmapField(TestBitmap::Entry2));
+  tbs.ToggleBitmapField(TestBitmap::Entry2);
+  EXPECT_FALSE(tbs.HasBitmapField(TestBitmap::Entry2));
+}
+
 TEST_F(BitmapTest, JsonString) {
   TestBitmapStruct testBitmapStruct;
   rapidjson::Document doc;
@@ -57,7 +71,8 @@ TEST_F(BitmapTest, JsonIntegral) {
 
 TEST_F(BitmapTest, GetEntries) {
   EXPECT_THAT(TestBitmap::GetEntries(),
-              ::testing::ElementsAre(TestBitmap::Entry1, TestBitmap::Entry2, TestBitmap::Entry3, TestBitmap::Entry4, TestBitmap::Entry5));
+              ::testing::ElementsAre(TestBitmap::Entry1, TestBitmap::Entry2, TestBitmap::Entry3,
+                                     TestBitmap::Entry4, TestBitmap::Entry5));
 }
 
 TEST_F(BitmapTest, Formatter) {

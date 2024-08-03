@@ -113,7 +113,7 @@ Character *DataManager::GetCharacter(uint32_t idx) {
   return &mCharacters[idx];
 }
 
-void DataManager::DeleteCharacter(size_t idx) {
+void DataManager::DeleteCharacter(uint32_t idx) {
   auto ptr = GetCharacter(idx);
   mCharactersNameIndex.erase(ptr->GetName());
   if (idx != mCharacters.size() - 1) {
@@ -175,7 +175,7 @@ Armor *DataManager::GetArmor(uint32_t idx) {
   return &mArmors[idx];
 }
 
-void DataManager::DeleteArmor(size_t idx) {
+void DataManager::DeleteArmor(uint32_t idx) {
   auto ptr = GetArmor(idx);
   mArmorsNameIndex.erase(ptr->GetName());
   if (idx != mArmors.size() - 1) {
@@ -237,7 +237,7 @@ Weapon *DataManager::GetWeapon(uint32_t idx) {
   return &mWeapons[idx];
 }
 
-void DataManager::DeleteWeapon(size_t idx) {
+void DataManager::DeleteWeapon(uint32_t idx) {
   auto ptr = GetWeapon(idx);
   mWeaponsNameIndex.erase(ptr->GetName());
   if (idx != mWeapons.size() - 1) {
@@ -433,7 +433,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("DeleteCharacter", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
-      size_t arg0;
+      uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       instance->DeleteCharacter(arg0);
       return 0;
@@ -474,7 +474,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("DeleteArmor", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
-      size_t arg0;
+      uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       instance->DeleteArmor(arg0);
       return 0;
@@ -515,7 +515,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("DeleteWeapon", key)) {
     lua_pushcfunction(luaState, [](lua_State *lsInner) {
       auto instance = DataManager::ReadProxyFromLua(lsInner, -2);
-      size_t arg0;
+      uint32_t arg0;
       LuaHelper::Read(arg0, lsInner, -1);
       instance->DeleteWeapon(arg0);
       return 0;

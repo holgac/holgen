@@ -26,6 +26,22 @@ void TestBitmapStruct::SetBitmapField(const TestBitmap &val) {
   mBitmapField = val;
 }
 
+bool TestBitmapStruct::HasBitmapField(int64_t val) const {
+  return mBitmapField.Has(TestBitmap(val));
+}
+
+void TestBitmapStruct::AddBitmapField(int64_t val) {
+  mBitmapField.Add(TestBitmap(val));
+}
+
+void TestBitmapStruct::RemoveBitmapField(int64_t val) {
+  mBitmapField.Remove(TestBitmap(val));
+}
+
+void TestBitmapStruct::ToggleBitmapField(int64_t val) {
+  mBitmapField.Toggle(TestBitmap(val));
+}
+
 bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestBitmapStruct");
   for (const auto &data: json.GetObject()) {
@@ -92,6 +108,39 @@ int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("bitmapField", key)) {
     LuaHelper::Push(instance->mBitmapField, luaState, false);
+  } else if (0 == strcmp("HasBitmapField", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
+      int64_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      auto result = instance->HasBitmapField(arg0);
+      LuaHelper::Push(result, lsInner, true);
+      return 1;
+    });
+  } else if (0 == strcmp("AddBitmapField", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
+      int64_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      instance->AddBitmapField(arg0);
+      return 0;
+    });
+  } else if (0 == strcmp("RemoveBitmapField", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
+      int64_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      instance->RemoveBitmapField(arg0);
+      return 0;
+    });
+  } else if (0 == strcmp("ToggleBitmapField", key)) {
+    lua_pushcfunction(luaState, [](lua_State *lsInner) {
+      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
+      int64_t arg0;
+      LuaHelper::Read(arg0, lsInner, -1);
+      instance->ToggleBitmapField(arg0);
+      return 0;
+    });
   } else {
     HOLGEN_WARN("Unexpected lua field: TestBitmapStruct.{}", key);
     return 0;
