@@ -115,16 +115,16 @@ Race Race::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
 void Race::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "Human");
-  lua_pushnumber(luaState, 2);
+  lua_pushnumber(luaState, Race::Human);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Elf");
-  lua_pushnumber(luaState, 0);
+  lua_pushnumber(luaState, Race::Elf);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Dwarf");
-  lua_pushnumber(luaState, 1);
+  lua_pushnumber(luaState, Race::Dwarf);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Hobbit");
-  lua_pushnumber(luaState, 3);
+  lua_pushnumber(luaState, Race::Hobbit);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Invalid");
   lua_pushnumber(luaState, 4);

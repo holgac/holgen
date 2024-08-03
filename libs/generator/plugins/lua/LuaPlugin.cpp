@@ -531,10 +531,16 @@ void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add("lua_newtable(luaState);");
 
+  bool isBitMap = cls.mEnum->mType == EnumDefinitionType::Bitmap;
   for (auto &entry: cls.mEnum->mEntries) {
     method.mBody.Add("lua_pushstring(luaState, \"{}\");", entry.mName);
-    method.mBody.Add("lua_pushnumber(luaState, {});", entry.mValue);
+    method.mBody.Add("lua_pushnumber(luaState, {}::{});", cls.mName, entry.mName);
     method.mBody.Add("lua_settable(luaState, -3);");
+    if (isBitMap) {
+      method.mBody.Add("lua_pushstring(luaState, \"{}Index\");", entry.mName);
+      method.mBody.Add("lua_pushnumber(luaState, {}::{}Index);", cls.mName, entry.mName);
+      method.mBody.Add("lua_settable(luaState, -3);");
+    }
   }
   // TODO: use const for invalid entry name
   method.mBody.Add("lua_pushstring(luaState, \"Invalid\");");

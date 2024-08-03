@@ -111,13 +111,13 @@ TestEnum TestEnum::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
 void TestEnum::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "Entry5");
-  lua_pushnumber(luaState, 5);
+  lua_pushnumber(luaState, TestEnum::Entry5);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Entry1");
-  lua_pushnumber(luaState, 0);
+  lua_pushnumber(luaState, TestEnum::Entry1);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Entry2");
-  lua_pushnumber(luaState, 1);
+  lua_pushnumber(luaState, TestEnum::Entry2);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Invalid");
   lua_pushnumber(luaState, 2);

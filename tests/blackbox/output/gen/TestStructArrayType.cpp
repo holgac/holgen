@@ -107,10 +107,10 @@ TestStructArrayType TestStructArrayType::ReadMirrorFromLua(lua_State *luaState, 
 void TestStructArrayType::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "Type1");
-  lua_pushnumber(luaState, 0);
+  lua_pushnumber(luaState, TestStructArrayType::Type1);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Type2");
-  lua_pushnumber(luaState, 1);
+  lua_pushnumber(luaState, TestStructArrayType::Type2);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Invalid");
   lua_pushnumber(luaState, 2);

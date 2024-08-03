@@ -107,10 +107,10 @@ WeaponType WeaponType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
 void WeaponType::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "Sword");
-  lua_pushnumber(luaState, 0);
+  lua_pushnumber(luaState, WeaponType::Sword);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Bow");
-  lua_pushnumber(luaState, 1);
+  lua_pushnumber(luaState, WeaponType::Bow);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Invalid");
   lua_pushnumber(luaState, 2);

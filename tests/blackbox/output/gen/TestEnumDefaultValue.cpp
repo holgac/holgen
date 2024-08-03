@@ -111,13 +111,13 @@ TestEnumDefaultValue TestEnumDefaultValue::ReadMirrorFromLua(lua_State *luaState
 void TestEnumDefaultValue::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "SomeEntry");
-  lua_pushnumber(luaState, 0);
+  lua_pushnumber(luaState, TestEnumDefaultValue::SomeEntry);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "DefaultEntry");
-  lua_pushnumber(luaState, 1);
+  lua_pushnumber(luaState, TestEnumDefaultValue::DefaultEntry);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "AnotherEntry");
-  lua_pushnumber(luaState, 2);
+  lua_pushnumber(luaState, TestEnumDefaultValue::AnotherEntry);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Invalid");
   lua_pushnumber(luaState, 3);

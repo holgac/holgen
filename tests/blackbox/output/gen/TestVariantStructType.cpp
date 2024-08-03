@@ -107,10 +107,10 @@ TestVariantStructType TestVariantStructType::ReadMirrorFromLua(lua_State *luaSta
 void TestVariantStructType::PushEnumToLua(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "Human");
-  lua_pushnumber(luaState, 0);
+  lua_pushnumber(luaState, TestVariantStructType::Human);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Cat");
-  lua_pushnumber(luaState, 1);
+  lua_pushnumber(luaState, TestVariantStructType::Cat);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "Invalid");
   lua_pushnumber(luaState, 2);
