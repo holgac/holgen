@@ -59,6 +59,8 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
   const std::string *sourceTable = nullptr;
+  bool isFunctionStatic =
+      functionDefinition.GetMatchingAttribute(Annotations::LuaFunc, Annotations::LuaFunc_Static);
   if (isFuncTable) {
     auto attrib = cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)
                       ->GetAttribute(Annotations::LuaFuncTable_SourceTable);
@@ -66,9 +68,9 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
       sourceTable = &attrib->mValue.mName;
     }
 
-    bool isStatic = cls.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable,
-                                                      Annotations::LuaFuncTable_Static) ||
-        functionDefinition.GetMatchingAttribute(Annotations::LuaFunc, Annotations::LuaFunc_Static);
+    bool isStatic = isFunctionStatic ||
+        cls.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable,
+                                          Annotations::LuaFuncTable_Static);
 
     GenerateFunction(cls, functionDefinition, sourceTable, functionDefinition.mName, isFuncTable,
                      isStatic);
@@ -80,7 +82,8 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
     if (attrib) {
       sourceTable = &attrib->mValue.mName;
     }
-    GenerateFunction(cls, functionDefinition, sourceTable, field.mName, isFuncTable, false);
+    GenerateFunction(cls, functionDefinition, sourceTable, field.mName, isFuncTable,
+                     isFunctionStatic);
     GenerateFunctionSetter(cls, functionDefinition, field);
     GenerateFunctionChecker(cls, functionDefinition, field);
     Validate().NewField(cls, field);
