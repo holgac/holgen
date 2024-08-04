@@ -4,6 +4,7 @@
 #include "generator/plugins/ClassPlugin.h"
 #include "generator/plugins/CppFunctionPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
+#include "generator/plugins/lua/LuaIndexMetaMethodPlugin.h"
 #include "generator/plugins/enum/EnumPlugin.h"
 #include "core/St.h"
 
@@ -16,6 +17,7 @@ protected:
     ClassFieldPlugin(project, {}).Run();
     CppFunctionPlugin(project, {}).Run();
     LuaPlugin(project, {}).Run();
+    LuaIndexMetaMethodPlugin(project, {}).Run();
   }
 };
 

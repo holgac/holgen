@@ -26,6 +26,8 @@ set(gen_json_plugins
 )
 
 set(gen_lua_plugins
+    plugins/lua/LuaPluginBase.cpp
+    plugins/lua/LuaIndexMetaMethodPlugin.cpp
     plugins/lua/LuaPlugin.cpp
     plugins/lua/LuaFieldsPlugin.cpp
     plugins/lua/LuaHelperPlugin.cpp

@@ -23,6 +23,7 @@
 #include "generator/plugins/lua/LuaHelperPlugin.h"
 #include "generator/plugins/lua/LuaFieldsPlugin.h"
 #include "generator/plugins/lua/LuaPlugin.h"
+#include "generator/plugins/lua/LuaIndexMetaMethodPlugin.h"
 #include "generator/plugins/ClassCopyMoveDestroyPlugin.h"
 
 namespace holgen {
@@ -52,6 +53,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<JsonHelperPlugin>();
   // TODO: lua plugins should run before json so that LuaRegistryData can be initialized via json
   AddPlugin<LuaPlugin>();
+  AddPlugin<LuaIndexMetaMethodPlugin>();
   AddPlugin<LuaHelperPlugin>();
   AddPlugin<GlobalPointerPlugin>();
   AddPlugin<FilesystemHelperPlugin>();
