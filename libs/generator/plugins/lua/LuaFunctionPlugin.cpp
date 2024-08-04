@@ -224,6 +224,14 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
     retVal = "nullptr";
   } else if (functionDefinition.mReturnType.mType.mName == "void") {
     retVal = "void()";
+  } else if (auto returnedCls = mProject.GetClass(method.mReturnType.mName)) {
+    if (returnedCls->mEnum) {
+      if (returnedCls->mEnum->mType == EnumDefinitionType::Bitmap) {
+        retVal = std::format("{}(0)", returnedCls->mName);
+      } else {
+        retVal = std::format("{0}({0}::Invalid)", returnedCls->mName);
+      }
+    }
   }
 
   bool throwOnFailure =
