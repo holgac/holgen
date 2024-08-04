@@ -31,6 +31,11 @@ void LuaIndexMetaMethodPlugin::Process(Class &cls) {
       method.mBody.Add("auto instance = {}::{}(luaState, -2);", cls.mName, St::Lua_ReadProxyObject);
     }
     method.mBody.Add("const char *key = lua_tostring(luaState, -1);");
+    if (hasFields) {
+      method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!instance, 0, \"Requesting for {}.{{}} with "
+                       "an invalid lua proxy object!\", key);",
+                       cls.mName, method.mName);
+    }
     method.mBody.Add(std::move(switcher.Generate()));
     method.mBody.Line() << "return 1;";
   } else {
@@ -81,6 +86,9 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
   methodCaller.mBody.Add("auto instance = {}::{}(luaState, {});", cls.mName,
                          St::Lua_ReadProxyObject,
                          -ptrdiff_t(method.mArguments.size()) - 1 + isLuaFunc);
+  methodCaller.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!instance, 0, \"Calling {}.{} method with "
+                         "an invalid lua proxy object!\");",
+                         cls.mName, method.mName);
   std::string funcArgs =
       GenerateReadExposedMethodArgsAndGetArgsString(method, methodCaller.mBody, isLuaFunc);
 

@@ -195,6 +195,7 @@ struct TestData {
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
+HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.{} with an invalid lua proxy object!", key);
 if (0 == strcmp("testFieldUnsigned", key)) {
   LuaHelper::Push(instance->mTestFieldUnsigned, luaState, false);
 } else if (0 == strcmp("testFieldString", key)) {
@@ -250,6 +251,7 @@ return 1;
     helpers::ExpectEqual(*cls->GetMethod("functionReturningVoidCallerFromLua", Constness::NotConst),
                          method, R"R(
 auto instance = TestData::ReadProxyFromLua(luaState, -3);
+HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestData.functionReturningVoid method with an invalid lua proxy object!");
 int32_t arg0;
 LuaHelper::Read(arg0, luaState, -2);
 std::string arg1;
@@ -267,6 +269,7 @@ return 0;
     helpers::ExpectEqual(
         *cls->GetMethod("functionReturningStringCallerFromLua", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadProxyFromLua(luaState, -1);
+HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestData.functionReturningString method with an invalid lua proxy object!");
 auto result = instance->functionReturningString();
 LuaHelper::Push(result, luaState, true);
 return 1;
@@ -298,6 +301,7 @@ struct TestData {
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
+HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.{} with an invalid lua proxy object!", key);
 if (0 == strcmp("testStructWithIdRefId", key)) {
   LuaHelper::Push(instance->mTestStructWithIdRefId, luaState, false);
 } else if (0 == strcmp("testStructNoIdRef", key)) {
