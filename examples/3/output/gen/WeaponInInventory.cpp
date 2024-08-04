@@ -176,6 +176,28 @@ WeaponInInventory WeaponInInventory::ReadMirrorFromLua(lua_State *luaState, int3
   return result;
 }
 
+int WeaponInInventory::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("type", key)) {
+    LuaHelper::Read(instance->mType, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: WeaponInInventory.{}", key);
+  }
+  return 0;
+}
+
+void WeaponInInventory::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, WeaponInInventory::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, WeaponInInventory::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "WeaponInInventoryMeta");
+}
+
 int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -197,28 +219,6 @@ int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int WeaponInInventory::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("type", key)) {
-    LuaHelper::Read(instance->mType, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: WeaponInInventory.{}", key);
-  }
-  return 0;
-}
-
-void WeaponInInventory::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, WeaponInInventory::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, WeaponInInventory::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "WeaponInInventoryMeta");
 }
 
 WeaponInInventory &WeaponInInventory::operator=(const WeaponInInventory &rhs) {

@@ -50,8 +50,8 @@ public:
   TestContainerMap &operator=(const TestContainerMap &rhs) = default;
   TestContainerMap &operator=(TestContainerMap &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::map<uint32_t, TestContainerInnerStructWithId> mInnerStructsWithId;
   std::map<std::string, uint32_t> mInnerStructsWithIdNameIndex;
   uint32_t mInnerStructsWithIdNextId = 0;

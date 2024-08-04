@@ -51,8 +51,8 @@ public:
   TestVariantStructSharedType &operator=(const TestVariantStructSharedType &rhs);
   TestVariantStructSharedType &operator=(TestVariantStructSharedType &&rhs);
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   TestVariantStructType mBeingType;
   std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing1;
   std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing2;

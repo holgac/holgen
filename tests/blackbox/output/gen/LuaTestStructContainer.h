@@ -49,8 +49,8 @@ public:
   LuaTestStructContainer &operator=(const LuaTestStructContainer &rhs) = default;
   LuaTestStructContainer &operator=(LuaTestStructContainer &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::vector<uint32_t> mTestVector;
   std::map<std::string, uint32_t> mTestMap;
 };

@@ -148,24 +148,6 @@ Weapon Weapon::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
-int Weapon::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Weapon::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState, false);
-  } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else if (0 == strcmp("damageMin", key)) {
-    LuaHelper::Push(instance->mDamageMin, luaState, false);
-  } else if (0 == strcmp("damageMax", key)) {
-    LuaHelper::Push(instance->mDamageMax, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int Weapon::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -192,5 +174,23 @@ void Weapon::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, Weapon::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "WeaponMeta");
+}
+
+int Weapon::IndexMetaMethod(lua_State *luaState) {
+  auto instance = Weapon::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Push(instance->mId, luaState, false);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else if (0 == strcmp("damageMin", key)) {
+    LuaHelper::Push(instance->mDamageMin, luaState, false);
+  } else if (0 == strcmp("damageMax", key)) {
+    LuaHelper::Push(instance->mDamageMax, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

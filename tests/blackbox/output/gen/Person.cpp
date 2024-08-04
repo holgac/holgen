@@ -165,26 +165,6 @@ Person Person::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
-int Person::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Person::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("race", key)) {
-    LuaHelper::Push(instance->mRace, luaState, false);
-  } else if (0 == strcmp("currentCountry", key)) {
-    LuaHelper::Push(instance->mCurrentCountry, luaState, false);
-  } else if (0 == strcmp("currentCity", key)) {
-    LuaHelper::Push(instance->mCurrentCity, luaState, false);
-  } else if (0 == strcmp("homeCountry", key)) {
-    LuaHelper::Push(instance->mHomeCountry, luaState, false);
-  } else if (0 == strcmp("placeOfBirth", key)) {
-    LuaHelper::Push(instance->mPlaceOfBirth, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Person.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int Person::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Person::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -213,5 +193,25 @@ void Person::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, Person::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "PersonMeta");
+}
+
+int Person::IndexMetaMethod(lua_State *luaState) {
+  auto instance = Person::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("race", key)) {
+    LuaHelper::Push(instance->mRace, luaState, false);
+  } else if (0 == strcmp("currentCountry", key)) {
+    LuaHelper::Push(instance->mCurrentCountry, luaState, false);
+  } else if (0 == strcmp("currentCity", key)) {
+    LuaHelper::Push(instance->mCurrentCity, luaState, false);
+  } else if (0 == strcmp("homeCountry", key)) {
+    LuaHelper::Push(instance->mHomeCountry, luaState, false);
+  } else if (0 == strcmp("placeOfBirth", key)) {
+    LuaHelper::Push(instance->mPlaceOfBirth, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Person.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

@@ -47,8 +47,8 @@ public:
   TestLuaRegistryData &operator=(const TestLuaRegistryData &rhs) = delete;
   TestLuaRegistryData &operator=(TestLuaRegistryData &&rhs);
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   int mData = LUA_NOREF;
   std::string mTable;
 };

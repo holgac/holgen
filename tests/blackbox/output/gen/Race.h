@@ -49,8 +49,8 @@ public:
   Race &operator=(const Race &rhs) = default;
   Race &operator=(Race &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId;
   std::string mName;
   std::vector<std::string> mHairColors;

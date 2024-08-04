@@ -42,8 +42,8 @@ public:
   TestVariantStructCat &operator=(const TestVariantStructCat &rhs) = default;
   TestVariantStructCat &operator=(TestVariantStructCat &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::string mName = "Whiskers";
   std::string mColor = "orange";
 };

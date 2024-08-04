@@ -58,8 +58,8 @@ public:
   TestLuaCalculator &operator=(const TestLuaCalculator &rhs) = default;
   TestLuaCalculator &operator=(TestLuaCalculator &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   TestLuaNumber mLastValue;
   std::string mLuaFuncHandle_AddPrimitive;
   std::string mLuaFuncHandle_AddRef;

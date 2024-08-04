@@ -41,8 +41,8 @@ public:
   TestLuaFuncTableStatic &operator=(const TestLuaFuncTableStatic &rhs) = default;
   TestLuaFuncTableStatic &operator=(TestLuaFuncTableStatic &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::string mTable;
 };
 }

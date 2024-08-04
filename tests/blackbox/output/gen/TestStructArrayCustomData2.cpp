@@ -120,22 +120,6 @@ TestStructArrayCustomData2 TestStructArrayCustomData2::ReadMirrorFromLua(lua_Sta
   return result;
 }
 
-int TestStructArrayCustomData2::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructArrayCustomData2::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("f1", key)) {
-    LuaHelper::Push(instance->mF1, luaState, false);
-  } else if (0 == strcmp("f2", key)) {
-    LuaHelper::Push(instance->mF2, luaState, false);
-  } else if (0 == strcmp("f3", key)) {
-    LuaHelper::Push(instance->mF3, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestStructArrayCustomData2.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestStructArrayCustomData2::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArrayCustomData2::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -160,5 +144,21 @@ void TestStructArrayCustomData2::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestStructArrayCustomData2::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructArrayCustomData2Meta");
+}
+
+int TestStructArrayCustomData2::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestStructArrayCustomData2::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("f1", key)) {
+    LuaHelper::Push(instance->mF1, luaState, false);
+  } else if (0 == strcmp("f2", key)) {
+    LuaHelper::Push(instance->mF2, luaState, false);
+  } else if (0 == strcmp("f3", key)) {
+    LuaHelper::Push(instance->mF3, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestStructArrayCustomData2.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

@@ -42,8 +42,8 @@ public:
   TestVariantStructHuman &operator=(const TestVariantStructHuman &rhs) = default;
   TestVariantStructHuman &operator=(TestVariantStructHuman &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::string mName = "Jean";
   std::string mNationality = "Mixed";
 };

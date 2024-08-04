@@ -175,28 +175,6 @@ Character Character::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
-int Character::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Character::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState, false);
-  } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else if (0 == strcmp("bootId", key)) {
-    LuaHelper::Push(instance->mBootId, luaState, false);
-  } else if (0 == strcmp("boot", key)) {
-    LuaHelper::Push(Boot::Get(instance->mBootId), luaState, false);
-  } else if (0 == strcmp("armorId", key)) {
-    LuaHelper::Push(instance->mArmorId, luaState, false);
-  } else if (0 == strcmp("armor", key)) {
-    LuaHelper::Push(Armor::Get(instance->mArmorId), luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Character.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int Character::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Character::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -223,5 +201,27 @@ void Character::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, Character::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "CharacterMeta");
+}
+
+int Character::IndexMetaMethod(lua_State *luaState) {
+  auto instance = Character::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Push(instance->mId, luaState, false);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else if (0 == strcmp("bootId", key)) {
+    LuaHelper::Push(instance->mBootId, luaState, false);
+  } else if (0 == strcmp("boot", key)) {
+    LuaHelper::Push(Boot::Get(instance->mBootId), luaState, false);
+  } else if (0 == strcmp("armorId", key)) {
+    LuaHelper::Push(instance->mArmorId, luaState, false);
+  } else if (0 == strcmp("armor", key)) {
+    LuaHelper::Push(Armor::Get(instance->mArmorId), luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Character.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

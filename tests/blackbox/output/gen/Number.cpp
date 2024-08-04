@@ -87,18 +87,6 @@ Number Number::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
-int Number::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Number::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("value", key)) {
-    LuaHelper::Push(instance->mValue, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Number.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int Number::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Number::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -119,5 +107,17 @@ void Number::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, Number::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "NumberMeta");
+}
+
+int Number::IndexMetaMethod(lua_State *luaState) {
+  auto instance = Number::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("value", key)) {
+    LuaHelper::Push(instance->mValue, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Number.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

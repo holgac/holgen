@@ -54,8 +54,8 @@ public:
   TestVariantStructDifferentTypes &operator=(const TestVariantStructDifferentTypes &rhs);
   TestVariantStructDifferentTypes &operator=(TestVariantStructDifferentTypes &&rhs);
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   TestVariantStructType mBeing1Type;
   std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing1;
   TestVariantStructType mBeing2Type;

@@ -109,20 +109,6 @@ TestVariantStructCat TestVariantStructCat::ReadMirrorFromLua(lua_State *luaState
   return result;
 }
 
-int TestVariantStructCat::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructCat::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else if (0 == strcmp("color", key)) {
-    LuaHelper::Push(instance->mColor, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestVariantStructCat.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestVariantStructCat::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructCat::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -145,5 +131,19 @@ void TestVariantStructCat::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestVariantStructCat::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestVariantStructCatMeta");
+}
+
+int TestVariantStructCat::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestVariantStructCat::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else if (0 == strcmp("color", key)) {
+    LuaHelper::Push(instance->mColor, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestVariantStructCat.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

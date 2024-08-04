@@ -157,6 +157,28 @@ TestContainerMap TestContainerMap::ReadMirrorFromLua(lua_State *luaState, int32_
   return result;
 }
 
+int TestContainerMap::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = TestContainerMap::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("innerStructsWithId", key)) {
+    LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
+  }
+  return 0;
+}
+
+void TestContainerMap::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestContainerMap::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestContainerMap::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestContainerMapMeta");
+}
+
 int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -217,27 +239,5 @@ int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestContainerMap::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerMap::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("innerStructsWithId", key)) {
-    LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestContainerMap.{}", key);
-  }
-  return 0;
-}
-
-void TestContainerMap::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestContainerMap::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestContainerMap::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestContainerMapMeta");
 }
 }

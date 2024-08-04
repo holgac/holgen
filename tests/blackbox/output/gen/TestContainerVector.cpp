@@ -323,6 +323,34 @@ TestContainerVector TestContainerVector::ReadMirrorFromLua(lua_State *luaState, 
   return result;
 }
 
+int TestContainerVector::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = TestContainerVector::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("innerStructsWithId", key)) {
+    LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);
+  } else if (0 == strcmp("innerStructsNoId", key)) {
+    LuaHelper::Read(instance->mInnerStructsNoId, luaState, -1);
+  } else if (0 == strcmp("stringContainer", key)) {
+    LuaHelper::Read(instance->mStringContainer, luaState, -1);
+  } else if (0 == strcmp("unsignedContainer", key)) {
+    LuaHelper::Read(instance->mUnsignedContainer, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestContainerVector.{}", key);
+  }
+  return 0;
+}
+
+void TestContainerVector::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestContainerVector::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestContainerVector::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestContainerVectorMeta");
+}
+
 int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -487,33 +515,5 @@ int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestContainerVector::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerVector::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("innerStructsWithId", key)) {
-    LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);
-  } else if (0 == strcmp("innerStructsNoId", key)) {
-    LuaHelper::Read(instance->mInnerStructsNoId, luaState, -1);
-  } else if (0 == strcmp("stringContainer", key)) {
-    LuaHelper::Read(instance->mStringContainer, luaState, -1);
-  } else if (0 == strcmp("unsignedContainer", key)) {
-    LuaHelper::Read(instance->mUnsignedContainer, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestContainerVector.{}", key);
-  }
-  return 0;
-}
-
-void TestContainerVector::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestContainerVector::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestContainerVector::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestContainerVectorMeta");
 }
 }

@@ -149,24 +149,6 @@ Race Race::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
-int Race::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Race::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState, false);
-  } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else if (0 == strcmp("hairColors", key)) {
-    LuaHelper::Push(instance->mHairColors, luaState, false);
-  } else if (0 == strcmp("names", key)) {
-    LuaHelper::Push(instance->mNames, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Race.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int Race::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Race::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -193,5 +175,23 @@ void Race::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, Race::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "RaceMeta");
+}
+
+int Race::IndexMetaMethod(lua_State *luaState) {
+  auto instance = Race::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Push(instance->mId, luaState, false);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else if (0 == strcmp("hairColors", key)) {
+    LuaHelper::Push(instance->mHairColors, luaState, false);
+  } else if (0 == strcmp("names", key)) {
+    LuaHelper::Push(instance->mNames, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Race.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

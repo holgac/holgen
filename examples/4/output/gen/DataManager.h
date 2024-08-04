@@ -74,8 +74,8 @@ public:
   DataManager &operator=(const DataManager &rhs) = delete;
   DataManager &operator=(DataManager &&rhs);
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::deque<Character> mCharacters;
   std::deque<Armor> mArmors;
   std::deque<Weapon> mWeapons;

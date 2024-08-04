@@ -91,18 +91,6 @@ TestJsonStructWithTags TestJsonStructWithTags::ReadMirrorFromLua(lua_State *luaS
   return result;
 }
 
-int TestJsonStructWithTags::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonStructWithTags::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("tags", key)) {
-    LuaHelper::Push(instance->mTags, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestJsonStructWithTags::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonStructWithTags::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -123,5 +111,17 @@ void TestJsonStructWithTags::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestJsonStructWithTags::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestJsonStructWithTagsMeta");
+}
+
+int TestJsonStructWithTags::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestJsonStructWithTags::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("tags", key)) {
+    LuaHelper::Push(instance->mTags, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

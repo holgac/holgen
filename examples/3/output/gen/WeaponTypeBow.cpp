@@ -105,20 +105,6 @@ WeaponTypeBow WeaponTypeBow::ReadMirrorFromLua(lua_State *luaState, int32_t idx)
   return result;
 }
 
-int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("range", key)) {
-    LuaHelper::Push(instance->mRange, luaState, false);
-  } else if (0 == strcmp("material", key)) {
-    LuaHelper::Push(instance->mMaterial, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: WeaponTypeBow.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int WeaponTypeBow::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -141,5 +127,19 @@ void WeaponTypeBow::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, WeaponTypeBow::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "WeaponTypeBowMeta");
+}
+
+int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
+  auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("range", key)) {
+    LuaHelper::Push(instance->mRange, luaState, false);
+  } else if (0 == strcmp("material", key)) {
+    LuaHelper::Push(instance->mMaterial, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: WeaponTypeBow.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

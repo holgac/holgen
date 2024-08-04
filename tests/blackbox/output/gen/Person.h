@@ -45,8 +45,8 @@ public:
   Person &operator=(const Person &rhs) = default;
   Person &operator=(Person &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   uint32_t mRace;
   uint32_t mCurrentCountry;
   uint32_t mCurrentCity;

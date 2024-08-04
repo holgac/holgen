@@ -164,6 +164,21 @@ TestLuaRegistryData TestLuaRegistryData::ReadMirrorFromLua(lua_State *luaState, 
   return result;
 }
 
+int TestLuaRegistryData::NewIndexMetaMethod(lua_State *luaState) {
+  return 0;
+}
+
+void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestLuaRegistryData::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestLuaRegistryData::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestLuaRegistryDataMeta");
+}
+
 int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -197,21 +212,6 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestLuaRegistryData::NewIndexMetaMethod(lua_State *luaState) {
-  return 0;
-}
-
-void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestLuaRegistryData::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestLuaRegistryData::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestLuaRegistryDataMeta");
 }
 
 TestLuaRegistryData &TestLuaRegistryData::operator=(TestLuaRegistryData &&rhs) {

@@ -113,22 +113,6 @@ CharacterArmor CharacterArmor::ReadMirrorFromLua(lua_State *luaState, int32_t id
   return result;
 }
 
-int CharacterArmor::IndexMetaMethod(lua_State *luaState) {
-  auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("dirtAmount", key)) {
-    LuaHelper::Push(instance->mDirtAmount, luaState, false);
-  } else if (0 == strcmp("armorId", key)) {
-    LuaHelper::Push(instance->mArmorId, luaState, false);
-  } else if (0 == strcmp("armor", key)) {
-    LuaHelper::Push(Armor::Get(instance->mArmorId), luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: CharacterArmor.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int CharacterArmor::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = CharacterArmor::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -151,5 +135,21 @@ void CharacterArmor::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, CharacterArmor::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "CharacterArmorMeta");
+}
+
+int CharacterArmor::IndexMetaMethod(lua_State *luaState) {
+  auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("dirtAmount", key)) {
+    LuaHelper::Push(instance->mDirtAmount, luaState, false);
+  } else if (0 == strcmp("armorId", key)) {
+    LuaHelper::Push(instance->mArmorId, luaState, false);
+  } else if (0 == strcmp("armor", key)) {
+    LuaHelper::Push(Armor::Get(instance->mArmorId), luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: CharacterArmor.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

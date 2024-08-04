@@ -55,8 +55,8 @@ public:
   TestStruct &operator=(const TestStruct &rhs) = delete;
   TestStruct &operator=(TestStruct &&rhs);
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   bool mTestFieldBool;
   uint32_t mTestFieldUnsigned = 42;
   std::string mTestFieldString;

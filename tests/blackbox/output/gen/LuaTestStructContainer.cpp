@@ -136,6 +136,30 @@ LuaTestStructContainer LuaTestStructContainer::ReadMirrorFromLua(lua_State *luaS
   return result;
 }
 
+int LuaTestStructContainer::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("testVector", key)) {
+    LuaHelper::Read(instance->mTestVector, luaState, -1);
+  } else if (0 == strcmp("testMap", key)) {
+    LuaHelper::Read(instance->mTestMap, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: LuaTestStructContainer.{}", key);
+  }
+  return 0;
+}
+
+void LuaTestStructContainer::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, LuaTestStructContainer::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, LuaTestStructContainer::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "LuaTestStructContainerMeta");
+}
+
 int LuaTestStructContainer::IndexMetaMethod(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -181,29 +205,5 @@ int LuaTestStructContainer::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int LuaTestStructContainer::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("testVector", key)) {
-    LuaHelper::Read(instance->mTestVector, luaState, -1);
-  } else if (0 == strcmp("testMap", key)) {
-    LuaHelper::Read(instance->mTestMap, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: LuaTestStructContainer.{}", key);
-  }
-  return 0;
-}
-
-void LuaTestStructContainer::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, LuaTestStructContainer::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, LuaTestStructContainer::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "LuaTestStructContainerMeta");
 }
 }

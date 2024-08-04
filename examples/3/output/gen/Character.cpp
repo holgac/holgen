@@ -149,24 +149,6 @@ Character Character::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
-int Character::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Character::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState, false);
-  } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else if (0 == strcmp("race", key)) {
-    LuaHelper::Push(instance->mRace, luaState, false);
-  } else if (0 == strcmp("weapons", key)) {
-    LuaHelper::Push(instance->mWeapons, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Character.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int Character::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Character::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -193,5 +175,23 @@ void Character::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, Character::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "CharacterMeta");
+}
+
+int Character::IndexMetaMethod(lua_State *luaState) {
+  auto instance = Character::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Push(instance->mId, luaState, false);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else if (0 == strcmp("race", key)) {
+    LuaHelper::Push(instance->mRace, luaState, false);
+  } else if (0 == strcmp("weapons", key)) {
+    LuaHelper::Push(instance->mWeapons, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Character.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

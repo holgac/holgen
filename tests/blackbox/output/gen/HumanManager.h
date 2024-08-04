@@ -51,8 +51,8 @@ public:
   HumanManager &operator=(const HumanManager &rhs) = default;
   HumanManager &operator=(HumanManager &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::unordered_map<uint32_t, Human> mHumans;
   std::map<std::string, uint32_t> mHumansNameIndex;
   uint32_t mHumansNextId = 0;

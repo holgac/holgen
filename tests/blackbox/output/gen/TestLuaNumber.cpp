@@ -87,18 +87,6 @@ TestLuaNumber TestLuaNumber::ReadMirrorFromLua(lua_State *luaState, int32_t idx)
   return result;
 }
 
-int TestLuaNumber::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaNumber::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("value", key)) {
-    LuaHelper::Push(instance->mValue, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestLuaNumber.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestLuaNumber::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaNumber::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -119,5 +107,17 @@ void TestLuaNumber::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestLuaNumber::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestLuaNumberMeta");
+}
+
+int TestLuaNumber::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestLuaNumber::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("value", key)) {
+    LuaHelper::Push(instance->mValue, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestLuaNumber.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

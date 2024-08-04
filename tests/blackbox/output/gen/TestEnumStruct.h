@@ -43,8 +43,8 @@ public:
   TestEnumStruct &operator=(const TestEnumStruct &rhs) = default;
   TestEnumStruct &operator=(TestEnumStruct &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   TestEnum mEnumField;
   TestEnumDefaultValue mEnumDefaultValueField;
 };

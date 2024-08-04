@@ -42,8 +42,8 @@ public:
   CharacterArmor &operator=(const CharacterArmor &rhs) = default;
   CharacterArmor &operator=(CharacterArmor &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   float mDirtAmount = 0;
   uint32_t mArmorId = -1;
 };

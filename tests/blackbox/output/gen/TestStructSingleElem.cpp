@@ -91,18 +91,6 @@ TestStructSingleElem TestStructSingleElem::ReadMirrorFromLua(lua_State *luaState
   return result;
 }
 
-int TestStructSingleElem::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructSingleElem::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestStructSingleElem.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestStructSingleElem::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructSingleElem::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -123,5 +111,17 @@ void TestStructSingleElem::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestStructSingleElem::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructSingleElemMeta");
+}
+
+int TestStructSingleElem::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestStructSingleElem::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestStructSingleElem.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

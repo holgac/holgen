@@ -167,6 +167,28 @@ TestJsonTagManager TestJsonTagManager::ReadMirrorFromLua(lua_State *luaState, in
   return result;
 }
 
+int TestJsonTagManager::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("tags", key)) {
+    LuaHelper::Read(instance->mTags, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
+  }
+  return 0;
+}
+
+void TestJsonTagManager::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestJsonTagManager::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestJsonTagManager::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestJsonTagManagerMeta");
+}
+
 int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -219,27 +241,5 @@ int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestJsonTagManager::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("tags", key)) {
-    LuaHelper::Read(instance->mTags, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
-  }
-  return 0;
-}
-
-void TestJsonTagManager::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestJsonTagManager::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestJsonTagManager::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestJsonTagManagerMeta");
 }
 }

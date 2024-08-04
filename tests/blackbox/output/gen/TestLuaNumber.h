@@ -37,8 +37,8 @@ public:
   TestLuaNumber &operator=(const TestLuaNumber &rhs) = default;
   TestLuaNumber &operator=(TestLuaNumber &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   int32_t mValue = 0;
 };
 }

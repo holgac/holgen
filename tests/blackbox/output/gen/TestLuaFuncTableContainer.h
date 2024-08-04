@@ -58,8 +58,8 @@ public:
   TestLuaFuncTableContainer &operator=(const TestLuaFuncTableContainer &rhs) = default;
   TestLuaFuncTableContainer &operator=(TestLuaFuncTableContainer &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   int32_t mField;
   TestLuaFuncTable mScript1;
   TestLuaFuncTable mScript2;

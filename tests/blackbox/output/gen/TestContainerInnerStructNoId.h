@@ -41,8 +41,8 @@ public:
   TestContainerInnerStructNoId &operator=(const TestContainerInnerStructNoId &rhs) = default;
   TestContainerInnerStructNoId &operator=(TestContainerInnerStructNoId &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   uint32_t mField;
   std::string mName;
 };

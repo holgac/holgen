@@ -131,22 +131,6 @@ TestJsonStructMapWithConverters TestJsonStructMapWithConverters::ReadMirrorFromL
   return result;
 }
 
-int TestJsonStructMapWithConverters::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("testMapConvertElem", key)) {
-    LuaHelper::Push(instance->mTestMapConvertElem, luaState, false);
-  } else if (0 == strcmp("testMapConvertKey", key)) {
-    LuaHelper::Push(instance->mTestMapConvertKey, luaState, false);
-  } else if (0 == strcmp("testMapConvertKeyElem", key)) {
-    LuaHelper::Push(instance->mTestMapConvertKeyElem, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestJsonStructMapWithConverters.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestJsonStructMapWithConverters::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -171,5 +155,21 @@ void TestJsonStructMapWithConverters::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestJsonStructMapWithConverters::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestJsonStructMapWithConvertersMeta");
+}
+
+int TestJsonStructMapWithConverters::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("testMapConvertElem", key)) {
+    LuaHelper::Push(instance->mTestMapConvertElem, luaState, false);
+  } else if (0 == strcmp("testMapConvertKey", key)) {
+    LuaHelper::Push(instance->mTestMapConvertKey, luaState, false);
+  } else if (0 == strcmp("testMapConvertKeyElem", key)) {
+    LuaHelper::Push(instance->mTestMapConvertKeyElem, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestJsonStructMapWithConverters.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

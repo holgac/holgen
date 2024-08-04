@@ -37,8 +37,8 @@ public:
   Number &operator=(const Number &rhs) = default;
   Number &operator=(Number &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   int64_t mValue;
 };
 }

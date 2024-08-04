@@ -37,8 +37,8 @@ public:
   RaceId &operator=(const RaceId &rhs) = default;
   RaceId &operator=(RaceId &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId;
 };
 }

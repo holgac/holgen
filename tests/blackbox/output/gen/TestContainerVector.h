@@ -78,8 +78,8 @@ public:
   TestContainerVector &operator=(const TestContainerVector &rhs) = default;
   TestContainerVector &operator=(TestContainerVector &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestContainerInnerStructWithId> mInnerStructsWithId;
   std::vector<TestContainerInnerStructNoId> mInnerStructsNoId;
   std::vector<std::string> mStringContainer;

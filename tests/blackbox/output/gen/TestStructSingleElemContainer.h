@@ -55,8 +55,8 @@ public:
   TestStructSingleElemContainer &operator=(const TestStructSingleElemContainer &rhs) = default;
   TestStructSingleElemContainer &operator=(TestStructSingleElemContainer &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestStructSingleElem> mSingleElemStructs;
   std::vector<TestStructSingleElemWithId> mSingleElemStructsWithId;
 };

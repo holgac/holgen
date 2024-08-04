@@ -379,6 +379,32 @@ GameData GameData::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
+int GameData::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("boots", key)) {
+    LuaHelper::Read(instance->mBoots, luaState, -1);
+  } else if (0 == strcmp("armors", key)) {
+    LuaHelper::Read(instance->mArmors, luaState, -1);
+  } else if (0 == strcmp("characters", key)) {
+    LuaHelper::Read(instance->mCharacters, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: GameData.{}", key);
+  }
+  return 0;
+}
+
+void GameData::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, GameData::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, GameData::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "GameDataMeta");
+}
+
 int GameData::IndexMetaMethod(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -501,31 +527,5 @@ int GameData::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int GameData::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = GameData::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("boots", key)) {
-    LuaHelper::Read(instance->mBoots, luaState, -1);
-  } else if (0 == strcmp("armors", key)) {
-    LuaHelper::Read(instance->mArmors, luaState, -1);
-  } else if (0 == strcmp("characters", key)) {
-    LuaHelper::Read(instance->mCharacters, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: GameData.{}", key);
-  }
-  return 0;
-}
-
-void GameData::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, GameData::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, GameData::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "GameDataMeta");
 }
 }

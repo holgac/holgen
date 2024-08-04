@@ -102,20 +102,6 @@ WeaponTypeSword WeaponTypeSword::ReadMirrorFromLua(lua_State *luaState, int32_t 
   return result;
 }
 
-int WeaponTypeSword::IndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("sharpness", key)) {
-    LuaHelper::Push(instance->mSharpness, luaState, false);
-  } else if (0 == strcmp("isShortSword", key)) {
-    LuaHelper::Push(instance->mIsShortSword, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: WeaponTypeSword.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int WeaponTypeSword::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -138,5 +124,19 @@ void WeaponTypeSword::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, WeaponTypeSword::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "WeaponTypeSwordMeta");
+}
+
+int WeaponTypeSword::IndexMetaMethod(lua_State *luaState) {
+  auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("sharpness", key)) {
+    LuaHelper::Push(instance->mSharpness, luaState, false);
+  } else if (0 == strcmp("isShortSword", key)) {
+    LuaHelper::Push(instance->mIsShortSword, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: WeaponTypeSword.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

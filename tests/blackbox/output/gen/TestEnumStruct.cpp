@@ -109,20 +109,6 @@ TestEnumStruct TestEnumStruct::ReadMirrorFromLua(lua_State *luaState, int32_t id
   return result;
 }
 
-int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("enumField", key)) {
-    LuaHelper::Push(instance->mEnumField, luaState, false);
-  } else if (0 == strcmp("enumDefaultValueField", key)) {
-    LuaHelper::Push(instance->mEnumDefaultValueField, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestEnumStruct::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -145,5 +131,19 @@ void TestEnumStruct::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestEnumStruct::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestEnumStructMeta");
+}
+
+int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("enumField", key)) {
+    LuaHelper::Push(instance->mEnumField, luaState, false);
+  } else if (0 == strcmp("enumDefaultValueField", key)) {
+    LuaHelper::Push(instance->mEnumDefaultValueField, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

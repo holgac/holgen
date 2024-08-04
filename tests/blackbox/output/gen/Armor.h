@@ -49,8 +49,8 @@ public:
   Armor &operator=(const Armor &rhs) = default;
   Armor &operator=(Armor &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId = -1;
   std::string mName;
   std::string mAlternativeName;

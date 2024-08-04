@@ -109,20 +109,6 @@ TestVariantStructHuman TestVariantStructHuman::ReadMirrorFromLua(lua_State *luaS
   return result;
 }
 
-int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else if (0 == strcmp("nationality", key)) {
-    LuaHelper::Push(instance->mNationality, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestVariantStructHuman.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestVariantStructHuman::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -145,5 +131,19 @@ void TestVariantStructHuman::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestVariantStructHuman::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestVariantStructHumanMeta");
+}
+
+int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else if (0 == strcmp("nationality", key)) {
+    LuaHelper::Push(instance->mNationality, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestVariantStructHuman.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

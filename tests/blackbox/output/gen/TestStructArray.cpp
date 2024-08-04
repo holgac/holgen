@@ -102,6 +102,28 @@ TestStructArray TestStructArray::ReadMirrorFromLua(lua_State *luaState, int32_t 
   return result;
 }
 
+int TestStructArray::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = TestStructArray::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("type", key)) {
+    LuaHelper::Read(instance->mType, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestStructArray.{}", key);
+  }
+  return 0;
+}
+
+void TestStructArray::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestStructArray::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestStructArray::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestStructArrayMeta");
+}
+
 int TestStructArray::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -126,27 +148,5 @@ int TestStructArray::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestStructArray::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructArray::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("type", key)) {
-    LuaHelper::Read(instance->mType, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestStructArray.{}", key);
-  }
-  return 0;
-}
-
-void TestStructArray::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestStructArray::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestStructArray::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructArrayMeta");
 }
 }

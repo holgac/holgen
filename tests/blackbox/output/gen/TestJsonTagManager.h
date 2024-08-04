@@ -50,8 +50,8 @@ public:
   TestJsonTagManager &operator=(const TestJsonTagManager &rhs) = default;
   TestJsonTagManager &operator=(TestJsonTagManager &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestJsonTag> mTags;
   std::map<std::string, uint64_t> mTagsNameIndex;
 };

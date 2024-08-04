@@ -139,22 +139,6 @@ Boot Boot::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
-int Boot::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Boot::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("id", key)) {
-    LuaHelper::Push(instance->mId, luaState, false);
-  } else if (0 == strcmp("name", key)) {
-    LuaHelper::Push(instance->mName, luaState, false);
-  } else if (0 == strcmp("color", key)) {
-    LuaHelper::Push(instance->mColor, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Boot.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int Boot::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Boot::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -179,5 +163,21 @@ void Boot::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, Boot::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "BootMeta");
+}
+
+int Boot::IndexMetaMethod(lua_State *luaState) {
+  auto instance = Boot::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Push(instance->mId, luaState, false);
+  } else if (0 == strcmp("name", key)) {
+    LuaHelper::Push(instance->mName, luaState, false);
+  } else if (0 == strcmp("color", key)) {
+    LuaHelper::Push(instance->mColor, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Boot.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

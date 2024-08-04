@@ -47,8 +47,8 @@ public:
   Calculator &operator=(const Calculator &rhs) = default;
   Calculator &operator=(Calculator &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   Number mCurVal;
   std::string mLuaFuncHandle_Add;
   std::string mLuaFuncHandle_Subtract;

@@ -253,6 +253,21 @@ TestVariantStructDifferentTypes TestVariantStructDifferentTypes::ReadMirrorFromL
   return TestVariantStructDifferentTypes{};
 }
 
+int TestVariantStructDifferentTypes::NewIndexMetaMethod(lua_State *luaState) {
+  return 0;
+}
+
+void TestVariantStructDifferentTypes::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestVariantStructDifferentTypes::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestVariantStructDifferentTypes::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestVariantStructDifferentTypesMeta");
+}
+
 int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -283,21 +298,6 @@ int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestVariantStructDifferentTypes::NewIndexMetaMethod(lua_State *luaState) {
-  return 0;
-}
-
-void TestVariantStructDifferentTypes::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestVariantStructDifferentTypes::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestVariantStructDifferentTypes::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestVariantStructDifferentTypesMeta");
 }
 
 TestVariantStructDifferentTypes &TestVariantStructDifferentTypes::operator=(const TestVariantStructDifferentTypes &rhs) {

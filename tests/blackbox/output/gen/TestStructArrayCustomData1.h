@@ -41,8 +41,8 @@ public:
   TestStructArrayCustomData1 &operator=(const TestStructArrayCustomData1 &rhs) = default;
   TestStructArrayCustomData1 &operator=(TestStructArrayCustomData1 &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   uint32_t mF1 = 43;
   float mF2 = 44;
   uint64_t mF3 = 45;

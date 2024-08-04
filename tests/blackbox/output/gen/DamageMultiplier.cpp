@@ -106,20 +106,6 @@ DamageMultiplier DamageMultiplier::ReadMirrorFromLua(lua_State *luaState, int32_
   return result;
 }
 
-int DamageMultiplier::IndexMetaMethod(lua_State *luaState) {
-  auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("when", key)) {
-    LuaHelper::Push(instance->mWhen, luaState, false);
-  } else if (0 == strcmp("value", key)) {
-    LuaHelper::Push(instance->mValue, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int DamageMultiplier::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -142,5 +128,19 @@ void DamageMultiplier::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, DamageMultiplier::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "DamageMultiplierMeta");
+}
+
+int DamageMultiplier::IndexMetaMethod(lua_State *luaState) {
+  auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("when", key)) {
+    LuaHelper::Push(instance->mWhen, luaState, false);
+  } else if (0 == strcmp("value", key)) {
+    LuaHelper::Push(instance->mValue, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);
+    return 0;
+  }
+  return 1;
 }
 }

@@ -46,8 +46,8 @@ public:
   TestJsonStructMapWithConverters &operator=(const TestJsonStructMapWithConverters &rhs) = default;
   TestJsonStructMapWithConverters &operator=(TestJsonStructMapWithConverters &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::map<std::string, uint32_t> mTestMapConvertElem;
   std::map<uint32_t, std::string> mTestMapConvertKey;
   std::map<uint32_t, uint32_t> mTestMapConvertKeyElem;

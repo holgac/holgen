@@ -135,6 +135,32 @@ Weapon Weapon::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return result;
 }
 
+int Weapon::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = Weapon::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("id", key)) {
+    LuaHelper::Read(instance->mId, luaState, -1);
+  } else if (0 == strcmp("damageMin", key)) {
+    LuaHelper::Read(instance->mDamageMin, luaState, -1);
+  } else if (0 == strcmp("damageMax", key)) {
+    LuaHelper::Read(instance->mDamageMax, luaState, -1);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
+  }
+  return 0;
+}
+
+void Weapon::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, Weapon::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, Weapon::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "WeaponMeta");
+}
+
 int Weapon::IndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -169,31 +195,5 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int Weapon::NewIndexMetaMethod(lua_State *luaState) {
-  auto instance = Weapon::ReadProxyFromLua(luaState, -3);
-  const char *key = lua_tostring(luaState, -2);
-  if (0 == strcmp("id", key)) {
-    LuaHelper::Read(instance->mId, luaState, -1);
-  } else if (0 == strcmp("damageMin", key)) {
-    LuaHelper::Read(instance->mDamageMin, luaState, -1);
-  } else if (0 == strcmp("damageMax", key)) {
-    LuaHelper::Read(instance->mDamageMax, luaState, -1);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
-  }
-  return 0;
-}
-
-void Weapon::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, Weapon::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, Weapon::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "WeaponMeta");
 }
 }

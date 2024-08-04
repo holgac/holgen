@@ -49,8 +49,8 @@ public:
   Character &operator=(const Character &rhs) = default;
   Character &operator=(Character &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   // This is the ID of the object. Data managers can assign these, check out the relevant tutorial
   uint32_t mId = -1;
   std::string mName;

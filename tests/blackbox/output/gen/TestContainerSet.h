@@ -52,8 +52,8 @@ public:
   TestContainerSet &operator=(const TestContainerSet &rhs) = default;
   TestContainerSet &operator=(TestContainerSet &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::set<std::string> mStringContainer;
   std::set<uint32_t> mUnsignedContainer;
 };

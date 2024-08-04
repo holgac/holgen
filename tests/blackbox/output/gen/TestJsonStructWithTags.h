@@ -39,8 +39,8 @@ public:
   TestJsonStructWithTags &operator=(const TestJsonStructWithTags &rhs) = default;
   TestJsonStructWithTags &operator=(TestJsonStructWithTags &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   std::vector<uint64_t> mTags;
 };
 }

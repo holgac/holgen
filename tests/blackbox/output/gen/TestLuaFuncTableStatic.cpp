@@ -98,6 +98,21 @@ TestLuaFuncTableStatic TestLuaFuncTableStatic::ReadMirrorFromLua(lua_State *luaS
   return TestLuaFuncTableStatic{};
 }
 
+int TestLuaFuncTableStatic::NewIndexMetaMethod(lua_State *luaState) {
+  return 0;
+}
+
+void TestLuaFuncTableStatic::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestLuaFuncTableStatic::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestLuaFuncTableStatic::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestLuaFuncTableStaticMeta");
+}
+
 int TestLuaFuncTableStatic::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("SetField", key)) {
@@ -136,20 +151,5 @@ int TestLuaFuncTableStatic::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestLuaFuncTableStatic::NewIndexMetaMethod(lua_State *luaState) {
-  return 0;
-}
-
-void TestLuaFuncTableStatic::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestLuaFuncTableStatic::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestLuaFuncTableStatic::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestLuaFuncTableStaticMeta");
 }
 }

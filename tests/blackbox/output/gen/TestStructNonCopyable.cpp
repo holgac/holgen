@@ -95,18 +95,6 @@ TestStructNonCopyable TestStructNonCopyable::ReadMirrorFromLua(lua_State *luaSta
   return result;
 }
 
-int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -2);
-  const char *key = lua_tostring(luaState, -1);
-  if (0 == strcmp("bigVector", key)) {
-    LuaHelper::Push(instance->mBigVector, luaState, false);
-  } else {
-    HOLGEN_WARN("Unexpected lua field: TestStructNonCopyable.{}", key);
-    return 0;
-  }
-  return 1;
-}
-
 int TestStructNonCopyable::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
@@ -127,6 +115,18 @@ void TestStructNonCopyable::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestStructNonCopyable::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructNonCopyableMeta");
+}
+
+int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {
+  auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -2);
+  const char *key = lua_tostring(luaState, -1);
+  if (0 == strcmp("bigVector", key)) {
+    LuaHelper::Push(instance->mBigVector, luaState, false);
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestStructNonCopyable.{}", key);
+    return 0;
+  }
+  return 1;
 }
 
 TestStructNonCopyable &TestStructNonCopyable::operator=(TestStructNonCopyable &&rhs) {

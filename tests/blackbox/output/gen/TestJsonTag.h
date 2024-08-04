@@ -43,8 +43,8 @@ public:
   TestJsonTag &operator=(const TestJsonTag &rhs) = default;
   TestJsonTag &operator=(TestJsonTag &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   uint64_t mId = -1;
   std::string mName;
 };

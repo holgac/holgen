@@ -206,6 +206,21 @@ TestVariantStructSharedType TestVariantStructSharedType::ReadMirrorFromLua(lua_S
   return TestVariantStructSharedType{};
 }
 
+int TestVariantStructSharedType::NewIndexMetaMethod(lua_State *luaState) {
+  return 0;
+}
+
+void TestVariantStructSharedType::CreateLuaMetatable(lua_State *luaState) {
+  lua_newtable(luaState);
+  lua_pushstring(luaState, "__index");
+  lua_pushcfunction(luaState, TestVariantStructSharedType::IndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__newindex");
+  lua_pushcfunction(luaState, TestVariantStructSharedType::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_setglobal(luaState, "TestVariantStructSharedTypeMeta");
+}
+
 int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructSharedType::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -236,21 +251,6 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
     return 0;
   }
   return 1;
-}
-
-int TestVariantStructSharedType::NewIndexMetaMethod(lua_State *luaState) {
-  return 0;
-}
-
-void TestVariantStructSharedType::CreateLuaMetatable(lua_State *luaState) {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "__index");
-  lua_pushcfunction(luaState, TestVariantStructSharedType::IndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_pushstring(luaState, "__newindex");
-  lua_pushcfunction(luaState, TestVariantStructSharedType::NewIndexMetaMethod);
-  lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestVariantStructSharedTypeMeta");
 }
 
 TestVariantStructSharedType &TestVariantStructSharedType::operator=(const TestVariantStructSharedType &rhs) {

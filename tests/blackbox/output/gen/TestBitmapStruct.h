@@ -43,8 +43,8 @@ public:
   TestBitmapStruct &operator=(const TestBitmapStruct &rhs) = default;
   TestBitmapStruct &operator=(TestBitmapStruct &&rhs) = default;
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   TestBitmap mBitmapField;
 };
 }

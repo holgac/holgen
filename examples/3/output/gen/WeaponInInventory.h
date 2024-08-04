@@ -47,8 +47,8 @@ public:
   WeaponInInventory &operator=(const WeaponInInventory &rhs);
   WeaponInInventory &operator=(WeaponInInventory &&rhs);
 private:
-  static int IndexMetaMethod(lua_State *luaState);
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int IndexMetaMethod(lua_State *luaState);
   WeaponType mType;
   std::array<uint8_t, std::max({sizeof(WeaponTypeBow), sizeof(WeaponTypeSword)})> mWeapon;
 };
