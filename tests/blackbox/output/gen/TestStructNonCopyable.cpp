@@ -120,6 +120,7 @@ void TestStructNonCopyable::CreateLuaMetatable(lua_State *luaState) {
 int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructNonCopyable.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("bigVector", key)) {
     LuaHelper::Push(instance->mBigVector, luaState, false);
   } else {

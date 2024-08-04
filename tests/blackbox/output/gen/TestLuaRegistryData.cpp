@@ -181,6 +181,7 @@ void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
 
 int TestLuaRegistryData::InitCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaRegistryData.Init method with an invalid lua proxy object!");
   std::function<void(lua_State *, const TestLuaRegistryData &)> arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->Init(luaState, arg0);
@@ -189,6 +190,7 @@ int TestLuaRegistryData::InitCallerFromLua(lua_State *luaState) {
 
 int TestLuaRegistryData::GetCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaRegistryData.Get method with an invalid lua proxy object!");
   auto result = instance->Get(luaState);
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -196,6 +198,7 @@ int TestLuaRegistryData::GetCallerFromLua(lua_State *luaState) {
 
 int TestLuaRegistryData::AddCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaRegistryData.Add method with an invalid lua proxy object!");
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->Add(luaState, arg0);
@@ -205,6 +208,7 @@ int TestLuaRegistryData::AddCallerFromLua(lua_State *luaState) {
 int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaRegistryData.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("data", key)) {
     lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->mData);
   } else if (0 == strcmp("Init", key)) {

@@ -127,6 +127,7 @@ void TestBitmapStruct::CreateLuaMetatable(lua_State *luaState) {
 
 int TestBitmapStruct::HasBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.HasBitmapField method with an invalid lua proxy object!");
   int64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->HasBitmapField(arg0);
@@ -136,6 +137,7 @@ int TestBitmapStruct::HasBitmapFieldCallerFromLua(lua_State *luaState) {
 
 int TestBitmapStruct::AddBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.AddBitmapField method with an invalid lua proxy object!");
   int64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->AddBitmapField(arg0);
@@ -144,6 +146,7 @@ int TestBitmapStruct::AddBitmapFieldCallerFromLua(lua_State *luaState) {
 
 int TestBitmapStruct::RemoveBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.RemoveBitmapField method with an invalid lua proxy object!");
   int64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->RemoveBitmapField(arg0);
@@ -152,6 +155,7 @@ int TestBitmapStruct::RemoveBitmapFieldCallerFromLua(lua_State *luaState) {
 
 int TestBitmapStruct::ToggleBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.ToggleBitmapField method with an invalid lua proxy object!");
   int64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->ToggleBitmapField(arg0);
@@ -161,6 +165,7 @@ int TestBitmapStruct::ToggleBitmapFieldCallerFromLua(lua_State *luaState) {
 int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestBitmapStruct.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("bitmapField", key)) {
     LuaHelper::Push(instance->mBitmapField, luaState, false);
   } else if (0 == strcmp("HasBitmapField", key)) {

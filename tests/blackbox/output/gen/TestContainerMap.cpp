@@ -181,6 +181,7 @@ void TestContainerMap::CreateLuaMetatable(lua_State *luaState) {
 
 int TestContainerMap::GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.GetInnerStructWithIdFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetInnerStructWithIdFromName(arg0);
@@ -190,6 +191,7 @@ int TestContainerMap::GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaSt
 
 int TestContainerMap::AddInnerStructWithIdCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.AddInnerStructWithId method with an invalid lua proxy object!");
   auto arg0 = TestContainerInnerStructWithId::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddInnerStructWithId(*arg0);
   result->PushToLua(luaState);
@@ -198,6 +200,7 @@ int TestContainerMap::AddInnerStructWithIdCallerFromLua(lua_State *luaState) {
 
 int TestContainerMap::GetInnerStructWithIdCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.GetInnerStructWithId method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetInnerStructWithId(arg0);
@@ -207,6 +210,7 @@ int TestContainerMap::GetInnerStructWithIdCallerFromLua(lua_State *luaState) {
 
 int TestContainerMap::HasInnerStructWithIdCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.HasInnerStructWithId method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->HasInnerStructWithId(arg0);
@@ -216,6 +220,7 @@ int TestContainerMap::HasInnerStructWithIdCallerFromLua(lua_State *luaState) {
 
 int TestContainerMap::DeleteInnerStructWithIdCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.DeleteInnerStructWithId method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->DeleteInnerStructWithId(arg0);
@@ -224,6 +229,7 @@ int TestContainerMap::DeleteInnerStructWithIdCallerFromLua(lua_State *luaState) 
 
 int TestContainerMap::GetInnerStructWithIdCountCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.GetInnerStructWithIdCount method with an invalid lua proxy object!");
   auto result = instance->GetInnerStructWithIdCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -232,6 +238,7 @@ int TestContainerMap::GetInnerStructWithIdCountCallerFromLua(lua_State *luaState
 int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerMap.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("innerStructsWithId", key)) {
     LuaHelper::Push(instance->mInnerStructsWithId, luaState, false);
   } else if (0 == strcmp("GetInnerStructWithIdFromName", key)) {

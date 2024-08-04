@@ -407,6 +407,7 @@ void GameData::CreateLuaMetatable(lua_State *luaState) {
 
 int GameData::GetBootFromNameCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetBootFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetBootFromName(arg0);
@@ -416,6 +417,7 @@ int GameData::GetBootFromNameCallerFromLua(lua_State *luaState) {
 
 int GameData::AddBootCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddBoot method with an invalid lua proxy object!");
   auto arg0 = Boot::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddBoot(*arg0);
   result->PushToLua(luaState);
@@ -424,6 +426,7 @@ int GameData::AddBootCallerFromLua(lua_State *luaState) {
 
 int GameData::GetBootCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetBoot method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetBoot(arg0);
@@ -433,6 +436,7 @@ int GameData::GetBootCallerFromLua(lua_State *luaState) {
 
 int GameData::GetBootCountCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetBootCount method with an invalid lua proxy object!");
   auto result = instance->GetBootCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -440,6 +444,7 @@ int GameData::GetBootCountCallerFromLua(lua_State *luaState) {
 
 int GameData::GetArmorFromNameCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetArmorFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmorFromName(arg0);
@@ -449,6 +454,7 @@ int GameData::GetArmorFromNameCallerFromLua(lua_State *luaState) {
 
 int GameData::GetArmorFromAlternativeNameCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetArmorFromAlternativeName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmorFromAlternativeName(arg0);
@@ -458,6 +464,7 @@ int GameData::GetArmorFromAlternativeNameCallerFromLua(lua_State *luaState) {
 
 int GameData::AddArmorCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddArmor method with an invalid lua proxy object!");
   auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddArmor(*arg0);
   result->PushToLua(luaState);
@@ -466,6 +473,7 @@ int GameData::AddArmorCallerFromLua(lua_State *luaState) {
 
 int GameData::GetArmorCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetArmor method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmor(arg0);
@@ -475,6 +483,7 @@ int GameData::GetArmorCallerFromLua(lua_State *luaState) {
 
 int GameData::GetArmorCountCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetArmorCount method with an invalid lua proxy object!");
   auto result = instance->GetArmorCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -482,6 +491,7 @@ int GameData::GetArmorCountCallerFromLua(lua_State *luaState) {
 
 int GameData::GetCharacterFromNameCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetCharacterFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetCharacterFromName(arg0);
@@ -491,6 +501,7 @@ int GameData::GetCharacterFromNameCallerFromLua(lua_State *luaState) {
 
 int GameData::AddCharacterCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddCharacter method with an invalid lua proxy object!");
   auto arg0 = Character::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddCharacter(*arg0);
   result->PushToLua(luaState);
@@ -499,6 +510,7 @@ int GameData::AddCharacterCallerFromLua(lua_State *luaState) {
 
 int GameData::GetCharacterCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetCharacter method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetCharacter(arg0);
@@ -508,6 +520,7 @@ int GameData::GetCharacterCallerFromLua(lua_State *luaState) {
 
 int GameData::GetCharacterCountCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetCharacterCount method with an invalid lua proxy object!");
   auto result = instance->GetCharacterCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -516,6 +529,7 @@ int GameData::GetCharacterCountCallerFromLua(lua_State *luaState) {
 int GameData::IndexMetaMethod(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for GameData.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("boots", key)) {
     LuaHelper::Push(instance->mBoots, luaState, false);
   } else if (0 == strcmp("armors", key)) {

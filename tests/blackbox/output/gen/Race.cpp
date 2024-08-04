@@ -180,6 +180,7 @@ void Race::CreateLuaMetatable(lua_State *luaState) {
 int Race::IndexMetaMethod(lua_State *luaState) {
   auto instance = Race::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Race.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {

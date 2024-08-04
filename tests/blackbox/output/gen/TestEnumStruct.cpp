@@ -136,6 +136,7 @@ void TestEnumStruct::CreateLuaMetatable(lua_State *luaState) {
 int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestEnumStruct.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("enumField", key)) {
     LuaHelper::Push(instance->mEnumField, luaState, false);
   } else if (0 == strcmp("enumDefaultValueField", key)) {

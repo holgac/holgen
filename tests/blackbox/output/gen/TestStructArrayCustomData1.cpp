@@ -149,6 +149,7 @@ void TestStructArrayCustomData1::CreateLuaMetatable(lua_State *luaState) {
 int TestStructArrayCustomData1::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArrayCustomData1::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArrayCustomData1.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("f1", key)) {
     LuaHelper::Push(instance->mF1, luaState, false);
   } else if (0 == strcmp("f2", key)) {

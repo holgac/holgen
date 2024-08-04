@@ -173,6 +173,7 @@ void Calculator::CreateLuaMetatable(lua_State *luaState) {
 
 int Calculator::AddCallerFromLua(lua_State *luaState) {
   auto instance = Calculator::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Calculator.Add method with an invalid lua proxy object!");
   int64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->Add(luaState, arg0);
@@ -182,6 +183,7 @@ int Calculator::AddCallerFromLua(lua_State *luaState) {
 
 int Calculator::SubtractCallerFromLua(lua_State *luaState) {
   auto instance = Calculator::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Calculator.Subtract method with an invalid lua proxy object!");
   auto arg0 = Number::ReadProxyFromLua(luaState, -1);
   auto result = instance->Subtract(luaState, *arg0);
   result->PushToLua(luaState);
@@ -190,6 +192,7 @@ int Calculator::SubtractCallerFromLua(lua_State *luaState) {
 
 int Calculator::SubtractThenMultiplyCallerFromLua(lua_State *luaState) {
   auto instance = Calculator::ReadProxyFromLua(luaState, -3);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Calculator.SubtractThenMultiply method with an invalid lua proxy object!");
   int64_t arg0;
   LuaHelper::Read(arg0, luaState, -2);
   int64_t arg1;
@@ -202,6 +205,7 @@ int Calculator::SubtractThenMultiplyCallerFromLua(lua_State *luaState) {
 int Calculator::IndexMetaMethod(lua_State *luaState) {
   auto instance = Calculator::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Calculator.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("curVal", key)) {
     LuaHelper::Push(instance->mCurVal, luaState, false);
   } else if (0 == strcmp("Add", key)) {

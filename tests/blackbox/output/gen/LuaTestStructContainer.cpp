@@ -162,6 +162,7 @@ void LuaTestStructContainer::CreateLuaMetatable(lua_State *luaState) {
 
 int LuaTestStructContainer::AddTestVectorElemCallerFromLua(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling LuaTestStructContainer.AddTestVectorElem method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->AddTestVectorElem(arg0);
@@ -171,6 +172,7 @@ int LuaTestStructContainer::AddTestVectorElemCallerFromLua(lua_State *luaState) 
 
 int LuaTestStructContainer::GetTestVectorElemCallerFromLua(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling LuaTestStructContainer.GetTestVectorElem method with an invalid lua proxy object!");
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetTestVectorElem(arg0);
@@ -180,6 +182,7 @@ int LuaTestStructContainer::GetTestVectorElemCallerFromLua(lua_State *luaState) 
 
 int LuaTestStructContainer::DeleteTestVectorElemCallerFromLua(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling LuaTestStructContainer.DeleteTestVectorElem method with an invalid lua proxy object!");
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->DeleteTestVectorElem(arg0);
@@ -188,6 +191,7 @@ int LuaTestStructContainer::DeleteTestVectorElemCallerFromLua(lua_State *luaStat
 
 int LuaTestStructContainer::GetTestVectorElemCountCallerFromLua(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling LuaTestStructContainer.GetTestVectorElemCount method with an invalid lua proxy object!");
   auto result = instance->GetTestVectorElemCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -196,6 +200,7 @@ int LuaTestStructContainer::GetTestVectorElemCountCallerFromLua(lua_State *luaSt
 int LuaTestStructContainer::IndexMetaMethod(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for LuaTestStructContainer.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("testVector", key)) {
     LuaHelper::Push(instance->mTestVector, luaState, false);
   } else if (0 == strcmp("testMap", key)) {

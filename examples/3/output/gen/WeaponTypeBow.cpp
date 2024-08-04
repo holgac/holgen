@@ -132,6 +132,7 @@ void WeaponTypeBow::CreateLuaMetatable(lua_State *luaState) {
 int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeBow.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("range", key)) {
     LuaHelper::Push(instance->mRange, luaState, false);
   } else if (0 == strcmp("material", key)) {

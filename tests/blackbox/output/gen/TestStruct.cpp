@@ -160,6 +160,7 @@ void TestStruct::CreateLuaMetatable(lua_State *luaState) {
 int TestStruct::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("testFieldBool", key)) {
     LuaHelper::Push(instance->mTestFieldBool, luaState, false);
   } else if (0 == strcmp("testFieldUnsigned", key)) {

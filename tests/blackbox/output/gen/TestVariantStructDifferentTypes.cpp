@@ -271,6 +271,7 @@ void TestVariantStructDifferentTypes::CreateLuaMetatable(lua_State *luaState) {
 int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructDifferentTypes.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("being1", key)) {
     switch (instance->mBeing1Type.GetValue()) {
     case TestVariantStructType::Cat:

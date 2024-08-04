@@ -194,6 +194,7 @@ void TestStructSingleElemContainer::CreateLuaMetatable(lua_State *luaState) {
 
 int TestStructSingleElemContainer::AddSingleElemStructCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.AddSingleElemStruct method with an invalid lua proxy object!");
   TestStructSingleElem arg0Mirror;
   TestStructSingleElem *arg0;
   if (lua_getmetatable(luaState, -1)) {
@@ -210,6 +211,7 @@ int TestStructSingleElemContainer::AddSingleElemStructCallerFromLua(lua_State *l
 
 int TestStructSingleElemContainer::GetSingleElemStructCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStruct method with an invalid lua proxy object!");
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetSingleElemStruct(arg0);
@@ -219,6 +221,7 @@ int TestStructSingleElemContainer::GetSingleElemStructCallerFromLua(lua_State *l
 
 int TestStructSingleElemContainer::DeleteSingleElemStructCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.DeleteSingleElemStruct method with an invalid lua proxy object!");
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->DeleteSingleElemStruct(arg0);
@@ -227,6 +230,7 @@ int TestStructSingleElemContainer::DeleteSingleElemStructCallerFromLua(lua_State
 
 int TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructCount method with an invalid lua proxy object!");
   auto result = instance->GetSingleElemStructCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -234,6 +238,7 @@ int TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua(lua_Sta
 
 int TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.AddSingleElemStructWithId method with an invalid lua proxy object!");
   auto arg0 = TestStructSingleElemWithId::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddSingleElemStructWithId(*arg0);
   result->PushToLua(luaState);
@@ -242,6 +247,7 @@ int TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua(lua_St
 
 int TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructWithId method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetSingleElemStructWithId(arg0);
@@ -251,6 +257,7 @@ int TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua(lua_St
 
 int TestStructSingleElemContainer::GetSingleElemStructWithIdCountCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructWithIdCount method with an invalid lua proxy object!");
   auto result = instance->GetSingleElemStructWithIdCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -259,6 +266,7 @@ int TestStructSingleElemContainer::GetSingleElemStructWithIdCountCallerFromLua(l
 int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElemContainer.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("singleElemStructs", key)) {
     LuaHelper::Push(instance->mSingleElemStructs, luaState, false);
   } else if (0 == strcmp("singleElemStructsWithId", key)) {

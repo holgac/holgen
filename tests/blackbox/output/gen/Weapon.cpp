@@ -175,6 +175,7 @@ void Weapon::CreateLuaMetatable(lua_State *luaState) {
 
 int Weapon::GetAverageDamageCallerFromLua(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Weapon.GetAverageDamage method with an invalid lua proxy object!");
   auto result = instance->GetAverageDamage();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -183,6 +184,7 @@ int Weapon::GetAverageDamageCallerFromLua(lua_State *luaState) {
 int Weapon::IndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("damageMin", key)) {
     LuaHelper::Push(instance->mDamageMin, luaState, false);
   } else if (0 == strcmp("damageMax", key)) {

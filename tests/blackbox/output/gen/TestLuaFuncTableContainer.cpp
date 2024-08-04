@@ -282,6 +282,7 @@ void TestLuaFuncTableContainer::CreateLuaMetatable(lua_State *luaState) {
 int TestLuaFuncTableContainer::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("field", key)) {
     LuaHelper::Push(instance->mField, luaState, false);
   } else if (0 == strcmp("script1", key)) {

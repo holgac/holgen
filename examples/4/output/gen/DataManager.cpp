@@ -423,6 +423,7 @@ void DataManager::CreateLuaMetatable(lua_State *luaState) {
 
 int DataManager::GetCharacterFromNameCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetCharacterFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetCharacterFromName(arg0);
@@ -432,6 +433,7 @@ int DataManager::GetCharacterFromNameCallerFromLua(lua_State *luaState) {
 
 int DataManager::AddCharacterCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddCharacter method with an invalid lua proxy object!");
   auto arg0 = Character::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddCharacter(*arg0);
   result->PushToLua(luaState);
@@ -440,6 +442,7 @@ int DataManager::AddCharacterCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetCharacterCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetCharacter method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetCharacter(arg0);
@@ -449,6 +452,7 @@ int DataManager::GetCharacterCallerFromLua(lua_State *luaState) {
 
 int DataManager::DeleteCharacterCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteCharacter method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->DeleteCharacter(arg0);
@@ -457,6 +461,7 @@ int DataManager::DeleteCharacterCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetCharacterCountCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetCharacterCount method with an invalid lua proxy object!");
   auto result = instance->GetCharacterCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -464,6 +469,7 @@ int DataManager::GetCharacterCountCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetArmorFromNameCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmorFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmorFromName(arg0);
@@ -473,6 +479,7 @@ int DataManager::GetArmorFromNameCallerFromLua(lua_State *luaState) {
 
 int DataManager::AddArmorCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddArmor method with an invalid lua proxy object!");
   auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddArmor(*arg0);
   result->PushToLua(luaState);
@@ -481,6 +488,7 @@ int DataManager::AddArmorCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetArmorCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmor method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmor(arg0);
@@ -490,6 +498,7 @@ int DataManager::GetArmorCallerFromLua(lua_State *luaState) {
 
 int DataManager::DeleteArmorCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteArmor method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->DeleteArmor(arg0);
@@ -498,6 +507,7 @@ int DataManager::DeleteArmorCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetArmorCountCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmorCount method with an invalid lua proxy object!");
   auto result = instance->GetArmorCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -505,6 +515,7 @@ int DataManager::GetArmorCountCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetWeaponFromNameCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetWeaponFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetWeaponFromName(arg0);
@@ -514,6 +525,7 @@ int DataManager::GetWeaponFromNameCallerFromLua(lua_State *luaState) {
 
 int DataManager::AddWeaponCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddWeapon method with an invalid lua proxy object!");
   auto arg0 = Weapon::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddWeapon(*arg0);
   result->PushToLua(luaState);
@@ -522,6 +534,7 @@ int DataManager::AddWeaponCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetWeaponCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetWeapon method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetWeapon(arg0);
@@ -531,6 +544,7 @@ int DataManager::GetWeaponCallerFromLua(lua_State *luaState) {
 
 int DataManager::DeleteWeaponCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteWeapon method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->DeleteWeapon(arg0);
@@ -539,6 +553,7 @@ int DataManager::DeleteWeaponCallerFromLua(lua_State *luaState) {
 
 int DataManager::GetWeaponCountCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetWeaponCount method with an invalid lua proxy object!");
   auto result = instance->GetWeaponCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -547,6 +562,7 @@ int DataManager::GetWeaponCountCallerFromLua(lua_State *luaState) {
 int DataManager::IndexMetaMethod(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for DataManager.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("characters", key)) {
     LuaHelper::Push(instance->mCharacters, luaState, false);
   } else if (0 == strcmp("armors", key)) {

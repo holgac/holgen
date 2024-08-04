@@ -191,6 +191,7 @@ void TestJsonTagManager::CreateLuaMetatable(lua_State *luaState) {
 
 int TestJsonTagManager::GetOrInsertCallerFromLua(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonTagManager.GetOrInsert method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetOrInsert(arg0);
@@ -200,6 +201,7 @@ int TestJsonTagManager::GetOrInsertCallerFromLua(lua_State *luaState) {
 
 int TestJsonTagManager::GetTagFromNameCallerFromLua(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonTagManager.GetTagFromName method with an invalid lua proxy object!");
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetTagFromName(arg0);
@@ -209,6 +211,7 @@ int TestJsonTagManager::GetTagFromNameCallerFromLua(lua_State *luaState) {
 
 int TestJsonTagManager::AddTagCallerFromLua(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonTagManager.AddTag method with an invalid lua proxy object!");
   auto arg0 = TestJsonTag::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddTag(*arg0);
   result->PushToLua(luaState);
@@ -217,6 +220,7 @@ int TestJsonTagManager::AddTagCallerFromLua(lua_State *luaState) {
 
 int TestJsonTagManager::GetTagCallerFromLua(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonTagManager.GetTag method with an invalid lua proxy object!");
   uint64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetTag(arg0);
@@ -226,6 +230,7 @@ int TestJsonTagManager::GetTagCallerFromLua(lua_State *luaState) {
 
 int TestJsonTagManager::GetTagCountCallerFromLua(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonTagManager.GetTagCount method with an invalid lua proxy object!");
   auto result = instance->GetTagCount();
   LuaHelper::Push(result, luaState, true);
   return 1;
@@ -234,6 +239,7 @@ int TestJsonTagManager::GetTagCountCallerFromLua(lua_State *luaState) {
 int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonTagManager.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("tags", key)) {
     LuaHelper::Push(instance->mTags, luaState, false);
   } else if (0 == strcmp("GetOrInsert", key)) {

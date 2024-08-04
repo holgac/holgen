@@ -168,6 +168,7 @@ void Boot::CreateLuaMetatable(lua_State *luaState) {
 int Boot::IndexMetaMethod(lua_State *luaState) {
   auto instance = Boot::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {

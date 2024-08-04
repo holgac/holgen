@@ -112,6 +112,7 @@ void Number::CreateLuaMetatable(lua_State *luaState) {
 int Number::IndexMetaMethod(lua_State *luaState) {
   auto instance = Number::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Number.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("value", key)) {
     LuaHelper::Push(instance->mValue, luaState, false);
   } else {

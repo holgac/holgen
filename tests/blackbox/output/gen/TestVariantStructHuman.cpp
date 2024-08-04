@@ -136,6 +136,7 @@ void TestVariantStructHuman::CreateLuaMetatable(lua_State *luaState) {
 int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructHuman.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("name", key)) {
     LuaHelper::Push(instance->mName, luaState, false);
   } else if (0 == strcmp("nationality", key)) {

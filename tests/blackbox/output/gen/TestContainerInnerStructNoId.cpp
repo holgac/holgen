@@ -132,6 +132,7 @@ void TestContainerInnerStructNoId::CreateLuaMetatable(lua_State *luaState) {
 int TestContainerInnerStructNoId::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerInnerStructNoId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerInnerStructNoId.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("field", key)) {
     LuaHelper::Push(instance->mField, luaState, false);
   } else if (0 == strcmp("name", key)) {

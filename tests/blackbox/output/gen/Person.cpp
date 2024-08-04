@@ -198,6 +198,7 @@ void Person::CreateLuaMetatable(lua_State *luaState) {
 int Person::IndexMetaMethod(lua_State *luaState) {
   auto instance = Person::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Person.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("race", key)) {
     LuaHelper::Push(instance->mRace, luaState, false);
   } else if (0 == strcmp("currentCountry", key)) {

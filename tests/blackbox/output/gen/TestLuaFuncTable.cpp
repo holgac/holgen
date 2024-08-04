@@ -117,6 +117,7 @@ void TestLuaFuncTable::CreateLuaMetatable(lua_State *luaState) {
 
 int TestLuaFuncTable::SetFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaFuncTable::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaFuncTable.SetField method with an invalid lua proxy object!");
   TestLuaFuncTableContainer arg0Mirror;
   TestLuaFuncTableContainer *arg0;
   if (lua_getmetatable(luaState, -1)) {
@@ -132,6 +133,7 @@ int TestLuaFuncTable::SetFieldCallerFromLua(lua_State *luaState) {
 
 int TestLuaFuncTable::GetFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaFuncTable::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaFuncTable.GetField method with an invalid lua proxy object!");
   TestLuaFuncTableContainer arg0Mirror;
   TestLuaFuncTableContainer *arg0;
   if (lua_getmetatable(luaState, -1)) {
