@@ -12,9 +12,10 @@ public:
 private:
   void Process(Class &cls);
   void GenerateIndexMetaMethodForFields(Class &cls, StringSwitcher &switcher);
+  void GenerateMethodCaller(Class &cls, const ClassMethod &method);
   void GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitcher &switcher);
   void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock);
-  std::string GenerateReadExposedMethodArgsAndGetArgsString(ClassMethod &exposedMethod,
+  std::string GenerateReadExposedMethodArgsAndGetArgsString(const ClassMethod &exposedMethod,
                                                             CodeBlock &switchBlock, bool isLuaFunc);
   void GenerateIndexForVariantField(Class &cls, ClassField &field, CodeBlock &switchBlock);
   void GenerateIndexForRegistryData(ClassField &field, CodeBlock &switchBlock);

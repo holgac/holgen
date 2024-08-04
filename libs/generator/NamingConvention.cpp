@@ -136,6 +136,10 @@ std::string NamingConvention::LuaMetatableName(const Class &cls) const {
   return cls.mName + "Meta";
 }
 
+std::string NamingConvention::LuaMethodCaller(const ClassMethod &method) const {
+  return method.mName + "CallerFromLua";
+}
+
 std::string NamingConvention::FieldNameInCpp(const std::string &fieldName) const {
   return std::format("m{}", St::Capitalize(fieldName));
 }

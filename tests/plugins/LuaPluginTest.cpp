@@ -231,26 +231,44 @@ struct TestData {
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
 const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("functionReturningVoid", key)) {
-  lua_pushcfunction(luaState, [](lua_State *lsInner) {
-    auto instance = TestData::ReadProxyFromLua(lsInner, -3);
-    int32_t arg0;
-    LuaHelper::Read(arg0, lsInner, -2);
-    std::string arg1;
-    LuaHelper::Read(arg1, lsInner, -1);
-    instance->functionReturningVoid(arg0, arg1);
-    return 0;
-  });
+  lua_pushcfunction(luaState, TestData::functionReturningVoidCallerFromLua);
 } else if (0 == strcmp("functionReturningString", key)) {
-  lua_pushcfunction(luaState, [](lua_State *lsInner) {
-    auto instance = TestData::ReadProxyFromLua(lsInner, -1);
-    auto result = instance->functionReturningString();
-    LuaHelper::Push(result, lsInner, true);
-    return 1;
-  });
+  lua_pushcfunction(luaState, TestData::functionReturningStringCallerFromLua);
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
   return 0;
 }
+return 1;
+  )R");
+  }
+
+  ASSERT_NE(cls->GetMethod("functionReturningVoidCallerFromLua", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"functionReturningVoidCallerFromLua", Type{"int"},
+                              Visibility::Private, Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    helpers::ExpectEqual(*cls->GetMethod("functionReturningVoidCallerFromLua", Constness::NotConst),
+                         method, R"R(
+auto instance = TestData::ReadProxyFromLua(luaState, -3);
+int32_t arg0;
+LuaHelper::Read(arg0, luaState, -2);
+std::string arg1;
+LuaHelper::Read(arg1, luaState, -1);
+instance->functionReturningVoid(arg0, arg1);
+return 0;
+  )R");
+  }
+
+  ASSERT_NE(cls->GetMethod("functionReturningStringCallerFromLua", Constness::NotConst), nullptr);
+  {
+    auto method = ClassMethod{"functionReturningStringCallerFromLua", Type{"int"},
+                              Visibility::Private, Constness::NotConst, Staticness::Static};
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+    helpers::ExpectEqual(
+        *cls->GetMethod("functionReturningStringCallerFromLua", Constness::NotConst), method, R"R(
+auto instance = TestData::ReadProxyFromLua(luaState, -1);
+auto result = instance->functionReturningString();
+LuaHelper::Push(result, luaState, true);
 return 1;
   )R");
   }

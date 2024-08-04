@@ -9,6 +9,7 @@ struct StructDefinition;
 struct TranslatedProject;
 struct FunctionDefinition;
 struct Class;
+struct ClassMethod;
 
 class NamingConvention {
 public:
@@ -46,6 +47,7 @@ public:
   virtual std::string
       LuaFunctionHandleNameInCpp(const FunctionDefinition &functionDefinition) const;
   virtual std::string LuaMetatableName(const Class &cls) const;
+  virtual std::string LuaMethodCaller(const ClassMethod &method) const;
 
 private:
   TranslatedProject &mProject;
