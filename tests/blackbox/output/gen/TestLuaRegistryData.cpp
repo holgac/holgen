@@ -179,34 +179,40 @@ void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestLuaRegistryDataMeta");
 }
 
+int TestLuaRegistryData::InitCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
+  std::function<void(lua_State *, const TestLuaRegistryData &)> arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->Init(luaState, arg0);
+  return 0;
+}
+
+int TestLuaRegistryData::GetCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -1);
+  auto result = instance->Get(luaState);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestLuaRegistryData::AddCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
+  int32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->Add(luaState, arg0);
+  return 0;
+}
+
 int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("data", key)) {
     lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->mData);
   } else if (0 == strcmp("Init", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaRegistryData::ReadProxyFromLua(lsInner, -2);
-      std::function<void(lua_State *, const TestLuaRegistryData &)> arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->Init(lsInner, arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestLuaRegistryData::InitCallerFromLua);
   } else if (0 == strcmp("Get", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaRegistryData::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->Get(lsInner);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaRegistryData::GetCallerFromLua);
   } else if (0 == strcmp("Add", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaRegistryData::ReadProxyFromLua(lsInner, -2);
-      int32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->Add(lsInner, arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestLuaRegistryData::AddCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaRegistryData.{}", key);
     return 0;

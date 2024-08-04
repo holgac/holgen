@@ -192,61 +192,73 @@ void HumanManager::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "HumanManagerMeta");
 }
 
+int HumanManager::GetHumanFromNameCallerFromLua(lua_State *luaState) {
+  auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetHumanFromName(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int HumanManager::AddHumanCallerFromLua(lua_State *luaState) {
+  auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
+  auto arg0 = Human::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddHuman(*arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int HumanManager::GetHumanCallerFromLua(lua_State *luaState) {
+  auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetHuman(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int HumanManager::HasHumanCallerFromLua(lua_State *luaState) {
+  auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->HasHuman(arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int HumanManager::DeleteHumanCallerFromLua(lua_State *luaState) {
+  auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteHuman(arg0);
+  return 0;
+}
+
+int HumanManager::GetHumanCountCallerFromLua(lua_State *luaState) {
+  auto instance = HumanManager::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetHumanCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int HumanManager::IndexMetaMethod(lua_State *luaState) {
   auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("humans", key)) {
     LuaHelper::Push(instance->mHumans, luaState, false);
   } else if (0 == strcmp("GetHumanFromName", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = HumanManager::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetHumanFromName(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, HumanManager::GetHumanFromNameCallerFromLua);
   } else if (0 == strcmp("AddHuman", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = HumanManager::ReadProxyFromLua(lsInner, -2);
-      auto arg0 = Human::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->AddHuman(*arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, HumanManager::AddHumanCallerFromLua);
   } else if (0 == strcmp("GetHuman", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = HumanManager::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetHuman(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, HumanManager::GetHumanCallerFromLua);
   } else if (0 == strcmp("HasHuman", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = HumanManager::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->HasHuman(arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, HumanManager::HasHumanCallerFromLua);
   } else if (0 == strcmp("DeleteHuman", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = HumanManager::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->DeleteHuman(arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, HumanManager::DeleteHumanCallerFromLua);
   } else if (0 == strcmp("GetHumanCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = HumanManager::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetHumanCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, HumanManager::GetHumanCountCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: HumanManager.{}", key);
     return 0;

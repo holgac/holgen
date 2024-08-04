@@ -47,6 +47,9 @@ public:
   Weapon &operator=(Weapon &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetAverageDamageCallerFromLua(lua_State *luaState);
+  static int InitializeCallerFromLua(lua_State *luaState);
+  static int GetDamageCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId = -1;
   uint8_t mDamageMin;

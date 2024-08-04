@@ -48,6 +48,9 @@ public:
   TestLuaRegistryData &operator=(TestLuaRegistryData &&rhs);
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int InitCallerFromLua(lua_State *luaState);
+  static int GetCallerFromLua(lua_State *luaState);
+  static int AddCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   int mData = LUA_NOREF;
   std::string mTable;

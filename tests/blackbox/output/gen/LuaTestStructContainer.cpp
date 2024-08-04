@@ -160,6 +160,39 @@ void LuaTestStructContainer::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "LuaTestStructContainerMeta");
 }
 
+int LuaTestStructContainer::AddTestVectorElemCallerFromLua(lua_State *luaState) {
+  auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->AddTestVectorElem(arg0);
+  LuaHelper::Push(result, luaState, false);
+  return 1;
+}
+
+int LuaTestStructContainer::GetTestVectorElemCallerFromLua(lua_State *luaState) {
+  auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+  size_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetTestVectorElem(arg0);
+  LuaHelper::Push(result, luaState, false);
+  return 1;
+}
+
+int LuaTestStructContainer::DeleteTestVectorElemCallerFromLua(lua_State *luaState) {
+  auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+  size_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteTestVectorElem(arg0);
+  return 0;
+}
+
+int LuaTestStructContainer::GetTestVectorElemCountCallerFromLua(lua_State *luaState) {
+  auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetTestVectorElemCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int LuaTestStructContainer::IndexMetaMethod(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -168,38 +201,13 @@ int LuaTestStructContainer::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("testMap", key)) {
     LuaHelper::Push(instance->mTestMap, luaState, false);
   } else if (0 == strcmp("AddTestVectorElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = LuaTestStructContainer::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->AddTestVectorElem(arg0);
-      LuaHelper::Push(result, lsInner, false);
-      return 1;
-    });
+    lua_pushcfunction(luaState, LuaTestStructContainer::AddTestVectorElemCallerFromLua);
   } else if (0 == strcmp("GetTestVectorElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = LuaTestStructContainer::ReadProxyFromLua(lsInner, -2);
-      size_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetTestVectorElem(arg0);
-      LuaHelper::Push(result, lsInner, false);
-      return 1;
-    });
+    lua_pushcfunction(luaState, LuaTestStructContainer::GetTestVectorElemCallerFromLua);
   } else if (0 == strcmp("DeleteTestVectorElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = LuaTestStructContainer::ReadProxyFromLua(lsInner, -2);
-      size_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->DeleteTestVectorElem(arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, LuaTestStructContainer::DeleteTestVectorElemCallerFromLua);
   } else if (0 == strcmp("GetTestVectorElemCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = LuaTestStructContainer::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetTestVectorElemCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, LuaTestStructContainer::GetTestVectorElemCountCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: LuaTestStructContainer.{}", key);
     return 0;

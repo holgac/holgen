@@ -405,6 +405,114 @@ void GameData::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "GameDataMeta");
 }
 
+int GameData::GetBootFromNameCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetBootFromName(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::AddBootCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  auto arg0 = Boot::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddBoot(*arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::GetBootCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetBoot(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::GetBootCountCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetBootCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int GameData::GetArmorFromNameCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetArmorFromName(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::GetArmorFromAlternativeNameCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetArmorFromAlternativeName(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::AddArmorCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddArmor(*arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::GetArmorCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetArmor(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::GetArmorCountCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetArmorCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int GameData::GetCharacterFromNameCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetCharacterFromName(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::AddCharacterCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  auto arg0 = Character::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddCharacter(*arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::GetCharacterCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetCharacter(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int GameData::GetCharacterCountCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetCharacterCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int GameData::IndexMetaMethod(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -415,113 +523,31 @@ int GameData::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("characters", key)) {
     LuaHelper::Push(instance->mCharacters, luaState, false);
   } else if (0 == strcmp("GetBootFromName", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetBootFromName(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetBootFromNameCallerFromLua);
   } else if (0 == strcmp("AddBoot", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      auto arg0 = Boot::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->AddBoot(*arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::AddBootCallerFromLua);
   } else if (0 == strcmp("GetBoot", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetBoot(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetBootCallerFromLua);
   } else if (0 == strcmp("GetBootCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetBootCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetBootCountCallerFromLua);
   } else if (0 == strcmp("GetArmorFromName", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetArmorFromName(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetArmorFromNameCallerFromLua);
   } else if (0 == strcmp("GetArmorFromAlternativeName", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetArmorFromAlternativeName(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetArmorFromAlternativeNameCallerFromLua);
   } else if (0 == strcmp("AddArmor", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      auto arg0 = Armor::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->AddArmor(*arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::AddArmorCallerFromLua);
   } else if (0 == strcmp("GetArmor", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetArmor(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetArmorCallerFromLua);
   } else if (0 == strcmp("GetArmorCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetArmorCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetArmorCountCallerFromLua);
   } else if (0 == strcmp("GetCharacterFromName", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetCharacterFromName(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetCharacterFromNameCallerFromLua);
   } else if (0 == strcmp("AddCharacter", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      auto arg0 = Character::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->AddCharacter(*arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::AddCharacterCallerFromLua);
   } else if (0 == strcmp("GetCharacter", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetCharacter(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetCharacterCallerFromLua);
   } else if (0 == strcmp("GetCharacterCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = GameData::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetCharacterCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, GameData::GetCharacterCountCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: GameData.{}", key);
     return 0;

@@ -175,6 +175,72 @@ void TestContainerSet::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestContainerSetMeta");
 }
 
+int TestContainerSet::AddStringElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->AddStringElem(arg0);
+  LuaHelper::Push(result, luaState, false);
+  return 1;
+}
+
+int TestContainerSet::HasStringElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->HasStringElem(arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestContainerSet::DeleteStringElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteStringElem(arg0);
+  return 0;
+}
+
+int TestContainerSet::GetStringElemCountCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetStringElemCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestContainerSet::AddUnsignedElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->AddUnsignedElem(arg0);
+  LuaHelper::Push(result, luaState, false);
+  return 1;
+}
+
+int TestContainerSet::HasUnsignedElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->HasUnsignedElem(arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestContainerSet::DeleteUnsignedElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteUnsignedElem(arg0);
+  return 0;
+}
+
+int TestContainerSet::GetUnsignedElemCountCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetUnsignedElemCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int TestContainerSet::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -183,71 +249,21 @@ int TestContainerSet::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("unsignedContainer", key)) {
     LuaHelper::Push(instance->mUnsignedContainer, luaState, false);
   } else if (0 == strcmp("AddStringElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->AddStringElem(arg0);
-      LuaHelper::Push(result, lsInner, false);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::AddStringElemCallerFromLua);
   } else if (0 == strcmp("HasStringElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->HasStringElem(arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::HasStringElemCallerFromLua);
   } else if (0 == strcmp("DeleteStringElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->DeleteStringElem(arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::DeleteStringElemCallerFromLua);
   } else if (0 == strcmp("GetStringElemCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetStringElemCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::GetStringElemCountCallerFromLua);
   } else if (0 == strcmp("AddUnsignedElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->AddUnsignedElem(arg0);
-      LuaHelper::Push(result, lsInner, false);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::AddUnsignedElemCallerFromLua);
   } else if (0 == strcmp("HasUnsignedElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->HasUnsignedElem(arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::HasUnsignedElemCallerFromLua);
   } else if (0 == strcmp("DeleteUnsignedElem", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -2);
-      uint32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->DeleteUnsignedElem(arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::DeleteUnsignedElemCallerFromLua);
   } else if (0 == strcmp("GetUnsignedElemCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestContainerSet::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetUnsignedElemCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestContainerSet::GetUnsignedElemCountCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestContainerSet.{}", key);
     return 0;

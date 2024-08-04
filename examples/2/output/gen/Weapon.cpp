@@ -161,6 +161,26 @@ void Weapon::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "WeaponMeta");
 }
 
+int Weapon::GetAverageDamageCallerFromLua(lua_State *luaState) {
+  auto instance = Weapon::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetAverageDamage(luaState);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int Weapon::InitializeCallerFromLua(lua_State *luaState) {
+  auto instance = Weapon::ReadProxyFromLua(luaState, -1);
+  instance->Initialize();
+  return 0;
+}
+
+int Weapon::GetDamageCallerFromLua(lua_State *luaState) {
+  auto instance = Weapon::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetDamage();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int Weapon::IndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -171,25 +191,11 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("damageMax", key)) {
     LuaHelper::Push(instance->mDamageMax, luaState, false);
   } else if (0 == strcmp("GetAverageDamage", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Weapon::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetAverageDamage(lsInner);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, Weapon::GetAverageDamageCallerFromLua);
   } else if (0 == strcmp("Initialize", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Weapon::ReadProxyFromLua(lsInner, -1);
-      instance->Initialize();
-      return 0;
-    });
+    lua_pushcfunction(luaState, Weapon::InitializeCallerFromLua);
   } else if (0 == strcmp("GetDamage", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Weapon::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetDamage();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, Weapon::GetDamageCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
     return 0;

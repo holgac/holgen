@@ -53,6 +53,14 @@ public:
   TestContainerSet &operator=(TestContainerSet &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int AddStringElemCallerFromLua(lua_State *luaState);
+  static int HasStringElemCallerFromLua(lua_State *luaState);
+  static int DeleteStringElemCallerFromLua(lua_State *luaState);
+  static int GetStringElemCountCallerFromLua(lua_State *luaState);
+  static int AddUnsignedElemCallerFromLua(lua_State *luaState);
+  static int HasUnsignedElemCallerFromLua(lua_State *luaState);
+  static int DeleteUnsignedElemCallerFromLua(lua_State *luaState);
+  static int GetUnsignedElemCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::set<std::string> mStringContainer;
   std::set<uint32_t> mUnsignedContainer;

@@ -51,6 +51,12 @@ public:
   TestContainerMap &operator=(TestContainerMap &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState);
+  static int AddInnerStructWithIdCallerFromLua(lua_State *luaState);
+  static int GetInnerStructWithIdCallerFromLua(lua_State *luaState);
+  static int HasInnerStructWithIdCallerFromLua(lua_State *luaState);
+  static int DeleteInnerStructWithIdCallerFromLua(lua_State *luaState);
+  static int GetInnerStructWithIdCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::map<uint32_t, TestContainerInnerStructWithId> mInnerStructsWithId;
   std::map<std::string, uint32_t> mInnerStructsWithIdNameIndex;

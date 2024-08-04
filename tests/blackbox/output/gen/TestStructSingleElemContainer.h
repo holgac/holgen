@@ -56,6 +56,13 @@ public:
   TestStructSingleElemContainer &operator=(TestStructSingleElemContainer &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int AddSingleElemStructCallerFromLua(lua_State *luaState);
+  static int GetSingleElemStructCallerFromLua(lua_State *luaState);
+  static int DeleteSingleElemStructCallerFromLua(lua_State *luaState);
+  static int GetSingleElemStructCountCallerFromLua(lua_State *luaState);
+  static int AddSingleElemStructWithIdCallerFromLua(lua_State *luaState);
+  static int GetSingleElemStructWithIdCallerFromLua(lua_State *luaState);
+  static int GetSingleElemStructWithIdCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestStructSingleElem> mSingleElemStructs;
   std::vector<TestStructSingleElemWithId> mSingleElemStructsWithId;

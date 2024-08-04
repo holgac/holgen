@@ -55,6 +55,7 @@ public:
   Character &operator=(Character &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int InitializeCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId = -1;
   std::string mName;

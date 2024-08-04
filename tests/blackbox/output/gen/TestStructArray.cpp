@@ -124,25 +124,29 @@ void TestStructArray::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestStructArrayMeta");
 }
 
+int TestStructArray::GetData1CallerFromLua(lua_State *luaState) {
+  auto instance = TestStructArray::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetData1();
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int TestStructArray::GetData2CallerFromLua(lua_State *luaState) {
+  auto instance = TestStructArray::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetData2();
+  result->PushToLua(luaState);
+  return 1;
+}
+
 int TestStructArray::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("type", key)) {
     LuaHelper::Push(instance->mType, luaState, false);
   } else if (0 == strcmp("GetData1", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestStructArray::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetData1();
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestStructArray::GetData1CallerFromLua);
   } else if (0 == strcmp("GetData2", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestStructArray::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetData2();
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestStructArray::GetData2CallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructArray.{}", key);
     return 0;

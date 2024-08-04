@@ -59,6 +59,12 @@ public:
   TestLuaCalculator &operator=(TestLuaCalculator &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int AddPrimitiveCallerFromLua(lua_State *luaState);
+  static int AddRefCallerFromLua(lua_State *luaState);
+  static int AddNullableCallerFromLua(lua_State *luaState);
+  static int ReturnNullableCallerFromLua(lua_State *luaState);
+  static int ReturnRefCallerFromLua(lua_State *luaState);
+  static int ReturnNewCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   TestLuaNumber mLastValue;
   std::string mLuaFuncHandle_AddPrimitive;

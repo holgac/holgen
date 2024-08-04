@@ -49,6 +49,8 @@ public:
   TestStructArray &operator=(TestStructArray &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetData1CallerFromLua(lua_State *luaState);
+  static int GetData2CallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   TestStructArrayType mType;
   std::array<uint8_t, 16> mCustomData;

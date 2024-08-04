@@ -125,44 +125,52 @@ void TestBitmapStruct::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestBitmapStructMeta");
 }
 
+int TestBitmapStruct::HasBitmapFieldCallerFromLua(lua_State *luaState) {
+  auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  int64_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->HasBitmapField(arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestBitmapStruct::AddBitmapFieldCallerFromLua(lua_State *luaState) {
+  auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  int64_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->AddBitmapField(arg0);
+  return 0;
+}
+
+int TestBitmapStruct::RemoveBitmapFieldCallerFromLua(lua_State *luaState) {
+  auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  int64_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->RemoveBitmapField(arg0);
+  return 0;
+}
+
+int TestBitmapStruct::ToggleBitmapFieldCallerFromLua(lua_State *luaState) {
+  auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+  int64_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->ToggleBitmapField(arg0);
+  return 0;
+}
+
 int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("bitmapField", key)) {
     LuaHelper::Push(instance->mBitmapField, luaState, false);
   } else if (0 == strcmp("HasBitmapField", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
-      int64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->HasBitmapField(arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestBitmapStruct::HasBitmapFieldCallerFromLua);
   } else if (0 == strcmp("AddBitmapField", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
-      int64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->AddBitmapField(arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestBitmapStruct::AddBitmapFieldCallerFromLua);
   } else if (0 == strcmp("RemoveBitmapField", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
-      int64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->RemoveBitmapField(arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestBitmapStruct::RemoveBitmapFieldCallerFromLua);
   } else if (0 == strcmp("ToggleBitmapField", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestBitmapStruct::ReadProxyFromLua(lsInner, -2);
-      int64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      instance->ToggleBitmapField(arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestBitmapStruct::ToggleBitmapFieldCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestBitmapStruct.{}", key);
     return 0;

@@ -50,6 +50,10 @@ public:
   LuaTestStructContainer &operator=(LuaTestStructContainer &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int AddTestVectorElemCallerFromLua(lua_State *luaState);
+  static int GetTestVectorElemCallerFromLua(lua_State *luaState);
+  static int DeleteTestVectorElemCallerFromLua(lua_State *luaState);
+  static int GetTestVectorElemCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<uint32_t> mTestVector;
   std::map<std::string, uint32_t> mTestMap;

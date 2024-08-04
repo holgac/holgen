@@ -189,53 +189,63 @@ void TestJsonTagManager::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestJsonTagManagerMeta");
 }
 
+int TestJsonTagManager::GetOrInsertCallerFromLua(lua_State *luaState) {
+  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetOrInsert(arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestJsonTagManager::GetTagFromNameCallerFromLua(lua_State *luaState) {
+  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetTagFromName(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int TestJsonTagManager::AddTagCallerFromLua(lua_State *luaState) {
+  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  auto arg0 = TestJsonTag::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddTag(*arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int TestJsonTagManager::GetTagCallerFromLua(lua_State *luaState) {
+  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  uint64_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetTag(arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int TestJsonTagManager::GetTagCountCallerFromLua(lua_State *luaState) {
+  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetTagCount();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("tags", key)) {
     LuaHelper::Push(instance->mTags, luaState, false);
   } else if (0 == strcmp("GetOrInsert", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestJsonTagManager::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetOrInsert(arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestJsonTagManager::GetOrInsertCallerFromLua);
   } else if (0 == strcmp("GetTagFromName", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestJsonTagManager::ReadProxyFromLua(lsInner, -2);
-      std::string arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetTagFromName(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestJsonTagManager::GetTagFromNameCallerFromLua);
   } else if (0 == strcmp("AddTag", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestJsonTagManager::ReadProxyFromLua(lsInner, -2);
-      auto arg0 = TestJsonTag::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->AddTag(*arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestJsonTagManager::AddTagCallerFromLua);
   } else if (0 == strcmp("GetTag", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestJsonTagManager::ReadProxyFromLua(lsInner, -2);
-      uint64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->GetTag(arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestJsonTagManager::GetTagCallerFromLua);
   } else if (0 == strcmp("GetTagCount", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestJsonTagManager::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetTagCount();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestJsonTagManager::GetTagCountCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonTagManager.{}", key);
     return 0;

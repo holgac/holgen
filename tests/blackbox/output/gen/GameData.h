@@ -75,6 +75,19 @@ public:
   GameData &operator=(GameData &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetBootFromNameCallerFromLua(lua_State *luaState);
+  static int AddBootCallerFromLua(lua_State *luaState);
+  static int GetBootCallerFromLua(lua_State *luaState);
+  static int GetBootCountCallerFromLua(lua_State *luaState);
+  static int GetArmorFromNameCallerFromLua(lua_State *luaState);
+  static int GetArmorFromAlternativeNameCallerFromLua(lua_State *luaState);
+  static int AddArmorCallerFromLua(lua_State *luaState);
+  static int GetArmorCallerFromLua(lua_State *luaState);
+  static int GetArmorCountCallerFromLua(lua_State *luaState);
+  static int GetCharacterFromNameCallerFromLua(lua_State *luaState);
+  static int AddCharacterCallerFromLua(lua_State *luaState);
+  static int GetCharacterCallerFromLua(lua_State *luaState);
+  static int GetCharacterCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<Boot> mBoots;
   std::vector<Armor> mArmors;

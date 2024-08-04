@@ -75,6 +75,21 @@ public:
   DataManager &operator=(DataManager &&rhs);
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetCharacterFromNameCallerFromLua(lua_State *luaState);
+  static int AddCharacterCallerFromLua(lua_State *luaState);
+  static int GetCharacterCallerFromLua(lua_State *luaState);
+  static int DeleteCharacterCallerFromLua(lua_State *luaState);
+  static int GetCharacterCountCallerFromLua(lua_State *luaState);
+  static int GetArmorFromNameCallerFromLua(lua_State *luaState);
+  static int AddArmorCallerFromLua(lua_State *luaState);
+  static int GetArmorCallerFromLua(lua_State *luaState);
+  static int DeleteArmorCallerFromLua(lua_State *luaState);
+  static int GetArmorCountCallerFromLua(lua_State *luaState);
+  static int GetWeaponFromNameCallerFromLua(lua_State *luaState);
+  static int AddWeaponCallerFromLua(lua_State *luaState);
+  static int GetWeaponCallerFromLua(lua_State *luaState);
+  static int DeleteWeaponCallerFromLua(lua_State *luaState);
+  static int GetWeaponCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::deque<Character> mCharacters;
   std::deque<Armor> mArmors;

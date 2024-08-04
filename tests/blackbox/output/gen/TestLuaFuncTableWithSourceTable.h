@@ -42,6 +42,8 @@ public:
   TestLuaFuncTableWithSourceTable &operator=(TestLuaFuncTableWithSourceTable &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int SetFieldCallerFromLua(lua_State *luaState);
+  static int GetFieldCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::string mTable;
 };

@@ -44,6 +44,10 @@ public:
   TestBitmapStruct &operator=(TestBitmapStruct &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int HasBitmapFieldCallerFromLua(lua_State *luaState);
+  static int AddBitmapFieldCallerFromLua(lua_State *luaState);
+  static int RemoveBitmapFieldCallerFromLua(lua_State *luaState);
+  static int ToggleBitmapFieldCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   TestBitmap mBitmapField;
 };

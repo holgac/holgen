@@ -285,71 +285,83 @@ void TestLuaCalculator::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestLuaCalculatorMeta");
 }
 
+int TestLuaCalculator::AddPrimitiveCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+  int32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->AddPrimitive(luaState, arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestLuaCalculator::AddRefCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+  auto arg0 = TestLuaNumber::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddRef(luaState, *arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestLuaCalculator::AddNullableCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+  TestLuaNumber arg0Mirror;
+  TestLuaNumber *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestLuaNumber::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestLuaNumber::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->AddNullable(luaState, arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int TestLuaCalculator::ReturnNullableCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+  int32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->ReturnNullable(luaState, arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int TestLuaCalculator::ReturnRefCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+  int32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto& result = instance->ReturnRef(luaState, arg0);
+  result.PushToLua(luaState);
+  return 1;
+}
+
+int TestLuaCalculator::ReturnNewCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+  int32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->ReturnNew(luaState, arg0);
+  result.PushMirrorToLua(luaState);
+  return 1;
+}
+
 int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("lastValue", key)) {
     LuaHelper::Push(instance->mLastValue, luaState, false);
   } else if (0 == strcmp("AddPrimitive", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
-      int32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->AddPrimitive(lsInner, arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaCalculator::AddPrimitiveCallerFromLua);
   } else if (0 == strcmp("AddRef", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
-      auto arg0 = TestLuaNumber::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->AddRef(lsInner, *arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaCalculator::AddRefCallerFromLua);
   } else if (0 == strcmp("AddNullable", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
-      TestLuaNumber arg0Mirror;
-      TestLuaNumber *arg0;
-      if (lua_getmetatable(lsInner, -1)) {
-        lua_pop(lsInner, 1);
-        arg0 = TestLuaNumber::ReadProxyFromLua(lsInner, -1);
-      } else {
-        arg0Mirror = TestLuaNumber::ReadMirrorFromLua(lsInner, -1);
-        arg0 = &arg0Mirror;
-      }
-      auto result = instance->AddNullable(lsInner, arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaCalculator::AddNullableCallerFromLua);
   } else if (0 == strcmp("ReturnNullable", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
-      int32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->ReturnNullable(lsInner, arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaCalculator::ReturnNullableCallerFromLua);
   } else if (0 == strcmp("ReturnRef", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
-      int32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto& result = instance->ReturnRef(lsInner, arg0);
-      result.PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaCalculator::ReturnRefCallerFromLua);
   } else if (0 == strcmp("ReturnNew", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaCalculator::ReadProxyFromLua(lsInner, -2);
-      int32_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->ReturnNew(lsInner, arg0);
-      result.PushMirrorToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaCalculator::ReturnNewCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaCalculator.{}", key);
     return 0;

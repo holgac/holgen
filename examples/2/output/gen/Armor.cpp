@@ -118,6 +118,12 @@ void Armor::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "ArmorMeta");
 }
 
+int Armor::InitializeCallerFromLua(lua_State *luaState) {
+  auto instance = Armor::ReadProxyFromLua(luaState, -1);
+  instance->Initialize();
+  return 0;
+}
+
 int Armor::IndexMetaMethod(lua_State *luaState) {
   auto instance = Armor::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -126,11 +132,7 @@ int Armor::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("armorClass", key)) {
     LuaHelper::Push(instance->mArmorClass, luaState, false);
   } else if (0 == strcmp("Initialize", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Armor::ReadProxyFromLua(lsInner, -1);
-      instance->Initialize();
-      return 0;
-    });
+    lua_pushcfunction(luaState, Armor::InitializeCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: Armor.{}", key);
     return 0;

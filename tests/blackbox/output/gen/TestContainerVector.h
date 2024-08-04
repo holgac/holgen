@@ -79,6 +79,23 @@ public:
   TestContainerVector &operator=(TestContainerVector &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState);
+  static int AddInnerStructWithIdCallerFromLua(lua_State *luaState);
+  static int GetInnerStructWithIdCallerFromLua(lua_State *luaState);
+  static int GetInnerStructWithIdCountCallerFromLua(lua_State *luaState);
+  static int GetInnerStructNoIdFromNameCallerFromLua(lua_State *luaState);
+  static int AddInnerStructNoIdCallerFromLua(lua_State *luaState);
+  static int GetInnerStructNoIdCallerFromLua(lua_State *luaState);
+  static int DeleteInnerStructNoIdCallerFromLua(lua_State *luaState);
+  static int GetInnerStructNoIdCountCallerFromLua(lua_State *luaState);
+  static int AddStringElemCallerFromLua(lua_State *luaState);
+  static int GetStringElemCallerFromLua(lua_State *luaState);
+  static int DeleteStringElemCallerFromLua(lua_State *luaState);
+  static int GetStringElemCountCallerFromLua(lua_State *luaState);
+  static int AddUnsignedElemCallerFromLua(lua_State *luaState);
+  static int GetUnsignedElemCallerFromLua(lua_State *luaState);
+  static int DeleteUnsignedElemCallerFromLua(lua_State *luaState);
+  static int GetUnsignedElemCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestContainerInnerStructWithId> mInnerStructsWithId;
   std::vector<TestContainerInnerStructNoId> mInnerStructsNoId;

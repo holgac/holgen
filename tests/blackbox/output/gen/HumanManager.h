@@ -52,6 +52,12 @@ public:
   HumanManager &operator=(HumanManager &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetHumanFromNameCallerFromLua(lua_State *luaState);
+  static int AddHumanCallerFromLua(lua_State *luaState);
+  static int GetHumanCallerFromLua(lua_State *luaState);
+  static int HasHumanCallerFromLua(lua_State *luaState);
+  static int DeleteHumanCallerFromLua(lua_State *luaState);
+  static int GetHumanCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::unordered_map<uint32_t, Human> mHumans;
   std::map<std::string, uint32_t> mHumansNameIndex;

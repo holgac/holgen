@@ -208,6 +208,12 @@ void Character::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "CharacterMeta");
 }
 
+int Character::InitializeCallerFromLua(lua_State *luaState) {
+  auto instance = Character::ReadProxyFromLua(luaState, -1);
+  instance->Initialize();
+  return 0;
+}
+
 int Character::IndexMetaMethod(lua_State *luaState) {
   auto instance = Character::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -222,11 +228,7 @@ int Character::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("weapon", key)) {
     LuaHelper::Push(instance->mWeapon, luaState, false);
   } else if (0 == strcmp("Initialize", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Character::ReadProxyFromLua(lsInner, -1);
-      instance->Initialize();
-      return 0;
-    });
+    lua_pushcfunction(luaState, Character::InitializeCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: Character.{}", key);
     return 0;

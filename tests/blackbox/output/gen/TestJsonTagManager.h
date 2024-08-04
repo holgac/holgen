@@ -51,6 +51,11 @@ public:
   TestJsonTagManager &operator=(TestJsonTagManager &&rhs) = default;
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetOrInsertCallerFromLua(lua_State *luaState);
+  static int GetTagFromNameCallerFromLua(lua_State *luaState);
+  static int AddTagCallerFromLua(lua_State *luaState);
+  static int GetTagCallerFromLua(lua_State *luaState);
+  static int GetTagCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestJsonTag> mTags;
   std::map<std::string, uint64_t> mTagsNameIndex;

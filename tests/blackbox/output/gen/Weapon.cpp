@@ -173,6 +173,13 @@ void Weapon::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "WeaponMeta");
 }
 
+int Weapon::GetAverageDamageCallerFromLua(lua_State *luaState) {
+  auto instance = Weapon::ReadProxyFromLua(luaState, -1);
+  auto result = instance->GetAverageDamage();
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int Weapon::IndexMetaMethod(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
@@ -185,12 +192,7 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("modifiers", key)) {
     LuaHelper::Push(instance->mModifiers, luaState, false);
   } else if (0 == strcmp("GetAverageDamage", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Weapon::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->GetAverageDamage();
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, Weapon::GetAverageDamageCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
     return 0;

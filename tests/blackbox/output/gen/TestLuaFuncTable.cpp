@@ -115,39 +115,43 @@ void TestLuaFuncTable::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestLuaFuncTableMeta");
 }
 
+int TestLuaFuncTable::SetFieldCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaFuncTable::ReadProxyFromLua(luaState, -2);
+  TestLuaFuncTableContainer arg0Mirror;
+  TestLuaFuncTableContainer *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestLuaFuncTableContainer::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  instance->SetField(luaState, *arg0);
+  return 0;
+}
+
+int TestLuaFuncTable::GetFieldCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaFuncTable::ReadProxyFromLua(luaState, -2);
+  TestLuaFuncTableContainer arg0Mirror;
+  TestLuaFuncTableContainer *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestLuaFuncTableContainer::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->GetField(luaState, *arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int TestLuaFuncTable::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("SetField", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaFuncTable::ReadProxyFromLua(lsInner, -2);
-      TestLuaFuncTableContainer arg0Mirror;
-      TestLuaFuncTableContainer *arg0;
-      if (lua_getmetatable(lsInner, -1)) {
-        lua_pop(lsInner, 1);
-        arg0 = TestLuaFuncTableContainer::ReadProxyFromLua(lsInner, -1);
-      } else {
-        arg0Mirror = TestLuaFuncTableContainer::ReadMirrorFromLua(lsInner, -1);
-        arg0 = &arg0Mirror;
-      }
-      instance->SetField(lsInner, *arg0);
-      return 0;
-    });
+    lua_pushcfunction(luaState, TestLuaFuncTable::SetFieldCallerFromLua);
   } else if (0 == strcmp("GetField", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = TestLuaFuncTable::ReadProxyFromLua(lsInner, -2);
-      TestLuaFuncTableContainer arg0Mirror;
-      TestLuaFuncTableContainer *arg0;
-      if (lua_getmetatable(lsInner, -1)) {
-        lua_pop(lsInner, 1);
-        arg0 = TestLuaFuncTableContainer::ReadProxyFromLua(lsInner, -1);
-      } else {
-        arg0Mirror = TestLuaFuncTableContainer::ReadMirrorFromLua(lsInner, -1);
-        arg0 = &arg0Mirror;
-      }
-      auto result = instance->GetField(lsInner, *arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, TestLuaFuncTable::GetFieldCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTable.{}", key);
     return 0;

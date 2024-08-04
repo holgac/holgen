@@ -171,39 +171,45 @@ void Calculator::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "CalculatorMeta");
 }
 
+int Calculator::AddCallerFromLua(lua_State *luaState) {
+  auto instance = Calculator::ReadProxyFromLua(luaState, -2);
+  int64_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->Add(luaState, arg0);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
+int Calculator::SubtractCallerFromLua(lua_State *luaState) {
+  auto instance = Calculator::ReadProxyFromLua(luaState, -2);
+  auto arg0 = Number::ReadProxyFromLua(luaState, -1);
+  auto result = instance->Subtract(luaState, *arg0);
+  result->PushToLua(luaState);
+  return 1;
+}
+
+int Calculator::SubtractThenMultiplyCallerFromLua(lua_State *luaState) {
+  auto instance = Calculator::ReadProxyFromLua(luaState, -3);
+  int64_t arg0;
+  LuaHelper::Read(arg0, luaState, -2);
+  int64_t arg1;
+  LuaHelper::Read(arg1, luaState, -1);
+  auto result = instance->SubtractThenMultiply(arg0, arg1);
+  LuaHelper::Push(result, luaState, true);
+  return 1;
+}
+
 int Calculator::IndexMetaMethod(lua_State *luaState) {
   auto instance = Calculator::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("curVal", key)) {
     LuaHelper::Push(instance->mCurVal, luaState, false);
   } else if (0 == strcmp("Add", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Calculator::ReadProxyFromLua(lsInner, -2);
-      int64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -1);
-      auto result = instance->Add(lsInner, arg0);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, Calculator::AddCallerFromLua);
   } else if (0 == strcmp("Subtract", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Calculator::ReadProxyFromLua(lsInner, -2);
-      auto arg0 = Number::ReadProxyFromLua(lsInner, -1);
-      auto result = instance->Subtract(lsInner, *arg0);
-      result->PushToLua(lsInner);
-      return 1;
-    });
+    lua_pushcfunction(luaState, Calculator::SubtractCallerFromLua);
   } else if (0 == strcmp("SubtractThenMultiply", key)) {
-    lua_pushcfunction(luaState, [](lua_State *lsInner) {
-      auto instance = Calculator::ReadProxyFromLua(lsInner, -3);
-      int64_t arg0;
-      LuaHelper::Read(arg0, lsInner, -2);
-      int64_t arg1;
-      LuaHelper::Read(arg1, lsInner, -1);
-      auto result = instance->SubtractThenMultiply(arg0, arg1);
-      LuaHelper::Push(result, lsInner, true);
-      return 1;
-    });
+    lua_pushcfunction(luaState, Calculator::SubtractThenMultiplyCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
     return 0;
