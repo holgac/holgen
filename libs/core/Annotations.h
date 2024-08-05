@@ -216,6 +216,22 @@ public:
   inline static const std::string LuaFunc_Static = "static";
 
   /**
+   * luadata related annotations.
+   *
+   * By default, any luadata field will be initialized in InitializeLua and deleted in
+   * UninitializeLua.
+   * @luaData(noInit) can be used to prevent this behaviour.
+   *
+   * If the luadata is shared across many instances, it's OK for the class to be destroyed without
+   * setting it back to LUA_NOREF. @luaData(shared) can be used to remove the warning logging in
+   * destructor.
+   */
+  inline static const std::string LuaData = "luadata";
+  inline static const std::string LuaData_NoInit = "noInit";
+  inline static const std::string LuaData_Shared = "shared";
+
+
+  /**
    * Controls the function below. By default the functions are defined in cpp, but
    * @luaFunc can be used to change this behaviour.
    *
