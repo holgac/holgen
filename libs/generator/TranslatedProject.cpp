@@ -2,6 +2,7 @@
 #include "holgen.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include "core/Exception.h"
 
 namespace holgen {
 
@@ -147,6 +148,10 @@ std::vector<std::pair<Class *, const EnumEntryDefinition *>>
       continue;
     auto entry = cls.mStruct->GetMatchingAttribute(Annotations::Variant, Annotations::Variant_Entry)
                      ->mValue.mName;
+    auto enumEntry = enumDefinition.GetEnumEntry(entry);
+    THROW_IF(!enumEntry, "Entry {} of enum {} ({}) referenced by {} ({}) does not exist!", entry,
+             enumDefinition.mName, enumDefinition.mDefinitionSource, cls.mName,
+             cls.mStruct->mDefinitionSource);
     result.emplace_back(&cls, enumDefinition.GetEnumEntry(entry));
     ;
   }
