@@ -13,5 +13,7 @@ private:
   void GenerateEnumConstructor(Class &cls);
   void GenerateHash(Class &cls);
   void GenerateIntegralConstructor(Class &cls);
+  void GenerateProperties(Class &cls);
+  void GenerateProperty(Class &cls, const AnnotationDefinition &annotation);
 };
 } // namespace holgen

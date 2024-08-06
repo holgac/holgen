@@ -332,6 +332,23 @@ void Validator::IndexAnnotation(const Class &cls, const ClassField &field,
            ToString(cls, field), Annotations::DataManager);
 }
 
+void Validator::EnumPropertyAnnotation(const Class &cls,
+                                       const AnnotationDefinition &annotationDefinition) const {
+  THROW_IF(!annotationDefinition.GetAttribute(Annotations::EnumProperty_Name) ||
+               !annotationDefinition.GetAttribute(Annotations::EnumProperty_Default) ||
+               !annotationDefinition.GetAttribute(Annotations::EnumProperty_Type),
+           "Invalid enumProperty annotation in {} ({})", cls.mName,
+           annotationDefinition.mDefinitionSource)
+  auto &name = annotationDefinition.GetAttribute(Annotations::EnumProperty_Name)->mValue.mName;
+  for (auto &entry: cls.mEnum->mEntries) {
+    auto entryAnnotation = entry.GetMatchingAnnotation(Annotations::EnumProperty,
+                                                       Annotations::EnumProperty_Name, name);
+    THROW_IF(entryAnnotation && !entryAnnotation->GetAttribute(Annotations::EnumProperty_Value),
+             "enumProperty annotation {} is missing its value parameter!",
+             ToString(*entryAnnotation));
+  }
+}
+
 void Validator::ValidateAttributeCount(const AnnotationDefinition &annotation,
                                        const std::string &attributeName, const std::string &source,
                                        size_t minCount, size_t maxCount) const {

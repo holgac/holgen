@@ -20,6 +20,8 @@ public:
   void ManagedAnnotation(const Class &cls, const AnnotationDefinition &annotationDefinition) const;
   void IndexAnnotation(const Class &cls, const ClassField &field,
                        const AnnotationDefinition &annotationDefinition) const;
+  void EnumPropertyAnnotation(const Class &cls,
+                              const AnnotationDefinition &annotationDefinition) const;
   void JsonConverters() const;
 
 private:

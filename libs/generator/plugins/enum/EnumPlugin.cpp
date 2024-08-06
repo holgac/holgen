@@ -21,6 +21,7 @@ void EnumPlugin::Run() {
     GenerateOperators(cls);
     GenerateGetEntries(cls, "GetEntries", "");
     GenerateHash(cls);
+    GenerateProperties(cls);
     GenerateFormatter(cls, true);
     GenerateFormatter(cls, false);
     Validate().Enum(cls);
@@ -71,6 +72,64 @@ void EnumPlugin::GenerateIntegralConstructor(Class &cls) {
   } else {
     EnumPluginBase::GenerateIntegralConstructor(cls, "Invalid");
   }
+}
+
+void EnumPlugin::GenerateProperties(Class &cls) {
+  for (auto &annotation: cls.mEnum->GetAnnotations(Annotations::EnumProperty)) {
+    GenerateProperty(cls, annotation);
+  }
+}
+
+void EnumPlugin::GenerateProperty(Class &cls, const AnnotationDefinition &annotation) {
+  Validate().EnumPropertyAnnotation(cls, annotation);
+  auto typeAttribute = annotation.GetAttribute(Annotations::EnumProperty_Type);
+  auto &defaultValue = annotation.GetAttribute(Annotations::EnumProperty_Default)->mValue.mName;
+  auto &name = annotation.GetAttribute(Annotations::EnumProperty_Name)->mValue.mName;
+  std::map<std::string, std::vector<const EnumEntryDefinition *>> valueToEntries;
+  for (auto &entry: cls.mEnum->mEntries) {
+    auto entryAnnotation = entry.GetMatchingAnnotation(Annotations::EnumProperty,
+                                                       Annotations::EnumProperty_Name, name);
+    const std::string *value;
+    if (entryAnnotation) {
+      value = &entryAnnotation->GetAttribute(Annotations::EnumProperty_Value)->mValue.mName;
+    } else {
+      value = &defaultValue;
+    }
+    valueToEntries[*value].push_back(&entry);
+  }
+
+  auto method =
+      ClassMethod{Naming().FieldGetterNameInCpp(name),
+                  Type{mProject, typeAttribute->mDefinitionSource, typeAttribute->mValue}};
+  bool addQuotes;
+  if (typeAttribute->mValue.mName == "string") {
+    addQuotes = true;
+    method.mReturnType = Type{"char", PassByType::Pointer, Constness::Const};
+  } else {
+    method.mReturnType.PreventCopying();
+    addQuotes = false;
+  }
+  method.mBody.Add("switch (mValue) {{");
+  for (auto &[value, entries]: valueToEntries) {
+    for (auto &entry: entries) {
+      method.mBody.Add("case Entry::{}:", entry->mName);
+    }
+    method.mBody.Indent(1);
+    if (addQuotes) {
+      method.mBody.Add("return \"{}\";", value);
+    } else {
+      method.mBody.Add("return {};", value);
+    }
+    method.mBody.Indent(-1);
+  }
+  method.mBody.Add("}}");
+  if (addQuotes) {
+    method.mBody.Add("return \"{}\";", defaultValue);
+  } else {
+    method.mBody.Add("return {};", defaultValue);
+  }
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 } // namespace holgen

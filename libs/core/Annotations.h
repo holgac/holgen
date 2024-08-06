@@ -312,6 +312,25 @@ public:
   inline static const std::string Enum_Default = "default";
 
   /**
+   * You can store primitive data and strings in enums.
+   * @enumProperty(name=canTalk, type=bool)
+   * @enumProperty(name=alternativeName, type=string, default=NOT_DEFINED)
+   * enum Animal {
+   *   @enumProperty(name=canTalk, value=true)
+   *   @enumProperty(name=alternativeName, value=hooman)
+   *   Human;
+   *   @enumProperty(name=canTalk, value=false)
+   *   @enumProperty(name=alternativeName, value=kitty)
+   *   Cat;
+   * }
+   */
+  inline static const std::string EnumProperty = "enumProperty";
+  inline static const std::string EnumProperty_Name = "name";
+  inline static const std::string EnumProperty_Default = "default";
+  inline static const std::string EnumProperty_Type = "type";
+  inline static const std::string EnumProperty_Value = "value";
+
+  /**
    * Struct related annotations
    *
    * A struct can be defined nonCopyable which removes operator= and copy constructor

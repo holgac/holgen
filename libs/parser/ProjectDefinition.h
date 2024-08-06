@@ -45,20 +45,27 @@ struct AnnotationDefinition {
   }
 };
 
-struct FieldDefinition {
-  TypeDefinition mType;
-  std::string mName;
+struct AnnotationsMixin {
   std::vector<AnnotationDefinition> mAnnotations;
-  std::optional<std::string> mDefaultValue = std::nullopt;
-  DefinitionSource mDefinitionSource;
   [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
-  [[nodiscard]] const AnnotationAttributeDefinition *
-      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
-                           std::optional<std::string> attributeValue = std::nullopt) const;
 
   auto GetAnnotations(const std::string &name) const {
     return NameFilterForEachWrapper(name, mAnnotations);
   }
+
+  [[nodiscard]] const AnnotationAttributeDefinition *
+      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
+                           const std::optional<std::string> &attributeValue = std::nullopt) const;
+  [[nodiscard]] const AnnotationDefinition *
+      GetMatchingAnnotation(const std::string &annotationName, const std::string &attributeName,
+                            const std::optional<std::string> &attributeValue = std::nullopt) const;
+};
+
+struct FieldDefinition : public AnnotationsMixin {
+  TypeDefinition mType;
+  std::string mName;
+  std::optional<std::string> mDefaultValue = std::nullopt;
+  DefinitionSource mDefinitionSource;
 };
 
 enum class Nullability {
@@ -87,58 +94,29 @@ struct FunctionReturnTypeDefinition {
   FunctionReturnTypeCategory mCategory = FunctionReturnTypeCategory::NewObject;
 };
 
-struct FunctionDefinition {
+struct FunctionDefinition : public AnnotationsMixin {
   std::string mName;
   FunctionReturnTypeDefinition mReturnType;
   std::vector<FunctionArgumentDefinition> mArguments;
-  std::vector<AnnotationDefinition> mAnnotations;
   DefinitionSource mDefinitionSource;
-  [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
-  [[nodiscard]] const AnnotationAttributeDefinition *
-      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
-                           std::optional<std::string> attributeValue = std::nullopt) const;
-
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
 };
 
-struct StructDefinition {
+struct StructDefinition : public AnnotationsMixin {
   std::string mName;
   std::vector<FieldDefinition> mFields;
-  std::vector<AnnotationDefinition> mAnnotations;
   std::vector<FunctionDefinition> mFunctions;
   std::vector<std::string> mMixins;
   bool mIsMixin = false;
   DefinitionSource mDefinitionSource;
-  [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   [[nodiscard]] const FieldDefinition *GetField(const std::string &name) const;
   [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
   [[nodiscard]] const FieldDefinition *GetIdField() const;
-
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
-
-  [[nodiscard]] const AnnotationAttributeDefinition *
-      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
-                           std::optional<std::string> attributeValue = std::nullopt) const;
 };
 
-struct EnumEntryDefinition {
+struct EnumEntryDefinition : public AnnotationsMixin {
   std::string mName;
   std::string mValue;
-  std::vector<AnnotationDefinition> mAnnotations;
   DefinitionSource mDefinitionSource;
-  [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
-
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
-
-  [[nodiscard]] const AnnotationAttributeDefinition *
-      GetMatchingAttribute(const std::string &annotationName, const std::string &attributeName,
-                           std::optional<std::string> attributeValue = std::nullopt) const;
 };
 
 enum class EnumDefinitionType {
@@ -146,20 +124,14 @@ enum class EnumDefinitionType {
   Bitmap,
 };
 
-struct EnumDefinition {
+struct EnumDefinition : public AnnotationsMixin {
   std::string mName;
   std::string mInvalidValue;
   std::vector<EnumEntryDefinition> mEntries;
-  std::vector<AnnotationDefinition> mAnnotations;
   DefinitionSource mDefinitionSource;
   EnumDefinitionType mType;
   [[nodiscard]] const EnumEntryDefinition *GetEnumEntry(const std::string &name) const;
-  [[nodiscard]] const AnnotationDefinition *GetAnnotation(const std::string &name) const;
   [[nodiscard]] const EnumEntryDefinition *GetDefaultEntry() const;
-
-  auto GetAnnotations(const std::string &name) const {
-    return NameFilterForEachWrapper(name, mAnnotations);
-  }
 };
 
 struct ProjectDefinition {

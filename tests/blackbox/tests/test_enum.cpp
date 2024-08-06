@@ -7,6 +7,8 @@
 #include "Converter.h"
 #include "LuaTestHelper.h"
 
+#include "TestEnumProperty.h"
+
 
 using namespace holgen_blackbox_test;
 
@@ -118,4 +120,16 @@ TEST_F(EnumTest, DefaultValueLua) {
   testEnumStruct = TestEnumStruct::ReadMirrorFromLua(luaContext, -1);
   EXPECT_EQ(testEnumStruct.GetEnumDefaultValueField(), TestEnumDefaultValue::Invalid);
   lua_pop(luaContext, 1);
+}
+
+TEST_F(EnumTest, Property) {
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Invalid).GetPlural(), std::string("NOT_DEFINED"));
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Human).GetPlural(), std::string("NOT_DEFINED"));
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Elf).GetPlural(), std::string("Elves"));
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Goblin).GetPlural(), std::string("Goblins"));
+
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Invalid).GetMaxAge(), 20);
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Human).GetMaxAge(), 80);
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Elf).GetMaxAge(), 200);
+  EXPECT_EQ(TestEnumProperty(TestEnumProperty::Goblin).GetMaxAge(), 20);
 }
