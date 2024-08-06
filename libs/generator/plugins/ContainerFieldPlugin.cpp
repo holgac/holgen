@@ -32,6 +32,8 @@ void ContainerFieldPlugin::ProcessField(Class &cls, ClassField &field) {
     GenerateHasElem(cls, field);
   if (CanImplementDeleteElem(cls, field))
     GenerateDeleteElem(cls, field);
+  if (CanImplementSetElem(cls, field))
+    GenerateSetElem(cls, field);
   GenerateGetCount(cls, field);
 }
 
@@ -89,8 +91,12 @@ void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
 
 void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, bool useMoveRef) {
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
-                                         Annotations::MethodOption_None))
+                                         Annotations::MethodOption_None)) {
     return;
+  }
+  if (TypeInfo::Get().CppFixedSizeContainers.contains(field.mType.mName)) {
+    return;
+  }
   auto &underlyingType = field.mType.mTemplateParameters.back();
   if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(underlyingType.mName)) {
     return;
@@ -196,8 +202,14 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
                                          Annotations::MethodOption_None))
     return;
 
-  auto &underlyingType = field.mType.mTemplateParameters.back();
-  auto underlyingClass = mProject.GetClass(underlyingType.mName);
+  auto underlyingType = &field.mType.mTemplateParameters.back();
+  bool fixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(field.mType.mName);
+  auto fixedSizeEnumArray = mProject.mProject.GetEnum(field.mField->mType.mArraySize);
+  if (fixedSize) {
+    underlyingType = &field.mType.mTemplateParameters.front();
+  }
+
+  auto underlyingClass = mProject.GetClass(underlyingType->mName);
   const ClassField *underlyingIdField = nullptr;
   if (underlyingClass && underlyingClass->mStruct)
     underlyingIdField = underlyingClass->GetIdField();
@@ -206,7 +218,7 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
   bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
   for (int i = 0; i < 2; ++i) {
     auto constness = i == 0 ? Constness::Const : Constness::NotConst;
-    auto method = ClassMethod{Naming().ContainerElemGetterNameInCpp(*field.mField), underlyingType,
+    auto method = ClassMethod{Naming().ContainerElemGetterNameInCpp(*field.mField), *underlyingType,
                               Visibility::Public, constness};
     method.mReturnType.mType = PassByType::Pointer;
     method.mReturnType.mConstness = constness;
@@ -222,6 +234,8 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
         idxExpression = std::format("size_t({}(idx))",
                                     TypeInfo::Get().GetUnsigned(underlyingIdField->mType.mName));
       }
+    } else if (fixedSizeEnumArray) {
+      method.mArguments.emplace_back("idx", Type{fixedSizeEnumArray->mName});
     } else {
       method.mArguments.emplace_back("idx", Type{"size_t"});
     }
@@ -242,6 +256,8 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       if (isKeyedContainer) {
         method.mBody.Add("auto it = {}.find(idx);", field.mName);
         method.mBody.Add("if (it == {}.end())", field.mName);
+      } else if (fixedSizeEnumArray) {
+        method.mBody.Add("if ({} == {}::Invalid)", idxExpression, fixedSizeEnumArray->mName);
       } else {
         method.mBody.Add("if ({} >= {}.size())", idxExpression, field.mName);
       }
@@ -250,6 +266,8 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       method.mBody.Indent(-1);
       if (isKeyedContainer) {
         method.mBody.Add("return &it->second;");
+      } else if (fixedSizeEnumArray) {
+        method.mBody.Add("return &{}[{}.GetValue()];", field.mName, idxExpression);
       } else {
         method.mBody.Add("return &{}[{}];", field.mName, idxExpression);
       }
@@ -287,8 +305,9 @@ void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field)
 
 void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &field) {
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
-                                         Annotations::MethodOption_None))
+                                         Annotations::MethodOption_None)) {
     return;
+  }
 
   auto &underlyingType = field.mType.mTemplateParameters.back();
   auto underlyingClass = mProject.GetClass(underlyingType.mName);
@@ -367,6 +386,18 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
   cls.mMethods.push_back(std::move(method));
 }
 
+void ContainerFieldPlugin::GenerateSetElem(Class &cls, const ClassField &field) {
+  auto method = ClassMethod{Naming().ContainerElemSetterNameInCpp(*field.mField), Type{"void"},
+                            Visibility::Public, Constness::NotConst};
+  auto fixedSizeEnumArray = mProject.mProject.GetEnum(field.mField->mType.mArraySize);
+  method.mArguments.emplace_back("idx", Type{fixedSizeEnumArray->mName});
+  method.mArguments.back().mType.PreventCopying();
+  method.mArguments.emplace_back("val", field.mType.mTemplateParameters.front());
+  method.mBody.Add("{}[idx.GetValue()] = val;", field.mName);
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
 void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) {
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
                                          Annotations::MethodOption_None))
@@ -399,12 +430,20 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
 
 bool ContainerFieldPlugin::CanImplementDeleteElem(Class &generatedClass HOLGEN_ATTRIBUTE_UNUSED,
                                                   const ClassField &field) {
+  if (TypeInfo::Get().CppFixedSizeContainers.contains(field.mType.mName)) {
+    return false;
+  }
   auto underlyingStruct = mProject.mProject.GetStruct(field.mType.mTemplateParameters.back().mName);
   if (!underlyingStruct || !underlyingStruct->GetIdField())
     return true;
   if (!TypeInfo::Get().CppIndexedContainers.contains(field.mType.mName))
     return true;
   return false;
+}
+
+bool ContainerFieldPlugin::CanImplementSetElem(Class &generatedClass HOLGEN_ATTRIBUTE_UNUSED,
+                                               const ClassField &field) {
+  return TypeInfo::Get().CppFixedSizeContainers.contains(field.mType.mName);
 }
 
 bool ContainerFieldPlugin::CanImplementHasElem(Class &generatedClass HOLGEN_ATTRIBUTE_UNUSED,

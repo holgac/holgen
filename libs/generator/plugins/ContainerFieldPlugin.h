@@ -20,7 +20,9 @@ private:
   void GenerateGetElem(Class &cls, const ClassField &field);
   void GenerateGetCount(Class &cls, const ClassField &field);
   void GenerateDeleteElem(Class &cls, const ClassField &field);
+  void GenerateSetElem(Class &cls, const ClassField &field);
   bool CanImplementHasElem(Class &generatedClass, const ClassField &field);
   bool CanImplementDeleteElem(Class &generatedClass, const ClassField &field);
+  bool CanImplementSetElem(Class &generatedClass, const ClassField &field);
 };
 } // namespace holgen

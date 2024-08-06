@@ -17,10 +17,12 @@
 #include "RaceId.h"
 #include "TestBitmap.h"
 #include "TestBitmapStruct.h"
+#include "TestContainerEnum.h"
 #include "TestContainerInnerStructNoId.h"
 #include "TestContainerInnerStructWithId.h"
 #include "TestContainerMap.h"
 #include "TestContainerSet.h"
+#include "TestContainerSkill.h"
 #include "TestContainerVector.h"
 #include "TestEnum.h"
 #include "TestEnumDefaultValue.h"
@@ -194,6 +196,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   Race::CreateLuaMetatable(luaState);
   RaceId::CreateLuaMetatable(luaState);
   TestBitmapStruct::CreateLuaMetatable(luaState);
+  TestContainerEnum::CreateLuaMetatable(luaState);
   TestContainerInnerStructNoId::CreateLuaMetatable(luaState);
   TestContainerInnerStructWithId::CreateLuaMetatable(luaState);
   TestContainerMap::CreateLuaMetatable(luaState);
@@ -226,6 +229,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestVariantStructSharedType::CreateLuaMetatable(luaState);
   Weapon::CreateLuaMetatable(luaState);
   TestBitmap::PushEnumToLua(luaState);
+  TestContainerSkill::PushEnumToLua(luaState);
   TestEnum::PushEnumToLua(luaState);
   TestEnumDefaultValue::PushEnumToLua(luaState);
   TestStructArrayType::PushEnumToLua(luaState);

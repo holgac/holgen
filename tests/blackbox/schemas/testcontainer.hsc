@@ -38,3 +38,15 @@ struct TestContainerSet {
     @container(elemName=unsignedElem)
     set<u32> unsignedContainer;
 }
+
+enum TestContainerSkill {
+    Strength;
+    Perception;
+    Endurance;
+    Charisma;
+}
+
+struct TestContainerEnum {
+    @container(elemName=skill)
+    u8[TestContainerSkill] skills;
+}

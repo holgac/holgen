@@ -28,6 +28,7 @@ public:
                                              const StructDefinition &getAs) const;
   virtual std::string VariantResetterNameInCpp(const std::string &fieldName) const;
   virtual std::string ContainerElemGetterNameInCpp(const FieldDefinition &fieldDefinition) const;
+  virtual std::string ContainerElemSetterNameInCpp(const FieldDefinition &fieldDefinition) const;
   virtual std::string ContainerElemAdderNameInCpp(const FieldDefinition &fieldDefinition) const;
   virtual std::string
       ContainerElemExistenceCheckerNameInCpp(const FieldDefinition &fieldDefinition) const;

@@ -61,6 +61,13 @@ std::string
 }
 
 std::string
+    NamingConvention::ContainerElemSetterNameInCpp(const FieldDefinition &fieldDefinition) const {
+  auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
+  auto elemName = containerAnnotation->GetAttribute(Annotations::Container_ElemName);
+  return std::format("Set{}", St::Capitalize(elemName->mValue.mName));
+}
+
+std::string
     NamingConvention::ContainerElemAdderNameInCpp(const FieldDefinition &fieldDefinition) const {
   auto containerAnnotation = fieldDefinition.GetAnnotation(Annotations::Container);
   auto elemName = containerAnnotation->GetAttribute(Annotations::Container_ElemName);

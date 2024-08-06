@@ -3,6 +3,8 @@
 #include "TestContainerMap.h"
 #include "TestContainerSet.h"
 #include "JsonHelper.h"
+
+#include "TestContainerEnum.h"
 #include <format>
 #include <gmock/gmock-matchers.h>
 
@@ -134,6 +136,12 @@ TEST_F(ContainerTest, UnsignedSet) {
     EXPECT_EQ(tcv.GetUnsignedElemCount(), 5 - i - 1);
     EXPECT_EQ(tcv.HasUnsignedElem(i), false);
   }
+}
+
+TEST_F(ContainerTest, EnumArray) {
+  TestContainerEnum tce;
+  tce.SetSkill(TestContainerSkill::Endurance, 10);
+  EXPECT_EQ(*tce.GetSkill(TestContainerSkill::Endurance), 10);
 }
 
 // TODO: test lua
