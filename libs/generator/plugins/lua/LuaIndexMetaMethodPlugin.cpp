@@ -118,12 +118,18 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
         methodCaller.mBody.Add("result{}PushToLua(luaState);", accessor);
       }
     } else {
-      std::string mirrorArg = "false";
+      bool shouldBeMirror = false;
       if (method.mReturnType.mType == PassByType::Value) {
-        mirrorArg = "true";
+        shouldBeMirror = true;
+        if (TypeInfo::Get().CppIndexedContainers.contains(method.mReturnType.mName)) {
+          auto &underlyingType = method.mReturnType.mTemplateParameters.front();
+          if (underlyingType.mType == PassByType::Pointer) {
+            shouldBeMirror = false;
+          }
+        }
       }
       methodCaller.mBody.Add("{}::{}(result, luaState, {});", St::LuaHelper, St::LuaHelper_Push,
-                             mirrorArg);
+                             shouldBeMirror ? "true" : "false");
     }
     methodCaller.mBody.Add("return 1;");
   } else {
