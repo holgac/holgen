@@ -98,10 +98,11 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     return;
   }
   auto &underlyingType = field.mType.mTemplateParameters.back();
-  if (useMoveRef && TypeInfo::Get().CppPrimitives.contains(underlyingType.mName)) {
+  bool isPointer = underlyingType.mType == PassByType::Pointer;
+  if (useMoveRef && (isPointer || TypeInfo::Get().CppPrimitives.contains(underlyingType.mName))) {
     return;
   }
-  if (!useMoveRef && !field.mType.IsCopyable(mProject)) {
+  if (!useMoveRef && !isPointer && !field.mType.IsCopyable(mProject)) {
     return;
   }
   auto underlyingClass = mProject.GetClass(underlyingType.mName);
@@ -117,7 +118,7 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
   method.mArguments.emplace_back("elem", underlyingType);
   if (useMoveRef) {
     method.mArguments.back().mType.mType = PassByType::MoveReference;
-  } else {
+  } else if (!isPointer) {
     method.mArguments.back().mType.PreventCopying();
   }
   if (underlyingIdField) {
@@ -188,6 +189,8 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
                        field.mField->mName);
       method.mBody.Add("return &(*it);", field.mName);
       method.mReturnType.mConstness = Constness::Const;
+    } else if (isPointer) {
+      method.mBody.Add("return {}.emplace_back({});", field.mName, elemToInsert);
     } else {
       method.mBody.Add("return &({}.emplace_back({}));", field.mName, elemToInsert);
     }
@@ -209,6 +212,7 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
     underlyingType = &field.mType.mTemplateParameters.front();
   }
 
+  bool isPointer = underlyingType->mType == PassByType::Pointer;
   auto underlyingClass = mProject.GetClass(underlyingType->mName);
   const ClassField *underlyingIdField = nullptr;
   if (underlyingClass && underlyingClass->mStruct)
@@ -268,6 +272,8 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
         method.mBody.Add("return &it->second;");
       } else if (fixedSizeEnumArray) {
         method.mBody.Add("return &{}[{}.GetValue()];", field.mName, idxExpression);
+      } else if (isPointer) {
+        method.mBody.Add("return {}[{}];", field.mName, idxExpression);
       } else {
         method.mBody.Add("return &{}[{}];", field.mName, idxExpression);
       }
