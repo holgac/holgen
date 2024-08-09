@@ -28,7 +28,7 @@ protected:
   };
 
   void GenerateIntegralConstructor(Class &cls, const std::string &defaultValue);
-  void GenerateUnderlyingType(Class &cls);
+  void GenerateUnderlyingType(Class &cls, const std::string &type);
   void GenerateValueField(Class &cls, const std::string &type);
   void GenerateClassEnum(Class &cls, const std::string &entrySuffix = "");
   void GenerateFromStringSingle(Class &cls, const std::string &methodName, Visibility visibility,

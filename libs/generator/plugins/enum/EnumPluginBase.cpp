@@ -13,8 +13,8 @@ void EnumPluginBase::GenerateIntegralConstructor(Class &cls, const std::string &
   cls.mConstructors.push_back(std::move(ctor));
 }
 
-void EnumPluginBase::GenerateUnderlyingType(Class &cls) {
-  cls.mUsings.emplace_back(Type{"int64_t"}, St::Enum_UnderlyingType);
+void EnumPluginBase::GenerateUnderlyingType(Class &cls, const std::string &type) {
+  cls.mUsings.emplace_back(Type{type}, St::Enum_UnderlyingType);
 }
 
 void EnumPluginBase::GenerateValueField(Class &cls, const std::string &type) {

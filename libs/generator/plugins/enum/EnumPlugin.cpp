@@ -1,5 +1,6 @@
 #include "EnumPlugin.h"
 #include <format>
+#include <string>
 #include "core/St.h"
 #include "core/Exception.h"
 
@@ -8,7 +9,7 @@ void EnumPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (cls.mEnum == nullptr || cls.mEnum->mType != EnumDefinitionType::Enum)
       continue;
-    GenerateUnderlyingType(cls);
+    GenerateUnderlyingType(cls, DetermineUnderlyingType(cls));
     GenerateClassEnum(cls);
     GenerateValueField(cls, std::format("{}::Entry", cls.mName));
     GenerateIntegralConstructor(cls);
@@ -130,6 +131,32 @@ void EnumPlugin::GenerateProperty(Class &cls, const AnnotationDefinition &annota
   }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
+}
+
+std::string EnumPlugin::DetermineUnderlyingType(Class &cls) {
+  if (cls.mEnum->mEntries.empty()) {
+    return "uint8_t";
+  }
+  uint64_t largest = 0;
+  for (auto &entry: cls.mEnum->mEntries) {
+    if (entry.mValue[0] == '-') {
+      return "int64_t";
+    }
+    uint64_t val;
+    try {
+      val = std::stoull(entry.mValue);
+    } catch (const std::invalid_argument &) {
+      return "int64_t";
+    }
+    largest = std::max(val, largest);
+  }
+  if (largest < 0x100ull)
+    return "uint8_t";
+  if (largest < 0x10000ull)
+    return "uint16_t";
+  if (largest < 0x100000000ull)
+    return "uint32_t";
+  return "uint64_t";
 }
 
 } // namespace holgen
