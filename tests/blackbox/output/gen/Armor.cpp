@@ -165,13 +165,17 @@ int Armor::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Armor::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
-    LuaHelper::Read(instance->mId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Armor.id from lua failed!");
   } else if (0 == strcmp("name", key)) {
-    LuaHelper::Read(instance->mName, luaState, -1);
+    auto res = LuaHelper::Read(instance->mName, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Armor.name from lua failed!");
   } else if (0 == strcmp("alternativeName", key)) {
-    LuaHelper::Read(instance->mAlternativeName, luaState, -1);
+    auto res = LuaHelper::Read(instance->mAlternativeName, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Armor.alternativeName from lua failed!");
   } else if (0 == strcmp("armorClass", key)) {
-    LuaHelper::Read(instance->mArmorClass, luaState, -1);
+    auto res = LuaHelper::Read(instance->mArmorClass, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Armor.armorClass from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: Armor.{}", key);
   }

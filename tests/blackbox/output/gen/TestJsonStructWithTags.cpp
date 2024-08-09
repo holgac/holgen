@@ -95,7 +95,8 @@ int TestJsonStructWithTags::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonStructWithTags::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("tags", key)) {
-    LuaHelper::Read(instance->mTags, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTags, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestJsonStructWithTags.tags from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
   }

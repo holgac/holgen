@@ -113,9 +113,11 @@ int TestEnumStruct::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("enumField", key)) {
-    LuaHelper::Read(instance->mEnumField, luaState, -1);
+    auto res = LuaHelper::Read(instance->mEnumField, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestEnumStruct.enumField from lua failed!");
   } else if (0 == strcmp("enumDefaultValueField", key)) {
-    LuaHelper::Read(instance->mEnumDefaultValueField, luaState, -1);
+    auto res = LuaHelper::Read(instance->mEnumDefaultValueField, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestEnumStruct.enumDefaultValueField from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
   }

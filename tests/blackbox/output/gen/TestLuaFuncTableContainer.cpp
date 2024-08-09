@@ -249,19 +249,26 @@ int TestLuaFuncTableContainer::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("field", key)) {
-    LuaHelper::Read(instance->mField, luaState, -1);
+    auto res = LuaHelper::Read(instance->mField, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaFuncTableContainer.field from lua failed!");
   } else if (0 == strcmp("script1", key)) {
-    LuaHelper::Read(instance->mScript1, luaState, -1);
+    auto res = LuaHelper::Read(instance->mScript1, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaFuncTableContainer.script1 from lua failed!");
   } else if (0 == strcmp("script2", key)) {
-    LuaHelper::Read(instance->mScript2, luaState, -1);
+    auto res = LuaHelper::Read(instance->mScript2, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaFuncTableContainer.script2 from lua failed!");
   } else if (0 == strcmp("scriptWithSourceTable1", key)) {
-    LuaHelper::Read(instance->mScriptWithSourceTable1, luaState, -1);
+    auto res = LuaHelper::Read(instance->mScriptWithSourceTable1, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaFuncTableContainer.scriptWithSourceTable1 from lua failed!");
   } else if (0 == strcmp("scriptWithSourceTable2", key)) {
-    LuaHelper::Read(instance->mScriptWithSourceTable2, luaState, -1);
+    auto res = LuaHelper::Read(instance->mScriptWithSourceTable2, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaFuncTableContainer.scriptWithSourceTable2 from lua failed!");
   } else if (0 == strcmp("staticScript1", key)) {
-    LuaHelper::Read(instance->mStaticScript1, luaState, -1);
+    auto res = LuaHelper::Read(instance->mStaticScript1, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaFuncTableContainer.staticScript1 from lua failed!");
   } else if (0 == strcmp("staticScript2", key)) {
-    LuaHelper::Read(instance->mStaticScript2, luaState, -1);
+    auto res = LuaHelper::Read(instance->mStaticScript2, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaFuncTableContainer.staticScript2 from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);
   }

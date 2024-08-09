@@ -142,11 +142,14 @@ int Country::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Country::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("leader", key)) {
-    LuaHelper::Read(instance->mLeader, luaState, -1);
+    auto res = LuaHelper::Read(instance->mLeader, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Country.leader from lua failed!");
   } else if (0 == strcmp("citizens", key)) {
-    LuaHelper::Read(instance->mCitizens, luaState, -1);
+    auto res = LuaHelper::Read(instance->mCitizens, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Country.citizens from lua failed!");
   } else if (0 == strcmp("population", key)) {
-    LuaHelper::Read(instance->mPopulation, luaState, -1);
+    auto res = LuaHelper::Read(instance->mPopulation, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Country.population from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: Country.{}", key);
   }

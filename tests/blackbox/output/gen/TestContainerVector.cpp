@@ -327,13 +327,17 @@ int TestContainerVector::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestContainerVector::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("innerStructsWithId", key)) {
-    LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mInnerStructsWithId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestContainerVector.innerStructsWithId from lua failed!");
   } else if (0 == strcmp("innerStructsNoId", key)) {
-    LuaHelper::Read(instance->mInnerStructsNoId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mInnerStructsNoId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestContainerVector.innerStructsNoId from lua failed!");
   } else if (0 == strcmp("stringContainer", key)) {
-    LuaHelper::Read(instance->mStringContainer, luaState, -1);
+    auto res = LuaHelper::Read(instance->mStringContainer, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestContainerVector.stringContainer from lua failed!");
   } else if (0 == strcmp("unsignedContainer", key)) {
-    LuaHelper::Read(instance->mUnsignedContainer, luaState, -1);
+    auto res = LuaHelper::Read(instance->mUnsignedContainer, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestContainerVector.unsignedContainer from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestContainerVector.{}", key);
   }

@@ -153,13 +153,17 @@ int Race::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Race::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
-    LuaHelper::Read(instance->mId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Race.id from lua failed!");
   } else if (0 == strcmp("name", key)) {
-    LuaHelper::Read(instance->mName, luaState, -1);
+    auto res = LuaHelper::Read(instance->mName, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Race.name from lua failed!");
   } else if (0 == strcmp("hairColors", key)) {
-    LuaHelper::Read(instance->mHairColors, luaState, -1);
+    auto res = LuaHelper::Read(instance->mHairColors, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Race.hairColors from lua failed!");
   } else if (0 == strcmp("names", key)) {
-    LuaHelper::Read(instance->mNames, luaState, -1);
+    auto res = LuaHelper::Read(instance->mNames, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Race.names from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: Race.{}", key);
   }

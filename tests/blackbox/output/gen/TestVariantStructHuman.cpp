@@ -113,9 +113,11 @@ int TestVariantStructHuman::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("name", key)) {
-    LuaHelper::Read(instance->mName, luaState, -1);
+    auto res = LuaHelper::Read(instance->mName, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructHuman.name from lua failed!");
   } else if (0 == strcmp("nationality", key)) {
-    LuaHelper::Read(instance->mNationality, luaState, -1);
+    auto res = LuaHelper::Read(instance->mNationality, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructHuman.nationality from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructHuman.{}", key);
   }

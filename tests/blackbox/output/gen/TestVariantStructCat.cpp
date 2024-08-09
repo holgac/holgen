@@ -113,9 +113,11 @@ int TestVariantStructCat::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestVariantStructCat::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("name", key)) {
-    LuaHelper::Read(instance->mName, luaState, -1);
+    auto res = LuaHelper::Read(instance->mName, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructCat.name from lua failed!");
   } else if (0 == strcmp("color", key)) {
-    LuaHelper::Read(instance->mColor, luaState, -1);
+    auto res = LuaHelper::Read(instance->mColor, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructCat.color from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructCat.{}", key);
   }

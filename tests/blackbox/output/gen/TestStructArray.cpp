@@ -106,7 +106,8 @@ int TestStructArray::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArray::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("type", key)) {
-    LuaHelper::Read(instance->mType, luaState, -1);
+    auto res = LuaHelper::Read(instance->mType, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStructArray.type from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructArray.{}", key);
   }

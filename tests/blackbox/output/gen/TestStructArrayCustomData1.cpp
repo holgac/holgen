@@ -124,11 +124,14 @@ int TestStructArrayCustomData1::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStructArrayCustomData1::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("f1", key)) {
-    LuaHelper::Read(instance->mF1, luaState, -1);
+    auto res = LuaHelper::Read(instance->mF1, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStructArrayCustomData1.f1 from lua failed!");
   } else if (0 == strcmp("f2", key)) {
-    LuaHelper::Read(instance->mF2, luaState, -1);
+    auto res = LuaHelper::Read(instance->mF2, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStructArrayCustomData1.f2 from lua failed!");
   } else if (0 == strcmp("f3", key)) {
-    LuaHelper::Read(instance->mF3, luaState, -1);
+    auto res = LuaHelper::Read(instance->mF3, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStructArrayCustomData1.f3 from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructArrayCustomData1.{}", key);
   }

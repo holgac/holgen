@@ -179,13 +179,17 @@ int Character::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Character::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("id", key)) {
-    LuaHelper::Read(instance->mId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Character.id from lua failed!");
   } else if (0 == strcmp("name", key)) {
-    LuaHelper::Read(instance->mName, luaState, -1);
+    auto res = LuaHelper::Read(instance->mName, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Character.name from lua failed!");
   } else if (0 == strcmp("bootId", key)) {
-    LuaHelper::Read(instance->mBootId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mBootId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Character.boot from lua failed!");
   } else if (0 == strcmp("armorId", key)) {
-    LuaHelper::Read(instance->mArmorId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mArmorId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Character.armor from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: Character.{}", key);
   }

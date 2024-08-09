@@ -383,11 +383,14 @@ int GameData::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("boots", key)) {
-    LuaHelper::Read(instance->mBoots, luaState, -1);
+    auto res = LuaHelper::Read(instance->mBoots, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning GameData.boots from lua failed!");
   } else if (0 == strcmp("armors", key)) {
-    LuaHelper::Read(instance->mArmors, luaState, -1);
+    auto res = LuaHelper::Read(instance->mArmors, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning GameData.armors from lua failed!");
   } else if (0 == strcmp("characters", key)) {
-    LuaHelper::Read(instance->mCharacters, luaState, -1);
+    auto res = LuaHelper::Read(instance->mCharacters, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning GameData.characters from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: GameData.{}", key);
   }

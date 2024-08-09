@@ -91,7 +91,8 @@ int TestLuaStaticCppFunction::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaStaticCppFunction::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("data", key)) {
-    LuaHelper::Read(instance->mData, luaState, -1);
+    auto res = LuaHelper::Read(instance->mData, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaStaticCppFunction.data from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaStaticCppFunction.{}", key);
   }

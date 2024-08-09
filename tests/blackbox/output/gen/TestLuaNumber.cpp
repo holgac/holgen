@@ -91,7 +91,8 @@ int TestLuaNumber::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaNumber::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("value", key)) {
-    LuaHelper::Read(instance->mValue, luaState, -1);
+    auto res = LuaHelper::Read(instance->mValue, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaNumber.value from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaNumber.{}", key);
   }

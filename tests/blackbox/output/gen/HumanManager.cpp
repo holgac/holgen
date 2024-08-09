@@ -174,7 +174,8 @@ int HumanManager::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = HumanManager::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("humans", key)) {
-    LuaHelper::Read(instance->mHumans, luaState, -1);
+    auto res = LuaHelper::Read(instance->mHumans, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning HumanManager.humans from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: HumanManager.{}", key);
   }

@@ -169,15 +169,20 @@ int Person::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Person::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("race", key)) {
-    LuaHelper::Read(instance->mRace, luaState, -1);
+    auto res = LuaHelper::Read(instance->mRace, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Person.race from lua failed!");
   } else if (0 == strcmp("currentCountry", key)) {
-    LuaHelper::Read(instance->mCurrentCountry, luaState, -1);
+    auto res = LuaHelper::Read(instance->mCurrentCountry, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Person.currentCountry from lua failed!");
   } else if (0 == strcmp("currentCity", key)) {
-    LuaHelper::Read(instance->mCurrentCity, luaState, -1);
+    auto res = LuaHelper::Read(instance->mCurrentCity, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Person.currentCity from lua failed!");
   } else if (0 == strcmp("homeCountry", key)) {
-    LuaHelper::Read(instance->mHomeCountry, luaState, -1);
+    auto res = LuaHelper::Read(instance->mHomeCountry, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Person.homeCountry from lua failed!");
   } else if (0 == strcmp("placeOfBirth", key)) {
-    LuaHelper::Read(instance->mPlaceOfBirth, luaState, -1);
+    auto res = LuaHelper::Read(instance->mPlaceOfBirth, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Person.placeOfBirth from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: Person.{}", key);
   }

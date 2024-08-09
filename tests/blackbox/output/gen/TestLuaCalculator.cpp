@@ -267,7 +267,8 @@ int TestLuaCalculator::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("lastValue", key)) {
-    LuaHelper::Read(instance->mLastValue, luaState, -1);
+    auto res = LuaHelper::Read(instance->mLastValue, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestLuaCalculator.lastValue from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaCalculator.{}", key);
   }

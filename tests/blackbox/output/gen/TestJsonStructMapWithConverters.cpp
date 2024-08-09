@@ -135,11 +135,14 @@ int TestJsonStructMapWithConverters::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("testMapConvertElem", key)) {
-    LuaHelper::Read(instance->mTestMapConvertElem, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestMapConvertElem, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestJsonStructMapWithConverters.testMapConvertElem from lua failed!");
   } else if (0 == strcmp("testMapConvertKey", key)) {
-    LuaHelper::Read(instance->mTestMapConvertKey, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestMapConvertKey, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestJsonStructMapWithConverters.testMapConvertKey from lua failed!");
   } else if (0 == strcmp("testMapConvertKeyElem", key)) {
-    LuaHelper::Read(instance->mTestMapConvertKeyElem, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestMapConvertKeyElem, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestJsonStructMapWithConverters.testMapConvertKeyElem from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonStructMapWithConverters.{}", key);
   }

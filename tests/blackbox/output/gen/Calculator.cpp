@@ -153,7 +153,8 @@ int Calculator::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = Calculator::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("curVal", key)) {
-    LuaHelper::Read(instance->mCurVal, luaState, -1);
+    auto res = LuaHelper::Read(instance->mCurVal, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning Calculator.curVal from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: Calculator.{}", key);
   }

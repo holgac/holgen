@@ -135,11 +135,14 @@ int TestStruct::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = TestStruct::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("testFieldBool", key)) {
-    LuaHelper::Read(instance->mTestFieldBool, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestFieldBool, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStruct.testFieldBool from lua failed!");
   } else if (0 == strcmp("testFieldUnsigned", key)) {
-    LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStruct.testFieldUnsigned from lua failed!");
   } else if (0 == strcmp("testFieldString", key)) {
-    LuaHelper::Read(instance->mTestFieldString, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestFieldString, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStruct.testFieldString from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
   }

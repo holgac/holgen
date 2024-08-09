@@ -40,8 +40,10 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
     // TODO: Make this work with nested structs
     // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
     switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
-      switchBlock.Add("{}::{}(instance->{}, luaState, -1);", St::LuaHelper, St::LuaHelper_Read,
-                      field.mName);
+      switchBlock.Add("auto res = {}::{}(instance->{}, luaState, -1);", St::LuaHelper,
+                      St::LuaHelper_Read, field.mName);
+      switchBlock.Add("HOLGEN_WARN_IF(!res, \"Assigning {}.{} from lua failed!\");", cls.mName,
+                      field.mField->mName);
     });
   }
   if (!switcher.IsEmpty()) {
@@ -273,6 +275,7 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
 void LuaPlugin::ProcessStruct(Class &cls) {
   if (cls.mStruct->GetAnnotation(Annotations::NoLua))
     return;
+  cls.mSourceIncludes.AddStandardHeader("cstring");
   // TODO: just include in header
   // cls.mHeaderIncludes.AddLibHeader("lua.hpp");
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});

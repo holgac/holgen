@@ -140,9 +140,11 @@ int LuaTestStructContainer::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("testVector", key)) {
-    LuaHelper::Read(instance->mTestVector, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestVector, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning LuaTestStructContainer.testVector from lua failed!");
   } else if (0 == strcmp("testMap", key)) {
-    LuaHelper::Read(instance->mTestMap, luaState, -1);
+    auto res = LuaHelper::Read(instance->mTestMap, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning LuaTestStructContainer.testMap from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: LuaTestStructContainer.{}", key);
   }
