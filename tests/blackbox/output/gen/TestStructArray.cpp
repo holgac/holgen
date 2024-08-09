@@ -141,10 +141,10 @@ int TestStructArray::GetData2CallerFromLua(lua_State *luaState) {
 }
 
 int TestStructArray::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArray.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("type", key)) {
+    auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArray.type with an invalid lua proxy object!");
     LuaHelper::Push(instance->mType, luaState, false);
   } else if (0 == strcmp("GetData1", key)) {
     lua_pushcfunction(luaState, TestStructArray::GetData1CallerFromLua);

@@ -166,14 +166,18 @@ void Boot::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int Boot::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Boot::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = Boot::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {
+    auto instance = Boot::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.name with an invalid lua proxy object!");
     LuaHelper::Push(instance->mName, luaState, false);
   } else if (0 == strcmp("color", key)) {
+    auto instance = Boot::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.color with an invalid lua proxy object!");
     LuaHelper::Push(instance->mColor, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Boot.{}", key);

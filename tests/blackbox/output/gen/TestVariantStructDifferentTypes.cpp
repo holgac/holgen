@@ -269,10 +269,10 @@ void TestVariantStructDifferentTypes::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructDifferentTypes.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("being1", key)) {
+    auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructDifferentTypes.being1 with an invalid lua proxy object!");
     switch (instance->mBeing1Type.GetValue()) {
     case TestVariantStructType::Cat:
       LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState, false);
@@ -284,6 +284,8 @@ int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
       lua_pushnil(luaState);
     }
   } else if (0 == strcmp("being2", key)) {
+    auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructDifferentTypes.being2 with an invalid lua proxy object!");
     switch (instance->mBeing2Type.GetValue()) {
     case TestVariantStructType::Cat:
       LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState, false);

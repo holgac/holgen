@@ -138,14 +138,17 @@ void CharacterArmor::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int CharacterArmor::IndexMetaMethod(lua_State *luaState) {
-  auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for CharacterArmor.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("dirtAmount", key)) {
+    auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for CharacterArmor.dirtAmount with an invalid lua proxy object!");
     LuaHelper::Push(instance->mDirtAmount, luaState, false);
   } else if (0 == strcmp("armorId", key)) {
+    auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for CharacterArmor.armor with an invalid lua proxy object!");
     LuaHelper::Push(instance->mArmorId, luaState, false);
   } else if (0 == strcmp("armor", key)) {
+    auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
     LuaHelper::Push(Armor::Get(instance->mArmorId), luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: CharacterArmor.{}", key);

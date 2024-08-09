@@ -196,18 +196,26 @@ void Person::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int Person::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Person::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Person.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("race", key)) {
+    auto instance = Person::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Person.race with an invalid lua proxy object!");
     LuaHelper::Push(instance->mRace, luaState, false);
   } else if (0 == strcmp("currentCountry", key)) {
+    auto instance = Person::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Person.currentCountry with an invalid lua proxy object!");
     LuaHelper::Push(instance->mCurrentCountry, luaState, false);
   } else if (0 == strcmp("currentCity", key)) {
+    auto instance = Person::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Person.currentCity with an invalid lua proxy object!");
     LuaHelper::Push(instance->mCurrentCity, luaState, false);
   } else if (0 == strcmp("homeCountry", key)) {
+    auto instance = Person::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Person.homeCountry with an invalid lua proxy object!");
     LuaHelper::Push(instance->mHomeCountry, luaState, false);
   } else if (0 == strcmp("placeOfBirth", key)) {
+    auto instance = Person::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Person.placeOfBirth with an invalid lua proxy object!");
     LuaHelper::Push(instance->mPlaceOfBirth, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Person.{}", key);

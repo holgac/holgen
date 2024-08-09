@@ -163,10 +163,10 @@ int TestBitmapStruct::ToggleBitmapFieldCallerFromLua(lua_State *luaState) {
 }
 
 int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestBitmapStruct.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("bitmapField", key)) {
+    auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestBitmapStruct.bitmapField with an invalid lua proxy object!");
     LuaHelper::Push(instance->mBitmapField, luaState, false);
   } else if (0 == strcmp("HasBitmapField", key)) {
     lua_pushcfunction(luaState, TestBitmapStruct::HasBitmapFieldCallerFromLua);

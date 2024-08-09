@@ -114,10 +114,10 @@ void RaceId::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int RaceId::IndexMetaMethod(lua_State *luaState) {
-  auto instance = RaceId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for RaceId.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = RaceId::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for RaceId.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: RaceId.{}", key);

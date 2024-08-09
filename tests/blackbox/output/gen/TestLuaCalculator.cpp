@@ -352,10 +352,10 @@ int TestLuaCalculator::ReturnNewCallerFromLua(lua_State *luaState) {
 }
 
 int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaCalculator.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("lastValue", key)) {
+    auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaCalculator.lastValue with an invalid lua proxy object!");
     LuaHelper::Push(instance->mLastValue, luaState, false);
   } else if (0 == strcmp("AddPrimitive", key)) {
     lua_pushcfunction(luaState, TestLuaCalculator::AddPrimitiveCallerFromLua);

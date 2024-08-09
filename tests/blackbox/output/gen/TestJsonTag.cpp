@@ -146,12 +146,14 @@ void TestJsonTag::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestJsonTag::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonTag::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonTag.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = TestJsonTag::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonTag.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {
+    auto instance = TestJsonTag::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonTag.name with an invalid lua proxy object!");
     LuaHelper::Push(instance->mName, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonTag.{}", key);

@@ -185,14 +185,18 @@ int Weapon::GetDamageCallerFromLua(lua_State *luaState) {
 }
 
 int Weapon::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Weapon::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = Weapon::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("damageMin", key)) {
+    auto instance = Weapon::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.damageMin with an invalid lua proxy object!");
     LuaHelper::Push(instance->mDamageMin, luaState, false);
   } else if (0 == strcmp("damageMax", key)) {
+    auto instance = Weapon::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.damageMax with an invalid lua proxy object!");
     LuaHelper::Push(instance->mDamageMax, luaState, false);
   } else if (0 == strcmp("GetAverageDamage", key)) {
     lua_pushcfunction(luaState, Weapon::GetAverageDamageCallerFromLua);

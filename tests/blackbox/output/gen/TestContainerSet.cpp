@@ -250,12 +250,14 @@ int TestContainerSet::GetUnsignedElemCountCallerFromLua(lua_State *luaState) {
 }
 
 int TestContainerSet::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerSet.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("stringContainer", key)) {
+    auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerSet.stringContainer with an invalid lua proxy object!");
     LuaHelper::Push(instance->mStringContainer, luaState, false);
   } else if (0 == strcmp("unsignedContainer", key)) {
+    auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerSet.unsignedContainer with an invalid lua proxy object!");
     LuaHelper::Push(instance->mUnsignedContainer, luaState, false);
   } else if (0 == strcmp("AddStringElem", key)) {
     lua_pushcfunction(luaState, TestContainerSet::AddStringElemCallerFromLua);

@@ -158,14 +158,18 @@ void TestStruct::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestStruct::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("testFieldBool", key)) {
+    auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.testFieldBool with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestFieldBool, luaState, false);
   } else if (0 == strcmp("testFieldUnsigned", key)) {
+    auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.testFieldUnsigned with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestFieldUnsigned, luaState, false);
   } else if (0 == strcmp("testFieldString", key)) {
+    auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.testFieldString with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestFieldString, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);

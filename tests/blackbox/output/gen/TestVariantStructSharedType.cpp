@@ -222,10 +222,10 @@ void TestVariantStructSharedType::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructSharedType::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructSharedType.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("being1", key)) {
+    auto instance = TestVariantStructSharedType::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructSharedType.being1 with an invalid lua proxy object!");
     switch (instance->mBeingType.GetValue()) {
     case TestVariantStructType::Cat:
       LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState, false);
@@ -237,6 +237,8 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
       lua_pushnil(luaState);
     }
   } else if (0 == strcmp("being2", key)) {
+    auto instance = TestVariantStructSharedType::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructSharedType.being2 with an invalid lua proxy object!");
     switch (instance->mBeingType.GetValue()) {
     case TestVariantStructType::Cat:
       LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState, false);

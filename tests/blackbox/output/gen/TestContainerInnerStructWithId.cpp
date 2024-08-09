@@ -134,12 +134,14 @@ void TestContainerInnerStructWithId::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestContainerInnerStructWithId::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerInnerStructWithId::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerInnerStructWithId.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = TestContainerInnerStructWithId::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerInnerStructWithId.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {
+    auto instance = TestContainerInnerStructWithId::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerInnerStructWithId.name with an invalid lua proxy object!");
     LuaHelper::Push(instance->mName, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestContainerInnerStructWithId.{}", key);

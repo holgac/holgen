@@ -127,12 +127,14 @@ void WeaponTypeSword::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int WeaponTypeSword::IndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeSword.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("sharpness", key)) {
+    auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeSword.sharpness with an invalid lua proxy object!");
     LuaHelper::Push(instance->mSharpness, luaState, false);
   } else if (0 == strcmp("isShortSword", key)) {
+    auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeSword.isShortSword with an invalid lua proxy object!");
     LuaHelper::Push(instance->mIsShortSword, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponTypeSword.{}", key);

@@ -198,12 +198,14 @@ int LuaTestStructContainer::GetTestVectorElemCountCallerFromLua(lua_State *luaSt
 }
 
 int LuaTestStructContainer::IndexMetaMethod(lua_State *luaState) {
-  auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for LuaTestStructContainer.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("testVector", key)) {
+    auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for LuaTestStructContainer.testVector with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestVector, luaState, false);
   } else if (0 == strcmp("testMap", key)) {
+    auto instance = LuaTestStructContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for LuaTestStructContainer.testMap with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestMap, luaState, false);
   } else if (0 == strcmp("AddTestVectorElem", key)) {
     lua_pushcfunction(luaState, LuaTestStructContainer::AddTestVectorElemCallerFromLua);

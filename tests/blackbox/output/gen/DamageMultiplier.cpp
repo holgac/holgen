@@ -131,12 +131,14 @@ void DamageMultiplier::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int DamageMultiplier::IndexMetaMethod(lua_State *luaState) {
-  auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for DamageMultiplier.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("when", key)) {
+    auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for DamageMultiplier.when with an invalid lua proxy object!");
     LuaHelper::Push(instance->mWhen, luaState, false);
   } else if (0 == strcmp("value", key)) {
+    auto instance = DamageMultiplier::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for DamageMultiplier.value with an invalid lua proxy object!");
     LuaHelper::Push(instance->mValue, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: DamageMultiplier.{}", key);

@@ -216,18 +216,26 @@ int Character::InitializeCallerFromLua(lua_State *luaState) {
 }
 
 int Character::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Character::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.name with an invalid lua proxy object!");
     LuaHelper::Push(instance->mName, luaState, false);
   } else if (0 == strcmp("race", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.race with an invalid lua proxy object!");
     LuaHelper::Push(instance->mRace, luaState, false);
   } else if (0 == strcmp("armor", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.armor with an invalid lua proxy object!");
     LuaHelper::Push(instance->mArmor, luaState, false);
   } else if (0 == strcmp("weapon", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.weapon with an invalid lua proxy object!");
     LuaHelper::Push(instance->mWeapon, luaState, false);
   } else if (0 == strcmp("Initialize", key)) {
     lua_pushcfunction(luaState, Character::InitializeCallerFromLua);

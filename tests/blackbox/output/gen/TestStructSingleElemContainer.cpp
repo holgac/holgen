@@ -264,12 +264,14 @@ int TestStructSingleElemContainer::GetSingleElemStructWithIdCountCallerFromLua(l
 }
 
 int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElemContainer.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("singleElemStructs", key)) {
+    auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElemContainer.singleElemStructs with an invalid lua proxy object!");
     LuaHelper::Push(instance->mSingleElemStructs, luaState, false);
   } else if (0 == strcmp("singleElemStructsWithId", key)) {
+    auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElemContainer.singleElemStructsWithId with an invalid lua proxy object!");
     LuaHelper::Push(instance->mSingleElemStructsWithId, luaState, false);
   } else if (0 == strcmp("AddSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::AddSingleElemStructCallerFromLua);

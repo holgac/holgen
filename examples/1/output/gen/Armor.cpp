@@ -126,12 +126,14 @@ void Armor::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int Armor::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Armor::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Armor.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = Armor::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Armor.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("armorClass", key)) {
+    auto instance = Armor::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Armor.armorClass with an invalid lua proxy object!");
     LuaHelper::Push(instance->mArmorClass, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Armor.{}", key);

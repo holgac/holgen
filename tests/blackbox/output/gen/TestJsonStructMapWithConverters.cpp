@@ -158,14 +158,18 @@ void TestJsonStructMapWithConverters::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestJsonStructMapWithConverters::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructMapWithConverters.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("testMapConvertElem", key)) {
+    auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructMapWithConverters.testMapConvertElem with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestMapConvertElem, luaState, false);
   } else if (0 == strcmp("testMapConvertKey", key)) {
+    auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructMapWithConverters.testMapConvertKey with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestMapConvertKey, luaState, false);
   } else if (0 == strcmp("testMapConvertKeyElem", key)) {
+    auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructMapWithConverters.testMapConvertKeyElem with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTestMapConvertKeyElem, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonStructMapWithConverters.{}", key);

@@ -106,24 +106,25 @@ void TestLuaStaticCppFunction::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestLuaStaticCppFunction::NewIndexMetaMethod);
   lua_settable(luaState, -3);
+  lua_pushstring(luaState, "Factory");
+  lua_pushcfunction(luaState, TestLuaStaticCppFunction::FactoryCallerFromLua);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestLuaStaticCppFunctionMeta");
 }
 
 int TestLuaStaticCppFunction::FactoryCallerFromLua(lua_State *luaState) {
-  auto instance = TestLuaStaticCppFunction::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaStaticCppFunction.Factory method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
-  auto result = instance->Factory(arg0);
+  auto result = TestLuaStaticCppFunction::Factory(arg0);
   result.PushMirrorToLua(luaState);
   return 1;
 }
 
 int TestLuaStaticCppFunction::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaStaticCppFunction::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaStaticCppFunction.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("data", key)) {
+    auto instance = TestLuaStaticCppFunction::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaStaticCppFunction.data with an invalid lua proxy object!");
     LuaHelper::Push(instance->mData, luaState, false);
   } else if (0 == strcmp("Factory", key)) {
     lua_pushcfunction(luaState, TestLuaStaticCppFunction::FactoryCallerFromLua);

@@ -130,12 +130,14 @@ void WeaponTypeBow::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
-  auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeBow.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("range", key)) {
+    auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeBow.range with an invalid lua proxy object!");
     LuaHelper::Push(instance->mRange, luaState, false);
   } else if (0 == strcmp("material", key)) {
+    auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeBow.material with an invalid lua proxy object!");
     LuaHelper::Push(instance->mMaterial, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponTypeBow.{}", key);

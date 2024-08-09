@@ -206,10 +206,10 @@ int TestLuaRegistryData::AddCallerFromLua(lua_State *luaState) {
 }
 
 int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaRegistryData.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("data", key)) {
+    auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaRegistryData.data with an invalid lua proxy object!");
     lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->mData);
   } else if (0 == strcmp("Init", key)) {
     lua_pushcfunction(luaState, TestLuaRegistryData::InitCallerFromLua);

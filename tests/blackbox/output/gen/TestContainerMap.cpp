@@ -236,10 +236,10 @@ int TestContainerMap::GetInnerStructWithIdCountCallerFromLua(lua_State *luaState
 }
 
 int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerMap.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("innerStructsWithId", key)) {
+    auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerMap.innerStructsWithId with an invalid lua proxy object!");
     LuaHelper::Push(instance->mInnerStructsWithId, luaState, false);
   } else if (0 == strcmp("GetInnerStructWithIdFromName", key)) {
     lua_pushcfunction(luaState, TestContainerMap::GetInnerStructWithIdFromNameCallerFromLua);

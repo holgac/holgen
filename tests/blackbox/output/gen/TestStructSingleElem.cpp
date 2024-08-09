@@ -114,10 +114,10 @@ void TestStructSingleElem::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestStructSingleElem::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestStructSingleElem::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElem.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("name", key)) {
+    auto instance = TestStructSingleElem::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElem.name with an invalid lua proxy object!");
     LuaHelper::Push(instance->mName, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructSingleElem.{}", key);

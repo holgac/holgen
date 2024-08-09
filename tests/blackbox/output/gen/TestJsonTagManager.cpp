@@ -237,10 +237,10 @@ int TestJsonTagManager::GetTagCountCallerFromLua(lua_State *luaState) {
 }
 
 int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonTagManager.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("tags", key)) {
+    auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonTagManager.tags with an invalid lua proxy object!");
     LuaHelper::Push(instance->mTags, luaState, false);
   } else if (0 == strcmp("GetOrInsert", key)) {
     lua_pushcfunction(luaState, TestJsonTagManager::GetOrInsertCallerFromLua);

@@ -280,22 +280,34 @@ void TestLuaFuncTableContainer::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestLuaFuncTableContainer::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("field", key)) {
+    auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.field with an invalid lua proxy object!");
     LuaHelper::Push(instance->mField, luaState, false);
   } else if (0 == strcmp("script1", key)) {
+    auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.script1 with an invalid lua proxy object!");
     LuaHelper::Push(instance->mScript1, luaState, false);
   } else if (0 == strcmp("script2", key)) {
+    auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.script2 with an invalid lua proxy object!");
     LuaHelper::Push(instance->mScript2, luaState, false);
   } else if (0 == strcmp("scriptWithSourceTable1", key)) {
+    auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.scriptWithSourceTable1 with an invalid lua proxy object!");
     LuaHelper::Push(instance->mScriptWithSourceTable1, luaState, false);
   } else if (0 == strcmp("scriptWithSourceTable2", key)) {
+    auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.scriptWithSourceTable2 with an invalid lua proxy object!");
     LuaHelper::Push(instance->mScriptWithSourceTable2, luaState, false);
   } else if (0 == strcmp("staticScript1", key)) {
+    auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.staticScript1 with an invalid lua proxy object!");
     LuaHelper::Push(instance->mStaticScript1, luaState, false);
   } else if (0 == strcmp("staticScript2", key)) {
+    auto instance = TestLuaFuncTableContainer::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaFuncTableContainer.staticScript2 with an invalid lua proxy object!");
     LuaHelper::Push(instance->mStaticScript2, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableContainer.{}", key);

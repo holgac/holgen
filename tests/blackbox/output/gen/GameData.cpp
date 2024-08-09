@@ -527,14 +527,18 @@ int GameData::GetCharacterCountCallerFromLua(lua_State *luaState) {
 }
 
 int GameData::IndexMetaMethod(lua_State *luaState) {
-  auto instance = GameData::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for GameData.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("boots", key)) {
+    auto instance = GameData::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for GameData.boots with an invalid lua proxy object!");
     LuaHelper::Push(instance->mBoots, luaState, false);
   } else if (0 == strcmp("armors", key)) {
+    auto instance = GameData::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for GameData.armors with an invalid lua proxy object!");
     LuaHelper::Push(instance->mArmors, luaState, false);
   } else if (0 == strcmp("characters", key)) {
+    auto instance = GameData::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for GameData.characters with an invalid lua proxy object!");
     LuaHelper::Push(instance->mCharacters, luaState, false);
   } else if (0 == strcmp("GetBootFromName", key)) {
     lua_pushcfunction(luaState, GameData::GetBootFromNameCallerFromLua);

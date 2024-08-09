@@ -134,12 +134,14 @@ void TestVariantStructHuman::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructHuman.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("name", key)) {
+    auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructHuman.name with an invalid lua proxy object!");
     LuaHelper::Push(instance->mName, luaState, false);
   } else if (0 == strcmp("nationality", key)) {
+    auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructHuman.nationality with an invalid lua proxy object!");
     LuaHelper::Push(instance->mNationality, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructHuman.{}", key);

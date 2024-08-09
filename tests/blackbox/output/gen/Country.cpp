@@ -165,14 +165,18 @@ void Country::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int Country::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Country::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Country.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("leader", key)) {
+    auto instance = Country::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Country.leader with an invalid lua proxy object!");
     LuaHelper::Push(instance->mLeader, luaState, false);
   } else if (0 == strcmp("citizens", key)) {
+    auto instance = Country::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Country.citizens with an invalid lua proxy object!");
     LuaHelper::Push(instance->mCitizens, luaState, false);
   } else if (0 == strcmp("population", key)) {
+    auto instance = Country::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Country.population with an invalid lua proxy object!");
     LuaHelper::Push(instance->mPopulation, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Country.{}", key);

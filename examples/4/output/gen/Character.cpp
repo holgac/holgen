@@ -225,22 +225,32 @@ void Character::CreateLuaMetatable(lua_State *luaState) {
 }
 
 int Character::IndexMetaMethod(lua_State *luaState) {
-  auto instance = Character::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("id", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.id with an invalid lua proxy object!");
     LuaHelper::Push(instance->mId, luaState, false);
   } else if (0 == strcmp("name", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.name with an invalid lua proxy object!");
     LuaHelper::Push(instance->mName, luaState, false);
   } else if (0 == strcmp("partnerId", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.partner with an invalid lua proxy object!");
     LuaHelper::Push(instance->mPartnerId, luaState, false);
   } else if (0 == strcmp("partner", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
     LuaHelper::Push(Character::Get(instance->mPartnerId), luaState, false);
   } else if (0 == strcmp("weaponId", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.weapon with an invalid lua proxy object!");
     LuaHelper::Push(instance->mWeaponId, luaState, false);
   } else if (0 == strcmp("weapon", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
     LuaHelper::Push(Weapon::Get(instance->mWeaponId), luaState, false);
   } else if (0 == strcmp("armor", key)) {
+    auto instance = Character::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.armor with an invalid lua proxy object!");
     LuaHelper::Push(instance->mArmor, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: Character.{}", key);

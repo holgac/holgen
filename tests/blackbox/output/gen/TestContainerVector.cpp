@@ -517,16 +517,22 @@ int TestContainerVector::GetUnsignedElemCountCallerFromLua(lua_State *luaState) 
 }
 
 int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
-  auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
   const char *key = lua_tostring(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.{} with an invalid lua proxy object!", key);
   if (0 == strcmp("innerStructsWithId", key)) {
+    auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.innerStructsWithId with an invalid lua proxy object!");
     LuaHelper::Push(instance->mInnerStructsWithId, luaState, false);
   } else if (0 == strcmp("innerStructsNoId", key)) {
+    auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.innerStructsNoId with an invalid lua proxy object!");
     LuaHelper::Push(instance->mInnerStructsNoId, luaState, false);
   } else if (0 == strcmp("stringContainer", key)) {
+    auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.stringContainer with an invalid lua proxy object!");
     LuaHelper::Push(instance->mStringContainer, luaState, false);
   } else if (0 == strcmp("unsignedContainer", key)) {
+    auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.unsignedContainer with an invalid lua proxy object!");
     LuaHelper::Push(instance->mUnsignedContainer, luaState, false);
   } else if (0 == strcmp("GetInnerStructWithIdFromName", key)) {
     lua_pushcfunction(luaState, TestContainerVector::GetInnerStructWithIdFromNameCallerFromLua);
