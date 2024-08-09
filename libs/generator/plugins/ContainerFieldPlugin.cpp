@@ -130,17 +130,16 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     method.mExposeToLua = true;
 
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+                                         Annotations::MethodOption_Private)) {
+    method.mVisibility = Visibility::Private;
+  } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
+                                                Annotations::MethodOption_Protected)) {
+    method.mVisibility = Visibility::Protected;
+  }
+  if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
                                          Annotations::MethodOption_Custom)) {
     method.mUserDefined = true;
   } else {
-    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
-                                           Annotations::MethodOption_Private)) {
-      method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
-                                                  Annotations::Container_Add,
-                                                  Annotations::MethodOption_Protected)) {
-      method.mVisibility = Visibility::Protected;
-    }
     CodeBlock validators;
     CodeBlock inserters;
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
@@ -245,17 +244,17 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
     }
 
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
+                                           Annotations::MethodOption_Private)) {
+      method.mVisibility = Visibility::Private;
+    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                  Annotations::Container_Get,
+                                                  Annotations::MethodOption_Protected)) {
+      method.mVisibility = Visibility::Protected;
+    }
+    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
                                            Annotations::MethodOption_Custom)) {
       method.mUserDefined = true;
     } else {
-      if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
-                                             Annotations::MethodOption_Private)) {
-        method.mVisibility = Visibility::Private;
-      } else if (field.mField->GetMatchingAttribute(Annotations::Container,
-                                                    Annotations::Container_Get,
-                                                    Annotations::MethodOption_Protected)) {
-        method.mVisibility = Visibility::Protected;
-      }
       // TODO: @container(unsafe) attribute that avoids bounds checks, can return ref instead of ptr
       if (isKeyedContainer) {
         method.mBody.Add("auto it = {}.find(idx);", field.mName);
@@ -291,17 +290,17 @@ void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field)
   method.mExposeToLua = true;
 
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
+                                         Annotations::MethodOption_Private)) {
+    method.mVisibility = Visibility::Private;
+  } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                Annotations::Container_Count,
+                                                Annotations::MethodOption_Protected)) {
+    method.mVisibility = Visibility::Protected;
+  }
+  if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
                                          Annotations::MethodOption_Custom)) {
     method.mUserDefined = true;
   } else {
-    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
-                                           Annotations::MethodOption_Private)) {
-      method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
-                                                  Annotations::Container_Count,
-                                                  Annotations::MethodOption_Protected)) {
-      method.mVisibility = Visibility::Protected;
-    }
     method.mBody.Add("return {}.size();", field.mName);
   }
 
@@ -336,17 +335,17 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
 
   method.mExposeToLua = true;
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
+                                         Annotations::MethodOption_Private)) {
+    method.mVisibility = Visibility::Private;
+  } else if (field.mField->GetMatchingAttribute(Annotations::Container,
+                                                Annotations::Container_Delete,
+                                                Annotations::MethodOption_Protected)) {
+    method.mVisibility = Visibility::Protected;
+  }
+  if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
                                          Annotations::MethodOption_Custom)) {
     method.mUserDefined = true;
   } else {
-    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
-                                           Annotations::MethodOption_Private)) {
-      method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
-                                                  Annotations::Container_Delete,
-                                                  Annotations::MethodOption_Protected)) {
-      method.mVisibility = Visibility::Protected;
-    }
     CodeBlock indexDeleters;
     CodeBlock indexReassigners;
     auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
@@ -417,17 +416,16 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
   }
   arg.mType.PreventCopying();
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
+                                         Annotations::MethodOption_Private)) {
+    method.mVisibility = Visibility::Private;
+  } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
+                                                Annotations::MethodOption_Protected)) {
+    method.mVisibility = Visibility::Protected;
+  }
+  if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
                                          Annotations::MethodOption_Custom)) {
     method.mUserDefined = true;
   } else {
-    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
-                                           Annotations::MethodOption_Private)) {
-      method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
-                                                  Annotations::Container_Has,
-                                                  Annotations::MethodOption_Protected)) {
-      method.mVisibility = Visibility::Protected;
-    }
     method.mBody.Add("return {}.contains({});", field.mName, arg.mName);
   }
   Validate().NewMethod(cls, method);
