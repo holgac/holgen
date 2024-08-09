@@ -193,16 +193,22 @@ struct TestData {
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
-auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
-HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.{} with an invalid lua proxy object!", key);
 if (0 == strcmp("testFieldUnsigned", key)) {
+  auto instance = TestData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldUnsigned with an invalid lua proxy object!");
   LuaHelper::Push(instance->mTestFieldUnsigned, luaState, false);
 } else if (0 == strcmp("testFieldString", key)) {
+  auto instance = TestData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldString with an invalid lua proxy object!");
   LuaHelper::Push(instance->mTestFieldString, luaState, false);
 } else if (0 == strcmp("testFieldBool", key)) {
+  auto instance = TestData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldBool with an invalid lua proxy object!");
   LuaHelper::Push(instance->mTestFieldBool, luaState, false);
 } else if (0 == strcmp("testFieldInnerStruct", key)) {
+  auto instance = TestData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldInnerStruct with an invalid lua proxy object!");
   LuaHelper::Push(instance->mTestFieldInnerStruct, luaState, false);
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
@@ -299,12 +305,14 @@ struct TestData {
                               Constness::NotConst, Staticness::Static};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("IndexMetaMethod", Constness::NotConst), method, R"R(
-auto instance = TestData::ReadProxyFromLua(luaState, -2);
 const char *key = lua_tostring(luaState, -1);
-HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.{} with an invalid lua proxy object!", key);
 if (0 == strcmp("testStructWithIdRefId", key)) {
+  auto instance = TestData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testStructWithIdRef with an invalid lua proxy object!");
   LuaHelper::Push(instance->mTestStructWithIdRefId, luaState, false);
 } else if (0 == strcmp("testStructNoIdRef", key)) {
+  auto instance = TestData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testStructNoIdRef with an invalid lua proxy object!");
   LuaHelper::Push(instance->mTestStructNoIdRef, luaState, false);
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
