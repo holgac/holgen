@@ -310,9 +310,17 @@ public:
    *  @enum(default)
    *  Entry1;
    * }
+   *
+   * By default, enums use the smallest unsigned integer type that can store the entries, but type
+   * attribute can be used to override this behaviour.
+   * @enum(type=u32)
+   * enum SomeEnum {
+   *  Entry1;
+   * }
    */
   inline static const std::string Enum = "enum";
   inline static const std::string Enum_Default = "default";
+  inline static const std::string Enum_Type = "type";
 
   /**
    * You can store primitive data and strings in enums.

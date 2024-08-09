@@ -134,6 +134,10 @@ void EnumPlugin::GenerateProperty(Class &cls, const AnnotationDefinition &annota
 }
 
 std::string EnumPlugin::DetermineUnderlyingType(Class &cls) {
+  auto typeAttribute = cls.mEnum->GetMatchingAttribute(Annotations::Enum, Annotations::Enum_Type);
+  if (typeAttribute) {
+    return Type{mProject, typeAttribute->mDefinitionSource, typeAttribute->mValue}.mName;
+  }
   if (cls.mEnum->mEntries.empty()) {
     return "uint8_t";
   }
