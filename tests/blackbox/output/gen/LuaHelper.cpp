@@ -39,6 +39,7 @@
 #include "TestLuaFuncTableWithSourceTable.h"
 #include "TestLuaNumber.h"
 #include "TestLuaRegistryData.h"
+#include "TestLuaStaticCppFunction.h"
 #include "TestStruct.h"
 #include "TestStructArray.h"
 #include "TestStructArrayCustomData1.h"
@@ -215,6 +216,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestLuaFuncTableWithSourceTable::CreateLuaMetatable(luaState);
   TestLuaNumber::CreateLuaMetatable(luaState);
   TestLuaRegistryData::CreateLuaMetatable(luaState);
+  TestLuaStaticCppFunction::CreateLuaMetatable(luaState);
   TestStruct::CreateLuaMetatable(luaState);
   TestStructArray::CreateLuaMetatable(luaState);
   TestStructArrayCustomData1::CreateLuaMetatable(luaState);

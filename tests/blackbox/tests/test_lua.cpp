@@ -18,6 +18,7 @@
 #include "TestLuaFuncTable.h"
 #include "TestLuaFuncTableContainer.h"
 #include "TestLuaRegistryData.h"
+#include "TestLuaStaticCppFunction.h"
 #include <rapidjson/document.h>
 
 using namespace holgen_blackbox_test;
@@ -548,4 +549,8 @@ Tester = {
   luaL_dostring(mState, "tlrd:Init({initialValue=32})");
   EXPECT_EQ(tlrd.Get(mState), 32);
   tlrd.UninitializeLua(mState);
+}
+
+TEST_F(LuaTest, StaticFunction) {
+  EXPECT_EQ(TestLuaStaticCppFunction::Factory(15).GetData(), 15);
 }

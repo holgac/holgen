@@ -66,3 +66,9 @@ struct TestLuaRegistryData {
     func Get() -> s32;
     func Add(s32 val);
 }
+
+struct TestLuaStaticCppFunction {
+    u32 data;
+    @func(static)
+    func Factory(u32 data) -> TestLuaStaticCppFunction;
+}
