@@ -21,10 +21,10 @@ public:
   const TestBitmap &GetBitmapField() const;
   TestBitmap &GetBitmapField();
   void SetBitmapField(const TestBitmap &val);
-  bool HasBitmapField(int64_t val) const;
-  void AddBitmapField(int64_t val);
-  void RemoveBitmapField(int64_t val);
-  void ToggleBitmapField(int64_t val);
+  bool HasBitmapField(uint64_t val) const;
+  void AddBitmapField(uint64_t val);
+  void RemoveBitmapField(uint64_t val);
+  void ToggleBitmapField(uint64_t val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

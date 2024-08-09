@@ -15,7 +15,7 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestBitmap {
 public:
-  using UnderlyingType=int64_t;
+  using UnderlyingType=uint64_t;
   enum EntryIndex : UnderlyingType {
     Entry1Index = 0,
     Entry2Index = 1,

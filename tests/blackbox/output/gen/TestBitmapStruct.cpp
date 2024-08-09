@@ -26,19 +26,19 @@ void TestBitmapStruct::SetBitmapField(const TestBitmap &val) {
   mBitmapField = val;
 }
 
-bool TestBitmapStruct::HasBitmapField(int64_t val) const {
+bool TestBitmapStruct::HasBitmapField(uint64_t val) const {
   return mBitmapField.Has(TestBitmap(val));
 }
 
-void TestBitmapStruct::AddBitmapField(int64_t val) {
+void TestBitmapStruct::AddBitmapField(uint64_t val) {
   mBitmapField.Add(TestBitmap(val));
 }
 
-void TestBitmapStruct::RemoveBitmapField(int64_t val) {
+void TestBitmapStruct::RemoveBitmapField(uint64_t val) {
   mBitmapField.Remove(TestBitmap(val));
 }
 
-void TestBitmapStruct::ToggleBitmapField(int64_t val) {
+void TestBitmapStruct::ToggleBitmapField(uint64_t val) {
   mBitmapField.Toggle(TestBitmap(val));
 }
 
@@ -128,7 +128,7 @@ void TestBitmapStruct::CreateLuaMetatable(lua_State *luaState) {
 int TestBitmapStruct::HasBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.HasBitmapField method with an invalid lua proxy object!");
-  int64_t arg0;
+  uint64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->HasBitmapField(arg0);
   LuaHelper::Push(result, luaState, true);
@@ -138,7 +138,7 @@ int TestBitmapStruct::HasBitmapFieldCallerFromLua(lua_State *luaState) {
 int TestBitmapStruct::AddBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.AddBitmapField method with an invalid lua proxy object!");
-  int64_t arg0;
+  uint64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->AddBitmapField(arg0);
   return 0;
@@ -147,7 +147,7 @@ int TestBitmapStruct::AddBitmapFieldCallerFromLua(lua_State *luaState) {
 int TestBitmapStruct::RemoveBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.RemoveBitmapField method with an invalid lua proxy object!");
-  int64_t arg0;
+  uint64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->RemoveBitmapField(arg0);
   return 0;
@@ -156,7 +156,7 @@ int TestBitmapStruct::RemoveBitmapFieldCallerFromLua(lua_State *luaState) {
 int TestBitmapStruct::ToggleBitmapFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestBitmapStruct.ToggleBitmapField method with an invalid lua proxy object!");
-  int64_t arg0;
+  uint64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->ToggleBitmapField(arg0);
   return 0;

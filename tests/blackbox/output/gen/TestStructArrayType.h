@@ -14,7 +14,7 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestStructArrayType {
 public:
-  using UnderlyingType=int64_t;
+  using UnderlyingType=uint8_t;
   enum Entry : UnderlyingType {
     Type1 = 0,
     Type2 = 1,

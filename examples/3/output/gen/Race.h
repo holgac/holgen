@@ -14,7 +14,7 @@ namespace ex3_schemas {
 namespace ex3_schemas {
 class Race {
 public:
-  using UnderlyingType=int64_t;
+  using UnderlyingType=uint8_t;
   enum Entry : UnderlyingType {
     Human = 2,
     Elf = 0,

@@ -15,7 +15,7 @@ namespace ex2_schemas {
 // enums can have comments too
 class Race {
 public:
-  using UnderlyingType=int64_t;
+  using UnderlyingType=uint8_t;
   enum Entry : UnderlyingType {
     Human = 2,
     // enum entries can have comments too
