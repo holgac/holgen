@@ -23,19 +23,10 @@ void LuaIndexMetaMethodPlugin::Process(Class &cls) {
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
 
   GenerateIndexMetaMethodForFields(cls, switcher);
-  bool hasFields = !switcher.IsEmpty();
   GenerateIndexMetaMethodForExposedMethods(cls, switcher);
 
   if (!switcher.IsEmpty()) {
-    if (hasFields) {
-      method.mBody.Add("auto instance = {}::{}(luaState, -2);", cls.mName, St::Lua_ReadProxyObject);
-    }
     method.mBody.Add("const char *key = lua_tostring(luaState, -1);");
-    if (hasFields) {
-      method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!instance, 0, \"Requesting for {}.{{}} with "
-                       "an invalid lua proxy object!\", key);",
-                       cls.mName, method.mName);
-    }
     method.mBody.Add(std::move(switcher.Generate()));
     method.mBody.Line() << "return 1;";
   } else {
@@ -61,6 +52,7 @@ void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFields(Class &cls,
           mProject.mProject.GetStruct(field.mField->mType.mTemplateParameters.front().mName);
       if (underlyingStruct->GetAnnotation(Annotations::Managed)) {
         switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
+          GenerateInstanceGetter(cls, switchBlock, -2, "instance");
           switchBlock.Add("{}::{}({}::{}(instance->{}), luaState, false);", St::LuaHelper,
                           St::LuaHelper_Push, field.mField->mType.mTemplateParameters[0].mName,
                           St::ManagedObject_Getter, field.mName);
@@ -83,12 +75,17 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
     isLuaFunc = true;
   }
 
-  methodCaller.mBody.Add("auto instance = {}::{}(luaState, {});", cls.mName,
-                         St::Lua_ReadProxyObject,
-                         -ptrdiff_t(method.mArguments.size()) - 1 + isLuaFunc);
-  methodCaller.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!instance, 0, \"Calling {}.{} method with "
-                         "an invalid lua proxy object!\");",
-                         cls.mName, method.mName);
+  std::string callPrefix;
+  if (method.mStaticness == Staticness::Static) {
+    callPrefix = std::format("{}::", cls.mName);
+  } else {
+    GenerateInstanceGetter(cls, methodCaller.mBody,
+                           -ptrdiff_t(method.mArguments.size()) - 1 + isLuaFunc, "instance");
+    methodCaller.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!instance, 0, \"Calling {}.{} method with "
+                           "an invalid lua proxy object!\");",
+                           cls.mName, method.mName);
+    callPrefix = std::format("instance->", cls.mName);
+  }
   std::string funcArgs =
       GenerateReadExposedMethodArgsAndGetArgsString(method, methodCaller.mBody, isLuaFunc);
 
@@ -102,9 +99,9 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
 
   if (method.mReturnType.mName != "void") {
     if (method.mReturnType.mType == PassByType::Reference) {
-      methodCaller.mBody.Add("auto& result = instance->{}({});", method.mName, funcArgs);
+      methodCaller.mBody.Add("auto& result = {}{}({});", callPrefix, method.mName, funcArgs);
     } else {
-      methodCaller.mBody.Add("auto result = instance->{}({});", method.mName, funcArgs);
+      methodCaller.mBody.Add("auto result = {}{}({});", callPrefix, method.mName, funcArgs);
     }
     std::string accessor = ".";
     if (method.mReturnType.mType == PassByType::Pointer) {
@@ -156,6 +153,10 @@ void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForExposedMethods(Class &c
 
 void LuaIndexMetaMethodPlugin::GenerateIndexForField(Class &cls, ClassField &field,
                                                      CodeBlock &switchBlock) {
+  GenerateInstanceGetter(cls, switchBlock, -2, "instance");
+  switchBlock.Add("HOLGEN_WARN_AND_RETURN_IF(!instance, 0, \"Requesting for {}.{} with "
+                  "an invalid lua proxy object!\");",
+                  cls.mName, field.mField ? field.mField->mName : field.mName);
   if (field.mField->mType.mName == St::Variant) {
     GenerateIndexForVariantField(cls, field, switchBlock);
   } else if (field.mField->mType.mName == St::Lua_CustomData) {
@@ -271,6 +272,12 @@ void LuaIndexMetaMethodPlugin::GenerateIndexForVariantField(Class &cls, ClassFie
 void LuaIndexMetaMethodPlugin::GenerateIndexForRegistryData(ClassField &field,
                                                             CodeBlock &switchBlock) {
   switchBlock.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, instance->{});", field.mName);
+}
+
+void LuaIndexMetaMethodPlugin::GenerateInstanceGetter(Class &cls, CodeBlock &codeBlock, int index,
+                                                      const std::string &outVarName = "instance") {
+  codeBlock.Add("auto {} = {}::{}(luaState, {});", outVarName, cls.mName, St::Lua_ReadProxyObject,
+                index);
 }
 
 } // namespace holgen

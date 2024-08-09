@@ -19,6 +19,8 @@ private:
                                                             CodeBlock &switchBlock, bool isLuaFunc);
   void GenerateIndexForVariantField(Class &cls, ClassField &field, CodeBlock &switchBlock);
   void GenerateIndexForRegistryData(ClassField &field, CodeBlock &switchBlock);
+  void GenerateInstanceGetter(Class &cls, CodeBlock &codeBlock, int index,
+                              const std::string &outVarName);
 };
 
 } // namespace holgen

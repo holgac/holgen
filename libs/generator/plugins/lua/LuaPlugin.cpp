@@ -335,6 +335,15 @@ void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
   method.mBody.Add("lua_pushstring(luaState, \"__newindex\");");
   method.mBody.Add("lua_pushcfunction(luaState, {}::NewIndexMetaMethod);", cls.mName);
   method.mBody.Add("lua_settable(luaState, -3);");
+  for (auto &clsMethod: cls.mMethods) {
+    if (!clsMethod.mExposeToLua || clsMethod.mStaticness != Staticness::Static) {
+      continue;
+    }
+    method.mBody.Add("lua_pushstring(luaState, \"{}\");", clsMethod.mName);
+    method.mBody.Add("lua_pushcfunction(luaState, {}::{});", cls.mName,
+                     Naming().LuaMethodCaller(clsMethod));
+    method.mBody.Add("lua_settable(luaState, -3);");
+  }
   method.mBody.Add("lua_setglobal(luaState, \"{}\");", Naming().LuaMetatableName(cls));
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

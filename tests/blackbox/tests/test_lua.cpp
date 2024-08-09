@@ -552,5 +552,9 @@ Tester = {
 }
 
 TEST_F(LuaTest, StaticFunction) {
+  LuaHelper::CreateMetatables(mState);
   EXPECT_EQ(TestLuaStaticCppFunction::Factory(15).GetData(), 15);
+  luaL_dostring(mState, "return TestLuaStaticCppFunctionMeta.Factory(32).data");
+  LuaTestHelper::ExpectStack(mState, {"32"});
+  lua_pop(mState, 1);
 }
