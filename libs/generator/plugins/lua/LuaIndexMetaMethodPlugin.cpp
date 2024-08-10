@@ -182,6 +182,7 @@ std::string LuaIndexMetaMethodPlugin::GenerateReadExposedMethodArgsAndGetArgsStr
     if (auto argClass = mProject.GetClass(arg.mType.mName)) {
       bool canBeMirror = true;
       bool canBeProxy = true;
+      bool canBeNull = arg.mType.mType == PassByType::Pointer;
       if (arg.mType.mType != PassByType::Value && arg.mType.mConstness == Constness::NotConst) {
         canBeMirror = false;
       }
@@ -191,7 +192,15 @@ std::string LuaIndexMetaMethodPlugin::GenerateReadExposedMethodArgsAndGetArgsStr
       if (canBeProxy && canBeMirror) {
         switchBlock.Add("{} arg{}Mirror;", arg.mType.mName, i);
         switchBlock.Add("{} *arg{};", arg.mType.mName, i);
-        switchBlock.Add("if (lua_getmetatable(luaState, {})) {{", stackIdx);
+        if (canBeNull) {
+          switchBlock.Add("if (lua_isnil(luaState, {})) {{", stackIdx);
+          switchBlock.Indent(1);
+          switchBlock.Add("arg{} = nullptr;", i);
+          switchBlock.Indent(-1);
+          switchBlock.Add("}} else if (lua_getmetatable(luaState, {})) {{", stackIdx);
+        } else {
+          switchBlock.Add("if (lua_getmetatable(luaState, {})) {{", stackIdx);
+        }
         switchBlock.Indent(1);
         switchBlock.Add("lua_pop(luaState, 1);");
         switchBlock.Add("arg{} = {}::{}(luaState, {});", i, arg.mType.mName,
