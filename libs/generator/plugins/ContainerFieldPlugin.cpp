@@ -239,6 +239,7 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       }
     } else if (fixedSizeEnumArray) {
       method.mArguments.emplace_back("idx", Type{fixedSizeEnumArray->mName});
+      method.mReturnType.mType = PassByType::Reference;
     } else {
       method.mArguments.emplace_back("idx", Type{"size_t"});
     }
@@ -254,13 +255,13 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
                                            Annotations::MethodOption_Custom)) {
       method.mUserDefined = true;
+    } else if (fixedSizeEnumArray) {
+      method.mBody.Add("return {}[{}.GetValue()];", field.mName, idxExpression);
     } else {
       // TODO: @container(unsafe) attribute that avoids bounds checks, can return ref instead of ptr
       if (isKeyedContainer) {
         method.mBody.Add("auto it = {}.find(idx);", field.mName);
         method.mBody.Add("if (it == {}.end())", field.mName);
-      } else if (fixedSizeEnumArray) {
-        method.mBody.Add("if ({} == {}::Invalid)", idxExpression, fixedSizeEnumArray->mName);
       } else {
         method.mBody.Add("if ({} >= {}.size())", idxExpression, field.mName);
       }
@@ -269,8 +270,6 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
       method.mBody.Indent(-1);
       if (isKeyedContainer) {
         method.mBody.Add("return &it->second;");
-      } else if (fixedSizeEnumArray) {
-        method.mBody.Add("return &{}[{}.GetValue()];", field.mName, idxExpression);
       } else if (isPointer) {
         method.mBody.Add("return {}[{}];", field.mName, idxExpression);
       } else {
