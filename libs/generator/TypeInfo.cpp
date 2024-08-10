@@ -194,14 +194,25 @@ void Type::PreventCopying(bool addConst) {
 }
 
 bool Type::IsCopyable(TranslatedProject &project) const {
+  std::set<std::string> seenClasses;
+  return IsCopyable(project, seenClasses);
+}
+
+bool Type::IsCopyable(TranslatedProject &project, std::set<std::string> &seenClasses) const {
+  // class A has a vector<A>, which doesn't prevent A from being copyable
+  if (seenClasses.contains(mName)) {
+    return true;
+  }
   auto cls = project.GetClass(mName);
   if (cls) {
+    seenClasses.insert(cls->mName);
     if (cls->mStruct &&
         cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
       return false;
     }
     for (auto &field: cls->mFields) {
-      if (!field.mType.IsCopyable(project)) {
+
+      if (!field.mType.IsCopyable(project, seenClasses)) {
         return false;
       }
       if (!field.mField) {
@@ -220,7 +231,7 @@ bool Type::IsCopyable(TranslatedProject &project) const {
     }
   }
   for (auto &templateParameter: mTemplateParameters) {
-    if (!templateParameter.IsCopyable(project)) {
+    if (!templateParameter.IsCopyable(project, seenClasses)) {
       return false;
     }
   }

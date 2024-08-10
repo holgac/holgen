@@ -58,6 +58,10 @@ struct Type {
   [[nodiscard]] std::string ToString(bool noTrailingSpace) const;
   void PreventCopying(bool addConst = true);
   [[nodiscard]] bool IsCopyable(TranslatedProject &project) const;
+
+private:
+  [[nodiscard]] bool IsCopyable(TranslatedProject &project,
+                                std::set<std::string> &seenClasses) const;
 };
 
 enum class TypeUseCase {
