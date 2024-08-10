@@ -141,7 +141,7 @@ TEST_F(ContainerTest, UnsignedSet) {
 TEST_F(ContainerTest, EnumArray) {
   TestContainerEnum tce;
   tce.SetSkill(TestContainerSkill::Endurance, 10);
-  EXPECT_EQ(*tce.GetSkill(TestContainerSkill::Endurance), 10);
+  EXPECT_EQ(tce.GetSkill(TestContainerSkill::Endurance), 10);
 }
 
 // TODO: test lua

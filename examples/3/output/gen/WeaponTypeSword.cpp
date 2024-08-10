@@ -2,6 +2,7 @@
 #include "WeaponTypeSword.h"
 
 #include <cmath>
+#include <cstring>
 #include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
@@ -106,9 +107,11 @@ int WeaponTypeSword::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponTypeSword::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("sharpness", key)) {
-    LuaHelper::Read(instance->mSharpness, luaState, -1);
+    auto res = LuaHelper::Read(instance->mSharpness, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning WeaponTypeSword.sharpness from lua failed!");
   } else if (0 == strcmp("isShortSword", key)) {
-    LuaHelper::Read(instance->mIsShortSword, luaState, -1);
+    auto res = LuaHelper::Read(instance->mIsShortSword, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning WeaponTypeSword.isShortSword from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponTypeSword.{}", key);
   }

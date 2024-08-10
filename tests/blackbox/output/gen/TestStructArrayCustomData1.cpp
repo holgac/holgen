@@ -2,6 +2,7 @@
 #include "TestStructArrayCustomData1.h"
 
 #include <cmath>
+#include <cstring>
 #include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"

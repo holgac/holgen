@@ -2,6 +2,7 @@
 #include "CharacterArmor.h"
 
 #include <cmath>
+#include <cstring>
 #include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Armor.h"
@@ -117,9 +118,11 @@ int CharacterArmor::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = CharacterArmor::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("dirtAmount", key)) {
-    LuaHelper::Read(instance->mDirtAmount, luaState, -1);
+    auto res = LuaHelper::Read(instance->mDirtAmount, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning CharacterArmor.dirtAmount from lua failed!");
   } else if (0 == strcmp("armorId", key)) {
-    LuaHelper::Read(instance->mArmorId, luaState, -1);
+    auto res = LuaHelper::Read(instance->mArmorId, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning CharacterArmor.armor from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: CharacterArmor.{}", key);
   }

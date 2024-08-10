@@ -344,11 +344,14 @@ struct TestData {
 auto instance = TestData::ReadProxyFromLua(luaState, -3);
 const char *key = lua_tostring(luaState, -2);
 if (0 == strcmp("testFieldUnsigned", key)) {
-  LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
+  auto res = LuaHelper::Read(instance->mTestFieldUnsigned, luaState, -1);
+  HOLGEN_WARN_IF(!res, "Assigning TestData.testFieldUnsigned from lua failed!");
 } else if (0 == strcmp("testFieldString", key)) {
-  LuaHelper::Read(instance->mTestFieldString, luaState, -1);
+  auto res = LuaHelper::Read(instance->mTestFieldString, luaState, -1);
+  HOLGEN_WARN_IF(!res, "Assigning TestData.testFieldString from lua failed!");
 } else if (0 == strcmp("testFieldBool", key)) {
-  LuaHelper::Read(instance->mTestFieldBool, luaState, -1);
+  auto res = LuaHelper::Read(instance->mTestFieldBool, luaState, -1);
+  HOLGEN_WARN_IF(!res, "Assigning TestData.testFieldBool from lua failed!");
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
 }
@@ -380,7 +383,8 @@ struct TestData {
 auto instance = TestData::ReadProxyFromLua(luaState, -3);
 const char *key = lua_tostring(luaState, -2);
 if (0 == strcmp("testStructRefId", key)) {
-  LuaHelper::Read(instance->mTestStructRefId, luaState, -1);
+  auto res = LuaHelper::Read(instance->mTestStructRefId, luaState, -1);
+  HOLGEN_WARN_IF(!res, "Assigning TestData.testStructRef from lua failed!");
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
 }
