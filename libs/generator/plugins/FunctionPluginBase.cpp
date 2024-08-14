@@ -60,7 +60,8 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
 
   method.mReturnType.mConstness = functionDefinition.mReturnType.mConstness;
 
-  method.mExposeToLua = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr;
+  method.mExposeToLua = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr &&
+      method.mVisibility == Visibility::Public;
   method.mFunction = &functionDefinition;
 
   for (const auto &funcArg: functionDefinition.mArguments) {
