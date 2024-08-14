@@ -36,7 +36,8 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
       continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
-    // TODO: Make this work with pointers
+    if (field.mType.mType == PassByType::Pointer)
+      continue;
     // TODO: Make this work with nested structs
     // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
     switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
