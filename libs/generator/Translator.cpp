@@ -34,6 +34,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<ClassPlugin>();
   AddPlugin<ClassIdFieldPlugin>();
   AddPlugin<ClassFieldPlugin>();
+  AddPlugin<CppDestructorPlugin>();
   AddPlugin<LuaFieldsPlugin>();
   AddPlugin<ClassFieldVariantPlugin>();
   AddPlugin<ClassEqualsOperatorPlugin>();
@@ -41,7 +42,6 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<ClassFieldSetterPlugin>();
   AddPlugin<LuaFunctionPlugin>();
   AddPlugin<CppFunctionPlugin>();
-  AddPlugin<CppDestructorPlugin>();
   AddPlugin<ContainerFieldPlugin>();
   AddPlugin<ManagedClassPlugin>();
   AddPlugin<EnumPlugin>();
