@@ -397,7 +397,12 @@ void ContainerFieldPlugin::GenerateSetElem(Class &cls, const ClassField &field) 
   method.mArguments.emplace_back("idx", Type{fixedSizeEnumArray->mName});
   method.mArguments.back().mType.PreventCopying();
   method.mArguments.emplace_back("val", field.mType.mTemplateParameters.front());
-  method.mBody.Add("{}[idx.GetValue()] = val;", field.mName);
+  if (!field.mType.IsCopyable(mProject)) {
+    method.mArguments.back().mType.mType = PassByType::MoveReference;
+    method.mBody.Add("{}[idx.GetValue()] = std::move(val);", field.mName);
+  } else {
+    method.mBody.Add("{}[idx.GetValue()] = val;", field.mName);
+  }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
