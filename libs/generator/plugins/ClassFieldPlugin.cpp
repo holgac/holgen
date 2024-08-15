@@ -33,6 +33,10 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls,
                    Type{mProject, fieldDefinition.mDefinitionSource, fieldDefinition.mType},
                    Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
+    if (field.mType.mType == PassByType::Pointer &&
+        field.mField->GetMatchingAnnotation(Annotations::Field, Annotations::Field_ConstPtr)) {
+      field.mType.mConstness = Constness::Const;
+    }
     if (fieldDefinition.mType.mName == St::UserData) {
       field.mType = Type{"void", PassByType::Pointer};
       field.mDefaultValue = "nullptr";

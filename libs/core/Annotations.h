@@ -361,6 +361,8 @@ public:
    * @field(const)
    * u32 fieldWithNoSetter;
    *
+   * In case of pointer backed refs, the pointer can be set as const with constPtr
+   *
    * Field setters can be disabled, made private/protected, or custom
    * @field(set=private, set=custom)
    * u32 customPrivateSetter;
@@ -369,6 +371,7 @@ public:
    */
   inline static const std::string Field = "field";
   inline static const std::string Field_Const = "const";
+  inline static const std::string Field_ConstPtr = "constPtr";
   inline static const std::string Field_Set = "set";
   inline static const std::string Field_Get = "get";
   inline static const std::string Field_OnCopy = "onCopy";
