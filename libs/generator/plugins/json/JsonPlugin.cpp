@@ -80,9 +80,10 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
       R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
   StringSwitcher switcher("name", std::move(stringSwitcherElseCase));
   for (const auto &field: cls.mFields) {
-    if (field.mField &&
-        (field.mField->GetAnnotation(Annotations::NoJson) ||
-         field.mField->mType.mName == St::UserData))
+    if ((field.mField &&
+         (field.mField->GetAnnotation(Annotations::NoJson) ||
+          field.mField->mType.mName == St::UserData)) ||
+        field.mType.mType == PassByType::Pointer)
       continue;
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = IsVariantTypeField(cls, field, &variantRawName);
