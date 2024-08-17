@@ -109,11 +109,9 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
     }
     auto returnedClass = mProject.GetClass(method.mReturnType.mName);
     if (returnedClass && !returnedClass->mEnum) {
-      if (method.mReturnType.mType == PassByType::Value) {
-        methodCaller.mBody.Add("result{}{}(luaState);", accessor, St::Lua_PushMirrorObject);
-      } else {
-        methodCaller.mBody.Add("result{}PushToLua(luaState);", accessor);
-      }
+      bool pushMirror = method.mReturnType.mType == PassByType::Value;
+      methodCaller.mBody.Add("{}::{}(result, luaState, {});", St::LuaHelper, St::LuaHelper_Push,
+                             pushMirror);
     } else {
       bool shouldBeMirror = false;
       if (method.mReturnType.mType == PassByType::Value) {

@@ -188,7 +188,7 @@ int Calculator::SubtractCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Calculator.Subtract method with an invalid lua proxy object!");
   auto arg0 = Number::ReadProxyFromLua(luaState, -1);
   auto result = instance->Subtract(luaState, *arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 

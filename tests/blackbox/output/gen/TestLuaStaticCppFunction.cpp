@@ -118,7 +118,7 @@ int TestLuaStaticCppFunction::FactoryCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = TestLuaStaticCppFunction::Factory(arg0);
-  result.PushMirrorToLua(luaState);
+  LuaHelper::Push(result, luaState, true);
   return 1;
 }
 

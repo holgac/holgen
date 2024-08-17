@@ -415,7 +415,7 @@ int GameData::GetBootFromNameCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetBootFromName(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -424,7 +424,7 @@ int GameData::AddBootCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddBoot method with an invalid lua proxy object!");
   auto arg0 = Boot::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddBoot(*arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -434,7 +434,7 @@ int GameData::GetBootCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetBoot(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -452,7 +452,7 @@ int GameData::GetArmorFromNameCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmorFromName(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -462,7 +462,7 @@ int GameData::GetArmorFromAlternativeNameCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmorFromAlternativeName(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -471,7 +471,7 @@ int GameData::AddArmorCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddArmor method with an invalid lua proxy object!");
   auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddArmor(*arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -481,7 +481,7 @@ int GameData::GetArmorCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmor(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -499,7 +499,7 @@ int GameData::GetCharacterFromNameCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetCharacterFromName(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -508,7 +508,7 @@ int GameData::AddCharacterCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddCharacter method with an invalid lua proxy object!");
   auto arg0 = Character::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddCharacter(*arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -518,7 +518,7 @@ int GameData::GetCharacterCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetCharacter(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 

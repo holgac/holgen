@@ -208,7 +208,7 @@ int TestStructSingleElemContainer::AddSingleElemStructCallerFromLua(lua_State *l
     arg0 = &arg0Mirror;
   }
   auto result = instance->AddSingleElemStruct(*arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -218,7 +218,7 @@ int TestStructSingleElemContainer::GetSingleElemStructCallerFromLua(lua_State *l
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetSingleElemStruct(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -244,7 +244,7 @@ int TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua(lua_St
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.AddSingleElemStructWithId method with an invalid lua proxy object!");
   auto arg0 = TestStructSingleElemWithId::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddSingleElemStructWithId(*arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -254,7 +254,7 @@ int TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua(lua_St
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetSingleElemStructWithId(arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 

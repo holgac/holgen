@@ -331,7 +331,7 @@ int TestLuaCalculator::ReturnNullableCallerFromLua(lua_State *luaState) {
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->ReturnNullable(luaState, arg0);
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -341,7 +341,7 @@ int TestLuaCalculator::ReturnRefCallerFromLua(lua_State *luaState) {
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto& result = instance->ReturnRef(luaState, arg0);
-  result.PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -351,7 +351,7 @@ int TestLuaCalculator::ReturnNewCallerFromLua(lua_State *luaState) {
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->ReturnNew(luaState, arg0);
-  result.PushMirrorToLua(luaState);
+  LuaHelper::Push(result, luaState, true);
   return 1;
 }
 

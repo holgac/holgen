@@ -130,7 +130,7 @@ int TestStructArray::GetData1CallerFromLua(lua_State *luaState) {
   auto instance = TestStructArray::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructArray.GetData1 method with an invalid lua proxy object!");
   auto result = instance->GetData1();
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
@@ -138,7 +138,7 @@ int TestStructArray::GetData2CallerFromLua(lua_State *luaState) {
   auto instance = TestStructArray::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructArray.GetData2 method with an invalid lua proxy object!");
   auto result = instance->GetData2();
-  result->PushToLua(luaState);
+  LuaHelper::Push(result, luaState, false);
   return 1;
 }
 
