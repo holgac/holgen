@@ -1,7 +1,7 @@
 # HolGen : Generate your Json/Lua C++ Bindings!
 
 HolGen (pronounced whole-gen) is an MIT licensed code generation tool developed
-alongside [a game](https://x.com/dj_revani) that I'm working
+alongside [a game](https://x.com/armonium_rpg) that I'm working
 on, that generates json loaders (using rapidjson) and Lua exporters for your data structures in C++. It has a C-like DSL
 allowing you to express your data structure along with your usage intent, and it generates C++ classes and CMake
 files.
