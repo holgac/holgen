@@ -145,7 +145,9 @@ void Validator::ValidateKeyedContainer(const Class &cls, const Type &type,
                "Class {} ({}) used in {} does not have a valid hash function", keyClass->mName,
                keyClass->mStruct->mDefinitionSource, source);
     } else {
-      THROW("Non-hash map used in {} is currently not supported for custom types", source)
+      THROW_IF(!keyClass->mStruct->GetFunction("operator<"),
+               "Map key {} used by {} is not a valid key", type.mTemplateParameters[0].mName,
+               source);
     }
   }
   ValidateType(type.mTemplateParameters[1], cls, false, method, source);

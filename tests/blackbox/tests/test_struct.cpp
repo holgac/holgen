@@ -10,6 +10,8 @@
 #include "TestStructNonCopyable.h"
 #include "TestStructHashable.h"
 #include "TestStructHashableMap.h"
+#include "TestStructComparable.h"
+#include "TestStructComparableMap.h"
 
 using namespace holgen_blackbox_test;
 
@@ -115,19 +117,21 @@ TEST_F(StructTest, NonCopyable) {
   auto a2 = std::move(a1);
 }
 
-TEST_F(StructTest, Hashable) {
-  TestStructHashableMap map;
-  TestStructHashable data1;
+namespace {
+template <typename MapType, typename DataType>
+void TestMap() {
+  MapType map;
+  DataType data1;
   data1.SetField1(1);
   data1.SetField1(1001);
   map.GetData().emplace(data1, "data1");
-  TestStructHashable data2;
+  DataType data2;
   data2.SetField1(2);
   data2.SetField1(1002);
   map.GetData().emplace(data2, "data2");
-  std::map<std::string, TestStructHashable> dataInMap;
-  for (auto &[hashable, data]: map.GetData()) {
-    dataInMap[data] = hashable;
+  std::map<std::string, DataType> dataInMap;
+  for (auto &[key, data]: map.GetData()) {
+    dataInMap[data] = key;
   }
 
   EXPECT_EQ(map.GetData().size(), 2);
@@ -140,4 +144,13 @@ TEST_F(StructTest, Hashable) {
   ASSERT_TRUE(map.GetData().contains(data2));
   EXPECT_EQ(map.GetData().at(data1), "data1");
   EXPECT_EQ(map.GetData().at(data2), "data2");
+}
+} // namespace
+
+TEST_F(StructTest, Hashable) {
+  TestMap<TestStructHashableMap, TestStructHashable>();
+}
+
+TEST_F(StructTest, Comparable) {
+  TestMap<TestStructComparableMap, TestStructComparable>();
 }

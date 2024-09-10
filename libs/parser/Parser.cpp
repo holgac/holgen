@@ -301,6 +301,12 @@ void Parser::ParseFunction(Token &curToken, FunctionDefinition &fd) {
                   "Function name should be a string, found \"{}\"", curToken.mContents);
   fd.mName = curToken.mContents;
   NEXT_OR_THROW(curToken, "Incomplete function definition!");
+  if (fd.mName == "operator") {
+    while (curToken.mType != TokenType::POpen && curToken.mType != TokenType::SemiColon) {
+      fd.mName += curToken.mContents;
+      NEXT_OR_THROW(curToken, "Incomplete function definition!");
+    }
+  }
   if (curToken.mType == TokenType::SemiColon)
     return;
   PARSER_THROW_IF(curToken.mType != TokenType::POpen,

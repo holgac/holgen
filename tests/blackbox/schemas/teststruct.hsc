@@ -66,3 +66,15 @@ struct TestStructHashable {
 struct TestStructHashableMap {
     unordered_map<TestStructHashable, string> data;
 }
+
+struct TestStructComparable {
+    u32 field1;
+    u32 field2;
+    @func(const)
+    @noLua
+    func operator<(TestStructComparable rhs) -> bool;
+}
+
+struct TestStructComparableMap {
+    map<TestStructComparable, string> data;
+}
