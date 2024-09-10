@@ -11,5 +11,6 @@ public:
 private:
   void ProcessFunctionArgument(Class &cls, ClassMethod &method,
                                const FunctionArgumentDefinition &funcArg);
+  void ProcessHashFunction(Class &cls, const ClassMethod &method);
 };
 } // namespace holgen

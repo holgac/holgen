@@ -239,6 +239,8 @@ public:
    * const: Specifies whether the function is const
    *
    * static: Creates a static method that can be called without an instance.
+   *
+   * hash: Marks the function as the hash function used in std::hash
    */
   inline static const std::string Func = "func";
   inline static const std::string Func_OnDestroy = "onDestroy";
@@ -246,6 +248,7 @@ public:
   inline static const std::string Func_Private = "private";
   inline static const std::string Func_Protected = "protected";
   inline static const std::string Func_Static = "static";
+  inline static const std::string Func_Hash = "hash";
 
   /**
    * Adds a comment to a struct, field or function.

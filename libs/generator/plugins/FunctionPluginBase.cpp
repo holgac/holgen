@@ -1,6 +1,6 @@
 #include "FunctionPluginBase.h"
-
 #include "core/St.h"
+#include "core/Exception.h"
 
 namespace holgen {
 void FunctionPluginBase::ProcessFunctionArgument(Class &cls, ClassMethod &method,
@@ -26,6 +26,27 @@ void FunctionPluginBase::ProcessFunctionArgument(Class &cls, ClassMethod &method
   }
 }
 
+void FunctionPluginBase::ProcessHashFunction(Class &cls, const ClassMethod &method) {
+  auto funcAnnotation = method.mFunction->GetAnnotation(Annotations::Func);
+  THROW_IF(funcAnnotation->GetAttribute(Annotations::LuaFunc),
+           "Lua function {} cannot be used as hash", method.mFunction->mDefinitionSource);
+  THROW_IF(!method.mArguments.empty(), "Hash function {} cannot take arguments",
+           method.mFunction->mDefinitionSource);
+  THROW_IF(method.mConstness != Constness::Const, "Hash function {} cannot be non-const",
+           method.mFunction->mDefinitionSource);
+
+  auto className = std::format("{}::{}", cls.mNamespace, cls.mName);
+  auto hash = Class{"hash", "std"};
+  hash.mTemplateSpecializations.push_back(className);
+  hash.mClassType = ClassType::Struct;
+
+  auto hasher = ClassMethod{"operator()", Type{"size_t"}, Visibility::Public, Constness::Const};
+  hasher.mArguments.emplace_back("obj", Type{className, PassByType::Reference, Constness::Const});
+  hasher.mBody.Add("return obj.{}();", method.mName);
+  hash.mMethods.push_back(std::move(hasher));
+  cls.mSpecializations.push_back(std::move(hash));
+}
+
 ClassMethod FunctionPluginBase::NewFunction(Class &cls,
                                             const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
@@ -36,6 +57,7 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
       (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Const))
           ? Constness::Const
           : Constness::NotConst};
+
   if (funcAnnotation) {
     if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy)) {
       method.mVisibility = Visibility::Protected;
@@ -68,6 +90,11 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
     ProcessFunctionArgument(cls, method, funcArg);
   }
   FillComments(functionDefinition, method.mComments);
+
+  if (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Hash)) {
+    ProcessHashFunction(cls, method);
+  }
+
   return method;
 }
 } // namespace holgen

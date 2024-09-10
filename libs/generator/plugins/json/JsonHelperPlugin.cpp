@@ -220,9 +220,19 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std:
   }
 
   method.mBody.Line() << "auto[it, insertRes] = out.try_emplace(key, V());";
+  method.mBody.Add("if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {{");
+  method.mBody.Indent(1);
   method.mBody.Add(
       R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
       container);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}} else {{");
+  method.mBody.Indent(1);
+  method.mBody.Add(
+      R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing {}");)R",
+      container);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
   if (withElemConverter) {
     method.mBody.Add("ElemSourceType valueRaw;");
     method.mBody.Add("res = {}(valueRaw, data.value, converter);", St::JsonHelper_Parse);

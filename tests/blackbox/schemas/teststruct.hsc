@@ -55,3 +55,14 @@ struct TestStructArray {
 struct TestStructNonCopyable {
   vector<int> bigVector;
 }
+
+struct TestStructHashable {
+    u32 field1;
+    u32 field2;
+    @func(const, hash)
+    func Hash() -> u64;
+}
+
+struct TestStructHashableMap {
+    unordered_map<TestStructHashable, string> data;
+}

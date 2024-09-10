@@ -50,10 +50,14 @@ TypeInfo::TypeInfo() {
       "std::deque",
       "std::array",
   };
-  CppKeyedContainers = {
-      "std::map",
+  CppHashContainers = {
       "std::unordered_map",
   };
+  CppTreeContainers = {
+      "std::map",
+  };
+  CppKeyedContainers = CppHashContainers;
+  CppKeyedContainers.insert(CppTreeContainers.begin(), CppTreeContainers.end());
   CppSets = {
       "std::set",
       "std::unordered_set",

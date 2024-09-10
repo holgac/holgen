@@ -7,6 +7,7 @@
 #include "core/Iterators.h"
 
 namespace holgen {
+struct ProjectDefinition;
 
 enum class Constness {
   Const,
@@ -111,6 +112,7 @@ struct StructDefinition : public AnnotationsMixin {
   [[nodiscard]] const FieldDefinition *GetField(const std::string &name) const;
   [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
   [[nodiscard]] const FieldDefinition *GetIdField() const;
+  [[nodiscard]] const FunctionDefinition *GetHashFunction(const ProjectDefinition &project) const;
 };
 
 struct EnumEntryDefinition : public AnnotationsMixin {

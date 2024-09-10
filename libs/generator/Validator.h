@@ -10,6 +10,8 @@ public:
   void NewClass(const Class &cls) const;
   void IdField(const Class &cls, const ClassField &field) const;
   void NewField(const Class &cls, const ClassField &field) const;
+  void ValidateKeyedContainer(const Class &cls, const Type &type, const ClassMethod *method,
+                              const std::string &source) const;
   void RefField(const Class &cls, const FieldDefinition &fieldDefinition) const;
   void NewMethod(const Class &cls, const ClassMethod &method) const;
   void Enum(const Class &cls) const;
@@ -33,6 +35,8 @@ private:
   void EnforceUniqueAnnotation(const Class &cls, const ClassField &field,
                                const std::string &annotationName) const;
   void EnforceUniqueAnnotation(const Class &cls, const std::string &annotationName) const;
+  bool IsTemplateParameter(const std::string &name, const Class &cls,
+                           const ClassMethod *method) const;
   TranslatedProject &mProject;
   const NamingConvention &mNaming;
 };

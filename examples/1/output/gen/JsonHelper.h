@@ -168,7 +168,11 @@ public:
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+      }
       res = Parse(it->second, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
     }
@@ -182,7 +186,11 @@ public:
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+      }
       ElemSourceType valueRaw;
       res = Parse(valueRaw, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
@@ -199,7 +207,11 @@ public:
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
       K key = std::move(keyConverter(keyInJson));
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+      }
       res = Parse(it->second, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
     }
@@ -214,7 +226,11 @@ public:
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
       K key = std::move(keyConverter(keyInJson));
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+      }
       ElemSourceType valueRaw;
       res = Parse(valueRaw, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
@@ -230,7 +246,11 @@ public:
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+      }
       res = Parse(it->second, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
     }
@@ -244,7 +264,11 @@ public:
       auto res = Parse(key, data.name, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+      }
       ElemSourceType valueRaw;
       res = Parse(valueRaw, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
@@ -261,7 +285,11 @@ public:
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
       K key = std::move(keyConverter(keyInJson));
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+      }
       res = Parse(it->second, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
     }
@@ -276,7 +304,11 @@ public:
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
       K key = std::move(keyConverter(keyInJson));
       auto[it, insertRes] = out.try_emplace(key, V());
-      HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+      } else {
+        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+      }
       ElemSourceType valueRaw;
       res = Parse(valueRaw, data.value, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");

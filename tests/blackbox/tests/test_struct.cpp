@@ -8,6 +8,8 @@
 #include "TestStructArrayCustomData1.h"
 #include "TestStructArrayCustomData2.h"
 #include "TestStructNonCopyable.h"
+#include "TestStructHashable.h"
+#include "TestStructHashableMap.h"
 
 using namespace holgen_blackbox_test;
 
@@ -111,4 +113,31 @@ TEST_F(StructTest, ArrayCustomData2) {
 TEST_F(StructTest, NonCopyable) {
   TestStructNonCopyable a1;
   auto a2 = std::move(a1);
+}
+
+TEST_F(StructTest, Hashable) {
+  TestStructHashableMap map;
+  TestStructHashable data1;
+  data1.SetField1(1);
+  data1.SetField1(1001);
+  map.GetData().emplace(data1, "data1");
+  TestStructHashable data2;
+  data2.SetField1(2);
+  data2.SetField1(1002);
+  map.GetData().emplace(data2, "data2");
+  std::map<std::string, TestStructHashable> dataInMap;
+  for (auto &[hashable, data]: map.GetData()) {
+    dataInMap[data] = hashable;
+  }
+
+  EXPECT_EQ(map.GetData().size(), 2);
+  ASSERT_TRUE(dataInMap.contains("data1"));
+  ASSERT_TRUE(dataInMap.contains("data2"));
+  EXPECT_EQ(dataInMap.at("data1"), data1);
+  EXPECT_EQ(dataInMap.at("data2"), data2);
+
+  ASSERT_TRUE(map.GetData().contains(data1));
+  ASSERT_TRUE(map.GetData().contains(data2));
+  EXPECT_EQ(map.GetData().at(data1), "data1");
+  EXPECT_EQ(map.GetData().at(data2), "data2");
 }

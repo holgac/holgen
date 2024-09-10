@@ -344,9 +344,7 @@ TEST_F(ClassFieldPluginTest, Map) {
                      "template parameter",
                      Source);
   ExpectErrorMessage("struct A {map<vector<u32>, u32> field;}", Run,
-                     "Map type std::map used by A.field ({0}:1:11) should have a keyable first "
-                     "template parameter, found std::vector",
-                     Source);
+                     "Map key std::vector used by A.field ({0}:1:11) is not a valid key", Source);
 }
 
 TEST_F(ClassFieldPluginTest, InvalidType) {

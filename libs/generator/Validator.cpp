@@ -126,11 +126,33 @@ void Validator::NewField(const Class &cls, const ClassField &field) const {
   ValidateType(field.mType, cls, false, nullptr, ToString(cls, field));
 }
 
+void Validator::ValidateKeyedContainer(const Class &cls, const Type &type,
+                                       const ClassMethod *method, const std::string &source) const {
+  THROW_IF(type.mTemplateParameters.size() != 2,
+           "Map type {} used by {} should have two template parameters", type.mName, source);
+  THROW_IF(type.mFunctionalTemplateParameters.size() > 0,
+           "Map type {} used by {} cannot have functional template arguments", type.mName, source);
+  auto definitelyKeyable =
+      TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName) ||
+      IsTemplateParameter(type.mTemplateParameters[0].mName, cls, method) ||
+      mProject.mProject.GetEnum(type.mTemplateParameters[0].mName);
+  if (!definitelyKeyable) {
+    auto keyClass = mProject.GetClass(type.mTemplateParameters[0].mName);
+    THROW_IF(!keyClass || !keyClass->mStruct, "Map key {} used by {} is not a valid key",
+             type.mTemplateParameters[0].mName, source);
+    if (TypeInfo::Get().CppHashContainers.contains(type.mName)) {
+      THROW_IF(!keyClass->mStruct->GetHashFunction(mProject.mProject),
+               "Class {} ({}) used in {} does not have a valid hash function", keyClass->mName,
+               keyClass->mStruct->mDefinitionSource, source);
+    } else {
+      THROW("Non-hash map used in {} is currently not supported for custom types", source)
+    }
+  }
+  ValidateType(type.mTemplateParameters[1], cls, false, method, source);
+}
+
 void Validator::ValidateType(const Type &type, const Class &cls, bool acceptVoid,
                              const ClassMethod *method, const std::string &source) const {
-  auto isTemplateParameter = [&](const std::string &name) {
-    return cls.GetTemplateParameter(name) || (method && method->GetTemplateParameter(name));
-  };
   if (TypeInfo::Get().CppBasicTypes.contains(type.mName)) {
     THROW_IF(type.mTemplateParameters.size() > 0,
              "Primitive type {} used by {} cannot have template parameters", type.mName, source);
@@ -154,22 +176,12 @@ void Validator::ValidateType(const Type &type, const Class &cls, bool acceptVoid
              "Set type {} used by {} cannot have functional template arguments", type.mName,
              source);
     THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName) &&
-                 !isTemplateParameter(type.mTemplateParameters[0].mName),
+                 !IsTemplateParameter(type.mTemplateParameters[0].mName, cls, method),
              "Set type {} used by {} should have a keyable template parameter, found {}",
              type.mName, source, type.mTemplateParameters[0].mName);
     ValidateType(type.mTemplateParameters[0], cls, false, method, source);
   } else if (TypeInfo::Get().CppKeyedContainers.contains(type.mName)) {
-    THROW_IF(type.mTemplateParameters.size() != 2,
-             "Map type {} used by {} should have two template parameters", type.mName, source);
-    THROW_IF(type.mFunctionalTemplateParameters.size() > 0,
-             "Map type {} used by {} cannot have functional template arguments", type.mName,
-             source);
-    THROW_IF(!TypeInfo::Get().KeyableTypes.contains(type.mTemplateParameters[0].mName) &&
-                 !isTemplateParameter(type.mTemplateParameters[0].mName) &&
-                 !mProject.mProject.GetEnum(type.mTemplateParameters[0].mName),
-             "Map type {} used by {} should have a keyable first template parameter, found {}",
-             type.mName, source, type.mTemplateParameters[0].mName);
-    ValidateType(type.mTemplateParameters[1], cls, false, method, source);
+    ValidateKeyedContainer(cls, type, method, source);
   } else if (type.mName == "void") {
     THROW_IF(!acceptVoid && type.mType != PassByType::Pointer, "Invalid void usage in {}", source);
     THROW_IF(type.mType == PassByType::Reference || type.mType == PassByType::MoveReference,
@@ -178,7 +190,7 @@ void Validator::ValidateType(const Type &type, const Class &cls, bool acceptVoid
              source);
   } else if (mProject.GetClass(type.mName)) {
     // all good
-  } else if (isTemplateParameter(type.mName)) {
+  } else if (IsTemplateParameter(type.mName, cls, method)) {
     // all good
   } else if (auto usingStatement = cls.GetUsing(type.mName)) {
     ValidateType(usingStatement->mSourceType, cls, acceptVoid, method, source);
@@ -367,6 +379,11 @@ void Validator::EnforceUniqueAnnotation(const Class &cls, const std::string &ann
       [&annotationName](const auto &annotation) { return annotation.mName == annotationName; });
   THROW_IF(count != 1, "{} annotation in {} should be used only once", annotationName,
            ToString(cls));
+}
+
+bool Validator::IsTemplateParameter(const std::string &name, const Class &cls,
+                                    const ClassMethod *method) const {
+  return cls.GetTemplateParameter(name) || (method && method->GetTemplateParameter(name));
 }
 
 void Validator::EnforceUniqueAnnotation(const Class &cls, const ClassField &field,

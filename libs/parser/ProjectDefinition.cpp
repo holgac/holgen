@@ -56,6 +56,24 @@ const FieldDefinition *StructDefinition::GetIdField() const {
   return nullptr;
 }
 
+const FunctionDefinition *
+    StructDefinition::GetHashFunction(const ProjectDefinition &project) const {
+  for (auto &function: mFunctions) {
+    if (function.GetMatchingAttribute(Annotations::Func, Annotations::Func_Hash)) {
+      return &function;
+    }
+  }
+
+  for (auto &mixin: mMixins) {
+    auto func = project.GetStruct(mixin)->GetHashFunction(project);
+    if (func) {
+      return func;
+    }
+  }
+
+  return nullptr;
+}
+
 bool TypeDefinition::operator==(const TypeDefinition &rhs) const {
   if (mName != rhs.mName)
     return false;
