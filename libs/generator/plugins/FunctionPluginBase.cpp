@@ -27,6 +27,11 @@ void FunctionPluginBase::ProcessFunctionArgument(Class &cls, ClassMethod &method
 }
 
 void FunctionPluginBase::ProcessHashFunction(Class &cls, const ClassMethod &method) {
+  auto expectedHashFunction = cls.mStruct->GetHashFunction(mProject.mProject);
+  THROW_IF(expectedHashFunction != method.mFunction,
+           "Class {} ({}) has multiple hash functions: {} and {}", cls.mName,
+           cls.mStruct->mDefinitionSource, method.mFunction->mDefinitionSource,
+           expectedHashFunction->mDefinitionSource);
   auto funcAnnotation = method.mFunction->GetAnnotation(Annotations::Func);
   THROW_IF(funcAnnotation->GetAttribute(Annotations::LuaFunc),
            "Lua function {} cannot be used as hash", method.mFunction->mDefinitionSource);
