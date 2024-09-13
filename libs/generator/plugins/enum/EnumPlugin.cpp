@@ -102,14 +102,14 @@ void EnumPlugin::GenerateProperty(Class &cls, const AnnotationDefinition &annota
   auto method =
       ClassMethod{Naming().FieldGetterNameInCpp(name),
                   Type{mProject, typeAttribute->mDefinitionSource, typeAttribute->mValue}};
-  bool addQuotes;
+  bool addQuotes = false;
   if (typeAttribute->mValue.mName == "string") {
     addQuotes = true;
     method.mReturnType = Type{"char", PassByType::Pointer, Constness::Const};
-  } else {
+  } else if (!mProject.mProject.GetEnum(typeAttribute->mValue.mName)) {
     method.mReturnType.PreventCopying();
-    addQuotes = false;
   }
+
   method.mBody.Add("switch (mValue) {{");
   for (auto &[value, entries]: valueToEntries) {
     for (auto &entry: entries) {

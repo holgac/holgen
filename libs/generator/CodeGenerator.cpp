@@ -436,23 +436,25 @@ void CodeGenerator::GenerateCMakeLists(GeneratedContent &cmake,
   cmake.mName = "CMakeLists.txt";
   CodeBlock codeBlock;
   codeBlock.Add("# {}", PartialGenMessage);
-  {
-    auto line = codeBlock.Line();
-    line << "set(gen_sources";
-    for (auto &cls: translatedProject.mClasses) {
-      line << " gen/" << cls.mName << ".cpp";
-    }
-    line << ")";
+  codeBlock.Add("set(gen_sources");
+  codeBlock.Indent(2);
+
+  for (auto &cls: translatedProject.mClasses) {
+    codeBlock.Add("gen/{}.cpp", cls.mName);
   }
-  {
-    auto line = codeBlock.Line();
-    line << "set(src_sources";
-    for (auto &cls: translatedProject.mClasses) {
-      if (HasUserDefinedMethods(cls))
-        line << " src/" << cls.mName << ".cpp";
+  codeBlock.Indent(-2);
+  codeBlock.Add(")");
+  codeBlock.Add("set(src_sources");
+  codeBlock.Indent(2);
+
+  for (auto &cls: translatedProject.mClasses) {
+    if (HasUserDefinedMethods(cls)) {
+      codeBlock.Add("src/{}.cpp", cls.mName);
     }
-    line << ")";
   }
+  codeBlock.Indent(-2);
+  codeBlock.Add(")");
+
   codeBlock.Add("set(custom_sources)");
   codeBlock.UserDefined("CustomSources");
   codeBlock.Add("add_library({} STATIC ${{gen_sources}} ${{src_sources}} ${{custom_sources}})",
