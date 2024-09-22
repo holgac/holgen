@@ -136,10 +136,10 @@ void Character::PushMirrorToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "name");
   LuaHelper::Push(mName, luaState, true);
   lua_settable(luaState, -3);
-  lua_pushstring(luaState, "partner");
+  lua_pushstring(luaState, "partnerId");
   LuaHelper::Push(mPartnerId, luaState, true);
   lua_settable(luaState, -3);
-  lua_pushstring(luaState, "weapon");
+  lua_pushstring(luaState, "weaponId");
   LuaHelper::Push(mWeaponId, luaState, true);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "armor");

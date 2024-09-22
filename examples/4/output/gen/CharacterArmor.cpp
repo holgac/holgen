@@ -75,7 +75,7 @@ void CharacterArmor::PushMirrorToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "dirtAmount");
   LuaHelper::Push(mDirtAmount, luaState, true);
   lua_settable(luaState, -3);
-  lua_pushstring(luaState, "armor");
+  lua_pushstring(luaState, "armorId");
   LuaHelper::Push(mArmorId, luaState, true);
   lua_settable(luaState, -3);
 }

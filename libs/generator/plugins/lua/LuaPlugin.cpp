@@ -256,7 +256,7 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
         field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant) {
       continue;
     }
-    method.mBody.Add("lua_pushstring(luaState, \"{}\");", field.mField->mName);
+    method.mBody.Add("lua_pushstring(luaState, \"{}\");", Naming().FieldNameInLua(*field.mField));
     auto fieldClass = mProject.GetClass(field.mType.mName);
     if (fieldClass && !fieldClass->mEnum) {
       std::string accessOperator = field.mType.mType == PassByType::Pointer ? "->" : ".";
