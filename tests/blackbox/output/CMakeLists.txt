@@ -43,6 +43,7 @@ set(gen_sources
     gen/TestStructHashable.cpp
     gen/TestStructHashableMap.cpp
     gen/TestStructNonCopyable.cpp
+    gen/TestStructPairFields.cpp
     gen/TestStructSingleElem.cpp
     gen/TestStructSingleElemContainer.cpp
     gen/TestStructSingleElemWithId.cpp

@@ -19,6 +19,7 @@
 #include "TestLuaFuncTableContainer.h"
 #include "TestLuaRegistryData.h"
 #include "TestLuaStaticCppFunction.h"
+#include "TestStructPairFields.h"
 #include <rapidjson/document.h>
 
 using namespace holgen_blackbox_test;
@@ -556,5 +557,23 @@ TEST_F(LuaTest, StaticFunction) {
   EXPECT_EQ(TestLuaStaticCppFunction::Factory(15).GetData(), 15);
   luaL_dostring(mState, "return TestLuaStaticCppFunctionMeta.Factory(32).data");
   LuaTestHelper::ExpectStack(mState, {"32"});
+  lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, ParsingPairFields) {
+  TestStructPairFields data;
+  data.SetIntStringPair(std::make_pair(5, std::string("hello")));
+  data.GetPairVector().emplace_back(std::string("hello"), 5);
+  data.GetPairVector().emplace_back(std::string("howareyou"), 9);
+  LuaHelper::CreateMetatables(mState);
+  data.PushGlobalToLua(mState, "data");
+  luaL_dostring(mState, "return data.intStringPair");
+  LuaTestHelper::ExpectStack(mState, {"{1:hello,0:5}"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return data.pairVector[0]");
+  LuaTestHelper::ExpectStack(mState, {"{1:5,0:hello}"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return data.pairVector[1]");
+  LuaTestHelper::ExpectStack(mState, {"{1:9,0:howareyou}"});
   lua_pop(mState, 1);
 }

@@ -78,3 +78,8 @@ struct TestStructComparable {
 struct TestStructComparableMap {
     map<TestStructComparable, string> data;
 }
+
+struct TestStructPairFields {
+    pair<s32, string> intStringPair;
+    vector<pair<string, s32>> pairVector;
+}

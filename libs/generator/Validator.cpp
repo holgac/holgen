@@ -184,6 +184,8 @@ void Validator::ValidateType(const Type &type, const Class &cls, bool acceptVoid
     ValidateType(type.mTemplateParameters[0], cls, false, method, source);
   } else if (TypeInfo::Get().CppKeyedContainers.contains(type.mName)) {
     ValidateKeyedContainer(cls, type, method, source);
+  } else if (type.mName == "std::pair") {
+    ValidatePair(cls, type, method, source);
   } else if (type.mName == "void") {
     THROW_IF(!acceptVoid && type.mType != PassByType::Pointer, "Invalid void usage in {}", source);
     THROW_IF(type.mType == PassByType::Reference || type.mType == PassByType::MoveReference,
@@ -386,6 +388,13 @@ void Validator::EnforceUniqueAnnotation(const Class &cls, const std::string &ann
 bool Validator::IsTemplateParameter(const std::string &name, const Class &cls,
                                     const ClassMethod *method) const {
   return cls.GetTemplateParameter(name) || (method && method->GetTemplateParameter(name));
+}
+
+void Validator::ValidatePair(const Class &cls, const Type &type, const ClassMethod *method,
+                             const std::string &source) const {
+  THROW_IF(type.mTemplateParameters.size() != 2, "pairs should have two template parameters");
+  ValidateType(type.mTemplateParameters[0], cls, false, method, source);
+  ValidateType(type.mTemplateParameters[1], cls, false, method, source);
 }
 
 void Validator::EnforceUniqueAnnotation(const Class &cls, const ClassField &field,

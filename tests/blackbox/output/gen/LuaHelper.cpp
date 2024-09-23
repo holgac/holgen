@@ -50,6 +50,7 @@
 #include "TestStructHashable.h"
 #include "TestStructHashableMap.h"
 #include "TestStructNonCopyable.h"
+#include "TestStructPairFields.h"
 #include "TestStructSingleElem.h"
 #include "TestStructSingleElemContainer.h"
 #include "TestStructSingleElemWithId.h"
@@ -230,6 +231,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestStructHashable::CreateLuaMetatable(luaState);
   TestStructHashableMap::CreateLuaMetatable(luaState);
   TestStructNonCopyable::CreateLuaMetatable(luaState);
+  TestStructPairFields::CreateLuaMetatable(luaState);
   TestStructSingleElem::CreateLuaMetatable(luaState);
   TestStructSingleElemContainer::CreateLuaMetatable(luaState);
   TestStructSingleElemWithId::CreateLuaMetatable(luaState);

@@ -37,6 +37,8 @@ private:
   void EnforceUniqueAnnotation(const Class &cls, const std::string &annotationName) const;
   bool IsTemplateParameter(const std::string &name, const Class &cls,
                            const ClassMethod *method) const;
+  void ValidatePair(const Class &cls, const Type &type, const ClassMethod *method,
+                    const std::string &source) const;
   TranslatedProject &mProject;
   const NamingConvention &mNaming;
 };

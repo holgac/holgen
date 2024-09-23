@@ -44,6 +44,7 @@ void LuaHelperPlugin::GeneratePush(Class &cls) {
   GeneratePushNil(cls);
   GeneratePushForPrimitives(cls);
   GeneratePushForContainers(cls);
+  GeneratePushTuple(cls, 2, "std::pair");
 }
 
 void LuaHelperPlugin::GeneratePushForContainers(Class &cls) {
@@ -62,6 +63,27 @@ void LuaHelperPlugin::GeneratePushForContainers(Class &cls) {
   for (const auto &container: TypeInfo::Get().CppKeyedContainers) {
     GeneratePushForKeyedContainer(cls, container);
   }
+}
+
+void LuaHelperPlugin::GeneratePushTuple(Class &cls, size_t size,
+                                        const std::string &tupleClassName) {
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
+  auto &tupleArg = method.mArguments.emplace_back("data", Type{tupleClassName});
+  tupleArg.mType.mType = PassByType::Reference;
+  tupleArg.mType.mConstness = Constness::Const;
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mArguments.emplace_back("pushMirror", Type{"bool"});
+  method.mBody.Add("lua_newtable(luaState);");
+  for (size_t i = 0; i < size; ++i) {
+    auto templateParameter = std::format("T{}", i);
+    tupleArg.mType.mTemplateParameters.emplace_back(templateParameter);
+    method.mTemplateParameters.emplace_back("typename", templateParameter);
+    method.mBody.Add("Push(std::get<{}>(data), luaState, pushMirror);", i);
+    method.mBody.Add("lua_rawseti(luaState, -2, {});", i);
+  }
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls,
@@ -160,6 +182,7 @@ void LuaHelperPlugin::GenerateRead(Class &cls) {
   GenerateReadForPrimitives(cls);
   GenerateReadFunction(cls);
   GenerateReadForContainers(cls);
+  GenerateReadTuple(cls, 2, "std::pair");
 }
 
 void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
@@ -243,6 +266,36 @@ void LuaHelperPlugin::GenerateReadFunction(Class &cls) {
   method.mBody.Add("}};");
 
   method.mBody.Line() << "return true;";
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void LuaHelperPlugin::GenerateReadTuple(Class &cls, size_t size,
+                                        const std::string &tupleClassName) {
+  auto method = ClassMethod{"Read", Type{"bool"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
+  auto &tupleArg = method.mArguments.emplace_back("data", Type{tupleClassName});
+  tupleArg.mType.mType = PassByType::Reference;
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
+  method.mBody.Add("lua_newtable(luaState);");
+  method.mBody.Add("lua_pushvalue(luaState, luaIndex);");
+  method.mBody.Add("lua_pushnil(luaState);");
+  for (size_t i = 0; i < size; ++i) {
+    method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!lua_next(luaState, -2), false, \"Exhausted "
+                     "elements when reading from lua into a {}\");",
+                     tupleClassName);
+    auto templateParameter = std::format("T{}", i);
+    tupleArg.mType.mTemplateParameters.emplace_back(templateParameter);
+    method.mTemplateParameters.emplace_back("typename", templateParameter);
+    method.mBody.Add("Read(std::get<{}>(data), luaState, -1);", i);
+    method.mBody.Add("lua_pop(luaState, 1);");
+  }
+  method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(lua_next(luaState, -2), false, \"Too many elements "
+                   "when from lua into a {}\");",
+                   tupleClassName);
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("return true;");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

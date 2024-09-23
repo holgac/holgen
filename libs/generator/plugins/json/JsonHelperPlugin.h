@@ -21,5 +21,6 @@ private:
   void GenerateParseSingleElem(Class &cls);
   void GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,
                                const std::string &getter);
+  void GenerateParseTuple(Class &cls, size_t size, const std::string &tupleClassName);
 };
 } // namespace holgen

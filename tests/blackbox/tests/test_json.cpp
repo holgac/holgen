@@ -5,8 +5,8 @@
 #include "TestJsonTag.h"
 #include "JsonHelper.h"
 #include "Converter.h"
-
-#include <TestJsonStructMapWithConverters.h>
+#include "TestStructPairFields.h"
+#include "TestJsonStructMapWithConverters.h"
 
 using namespace holgen_blackbox_test;
 
@@ -56,7 +56,7 @@ TEST_F(JsonTest, ElemConverter) {
 TEST_F(JsonTest, MapConvertElem) {
   TestJsonStructMapWithConverters obj;
   auto cv = Converter{};
-  cv.testJsonConvertStringToU32 = [](const std::string& str) {
+  cv.testJsonConvertStringToU32 = [](const std::string &str) {
     return uint32_t(atoll(str.c_str()));
   };
 
@@ -75,7 +75,7 @@ TEST_F(JsonTest, MapConvertElem) {
 TEST_F(JsonTest, MapConvertKey) {
   TestJsonStructMapWithConverters obj;
   auto cv = Converter{};
-  cv.testJsonConvertStringToU32 = [](const std::string& str) {
+  cv.testJsonConvertStringToU32 = [](const std::string &str) {
     return uint32_t(atoll(str.c_str()));
   };
 
@@ -94,7 +94,7 @@ TEST_F(JsonTest, MapConvertKey) {
 TEST_F(JsonTest, MapConvertKeyElem) {
   TestJsonStructMapWithConverters obj;
   auto cv = Converter{};
-  cv.testJsonConvertStringToU32 = [](const std::string& str) {
+  cv.testJsonConvertStringToU32 = [](const std::string &str) {
     return uint32_t(atoll(str.c_str()));
   };
 
@@ -108,4 +108,26 @@ TEST_F(JsonTest, MapConvertKeyElem) {
   ASSERT_EQ(obj.GetTestMapConvertKeyElem().size(), 2);
   EXPECT_EQ(obj.GetTestMapConvertKeyElem().at(1), 1);
   EXPECT_EQ(obj.GetTestMapConvertKeyElem().at(2), 2);
+}
+
+TEST_F(JsonTest, ParsingPairFields) {
+  TestStructPairFields data;
+  rapidjson::Document doc;
+  doc.Parse(R"R(
+{
+  "intStringPair": [5, "hello"],
+  "pairVector": [
+    ["hello", 5],
+    ["howareyou", 9]
+  ]
+}
+)R");
+  data.ParseJson(doc, {});
+  EXPECT_EQ(data.GetIntStringPair().first, 5);
+  EXPECT_EQ(data.GetIntStringPair().second, "hello");
+  ASSERT_EQ(data.GetPairVector().size(), 2);
+  EXPECT_EQ(data.GetPairVector()[0].first, "hello");
+  EXPECT_EQ(data.GetPairVector()[0].second, 5);
+  EXPECT_EQ(data.GetPairVector()[1].first, "howareyou");
+  EXPECT_EQ(data.GetPairVector()[1].second, 9);
 }

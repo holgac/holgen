@@ -12,6 +12,7 @@
 #include "TestStructHashableMap.h"
 #include "TestStructComparable.h"
 #include "TestStructComparableMap.h"
+#include "TestStructPairFields.h"
 
 using namespace holgen_blackbox_test;
 
@@ -153,4 +154,11 @@ TEST_F(StructTest, Hashable) {
 
 TEST_F(StructTest, Comparable) {
   TestMap<TestStructComparableMap, TestStructComparable>();
+}
+
+TEST_F(StructTest, PairFields) {
+  TestStructPairFields data;
+  data.SetIntStringPair(std::make_pair(5, std::string("hello")));
+  EXPECT_EQ(data.GetIntStringPair().first, 5);
+  EXPECT_EQ(data.GetIntStringPair().second, "hello");
 }

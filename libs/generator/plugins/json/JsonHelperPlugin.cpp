@@ -8,6 +8,7 @@ void JsonHelperPlugin::Run() {
   cls.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
   GenerateBaseParse(cls);
   GenerateParseSingleElem(cls);
+  GenerateParseTuple(cls, 2, "std::pair");
   for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
     GenerateParseJsonForSingleElemContainer(cls, container, true);
     GenerateParseJsonForSingleElemContainer(cls, container, false);
@@ -136,6 +137,43 @@ void JsonHelperPlugin::GenerateParseSingleElem(Class &cls, const std::string &ty
       validator, type);
   method.mBody.Line() << "out = json." << getter << "();";
   method.mBody.Line() << "return true;";
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
+                                          const std::string &tupleClassName) {
+  auto method = ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  auto &tupleArg = method.mArguments.emplace_back("out", Type{tupleClassName});
+  tupleArg.mType.mType = PassByType::Reference;
+  for (size_t i = 0; i < size; ++i) {
+    auto templateParameter = std::format("T{}", i);
+    tupleArg.mType.mTemplateParameters.emplace_back(templateParameter);
+    method.mTemplateParameters.emplace_back("typename", templateParameter);
+  }
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("converter",
+                                 Type{St::Converter, PassByType::Reference, Constness::Const});
+  method.mBody.Add(
+      R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing {}");)R",
+      tupleClassName);
+  method.mBody.Add("bool res;");
+  method.mBody.Add("auto it = json.Begin();");
+  for (size_t i = 0; i < size; ++i) {
+    method.mBody.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing {}!");)R",
+        tupleClassName);
+    method.mBody.Add("res = {}(std::get<{}>(out), *it, converter);", St::JsonHelper_Parse, i);
+    method.mBody.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Parsing {} failed!");)R",
+                     tupleClassName);
+    method.mBody.Add("++it;");
+  }
+  method.mBody.Add(
+      R"R(HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing {}!");)R",
+      tupleClassName);
+  method.mBody.Add("return true;");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

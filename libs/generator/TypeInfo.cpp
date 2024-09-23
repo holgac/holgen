@@ -18,7 +18,7 @@ TypeInfo::TypeInfo() {
       {"vector", "std::vector"}, {"deque", "std::deque"},
       {"map", "std::map"},       {"unordered_map", "std::unordered_map"},
       {"set", "std::set"},       {"unordered_set", "std::unordered_set"},
-      {"list", "std::list"},
+      {"list", "std::list"},     {"pair", "std::pair"},
   };
 
   SignedIntegralTypes = {
