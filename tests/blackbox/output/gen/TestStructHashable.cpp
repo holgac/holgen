@@ -33,18 +33,22 @@ void TestStructHashable::SetField2(uint32_t val) {
 }
 
 bool TestStructHashable::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructHashable");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("field1", name)) {
-      auto res = JsonHelper::Parse(mField1, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashable.field1 field");
-    } else if (0 == strcmp("field2", name)) {
-      auto res = JsonHelper::Parse(mField2, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashable.field2 field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestStructHashable: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("field1", name)) {
+        auto res = JsonHelper::Parse(mField1, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashable.field1 field");
+      } else if (0 == strcmp("field2", name)) {
+        auto res = JsonHelper::Parse(mField2, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashable.field2 field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestStructHashable: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestStructHashable.");
+    return false;
   }
   return true;
 }

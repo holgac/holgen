@@ -41,18 +41,22 @@ void TestEnumStruct::SetEnumDefaultValueField(const TestEnumDefaultValue &val) {
 }
 
 bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestEnumStruct");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("enumField", name)) {
-      auto res = JsonHelper::Parse(mEnumField, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumField field");
-    } else if (0 == strcmp("enumDefaultValueField", name)) {
-      auto res = JsonHelper::Parse(mEnumDefaultValueField, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumDefaultValueField field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestEnumStruct: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("enumField", name)) {
+        auto res = JsonHelper::Parse(mEnumField, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumField field");
+      } else if (0 == strcmp("enumDefaultValueField", name)) {
+        auto res = JsonHelper::Parse(mEnumDefaultValueField, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumDefaultValueField field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestEnumStruct: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestEnumStruct.");
+    return false;
   }
   return true;
 }

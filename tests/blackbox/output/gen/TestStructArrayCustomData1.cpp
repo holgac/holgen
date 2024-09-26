@@ -43,21 +43,25 @@ void TestStructArrayCustomData1::SetF3(uint64_t val) {
 }
 
 bool TestStructArrayCustomData1::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructArrayCustomData1");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("f1", name)) {
-      auto res = JsonHelper::Parse(mF1, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f1 field");
-    } else if (0 == strcmp("f2", name)) {
-      auto res = JsonHelper::Parse(mF2, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f2 field");
-    } else if (0 == strcmp("f3", name)) {
-      auto res = JsonHelper::Parse(mF3, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f3 field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestStructArrayCustomData1: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("f1", name)) {
+        auto res = JsonHelper::Parse(mF1, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f1 field");
+      } else if (0 == strcmp("f2", name)) {
+        auto res = JsonHelper::Parse(mF2, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f2 field");
+      } else if (0 == strcmp("f3", name)) {
+        auto res = JsonHelper::Parse(mF3, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f3 field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestStructArrayCustomData1: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestStructArrayCustomData1.");
+    return false;
   }
   return true;
 }

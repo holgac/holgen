@@ -63,24 +63,28 @@ void Race::SetNames(const std::map<std::string, std::vector<std::string>> &val) 
 }
 
 bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Race");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("id", name)) {
-      auto res = JsonHelper::Parse(mId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.id field");
-    } else if (0 == strcmp("name", name)) {
-      auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.name field");
-    } else if (0 == strcmp("hairColors", name)) {
-      auto res = JsonHelper::Parse(mHairColors, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.hairColors field");
-    } else if (0 == strcmp("names", name)) {
-      auto res = JsonHelper::Parse(mNames, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.names field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Race: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("id", name)) {
+        auto res = JsonHelper::Parse(mId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.id field");
+      } else if (0 == strcmp("name", name)) {
+        auto res = JsonHelper::Parse(mName, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.name field");
+      } else if (0 == strcmp("hairColors", name)) {
+        auto res = JsonHelper::Parse(mHairColors, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.hairColors field");
+      } else if (0 == strcmp("names", name)) {
+        auto res = JsonHelper::Parse(mNames, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.names field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Race: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing Race.");
+    return false;
   }
   return true;
 }

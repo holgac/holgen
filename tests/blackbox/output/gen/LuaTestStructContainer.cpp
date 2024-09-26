@@ -68,18 +68,22 @@ size_t LuaTestStructContainer::GetTestVectorElemCount() const {
 }
 
 bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing LuaTestStructContainer");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("testVector", name)) {
-      auto res = JsonHelper::Parse(mTestVector, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testVector field");
-    } else if (0 == strcmp("testMap", name)) {
-      auto res = JsonHelper::Parse(mTestMap, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testMap field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing LuaTestStructContainer: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("testVector", name)) {
+        auto res = JsonHelper::Parse(mTestVector, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testVector field");
+      } else if (0 == strcmp("testMap", name)) {
+        auto res = JsonHelper::Parse(mTestMap, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testMap field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing LuaTestStructContainer: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing LuaTestStructContainer.");
+    return false;
   }
   return true;
 }

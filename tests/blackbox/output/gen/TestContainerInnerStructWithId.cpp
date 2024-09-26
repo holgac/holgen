@@ -51,8 +51,8 @@ bool TestContainerInnerStructWithId::ParseJson(const rapidjson::Value &json, con
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mName, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructWithId.name field");
+    HOLGEN_WARN("Unexpected json type when parsing TestContainerInnerStructWithId.");
+    return false;
   }
   return true;
 }

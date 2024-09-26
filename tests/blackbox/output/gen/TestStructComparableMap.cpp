@@ -28,15 +28,19 @@ void TestStructComparableMap::SetData(const std::map<TestStructComparable, std::
 }
 
 bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructComparableMap");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("data", name)) {
-      auto res = JsonHelper::Parse(mData, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructComparableMap.data field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestStructComparableMap: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("data", name)) {
+        auto res = JsonHelper::Parse(mData, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructComparableMap.data field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestStructComparableMap: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestStructComparableMap.");
+    return false;
   }
   return true;
 }

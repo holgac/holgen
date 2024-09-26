@@ -118,6 +118,14 @@ public:
       lua_settable(luaState, -3);
     }
   }
+  template <typename T0, typename T1>
+  static void Push(const std::pair<T0, T1> &data, lua_State *luaState, bool pushMirror) {
+    lua_newtable(luaState);
+    Push(std::get<0>(data), luaState, pushMirror);
+    lua_rawseti(luaState, -2, 0);
+    Push(std::get<1>(data), luaState, pushMirror);
+    lua_rawseti(luaState, -2, 1);
+  }
   template <typename T>
   static bool Read(T &data, lua_State *luaState, int32_t luaIndex) {
     data = T::ReadMirrorFromLua(luaState, luaIndex);
@@ -234,6 +242,21 @@ public:
   template <typename K, typename V>
   static bool Read(std::unordered_map<K, V> &data, lua_State *luaState, int32_t luaIndex) {
     return false;
+  }
+  template <typename T0, typename T1>
+  static bool Read(std::pair<T0, T1> &data, lua_State *luaState, int32_t luaIndex) {
+    lua_newtable(luaState);
+    lua_pushvalue(luaState, luaIndex);
+    lua_pushnil(luaState);
+    HOLGEN_WARN_AND_RETURN_IF(!lua_next(luaState, -2), false, "Exhausted elements when reading from lua into a std::pair");
+    Read(std::get<0>(data), luaState, -1);
+    lua_pop(luaState, 1);
+    HOLGEN_WARN_AND_RETURN_IF(!lua_next(luaState, -2), false, "Exhausted elements when reading from lua into a std::pair");
+    Read(std::get<1>(data), luaState, -1);
+    lua_pop(luaState, 1);
+    HOLGEN_WARN_AND_RETURN_IF(lua_next(luaState, -2), false, "Too many elements when from lua into a std::pair");
+    lua_pop(luaState, 1);
+    return true;
   }
   static void CreateMetatables(lua_State *luaState);
 };

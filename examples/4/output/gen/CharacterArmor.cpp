@@ -43,20 +43,24 @@ void CharacterArmor::SetArmorId(uint32_t val) {
 }
 
 bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing CharacterArmor");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("dirtAmount", name)) {
-      auto res = JsonHelper::Parse(mDirtAmount, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.dirtAmount field");
-    } else if (0 == strcmp("armor", name)) {
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
-      mArmorId = converter.armorNameToId(temp);
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing CharacterArmor: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("dirtAmount", name)) {
+        auto res = JsonHelper::Parse(mDirtAmount, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.dirtAmount field");
+      } else if (0 == strcmp("armor", name)) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
+        mArmorId = converter.armorNameToId(temp);
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing CharacterArmor: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing CharacterArmor.");
+    return false;
   }
   return true;
 }

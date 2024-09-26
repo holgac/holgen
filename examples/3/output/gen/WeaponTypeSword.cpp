@@ -34,18 +34,22 @@ void WeaponTypeSword::SetIsShortSword(bool val) {
 }
 
 bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing WeaponTypeSword");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("sharpness", name)) {
-      auto res = JsonHelper::Parse(mSharpness, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.sharpness field");
-    } else if (0 == strcmp("isShortSword", name)) {
-      auto res = JsonHelper::Parse(mIsShortSword, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.isShortSword field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeSword: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("sharpness", name)) {
+        auto res = JsonHelper::Parse(mSharpness, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.sharpness field");
+      } else if (0 == strcmp("isShortSword", name)) {
+        auto res = JsonHelper::Parse(mIsShortSword, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.isShortSword field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeSword: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing WeaponTypeSword.");
+    return false;
   }
   return true;
 }

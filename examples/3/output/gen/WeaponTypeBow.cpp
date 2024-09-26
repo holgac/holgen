@@ -37,18 +37,22 @@ void WeaponTypeBow::SetMaterial(const std::string &val) {
 }
 
 bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing WeaponTypeBow");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("range", name)) {
-      auto res = JsonHelper::Parse(mRange, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.range field");
-    } else if (0 == strcmp("material", name)) {
-      auto res = JsonHelper::Parse(mMaterial, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.material field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeBow: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("range", name)) {
+        auto res = JsonHelper::Parse(mRange, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.range field");
+      } else if (0 == strcmp("material", name)) {
+        auto res = JsonHelper::Parse(mMaterial, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.material field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeBow: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing WeaponTypeBow.");
+    return false;
   }
   return true;
 }

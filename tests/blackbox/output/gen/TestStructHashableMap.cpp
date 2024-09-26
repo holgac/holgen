@@ -28,15 +28,19 @@ void TestStructHashableMap::SetData(const std::unordered_map<TestStructHashable,
 }
 
 bool TestStructHashableMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructHashableMap");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("data", name)) {
-      auto res = JsonHelper::Parse(mData, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashableMap.data field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestStructHashableMap: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("data", name)) {
+        auto res = JsonHelper::Parse(mData, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashableMap.data field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestStructHashableMap: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestStructHashableMap.");
+    return false;
   }
   return true;
 }

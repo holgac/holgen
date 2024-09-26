@@ -237,24 +237,28 @@ size_t TestContainerVector::GetUnsignedElemCount() const {
 }
 
 bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerVector");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("innerStructsWithId", name)) {
-      auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsWithId field");
-    } else if (0 == strcmp("innerStructsNoId", name)) {
-      auto res = JsonHelper::Parse(mInnerStructsNoId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsNoId field");
-    } else if (0 == strcmp("stringContainer", name)) {
-      auto res = JsonHelper::Parse(mStringContainer, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.stringContainer field");
-    } else if (0 == strcmp("unsignedContainer", name)) {
-      auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.unsignedContainer field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestContainerVector: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("innerStructsWithId", name)) {
+        auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsWithId field");
+      } else if (0 == strcmp("innerStructsNoId", name)) {
+        auto res = JsonHelper::Parse(mInnerStructsNoId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsNoId field");
+      } else if (0 == strcmp("stringContainer", name)) {
+        auto res = JsonHelper::Parse(mStringContainer, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.stringContainer field");
+      } else if (0 == strcmp("unsignedContainer", name)) {
+        auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.unsignedContainer field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestContainerVector: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestContainerVector.");
+    return false;
   }
   return true;
 }

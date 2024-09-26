@@ -39,8 +39,8 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Conve
       }
     }
   } else {
-    auto res = JsonHelper::ParseConvertElem<std::string>(mTags, json, converter, converter.testJsonConvertTag);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+    HOLGEN_WARN("Unexpected json type when parsing TestJsonStructWithTags.");
+    return false;
   }
   return true;
 }

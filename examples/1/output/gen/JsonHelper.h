@@ -24,6 +24,22 @@ public:
   static bool Parse(T &out, const rapidjson::Value &json, const Converter &converter) {
     return out.ParseJson(json, converter);
   }
+  template <typename T0, typename T1>
+  static bool Parse(std::pair<T0, T1> &out, const rapidjson::Value &json, const Converter &converter) {
+    HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::pair");
+    bool res;
+    auto it = json.Begin();
+    HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing std::pair!");
+    res = Parse(std::get<0>(out), *it, converter);
+    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Parsing std::pair failed!");
+    ++it;
+    HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing std::pair!");
+    res = Parse(std::get<1>(out), *it, converter);
+    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Parsing std::pair failed!");
+    ++it;
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing std::pair!");
+    return true;
+  }
   template <typename SourceType, typename T, size_t C, typename ElemConverter>
   static bool ParseConvertElem(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");

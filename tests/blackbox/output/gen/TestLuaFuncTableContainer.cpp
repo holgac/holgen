@@ -102,33 +102,37 @@ void TestLuaFuncTableContainer::SetStaticScript2(const TestLuaFuncTableStatic &v
 }
 
 bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestLuaFuncTableContainer");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("field", name)) {
-      auto res = JsonHelper::Parse(mField, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.field field");
-    } else if (0 == strcmp("script1", name)) {
-      auto res = JsonHelper::Parse(mScript1, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script1 field");
-    } else if (0 == strcmp("script2", name)) {
-      auto res = JsonHelper::Parse(mScript2, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script2 field");
-    } else if (0 == strcmp("scriptWithSourceTable1", name)) {
-      auto res = JsonHelper::Parse(mScriptWithSourceTable1, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable1 field");
-    } else if (0 == strcmp("scriptWithSourceTable2", name)) {
-      auto res = JsonHelper::Parse(mScriptWithSourceTable2, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable2 field");
-    } else if (0 == strcmp("staticScript1", name)) {
-      auto res = JsonHelper::Parse(mStaticScript1, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript1 field");
-    } else if (0 == strcmp("staticScript2", name)) {
-      auto res = JsonHelper::Parse(mStaticScript2, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript2 field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestLuaFuncTableContainer: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("field", name)) {
+        auto res = JsonHelper::Parse(mField, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.field field");
+      } else if (0 == strcmp("script1", name)) {
+        auto res = JsonHelper::Parse(mScript1, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script1 field");
+      } else if (0 == strcmp("script2", name)) {
+        auto res = JsonHelper::Parse(mScript2, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script2 field");
+      } else if (0 == strcmp("scriptWithSourceTable1", name)) {
+        auto res = JsonHelper::Parse(mScriptWithSourceTable1, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable1 field");
+      } else if (0 == strcmp("scriptWithSourceTable2", name)) {
+        auto res = JsonHelper::Parse(mScriptWithSourceTable2, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable2 field");
+      } else if (0 == strcmp("staticScript1", name)) {
+        auto res = JsonHelper::Parse(mStaticScript1, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript1 field");
+      } else if (0 == strcmp("staticScript2", name)) {
+        auto res = JsonHelper::Parse(mStaticScript2, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript2 field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestLuaFuncTableContainer: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestLuaFuncTableContainer.");
+    return false;
   }
   return true;
 }

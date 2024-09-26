@@ -43,8 +43,8 @@ bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Conver
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mBigVector, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructNonCopyable.bigVector field");
+    HOLGEN_WARN("Unexpected json type when parsing TestStructNonCopyable.");
+    return false;
   }
   return true;
 }

@@ -35,8 +35,8 @@ bool TestLuaStaticCppFunction::ParseJson(const rapidjson::Value &json, const Con
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mData, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaStaticCppFunction.data field");
+    HOLGEN_WARN("Unexpected json type when parsing TestLuaStaticCppFunction.");
+    return false;
   }
   return true;
 }

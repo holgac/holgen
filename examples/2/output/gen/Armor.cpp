@@ -29,15 +29,19 @@ void Armor::SetId(uint32_t val) {
 }
 
 bool Armor::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Armor");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("armorClass", name)) {
-      auto res = JsonHelper::Parse(mArmorClass, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.armorClass field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Armor: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("armorClass", name)) {
+        auto res = JsonHelper::Parse(mArmorClass, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.armorClass field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Armor: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing Armor.");
+    return false;
   }
   return true;
 }

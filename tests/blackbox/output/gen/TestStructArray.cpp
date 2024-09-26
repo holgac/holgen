@@ -43,15 +43,19 @@ void TestStructArray::SetCustomData(const std::array<uint8_t, 16> &val) {
 }
 
 bool TestStructArray::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructArray");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("type", name)) {
-      auto res = JsonHelper::Parse(mType, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArray.type field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestStructArray: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("type", name)) {
+        auto res = JsonHelper::Parse(mType, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArray.type field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestStructArray: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestStructArray.");
+    return false;
   }
   return true;
 }

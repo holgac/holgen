@@ -55,8 +55,8 @@ bool TestContainerEnum::ParseJson(const rapidjson::Value &json, const Converter 
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mSkills, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerEnum.skills field");
+    HOLGEN_WARN("Unexpected json type when parsing TestContainerEnum.");
+    return false;
   }
   return true;
 }

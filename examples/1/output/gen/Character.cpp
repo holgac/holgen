@@ -63,24 +63,28 @@ void Character::SetArmor(const Armor &val) {
 }
 
 bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Character");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("id", name)) {
-      auto res = JsonHelper::Parse(mId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.id field");
-    } else if (0 == strcmp("name", name)) {
-      auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
-    } else if (0 == strcmp("race", name)) {
-      auto res = JsonHelper::Parse(mRace, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.race field");
-    } else if (0 == strcmp("armor", name)) {
-      auto res = JsonHelper::Parse(mArmor, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("id", name)) {
+        auto res = JsonHelper::Parse(mId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.id field");
+      } else if (0 == strcmp("name", name)) {
+        auto res = JsonHelper::Parse(mName, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
+      } else if (0 == strcmp("race", name)) {
+        auto res = JsonHelper::Parse(mRace, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.race field");
+      } else if (0 == strcmp("armor", name)) {
+        auto res = JsonHelper::Parse(mArmor, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing Character.");
+    return false;
   }
   return true;
 }

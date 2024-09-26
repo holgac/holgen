@@ -95,26 +95,30 @@ Character *Character::GetFromName(const std::string &key) {
 }
 
 bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Character");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("name", name)) {
-      auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
-    } else if (0 == strcmp("partner", name)) {
-      auto res = JsonHelper::Parse(mPartnerId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.partner field");
-    } else if (0 == strcmp("weapon", name)) {
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.weapon field");
-      mWeaponId = converter.weaponNameToId(temp);
-    } else if (0 == strcmp("armor", name)) {
-      auto res = JsonHelper::Parse(mArmor, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("name", name)) {
+        auto res = JsonHelper::Parse(mName, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
+      } else if (0 == strcmp("partner", name)) {
+        auto res = JsonHelper::Parse(mPartnerId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.partner field");
+      } else if (0 == strcmp("weapon", name)) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.weapon field");
+        mWeaponId = converter.weaponNameToId(temp);
+      } else if (0 == strcmp("armor", name)) {
+        auto res = JsonHelper::Parse(mArmor, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing Character.");
+    return false;
   }
   return true;
 }

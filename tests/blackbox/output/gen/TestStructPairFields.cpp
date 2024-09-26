@@ -41,18 +41,22 @@ void TestStructPairFields::SetPairVector(const std::vector<std::pair<std::string
 }
 
 bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructPairFields");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("intStringPair", name)) {
-      auto res = JsonHelper::Parse(mIntStringPair, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.intStringPair field");
-    } else if (0 == strcmp("pairVector", name)) {
-      auto res = JsonHelper::Parse(mPairVector, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.pairVector field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestStructPairFields: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("intStringPair", name)) {
+        auto res = JsonHelper::Parse(mIntStringPair, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.intStringPair field");
+      } else if (0 == strcmp("pairVector", name)) {
+        auto res = JsonHelper::Parse(mPairVector, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.pairVector field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestStructPairFields: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestStructPairFields.");
+    return false;
   }
   return true;
 }

@@ -58,21 +58,25 @@ bool Weapon::HasGetAverageDamageLuaFunc() const {
 }
 
 bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Weapon");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("damageMin", name)) {
-      auto res = JsonHelper::Parse(mDamageMin, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMin field");
-    } else if (0 == strcmp("damageMax", name)) {
-      auto res = JsonHelper::Parse(mDamageMax, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMax field");
-    } else if (0 == strcmp("GetAverageDamage", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_GetAverageDamage, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.GetAverageDamage");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Weapon: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("damageMin", name)) {
+        auto res = JsonHelper::Parse(mDamageMin, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMin field");
+      } else if (0 == strcmp("damageMax", name)) {
+        auto res = JsonHelper::Parse(mDamageMax, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMax field");
+      } else if (0 == strcmp("GetAverageDamage", name)) {
+        auto res = JsonHelper::Parse(mLuaFuncHandle_GetAverageDamage, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.GetAverageDamage");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Weapon: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing Weapon.");
+    return false;
   }
   return true;
 }

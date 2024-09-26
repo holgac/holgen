@@ -37,10 +37,8 @@ bool RaceId::ParseJson(const rapidjson::Value &json, const Converter &converter)
       }
     }
   } else {
-    std::string temp;
-    auto res = JsonHelper::Parse(temp, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse RaceId.id field");
-    mId = converter.raceNameToId(temp);
+    HOLGEN_WARN("Unexpected json type when parsing RaceId.");
+    return false;
   }
   return true;
 }

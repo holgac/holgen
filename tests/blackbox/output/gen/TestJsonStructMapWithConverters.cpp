@@ -54,21 +54,25 @@ void TestJsonStructMapWithConverters::SetTestMapConvertKeyElem(const std::map<ui
 }
 
 bool TestJsonStructMapWithConverters::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestJsonStructMapWithConverters");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("testMapConvertElem", name)) {
-      auto res = JsonHelper::ParseConvertElem<std::string>(mTestMapConvertElem, data.value, converter, converter.testJsonConvertStringToU32);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
-    } else if (0 == strcmp("testMapConvertKey", name)) {
-      auto res = JsonHelper::ParseConvertKey<std::string>(mTestMapConvertKey, data.value, converter, converter.testJsonConvertStringToU32);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
-    } else if (0 == strcmp("testMapConvertKeyElem", name)) {
-      auto res = JsonHelper::ParseConvertKeyElem<std::string, std::string>(mTestMapConvertKeyElem, data.value, converter, converter.testJsonConvertStringToU32, converter.testJsonConvertStringToU32);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructMapWithConverters: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("testMapConvertElem", name)) {
+        auto res = JsonHelper::ParseConvertElem<std::string>(mTestMapConvertElem, data.value, converter, converter.testJsonConvertStringToU32);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
+      } else if (0 == strcmp("testMapConvertKey", name)) {
+        auto res = JsonHelper::ParseConvertKey<std::string>(mTestMapConvertKey, data.value, converter, converter.testJsonConvertStringToU32);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
+      } else if (0 == strcmp("testMapConvertKeyElem", name)) {
+        auto res = JsonHelper::ParseConvertKeyElem<std::string, std::string>(mTestMapConvertKeyElem, data.value, converter, converter.testJsonConvertStringToU32, converter.testJsonConvertStringToU32);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructMapWithConverters: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestJsonStructMapWithConverters.");
+    return false;
   }
   return true;
 }

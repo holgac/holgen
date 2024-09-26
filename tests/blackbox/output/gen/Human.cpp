@@ -61,8 +61,8 @@ bool Human::ParseJson(const rapidjson::Value &json, const Converter &converter) 
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mName, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.name field");
+    HOLGEN_WARN("Unexpected json type when parsing Human.");
+    return false;
   }
   return true;
 }

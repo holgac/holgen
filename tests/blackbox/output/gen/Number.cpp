@@ -35,8 +35,8 @@ bool Number::ParseJson(const rapidjson::Value &json, const Converter &converter)
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mValue, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Number.value field");
+    HOLGEN_WARN("Unexpected json type when parsing Number.");
+    return false;
   }
   return true;
 }

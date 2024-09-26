@@ -51,8 +51,8 @@ bool TestStructSingleElemWithId::ParseJson(const rapidjson::Value &json, const C
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mName, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemWithId.name field");
+    HOLGEN_WARN("Unexpected json type when parsing TestStructSingleElemWithId.");
+    return false;
   }
   return true;
 }

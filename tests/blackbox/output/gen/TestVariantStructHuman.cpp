@@ -41,18 +41,22 @@ void TestVariantStructHuman::SetNationality(const std::string &val) {
 }
 
 bool TestVariantStructHuman::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructHuman");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("name", name)) {
-      auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructHuman.name field");
-    } else if (0 == strcmp("nationality", name)) {
-      auto res = JsonHelper::Parse(mNationality, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructHuman.nationality field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructHuman: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("name", name)) {
+        auto res = JsonHelper::Parse(mName, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructHuman.name field");
+      } else if (0 == strcmp("nationality", name)) {
+        auto res = JsonHelper::Parse(mNationality, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructHuman.nationality field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructHuman: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestVariantStructHuman.");
+    return false;
   }
   return true;
 }

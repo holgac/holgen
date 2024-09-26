@@ -133,44 +133,48 @@ bool TestVariantStructExplicitType::operator==(const TestVariantStructExplicitTy
 }
 
 bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("type", name)) {
-      TestVariantStructType temp;
-      auto res = JsonHelper::Parse(temp, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.type field");
-      SetType(temp);
-    }
-  }
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestVariantStructExplicitType");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("type", name)) {
-    } else if (0 == strcmp("being1", name)) {
-      bool res;
-      if (mType == TestVariantStructType::Cat) {
-        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), data.value, converter);
-      } else if (mType == TestVariantStructType::Human) {
-        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), data.value, converter);
-      } else {
-        HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being1 variant field, its type {} is unexpected", mType);
-        return false;
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("type", name)) {
+        TestVariantStructType temp;
+        auto res = JsonHelper::Parse(temp, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.type field");
+        SetType(temp);
       }
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.being1 variant field of type {}", mType);
-    } else if (0 == strcmp("being2", name)) {
-      bool res;
-      if (mType == TestVariantStructType::Cat) {
-        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), data.value, converter);
-      } else if (mType == TestVariantStructType::Human) {
-        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), data.value, converter);
-      } else {
-        HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being2 variant field, its type {} is unexpected", mType);
-        return false;
-      }
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.being2 variant field of type {}", mType);
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructExplicitType: {}", name);
     }
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("type", name)) {
+      } else if (0 == strcmp("being1", name)) {
+        bool res;
+        if (mType == TestVariantStructType::Cat) {
+          res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), data.value, converter);
+        } else if (mType == TestVariantStructType::Human) {
+          res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), data.value, converter);
+        } else {
+          HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being1 variant field, its type {} is unexpected", mType);
+          return false;
+        }
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.being1 variant field of type {}", mType);
+      } else if (0 == strcmp("being2", name)) {
+        bool res;
+        if (mType == TestVariantStructType::Cat) {
+          res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), data.value, converter);
+        } else if (mType == TestVariantStructType::Human) {
+          res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), data.value, converter);
+        } else {
+          HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being2 variant field, its type {} is unexpected", mType);
+          return false;
+        }
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.being2 variant field of type {}", mType);
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructExplicitType: {}", name);
+      }
+    }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestVariantStructExplicitType.");
+    return false;
   }
   return true;
 }

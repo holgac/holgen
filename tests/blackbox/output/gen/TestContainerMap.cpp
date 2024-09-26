@@ -98,15 +98,19 @@ size_t TestContainerMap::GetInnerStructWithIdCount() const {
 }
 
 bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestContainerMap");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("innerStructsWithId", name)) {
-      auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerMap.innerStructsWithId field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestContainerMap: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("innerStructsWithId", name)) {
+        auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerMap.innerStructsWithId field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestContainerMap: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestContainerMap.");
+    return false;
   }
   return true;
 }

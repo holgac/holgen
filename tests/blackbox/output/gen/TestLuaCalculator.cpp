@@ -181,33 +181,37 @@ bool TestLuaCalculator::HasReturnNewLuaFunc() const {
 }
 
 bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestLuaCalculator");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("lastValue", name)) {
-      auto res = JsonHelper::Parse(mLastValue, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.lastValue field");
-    } else if (0 == strcmp("AddPrimitive", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_AddPrimitive, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddPrimitive");
-    } else if (0 == strcmp("AddRef", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_AddRef, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddRef");
-    } else if (0 == strcmp("AddNullable", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_AddNullable, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddNullable");
-    } else if (0 == strcmp("ReturnNullable", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNullable, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNullable");
-    } else if (0 == strcmp("ReturnRef", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnRef, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnRef");
-    } else if (0 == strcmp("ReturnNew", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNew, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNew");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestLuaCalculator: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("lastValue", name)) {
+        auto res = JsonHelper::Parse(mLastValue, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.lastValue field");
+      } else if (0 == strcmp("AddPrimitive", name)) {
+        auto res = JsonHelper::Parse(mLuaFuncHandle_AddPrimitive, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddPrimitive");
+      } else if (0 == strcmp("AddRef", name)) {
+        auto res = JsonHelper::Parse(mLuaFuncHandle_AddRef, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddRef");
+      } else if (0 == strcmp("AddNullable", name)) {
+        auto res = JsonHelper::Parse(mLuaFuncHandle_AddNullable, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddNullable");
+      } else if (0 == strcmp("ReturnNullable", name)) {
+        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNullable, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNullable");
+      } else if (0 == strcmp("ReturnRef", name)) {
+        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnRef, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnRef");
+      } else if (0 == strcmp("ReturnNew", name)) {
+        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNew, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNew");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestLuaCalculator: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestLuaCalculator.");
+    return false;
   }
   return true;
 }

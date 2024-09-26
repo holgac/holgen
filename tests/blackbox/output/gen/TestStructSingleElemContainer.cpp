@@ -100,18 +100,22 @@ size_t TestStructSingleElemContainer::GetSingleElemStructWithIdCount() const {
 }
 
 bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing TestStructSingleElemContainer");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("singleElemStructs", name)) {
-      auto res = JsonHelper::Parse(mSingleElemStructs, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructs field");
-    } else if (0 == strcmp("singleElemStructsWithId", name)) {
-      auto res = JsonHelper::Parse(mSingleElemStructsWithId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructsWithId field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing TestStructSingleElemContainer: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("singleElemStructs", name)) {
+        auto res = JsonHelper::Parse(mSingleElemStructs, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructs field");
+      } else if (0 == strcmp("singleElemStructsWithId", name)) {
+        auto res = JsonHelper::Parse(mSingleElemStructsWithId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructsWithId field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestStructSingleElemContainer: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestStructSingleElemContainer.");
+    return false;
   }
   return true;
 }

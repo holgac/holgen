@@ -35,8 +35,8 @@ bool TestLuaNumber::ParseJson(const rapidjson::Value &json, const Converter &con
       }
     }
   } else {
-    auto res = JsonHelper::Parse(mValue, json, converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaNumber.value field");
+    HOLGEN_WARN("Unexpected json type when parsing TestLuaNumber.");
+    return false;
   }
   return true;
 }

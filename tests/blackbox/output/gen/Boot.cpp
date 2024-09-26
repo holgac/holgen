@@ -60,21 +60,25 @@ Boot *Boot::GetFromName(const std::string &key) {
 }
 
 bool Boot::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing Boot");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("id", name)) {
-      auto res = JsonHelper::Parse(mId, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.id field");
-    } else if (0 == strcmp("name", name)) {
-      auto res = JsonHelper::Parse(mName, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.name field");
-    } else if (0 == strcmp("color", name)) {
-      auto res = JsonHelper::Parse(mColor, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.color field");
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing Boot: {}", name);
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("id", name)) {
+        auto res = JsonHelper::Parse(mId, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.id field");
+      } else if (0 == strcmp("name", name)) {
+        auto res = JsonHelper::Parse(mName, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.name field");
+      } else if (0 == strcmp("color", name)) {
+        auto res = JsonHelper::Parse(mColor, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.color field");
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing Boot: {}", name);
+      }
     }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing Boot.");
+    return false;
   }
   return true;
 }

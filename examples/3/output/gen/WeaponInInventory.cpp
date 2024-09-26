@@ -99,33 +99,37 @@ bool WeaponInInventory::operator==(const WeaponInInventory &rhs) const {
 }
 
 bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("type", name)) {
-      WeaponType temp;
-      auto res = JsonHelper::Parse(temp, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.type field");
-      SetType(temp);
-    }
-  }
-  HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing WeaponInInventory");
-  for (const auto &data: json.GetObject()) {
-    const auto &name = data.name.GetString();
-    if (0 == strcmp("type", name)) {
-    } else if (0 == strcmp("weapon", name)) {
-      bool res;
-      if (mType == WeaponType::Bow) {
-        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeBow(), data.value, converter);
-      } else if (mType == WeaponType::Sword) {
-        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeSword(), data.value, converter);
-      } else {
-        HOLGEN_WARN("Could not json-parse WeaponInInventory.weapon variant field, its type {} is unexpected", mType);
-        return false;
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("type", name)) {
+        WeaponType temp;
+        auto res = JsonHelper::Parse(temp, data.value, converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.type field");
+        SetType(temp);
       }
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.weapon variant field of type {}", mType);
-    } else {
-      HOLGEN_WARN("Unexpected entry in json when parsing WeaponInInventory: {}", name);
     }
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("type", name)) {
+      } else if (0 == strcmp("weapon", name)) {
+        bool res;
+        if (mType == WeaponType::Bow) {
+          res = JsonHelper::Parse(*GetWeaponAsWeaponTypeBow(), data.value, converter);
+        } else if (mType == WeaponType::Sword) {
+          res = JsonHelper::Parse(*GetWeaponAsWeaponTypeSword(), data.value, converter);
+        } else {
+          HOLGEN_WARN("Could not json-parse WeaponInInventory.weapon variant field, its type {} is unexpected", mType);
+          return false;
+        }
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.weapon variant field of type {}", mType);
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing WeaponInInventory: {}", name);
+      }
+    }
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing WeaponInInventory.");
+    return false;
   }
   return true;
 }
