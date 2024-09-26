@@ -6,36 +6,6 @@
 #include "generator/TypeInfo.h"
 
 namespace holgen {
-namespace {
-// To represent structs with a single (non-id) field in json,
-// we might want to just use that field instead of a json object.
-// This only works when the field type is primitive, string or a sequence
-ClassField *GetSingleBasicField(Class &cls) {
-  ClassField *singleField = nullptr;
-  ClassField *idField = nullptr;
-  for (auto &field: cls.mFields) {
-    if (!field.mField)
-      continue;
-    if (field.mField->GetAnnotation(Annotations::Id)) {
-      idField = &field;
-      continue;
-    }
-    if (singleField)
-      return nullptr;
-    singleField = &field;
-  }
-  if (singleField) {
-    if (TypeInfo::Get().CppBasicTypes.contains(singleField->mType.mName) ||
-        TypeInfo::Get().CppIndexedContainers.contains(singleField->mType.mName) ||
-        TypeInfo::Get().CppSets.contains(singleField->mType.mName))
-      return singleField;
-    return nullptr;
-  }
-  // id field is always basic
-  return idField;
-}
-} // namespace
-
 void JsonPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct)
@@ -45,13 +15,13 @@ void JsonPlugin::Run() {
   }
 }
 
-void JsonPlugin::GenerateSwitcherLoop(ClassMethod &method, CodeBlock &&codeBlock) {
-  method.mBody.Add("for (const auto &data: json.GetObject()) {{");
-  method.mBody.Indent(1);
-  method.mBody.Add("const auto &name = data.name.GetString();");
-  method.mBody.Add(std::move(codeBlock));
-  method.mBody.Indent(-1);
-  method.mBody.Line() << "}"; // range based for on json.GetObject()
+void JsonPlugin::GenerateSwitcherLoop(CodeBlock &methodBody, CodeBlock &&codeBlock) {
+  methodBody.Add("for (const auto &data: json.GetObject()) {{");
+  methodBody.Indent(1);
+  methodBody.Add("const auto &name = data.name.GetString();");
+  methodBody.Add(std::move(codeBlock));
+  methodBody.Indent(-1);
+  methodBody.Line() << "}"; // range based for on json.GetObject()
 }
 
 void JsonPlugin::GenerateParseJsonForLuaFuncTable(Class &cls) {
@@ -73,6 +43,28 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
 
+  CodeBlock parseJsonFromObjectBlock;
+  GenerateParseJsonFromObject(cls, parseJsonFromObjectBlock);
+  if (!parseJsonFromObjectBlock.IsEmpty()) {
+    method.mBody.Add("if (json.IsObject()) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add(std::move(parseJsonFromObjectBlock));
+    method.mBody.Indent(-1);
+
+    method.mBody.Add("}} else {{");
+    method.mBody.Indent(1);
+    method.mBody.Add(R"R(HOLGEN_WARN("Unexpected json type when parsing {}.");)R", cls.mName);
+    method.mBody.Line() << "return false;";
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
+  }
+
+  method.mBody.Line() << "return true;";
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void JsonPlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) {
   StringSwitcher variantSwitcher("name", {});
 
   CodeBlock stringSwitcherElseCase;
@@ -114,33 +106,12 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
   }
 
   if (!variantSwitcher.IsEmpty()) {
-    GenerateSwitcherLoop(method, std::move(variantSwitcher.Generate()));
+    GenerateSwitcherLoop(methodBody, std::move(variantSwitcher.Generate()));
   }
 
   if (!switcher.IsEmpty()) {
-    auto singleField = GetSingleBasicField(cls);
-    if (singleField) {
-      method.mBody.Add("if (json.IsObject()) {{");
-      method.mBody.Indent(1);
-    } else {
-      method.mBody.Add(
-          R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing {}");)R",
-          cls.mName);
-    }
-
-    GenerateSwitcherLoop(method, std::move(switcher.Generate()));
-    if (singleField) {
-      method.mBody.Indent(-1);
-      method.mBody.Add("}} else {{");
-      method.mBody.Indent(1);
-      GenerateParseJsonForField(cls, method.mBody, *singleField, "json");
-      method.mBody.Indent(-1);
-      method.mBody.Add("}}"); // else
-    }
+    GenerateSwitcherLoop(methodBody, std::move(switcher.Generate()));
   }
-  method.mBody.Line() << "return true;";
-  Validate().NewMethod(cls, method);
-  cls.mMethods.push_back(std::move(method));
 }
 
 void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock,

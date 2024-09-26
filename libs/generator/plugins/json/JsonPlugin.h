@@ -16,6 +16,8 @@ private:
   void ProcessStruct(Class &cls);
   void ProcessEnum(Class &cls);
   void GenerateParseJson(Class &cls);
+  void GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody);
+  void GenerateParseJsonFields(Class &cls, CodeBlock &codeBlock);
   void GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                  const std::string &varName);
   void GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
@@ -43,6 +45,6 @@ private:
                                          const std::string &varName);
   void GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                 const std::string &varName);
-  void GenerateSwitcherLoop(ClassMethod &method, CodeBlock &&codeBlock);
+  void GenerateSwitcherLoop(CodeBlock &methodBody, CodeBlock &&codeBlock);
 };
 } // namespace holgen
