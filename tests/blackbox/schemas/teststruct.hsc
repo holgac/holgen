@@ -10,6 +10,7 @@ struct TestStructSingleElem {
 
 struct TestStructSingleElemWithId {
   @id
+  @noJson
   u32 id;
   string name;
 }

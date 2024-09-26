@@ -16,12 +16,13 @@ private:
   void ProcessStruct(Class &cls);
   void ProcessEnum(Class &cls);
   void GenerateParseJson(Class &cls);
+  void GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBody);
   void GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody);
   void GenerateParseJsonFields(Class &cls, CodeBlock &codeBlock);
   void GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                  const std::string &varName);
   void GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
-                                    const ClassMethod &luaFunction);
+                                    const ClassMethod &luaFunction, const std::string &varName);
   bool IsVariantTypeField(const Class &cls, const ClassField &field,
                           const std::string **rawName = nullptr);
 

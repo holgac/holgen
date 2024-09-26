@@ -6,6 +6,27 @@
 #include "generator/TypeInfo.h"
 
 namespace holgen {
+
+namespace {
+bool ShouldParseField(const ClassField &field, bool isVariantTypeField) {
+  if ((field.mField &&
+       (field.mField->GetAnnotation(Annotations::NoJson) ||
+        field.mField->mType.mName == St::UserData)) ||
+      field.mType.mType == PassByType::Pointer)
+    return false;
+  if (!field.mField && !isVariantTypeField)
+    return false;
+  return true;
+}
+
+bool ShouldParseMethod(const ClassMethod &method) {
+  if (!method.mFunction || method.mFunction->GetAnnotation(Annotations::NoJson) ||
+      !method.mFunction->GetAnnotation(Annotations::LuaFunc))
+    return false;
+  return true;
+}
+} // namespace
+
 void JsonPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct)
@@ -50,6 +71,10 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
     method.mBody.Indent(1);
     method.mBody.Add(std::move(parseJsonFromObjectBlock));
     method.mBody.Indent(-1);
+    method.mBody.Add("}} else if (json.IsArray()) {{");
+    method.mBody.Indent(1);
+    GenerateParseJsonFromArray(cls, method.mBody);
+    method.mBody.Indent(-1);
 
     method.mBody.Add("}} else {{");
     method.mBody.Indent(1);
@@ -64,6 +89,41 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
+void JsonPlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBody) {
+  methodBody.Add("auto it = json.Begin();");
+  for (auto &field: cls.mFields) {
+    const std::string *variantRawName = nullptr;
+    bool isVariantTypeField = IsVariantTypeField(cls, field, &variantRawName);
+    if (!ShouldParseField(field, isVariantTypeField))
+      continue;
+
+    methodBody.Add("{{");
+    methodBody.Indent(1);
+    methodBody.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing {}!");)R",
+        cls.mName);
+    GenerateParseJsonForField(cls, methodBody, field, "(*it)");
+    methodBody.Add("++it;");
+    methodBody.Indent(-1);
+    methodBody.Add("}}");
+  }
+
+  for (const auto &method: cls.mMethods) {
+    if (!ShouldParseMethod(method))
+      continue;
+    methodBody.Add("{{");
+    methodBody.Indent(1);
+    GenerateParseJsonForFunction(cls, methodBody, method, "(*it)");
+    methodBody.Add("++it;");
+    methodBody.Indent(-1);
+    methodBody.Add("}}");
+  }
+
+  methodBody.Add(
+      R"R(HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing {}!");)R",
+      cls.mName);
+}
+
 void JsonPlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) {
   StringSwitcher variantSwitcher("name", {});
 
@@ -72,14 +132,9 @@ void JsonPlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) 
       R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
   StringSwitcher switcher("name", std::move(stringSwitcherElseCase));
   for (const auto &field: cls.mFields) {
-    if ((field.mField &&
-         (field.mField->GetAnnotation(Annotations::NoJson) ||
-          field.mField->mType.mName == St::UserData)) ||
-        field.mType.mType == PassByType::Pointer)
-      continue;
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = IsVariantTypeField(cls, field, &variantRawName);
-    if (!field.mField && !isVariantTypeField)
+    if (!ShouldParseField(field, isVariantTypeField))
       continue;
     if (isVariantTypeField) {
       variantSwitcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
@@ -96,12 +151,11 @@ void JsonPlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) 
     }
   }
 
-  for (const auto &luaMethod: cls.mMethods) {
-    if (!luaMethod.mFunction || luaMethod.mFunction->GetAnnotation(Annotations::NoJson) ||
-        !luaMethod.mFunction->GetAnnotation(Annotations::LuaFunc))
+  for (const auto &method: cls.mMethods) {
+    if (!ShouldParseMethod(method))
       continue;
-    switcher.AddCase(luaMethod.mFunction->mName, [&](CodeBlock &switchBlock) {
-      GenerateParseJsonForFunction(cls, switchBlock, luaMethod);
+    switcher.AddCase(method.mFunction->mName, [&](CodeBlock &switchBlock) {
+      GenerateParseJsonForFunction(cls, switchBlock, method, "data.value");
     });
   }
 
@@ -339,9 +393,10 @@ void JsonPlugin::ProcessEnum(Class &cls) {
 }
 
 void JsonPlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
-                                              const ClassMethod &luaFunction) {
-  codeBlock.Add("auto res = {}::{}({}, data.value, converter);", St::JsonHelper,
-                St::JsonHelper_Parse, Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction));
+                                              const ClassMethod &luaFunction,
+                                              const std::string &varName) {
+  codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
+                Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction), varName);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{}");)R",
                 cls.mStruct->mName, luaFunction.mFunction->mName);
 }

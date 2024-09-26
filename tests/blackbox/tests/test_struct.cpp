@@ -55,7 +55,7 @@ TEST_F(StructTest, SingleElem) {
 {
   "singleElemStructs": [
     {"name": "elem1"},
-    "elem2"
+    ["elem2"]
   ]
 }
 )R");
@@ -72,7 +72,7 @@ TEST_F(StructTest, SingleElemWithId) {
 {
   "singleElemStructsWithId": [
     {"name": "elem1"},
-    "elem2"
+    ["elem2"]
   ]
 }
   )R");

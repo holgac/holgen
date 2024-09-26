@@ -272,6 +272,21 @@ bool Market::ParseJson(const rapidjson::Value &json, const Converter &converter)
         HOLGEN_WARN("Unexpected entry in json when parsing Market: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Market!");
+      auto res = JsonHelper::Parse(mInstruments, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Market.instruments field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Market!");
+      auto res = JsonHelper::Parse(mPrices, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Market.prices field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Market!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Market.");
     return false;
@@ -394,6 +409,21 @@ bool Sound::ParseJson(const rapidjson::Value &json, const Converter &converter) 
         HOLGEN_WARN("Unexpected entry in json when parsing Sound: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Sound!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Sound.name field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Sound!");
+      auto res = JsonHelper::Parse(mVolume, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Sound.volume field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Sound!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Sound.");
     return false;
@@ -476,6 +506,15 @@ bool Animal::ParseJson(const rapidjson::Value &json, const Converter &converter)
         HOLGEN_WARN("Unexpected entry in json when parsing Animal: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Animal!");
+      auto res = JsonHelper::Parse(mSounds, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Animal.sounds field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Animal!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Animal.");
     return false;
@@ -637,6 +676,41 @@ bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter)
         HOLGEN_WARN("Unexpected entry in json when parsing Person: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
+      mCurrentCountry = converter.countryToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
+      mCurrentCity = converter.cityToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
+      mHomeCountry = converter.countryToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
+      mPlaceOfBirth = converter.cityToId(temp);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Person!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Person.");
     return false;
@@ -733,6 +807,15 @@ bool Country::ParseJson(const rapidjson::Value &json, const Converter &converter
         HOLGEN_WARN("Unexpected entry in json when parsing Country: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Country!");
+      auto res = JsonHelper::Parse(mLeader, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.leader field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Country!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Country.");
     return false;
