@@ -127,6 +127,31 @@ bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter 
         HOLGEN_WARN("Unexpected entry in json when parsing WeaponInInventory: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponInInventory!");
+      WeaponType temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.type field");
+      SetType(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponInInventory!");
+      bool res;
+      if (mType == WeaponType::Bow) {
+        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeBow(), (*it), converter);
+      } else if (mType == WeaponType::Sword) {
+        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeSword(), (*it), converter);
+      } else {
+        HOLGEN_WARN("Could not json-parse WeaponInInventory.weapon variant field, its type {} is unexpected", mType);
+        return false;
+      }
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.weapon variant field of type {}", mType);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing WeaponInInventory!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing WeaponInInventory.");
     return false;

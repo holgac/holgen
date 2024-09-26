@@ -54,6 +54,21 @@ bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &co
         HOLGEN_WARN("Unexpected entry in json when parsing TestEnumStruct: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestEnumStruct!");
+      auto res = JsonHelper::Parse(mEnumField, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumField field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestEnumStruct!");
+      auto res = JsonHelper::Parse(mEnumDefaultValueField, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumDefaultValueField field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestEnumStruct!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestEnumStruct.");
     return false;

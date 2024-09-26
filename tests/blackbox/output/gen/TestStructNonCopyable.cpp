@@ -42,6 +42,15 @@ bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Conver
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructNonCopyable: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructNonCopyable!");
+      auto res = JsonHelper::Parse(mBigVector, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructNonCopyable.bigVector field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructNonCopyable!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructNonCopyable.");
     return false;

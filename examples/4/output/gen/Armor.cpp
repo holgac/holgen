@@ -69,6 +69,21 @@ bool Armor::ParseJson(const rapidjson::Value &json, const Converter &converter) 
         HOLGEN_WARN("Unexpected entry in json when parsing Armor: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Armor!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.name field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Armor!");
+      auto res = JsonHelper::Parse(mArmorClass, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Armor.armorClass field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Armor!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Armor.");
     return false;

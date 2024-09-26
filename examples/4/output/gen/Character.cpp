@@ -116,6 +116,35 @@ bool Character::ParseJson(const rapidjson::Value &json, const Converter &convert
         HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
+      auto res = JsonHelper::Parse(mPartnerId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.partner field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.weapon field");
+      mWeaponId = converter.weaponNameToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
+      auto res = JsonHelper::Parse(mArmor, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Character!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Character.");
     return false;

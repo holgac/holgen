@@ -38,6 +38,15 @@ bool TestStructHashableMap::ParseJson(const rapidjson::Value &json, const Conver
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructHashableMap: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructHashableMap!");
+      auto res = JsonHelper::Parse(mData, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashableMap.data field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructHashableMap!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructHashableMap.");
     return false;

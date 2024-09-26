@@ -60,6 +60,21 @@ bool TestJsonTag::ParseJson(const rapidjson::Value &json, const Converter &conve
         HOLGEN_WARN("Unexpected entry in json when parsing TestJsonTag: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonTag!");
+      auto res = JsonHelper::Parse(mId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonTag.id field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonTag!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonTag.name field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestJsonTag!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestJsonTag.");
     return false;

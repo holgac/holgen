@@ -256,6 +256,33 @@ bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converte
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerVector: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
+      auto res = JsonHelper::Parse(mInnerStructsWithId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsWithId field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
+      auto res = JsonHelper::Parse(mInnerStructsNoId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsNoId field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
+      auto res = JsonHelper::Parse(mStringContainer, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.stringContainer field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
+      auto res = JsonHelper::Parse(mUnsignedContainer, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.unsignedContainer field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestContainerVector!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestContainerVector.");
     return false;

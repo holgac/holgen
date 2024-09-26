@@ -221,6 +221,53 @@ bool TestVariantStructDifferentTypes::ParseJson(const rapidjson::Value &json, co
         HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructDifferentTypes: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructDifferentTypes!");
+      TestVariantStructType temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being1Type field");
+      SetBeing1Type(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructDifferentTypes!");
+      bool res;
+      if (mBeing1Type == TestVariantStructType::Cat) {
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), (*it), converter);
+      } else if (mBeing1Type == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), (*it), converter);
+      } else {
+        HOLGEN_WARN("Could not json-parse TestVariantStructDifferentTypes.being1 variant field, its type {} is unexpected", mBeing1Type);
+        return false;
+      }
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being1 variant field of type {}", mBeing1Type);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructDifferentTypes!");
+      TestVariantStructType temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being2Type field");
+      SetBeing2Type(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructDifferentTypes!");
+      bool res;
+      if (mBeing2Type == TestVariantStructType::Cat) {
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), (*it), converter);
+      } else if (mBeing2Type == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), (*it), converter);
+      } else {
+        HOLGEN_WARN("Could not json-parse TestVariantStructDifferentTypes.being2 variant field, its type {} is unexpected", mBeing2Type);
+        return false;
+      }
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructDifferentTypes.being2 variant field of type {}", mBeing2Type);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestVariantStructDifferentTypes!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestVariantStructDifferentTypes.");
     return false;

@@ -108,6 +108,15 @@ bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerMap: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerMap!");
+      auto res = JsonHelper::Parse(mInnerStructsWithId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerMap.innerStructsWithId field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestContainerMap!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestContainerMap.");
     return false;

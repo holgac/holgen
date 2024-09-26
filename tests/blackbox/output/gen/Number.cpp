@@ -34,6 +34,15 @@ bool Number::ParseJson(const rapidjson::Value &json, const Converter &converter)
         HOLGEN_WARN("Unexpected entry in json when parsing Number: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Number!");
+      auto res = JsonHelper::Parse(mValue, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Number.value field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Number!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Number.");
     return false;

@@ -60,6 +60,21 @@ bool Human::ParseJson(const rapidjson::Value &json, const Converter &converter) 
         HOLGEN_WARN("Unexpected entry in json when parsing Human: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Human!");
+      auto res = JsonHelper::Parse(mId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.id field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Human!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.name field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Human!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Human.");
     return false;

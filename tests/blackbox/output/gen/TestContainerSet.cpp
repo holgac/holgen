@@ -96,6 +96,21 @@ bool TestContainerSet::ParseJson(const rapidjson::Value &json, const Converter &
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerSet: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerSet!");
+      auto res = JsonHelper::Parse(mStringContainer, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.stringContainer field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerSet!");
+      auto res = JsonHelper::Parse(mUnsignedContainer, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.unsignedContainer field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestContainerSet!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestContainerSet.");
     return false;

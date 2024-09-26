@@ -209,6 +209,45 @@ bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter 
         HOLGEN_WARN("Unexpected entry in json when parsing TestLuaCalculator: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaCalculator!");
+      auto res = JsonHelper::Parse(mLastValue, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.lastValue field");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_AddPrimitive, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddPrimitive");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_AddRef, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddRef");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_AddNullable, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddNullable");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNullable, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNullable");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnRef, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnRef");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNew, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNew");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestLuaCalculator!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestLuaCalculator.");
     return false;

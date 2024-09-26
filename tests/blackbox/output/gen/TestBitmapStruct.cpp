@@ -54,6 +54,15 @@ bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &
         HOLGEN_WARN("Unexpected entry in json when parsing TestBitmapStruct: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestBitmapStruct!");
+      auto res = JsonHelper::Parse(mBitmapField, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestBitmapStruct.bitmapField field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestBitmapStruct!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestBitmapStruct.");
     return false;

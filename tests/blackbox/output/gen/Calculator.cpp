@@ -95,6 +95,25 @@ bool Calculator::ParseJson(const rapidjson::Value &json, const Converter &conver
         HOLGEN_WARN("Unexpected entry in json when parsing Calculator: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Calculator!");
+      auto res = JsonHelper::Parse(mCurVal, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.curVal field");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_Add, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Add");
+      ++it;
+    }
+    {
+      auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Subtract");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Calculator!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Calculator.");
     return false;

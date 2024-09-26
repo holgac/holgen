@@ -113,6 +113,21 @@ bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, cons
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructSingleElemContainer: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructSingleElemContainer!");
+      auto res = JsonHelper::Parse(mSingleElemStructs, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructs field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructSingleElemContainer!");
+      auto res = JsonHelper::Parse(mSingleElemStructsWithId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructsWithId field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructSingleElemContainer!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructSingleElemContainer.");
     return false;

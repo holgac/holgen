@@ -76,6 +76,27 @@ bool Boot::ParseJson(const rapidjson::Value &json, const Converter &converter) {
         HOLGEN_WARN("Unexpected entry in json when parsing Boot: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Boot!");
+      auto res = JsonHelper::Parse(mId, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.id field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Boot!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.name field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Boot!");
+      auto res = JsonHelper::Parse(mColor, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Boot.color field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Boot!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Boot.");
     return false;

@@ -34,6 +34,15 @@ bool TestLuaStaticCppFunction::ParseJson(const rapidjson::Value &json, const Con
         HOLGEN_WARN("Unexpected entry in json when parsing TestLuaStaticCppFunction: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaStaticCppFunction!");
+      auto res = JsonHelper::Parse(mData, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaStaticCppFunction.data field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestLuaStaticCppFunction!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestLuaStaticCppFunction.");
     return false;

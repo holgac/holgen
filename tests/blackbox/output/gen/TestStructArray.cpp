@@ -53,6 +53,15 @@ bool TestStructArray::ParseJson(const rapidjson::Value &json, const Converter &c
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructArray: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructArray!");
+      auto res = JsonHelper::Parse(mType, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArray.type field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructArray!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructArray.");
     return false;

@@ -50,6 +50,21 @@ bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value &json, const
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerInnerStructNoId: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerInnerStructNoId!");
+      auto res = JsonHelper::Parse(mField, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.field field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerInnerStructNoId!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.name field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestContainerInnerStructNoId!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestContainerInnerStructNoId.");
     return false;

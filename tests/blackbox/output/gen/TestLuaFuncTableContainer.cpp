@@ -130,6 +130,51 @@ bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Co
         HOLGEN_WARN("Unexpected entry in json when parsing TestLuaFuncTableContainer: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
+      auto res = JsonHelper::Parse(mField, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.field field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
+      auto res = JsonHelper::Parse(mScript1, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script1 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
+      auto res = JsonHelper::Parse(mScript2, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script2 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
+      auto res = JsonHelper::Parse(mScriptWithSourceTable1, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable1 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
+      auto res = JsonHelper::Parse(mScriptWithSourceTable2, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable2 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
+      auto res = JsonHelper::Parse(mStaticScript1, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript1 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
+      auto res = JsonHelper::Parse(mStaticScript2, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript2 field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestLuaFuncTableContainer!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestLuaFuncTableContainer.");
     return false;

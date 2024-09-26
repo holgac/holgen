@@ -47,6 +47,21 @@ bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &c
         HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeSword: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeSword!");
+      auto res = JsonHelper::Parse(mSharpness, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.sharpness field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeSword!");
+      auto res = JsonHelper::Parse(mIsShortSword, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.isShortSword field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing WeaponTypeSword!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing WeaponTypeSword.");
     return false;

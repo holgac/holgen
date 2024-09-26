@@ -92,6 +92,49 @@ bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter)
         HOLGEN_WARN("Unexpected entry in json when parsing Person: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.race field");
+      mRace = converter.raceNameToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
+      mCurrentCountry = converter.countryNameToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
+      mCurrentCity = converter.cityNameToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
+      mHomeCountry = converter.countryNameToId(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
+      mPlaceOfBirth = converter.cityNameToId(temp);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Person!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Person.");
     return false;

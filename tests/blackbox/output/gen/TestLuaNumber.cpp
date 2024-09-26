@@ -34,6 +34,15 @@ bool TestLuaNumber::ParseJson(const rapidjson::Value &json, const Converter &con
         HOLGEN_WARN("Unexpected entry in json when parsing TestLuaNumber: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaNumber!");
+      auto res = JsonHelper::Parse(mValue, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaNumber.value field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestLuaNumber!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestLuaNumber.");
     return false;

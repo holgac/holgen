@@ -54,6 +54,21 @@ bool TestVariantStructCat::ParseJson(const rapidjson::Value &json, const Convert
         HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructCat: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructCat!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructCat.name field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructCat!");
+      auto res = JsonHelper::Parse(mColor, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructCat.color field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestVariantStructCat!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestVariantStructCat.");
     return false;

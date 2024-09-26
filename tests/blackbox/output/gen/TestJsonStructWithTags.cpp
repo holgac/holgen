@@ -38,6 +38,15 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Conve
         HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructWithTags: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructWithTags!");
+      auto res = JsonHelper::ParseConvertElem<std::string>(mTags, (*it), converter, converter.testJsonConvertTag);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestJsonStructWithTags!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestJsonStructWithTags.");
     return false;

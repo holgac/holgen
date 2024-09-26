@@ -81,6 +81,21 @@ bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Conve
         HOLGEN_WARN("Unexpected entry in json when parsing LuaTestStructContainer: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing LuaTestStructContainer!");
+      auto res = JsonHelper::Parse(mTestVector, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testVector field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing LuaTestStructContainer!");
+      auto res = JsonHelper::Parse(mTestMap, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testMap field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing LuaTestStructContainer!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing LuaTestStructContainer.");
     return false;

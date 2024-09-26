@@ -59,6 +59,27 @@ bool TestStructArrayCustomData1::ParseJson(const rapidjson::Value &json, const C
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructArrayCustomData1: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructArrayCustomData1!");
+      auto res = JsonHelper::Parse(mF1, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f1 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructArrayCustomData1!");
+      auto res = JsonHelper::Parse(mF2, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f2 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructArrayCustomData1!");
+      auto res = JsonHelper::Parse(mF3, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArrayCustomData1.f3 field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructArrayCustomData1!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructArrayCustomData1.");
     return false;

@@ -70,6 +70,27 @@ bool TestStruct::ParseJson(const rapidjson::Value &json, const Converter &conver
         HOLGEN_WARN("Unexpected entry in json when parsing TestStruct: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStruct!");
+      auto res = JsonHelper::Parse(mTestFieldBool, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldBool field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStruct!");
+      auto res = JsonHelper::Parse(mTestFieldUnsigned, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldUnsigned field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStruct!");
+      auto res = JsonHelper::Parse(mTestFieldString, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldString field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStruct!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStruct.");
     return false;

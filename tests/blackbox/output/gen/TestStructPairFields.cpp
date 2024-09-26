@@ -54,6 +54,21 @@ bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Convert
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructPairFields: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructPairFields!");
+      auto res = JsonHelper::Parse(mIntStringPair, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.intStringPair field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructPairFields!");
+      auto res = JsonHelper::Parse(mPairVector, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.pairVector field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructPairFields!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructPairFields.");
     return false;

@@ -51,6 +51,21 @@ bool DamageMultiplier::ParseJson(const rapidjson::Value &json, const Converter &
         HOLGEN_WARN("Unexpected entry in json when parsing DamageMultiplier: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing DamageMultiplier!");
+      auto res = JsonHelper::Parse(mWhen, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.when field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing DamageMultiplier!");
+      auto res = JsonHelper::Parse(mValue, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.value field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing DamageMultiplier!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing DamageMultiplier.");
     return false;

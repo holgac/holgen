@@ -50,6 +50,21 @@ bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &con
         HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeBow: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeBow!");
+      auto res = JsonHelper::Parse(mRange, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.range field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeBow!");
+      auto res = JsonHelper::Parse(mMaterial, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.material field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing WeaponTypeBow!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing WeaponTypeBow.");
     return false;

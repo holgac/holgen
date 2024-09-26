@@ -36,6 +36,17 @@ bool RaceId::ParseJson(const rapidjson::Value &json, const Converter &converter)
         HOLGEN_WARN("Unexpected entry in json when parsing RaceId: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing RaceId!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse RaceId.id field");
+      mId = converter.raceNameToId(temp);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing RaceId!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing RaceId.");
     return false;

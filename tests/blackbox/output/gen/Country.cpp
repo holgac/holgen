@@ -72,6 +72,29 @@ bool Country::ParseJson(const rapidjson::Value &json, const Converter &converter
         HOLGEN_WARN("Unexpected entry in json when parsing Country: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Country!");
+      auto res = JsonHelper::Parse(mLeader, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.leader field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Country!");
+      auto res = JsonHelper::Parse(mCitizens, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.citizens field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Country!");
+      std::map<std::string, uint32_t> temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Country.population field");
+      mPopulation = std::move(converter.raceU32Map(temp));
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Country!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Country.");
     return false;

@@ -46,6 +46,21 @@ bool TestStructHashable::ParseJson(const rapidjson::Value &json, const Converter
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructHashable: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructHashable!");
+      auto res = JsonHelper::Parse(mField1, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashable.field1 field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructHashable!");
+      auto res = JsonHelper::Parse(mField2, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructHashable.field2 field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructHashable!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructHashable.");
     return false;

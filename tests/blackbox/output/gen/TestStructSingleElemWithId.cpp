@@ -40,16 +40,22 @@ bool TestStructSingleElemWithId::ParseJson(const rapidjson::Value &json, const C
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
-      if (0 == strcmp("id", name)) {
-        auto res = JsonHelper::Parse(mId, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemWithId.id field");
-      } else if (0 == strcmp("name", name)) {
+      if (0 == strcmp("name", name)) {
         auto res = JsonHelper::Parse(mName, data.value, converter);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemWithId.name field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructSingleElemWithId: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructSingleElemWithId!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemWithId.name field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructSingleElemWithId!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructSingleElemWithId.");
     return false;

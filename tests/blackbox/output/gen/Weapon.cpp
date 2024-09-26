@@ -78,6 +78,33 @@ bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter)
         HOLGEN_WARN("Unexpected entry in json when parsing Weapon: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Weapon!");
+      auto res = JsonHelper::Parse(mDamageMin, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMin field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Weapon!");
+      auto res = JsonHelper::Parse(mDamageMax, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMax field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Weapon!");
+      auto res = JsonHelper::Parse(mDamageMultipliers, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMultipliers field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Weapon!");
+      auto res = JsonHelper::Parse(mModifiers, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.modifiers field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Weapon!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing Weapon.");
     return false;

@@ -58,6 +58,23 @@ bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &co
         HOLGEN_WARN("Unexpected entry in json when parsing CharacterArmor: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing CharacterArmor!");
+      auto res = JsonHelper::Parse(mDirtAmount, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.dirtAmount field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing CharacterArmor!");
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
+      mArmorId = converter.armorNameToId(temp);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing CharacterArmor!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing CharacterArmor.");
     return false;

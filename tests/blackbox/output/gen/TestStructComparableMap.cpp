@@ -38,6 +38,15 @@ bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Conv
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructComparableMap: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructComparableMap!");
+      auto res = JsonHelper::Parse(mData, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructComparableMap.data field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestStructComparableMap!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestStructComparableMap.");
     return false;

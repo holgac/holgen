@@ -174,6 +174,45 @@ bool TestVariantStructSharedType::ParseJson(const rapidjson::Value &json, const 
         HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructSharedType: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructSharedType!");
+      TestVariantStructType temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructSharedType.beingType field");
+      SetBeingType(temp);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructSharedType!");
+      bool res;
+      if (mBeingType == TestVariantStructType::Cat) {
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), (*it), converter);
+      } else if (mBeingType == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), (*it), converter);
+      } else {
+        HOLGEN_WARN("Could not json-parse TestVariantStructSharedType.being1 variant field, its type {} is unexpected", mBeingType);
+        return false;
+      }
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructSharedType.being1 variant field of type {}", mBeingType);
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructSharedType!");
+      bool res;
+      if (mBeingType == TestVariantStructType::Cat) {
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), (*it), converter);
+      } else if (mBeingType == TestVariantStructType::Human) {
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), (*it), converter);
+      } else {
+        HOLGEN_WARN("Could not json-parse TestVariantStructSharedType.being2 variant field, its type {} is unexpected", mBeingType);
+        return false;
+      }
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructSharedType.being2 variant field of type {}", mBeingType);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestVariantStructSharedType!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestVariantStructSharedType.");
     return false;

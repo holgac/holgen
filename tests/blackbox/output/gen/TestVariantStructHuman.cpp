@@ -54,6 +54,21 @@ bool TestVariantStructHuman::ParseJson(const rapidjson::Value &json, const Conve
         HOLGEN_WARN("Unexpected entry in json when parsing TestVariantStructHuman: {}", name);
       }
     }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructHuman!");
+      auto res = JsonHelper::Parse(mName, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructHuman.name field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructHuman!");
+      auto res = JsonHelper::Parse(mNationality, (*it), converter);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructHuman.nationality field");
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestVariantStructHuman!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestVariantStructHuman.");
     return false;
