@@ -64,7 +64,9 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
           : Constness::NotConst};
 
   if (funcAnnotation) {
-    if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy)) {
+    if (funcAnnotation->GetAttribute(Annotations::Func_Public)) {
+      method.mVisibility = Visibility::Public;
+    } else if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy)) {
       method.mVisibility = Visibility::Protected;
     } else if (funcAnnotation->GetAttribute(Annotations::Func_Protected)) {
       method.mVisibility = Visibility::Protected;

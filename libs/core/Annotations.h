@@ -236,6 +236,7 @@ public:
    * @luaFunc can be used to change this behaviour.
    *
    * onDestroy: Called when the object is destroyed, use it to free unmanaged resources
+   *            By default, onDestroy functions are protected, use "public" attribute if needed.
    * const: Specifies whether the function is const
    *
    * static: Creates a static method that can be called without an instance.
@@ -247,6 +248,7 @@ public:
   inline static const std::string Func_Const = "const";
   inline static const std::string Func_Private = "private";
   inline static const std::string Func_Protected = "protected";
+  inline static const std::string Func_Public = "public";
   inline static const std::string Func_Static = "static";
   inline static const std::string Func_Hash = "hash";
 
