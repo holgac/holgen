@@ -7,8 +7,9 @@
 namespace holgen {
 void LuaFieldsPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
-    if (cls.mStruct)
-      ProcessStruct(cls);
+    if (cls.mStruct) {
+      ProcessStruct(cls, *cls.mStruct);
+    }
   }
 }
 
@@ -51,10 +52,16 @@ void LuaFieldsPlugin::ProcessRegistryDataField(Class &cls, const FieldDefinition
   AddRegistryDataField(cls, fieldDefinition);
 }
 
-void LuaFieldsPlugin::ProcessStruct(Class &cls) {
-  if (cls.mStruct->GetAnnotation(Annotations::NoLua))
+void LuaFieldsPlugin::ProcessStruct(Class &cls, const StructDefinition &structDefinition) {
+  if (structDefinition.GetAnnotation(Annotations::NoLua)) {
     return;
-  for (auto &field: cls.mStruct->mFields) {
+  }
+
+  for (auto &mixin: structDefinition.mMixins) {
+    ProcessStruct(cls, *mProject.mProject.GetStruct(mixin));
+  }
+
+  for (auto &field: structDefinition.mFields) {
     if (field.mType.mName == St::Lua_CustomData) {
       ProcessRegistryDataField(cls, field);
     }

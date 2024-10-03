@@ -16,7 +16,7 @@ private:
   void AddRegistryDataField(Class &cls, const FieldDefinition &fieldDefinition);
   void AddRegistryDataUninitializer(Class &cls, ClassField &field);
   void AddRegistryDataInitializer(Class &cls, ClassField &field);
-  void ProcessStruct(Class &cls);
+  void ProcessStruct(Class &cls, const StructDefinition &structDefinition);
   ClassMethod &GetLuaInitializer(Class &cls);
   ClassMethod &GetLuaUninitializer(Class &cls);
 };
