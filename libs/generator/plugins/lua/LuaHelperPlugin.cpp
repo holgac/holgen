@@ -245,13 +245,10 @@ void LuaHelperPlugin::GenerateReadFunction(Class &cls) {
       "entry in stack is invalidated.");
   method.mComments.emplace_back("It was made specifically for forwarding lua parameters back to "
                                 "lua; do not use it for anything else.");
-  method.mTemplateParameters.emplace_back("typename", "T");
   method.mArguments.emplace_back("data", Type{"std::function", PassByType::Reference});
   method.mArguments.back().mType.mFunctionalTemplateParameters.emplace_back("void");
   method.mArguments.back().mType.mFunctionalTemplateParameters.emplace_back("lua_State",
                                                                             PassByType::Pointer);
-  method.mArguments.back().mType.mFunctionalTemplateParameters.emplace_back(
-      "T", PassByType::Reference, Constness::Const);
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mArguments.emplace_back("luaIndex", Type{"int32_t"});
   method.mBody.Add("if (luaIndex < 0) {{");
@@ -259,7 +256,7 @@ void LuaHelperPlugin::GenerateReadFunction(Class &cls) {
   method.mBody.Add("luaIndex = lua_gettop(luaState) + luaIndex + 1;");
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
-  method.mBody.Add("data = [luaIndex](lua_State *lsInner, const T& obj) {{");
+  method.mBody.Add("data = [luaIndex](lua_State *lsInner) {{");
   method.mBody.Indent(1);
   method.mBody.Add("lua_pushvalue(lsInner, luaIndex);");
   method.mBody.Indent(-1);

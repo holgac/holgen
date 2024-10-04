@@ -3,7 +3,7 @@
 #include "core/Exception.h"
 
 namespace holgen {
-void FunctionPluginBase::ProcessFunctionArgument(Class &cls, ClassMethod &method,
+void FunctionPluginBase::ProcessFunctionArgument(ClassMethod &method,
                                                  const FunctionArgumentDefinition &funcArg) {
   auto &arg = method.mArguments.emplace_back(
       funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
@@ -11,8 +11,6 @@ void FunctionPluginBase::ProcessFunctionArgument(Class &cls, ClassMethod &method
     arg.mType = Type{"std::function", PassByType::Reference, Constness::Const};
     arg.mType.mFunctionalTemplateParameters.emplace_back("void");
     arg.mType.mFunctionalTemplateParameters.emplace_back("lua_State", PassByType::Pointer);
-    arg.mType.mFunctionalTemplateParameters.emplace_back(cls.mName, PassByType::Reference,
-                                                         Constness::Const);
   } else {
     arg.mType.mConstness = funcArg.mConstness;
     if (TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
@@ -94,7 +92,7 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
   method.mFunction = &functionDefinition;
 
   for (const auto &funcArg: functionDefinition.mArguments) {
-    ProcessFunctionArgument(cls, method, funcArg);
+    ProcessFunctionArgument(method, funcArg);
   }
   FillComments(functionDefinition, method.mComments);
 

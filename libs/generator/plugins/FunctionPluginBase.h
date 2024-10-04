@@ -9,8 +9,7 @@ public:
   ClassMethod NewFunction(Class &cls, const FunctionDefinition &functionDefinition);
 
 private:
-  void ProcessFunctionArgument(Class &cls, ClassMethod &method,
-                               const FunctionArgumentDefinition &funcArg);
+  void ProcessFunctionArgument(ClassMethod &method, const FunctionArgumentDefinition &funcArg);
   void ProcessHashFunction(Class &cls, const ClassMethod &method);
 };
 } // namespace holgen

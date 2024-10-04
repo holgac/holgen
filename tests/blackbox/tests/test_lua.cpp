@@ -534,7 +534,7 @@ Tester = {
   TestLuaRegistryData tlrd;
   tlrd.InitializeLua(mState);
   tlrd.SetTable("Tester");
-  tlrd.Init(mState, [](lua_State *innerState, auto &instance) {
+  tlrd.Init(mState, [](lua_State *innerState) {
     lua_newtable(innerState);
     lua_pushstring(innerState, "initialValue");
     lua_pushnumber(innerState, 12);

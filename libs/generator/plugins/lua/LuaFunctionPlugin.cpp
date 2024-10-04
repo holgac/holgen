@@ -95,7 +95,7 @@ void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
                                                  const FunctionDefinition &functionDefinition) {
   for (auto &funcArg: functionDefinition.mArguments) {
     if (funcArg.mType.mName == St::Lua_CustomData) {
-      method.mBody.Add("{}(luaState, *this);", funcArg.mName);
+      method.mBody.Add("{}(luaState);", funcArg.mName);
     } else {
       // There could be a function modifier specifying whether to push mirror or proxy to lua
       method.mBody.Add("{}::{}({}, luaState, false);", St::LuaHelper, St::LuaHelper_Push,
