@@ -133,6 +133,16 @@ bool LuaHelper::Read(uint8_t &data, lua_State *luaState, int32_t luaIndex) {
   return true;
 }
 
+bool LuaHelper::Read(std::function<void(lua_State *)> &data, lua_State *luaState, int32_t luaIndex) {
+  if (luaIndex < 0) {
+    luaIndex = lua_gettop(luaState) + luaIndex + 1;
+  }
+  data = [luaIndex](lua_State *lsInner) {
+    lua_pushvalue(lsInner, luaIndex);
+  };
+  return true;
+}
+
 void LuaHelper::CreateMetatables(lua_State *luaState) {
   Character::CreateLuaMetatable(luaState);
   WeaponInInventory::CreateLuaMetatable(luaState);

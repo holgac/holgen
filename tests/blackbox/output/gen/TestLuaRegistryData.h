@@ -26,7 +26,7 @@ public:
   void SetData(int val);
   void SetTable(std::string val);
   const std::string &GetTable();
-  void Init(lua_State *luaState, const std::function<void(lua_State *, const TestLuaRegistryData &)> &initData) const;
+  void Init(lua_State *luaState, const std::function<void(lua_State *)> &initData) const;
   int32_t Get(lua_State *luaState) const;
   void Add(lua_State *luaState, const int32_t val) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);

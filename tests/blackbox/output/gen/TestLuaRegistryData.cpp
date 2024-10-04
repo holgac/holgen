@@ -50,7 +50,7 @@ const std::string &TestLuaRegistryData::GetTable() {
   return mTable;
 }
 
-void TestLuaRegistryData::Init(lua_State *luaState, const std::function<void(lua_State *, const TestLuaRegistryData &)> &initData) const {
+void TestLuaRegistryData::Init(lua_State *luaState, const std::function<void(lua_State *)> &initData) const {
   HOLGEN_WARN_AND_RETURN_IF(mTable.empty(), void(), "Calling unset Init function from table");
   lua_getglobal(luaState, mTable.c_str());
   if (lua_isnil(luaState, -1)) {
@@ -66,7 +66,7 @@ void TestLuaRegistryData::Init(lua_State *luaState, const std::function<void(lua
     return void();
   }
   LuaHelper::Push(*this, luaState, false);
-  initData(luaState, *this);
+  initData(luaState);
   lua_call(luaState, 2, 0);
   lua_pop(luaState, 1);
 }
@@ -183,7 +183,7 @@ void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
 int TestLuaRegistryData::InitCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaRegistryData.Init method with an invalid lua proxy object!");
-  std::function<void(lua_State *, const TestLuaRegistryData &)> arg0;
+  std::function<void(lua_State *)> arg0;
   LuaHelper::Read(arg0, luaState, -1);
   instance->Init(luaState, arg0);
   return 0;
