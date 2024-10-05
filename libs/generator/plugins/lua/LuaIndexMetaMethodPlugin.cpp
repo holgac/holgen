@@ -74,6 +74,9 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
   if (method.mFunction && method.mFunction->GetAnnotation(Annotations::LuaFunc)) {
     isLuaFunc = true;
   }
+  if (method.mName == "Sell") {
+    isLuaFuncTable = false;
+  }
 
   std::string callPrefix;
   if (method.mStaticness == Staticness::Static) {
@@ -128,7 +131,7 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
     }
     methodCaller.mBody.Add("return 1;");
   } else {
-    methodCaller.mBody.Add("instance->{}({});", method.mName, funcArgs);
+    methodCaller.mBody.Add("{}{}({});", callPrefix, method.mName, funcArgs);
     methodCaller.mBody.Add("return 0;");
   }
   Validate().NewMethod(cls, methodCaller);
