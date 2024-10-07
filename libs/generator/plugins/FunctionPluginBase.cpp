@@ -24,7 +24,8 @@ void FunctionPluginBase::ProcessFunctionArgument(ClassMethod &method,
   }
 }
 
-void FunctionPluginBase::ProcessHashFunction(Class &cls, const ClassMethod &method) {
+void FunctionPluginBase::ProcessHashFunction(Class &cls, ClassMethod &method) {
+  method.mConstness = Constness::Const;
   auto expectedHashFunction = cls.mStruct->GetHashFunction(mProject.mProject);
   THROW_IF(expectedHashFunction != method.mFunction,
            "Class {} ({}) has multiple hash functions: {} and {}", cls.mName,
@@ -48,6 +49,30 @@ void FunctionPluginBase::ProcessHashFunction(Class &cls, const ClassMethod &meth
   hasher.mBody.Add("return obj.{}();", method.mName);
   hash.mMethods.push_back(std::move(hasher));
   cls.mSpecializations.push_back(std::move(hash));
+}
+
+void FunctionPluginBase::ProcessToStringFunction(Class &cls, ClassMethod &method) {
+  method.mConstness = Constness::Const;
+  auto expectedToStringFunction = cls.mStruct->GetToStringFunction(mProject.mProject);
+  THROW_IF(expectedToStringFunction != method.mFunction,
+           "Class {} ({}) has multiple toString functions: {} and {}", cls.mName,
+           cls.mStruct->mDefinitionSource, method.mFunction->mDefinitionSource,
+           expectedToStringFunction->mDefinitionSource);
+  cls.mHeaderIncludes.AddStandardHeader("format");
+  auto className = std::format("{}::{}", cls.mNamespace, cls.mName);
+  auto formatter = Class{"formatter", "std"};
+  formatter.mTemplateSpecializations.push_back(className);
+  formatter.mClassType = ClassType::Struct;
+  formatter.mBaseClasses.emplace_back("formatter<string>");
+
+  auto format = ClassMethod{"format", Type{"auto"}, Visibility::Public, Constness::Const};
+  format.mTemplateParameters.emplace_back("typename", "FormatContext");
+  format.mArguments.emplace_back("obj", Type{className, PassByType::Reference, Constness::Const});
+  format.mArguments.emplace_back("ctx",
+                                 Type{"FormatContext", PassByType::Reference, Constness::NotConst});
+  format.mBody.Add("return format_to(ctx.out(), \"{{}}\", obj.{}());", method.mName);
+  formatter.mMethods.push_back(std::move(format));
+  cls.mSpecializations.push_back(std::move(formatter));
 }
 
 ClassMethod FunctionPluginBase::NewFunction(Class &cls,
@@ -98,6 +123,10 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
 
   if (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Hash)) {
     ProcessHashFunction(cls, method);
+  }
+
+  if (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_ToString)) {
+    ProcessToStringFunction(cls, method);
   }
 
   return method;

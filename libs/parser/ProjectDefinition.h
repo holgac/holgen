@@ -113,6 +113,7 @@ struct StructDefinition : public AnnotationsMixin {
   [[nodiscard]] const FunctionDefinition *GetFunction(const std::string &name) const;
   [[nodiscard]] const FieldDefinition *GetIdField() const;
   [[nodiscard]] const FunctionDefinition *GetHashFunction(const ProjectDefinition &project) const;
+  [[nodiscard]] const FunctionDefinition *GetToStringFunction(const ProjectDefinition &project) const;
 };
 
 struct EnumEntryDefinition : public AnnotationsMixin {

@@ -60,7 +60,7 @@ struct TestStructNonCopyable {
 struct TestStructHashable {
     u32 field1;
     u32 field2;
-    @func(const, hash)
+    @func(hash)
     func Hash() -> u64;
 }
 
@@ -83,4 +83,11 @@ struct TestStructComparableMap {
 struct TestStructPairFields {
     pair<s32, string> intStringPair;
     vector<pair<string, s32>> pairVector;
+}
+
+struct TestStructToString {
+    string field1;
+    string field2;
+    @func(toString)
+    func Stringify() -> string;
 }

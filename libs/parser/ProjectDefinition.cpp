@@ -74,6 +74,24 @@ const FunctionDefinition *
   return nullptr;
 }
 
+const FunctionDefinition *
+    StructDefinition::GetToStringFunction(const ProjectDefinition &project) const {
+  for (auto &function: mFunctions) {
+    if (function.GetMatchingAttribute(Annotations::Func, Annotations::Func_ToString)) {
+      return &function;
+    }
+  }
+
+  for (auto &mixin: mMixins) {
+    auto func = project.GetStruct(mixin)->GetToStringFunction(project);
+    if (func) {
+      return func;
+    }
+  }
+
+  return nullptr;
+}
+
 bool TypeDefinition::operator==(const TypeDefinition &rhs) const {
   if (mName != rhs.mName)
     return false;

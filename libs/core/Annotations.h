@@ -242,6 +242,8 @@ public:
    * static: Creates a static method that can be called without an instance.
    *
    * hash: Marks the function as the hash function used in std::hash
+   *
+   * toString: Uses the function in the std::formatter specialization
    */
   inline static const std::string Func = "func";
   inline static const std::string Func_OnDestroy = "onDestroy";
@@ -251,6 +253,7 @@ public:
   inline static const std::string Func_Public = "public";
   inline static const std::string Func_Static = "static";
   inline static const std::string Func_Hash = "hash";
+  inline static const std::string Func_ToString = "toString";
 
   /**
    * Adds a comment to a struct, field or function.
