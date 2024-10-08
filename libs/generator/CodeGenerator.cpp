@@ -86,6 +86,11 @@ bool HasUserDefinedMethods(const Class &cls) {
       return true;
     }
   }
+  for (const auto &ctor: cls.mConstructors) {
+    if (ctor.mUserDefined) {
+      return true;
+    }
+  }
   return false;
 }
 } // namespace
@@ -569,6 +574,11 @@ CodeBlock CodeGenerator::GenerateConstructorsForSource(const Class &cls) const {
       // These are defined in the header
       continue;
     }
+
+    if (ctor.mUserDefined) {
+      continue;
+    }
+
     if (isFirstMethod)
       isFirstMethod = false;
     else
@@ -578,18 +588,7 @@ CodeBlock CodeGenerator::GenerateConstructorsForSource(const Class &cls) const {
     }
     {
       auto line = codeBlock.Line();
-      line << cls.mName << "::" << cls.mName << "(";
-      bool isFirst = true;
-      for (auto &arg: ctor.mArguments) {
-        if (isFirst)
-          isFirst = false;
-        else
-          line << ", ";
-        if (cls.GetUsing(arg.mType.mName))
-          line << cls.mName << "::";
-        line << arg.mType.ToString(false) << arg.mName;
-      }
-      line << ")";
+      line << GenerateFunctionSignature(cls, ctor);
       if (ctor.mInitializerList.empty())
         line << " {";
       else
@@ -647,6 +646,24 @@ std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const Cla
   return ss.str();
 }
 
+std::string CodeGenerator::GenerateFunctionSignature(const Class &cls,
+                                                     const ClassConstructor &ctor) const {
+  std::stringstream ss;
+  ss << cls.mName << "::" << cls.mName << "(";
+  bool isFirst = true;
+  for (auto &arg: ctor.mArguments) {
+    if (isFirst)
+      isFirst = false;
+    else
+      ss << ", ";
+    if (cls.GetUsing(arg.mType.mName))
+      ss << cls.mName << "::";
+    ss << arg.mType.ToString(false) << arg.mName;
+  }
+  ss << ")";
+  return ss.str();
+}
+
 CodeBlock CodeGenerator::GenerateDestructor(const Class &cls, Visibility visibility,
                                             bool isHeader) const {
   CodeBlock codeBlock;
@@ -694,6 +711,17 @@ void CodeGenerator::GenerateClassModifiableSource(GeneratedContent &source,
     codeBlock.Add("{} {{", GenerateFunctionSignature(cls, method, false, false));
     codeBlock.UserDefined("{}_{}{}", cls.mName, method.mName,
                           method.mConstness == Constness::Const ? "_Const" : "");
+    codeBlock.Add("}}");
+    codeBlock.AddLine();
+  }
+
+  for (auto &ctor: cls.mConstructors) {
+    if (!ctor.mUserDefined)
+      continue;
+    codeBlock.AddLine(GenerateFunctionSignature(cls, ctor));
+    codeBlock.UserDefined("INITIALIZER_{}_{}", cls.mName, ctor.mFunction->mName);
+    codeBlock.Add("{{");
+    codeBlock.UserDefined("{}_{}", cls.mName, ctor.mFunction->mName);
     codeBlock.Add("}}");
     codeBlock.AddLine();
   }

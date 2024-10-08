@@ -56,6 +56,7 @@ private:
   void GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
   std::string GenerateFunctionSignature(const Class &cls, const ClassMethod &method,
                                         bool isInHeader, bool isInsideClass) const;
+  std::string GenerateFunctionSignature(const Class &cls, const ClassConstructor &ctor) const;
   std::string GenerateClassDeclaration(const Class &cls) const;
   void GenerateClassDefinition(const Class &cls, CodeBlock &codeBlock) const;
 };

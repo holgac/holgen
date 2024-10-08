@@ -141,14 +141,15 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
 ClassConstructor FunctionPluginBase::NewConstructor(Class &cls,
                                                     const FunctionDefinition &functionDefinition) {
   (void)cls;
-  auto method = ClassConstructor{};
-  ProcessMethodVisibility(method, functionDefinition);
+  auto ctor = ClassConstructor{};
+  ProcessMethodVisibility(ctor, functionDefinition);
 
   for (const auto &funcArg: functionDefinition.mArguments) {
-    ProcessFunctionArgument(method, funcArg);
+    ProcessFunctionArgument(ctor, funcArg);
   }
-  FillComments(functionDefinition, method.mComments);
+  FillComments(functionDefinition, ctor.mComments);
+  ctor.mFunction = &functionDefinition;
 
-  return method;
+  return ctor;
 }
 } // namespace holgen
