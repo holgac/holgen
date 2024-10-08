@@ -40,6 +40,7 @@ set(gen_sources
     gen/TestStructArrayCustomData2.cpp
     gen/TestStructComparable.cpp
     gen/TestStructComparableMap.cpp
+    gen/TestStructConstructor.cpp
     gen/TestStructHashable.cpp
     gen/TestStructHashableMap.cpp
     gen/TestStructNonCopyable.cpp
@@ -73,6 +74,7 @@ set(src_sources
     src/TestLuaStaticCppFunction.cpp
     src/TestStructArray.cpp
     src/TestStructComparable.cpp
+    src/TestStructConstructor.cpp
     src/TestStructHashable.cpp
     src/TestStructToString.cpp
     src/Weapon.cpp

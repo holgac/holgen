@@ -14,6 +14,7 @@
 #include "TestStructComparableMap.h"
 #include "TestStructPairFields.h"
 #include "TestStructToString.h"
+#include "TestStructConstructor.h"
 
 using namespace holgen_blackbox_test;
 
@@ -169,4 +170,11 @@ TEST_F(StructTest, ToString) {
   data.SetField1("first");
   data.SetField2("second");
   EXPECT_EQ(std::format("{}", data), "first,second");
+}
+
+TEST_F(StructTest, Construct) {
+  TestStructConstructor data = {1, 2, 3};
+  EXPECT_FLOAT_EQ(data.GetX(), 1);
+  EXPECT_FLOAT_EQ(data.GetY(), 2);
+  EXPECT_FLOAT_EQ(data.GetZ(), 3);
 }

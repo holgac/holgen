@@ -91,3 +91,13 @@ struct TestStructToString {
     @func(toString)
     func Stringify() -> string;
 }
+
+struct TestStructConstructor {
+    float x;
+    float y;
+    float z;
+    @func(constructor)
+    func Construct1(float val) -> string;
+    @func(constructor)
+    func Construct3(float x, float y, float z) -> string;
+}

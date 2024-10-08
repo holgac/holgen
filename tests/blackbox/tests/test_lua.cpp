@@ -577,3 +577,10 @@ TEST_F(LuaTest, ParsingPairFields) {
   LuaTestHelper::ExpectStack(mState, {"{1:9,0:howareyou}"});
   lua_pop(mState, 1);
 }
+
+TEST_F(LuaTest, Constructor) {
+  LuaHelper::CreateMetatables(mState);
+  luaL_dostring(mState, "return TestStructConstructorMeta.Construct3(1,2,3).y");
+  LuaTestHelper::ExpectStack(mState, {"2"});
+  lua_pop(mState, 1);
+}

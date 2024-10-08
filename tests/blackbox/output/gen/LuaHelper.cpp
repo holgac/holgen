@@ -47,6 +47,7 @@
 #include "TestStructArrayType.h"
 #include "TestStructComparable.h"
 #include "TestStructComparableMap.h"
+#include "TestStructConstructor.h"
 #include "TestStructHashable.h"
 #include "TestStructHashableMap.h"
 #include "TestStructNonCopyable.h"
@@ -239,6 +240,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestStructArrayCustomData2::CreateLuaMetatable(luaState);
   TestStructComparable::CreateLuaMetatable(luaState);
   TestStructComparableMap::CreateLuaMetatable(luaState);
+  TestStructConstructor::CreateLuaMetatable(luaState);
   TestStructHashable::CreateLuaMetatable(luaState);
   TestStructHashableMap::CreateLuaMetatable(luaState);
   TestStructNonCopyable::CreateLuaMetatable(luaState);
