@@ -60,6 +60,8 @@ void CppFunctionPlugin::AddCppConstructor(Class &cls,
                                           const FunctionDefinition &functionDefinition) {
   auto ctor = NewConstructor(cls, functionDefinition);
   ctor.mUserDefined = true;
+  if (functionDefinition.mArguments.size() == 1)
+    ctor.mExplicitness = Explicitness::Explicit;
   cls.mConstructors.push_back(std::move(ctor));
 }
 } // namespace holgen

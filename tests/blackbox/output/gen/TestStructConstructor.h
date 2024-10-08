@@ -12,7 +12,7 @@ namespace holgen_blackbox_test {
 namespace holgen_blackbox_test {
 class TestStructConstructor {
 public:
-  TestStructConstructor(const float val);
+  explicit TestStructConstructor(const float val);
   TestStructConstructor(const float x, const float y, const float z);
   TestStructConstructor() = default;
   TestStructConstructor(const TestStructConstructor &rhs) = default;
