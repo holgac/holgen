@@ -90,6 +90,21 @@ void LuaPlugin::GenerateReadMirrorObjectFromLua(Class &cls) {
 }
 
 void LuaPlugin::GenerateReadProxyStructFromLuaBody(Class &cls, ClassMethod &method) {
+
+  method.mBody.Add("lua_pushstring(luaState, \"c\");");
+  method.mBody.Add("lua_gettable(luaState, idx - 1);");
+  method.mBody.Add("if (!lua_isuserdata(luaState, -1)) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("HOLGEN_WARN(\"Proxy object does not contain the correct metadata!\");");
+  method.mBody.Add("return nullptr;");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Add("auto className = *static_cast<const char**>(lua_touserdata(luaState, -1));");
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(className != CLASS_NAME, nullptr, \"Received {{}} "
+                   "instance when expecting {}\", className);",
+                   cls.mName);
+
   if (!ShouldEmbedPointer(cls)) {
     method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Index);
     method.mBody.Add("lua_gettable(luaState, idx - 1);");
@@ -231,13 +246,13 @@ void LuaPlugin::GeneratePushToLua(Class &cls) {
     method.mBody.Add("lua_pushlightuserdata(luaState, (void *) this);");
   }
   method.mBody.Add("lua_settable(luaState, -3);");
-  /*
-  // TODO: this should read from GeneratorSettings
+
+  // TODO: this is a debug feature, read from GeneratorSettings and enable/disable on demand
   // can also just get the metatable that's already available?
-  method.mBody.Add("lua_pushstring(luaState, \"{}\");", LuaTableField_Type);
-  method.mBody.Add("lua_pushstring(luaState, \"{}\");", cls.mName);
+  method.mBody.Add("lua_pushstring(luaState, \"c\");");
+  method.mBody.Add("lua_pushlightuserdata(luaState, &CLASS_NAME);");
   method.mBody.Add("lua_settable(luaState, -3);");
-  */
+
   // Do this last so that metamethods don't get called during object construction
   method.mBody.Add("lua_getglobal(luaState, \"{}\");", Naming().LuaMetatableName(cls));
   method.mBody.Add("lua_setmetatable(luaState, -2);");

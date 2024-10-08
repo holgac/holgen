@@ -13,9 +13,8 @@ void ClassMetadataPlugin::Run() {
 void ClassMetadataPlugin::Process(Class &cls) {
   auto field = ClassField{St::ClassName, Type{"char", PassByType::Pointer, Constness::Const},
                           Visibility::Public, Staticness::Static};
-  field.mType.mConstexprness = Constexprness::Constexpr;
   field.mDefaultValue = std::format("\"{}\"", cls.mName);
   Validate().NewField(cls, field);
   cls.mFields.push_back(std::move(field));
 }
-}
+} // namespace holgen

@@ -130,6 +130,15 @@ struct TestData {}
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
     helpers::ExpectEqual(*cls->GetMethod(St::Lua_ReadProxyObject, Constness::NotConst), method, R"R(
+lua_pushstring(luaState, "c");
+lua_gettable(luaState, idx - 1);
+if (!lua_isuserdata(luaState, -1)) {
+  HOLGEN_WARN("Proxy object does not contain the correct metadata!");
+  return nullptr;
+}
+auto className = *static_cast<const char**>(lua_touserdata(luaState, -1));
+lua_pop(luaState, 1);
+HOLGEN_WARN_AND_RETURN_IF(className != CLASS_NAME, nullptr, "Received {} instance when expecting TestData", className);
 lua_pushstring(luaState, "p");
 lua_gettable(luaState, idx - 1);
 auto ptr = (TestData *) lua_touserdata(luaState, -1);
@@ -163,6 +172,15 @@ struct DM {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     method.mArguments.emplace_back("idx", Type{"int32_t"});
     helpers::ExpectEqual(*cls->GetMethod(St::Lua_ReadProxyObject, Constness::NotConst), method, R"R(
+lua_pushstring(luaState, "c");
+lua_gettable(luaState, idx - 1);
+if (!lua_isuserdata(luaState, -1)) {
+  HOLGEN_WARN("Proxy object does not contain the correct metadata!");
+  return nullptr;
+}
+auto className = *static_cast<const char**>(lua_touserdata(luaState, -1));
+lua_pop(luaState, 1);
+HOLGEN_WARN_AND_RETURN_IF(className != CLASS_NAME, nullptr, "Received {} instance when expecting TestData", className);
 lua_pushstring(luaState, "i");
 lua_gettable(luaState, idx - 1);
 uint32_t id = reinterpret_cast<uint64_t>(lua_touserdata(luaState, -1));
