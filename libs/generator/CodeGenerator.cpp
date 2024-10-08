@@ -231,7 +231,7 @@ void CodeGenerator::GenerateFieldDeclarations(CodeBlock &codeBlock, const Class 
       AddComments(codeBlock, field.mComments);
       auto line = codeBlock.Line();
       if (field.mStaticness == Staticness::Static) {
-        if (canDefineInline)
+        if (canDefineInline && field.mType.mConstexprness == Constexprness::NotConstexpr)
           line << "inline static ";
         else
           line << "static ";

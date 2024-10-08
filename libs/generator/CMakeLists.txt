@@ -51,6 +51,7 @@ set(gen_plugins
     plugins/ClassFieldVariantPlugin.cpp
     plugins/FunctionPluginBase.cpp
     plugins/ClassCopyMoveDestroyPlugin.cpp
+    plugins/ClassMetadataPlugin.cpp
 )
 
 add_library(generator

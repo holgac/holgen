@@ -10,16 +10,20 @@ void ClassPlugin::Run() {
     AddClass(structDefinition);
   }
   for (auto &enumDefinition: mProject.mProject.mEnums) {
-    auto cls = Class{enumDefinition.mName, mSettings.mNamespace, &enumDefinition};
-    FillComments(enumDefinition, cls.mComments);
-    Validate().NewClass(cls);
-    mProject.mClasses.push_back(std::move(cls));
+    AddEnum(enumDefinition);
   }
 }
 
 void ClassPlugin::AddClass(const StructDefinition &structDefinition) {
   auto cls = Class{structDefinition.mName, mSettings.mNamespace, &structDefinition};
   FillComments(structDefinition, cls.mComments);
+  Validate().NewClass(cls);
+  mProject.mClasses.push_back(std::move(cls));
+}
+
+void ClassPlugin::AddEnum(const EnumDefinition &enumDefinition) {
+  auto cls = Class{enumDefinition.mName, mSettings.mNamespace, &enumDefinition};
+  FillComments(enumDefinition, cls.mComments);
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
 }

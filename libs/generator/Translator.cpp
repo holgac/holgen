@@ -25,11 +25,12 @@
 #include "generator/plugins/lua/LuaPlugin.h"
 #include "generator/plugins/lua/LuaIndexMetaMethodPlugin.h"
 #include "generator/plugins/ClassCopyMoveDestroyPlugin.h"
+#include "generator/plugins/ClassMetadataPlugin.h"
 
 namespace holgen {
 
 Translator::Translator(const TranslatorSettings &translatorSettings) :
-    mTranslatorSettings(translatorSettings) {
+  mTranslatorSettings(translatorSettings) {
   // TODO: Users should pick which plugins to run
   AddPlugin<ClassPlugin>();
   AddPlugin<ClassIdFieldPlugin>();
@@ -58,6 +59,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<GlobalPointerPlugin>();
   AddPlugin<FilesystemHelperPlugin>();
   AddPlugin<ClassCopyMoveDestroyPlugin>();
+  AddPlugin<ClassMetadataPlugin>();
 }
 
 TranslatedProject Translator::Translate(const ProjectDefinition &project) const {
