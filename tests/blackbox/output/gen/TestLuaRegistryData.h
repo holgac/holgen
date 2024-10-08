@@ -46,6 +46,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestLuaRegistryData &operator=(const TestLuaRegistryData &rhs) = delete;
   TestLuaRegistryData &operator=(TestLuaRegistryData &&rhs);
+  inline static const char *CLASS_NAME = "TestLuaRegistryData";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int InitCallerFromLua(lua_State *luaState);

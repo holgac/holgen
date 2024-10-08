@@ -42,6 +42,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructPairFields &operator=(const TestStructPairFields &rhs) = default;
   TestStructPairFields &operator=(TestStructPairFields &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructPairFields";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

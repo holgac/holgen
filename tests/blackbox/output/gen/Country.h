@@ -46,6 +46,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   Country &operator=(const Country &rhs) = default;
   Country &operator=(Country &&rhs) = default;
+  inline static const char *CLASS_NAME = "Country";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

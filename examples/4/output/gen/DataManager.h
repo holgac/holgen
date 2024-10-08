@@ -73,6 +73,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   DataManager &operator=(const DataManager &rhs) = delete;
   DataManager &operator=(DataManager &&rhs);
+  inline static const char *CLASS_NAME = "DataManager";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetCharacterFromNameCallerFromLua(lua_State *luaState);

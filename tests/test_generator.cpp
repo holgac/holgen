@@ -110,7 +110,7 @@ public:
   void SetGender(float val);
   Person &operator=(const Person &rhs) = default;
   Person &operator=(Person &&rhs) = default;
-  static constexpr const char *CLASS_NAME = "Person";
+  inline static const char *CLASS_NAME = "Person";
 private:
   // this is the age of the person
   uint32_t mAge = 0;
@@ -212,7 +212,7 @@ public:
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Market &operator=(const Market &rhs) = default;
   Market &operator=(Market &&rhs) = default;
-  static constexpr const char *CLASS_NAME = "Market";
+  inline static const char *CLASS_NAME = "Market";
 private:
   std::vector<std::string> mInstruments;
   std::map<std::string, double> mPrices;
@@ -353,7 +353,7 @@ public:
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Sound &operator=(const Sound &rhs) = default;
   Sound &operator=(Sound &&rhs) = default;
-  static constexpr const char *CLASS_NAME = "Sound";
+  inline static const char *CLASS_NAME = "Sound";
 private:
   std::string mName;
   uint32_t mVolume;
@@ -464,7 +464,7 @@ public:
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Animal &operator=(const Animal &rhs) = default;
   Animal &operator=(Animal &&rhs) = default;
-  static constexpr const char *CLASS_NAME = "Animal";
+  inline static const char *CLASS_NAME = "Animal";
 private:
   std::vector<Sound> mSounds;
 };
@@ -593,7 +593,7 @@ public:
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Person &operator=(const Person &rhs) = default;
   Person &operator=(Person &&rhs) = default;
-  static constexpr const char *CLASS_NAME = "Person";
+  inline static const char *CLASS_NAME = "Person";
 private:
   uint32_t mCurrentCountry;
   uint32_t mCurrentCity;
@@ -754,7 +754,7 @@ public:
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Country &operator=(const Country &rhs) = default;
   Country &operator=(Country &&rhs) = default;
-  static constexpr const char *CLASS_NAME = "Country";
+  inline static const char *CLASS_NAME = "Country";
 private:
   std::string mName;
   Person mLeader;
@@ -892,7 +892,7 @@ public:
   static Person *Get(uint32_t id);
   Person &operator=(const Person &rhs) = default;
   Person &operator=(Person &&rhs) = default;
-  static constexpr const char *CLASS_NAME = "Person";
+  inline static const char *CLASS_NAME = "Person";
 private:
   uint32_t mId = -1;
   std::string mName;
@@ -999,7 +999,7 @@ public:
   bool operator==(const Person &rhs) const;
   Person &operator=(const Person &rhs) = delete;
   Person &operator=(Person &&rhs);
-  static constexpr const char *CLASS_NAME = "Person";
+  inline static const char *CLASS_NAME = "Person";
 };
 }
         )R");

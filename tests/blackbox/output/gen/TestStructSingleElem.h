@@ -38,6 +38,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructSingleElem &operator=(const TestStructSingleElem &rhs) = default;
   TestStructSingleElem &operator=(TestStructSingleElem &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructSingleElem";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

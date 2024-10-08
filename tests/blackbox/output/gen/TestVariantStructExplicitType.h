@@ -50,6 +50,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructExplicitType &operator=(const TestVariantStructExplicitType &rhs);
   TestVariantStructExplicitType &operator=(TestVariantStructExplicitType &&rhs);
+  inline static const char *CLASS_NAME = "TestVariantStructExplicitType";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

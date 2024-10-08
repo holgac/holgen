@@ -36,6 +36,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   Number &operator=(const Number &rhs) = default;
   Number &operator=(Number &&rhs) = default;
+  inline static const char *CLASS_NAME = "Number";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

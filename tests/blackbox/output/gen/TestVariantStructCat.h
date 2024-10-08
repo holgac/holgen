@@ -41,6 +41,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructCat &operator=(const TestVariantStructCat &rhs) = default;
   TestVariantStructCat &operator=(TestVariantStructCat &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestVariantStructCat";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

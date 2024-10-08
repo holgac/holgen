@@ -103,6 +103,9 @@ void TestJsonStructMapWithConverters::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "p");
   lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
+  lua_pushstring(luaState, "c");
+  lua_pushlightuserdata(luaState, &CLASS_NAME);
+  lua_settable(luaState, -3);
   lua_getglobal(luaState, "TestJsonStructMapWithConvertersMeta");
   lua_setmetatable(luaState, -2);
 }
@@ -126,6 +129,15 @@ void TestJsonStructMapWithConverters::PushGlobalToLua(lua_State *luaState, const
 }
 
 TestJsonStructMapWithConverters *TestJsonStructMapWithConverters::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
+  lua_pushstring(luaState, "c");
+  lua_gettable(luaState, idx - 1);
+  if (!lua_isuserdata(luaState, -1)) {
+    HOLGEN_WARN("Proxy object does not contain the correct metadata!");
+    return nullptr;
+  }
+  auto className = *static_cast<const char**>(lua_touserdata(luaState, -1));
+  lua_pop(luaState, 1);
+  HOLGEN_WARN_AND_RETURN_IF(className != CLASS_NAME, nullptr, "Received {} instance when expecting TestJsonStructMapWithConverters", className);
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
   auto ptr = (TestJsonStructMapWithConverters *) lua_touserdata(luaState, -1);

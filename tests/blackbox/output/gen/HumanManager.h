@@ -50,6 +50,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   HumanManager &operator=(const HumanManager &rhs) = default;
   HumanManager &operator=(HumanManager &&rhs) = default;
+  inline static const char *CLASS_NAME = "HumanManager";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetHumanFromNameCallerFromLua(lua_State *luaState);

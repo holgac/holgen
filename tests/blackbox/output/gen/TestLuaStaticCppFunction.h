@@ -37,6 +37,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestLuaStaticCppFunction &operator=(const TestLuaStaticCppFunction &rhs) = default;
   TestLuaStaticCppFunction &operator=(TestLuaStaticCppFunction &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestLuaStaticCppFunction";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int FactoryCallerFromLua(lua_State *luaState);

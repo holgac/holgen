@@ -38,6 +38,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestJsonStructWithTags &operator=(const TestJsonStructWithTags &rhs) = default;
   TestJsonStructWithTags &operator=(TestJsonStructWithTags &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestJsonStructWithTags";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

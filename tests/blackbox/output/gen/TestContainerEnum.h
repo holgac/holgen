@@ -43,6 +43,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerEnum &operator=(const TestContainerEnum &rhs) = default;
   TestContainerEnum &operator=(TestContainerEnum &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestContainerEnum";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetSkillCallerFromLua(lua_State *luaState);

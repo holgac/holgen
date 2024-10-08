@@ -40,6 +40,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestLuaFuncTableWithSourceTable &operator=(const TestLuaFuncTableWithSourceTable &rhs) = default;
   TestLuaFuncTableWithSourceTable &operator=(TestLuaFuncTableWithSourceTable &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestLuaFuncTableWithSourceTable";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int SetFieldCallerFromLua(lua_State *luaState);

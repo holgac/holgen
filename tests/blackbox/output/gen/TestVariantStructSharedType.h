@@ -50,6 +50,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructSharedType &operator=(const TestVariantStructSharedType &rhs);
   TestVariantStructSharedType &operator=(TestVariantStructSharedType &&rhs);
+  inline static const char *CLASS_NAME = "TestVariantStructSharedType";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

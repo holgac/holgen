@@ -54,6 +54,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructSingleElemContainer &operator=(const TestStructSingleElemContainer &rhs) = default;
   TestStructSingleElemContainer &operator=(TestStructSingleElemContainer &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructSingleElemContainer";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int AddSingleElemStructCallerFromLua(lua_State *luaState);

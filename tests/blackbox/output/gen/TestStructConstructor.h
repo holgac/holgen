@@ -44,6 +44,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructConstructor &operator=(const TestStructConstructor &rhs) = default;
   TestStructConstructor &operator=(TestStructConstructor &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructConstructor";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int Construct1CallerFromLua(lua_State *luaState);

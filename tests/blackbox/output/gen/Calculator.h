@@ -46,6 +46,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   Calculator &operator=(const Calculator &rhs) = default;
   Calculator &operator=(Calculator &&rhs) = default;
+  inline static const char *CLASS_NAME = "Calculator";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int AddCallerFromLua(lua_State *luaState);

@@ -39,6 +39,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructHashable &operator=(const TestStructHashable &rhs) = default;
   TestStructHashable &operator=(TestStructHashable &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructHashable";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int HashCallerFromLua(lua_State *luaState);

@@ -42,6 +42,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestBitmapStruct &operator=(const TestBitmapStruct &rhs) = default;
   TestBitmapStruct &operator=(TestBitmapStruct &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestBitmapStruct";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int HasBitmapFieldCallerFromLua(lua_State *luaState);

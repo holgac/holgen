@@ -44,7 +44,7 @@ public:
    */
   static TestEnumDefaultValue ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void PushEnumToLua(lua_State *luaState);
-  inline static constexpr const UnderlyingType Invalid = 3;
+  static constexpr const UnderlyingType Invalid = 3;
 private:
   TestEnumDefaultValue::Entry mValue;
 };

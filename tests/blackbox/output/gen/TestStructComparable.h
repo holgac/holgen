@@ -39,6 +39,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructComparable &operator=(const TestStructComparable &rhs) = default;
   TestStructComparable &operator=(TestStructComparable &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructComparable";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

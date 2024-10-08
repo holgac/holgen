@@ -49,6 +49,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerMap &operator=(const TestContainerMap &rhs) = default;
   TestContainerMap &operator=(TestContainerMap &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestContainerMap";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState);

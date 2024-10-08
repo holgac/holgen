@@ -54,6 +54,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStruct &operator=(const TestStruct &rhs) = delete;
   TestStruct &operator=(TestStruct &&rhs);
+  inline static const char *CLASS_NAME = "TestStruct";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

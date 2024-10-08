@@ -47,6 +47,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructArray &operator=(const TestStructArray &rhs) = default;
   TestStructArray &operator=(TestStructArray &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructArray";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetData1CallerFromLua(lua_State *luaState);

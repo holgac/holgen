@@ -46,6 +46,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   WeaponInInventory &operator=(const WeaponInInventory &rhs);
   WeaponInInventory &operator=(WeaponInInventory &&rhs);
+  inline static const char *CLASS_NAME = "WeaponInInventory";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

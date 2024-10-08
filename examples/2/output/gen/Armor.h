@@ -39,6 +39,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   Armor &operator=(const Armor &rhs) = default;
   Armor &operator=(Armor &&rhs) = default;
+  inline static const char *CLASS_NAME = "Armor";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int InitializeCallerFromLua(lua_State *luaState);

@@ -51,6 +51,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerSet &operator=(const TestContainerSet &rhs) = default;
   TestContainerSet &operator=(TestContainerSet &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestContainerSet";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int AddStringElemCallerFromLua(lua_State *luaState);

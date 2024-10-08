@@ -38,6 +38,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructNonCopyable &operator=(const TestStructNonCopyable &rhs) = delete;
   TestStructNonCopyable &operator=(TestStructNonCopyable &&rhs);
+  inline static const char *CLASS_NAME = "TestStructNonCopyable";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

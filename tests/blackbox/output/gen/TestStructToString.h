@@ -43,6 +43,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructToString &operator=(const TestStructToString &rhs) = default;
   TestStructToString &operator=(TestStructToString &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructToString";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int StringifyCallerFromLua(lua_State *luaState);

@@ -49,6 +49,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestJsonTagManager &operator=(const TestJsonTagManager &rhs) = default;
   TestJsonTagManager &operator=(TestJsonTagManager &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestJsonTagManager";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetOrInsertCallerFromLua(lua_State *luaState);

@@ -42,6 +42,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestJsonTag &operator=(const TestJsonTag &rhs) = default;
   TestJsonTag &operator=(TestJsonTag &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestJsonTag";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

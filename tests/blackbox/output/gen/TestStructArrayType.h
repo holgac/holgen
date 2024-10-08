@@ -43,7 +43,7 @@ public:
    */
   static TestStructArrayType ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void PushEnumToLua(lua_State *luaState);
-  inline static constexpr const UnderlyingType Invalid = 2;
+  static constexpr const UnderlyingType Invalid = 2;
 private:
   TestStructArrayType::Entry mValue;
 };

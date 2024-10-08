@@ -40,6 +40,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   WeaponTypeBow &operator=(const WeaponTypeBow &rhs) = default;
   WeaponTypeBow &operator=(WeaponTypeBow &&rhs) = default;
+  inline static const char *CLASS_NAME = "WeaponTypeBow";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

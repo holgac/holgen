@@ -45,6 +45,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   Weapon &operator=(const Weapon &rhs) = default;
   Weapon &operator=(Weapon &&rhs) = default;
+  inline static const char *CLASS_NAME = "Weapon";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetAverageDamageCallerFromLua(lua_State *luaState);

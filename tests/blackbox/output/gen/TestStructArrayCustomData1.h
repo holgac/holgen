@@ -40,6 +40,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructArrayCustomData1 &operator=(const TestStructArrayCustomData1 &rhs) = default;
   TestStructArrayCustomData1 &operator=(TestStructArrayCustomData1 &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestStructArrayCustomData1";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

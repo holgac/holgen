@@ -53,6 +53,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   Character &operator=(const Character &rhs) = default;
   Character &operator=(Character &&rhs) = default;
+  inline static const char *CLASS_NAME = "Character";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int InitializeCallerFromLua(lua_State *luaState);

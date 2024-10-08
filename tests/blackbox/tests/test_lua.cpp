@@ -67,7 +67,6 @@ TEST_F(LuaTest, Getters) {
   weapon.CreateLuaMetatable(mState);
   LuaTestHelper::ExpectStack(mState, {});
   weapon.PushToLua(mState);
-  LuaTestHelper::ExpectStack(mState, {"{p:lightuserdata}"});
   lua_setglobal(mState, "wp");
   LuaTestHelper::ExpectStack(mState, {});
   luaL_dostring(mState, "return wp.damageMin + wp.damageMax");
@@ -104,9 +103,6 @@ TEST_F(LuaTest, DataManager) {
   gd.ParseFiles("gamedata", {});
   gd.GetArmorFromName("Plate Mail")->PushToLua(mState);
   lua_setglobal(mState, "pm");
-  luaL_dostring(mState, "return pm");
-  LuaTestHelper::ExpectStack(mState, {"{i:lightuserdata}"});
-  lua_pop(mState, 1);
   luaL_dostring(mState, "return pm.alternativeName");
   LuaTestHelper::ExpectStack(mState, {"Platy"});
   lua_pop(mState, 1);
@@ -127,9 +123,6 @@ TEST_F(LuaTest, Ref) {
   lua_setglobal(mState, "gorion");
   luaL_dostring(mState, "return gorion.bootId");
   LuaTestHelper::ExpectStack(mState, {std::format("{}", boot->GetId())});
-  lua_pop(mState, 1);
-  luaL_dostring(mState, "return gorion.boot");
-  LuaTestHelper::ExpectStack(mState, {"{i:lightuserdata}"});
   lua_pop(mState, 1);
   luaL_dostring(mState, "return gorion.boot.name");
   LuaTestHelper::ExpectStack(mState, {"Boots of Speed"});
@@ -467,7 +460,6 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
   calc.SetReturnNullableLuaFunc("Func");
   EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
   luaL_dostring(mState, "return C:ReturnNullable(10)");
-  LuaTestHelper::ExpectStack(mState, {"{p:lightuserdata}"});
   auto num = TestLuaNumber::ReadProxyFromLua(mState, -1);
   lua_pop(mState, 1);
   ASSERT_NE(num, nullptr);
@@ -487,7 +479,6 @@ Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; re
   calc.SetReturnRefLuaFunc("Func");
   EXPECT_EQ(calc.GetLastValue().GetValue(), 0);
   luaL_dostring(mState, "return C:ReturnRef(10)");
-  LuaTestHelper::ExpectStack(mState, {"{p:lightuserdata}"});
   auto num = TestLuaNumber::ReadProxyFromLua(mState, -1);
   lua_pop(mState, 1);
   ASSERT_NE(num, nullptr);

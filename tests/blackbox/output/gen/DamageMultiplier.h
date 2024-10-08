@@ -40,6 +40,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   DamageMultiplier &operator=(const DamageMultiplier &rhs) = default;
   DamageMultiplier &operator=(DamageMultiplier &&rhs) = default;
+  inline static const char *CLASS_NAME = "DamageMultiplier";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

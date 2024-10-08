@@ -45,6 +45,7 @@ public:
   static void CreateLuaMetatable(lua_State *luaState);
   TestJsonStructMapWithConverters &operator=(const TestJsonStructMapWithConverters &rhs) = default;
   TestJsonStructMapWithConverters &operator=(TestJsonStructMapWithConverters &&rhs) = default;
+  inline static const char *CLASS_NAME = "TestJsonStructMapWithConverters";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
