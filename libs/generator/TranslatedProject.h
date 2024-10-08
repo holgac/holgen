@@ -73,6 +73,7 @@ struct ClassMethodBase {
   std::list<std::string> mComments;
   bool mIsTemplateSpecialization = false;
   DefaultDelete mDefaultDelete = DefaultDelete::Neither;
+  bool mUserDefined = false;
 
 protected:
   ClassMethodBase() = default;
@@ -102,7 +103,6 @@ struct ClassMethod : ClassMethodBase {
   Staticness mStaticness;
   Constexprness mConstexprness = Constexprness::NotConstexpr;
   const FunctionDefinition *mFunction = nullptr;
-  bool mUserDefined = false;
   bool mExposeToLua = false;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
 };

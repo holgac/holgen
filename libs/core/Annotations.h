@@ -237,6 +237,7 @@ public:
    *
    * onDestroy: Called when the object is destroyed, use it to free unmanaged resources
    *            By default, onDestroy functions are protected, use "public" attribute if needed.
+   *
    * const: Specifies whether the function is const
    *
    * static: Creates a static method that can be called without an instance.
@@ -244,6 +245,9 @@ public:
    * hash: Marks the function as the hash function used in std::hash
    *
    * toString: Uses the function in the std::formatter specialization
+   *
+   * constructor: Adds a custom constructor with the same arguments that calls the function. Implies
+   *              staticness.
    */
   inline static const std::string Func = "func";
   inline static const std::string Func_OnDestroy = "onDestroy";
@@ -254,6 +258,7 @@ public:
   inline static const std::string Func_Static = "static";
   inline static const std::string Func_Hash = "hash";
   inline static const std::string Func_ToString = "toString";
+  inline static const std::string Func_Constructor = "constructor";
 
   /**
    * Adds a comment to a struct, field or function.

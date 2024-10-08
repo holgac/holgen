@@ -3,7 +3,7 @@
 #include "core/Exception.h"
 
 namespace holgen {
-void FunctionPluginBase::ProcessFunctionArgument(ClassMethod &method,
+void FunctionPluginBase::ProcessFunctionArgument(ClassMethodBase &method,
                                                  const FunctionArgumentDefinition &funcArg) {
   auto &arg = method.mArguments.emplace_back(
       funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
@@ -75,6 +75,23 @@ void FunctionPluginBase::ProcessToStringFunction(Class &cls, ClassMethod &method
   cls.mSpecializations.push_back(std::move(formatter));
 }
 
+void FunctionPluginBase::ProcessMethodVisibility(ClassMethodBase &method,
+                                                 const FunctionDefinition &functionDefinition) {
+  auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
+  if (!funcAnnotation) {
+    return;
+  }
+  if (funcAnnotation->GetAttribute(Annotations::Func_Public)) {
+    method.mVisibility = Visibility::Public;
+  } else if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy)) {
+    method.mVisibility = Visibility::Protected;
+  } else if (funcAnnotation->GetAttribute(Annotations::Func_Protected)) {
+    method.mVisibility = Visibility::Protected;
+  } else if (funcAnnotation->GetAttribute(Annotations::Func_Private)) {
+    method.mVisibility = Visibility::Private;
+  }
+}
+
 ClassMethod FunctionPluginBase::NewFunction(Class &cls,
                                             const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
@@ -85,18 +102,7 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
       (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Const))
           ? Constness::Const
           : Constness::NotConst};
-
-  if (funcAnnotation) {
-    if (funcAnnotation->GetAttribute(Annotations::Func_Public)) {
-      method.mVisibility = Visibility::Public;
-    } else if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy)) {
-      method.mVisibility = Visibility::Protected;
-    } else if (funcAnnotation->GetAttribute(Annotations::Func_Protected)) {
-      method.mVisibility = Visibility::Protected;
-    } else if (funcAnnotation->GetAttribute(Annotations::Func_Private)) {
-      method.mVisibility = Visibility::Private;
-    }
-  }
+  ProcessMethodVisibility(method, functionDefinition);
 
   switch (functionDefinition.mReturnType.mCategory) {
   case FunctionReturnTypeCategory::Pointer:
@@ -128,6 +134,20 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
   if (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_ToString)) {
     ProcessToStringFunction(cls, method);
   }
+
+  return method;
+}
+
+ClassConstructor FunctionPluginBase::NewConstructor(Class &cls,
+                                                    const FunctionDefinition &functionDefinition) {
+  (void)cls;
+  auto method = ClassConstructor{};
+  ProcessMethodVisibility(method, functionDefinition);
+
+  for (const auto &funcArg: functionDefinition.mArguments) {
+    ProcessFunctionArgument(method, funcArg);
+  }
+  FillComments(functionDefinition, method.mComments);
 
   return method;
 }

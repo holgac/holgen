@@ -29,5 +29,37 @@ void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &fun
   method.mUserDefined = true;
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
+  if (functionDefinition.GetMatchingAttribute(Annotations::Func, Annotations::Func_Constructor)) {
+    ProcessConstructorAttribute(cls, cls.mMethods.back());
+  }
+}
+
+void CppFunctionPlugin::ProcessConstructorAttribute(Class &cls, ClassMethod &method) {
+  AddCppConstructor(cls, *method.mFunction);
+
+  method.mStaticness = Staticness::Static;
+  method.mUserDefined = false;
+  {
+    auto line = method.mBody.Line();
+    line << "return " << cls.mName << "(";
+    bool isFirst = true;
+    for (auto &arg: method.mArguments) {
+      if (isFirst) {
+        isFirst = false;
+      } else {
+        line << ", ";
+      }
+      line << arg.mName;
+    }
+    line << ");";
+  }
+  method.mReturnType = Type{cls.mName};
+}
+
+void CppFunctionPlugin::AddCppConstructor(Class &cls,
+                                          const FunctionDefinition &functionDefinition) {
+  auto ctor = NewConstructor(cls, functionDefinition);
+  ctor.mUserDefined = true;
+  cls.mConstructors.push_back(std::move(ctor));
 }
 } // namespace holgen
