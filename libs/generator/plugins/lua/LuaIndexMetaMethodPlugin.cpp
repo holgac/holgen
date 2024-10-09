@@ -24,6 +24,9 @@ void LuaIndexMetaMethodPlugin::Process(Class &cls) {
 
   GenerateIndexMetaMethodForFields(cls, switcher);
   GenerateIndexMetaMethodForExposedMethods(cls, switcher);
+  if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    GenerateIndexMetaMethodForFuncTable(cls, switcher);
+  }
 
   if (!switcher.IsEmpty()) {
     method.mBody.Add("const char *key = lua_tostring(luaState, -1);");
@@ -34,6 +37,15 @@ void LuaIndexMetaMethodPlugin::Process(Class &cls) {
   }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
+}
+
+void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFuncTable(Class &cls,
+                                                                   StringSwitcher &switcher) {
+  switcher.AddCase(St::LuaTable_TableFieldInIndexMethod, [&](CodeBlock &switchBlock) {
+    GenerateInstanceGetter(cls, switchBlock, -2, "instance");
+    switchBlock.Add("{}::{}(instance->{}, luaState, false);", St::LuaHelper, St::LuaHelper_Push,
+                    Naming().FieldNameInCpp(St::LuaTable_TableField));
+  });
 }
 
 void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFields(Class &cls,
@@ -73,9 +85,6 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
   bool isLuaFunc = isLuaFuncTable;
   if (method.mFunction && method.mFunction->GetAnnotation(Annotations::LuaFunc)) {
     isLuaFunc = true;
-  }
-  if (method.mName == "Sell") {
-    isLuaFuncTable = false;
   }
 
   std::string callPrefix;

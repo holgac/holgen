@@ -36,6 +36,7 @@ public:
   inline static const std::string Lua_CustomData = "luadata";
   inline static const std::string Lua_Initialize = "InitializeLua";
   inline static const std::string Lua_Uninitialize = "UninitializeLua";
+  inline static const std::string LuaTable_TableFieldInIndexMethod = "TABLE";
   inline static const std::string ManagedObject_Getter = "Get";
   inline static const std::string Enum_UnderlyingType = "UnderlyingType";
   inline static const std::string Converter = "Converter";

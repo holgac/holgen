@@ -230,6 +230,9 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestLuaRegistryData::GetCallerFromLua);
   } else if (0 == strcmp("Add", key)) {
     lua_pushcfunction(luaState, TestLuaRegistryData::AddCallerFromLua);
+  } else if (0 == strcmp("TABLE", key)) {
+    auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
+    LuaHelper::Push(instance->mTable, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaRegistryData.{}", key);
     return 0;

@@ -165,6 +165,9 @@ int TestLuaFuncTableStatic::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestLuaFuncTableStatic::SetFieldCallerFromLua);
   } else if (0 == strcmp("GetField", key)) {
     lua_pushcfunction(luaState, TestLuaFuncTableStatic::GetFieldCallerFromLua);
+  } else if (0 == strcmp("TABLE", key)) {
+    auto instance = TestLuaFuncTableStatic::ReadProxyFromLua(luaState, -2);
+    LuaHelper::Push(instance->mTable, luaState, false);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableStatic.{}", key);
     return 0;
