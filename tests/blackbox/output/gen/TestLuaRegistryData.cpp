@@ -46,7 +46,7 @@ void TestLuaRegistryData::SetTable(std::string val) {
   mTable = std::move(val);
 }
 
-const std::string &TestLuaRegistryData::GetTable() {
+const std::string &TestLuaRegistryData::GetTable() const {
   return mTable;
 }
 

@@ -25,7 +25,7 @@ public:
   int GetData() const;
   void SetData(int val);
   void SetTable(std::string val);
-  const std::string &GetTable();
+  const std::string &GetTable() const;
   void Init(lua_State *luaState, const std::function<void(lua_State *)> &initData) const;
   int32_t Get(lua_State *luaState) const;
   void Add(lua_State *luaState, const int32_t val) const;

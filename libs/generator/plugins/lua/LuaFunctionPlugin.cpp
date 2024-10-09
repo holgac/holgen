@@ -34,7 +34,7 @@ void LuaFunctionPlugin::GenerateTableSetter(Class &cls) {
 
 void LuaFunctionPlugin::GenerateTableGetter(Class &cls) {
   auto method = ClassMethod{Naming().FieldGetterNameInCpp(St::LuaTable_TableField),
-                            Type{"std::string"}, Visibility::Public, Constness::NotConst};
+                            Type{"std::string"}, Visibility::Public, Constness::Const};
   method.mReturnType.PreventCopying();
   method.mBody.Add("return {};", Naming().FieldNameInCpp(St::LuaTable_TableField));
   Validate().NewMethod(cls, method);

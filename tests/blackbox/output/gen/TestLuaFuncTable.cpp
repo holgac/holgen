@@ -18,7 +18,7 @@ void TestLuaFuncTable::SetTable(std::string val) {
   mTable = std::move(val);
 }
 
-const std::string &TestLuaFuncTable::GetTable() {
+const std::string &TestLuaFuncTable::GetTable() const {
   return mTable;
 }
 

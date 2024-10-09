@@ -20,7 +20,7 @@ public:
   ~TestLuaFuncTableStatic() = default;
   bool operator==(const TestLuaFuncTableStatic &rhs) const;
   void SetTable(std::string val);
-  const std::string &GetTable();
+  const std::string &GetTable() const;
   void SetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const;
   int32_t GetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
