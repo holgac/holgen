@@ -21,6 +21,11 @@ enum class Staticness {
   NotStatic,
 };
 
+enum class Noexceptness {
+  Noexcept,
+  NotNoexcept,
+};
+
 enum class Explicitness {
   Explicit,
   NotExplicit,
@@ -75,6 +80,7 @@ struct ClassMethodBase {
   bool mUserDefined = false;
   DefaultDelete mDefaultDelete = DefaultDelete::Neither;
   const FunctionDefinition *mFunction = nullptr;
+  Noexceptness mNoexceptness = Noexceptness::NotNoexcept;
 
 protected:
   ClassMethodBase() = default;

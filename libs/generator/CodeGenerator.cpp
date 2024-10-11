@@ -279,23 +279,7 @@ void CodeGenerator::GenerateConstructorsForHeader(CodeBlock &codeBlock, const Cl
 
     {
       auto line = codeBlock.Line();
-      if (ctor.mExplicitness == Explicitness::Explicit)
-        line << "explicit ";
-      if (!isInsideClass)
-        line << cls.mName << "::";
-      line << cls.mName << "(";
-      bool isFirst = true;
-      for (auto &arg: ctor.mArguments) {
-        if (isFirst)
-          isFirst = false;
-        else
-          line << ", ";
-        line << arg.mType.ToString(false) << arg.mName;
-        if (isInsideClass && arg.mDefaultValue.has_value()) {
-          line << " = " << *arg.mDefaultValue;
-        }
-      }
-      line << ")";
+      line << GenerateFunctionSignature(cls, ctor, true, isInsideClass);
       if (ctor.mDefaultDelete == DefaultDelete::Default) {
         line << " = default;";
         continue;
@@ -593,7 +577,7 @@ CodeBlock CodeGenerator::GenerateConstructorsForSource(const Class &cls) const {
     }
     {
       auto line = codeBlock.Line();
-      line << GenerateFunctionSignature(cls, ctor);
+      line << GenerateFunctionSignature(cls, ctor, false, false);
       if (ctor.mInitializerList.empty())
         line << " {";
       else
@@ -648,24 +632,35 @@ std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const Cla
   ss << ")";
   if (method.mConstness == Constness::Const)
     ss << " const";
+  if (method.mNoexceptness == Noexceptness::Noexcept)
+    ss << " noexcept";
   return ss.str();
 }
 
-std::string CodeGenerator::GenerateFunctionSignature(const Class &cls,
-                                                     const ClassConstructor &ctor) const {
+std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const ClassConstructor &ctor,
+                                                     bool isInHeader, bool isInsideClass) const {
   std::stringstream ss;
-  ss << cls.mName << "::" << cls.mName << "(";
+  if (isInHeader && isInsideClass && ctor.mExplicitness == Explicitness::Explicit)
+    ss << "explicit ";
+  if (!isInsideClass)
+    ss << cls.mName << "::";
+  ss << cls.mName << "(";
   bool isFirst = true;
   for (auto &arg: ctor.mArguments) {
     if (isFirst)
       isFirst = false;
     else
       ss << ", ";
-    if (cls.GetUsing(arg.mType.mName))
+    if (cls.GetUsing(arg.mType.mName) && !isInsideClass)
       ss << cls.mName << "::";
     ss << arg.mType.ToString(false) << arg.mName;
+    if (isInsideClass && arg.mDefaultValue.has_value()) {
+      ss << " = " << *arg.mDefaultValue;
+    }
   }
   ss << ")";
+  if (ctor.mNoexceptness == Noexceptness::Noexcept)
+    ss << " noexcept";
   return ss.str();
 }
 
@@ -723,7 +718,7 @@ void CodeGenerator::GenerateClassModifiableSource(GeneratedContent &source,
   for (auto &ctor: cls.mConstructors) {
     if (!ctor.mUserDefined)
       continue;
-    codeBlock.AddLine(GenerateFunctionSignature(cls, ctor));
+    codeBlock.AddLine(GenerateFunctionSignature(cls, ctor, false, false));
     codeBlock.UserDefined("INITIALIZER_{}_{}", cls.mName, ctor.mFunction->mName);
     codeBlock.Add("{{");
     codeBlock.UserDefined("{}_{}", cls.mName, ctor.mFunction->mName);
