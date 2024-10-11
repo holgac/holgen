@@ -139,6 +139,11 @@ void CodeGenerator::GenerateClassDefinition(const Class &cls, CodeBlock &codeBlo
   GenerateClassDeclarationsForHeader(codeBlock, cls);
   // TODO: struct-specific namespaces defined via annotations
   AddComments(codeBlock, cls.mComments);
+  if (cls.mStruct) {
+    codeBlock.Add("// Defined in {}", cls.mStruct->mDefinitionSource.mSource);
+  } else if (cls.mEnum) {
+    codeBlock.Add("// Defined in {}", cls.mEnum->mDefinitionSource.mSource);
+  }
   if (!cls.mTemplateParameters.empty() || !cls.mTemplateSpecializations.empty())
     codeBlock.AddLine(StringifyTemplateParameters(cls.mTemplateParameters));
   codeBlock.Add("{} {{", GenerateClassDeclaration(cls));

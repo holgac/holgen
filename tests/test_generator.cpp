@@ -97,6 +97,7 @@ namespace generator_test_namespace {
  * Person class
  * Represents a person
  */
+// Defined in GeneratorTest
 class Person {
 public:
   Person() = default;
@@ -194,6 +195,7 @@ namespace generator_test_namespace {
   class Converter;
 }
 namespace generator_test_namespace {
+// Defined in GeneratorTest
 class Market {
 public:
   Market() = default;
@@ -338,6 +340,7 @@ namespace generator_test_namespace {
   class Converter;
 }
 namespace generator_test_namespace {
+// Defined in GeneratorTest
 class Sound {
 public:
   Sound() = default;
@@ -451,6 +454,7 @@ namespace generator_test_namespace {
   class Converter;
 }
 namespace generator_test_namespace {
+// Defined in GeneratorTest
 class Animal {
 public:
   Animal() = default;
@@ -575,6 +579,7 @@ namespace generator_test_namespace {
   class Converter;
 }
 namespace generator_test_namespace {
+// Defined in GeneratorTest
 class Person {
 public:
   Person() = default;
@@ -738,6 +743,7 @@ namespace generator_test_namespace {
   class Converter;
 }
 namespace generator_test_namespace {
+// Defined in GeneratorTest
 class Country {
 public:
   Country() = default;
@@ -873,6 +879,7 @@ TEST(GeneratorTest, DataManager) {
 #include <string>
 
 namespace generator_test_namespace {
+// Defined in GeneratorTest
 class Person {
 public:
   Person() = default;
@@ -990,6 +997,7 @@ TEST(GeneratorTest, NonCopyableStruct) {
 
 #include "../holgen.h"
 namespace generator_test_namespace {
+// Defined in GeneratorTest
 class Person {
 public:
   Person() = default;
