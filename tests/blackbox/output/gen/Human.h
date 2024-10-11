@@ -11,6 +11,7 @@ namespace holgen_blackbox_test {
   class Converter;
 }
 namespace holgen_blackbox_test {
+// Defined in tests/blackbox/schemas/ref.hsc
 class Human {
 public:
   Human() = default;

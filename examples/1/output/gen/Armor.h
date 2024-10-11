@@ -10,6 +10,7 @@ namespace ex1_schemas {
   class Converter;
 }
 namespace ex1_schemas {
+// Defined in 1/schemas/character.hsc
 class Armor {
 public:
   Armor() = default;

@@ -12,6 +12,7 @@ namespace ex1_schemas {
   class Converter;
 }
 namespace ex1_schemas {
+// Defined in 1/schemas/character.hsc
 class Race {
 public:
   using UnderlyingType=uint8_t;

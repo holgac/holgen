@@ -13,6 +13,7 @@ namespace holgen_blackbox_test {
   class Converter;
 }
 namespace holgen_blackbox_test {
+// Defined in tests/blackbox/schemas/testlua.hsc
 class TestLuaRegistryData {
 public:
   TestLuaRegistryData() = default;

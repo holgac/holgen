@@ -14,6 +14,7 @@ namespace ex3_schemas {
   class Converter;
 }
 namespace ex3_schemas {
+// Defined in 3/schemas/character.hsc
 class Character {
 public:
   Character() = default;

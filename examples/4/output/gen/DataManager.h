@@ -16,6 +16,7 @@ namespace ex4_schemas {
   class Converter;
 }
 namespace ex4_schemas {
+// Defined in 4/schemas/dataManager.hsc
 class DataManager {
 public:
   DataManager() = default;

@@ -13,6 +13,7 @@ namespace holgen_blackbox_test {
   class Converter;
 }
 namespace holgen_blackbox_test {
+// Defined in tests/blackbox/schemas/person.hsc
 class Country {
 public:
   Country() = default;

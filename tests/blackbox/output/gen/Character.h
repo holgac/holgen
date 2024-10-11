@@ -13,6 +13,7 @@ namespace holgen_blackbox_test {
   class Converter;
 }
 namespace holgen_blackbox_test {
+// Defined in tests/blackbox/schemas/gamedata.hsc
 class Character {
 public:
   Character() = default;

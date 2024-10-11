@@ -13,6 +13,7 @@ namespace ex2_schemas {
 }
 namespace ex2_schemas {
 // enums can have comments too
+// Defined in 2/schemas/character.hsc
 class Race {
 public:
   using UnderlyingType=uint8_t;

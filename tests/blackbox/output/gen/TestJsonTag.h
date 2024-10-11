@@ -11,6 +11,7 @@ namespace holgen_blackbox_test {
   class Converter;
 }
 namespace holgen_blackbox_test {
+// Defined in tests/blackbox/schemas/testjson.hsc
 class TestJsonTag {
 public:
   TestJsonTag() = default;

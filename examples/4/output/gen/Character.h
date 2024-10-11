@@ -13,6 +13,7 @@ namespace ex4_schemas {
   class Weapon;
 }
 namespace ex4_schemas {
+// Defined in 4/schemas/dataManager.hsc
 class Character {
 public:
   Character() = default;

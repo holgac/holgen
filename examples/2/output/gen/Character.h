@@ -14,6 +14,7 @@ namespace ex2_schemas {
   class Converter;
 }
 namespace ex2_schemas {
+// Defined in 2/schemas/character.hsc
 class Character {
 public:
   Character() = default;

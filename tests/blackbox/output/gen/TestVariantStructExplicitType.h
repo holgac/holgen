@@ -15,6 +15,7 @@ namespace holgen_blackbox_test {
   class Converter;
 }
 namespace holgen_blackbox_test {
+// Defined in tests/blackbox/schemas/testvariant.hsc
 class TestVariantStructExplicitType {
 public:
   TestVariantStructExplicitType() = default;
