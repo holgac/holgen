@@ -16,7 +16,7 @@ class TestVariantStructCat {
 public:
   TestVariantStructCat() = default;
   TestVariantStructCat(const TestVariantStructCat &rhs) = default;
-  TestVariantStructCat(TestVariantStructCat &&rhs) = default;
+  TestVariantStructCat(TestVariantStructCat &&rhs) noexcept = default;
   ~TestVariantStructCat() = default;
   bool operator==(const TestVariantStructCat &rhs) const;
   const std::string &GetName() const;
@@ -41,7 +41,7 @@ public:
   static TestVariantStructCat ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructCat &operator=(const TestVariantStructCat &rhs) = default;
-  TestVariantStructCat &operator=(TestVariantStructCat &&rhs) = default;
+  TestVariantStructCat &operator=(TestVariantStructCat &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestVariantStructCat";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

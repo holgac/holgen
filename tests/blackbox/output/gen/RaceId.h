@@ -15,7 +15,7 @@ class RaceId {
 public:
   RaceId() = default;
   RaceId(const RaceId &rhs) = default;
-  RaceId(RaceId &&rhs) = default;
+  RaceId(RaceId &&rhs) noexcept = default;
   ~RaceId() = default;
   bool operator==(const RaceId &rhs) const;
   uint32_t GetId() const;
@@ -36,7 +36,7 @@ public:
   static RaceId ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   RaceId &operator=(const RaceId &rhs) = default;
-  RaceId &operator=(RaceId &&rhs) = default;
+  RaceId &operator=(RaceId &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "RaceId";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

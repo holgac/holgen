@@ -18,7 +18,7 @@ class Country {
 public:
   Country() = default;
   Country(const Country &rhs) = default;
-  Country(Country &&rhs) = default;
+  Country(Country &&rhs) noexcept = default;
   ~Country() = default;
   bool operator==(const Country &rhs) const;
   const Person &GetLeader() const;
@@ -46,7 +46,7 @@ public:
   static Country ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Country &operator=(const Country &rhs) = default;
-  Country &operator=(Country &&rhs) = default;
+  Country &operator=(Country &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Country";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

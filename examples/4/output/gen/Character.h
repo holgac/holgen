@@ -18,7 +18,7 @@ class Character {
 public:
   Character() = default;
   Character(const Character &rhs) = default;
-  Character(Character &&rhs) = default;
+  Character(Character &&rhs) noexcept = default;
   ~Character() = default;
   bool operator==(const Character &rhs) const;
   uint32_t GetId() const;
@@ -55,7 +55,7 @@ public:
   static Character ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Character &operator=(const Character &rhs) = default;
-  Character &operator=(Character &&rhs) = default;
+  Character &operator=(Character &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Character";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

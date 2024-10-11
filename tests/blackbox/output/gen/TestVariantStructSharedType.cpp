@@ -22,7 +22,7 @@ TestVariantStructSharedType::TestVariantStructSharedType(const TestVariantStruct
   mBeingType = rhs.mBeingType;
 }
 
-TestVariantStructSharedType::TestVariantStructSharedType(TestVariantStructSharedType &&rhs) {
+TestVariantStructSharedType::TestVariantStructSharedType(TestVariantStructSharedType &&rhs) noexcept {
   ResetBeingType();
   SetBeingType(rhs.mBeingType);
   if (mBeingType == TestVariantStructType::Cat) {
@@ -326,7 +326,7 @@ TestVariantStructSharedType &TestVariantStructSharedType::operator=(const TestVa
   return *this;
 }
 
-TestVariantStructSharedType &TestVariantStructSharedType::operator=(TestVariantStructSharedType &&rhs) {
+TestVariantStructSharedType &TestVariantStructSharedType::operator=(TestVariantStructSharedType &&rhs) noexcept {
   ResetBeingType();
   SetBeingType(rhs.mBeingType);
   if (mBeingType == TestVariantStructType::Cat) {

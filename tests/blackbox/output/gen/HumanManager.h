@@ -19,7 +19,7 @@ class HumanManager {
 public:
   HumanManager() = default;
   HumanManager(const HumanManager &rhs) = default;
-  HumanManager(HumanManager &&rhs) = default;
+  HumanManager(HumanManager &&rhs) noexcept = default;
   ~HumanManager() = default;
   bool operator==(const HumanManager &rhs) const;
   const std::unordered_map<uint32_t, Human> &GetHumans() const;
@@ -50,7 +50,7 @@ public:
   static HumanManager ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   HumanManager &operator=(const HumanManager &rhs) = default;
-  HumanManager &operator=(HumanManager &&rhs) = default;
+  HumanManager &operator=(HumanManager &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "HumanManager";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -18,7 +18,7 @@ class TestContainerMap {
 public:
   TestContainerMap() = default;
   TestContainerMap(const TestContainerMap &rhs) = default;
-  TestContainerMap(TestContainerMap &&rhs) = default;
+  TestContainerMap(TestContainerMap &&rhs) noexcept = default;
   ~TestContainerMap() = default;
   bool operator==(const TestContainerMap &rhs) const;
   const std::map<uint32_t, TestContainerInnerStructWithId> &GetInnerStructsWithId() const;
@@ -49,7 +49,7 @@ public:
   static TestContainerMap ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerMap &operator=(const TestContainerMap &rhs) = default;
-  TestContainerMap &operator=(TestContainerMap &&rhs) = default;
+  TestContainerMap &operator=(TestContainerMap &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestContainerMap";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

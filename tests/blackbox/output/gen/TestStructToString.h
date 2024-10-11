@@ -17,7 +17,7 @@ class TestStructToString {
 public:
   TestStructToString() = default;
   TestStructToString(const TestStructToString &rhs) = default;
-  TestStructToString(TestStructToString &&rhs) = default;
+  TestStructToString(TestStructToString &&rhs) noexcept = default;
   ~TestStructToString() = default;
   bool operator==(const TestStructToString &rhs) const;
   const std::string &GetField1() const;
@@ -43,7 +43,7 @@ public:
   static TestStructToString ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructToString &operator=(const TestStructToString &rhs) = default;
-  TestStructToString &operator=(TestStructToString &&rhs) = default;
+  TestStructToString &operator=(TestStructToString &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructToString";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

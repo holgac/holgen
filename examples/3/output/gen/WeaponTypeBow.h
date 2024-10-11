@@ -16,7 +16,7 @@ class WeaponTypeBow {
 public:
   WeaponTypeBow() = default;
   WeaponTypeBow(const WeaponTypeBow &rhs) = default;
-  WeaponTypeBow(WeaponTypeBow &&rhs) = default;
+  WeaponTypeBow(WeaponTypeBow &&rhs) noexcept = default;
   ~WeaponTypeBow() = default;
   bool operator==(const WeaponTypeBow &rhs) const;
   uint32_t GetRange() const;
@@ -40,7 +40,7 @@ public:
   static WeaponTypeBow ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   WeaponTypeBow &operator=(const WeaponTypeBow &rhs) = default;
-  WeaponTypeBow &operator=(WeaponTypeBow &&rhs) = default;
+  WeaponTypeBow &operator=(WeaponTypeBow &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "WeaponTypeBow";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

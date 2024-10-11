@@ -17,7 +17,7 @@ class TestStructPairFields {
 public:
   TestStructPairFields() = default;
   TestStructPairFields(const TestStructPairFields &rhs) = default;
-  TestStructPairFields(TestStructPairFields &&rhs) = default;
+  TestStructPairFields(TestStructPairFields &&rhs) noexcept = default;
   ~TestStructPairFields() = default;
   bool operator==(const TestStructPairFields &rhs) const;
   const std::pair<int32_t, std::string> &GetIntStringPair() const;
@@ -42,7 +42,7 @@ public:
   static TestStructPairFields ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructPairFields &operator=(const TestStructPairFields &rhs) = default;
-  TestStructPairFields &operator=(TestStructPairFields &&rhs) = default;
+  TestStructPairFields &operator=(TestStructPairFields &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructPairFields";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

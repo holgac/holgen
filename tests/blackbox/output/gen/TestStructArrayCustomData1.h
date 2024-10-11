@@ -15,7 +15,7 @@ class TestStructArrayCustomData1 {
 public:
   TestStructArrayCustomData1() = default;
   TestStructArrayCustomData1(const TestStructArrayCustomData1 &rhs) = default;
-  TestStructArrayCustomData1(TestStructArrayCustomData1 &&rhs) = default;
+  TestStructArrayCustomData1(TestStructArrayCustomData1 &&rhs) noexcept = default;
   ~TestStructArrayCustomData1() = default;
   bool operator==(const TestStructArrayCustomData1 &rhs) const;
   uint32_t GetF1() const;
@@ -40,7 +40,7 @@ public:
   static TestStructArrayCustomData1 ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructArrayCustomData1 &operator=(const TestStructArrayCustomData1 &rhs) = default;
-  TestStructArrayCustomData1 &operator=(TestStructArrayCustomData1 &&rhs) = default;
+  TestStructArrayCustomData1 &operator=(TestStructArrayCustomData1 &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructArrayCustomData1";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

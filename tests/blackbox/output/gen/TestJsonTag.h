@@ -16,7 +16,7 @@ class TestJsonTag {
 public:
   TestJsonTag() = default;
   TestJsonTag(const TestJsonTag &rhs) = default;
-  TestJsonTag(TestJsonTag &&rhs) = default;
+  TestJsonTag(TestJsonTag &&rhs) noexcept = default;
   ~TestJsonTag() = default;
   bool operator==(const TestJsonTag &rhs) const;
   uint64_t GetId() const;
@@ -42,7 +42,7 @@ public:
   static TestJsonTag ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestJsonTag &operator=(const TestJsonTag &rhs) = default;
-  TestJsonTag &operator=(TestJsonTag &&rhs) = default;
+  TestJsonTag &operator=(TestJsonTag &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestJsonTag";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

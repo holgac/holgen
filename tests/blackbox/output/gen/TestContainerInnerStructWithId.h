@@ -16,7 +16,7 @@ class TestContainerInnerStructWithId {
 public:
   TestContainerInnerStructWithId() = default;
   TestContainerInnerStructWithId(const TestContainerInnerStructWithId &rhs) = default;
-  TestContainerInnerStructWithId(TestContainerInnerStructWithId &&rhs) = default;
+  TestContainerInnerStructWithId(TestContainerInnerStructWithId &&rhs) noexcept = default;
   ~TestContainerInnerStructWithId() = default;
   bool operator==(const TestContainerInnerStructWithId &rhs) const;
   uint32_t GetId() const;
@@ -40,7 +40,7 @@ public:
   static TestContainerInnerStructWithId ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerInnerStructWithId &operator=(const TestContainerInnerStructWithId &rhs) = default;
-  TestContainerInnerStructWithId &operator=(TestContainerInnerStructWithId &&rhs) = default;
+  TestContainerInnerStructWithId &operator=(TestContainerInnerStructWithId &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestContainerInnerStructWithId";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

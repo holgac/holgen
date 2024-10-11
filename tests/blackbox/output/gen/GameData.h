@@ -22,7 +22,7 @@ class GameData {
 public:
   GameData() = default;
   GameData(const GameData &rhs) = default;
-  GameData(GameData &&rhs) = default;
+  GameData(GameData &&rhs) noexcept = default;
   ~GameData() = default;
   bool operator==(const GameData &rhs) const;
   const std::vector<Boot> &GetBoots() const;
@@ -73,7 +73,7 @@ public:
   static GameData ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   GameData &operator=(const GameData &rhs) = default;
-  GameData &operator=(GameData &&rhs) = default;
+  GameData &operator=(GameData &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "GameData";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

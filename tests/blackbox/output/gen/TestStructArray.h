@@ -19,7 +19,7 @@ class TestStructArray {
 public:
   TestStructArray() = default;
   TestStructArray(const TestStructArray &rhs) = default;
-  TestStructArray(TestStructArray &&rhs) = default;
+  TestStructArray(TestStructArray &&rhs) noexcept = default;
   ~TestStructArray() = default;
   bool operator==(const TestStructArray &rhs) const;
   const TestStructArrayType &GetType() const;
@@ -47,7 +47,7 @@ public:
   static TestStructArray ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructArray &operator=(const TestStructArray &rhs) = default;
-  TestStructArray &operator=(TestStructArray &&rhs) = default;
+  TestStructArray &operator=(TestStructArray &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructArray";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

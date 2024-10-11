@@ -18,7 +18,7 @@ class Weapon {
 public:
   Weapon() = default;
   Weapon(const Weapon &rhs) = default;
-  Weapon(Weapon &&rhs) = default;
+  Weapon(Weapon &&rhs) noexcept = default;
   ~Weapon() = default;
   bool operator==(const Weapon &rhs) const;
   uint32_t GetDamageMin() const;
@@ -48,7 +48,7 @@ public:
   static Weapon ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Weapon &operator=(const Weapon &rhs) = default;
-  Weapon &operator=(Weapon &&rhs) = default;
+  Weapon &operator=(Weapon &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Weapon";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -18,7 +18,7 @@ class TestStructHashableMap {
 public:
   TestStructHashableMap() = default;
   TestStructHashableMap(const TestStructHashableMap &rhs) = default;
-  TestStructHashableMap(TestStructHashableMap &&rhs) = default;
+  TestStructHashableMap(TestStructHashableMap &&rhs) noexcept = default;
   ~TestStructHashableMap() = default;
   bool operator==(const TestStructHashableMap &rhs) const;
   const std::unordered_map<TestStructHashable, std::string> &GetData() const;
@@ -40,7 +40,7 @@ public:
   static TestStructHashableMap ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructHashableMap &operator=(const TestStructHashableMap &rhs) = default;
-  TestStructHashableMap &operator=(TestStructHashableMap &&rhs) = default;
+  TestStructHashableMap &operator=(TestStructHashableMap &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructHashableMap";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -16,7 +16,7 @@ class TestVariantStructHuman {
 public:
   TestVariantStructHuman() = default;
   TestVariantStructHuman(const TestVariantStructHuman &rhs) = default;
-  TestVariantStructHuman(TestVariantStructHuman &&rhs) = default;
+  TestVariantStructHuman(TestVariantStructHuman &&rhs) noexcept = default;
   ~TestVariantStructHuman() = default;
   bool operator==(const TestVariantStructHuman &rhs) const;
   const std::string &GetName() const;
@@ -41,7 +41,7 @@ public:
   static TestVariantStructHuman ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructHuman &operator=(const TestVariantStructHuman &rhs) = default;
-  TestVariantStructHuman &operator=(TestVariantStructHuman &&rhs) = default;
+  TestVariantStructHuman &operator=(TestVariantStructHuman &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestVariantStructHuman";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

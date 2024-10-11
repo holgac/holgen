@@ -20,7 +20,7 @@ class TestVariantStructSharedType {
 public:
   TestVariantStructSharedType() = default;
   TestVariantStructSharedType(const TestVariantStructSharedType &rhs);
-  TestVariantStructSharedType(TestVariantStructSharedType &&rhs);
+  TestVariantStructSharedType(TestVariantStructSharedType &&rhs) noexcept;
   ~TestVariantStructSharedType();
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
@@ -50,7 +50,7 @@ public:
   static TestVariantStructSharedType ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructSharedType &operator=(const TestVariantStructSharedType &rhs);
-  TestVariantStructSharedType &operator=(TestVariantStructSharedType &&rhs);
+  TestVariantStructSharedType &operator=(TestVariantStructSharedType &&rhs) noexcept;
   inline static const char *CLASS_NAME = "TestVariantStructSharedType";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

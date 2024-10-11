@@ -15,7 +15,7 @@ class TestStructComparable {
 public:
   TestStructComparable() = default;
   TestStructComparable(const TestStructComparable &rhs) = default;
-  TestStructComparable(TestStructComparable &&rhs) = default;
+  TestStructComparable(TestStructComparable &&rhs) noexcept = default;
   ~TestStructComparable() = default;
   bool operator==(const TestStructComparable &rhs) const;
   uint32_t GetField1() const;
@@ -39,7 +39,7 @@ public:
   static TestStructComparable ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructComparable &operator=(const TestStructComparable &rhs) = default;
-  TestStructComparable &operator=(TestStructComparable &&rhs) = default;
+  TestStructComparable &operator=(TestStructComparable &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructComparable";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -15,7 +15,7 @@ class Number {
 public:
   Number() = default;
   Number(const Number &rhs) = default;
-  Number(Number &&rhs) = default;
+  Number(Number &&rhs) noexcept = default;
   ~Number() = default;
   bool operator==(const Number &rhs) const;
   int64_t GetValue() const;
@@ -36,7 +36,7 @@ public:
   static Number ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Number &operator=(const Number &rhs) = default;
-  Number &operator=(Number &&rhs) = default;
+  Number &operator=(Number &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Number";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

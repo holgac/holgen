@@ -18,7 +18,7 @@ class TestLuaFuncTableContainer {
 public:
   TestLuaFuncTableContainer() = default;
   TestLuaFuncTableContainer(const TestLuaFuncTableContainer &rhs) = default;
-  TestLuaFuncTableContainer(TestLuaFuncTableContainer &&rhs) = default;
+  TestLuaFuncTableContainer(TestLuaFuncTableContainer &&rhs) noexcept = default;
   ~TestLuaFuncTableContainer() = default;
   bool operator==(const TestLuaFuncTableContainer &rhs) const;
   int32_t GetField() const;
@@ -57,7 +57,7 @@ public:
   static TestLuaFuncTableContainer ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestLuaFuncTableContainer &operator=(const TestLuaFuncTableContainer &rhs) = default;
-  TestLuaFuncTableContainer &operator=(TestLuaFuncTableContainer &&rhs) = default;
+  TestLuaFuncTableContainer &operator=(TestLuaFuncTableContainer &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestLuaFuncTableContainer";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

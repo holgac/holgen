@@ -17,7 +17,7 @@ class TestContainerEnum {
 public:
   TestContainerEnum() = default;
   TestContainerEnum(const TestContainerEnum &rhs) = default;
-  TestContainerEnum(TestContainerEnum &&rhs) = default;
+  TestContainerEnum(TestContainerEnum &&rhs) noexcept = default;
   ~TestContainerEnum() = default;
   bool operator==(const TestContainerEnum &rhs) const;
   const std::array<uint8_t, 4> &GetSkills() const;
@@ -43,7 +43,7 @@ public:
   static TestContainerEnum ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerEnum &operator=(const TestContainerEnum &rhs) = default;
-  TestContainerEnum &operator=(TestContainerEnum &&rhs) = default;
+  TestContainerEnum &operator=(TestContainerEnum &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestContainerEnum";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

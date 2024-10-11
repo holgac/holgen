@@ -9,7 +9,7 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-TestStruct::TestStruct(TestStruct &&rhs) {
+TestStruct::TestStruct(TestStruct &&rhs) noexcept {
   mTestFieldBool = rhs.mTestFieldBool;
   mTestFieldUnsigned = rhs.mTestFieldUnsigned;
   mTestFieldString = std::move(rhs.mTestFieldString);
@@ -219,7 +219,7 @@ int TestStruct::IndexMetaMethod(lua_State *luaState) {
   return 1;
 }
 
-TestStruct &TestStruct::operator=(TestStruct &&rhs) {
+TestStruct &TestStruct::operator=(TestStruct &&rhs) noexcept {
   mTestFieldBool = rhs.mTestFieldBool;
   mTestFieldUnsigned = rhs.mTestFieldUnsigned;
   mTestFieldString = std::move(rhs.mTestFieldString);

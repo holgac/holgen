@@ -8,7 +8,7 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-TestLuaRegistryData::TestLuaRegistryData(TestLuaRegistryData &&rhs) {
+TestLuaRegistryData::TestLuaRegistryData(TestLuaRegistryData &&rhs) noexcept {
   std::swap(mData, rhs.mData);
   mTable = std::move(rhs.mTable);
 }
@@ -240,7 +240,7 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
   return 1;
 }
 
-TestLuaRegistryData &TestLuaRegistryData::operator=(TestLuaRegistryData &&rhs) {
+TestLuaRegistryData &TestLuaRegistryData::operator=(TestLuaRegistryData &&rhs) noexcept {
   std::swap(mData, rhs.mData);
   mTable = std::move(rhs.mTable);
   return *this;

@@ -17,7 +17,7 @@ class Calculator {
 public:
   Calculator() = default;
   Calculator(const Calculator &rhs) = default;
-  Calculator(Calculator &&rhs) = default;
+  Calculator(Calculator &&rhs) noexcept = default;
   ~Calculator() = default;
   bool operator==(const Calculator &rhs) const;
   const Number &GetCurVal() const;
@@ -46,7 +46,7 @@ public:
   static Calculator ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Calculator &operator=(const Calculator &rhs) = default;
-  Calculator &operator=(Calculator &&rhs) = default;
+  Calculator &operator=(Calculator &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Calculator";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

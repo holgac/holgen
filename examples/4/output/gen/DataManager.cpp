@@ -13,7 +13,7 @@
 #include "LuaHelper.h"
 
 namespace ex4_schemas {
-DataManager::DataManager(DataManager &&rhs) {
+DataManager::DataManager(DataManager &&rhs) noexcept {
   mCharacters = std::move(rhs.mCharacters);
   mArmors = std::move(rhs.mArmors);
   mWeapons = std::move(rhs.mWeapons);
@@ -626,7 +626,7 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
   return 1;
 }
 
-DataManager &DataManager::operator=(DataManager &&rhs) {
+DataManager &DataManager::operator=(DataManager &&rhs) noexcept {
   mCharacters = std::move(rhs.mCharacters);
   mArmors = std::move(rhs.mArmors);
   mWeapons = std::move(rhs.mWeapons);

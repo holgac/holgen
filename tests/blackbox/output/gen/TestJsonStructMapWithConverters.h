@@ -17,7 +17,7 @@ class TestJsonStructMapWithConverters {
 public:
   TestJsonStructMapWithConverters() = default;
   TestJsonStructMapWithConverters(const TestJsonStructMapWithConverters &rhs) = default;
-  TestJsonStructMapWithConverters(TestJsonStructMapWithConverters &&rhs) = default;
+  TestJsonStructMapWithConverters(TestJsonStructMapWithConverters &&rhs) noexcept = default;
   ~TestJsonStructMapWithConverters() = default;
   bool operator==(const TestJsonStructMapWithConverters &rhs) const;
   const std::map<std::string, uint32_t> &GetTestMapConvertElem() const;
@@ -45,7 +45,7 @@ public:
   static TestJsonStructMapWithConverters ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestJsonStructMapWithConverters &operator=(const TestJsonStructMapWithConverters &rhs) = default;
-  TestJsonStructMapWithConverters &operator=(TestJsonStructMapWithConverters &&rhs) = default;
+  TestJsonStructMapWithConverters &operator=(TestJsonStructMapWithConverters &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestJsonStructMapWithConverters";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

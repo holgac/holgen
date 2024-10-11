@@ -16,7 +16,7 @@ class TestStructNonCopyable {
 public:
   TestStructNonCopyable() = default;
   TestStructNonCopyable(const TestStructNonCopyable &rhs) = delete;
-  TestStructNonCopyable(TestStructNonCopyable &&rhs);
+  TestStructNonCopyable(TestStructNonCopyable &&rhs) noexcept;
   ~TestStructNonCopyable() = default;
   bool operator==(const TestStructNonCopyable &rhs) const;
   const std::vector<int> &GetBigVector() const;
@@ -38,7 +38,7 @@ public:
   static TestStructNonCopyable ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructNonCopyable &operator=(const TestStructNonCopyable &rhs) = delete;
-  TestStructNonCopyable &operator=(TestStructNonCopyable &&rhs);
+  TestStructNonCopyable &operator=(TestStructNonCopyable &&rhs) noexcept;
   inline static const char *CLASS_NAME = "TestStructNonCopyable";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

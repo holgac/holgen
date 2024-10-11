@@ -16,7 +16,7 @@ class Armor {
 public:
   Armor() = default;
   Armor(const Armor &rhs) = default;
-  Armor(Armor &&rhs) = default;
+  Armor(Armor &&rhs) noexcept = default;
   ~Armor() = default;
   bool operator==(const Armor &rhs) const;
   uint32_t GetId() const;
@@ -44,7 +44,7 @@ public:
   static Armor ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Armor &operator=(const Armor &rhs) = default;
-  Armor &operator=(Armor &&rhs) = default;
+  Armor &operator=(Armor &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Armor";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -18,7 +18,7 @@ class TestStructComparableMap {
 public:
   TestStructComparableMap() = default;
   TestStructComparableMap(const TestStructComparableMap &rhs) = default;
-  TestStructComparableMap(TestStructComparableMap &&rhs) = default;
+  TestStructComparableMap(TestStructComparableMap &&rhs) noexcept = default;
   ~TestStructComparableMap() = default;
   bool operator==(const TestStructComparableMap &rhs) const;
   const std::map<TestStructComparable, std::string> &GetData() const;
@@ -40,7 +40,7 @@ public:
   static TestStructComparableMap ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructComparableMap &operator=(const TestStructComparableMap &rhs) = default;
-  TestStructComparableMap &operator=(TestStructComparableMap &&rhs) = default;
+  TestStructComparableMap &operator=(TestStructComparableMap &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructComparableMap";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

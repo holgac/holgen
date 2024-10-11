@@ -20,7 +20,7 @@ class WeaponInInventory {
 public:
   WeaponInInventory() = default;
   WeaponInInventory(const WeaponInInventory &rhs);
-  WeaponInInventory(WeaponInInventory &&rhs);
+  WeaponInInventory(WeaponInInventory &&rhs) noexcept;
   ~WeaponInInventory();
   const WeaponTypeBow *GetWeaponAsWeaponTypeBow() const;
   WeaponTypeBow *GetWeaponAsWeaponTypeBow();
@@ -46,7 +46,7 @@ public:
   static WeaponInInventory ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   WeaponInInventory &operator=(const WeaponInInventory &rhs);
-  WeaponInInventory &operator=(WeaponInInventory &&rhs);
+  WeaponInInventory &operator=(WeaponInInventory &&rhs) noexcept;
   inline static const char *CLASS_NAME = "WeaponInInventory";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

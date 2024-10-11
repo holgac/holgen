@@ -28,7 +28,7 @@ TestVariantStructDifferentTypes::TestVariantStructDifferentTypes(const TestVaria
   mBeing2Type = rhs.mBeing2Type;
 }
 
-TestVariantStructDifferentTypes::TestVariantStructDifferentTypes(TestVariantStructDifferentTypes &&rhs) {
+TestVariantStructDifferentTypes::TestVariantStructDifferentTypes(TestVariantStructDifferentTypes &&rhs) noexcept {
   ResetBeing1Type();
   SetBeing1Type(rhs.mBeing1Type);
   if (mBeing1Type == TestVariantStructType::Cat) {
@@ -387,7 +387,7 @@ TestVariantStructDifferentTypes &TestVariantStructDifferentTypes::operator=(cons
   return *this;
 }
 
-TestVariantStructDifferentTypes &TestVariantStructDifferentTypes::operator=(TestVariantStructDifferentTypes &&rhs) {
+TestVariantStructDifferentTypes &TestVariantStructDifferentTypes::operator=(TestVariantStructDifferentTypes &&rhs) noexcept {
   ResetBeing1Type();
   SetBeing1Type(rhs.mBeing1Type);
   if (mBeing1Type == TestVariantStructType::Cat) {

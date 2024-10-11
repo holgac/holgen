@@ -15,7 +15,7 @@ class WeaponTypeSword {
 public:
   WeaponTypeSword() = default;
   WeaponTypeSword(const WeaponTypeSword &rhs) = default;
-  WeaponTypeSword(WeaponTypeSword &&rhs) = default;
+  WeaponTypeSword(WeaponTypeSword &&rhs) noexcept = default;
   ~WeaponTypeSword() = default;
   bool operator==(const WeaponTypeSword &rhs) const;
   float GetSharpness() const;
@@ -38,7 +38,7 @@ public:
   static WeaponTypeSword ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   WeaponTypeSword &operator=(const WeaponTypeSword &rhs) = default;
-  WeaponTypeSword &operator=(WeaponTypeSword &&rhs) = default;
+  WeaponTypeSword &operator=(WeaponTypeSword &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "WeaponTypeSword";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

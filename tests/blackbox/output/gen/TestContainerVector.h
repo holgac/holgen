@@ -20,7 +20,7 @@ class TestContainerVector {
 public:
   TestContainerVector() = default;
   TestContainerVector(const TestContainerVector &rhs) = default;
-  TestContainerVector(TestContainerVector &&rhs) = default;
+  TestContainerVector(TestContainerVector &&rhs) noexcept = default;
   ~TestContainerVector() = default;
   bool operator==(const TestContainerVector &rhs) const;
   const std::vector<TestContainerInnerStructWithId> &GetInnerStructsWithId() const;
@@ -77,7 +77,7 @@ public:
   static TestContainerVector ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerVector &operator=(const TestContainerVector &rhs) = default;
-  TestContainerVector &operator=(TestContainerVector &&rhs) = default;
+  TestContainerVector &operator=(TestContainerVector &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestContainerVector";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -16,7 +16,7 @@ class Boot {
 public:
   Boot() = default;
   Boot(const Boot &rhs) = default;
-  Boot(Boot &&rhs) = default;
+  Boot(Boot &&rhs) noexcept = default;
   ~Boot() = default;
   bool operator==(const Boot &rhs) const;
   uint32_t GetId() const;
@@ -45,7 +45,7 @@ public:
   static Boot ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Boot &operator=(const Boot &rhs) = default;
-  Boot &operator=(Boot &&rhs) = default;
+  Boot &operator=(Boot &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Boot";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

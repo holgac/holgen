@@ -15,7 +15,7 @@ class TestStructHashable {
 public:
   TestStructHashable() = default;
   TestStructHashable(const TestStructHashable &rhs) = default;
-  TestStructHashable(TestStructHashable &&rhs) = default;
+  TestStructHashable(TestStructHashable &&rhs) noexcept = default;
   ~TestStructHashable() = default;
   bool operator==(const TestStructHashable &rhs) const;
   uint32_t GetField1() const;
@@ -39,7 +39,7 @@ public:
   static TestStructHashable ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructHashable &operator=(const TestStructHashable &rhs) = default;
-  TestStructHashable &operator=(TestStructHashable &&rhs) = default;
+  TestStructHashable &operator=(TestStructHashable &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructHashable";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

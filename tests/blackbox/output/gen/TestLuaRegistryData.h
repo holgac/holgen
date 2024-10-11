@@ -18,7 +18,7 @@ class TestLuaRegistryData {
 public:
   TestLuaRegistryData() = default;
   TestLuaRegistryData(const TestLuaRegistryData &rhs) = delete;
-  TestLuaRegistryData(TestLuaRegistryData &&rhs);
+  TestLuaRegistryData(TestLuaRegistryData &&rhs) noexcept;
   ~TestLuaRegistryData();
   void InitializeLua(lua_State *luaState);
   void UninitializeLua(lua_State *luaState);
@@ -46,7 +46,7 @@ public:
   static TestLuaRegistryData ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestLuaRegistryData &operator=(const TestLuaRegistryData &rhs) = delete;
-  TestLuaRegistryData &operator=(TestLuaRegistryData &&rhs);
+  TestLuaRegistryData &operator=(TestLuaRegistryData &&rhs) noexcept;
   inline static const char *CLASS_NAME = "TestLuaRegistryData";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

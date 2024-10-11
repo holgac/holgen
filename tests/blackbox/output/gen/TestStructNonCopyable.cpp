@@ -9,7 +9,7 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-TestStructNonCopyable::TestStructNonCopyable(TestStructNonCopyable &&rhs) {
+TestStructNonCopyable::TestStructNonCopyable(TestStructNonCopyable &&rhs) noexcept {
   mBigVector = std::move(rhs.mBigVector);
 }
 
@@ -153,7 +153,7 @@ int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {
   return 1;
 }
 
-TestStructNonCopyable &TestStructNonCopyable::operator=(TestStructNonCopyable &&rhs) {
+TestStructNonCopyable &TestStructNonCopyable::operator=(TestStructNonCopyable &&rhs) noexcept {
   mBigVector = std::move(rhs.mBigVector);
   return *this;
 }

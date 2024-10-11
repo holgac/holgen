@@ -21,7 +21,7 @@ TestVariantStructExplicitType::TestVariantStructExplicitType(const TestVariantSt
   }
 }
 
-TestVariantStructExplicitType::TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs) {
+TestVariantStructExplicitType::TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs) noexcept {
   ResetType();
   SetType(rhs.mType);
   if (mType == TestVariantStructType::Cat) {
@@ -352,7 +352,7 @@ TestVariantStructExplicitType &TestVariantStructExplicitType::operator=(const Te
   return *this;
 }
 
-TestVariantStructExplicitType &TestVariantStructExplicitType::operator=(TestVariantStructExplicitType &&rhs) {
+TestVariantStructExplicitType &TestVariantStructExplicitType::operator=(TestVariantStructExplicitType &&rhs) noexcept {
   ResetType();
   SetType(rhs.mType);
   if (mType == TestVariantStructType::Cat) {

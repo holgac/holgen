@@ -21,7 +21,7 @@ class DataManager {
 public:
   DataManager() = default;
   DataManager(const DataManager &rhs) = delete;
-  DataManager(DataManager &&rhs);
+  DataManager(DataManager &&rhs) noexcept;
   ~DataManager() = default;
   bool operator==(const DataManager &rhs) const;
   const std::deque<Character> &GetCharacters() const;
@@ -73,7 +73,7 @@ public:
   static DataManager ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   DataManager &operator=(const DataManager &rhs) = delete;
-  DataManager &operator=(DataManager &&rhs);
+  DataManager &operator=(DataManager &&rhs) noexcept;
   inline static const char *CLASS_NAME = "DataManager";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

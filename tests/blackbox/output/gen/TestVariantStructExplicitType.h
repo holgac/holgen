@@ -20,7 +20,7 @@ class TestVariantStructExplicitType {
 public:
   TestVariantStructExplicitType() = default;
   TestVariantStructExplicitType(const TestVariantStructExplicitType &rhs);
-  TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs);
+  TestVariantStructExplicitType(TestVariantStructExplicitType &&rhs) noexcept;
   ~TestVariantStructExplicitType();
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
@@ -50,7 +50,7 @@ public:
   static TestVariantStructExplicitType ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructExplicitType &operator=(const TestVariantStructExplicitType &rhs);
-  TestVariantStructExplicitType &operator=(TestVariantStructExplicitType &&rhs);
+  TestVariantStructExplicitType &operator=(TestVariantStructExplicitType &&rhs) noexcept;
   inline static const char *CLASS_NAME = "TestVariantStructExplicitType";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -17,7 +17,7 @@ class TestLuaFuncTableStatic {
 public:
   TestLuaFuncTableStatic() = default;
   TestLuaFuncTableStatic(const TestLuaFuncTableStatic &rhs) = default;
-  TestLuaFuncTableStatic(TestLuaFuncTableStatic &&rhs) = default;
+  TestLuaFuncTableStatic(TestLuaFuncTableStatic &&rhs) noexcept = default;
   ~TestLuaFuncTableStatic() = default;
   bool operator==(const TestLuaFuncTableStatic &rhs) const;
   void SetTable(std::string val);
@@ -40,7 +40,7 @@ public:
   static TestLuaFuncTableStatic ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestLuaFuncTableStatic &operator=(const TestLuaFuncTableStatic &rhs) = default;
-  TestLuaFuncTableStatic &operator=(TestLuaFuncTableStatic &&rhs) = default;
+  TestLuaFuncTableStatic &operator=(TestLuaFuncTableStatic &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestLuaFuncTableStatic";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

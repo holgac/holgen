@@ -17,7 +17,7 @@ class TestContainerSet {
 public:
   TestContainerSet() = default;
   TestContainerSet(const TestContainerSet &rhs) = default;
-  TestContainerSet(TestContainerSet &&rhs) = default;
+  TestContainerSet(TestContainerSet &&rhs) noexcept = default;
   ~TestContainerSet() = default;
   bool operator==(const TestContainerSet &rhs) const;
   const std::set<std::string> &GetStringContainer() const;
@@ -51,7 +51,7 @@ public:
   static TestContainerSet ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestContainerSet &operator=(const TestContainerSet &rhs) = default;
-  TestContainerSet &operator=(TestContainerSet &&rhs) = default;
+  TestContainerSet &operator=(TestContainerSet &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestContainerSet";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

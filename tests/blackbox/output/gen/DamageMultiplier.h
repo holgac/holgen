@@ -16,7 +16,7 @@ class DamageMultiplier {
 public:
   DamageMultiplier() = default;
   DamageMultiplier(const DamageMultiplier &rhs) = default;
-  DamageMultiplier(DamageMultiplier &&rhs) = default;
+  DamageMultiplier(DamageMultiplier &&rhs) noexcept = default;
   ~DamageMultiplier() = default;
   bool operator==(const DamageMultiplier &rhs) const;
   const std::string &GetWhen() const;
@@ -40,7 +40,7 @@ public:
   static DamageMultiplier ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   DamageMultiplier &operator=(const DamageMultiplier &rhs) = default;
-  DamageMultiplier &operator=(DamageMultiplier &&rhs) = default;
+  DamageMultiplier &operator=(DamageMultiplier &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "DamageMultiplier";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -19,7 +19,7 @@ WeaponInInventory::WeaponInInventory(const WeaponInInventory &rhs) {
   }
 }
 
-WeaponInInventory::WeaponInInventory(WeaponInInventory &&rhs) {
+WeaponInInventory::WeaponInInventory(WeaponInInventory &&rhs) noexcept {
   ResetType();
   SetType(rhs.mType);
   if (mType == WeaponType::Bow) {
@@ -278,7 +278,7 @@ WeaponInInventory &WeaponInInventory::operator=(const WeaponInInventory &rhs) {
   return *this;
 }
 
-WeaponInInventory &WeaponInInventory::operator=(WeaponInInventory &&rhs) {
+WeaponInInventory &WeaponInInventory::operator=(WeaponInInventory &&rhs) noexcept {
   ResetType();
   SetType(rhs.mType);
   if (mType == WeaponType::Bow) {

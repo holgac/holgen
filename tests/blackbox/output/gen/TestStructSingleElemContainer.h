@@ -18,7 +18,7 @@ class TestStructSingleElemContainer {
 public:
   TestStructSingleElemContainer() = default;
   TestStructSingleElemContainer(const TestStructSingleElemContainer &rhs) = default;
-  TestStructSingleElemContainer(TestStructSingleElemContainer &&rhs) = default;
+  TestStructSingleElemContainer(TestStructSingleElemContainer &&rhs) noexcept = default;
   ~TestStructSingleElemContainer() = default;
   bool operator==(const TestStructSingleElemContainer &rhs) const;
   const std::vector<TestStructSingleElem> &GetSingleElemStructs() const;
@@ -54,7 +54,7 @@ public:
   static TestStructSingleElemContainer ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructSingleElemContainer &operator=(const TestStructSingleElemContainer &rhs) = default;
-  TestStructSingleElemContainer &operator=(TestStructSingleElemContainer &&rhs) = default;
+  TestStructSingleElemContainer &operator=(TestStructSingleElemContainer &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructSingleElemContainer";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

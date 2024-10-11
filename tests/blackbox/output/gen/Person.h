@@ -15,7 +15,7 @@ class Person {
 public:
   Person() = default;
   Person(const Person &rhs) = default;
-  Person(Person &&rhs) = default;
+  Person(Person &&rhs) noexcept = default;
   ~Person() = default;
   bool operator==(const Person &rhs) const;
   uint32_t GetRace() const;
@@ -44,7 +44,7 @@ public:
   static Person ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Person &operator=(const Person &rhs) = default;
-  Person &operator=(Person &&rhs) = default;
+  Person &operator=(Person &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Person";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

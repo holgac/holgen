@@ -18,7 +18,7 @@ class LuaTestStructContainer {
 public:
   LuaTestStructContainer() = default;
   LuaTestStructContainer(const LuaTestStructContainer &rhs) = default;
-  LuaTestStructContainer(LuaTestStructContainer &&rhs) = default;
+  LuaTestStructContainer(LuaTestStructContainer &&rhs) noexcept = default;
   ~LuaTestStructContainer() = default;
   bool operator==(const LuaTestStructContainer &rhs) const;
   const std::vector<uint32_t> &GetTestVector() const;
@@ -48,7 +48,7 @@ public:
   static LuaTestStructContainer ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   LuaTestStructContainer &operator=(const LuaTestStructContainer &rhs) = default;
-  LuaTestStructContainer &operator=(LuaTestStructContainer &&rhs) = default;
+  LuaTestStructContainer &operator=(LuaTestStructContainer &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "LuaTestStructContainer";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -20,7 +20,7 @@ class TestVariantStructDifferentTypes {
 public:
   TestVariantStructDifferentTypes() = default;
   TestVariantStructDifferentTypes(const TestVariantStructDifferentTypes &rhs);
-  TestVariantStructDifferentTypes(TestVariantStructDifferentTypes &&rhs);
+  TestVariantStructDifferentTypes(TestVariantStructDifferentTypes &&rhs) noexcept;
   ~TestVariantStructDifferentTypes();
   const TestVariantStructCat *GetBeing1AsTestVariantStructCat() const;
   TestVariantStructCat *GetBeing1AsTestVariantStructCat();
@@ -53,7 +53,7 @@ public:
   static TestVariantStructDifferentTypes ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestVariantStructDifferentTypes &operator=(const TestVariantStructDifferentTypes &rhs);
-  TestVariantStructDifferentTypes &operator=(TestVariantStructDifferentTypes &&rhs);
+  TestVariantStructDifferentTypes &operator=(TestVariantStructDifferentTypes &&rhs) noexcept;
   inline static const char *CLASS_NAME = "TestVariantStructDifferentTypes";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

@@ -15,7 +15,7 @@ class TestLuaNumber {
 public:
   TestLuaNumber() = default;
   TestLuaNumber(const TestLuaNumber &rhs) = default;
-  TestLuaNumber(TestLuaNumber &&rhs) = default;
+  TestLuaNumber(TestLuaNumber &&rhs) noexcept = default;
   ~TestLuaNumber() = default;
   bool operator==(const TestLuaNumber &rhs) const;
   int32_t GetValue() const;
@@ -36,7 +36,7 @@ public:
   static TestLuaNumber ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestLuaNumber &operator=(const TestLuaNumber &rhs) = default;
-  TestLuaNumber &operator=(TestLuaNumber &&rhs) = default;
+  TestLuaNumber &operator=(TestLuaNumber &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestLuaNumber";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

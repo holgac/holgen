@@ -18,7 +18,7 @@ class Race {
 public:
   Race() = default;
   Race(const Race &rhs) = default;
-  Race(Race &&rhs) = default;
+  Race(Race &&rhs) noexcept = default;
   ~Race() = default;
   bool operator==(const Race &rhs) const;
   uint32_t GetId() const;
@@ -48,7 +48,7 @@ public:
   static Race ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   Race &operator=(const Race &rhs) = default;
-  Race &operator=(Race &&rhs) = default;
+  Race &operator=(Race &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Race";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

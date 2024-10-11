@@ -19,7 +19,7 @@ class TestJsonTagManager {
 public:
   TestJsonTagManager() = default;
   TestJsonTagManager(const TestJsonTagManager &rhs) = default;
-  TestJsonTagManager(TestJsonTagManager &&rhs) = default;
+  TestJsonTagManager(TestJsonTagManager &&rhs) noexcept = default;
   ~TestJsonTagManager() = default;
   bool operator==(const TestJsonTagManager &rhs) const;
   const std::vector<TestJsonTag> &GetTags() const;
@@ -49,7 +49,7 @@ public:
   static TestJsonTagManager ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestJsonTagManager &operator=(const TestJsonTagManager &rhs) = default;
-  TestJsonTagManager &operator=(TestJsonTagManager &&rhs) = default;
+  TestJsonTagManager &operator=(TestJsonTagManager &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestJsonTagManager";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

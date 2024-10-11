@@ -17,7 +17,7 @@ public:
   TestStructConstructor(const float x, const float y, const float z);
   TestStructConstructor() = default;
   TestStructConstructor(const TestStructConstructor &rhs) = default;
-  TestStructConstructor(TestStructConstructor &&rhs) = default;
+  TestStructConstructor(TestStructConstructor &&rhs) noexcept = default;
   ~TestStructConstructor() = default;
   bool operator==(const TestStructConstructor &rhs) const;
   float GetX() const;
@@ -44,7 +44,7 @@ public:
   static TestStructConstructor ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructConstructor &operator=(const TestStructConstructor &rhs) = default;
-  TestStructConstructor &operator=(TestStructConstructor &&rhs) = default;
+  TestStructConstructor &operator=(TestStructConstructor &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructConstructor";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);

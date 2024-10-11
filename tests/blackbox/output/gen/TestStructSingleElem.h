@@ -16,7 +16,7 @@ class TestStructSingleElem {
 public:
   TestStructSingleElem() = default;
   TestStructSingleElem(const TestStructSingleElem &rhs) = default;
-  TestStructSingleElem(TestStructSingleElem &&rhs) = default;
+  TestStructSingleElem(TestStructSingleElem &&rhs) noexcept = default;
   ~TestStructSingleElem() = default;
   bool operator==(const TestStructSingleElem &rhs) const;
   const std::string &GetName() const;
@@ -38,7 +38,7 @@ public:
   static TestStructSingleElem ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
   TestStructSingleElem &operator=(const TestStructSingleElem &rhs) = default;
-  TestStructSingleElem &operator=(TestStructSingleElem &&rhs) = default;
+  TestStructSingleElem &operator=(TestStructSingleElem &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "TestStructSingleElem";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
