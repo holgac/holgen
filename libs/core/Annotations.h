@@ -248,6 +248,8 @@ public:
    *
    * constructor: Adds a custom constructor with the same arguments that calls the function. Implies
    *              staticness.
+   *
+   * noexcept: User defined functions without this attribute are not marked as noexcept.
    */
   inline static const std::string Func = "func";
   inline static const std::string Func_OnDestroy = "onDestroy";
@@ -259,6 +261,7 @@ public:
   inline static const std::string Func_Hash = "hash";
   inline static const std::string Func_ToString = "toString";
   inline static const std::string Func_Constructor = "constructor";
+  inline static const std::string Func_Noexcept = "noexcept";
 
   /**
    * Adds a comment to a struct, field or function.

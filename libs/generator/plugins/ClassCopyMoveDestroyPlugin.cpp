@@ -54,6 +54,7 @@ void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
 
   auto moveAssignment = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
                                     Visibility::Public, Constness::NotConst};
+  moveAssignment.mNoexceptness = Noexceptness::Noexcept;
   moveAssignment.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
   if (!isCopyable || needsCustomCopy) {
     PopulateMethod(cls, moveAssignment, variantData, true, true);
@@ -70,6 +71,7 @@ void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
   } else {
     moveConstructor.mDefaultDelete = DefaultDelete::Default;
   }
+  moveConstructor.mNoexceptness = Noexceptness::Noexcept;
   cls.mConstructors.push_back(std::move(moveConstructor));
   if (cls.mDestructor.IsEmpty()) {
     cls.mDestructor.mDefaultDelete = DefaultDelete::Default;

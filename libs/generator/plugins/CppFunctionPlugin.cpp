@@ -26,6 +26,9 @@ void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &fun
   if (functionDefinition.GetMatchingAttribute(Annotations::Func, Annotations::Func_Static)) {
     method.mStaticness = Staticness::Static;
   }
+  if (functionDefinition.GetMatchingAttribute(Annotations::Func, Annotations::Func_Noexcept)) {
+    method.mNoexceptness = Noexceptness::Noexcept;
+  }
   method.mUserDefined = true;
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

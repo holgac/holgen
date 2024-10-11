@@ -102,7 +102,7 @@ class Person {
 public:
   Person() = default;
   Person(const Person &rhs) = default;
-  Person(Person &&rhs) = default;
+  Person(Person &&rhs) noexcept = default;
   ~Person() = default;
   bool operator==(const Person &rhs) const;
   uint32_t GetAge() const;
@@ -110,7 +110,7 @@ public:
   void SetAge(uint32_t val);
   void SetGender(float val);
   Person &operator=(const Person &rhs) = default;
-  Person &operator=(Person &&rhs) = default;
+  Person &operator=(Person &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Person";
 private:
   // this is the age of the person
@@ -200,7 +200,7 @@ class Market {
 public:
   Market() = default;
   Market(const Market &rhs) = default;
-  Market(Market &&rhs) = default;
+  Market(Market &&rhs) noexcept = default;
   ~Market() = default;
   bool operator==(const Market &rhs) const;
   const std::vector<std::string> &GetInstruments() const;
@@ -213,7 +213,7 @@ public:
   void OnNewTrade(const std::string &instrument, const double price);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Market &operator=(const Market &rhs) = default;
-  Market &operator=(Market &&rhs) = default;
+  Market &operator=(Market &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Market";
 private:
   std::vector<std::string> mInstruments;
@@ -345,7 +345,7 @@ class Sound {
 public:
   Sound() = default;
   Sound(const Sound &rhs) = default;
-  Sound(Sound &&rhs) = default;
+  Sound(Sound &&rhs) noexcept = default;
   ~Sound() = default;
   bool operator==(const Sound &rhs) const;
   const std::string &GetName() const;
@@ -355,7 +355,7 @@ public:
   void SetVolume(uint32_t val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Sound &operator=(const Sound &rhs) = default;
-  Sound &operator=(Sound &&rhs) = default;
+  Sound &operator=(Sound &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Sound";
 private:
   std::string mName;
@@ -459,7 +459,7 @@ class Animal {
 public:
   Animal() = default;
   Animal(const Animal &rhs) = default;
-  Animal(Animal &&rhs) = default;
+  Animal(Animal &&rhs) noexcept = default;
   ~Animal() = default;
   bool operator==(const Animal &rhs) const;
   const std::vector<Sound> &GetSounds() const;
@@ -467,7 +467,7 @@ public:
   void SetSounds(const std::vector<Sound> &val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Animal &operator=(const Animal &rhs) = default;
-  Animal &operator=(Animal &&rhs) = default;
+  Animal &operator=(Animal &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Animal";
 private:
   std::vector<Sound> mSounds;
@@ -584,7 +584,7 @@ class Person {
 public:
   Person() = default;
   Person(const Person &rhs) = default;
-  Person(Person &&rhs) = default;
+  Person(Person &&rhs) noexcept = default;
   ~Person() = default;
   bool operator==(const Person &rhs) const;
   uint32_t GetCurrentCountry() const;
@@ -597,7 +597,7 @@ public:
   void SetPlaceOfBirth(uint32_t val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Person &operator=(const Person &rhs) = default;
-  Person &operator=(Person &&rhs) = default;
+  Person &operator=(Person &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Person";
 private:
   uint32_t mCurrentCountry;
@@ -748,7 +748,7 @@ class Country {
 public:
   Country() = default;
   Country(const Country &rhs) = default;
-  Country(Country &&rhs) = default;
+  Country(Country &&rhs) noexcept = default;
   ~Country() = default;
   bool operator==(const Country &rhs) const;
   const std::string &GetName() const;
@@ -759,7 +759,7 @@ public:
   void SetLeader(const Person &val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Country &operator=(const Country &rhs) = default;
-  Country &operator=(Country &&rhs) = default;
+  Country &operator=(Country &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Country";
 private:
   std::string mName;
@@ -884,7 +884,7 @@ class Person {
 public:
   Person() = default;
   Person(const Person &rhs) = default;
-  Person(Person &&rhs) = default;
+  Person(Person &&rhs) noexcept = default;
   ~Person() = default;
   bool operator==(const Person &rhs) const;
   uint32_t GetId() const;
@@ -898,7 +898,7 @@ public:
   void SetPartnerId(uint32_t val);
   static Person *Get(uint32_t id);
   Person &operator=(const Person &rhs) = default;
-  Person &operator=(Person &&rhs) = default;
+  Person &operator=(Person &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Person";
 private:
   uint32_t mId = -1;
@@ -1002,11 +1002,11 @@ class Person {
 public:
   Person() = default;
   Person(const Person &rhs) = delete;
-  Person(Person &&rhs);
+  Person(Person &&rhs) noexcept;
   ~Person() = default;
   bool operator==(const Person &rhs) const;
   Person &operator=(const Person &rhs) = delete;
-  Person &operator=(Person &&rhs);
+  Person &operator=(Person &&rhs) noexcept;
   inline static const char *CLASS_NAME = "Person";
 };
 }
@@ -1018,14 +1018,14 @@ public:
 #include "Person.h"
 
 namespace generator_test_namespace {
-Person::Person(Person &&rhs) {
+Person::Person(Person &&rhs) noexcept {
 }
 
 bool Person::operator==(const Person &rhs) const {
   return true;
 }
 
-Person &Person::operator=(Person &&rhs) {
+Person &Person::operator=(Person &&rhs) noexcept {
   return *this;
 }
 }
