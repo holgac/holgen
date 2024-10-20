@@ -14,4 +14,5 @@ target_link_libraries(cli
     parser
     tokenizer
     core
+    cargs
 )

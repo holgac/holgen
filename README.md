@@ -18,13 +18,17 @@ rebuilds. Or if you're lazy, just create a bash script like this that you execut
 ```
 #!/usr/bin/env bash
 
-holgen holgen/schemas libs/schemas project_r::schemas project_r_schemas ../ProjectRSchemas.h
+holgen --input holgen/schemas --cpp_output libs/schemas --namespace project_r::schemas --cmake project_r_schemas --header ../ProjectRSchemas.h
 ```
 
-CLI will change over time (getopts will be supported eventually), currently the usage is:
+CLI options:
 
 ```
-holgen [schema dir] [output dir] [namespace] [cmake project name] [common header file to include where you can configure error handling]
+-i, --input=DIR           Directory containing holgen schema files
+-o, --cpp_output=DIR      Directory to put the C++ output files
+-n, --namespace=VALUE     C++ namespace to use for all data structures
+-c, --cmake=VALUE         CMake target name to use for the generated static lib
+-h, --header=VALUE        Config header to include in all generated headers
 ```
 
 # Usage

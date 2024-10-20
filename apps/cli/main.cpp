@@ -32,18 +32,64 @@ struct CliOptions {
 };
 
 bool ParseArgs(CliOptions &out, int argc, char **argv) {
-  if (argc != 6) {
-    std::cerr << "Usage: " << std::endl
-              << argv[0]
-              << " [IN_DIRECTORY] [OUT_DIRECTORY] [NAMESPACE] [CMAKE_TARGET] [CONFIG_HEADER]"
-              << std::endl;
+  cag_option cargsCliOptions[] = {
+      {.identifier = 'i',
+       .access_letters = "i",
+       .access_name = "input",
+       .value_name = "DIR",
+       .description = "Directory containing holgen schema files"},
+      {.identifier = 'o',
+       .access_letters = "o",
+       .access_name = "cpp_output",
+       .value_name = "DIR",
+       .description = "Directory to put the C++ output files"},
+      {.identifier = 'n',
+       .access_letters = "n",
+       .access_name = "namespace",
+       .value_name = "VALUE",
+       .description = "C++ namespace to use for all data structures"},
+      {.identifier = 'c',
+       .access_letters = "c",
+       .access_name = "cmake",
+       .value_name = "VALUE",
+       .description = "CMake target name to use for the generated static lib"},
+      {.identifier = 'h',
+       .access_letters = "h",
+       .access_name = "header",
+       .value_name = "VALUE",
+       .description = "Config header to include in all generated headers"},
+  };
+  cag_option_context context;
+  cag_option_init(&context, cargsCliOptions, std::size(cargsCliOptions), argc, argv);
+  while (cag_option_fetch(&context)) {
+    switch (cag_option_get_identifier(&context)) {
+    case 'i':
+      out.mSchemaDirs.emplace_back(cag_option_get_value(&context));
+      break;
+    case 'o':
+      out.mOutDir = cag_option_get_value(&context);
+      break;
+    case 'n':
+      out.mNamespace = cag_option_get_value(&context);
+      break;
+    case 'c':
+      out.mCmakeTarget = cag_option_get_value(&context);
+      break;
+    case 'h':
+      out.mConfigHeader = cag_option_get_value(&context);
+      break;
+    default:
+    case '?':
+      cag_option_print_error(&context, stdout);
+      cag_option_print(cargsCliOptions, std::size(cargsCliOptions), stdout);
+      return false;
+    }
+  }
+  if (out.mOutDir.empty() || out.mSchemaDirs.empty() || out.mNamespace.empty() ||
+      out.mCmakeTarget.empty() || out.mConfigHeader.empty()) {
+    cag_option_print(cargsCliOptions, std::size(cargsCliOptions), stdout);
     return false;
   }
-  out.mSchemaDirs = {argv[1]};
-  out.mOutDir = argv[2];
-  out.mNamespace = argv[3];
-  out.mCmakeTarget = argv[4];
-  out.mConfigHeader = argv[5];
   return true;
 }
 
@@ -106,8 +152,8 @@ int Run(const CliOptions &cliOptions) {
     std::ofstream fout(target, std::ios::binary);
     fout.write(newContents.c_str(), newContents.size());
   }
-  // TODO: warn if there are files in the directory not created by us in case the schema changed but
-  // the dangling files weren't deleted.
+  // TODO: warn if there are files in the directory not created by us in case the schema changed
+  // but the dangling files weren't deleted.
   return 0;
 }
 } // namespace
