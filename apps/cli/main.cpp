@@ -27,7 +27,7 @@ struct CliOptions {
   std::vector<std::string> mSchemaDirs;
   std::string mOutDir;
   std::string mNamespace;
-  std::string mCmakeTarget;
+  std::string mProjectName;
   std::string mConfigHeader;
   bool mLuaEnabled = false;
   bool mJsonEnabled = false;
@@ -50,11 +50,11 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
        .access_name = "namespace",
        .value_name = "VALUE",
        .description = "C++ namespace to use for all data structures"},
-      {.identifier = 'c',
-       .access_letters = "c",
-       .access_name = "cmake",
+      {.identifier = 'p',
+       .access_letters = "p",
+       .access_name = "project",
        .value_name = "VALUE",
-       .description = "CMake target name to use for the generated static lib"},
+       .description = "Project name to use in cmake static lib and swig module"},
       {.identifier = 'h',
        .access_letters = "h",
        .access_name = "header",
@@ -84,8 +84,8 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
     case 'n':
       out.mNamespace = cag_option_get_value(&context);
       break;
-    case 'c':
-      out.mCmakeTarget = cag_option_get_value(&context);
+    case 'p':
+      out.mProjectName = cag_option_get_value(&context);
       break;
     case 'h':
       out.mConfigHeader = cag_option_get_value(&context);
@@ -104,7 +104,7 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
     }
   }
   if (out.mOutDir.empty() || out.mSchemaDirs.empty() || out.mNamespace.empty() ||
-      out.mCmakeTarget.empty() || out.mConfigHeader.empty()) {
+      out.mProjectName.empty() || out.mConfigHeader.empty()) {
     cag_option_print(cargsCliOptions, std::size(cargsCliOptions), stdout);
     return false;
   }
@@ -158,7 +158,7 @@ int Run(const CliOptions &cliOptions) {
 
   Translator translator{translatorSettings};
   auto project = translator.Translate(projectDefinition);
-  auto generator = CodeGenerator({cliOptions.mCmakeTarget, cliOptions.mConfigHeader});
+  auto generator = CodeGenerator({cliOptions.mProjectName, cliOptions.mConfigHeader});
   auto results = generator.Generate(project);
   std::filesystem::path outDir(cliOptions.mOutDir);
   for (auto &result: results) {

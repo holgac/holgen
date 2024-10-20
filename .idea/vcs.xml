@@ -2,10 +2,12 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/x_cargs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/x_googletest" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/x_lua/src" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/x_rapidjson" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/tests/blackbox/x_googletest" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/tests/blackbox/x_rapidjson" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/tests/blackbox_swig/x_googletest" vcs="Git" />
   </component>
 </project>
