@@ -6,6 +6,9 @@
 
 namespace holgen {
 void LuaFieldsPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    return;
+  }
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct) {
       ProcessStruct(cls, *cls.mStruct);

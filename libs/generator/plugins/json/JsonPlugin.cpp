@@ -28,6 +28,9 @@ bool ShouldParseMethod(const ClassMethod &method) {
 } // namespace
 
 void JsonPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Json)) {
+    return;
+  }
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct)
       ProcessStruct(cls);

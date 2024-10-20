@@ -5,6 +5,9 @@
 
 namespace holgen {
 void JsonConverterPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Json)) {
+    return;
+  }
   Validate().JsonConverters();
   auto cls = Class{St::Converter, mSettings.mNamespace};
   std::set<std::string> processedConverters;

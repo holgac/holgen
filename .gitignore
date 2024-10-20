@@ -1,5 +1,8 @@
 cmake-build-debug/
 cmake-build-release/
-.idea/misc.xml
 *.swp
 *.swo
+.idea/misc.xml
+tests/blackbox/.run/
+tests/blackbox/.idea/
+tests/blackbox_swig/.idea/

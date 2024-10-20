@@ -12,6 +12,9 @@ std::string ParseFiles = "ParseFiles";
 } // namespace
 
 void JsonParseFilesPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Json)) {
+    return;
+  }
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct == nullptr)
       continue;

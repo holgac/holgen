@@ -4,6 +4,9 @@
 
 namespace holgen {
 void JsonHelperPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Json)) {
+    return;
+  }
   auto cls = Class{St::JsonHelper, mSettings.mNamespace};
   cls.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
   GenerateBaseParse(cls);

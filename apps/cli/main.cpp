@@ -29,6 +29,8 @@ struct CliOptions {
   std::string mNamespace;
   std::string mCmakeTarget;
   std::string mConfigHeader;
+  bool mLuaEnabled = false;
+  bool mJsonEnabled = false;
 };
 
 bool ParseArgs(CliOptions &out, int argc, char **argv) {
@@ -58,6 +60,16 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
        .access_name = "header",
        .value_name = "VALUE",
        .description = "Config header to include in all generated headers"},
+      {.identifier = 'l',
+       .access_letters = nullptr,
+       .access_name = "lua",
+       .value_name = nullptr,
+       .description = "Enable lua bindings (requires lua)"},
+      {.identifier = 'j',
+       .access_letters = nullptr,
+       .access_name = "json",
+       .value_name = nullptr,
+       .description = "Enable json parsing (requires rapidjson)"},
   };
   cag_option_context context;
   cag_option_init(&context, cargsCliOptions, std::size(cargsCliOptions), argc, argv);
@@ -77,6 +89,12 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
       break;
     case 'h':
       out.mConfigHeader = cag_option_get_value(&context);
+      break;
+    case 'l':
+      out.mLuaEnabled = true;
+      break;
+    case 'j':
+      out.mJsonEnabled = true;
       break;
     default:
     case '?':
@@ -125,10 +143,19 @@ ProjectDefinition ParseProjectDefinition(const CliOptions &cliOptions) {
   return projectDefinition;
 }
 
+TranslatorSettings GetTranslatorSettings(const CliOptions &cliOptions) {
+  TranslatorSettings translatorSettings{cliOptions.mNamespace};
+  if (cliOptions.mLuaEnabled)
+    translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
+  if (cliOptions.mJsonEnabled)
+    translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  return translatorSettings;
+}
+
 int Run(const CliOptions &cliOptions) {
   auto projectDefinition = ParseProjectDefinition(cliOptions);
+  TranslatorSettings translatorSettings = GetTranslatorSettings(cliOptions);
 
-  TranslatorSettings translatorSettings{cliOptions.mNamespace};
   Translator translator{translatorSettings};
   auto project = translator.Translate(projectDefinition);
   auto generator = CodeGenerator({cliOptions.mCmakeTarget, cliOptions.mConfigHeader});

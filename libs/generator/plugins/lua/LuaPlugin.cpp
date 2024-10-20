@@ -12,6 +12,10 @@ std::string LuaTableField_Type = "t";
 } // namespace
 
 void LuaPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    return;
+  }
+
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct)
       ProcessStruct(cls);

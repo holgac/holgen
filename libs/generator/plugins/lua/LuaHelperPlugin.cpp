@@ -29,6 +29,9 @@ std::map<std::string, LuaTypeUsage> LuaUsage = {
 } // namespace
 
 void LuaHelperPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    return;
+  }
   auto cls = Class{St::LuaHelper, mSettings.mNamespace};
   cls.mHeaderIncludes.AddLibHeader("lua.hpp");
   cls.mHeaderIncludes.AddStandardHeader("cstddef");

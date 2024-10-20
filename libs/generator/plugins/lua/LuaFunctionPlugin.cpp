@@ -6,6 +6,9 @@
 
 namespace holgen {
 void LuaFunctionPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    return;
+  }
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::NoLua))
       continue;
