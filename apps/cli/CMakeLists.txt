@@ -1,3 +1,4 @@
+include_directories(../../external/x_cargs/include)
 add_executable(cli
     main.cpp
 )
@@ -6,6 +7,7 @@ add_dependencies(cli
     parser
     tokenizer
     core
+    cargs
 )
 target_link_libraries(cli
     generator

@@ -7,3 +7,6 @@
 [submodule "external/x_lua/src"]
 	path = external/x_lua/src
 	url = https://github.com/lua/lua.git
+[submodule "external/x_cargs"]
+	path = external/x_cargs
+	url = https://github.com/likle/cargs.git

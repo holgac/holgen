@@ -1,2 +1,3 @@
 add_subdirectory(x_googletest)
 include_directories(x_googletest/googletest/include)
+add_subdirectory(x_cargs)

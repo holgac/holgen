@@ -8,6 +8,9 @@
 #include "generator/UserDefinedSectionExtractor.h"
 #include "parser/Parser.h"
 #include "tokenizer/Tokenizer.h"
+#include "cargs.h"
+
+using namespace holgen;
 
 namespace {
 // TODO: this is needed by dataManager's ParseFiles too. Move to FileSystemHelper?
@@ -19,19 +22,37 @@ std::string ReadFile(const std::filesystem::path &path) {
   fin.read(contents.data(), contents.size());
   return contents;
 }
-} // namespace
 
-int run(int argc, char **argv) {
+struct CliOptions {
+  std::vector<std::string> mSchemaDirs;
+  std::string mOutDir;
+  std::string mNamespace;
+  std::string mCmakeTarget;
+  std::string mConfigHeader;
+};
+
+bool ParseArgs(CliOptions &out, int argc, char **argv) {
   if (argc != 6) {
     std::cerr << "Usage: " << std::endl
               << argv[0]
               << " [IN_DIRECTORY] [OUT_DIRECTORY] [NAMESPACE] [CMAKE_TARGET] [CONFIG_HEADER]"
               << std::endl;
-    return -1;
+    return false;
   }
-  holgen::ProjectDefinition projectDefinition;
+  out.mSchemaDirs = {argv[1]};
+  out.mOutDir = argv[2];
+  out.mNamespace = argv[3];
+  out.mCmakeTarget = argv[4];
+  out.mConfigHeader = argv[5];
+  return true;
+}
+
+ProjectDefinition ParseProjectDefinition(const CliOptions &cliOptions) {
+  ProjectDefinition projectDefinition;
   std::queue<std::filesystem::path> pathsQueue;
-  pathsQueue.push(argv[1]);
+  for (auto &path: cliOptions.mSchemaDirs) {
+    pathsQueue.push(path);
+  }
 
   while (!pathsQueue.empty()) {
     auto &curPath = pathsQueue.front();
@@ -44,23 +65,29 @@ int run(int argc, char **argv) {
         continue;
       }
       auto contents = ReadFile(entry.path());
-      holgen::Tokenizer tokenizer(contents, entry.path().string());
+      Tokenizer tokenizer(contents, entry.path().string());
       try {
-        holgen::Parser{projectDefinition, tokenizer}.Parse();
-      } catch (holgen::Exception &exc) {
+        Parser{projectDefinition, tokenizer}.Parse();
+      } catch (Exception &exc) {
         std::cerr << "In file " << entry.path() << std::endl;
         throw;
       }
     }
     pathsQueue.pop();
   }
-  holgen::Parser::PostProcess(projectDefinition);
-  holgen::TranslatorSettings translatorSettings{argv[3]};
-  holgen::Translator translator{translatorSettings};
+  Parser::PostProcess(projectDefinition);
+  return projectDefinition;
+}
+
+int Run(const CliOptions &cliOptions) {
+  auto projectDefinition = ParseProjectDefinition(cliOptions);
+
+  TranslatorSettings translatorSettings{cliOptions.mNamespace};
+  Translator translator{translatorSettings};
   auto project = translator.Translate(projectDefinition);
-  auto generator = holgen::CodeGenerator({argv[4], argv[5]});
+  auto generator = CodeGenerator({cliOptions.mCmakeTarget, cliOptions.mConfigHeader});
   auto results = generator.Generate(project);
-  std::filesystem::path outDir(argv[2]);
+  std::filesystem::path outDir(cliOptions.mOutDir);
   for (auto &result: results) {
     auto target = outDir / result.mName;
     auto dirname = target.parent_path();
@@ -71,7 +98,7 @@ int run(int argc, char **argv) {
     std::string existingContents;
     if (std::filesystem::exists(target)) {
       existingContents = ReadFile(target);
-      sections = holgen::UserDefinedSectionExtractor().Extract(existingContents);
+      sections = UserDefinedSectionExtractor().Extract(existingContents);
     }
     auto newContents = result.mBody.ToString(result.mType, sections);
     if (newContents == existingContents)
@@ -83,11 +110,16 @@ int run(int argc, char **argv) {
   // the dangling files weren't deleted.
   return 0;
 }
+} // namespace
 
 int main(int argc, char **argv) {
   try {
-    return run(argc, argv);
-  } catch (holgen::Exception &exc) {
+    CliOptions cliOptions;
+    if (!ParseArgs(cliOptions, argc, argv)) {
+      return -1;
+    }
+    return Run(cliOptions);
+  } catch (Exception &exc) {
     std::cerr << exc.what() << std::endl;
     return -1;
   }
