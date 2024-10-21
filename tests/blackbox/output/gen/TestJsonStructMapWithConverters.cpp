@@ -113,13 +113,13 @@ void TestJsonStructMapWithConverters::PushToLua(lua_State *luaState) const {
 void TestJsonStructMapWithConverters::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "testMapConvertElem");
-  LuaHelper::Push(mTestMapConvertElem, luaState, true);
+  LuaHelper::Push<true>(mTestMapConvertElem, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "testMapConvertKey");
-  LuaHelper::Push(mTestMapConvertKey, luaState, true);
+  LuaHelper::Push<true>(mTestMapConvertKey, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "testMapConvertKeyElem");
-  LuaHelper::Push(mTestMapConvertKeyElem, luaState, true);
+  LuaHelper::Push<true>(mTestMapConvertKeyElem, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -203,15 +203,15 @@ int TestJsonStructMapWithConverters::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("testMapConvertElem", key)) {
     auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructMapWithConverters.testMapConvertElem with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mTestMapConvertElem, luaState, false);
+    LuaHelper::Push<false>(instance->mTestMapConvertElem, luaState);
   } else if (0 == strcmp("testMapConvertKey", key)) {
     auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructMapWithConverters.testMapConvertKey with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mTestMapConvertKey, luaState, false);
+    LuaHelper::Push<false>(instance->mTestMapConvertKey, luaState);
   } else if (0 == strcmp("testMapConvertKeyElem", key)) {
     auto instance = TestJsonStructMapWithConverters::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructMapWithConverters.testMapConvertKeyElem with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mTestMapConvertKeyElem, luaState, false);
+    LuaHelper::Push<false>(instance->mTestMapConvertKeyElem, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonStructMapWithConverters.{}", key);
     return 0;

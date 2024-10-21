@@ -35,8 +35,8 @@ int32_t TestLuaCalculator::AddPrimitive(lua_State *luaState, const int32_t num) 
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(num, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(num, luaState);
   lua_call(luaState, 2, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -60,8 +60,8 @@ int32_t TestLuaCalculator::AddRef(lua_State *luaState, TestLuaNumber &num) const
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(num, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(num, luaState);
   lua_call(luaState, 2, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -85,8 +85,8 @@ int32_t TestLuaCalculator::AddNullable(lua_State *luaState, const TestLuaNumber 
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(num, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(num, luaState);
   lua_call(luaState, 2, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -110,8 +110,8 @@ TestLuaNumber *TestLuaCalculator::ReturnNullable(lua_State *luaState, const int3
     lua_pop(luaState, 1);
     return nullptr;
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(num, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(num, luaState);
   lua_call(luaState, 2, 1);
   auto result = TestLuaNumber::ReadProxyFromLua(luaState, -1);
   lua_pop(luaState, 1);
@@ -132,8 +132,8 @@ TestLuaNumber &TestLuaCalculator::ReturnRef(lua_State *luaState, const int32_t n
   if (lua_isnil(luaState, -1)) {
     HOLGEN_FAIL("Calling undefined ReturnRef function {}", mLuaFuncHandle_ReturnRef);
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(num, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(num, luaState);
   lua_call(luaState, 2, 1);
   auto result = TestLuaNumber::ReadProxyFromLua(luaState, -1);
   lua_pop(luaState, 1);
@@ -156,8 +156,8 @@ TestLuaNumber TestLuaCalculator::ReturnNew(lua_State *luaState, const int32_t nu
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(num, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(num, luaState);
   lua_call(luaState, 2, 1);
   TestLuaNumber resultMirror;
   TestLuaNumber *result;
@@ -348,7 +348,7 @@ int TestLuaCalculator::AddPrimitiveCallerFromLua(lua_State *luaState) {
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->AddPrimitive(luaState, arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -357,7 +357,7 @@ int TestLuaCalculator::AddRefCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaCalculator.AddRef method with an invalid lua proxy object!");
   auto arg0 = TestLuaNumber::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddRef(luaState, *arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -376,7 +376,7 @@ int TestLuaCalculator::AddNullableCallerFromLua(lua_State *luaState) {
     arg0 = &arg0Mirror;
   }
   auto result = instance->AddNullable(luaState, arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -386,7 +386,7 @@ int TestLuaCalculator::ReturnNullableCallerFromLua(lua_State *luaState) {
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->ReturnNullable(luaState, arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -396,7 +396,7 @@ int TestLuaCalculator::ReturnRefCallerFromLua(lua_State *luaState) {
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto& result = instance->ReturnRef(luaState, arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -406,7 +406,7 @@ int TestLuaCalculator::ReturnNewCallerFromLua(lua_State *luaState) {
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->ReturnNew(luaState, arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -415,7 +415,7 @@ int TestLuaCalculator::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("lastValue", key)) {
     auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaCalculator.lastValue with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mLastValue, luaState, false);
+    LuaHelper::Push<false>(instance->mLastValue, luaState);
   } else if (0 == strcmp("AddPrimitive", key)) {
     lua_pushcfunction(luaState, TestLuaCalculator::AddPrimitiveCallerFromLua);
   } else if (0 == strcmp("AddRef", key)) {

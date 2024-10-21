@@ -83,10 +83,10 @@ void TestStructComparable::PushToLua(lua_State *luaState) const {
 void TestStructComparable::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "field1");
-  LuaHelper::Push(mField1, luaState, true);
+  LuaHelper::Push<true>(mField1, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "field2");
-  LuaHelper::Push(mField2, luaState, true);
+  LuaHelper::Push<true>(mField2, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -164,11 +164,11 @@ int TestStructComparable::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("field1", key)) {
     auto instance = TestStructComparable::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructComparable.field1 with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mField1, luaState, false);
+    LuaHelper::Push<false>(instance->mField1, luaState);
   } else if (0 == strcmp("field2", key)) {
     auto instance = TestStructComparable::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructComparable.field2 with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mField2, luaState, false);
+    LuaHelper::Push<false>(instance->mField2, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructComparable.{}", key);
     return 0;

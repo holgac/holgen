@@ -91,10 +91,10 @@ void TestStructToString::PushToLua(lua_State *luaState) const {
 void TestStructToString::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "field1");
-  LuaHelper::Push(mField1, luaState, true);
+  LuaHelper::Push<true>(mField1, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "field2");
-  LuaHelper::Push(mField2, luaState, true);
+  LuaHelper::Push<true>(mField2, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -171,7 +171,7 @@ int TestStructToString::StringifyCallerFromLua(lua_State *luaState) {
   auto instance = TestStructToString::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructToString.Stringify method with an invalid lua proxy object!");
   auto result = instance->Stringify();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -180,11 +180,11 @@ int TestStructToString::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("field1", key)) {
     auto instance = TestStructToString::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructToString.field1 with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mField1, luaState, false);
+    LuaHelper::Push<false>(instance->mField1, luaState);
   } else if (0 == strcmp("field2", key)) {
     auto instance = TestStructToString::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructToString.field2 with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mField2, luaState, false);
+    LuaHelper::Push<false>(instance->mField2, luaState);
   } else if (0 == strcmp("Stringify", key)) {
     lua_pushcfunction(luaState, TestStructToString::StringifyCallerFromLua);
   } else {

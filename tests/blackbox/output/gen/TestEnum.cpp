@@ -89,11 +89,11 @@ bool TestEnum::ParseJson(const rapidjson::Value &json, const Converter &converte
 }
 
 void TestEnum::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(TestEnum::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(TestEnum::UnderlyingType(mValue), luaState);
 }
 
 void TestEnum::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(TestEnum::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(TestEnum::UnderlyingType(mValue), luaState);
 }
 
 TestEnum TestEnum::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

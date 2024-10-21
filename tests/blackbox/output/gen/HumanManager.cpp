@@ -139,7 +139,7 @@ void HumanManager::PushToLua(lua_State *luaState) const {
 void HumanManager::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "humans");
-  LuaHelper::Push(mHumans, luaState, true);
+  LuaHelper::Push<true>(mHumans, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -212,7 +212,7 @@ int HumanManager::GetHumanFromNameCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetHumanFromName(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -221,7 +221,7 @@ int HumanManager::AddHumanCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling HumanManager.AddHuman method with an invalid lua proxy object!");
   auto arg0 = Human::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddHuman(*arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -231,7 +231,7 @@ int HumanManager::GetHumanCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetHuman(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -241,7 +241,7 @@ int HumanManager::HasHumanCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->HasHuman(arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -258,7 +258,7 @@ int HumanManager::GetHumanCountCallerFromLua(lua_State *luaState) {
   auto instance = HumanManager::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling HumanManager.GetHumanCount method with an invalid lua proxy object!");
   auto result = instance->GetHumanCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -267,7 +267,7 @@ int HumanManager::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("humans", key)) {
     auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for HumanManager.humans with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mHumans, luaState, false);
+    LuaHelper::Push<false>(instance->mHumans, luaState);
   } else if (0 == strcmp("GetHumanFromName", key)) {
     lua_pushcfunction(luaState, HumanManager::GetHumanFromNameCallerFromLua);
   } else if (0 == strcmp("AddHuman", key)) {

@@ -93,11 +93,11 @@ bool TestContainerSkill::ParseJson(const rapidjson::Value &json, const Converter
 }
 
 void TestContainerSkill::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(TestContainerSkill::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(TestContainerSkill::UnderlyingType(mValue), luaState);
 }
 
 void TestContainerSkill::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(TestContainerSkill::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(TestContainerSkill::UnderlyingType(mValue), luaState);
 }
 
 TestContainerSkill TestContainerSkill::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

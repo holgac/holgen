@@ -84,7 +84,7 @@ void TestStructArray::PushToLua(lua_State *luaState) const {
 void TestStructArray::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "type");
-  LuaHelper::Push(mType, luaState, true);
+  LuaHelper::Push<true>(mType, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -155,7 +155,7 @@ int TestStructArray::GetData1CallerFromLua(lua_State *luaState) {
   auto instance = TestStructArray::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructArray.GetData1 method with an invalid lua proxy object!");
   auto result = instance->GetData1();
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -163,7 +163,7 @@ int TestStructArray::GetData2CallerFromLua(lua_State *luaState) {
   auto instance = TestStructArray::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructArray.GetData2 method with an invalid lua proxy object!");
   auto result = instance->GetData2();
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -172,7 +172,7 @@ int TestStructArray::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("type", key)) {
     auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArray.type with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mType, luaState, false);
+    LuaHelper::Push<false>(instance->mType, luaState);
   } else if (0 == strcmp("GetData1", key)) {
     lua_pushcfunction(luaState, TestStructArray::GetData1CallerFromLua);
   } else if (0 == strcmp("GetData2", key)) {

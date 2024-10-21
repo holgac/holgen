@@ -91,10 +91,10 @@ void TestEnumStruct::PushToLua(lua_State *luaState) const {
 void TestEnumStruct::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "enumField");
-  LuaHelper::Push(mEnumField, luaState, true);
+  LuaHelper::Push<true>(mEnumField, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "enumDefaultValueField");
-  LuaHelper::Push(mEnumDefaultValueField, luaState, true);
+  LuaHelper::Push<true>(mEnumDefaultValueField, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -172,11 +172,11 @@ int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("enumField", key)) {
     auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestEnumStruct.enumField with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mEnumField, luaState, false);
+    LuaHelper::Push<false>(instance->mEnumField, luaState);
   } else if (0 == strcmp("enumDefaultValueField", key)) {
     auto instance = TestEnumStruct::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestEnumStruct.enumDefaultValueField with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mEnumDefaultValueField, luaState, false);
+    LuaHelper::Push<false>(instance->mEnumDefaultValueField, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestEnumStruct.{}", key);
     return 0;

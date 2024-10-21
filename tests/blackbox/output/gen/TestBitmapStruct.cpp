@@ -85,7 +85,7 @@ void TestBitmapStruct::PushToLua(lua_State *luaState) const {
 void TestBitmapStruct::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "bitmapField");
-  LuaHelper::Push(mBitmapField, luaState, true);
+  LuaHelper::Push<true>(mBitmapField, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -158,7 +158,7 @@ int TestBitmapStruct::HasBitmapFieldCallerFromLua(lua_State *luaState) {
   uint64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->HasBitmapField(arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -194,7 +194,7 @@ int TestBitmapStruct::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("bitmapField", key)) {
     auto instance = TestBitmapStruct::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestBitmapStruct.bitmapField with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mBitmapField, luaState, false);
+    LuaHelper::Push<false>(instance->mBitmapField, luaState);
   } else if (0 == strcmp("HasBitmapField", key)) {
     lua_pushcfunction(luaState, TestBitmapStruct::HasBitmapFieldCallerFromLua);
   } else if (0 == strcmp("AddBitmapField", key)) {

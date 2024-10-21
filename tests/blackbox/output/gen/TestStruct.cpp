@@ -113,13 +113,13 @@ void TestStruct::PushToLua(lua_State *luaState) const {
 void TestStruct::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "testFieldBool");
-  LuaHelper::Push(mTestFieldBool, luaState, true);
+  LuaHelper::Push<true>(mTestFieldBool, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "testFieldUnsigned");
-  LuaHelper::Push(mTestFieldUnsigned, luaState, true);
+  LuaHelper::Push<true>(mTestFieldUnsigned, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "testFieldString");
-  LuaHelper::Push(mTestFieldString, luaState, true);
+  LuaHelper::Push<true>(mTestFieldString, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -203,15 +203,15 @@ int TestStruct::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("testFieldBool", key)) {
     auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.testFieldBool with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mTestFieldBool, luaState, false);
+    LuaHelper::Push<false>(instance->mTestFieldBool, luaState);
   } else if (0 == strcmp("testFieldUnsigned", key)) {
     auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.testFieldUnsigned with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mTestFieldUnsigned, luaState, false);
+    LuaHelper::Push<false>(instance->mTestFieldUnsigned, luaState);
   } else if (0 == strcmp("testFieldString", key)) {
     auto instance = TestStruct::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStruct.testFieldString with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mTestFieldString, luaState, false);
+    LuaHelper::Push<false>(instance->mTestFieldString, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStruct.{}", key);
     return 0;

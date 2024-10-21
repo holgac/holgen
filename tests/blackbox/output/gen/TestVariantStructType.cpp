@@ -85,11 +85,11 @@ bool TestVariantStructType::ParseJson(const rapidjson::Value &json, const Conver
 }
 
 void TestVariantStructType::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(TestVariantStructType::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(TestVariantStructType::UnderlyingType(mValue), luaState);
 }
 
 void TestVariantStructType::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(TestVariantStructType::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(TestVariantStructType::UnderlyingType(mValue), luaState);
 }
 
 TestVariantStructType TestVariantStructType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

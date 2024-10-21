@@ -124,16 +124,16 @@ void Weapon::PushToLua(lua_State *luaState) const {
 void Weapon::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState, true);
+  LuaHelper::Push<true>(mId, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState, true);
+  LuaHelper::Push<true>(mName, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "damageMin");
-  LuaHelper::Push(mDamageMin, luaState, true);
+  LuaHelper::Push<true>(mDamageMin, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "damageMax");
-  LuaHelper::Push(mDamageMax, luaState, true);
+  LuaHelper::Push<true>(mDamageMax, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -223,19 +223,19 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("id", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.id with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mId, luaState, false);
+    LuaHelper::Push<false>(instance->mId, luaState);
   } else if (0 == strcmp("name", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.name with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mName, luaState, false);
+    LuaHelper::Push<false>(instance->mName, luaState);
   } else if (0 == strcmp("damageMin", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.damageMin with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mDamageMin, luaState, false);
+    LuaHelper::Push<false>(instance->mDamageMin, luaState);
   } else if (0 == strcmp("damageMax", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.damageMax with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mDamageMax, luaState, false);
+    LuaHelper::Push<false>(instance->mDamageMax, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: Weapon.{}", key);
     return 0;

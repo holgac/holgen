@@ -74,7 +74,7 @@ int TestStructVirtualMethods::VirtualFuncCallerFromLua(lua_State *luaState) {
   auto instance = TestStructVirtualMethods::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructVirtualMethods.VirtualFunc method with an invalid lua proxy object!");
   auto result = instance->VirtualFunc();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -82,7 +82,7 @@ int TestStructVirtualMethods::PureVirtualFuncCallerFromLua(lua_State *luaState) 
   auto instance = TestStructVirtualMethods::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructVirtualMethods.PureVirtualFunc method with an invalid lua proxy object!");
   auto result = instance->PureVirtualFunc();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 

@@ -102,13 +102,13 @@ void TestStructArrayCustomData2::PushToLua(lua_State *luaState) const {
 void TestStructArrayCustomData2::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "f1");
-  LuaHelper::Push(mF1, luaState, true);
+  LuaHelper::Push<true>(mF1, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "f2");
-  LuaHelper::Push(mF2, luaState, true);
+  LuaHelper::Push<true>(mF2, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "f3");
-  LuaHelper::Push(mF3, luaState, true);
+  LuaHelper::Push<true>(mF3, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -192,15 +192,15 @@ int TestStructArrayCustomData2::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("f1", key)) {
     auto instance = TestStructArrayCustomData2::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArrayCustomData2.f1 with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mF1, luaState, false);
+    LuaHelper::Push<false>(instance->mF1, luaState);
   } else if (0 == strcmp("f2", key)) {
     auto instance = TestStructArrayCustomData2::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArrayCustomData2.f2 with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mF2, luaState, false);
+    LuaHelper::Push<false>(instance->mF2, luaState);
   } else if (0 == strcmp("f3", key)) {
     auto instance = TestStructArrayCustomData2::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArrayCustomData2.f3 with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mF3, luaState, false);
+    LuaHelper::Push<false>(instance->mF3, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructArrayCustomData2.{}", key);
     return 0;

@@ -65,7 +65,7 @@ void TestLuaStaticCppFunction::PushToLua(lua_State *luaState) const {
 void TestLuaStaticCppFunction::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "data");
-  LuaHelper::Push(mData, luaState, true);
+  LuaHelper::Push<true>(mData, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -139,7 +139,7 @@ int TestLuaStaticCppFunction::FactoryCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = TestLuaStaticCppFunction::Factory(arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -148,7 +148,7 @@ int TestLuaStaticCppFunction::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("data", key)) {
     auto instance = TestLuaStaticCppFunction::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestLuaStaticCppFunction.data with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mData, luaState, false);
+    LuaHelper::Push<false>(instance->mData, luaState);
   } else if (0 == strcmp("Factory", key)) {
     lua_pushcfunction(luaState, TestLuaStaticCppFunction::FactoryCallerFromLua);
   } else {

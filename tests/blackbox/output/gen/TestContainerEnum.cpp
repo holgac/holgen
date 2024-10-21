@@ -85,7 +85,7 @@ void TestContainerEnum::PushToLua(lua_State *luaState) const {
 void TestContainerEnum::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "skills");
-  LuaHelper::Push(mSkills, luaState, true);
+  LuaHelper::Push<true>(mSkills, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -157,7 +157,7 @@ int TestContainerEnum::GetSkillCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerEnum.GetSkill method with an invalid lua proxy object!");
   auto arg0 = TestContainerSkill::ReadMirrorFromLua(luaState, -1);
   auto& result = instance->GetSkill(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -165,7 +165,7 @@ int TestContainerEnum::GetSkillCountCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerEnum::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerEnum.GetSkillCount method with an invalid lua proxy object!");
   auto result = instance->GetSkillCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -174,7 +174,7 @@ int TestContainerEnum::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("skills", key)) {
     auto instance = TestContainerEnum::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerEnum.skills with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mSkills, luaState, false);
+    LuaHelper::Push<false>(instance->mSkills, luaState);
   } else if (0 == strcmp("GetSkill", key)) {
     lua_pushcfunction(luaState, TestContainerEnum::GetSkillCallerFromLua);
   } else if (0 == strcmp("GetSkillCount", key)) {

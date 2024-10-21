@@ -65,7 +65,7 @@ void TestLuaRegistryData::Init(lua_State *luaState, const std::function<void(lua
     lua_pop(luaState, 1);
     return void();
   }
-  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
   initData(luaState);
   lua_call(luaState, 2, 0);
   lua_pop(luaState, 1);
@@ -86,7 +86,7 @@ int32_t TestLuaRegistryData::Get(lua_State *luaState) const {
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
   lua_call(luaState, 1, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -109,8 +109,8 @@ void TestLuaRegistryData::Add(lua_State *luaState, const int32_t val) const {
     lua_pop(luaState, 1);
     return void();
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(val, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(val, luaState);
   lua_call(luaState, 2, 0);
   lua_pop(luaState, 1);
 }
@@ -205,7 +205,7 @@ int TestLuaRegistryData::GetCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaRegistryData.Get method with an invalid lua proxy object!");
   auto result = instance->Get(luaState);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -232,7 +232,7 @@ int TestLuaRegistryData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestLuaRegistryData::AddCallerFromLua);
   } else if (0 == strcmp("TABLE", key)) {
     auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
-    LuaHelper::Push(instance->mTable, luaState, false);
+    LuaHelper::Push<false>(instance->mTable, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaRegistryData.{}", key);
     return 0;

@@ -174,7 +174,7 @@ void WeaponInInventory::PushToLua(lua_State *luaState) const {
 void WeaponInInventory::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "type");
-  LuaHelper::Push(mType, luaState, true);
+  LuaHelper::Push<true>(mType, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -246,16 +246,16 @@ int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("type", key)) {
     auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponInInventory.type with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mType, luaState, false);
+    LuaHelper::Push<false>(instance->mType, luaState);
   } else if (0 == strcmp("weapon", key)) {
     auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponInInventory.weapon with an invalid lua proxy object!");
     switch (instance->mType.GetValue()) {
     case WeaponType::Bow:
-      LuaHelper::Push(instance->GetWeaponAsWeaponTypeBow(), luaState, false);
+      LuaHelper::Push<false>(instance->GetWeaponAsWeaponTypeBow(), luaState);
       break;
     case WeaponType::Sword:
-      LuaHelper::Push(instance->GetWeaponAsWeaponTypeSword(), luaState, false);
+      LuaHelper::Push<false>(instance->GetWeaponAsWeaponTypeSword(), luaState);
       break;
     default:
       lua_pushnil(luaState);

@@ -284,10 +284,10 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructSharedType.being1 with an invalid lua proxy object!");
     switch (instance->mBeingType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing1AsTestVariantStructCat(), luaState);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing1AsTestVariantStructHuman(), luaState);
       break;
     default:
       lua_pushnil(luaState);
@@ -297,10 +297,10 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructSharedType.being2 with an invalid lua proxy object!");
     switch (instance->mBeingType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing2AsTestVariantStructCat(), luaState);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing2AsTestVariantStructHuman(), luaState);
       break;
     default:
       lua_pushnil(luaState);

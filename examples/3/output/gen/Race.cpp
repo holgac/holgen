@@ -93,11 +93,11 @@ bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
 }
 
 void Race::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(Race::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(Race::UnderlyingType(mValue), luaState);
 }
 
 void Race::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(Race::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(Race::UnderlyingType(mValue), luaState);
 }
 
 Race Race::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

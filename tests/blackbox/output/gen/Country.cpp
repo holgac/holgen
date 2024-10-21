@@ -120,10 +120,10 @@ void Country::PushMirrorToLua(lua_State *luaState) const {
   mLeader.PushMirrorToLua(luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "citizens");
-  LuaHelper::Push(mCitizens, luaState, true);
+  LuaHelper::Push<true>(mCitizens, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "population");
-  LuaHelper::Push(mPopulation, luaState, true);
+  LuaHelper::Push<true>(mPopulation, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -212,15 +212,15 @@ int Country::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("leader", key)) {
     auto instance = Country::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Country.leader with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mLeader, luaState, false);
+    LuaHelper::Push<false>(instance->mLeader, luaState);
   } else if (0 == strcmp("citizens", key)) {
     auto instance = Country::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Country.citizens with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mCitizens, luaState, false);
+    LuaHelper::Push<false>(instance->mCitizens, luaState);
   } else if (0 == strcmp("population", key)) {
     auto instance = Country::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Country.population with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mPopulation, luaState, false);
+    LuaHelper::Push<false>(instance->mPopulation, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: Country.{}", key);
     return 0;

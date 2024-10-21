@@ -70,10 +70,10 @@ void Armor::PushToLua(lua_State *luaState) const {
 void Armor::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState, true);
+  LuaHelper::Push<true>(mId, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "armorClass");
-  LuaHelper::Push(mArmorClass, luaState, true);
+  LuaHelper::Push<true>(mArmorClass, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -158,11 +158,11 @@ int Armor::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("id", key)) {
     auto instance = Armor::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Armor.id with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mId, luaState, false);
+    LuaHelper::Push<false>(instance->mId, luaState);
   } else if (0 == strcmp("armorClass", key)) {
     auto instance = Armor::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Armor.armorClass with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mArmorClass, luaState, false);
+    LuaHelper::Push<false>(instance->mArmorClass, luaState);
   } else if (0 == strcmp("Initialize", key)) {
     lua_pushcfunction(luaState, Armor::InitializeCallerFromLua);
   } else {

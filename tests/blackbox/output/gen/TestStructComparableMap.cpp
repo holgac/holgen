@@ -69,7 +69,7 @@ void TestStructComparableMap::PushToLua(lua_State *luaState) const {
 void TestStructComparableMap::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "data");
-  LuaHelper::Push(mData, luaState, true);
+  LuaHelper::Push<true>(mData, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -141,7 +141,7 @@ int TestStructComparableMap::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("data", key)) {
     auto instance = TestStructComparableMap::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructComparableMap.data with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mData, luaState, false);
+    LuaHelper::Push<false>(instance->mData, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructComparableMap.{}", key);
     return 0;

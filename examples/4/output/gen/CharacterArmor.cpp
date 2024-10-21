@@ -97,10 +97,10 @@ void CharacterArmor::PushToLua(lua_State *luaState) const {
 void CharacterArmor::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "dirtAmount");
-  LuaHelper::Push(mDirtAmount, luaState, true);
+  LuaHelper::Push<true>(mDirtAmount, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "armorId");
-  LuaHelper::Push(mArmorId, luaState, true);
+  LuaHelper::Push<true>(mArmorId, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -178,14 +178,14 @@ int CharacterArmor::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("dirtAmount", key)) {
     auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for CharacterArmor.dirtAmount with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mDirtAmount, luaState, false);
+    LuaHelper::Push<false>(instance->mDirtAmount, luaState);
   } else if (0 == strcmp("armorId", key)) {
     auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for CharacterArmor.armor with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mArmorId, luaState, false);
+    LuaHelper::Push<false>(instance->mArmorId, luaState);
   } else if (0 == strcmp("armor", key)) {
     auto instance = CharacterArmor::ReadProxyFromLua(luaState, -2);
-    LuaHelper::Push(Armor::Get(instance->mArmorId), luaState, false);
+    LuaHelper::Push<false>(Armor::Get(instance->mArmorId), luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: CharacterArmor.{}", key);
     return 0;

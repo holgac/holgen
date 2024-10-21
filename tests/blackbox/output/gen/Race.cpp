@@ -131,16 +131,16 @@ void Race::PushToLua(lua_State *luaState) const {
 void Race::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState, true);
+  LuaHelper::Push<true>(mId, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState, true);
+  LuaHelper::Push<true>(mName, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "hairColors");
-  LuaHelper::Push(mHairColors, luaState, true);
+  LuaHelper::Push<true>(mHairColors, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "names");
-  LuaHelper::Push(mNames, luaState, true);
+  LuaHelper::Push<true>(mNames, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -230,19 +230,19 @@ int Race::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("id", key)) {
     auto instance = Race::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Race.id with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mId, luaState, false);
+    LuaHelper::Push<false>(instance->mId, luaState);
   } else if (0 == strcmp("name", key)) {
     auto instance = Race::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Race.name with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mName, luaState, false);
+    LuaHelper::Push<false>(instance->mName, luaState);
   } else if (0 == strcmp("hairColors", key)) {
     auto instance = Race::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Race.hairColors with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mHairColors, luaState, false);
+    LuaHelper::Push<false>(instance->mHairColors, luaState);
   } else if (0 == strcmp("names", key)) {
     auto instance = Race::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Race.names with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mNames, luaState, false);
+    LuaHelper::Push<false>(instance->mNames, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: Race.{}", key);
     return 0;

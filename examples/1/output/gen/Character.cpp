@@ -131,13 +131,13 @@ void Character::PushToLua(lua_State *luaState) const {
 void Character::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState, true);
+  LuaHelper::Push<true>(mId, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState, true);
+  LuaHelper::Push<true>(mName, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "race");
-  LuaHelper::Push(mRace, luaState, true);
+  LuaHelper::Push<true>(mRace, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "armor");
   mArmor.PushMirrorToLua(luaState);
@@ -235,19 +235,19 @@ int Character::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("id", key)) {
     auto instance = Character::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.id with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mId, luaState, false);
+    LuaHelper::Push<false>(instance->mId, luaState);
   } else if (0 == strcmp("name", key)) {
     auto instance = Character::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.name with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mName, luaState, false);
+    LuaHelper::Push<false>(instance->mName, luaState);
   } else if (0 == strcmp("race", key)) {
     auto instance = Character::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.race with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mRace, luaState, false);
+    LuaHelper::Push<false>(instance->mRace, luaState);
   } else if (0 == strcmp("armor", key)) {
     auto instance = Character::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Character.armor with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mArmor, luaState, false);
+    LuaHelper::Push<false>(instance->mArmor, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: Character.{}", key);
     return 0;

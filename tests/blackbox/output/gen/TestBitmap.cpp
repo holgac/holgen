@@ -229,11 +229,11 @@ bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &conver
 }
 
 void TestBitmap::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push<true>(mValue, luaState);
 }
 
 void TestBitmap::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push<true>(mValue, luaState);
 }
 
 TestBitmap TestBitmap::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

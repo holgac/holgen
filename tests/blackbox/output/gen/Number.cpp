@@ -65,7 +65,7 @@ void Number::PushToLua(lua_State *luaState) const {
 void Number::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "value");
-  LuaHelper::Push(mValue, luaState, true);
+  LuaHelper::Push<true>(mValue, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -137,7 +137,7 @@ int Number::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("value", key)) {
     auto instance = Number::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Number.value with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mValue, luaState, false);
+    LuaHelper::Push<false>(instance->mValue, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: Number.{}", key);
     return 0;

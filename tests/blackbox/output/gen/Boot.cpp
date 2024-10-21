@@ -120,13 +120,13 @@ void Boot::PushToLua(lua_State *luaState) const {
 void Boot::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "id");
-  LuaHelper::Push(mId, luaState, true);
+  LuaHelper::Push<true>(mId, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState, true);
+  LuaHelper::Push<true>(mName, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "color");
-  LuaHelper::Push(mColor, luaState, true);
+  LuaHelper::Push<true>(mColor, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -211,15 +211,15 @@ int Boot::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("id", key)) {
     auto instance = Boot::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.id with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mId, luaState, false);
+    LuaHelper::Push<false>(instance->mId, luaState);
   } else if (0 == strcmp("name", key)) {
     auto instance = Boot::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.name with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mName, luaState, false);
+    LuaHelper::Push<false>(instance->mName, luaState);
   } else if (0 == strcmp("color", key)) {
     auto instance = Boot::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Boot.color with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mColor, luaState, false);
+    LuaHelper::Push<false>(instance->mColor, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: Boot.{}", key);
     return 0;

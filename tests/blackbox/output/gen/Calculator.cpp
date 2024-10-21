@@ -35,8 +35,8 @@ int64_t Calculator::Add(lua_State *luaState, const int64_t val) const {
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(val, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(val, luaState);
   lua_call(luaState, 2, 1);
   int64_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -62,8 +62,8 @@ Number *Calculator::Subtract(lua_State *luaState, Number &val) const {
     lua_pop(luaState, 1);
     return nullptr;
   }
-  LuaHelper::Push(*this, luaState, false);
-  LuaHelper::Push(val, luaState, false);
+  LuaHelper::Push<false>(*this, luaState);
+  LuaHelper::Push<false>(val, luaState);
   lua_call(luaState, 2, 1);
   auto result = Number::ReadProxyFromLua(luaState, -1);
   lua_pop(luaState, 2);
@@ -214,7 +214,7 @@ int Calculator::AddCallerFromLua(lua_State *luaState) {
   int64_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->Add(luaState, arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -223,7 +223,7 @@ int Calculator::SubtractCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Calculator.Subtract method with an invalid lua proxy object!");
   auto arg0 = Number::ReadProxyFromLua(luaState, -1);
   auto result = instance->Subtract(luaState, *arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -235,7 +235,7 @@ int Calculator::SubtractThenMultiplyCallerFromLua(lua_State *luaState) {
   int64_t arg1;
   LuaHelper::Read(arg1, luaState, -1);
   auto result = instance->SubtractThenMultiply(arg0, arg1);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -244,7 +244,7 @@ int Calculator::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("curVal", key)) {
     auto instance = Calculator::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Calculator.curVal with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mCurVal, luaState, false);
+    LuaHelper::Push<false>(instance->mCurVal, luaState);
   } else if (0 == strcmp("Add", key)) {
     lua_pushcfunction(luaState, Calculator::AddCallerFromLua);
   } else if (0 == strcmp("Subtract", key)) {

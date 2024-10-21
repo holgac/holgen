@@ -69,7 +69,7 @@ void TestJsonStructWithTags::PushToLua(lua_State *luaState) const {
 void TestJsonStructWithTags::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "tags");
-  LuaHelper::Push(mTags, luaState, true);
+  LuaHelper::Push<true>(mTags, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -141,7 +141,7 @@ int TestJsonStructWithTags::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("tags", key)) {
     auto instance = TestJsonStructWithTags::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonStructWithTags.tags with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mTags, luaState, false);
+    LuaHelper::Push<false>(instance->mTags, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonStructWithTags.{}", key);
     return 0;

@@ -87,10 +87,10 @@ void TestContainerInnerStructNoId::PushToLua(lua_State *luaState) const {
 void TestContainerInnerStructNoId::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "field");
-  LuaHelper::Push(mField, luaState, true);
+  LuaHelper::Push<true>(mField, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState, true);
+  LuaHelper::Push<true>(mName, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -168,11 +168,11 @@ int TestContainerInnerStructNoId::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("field", key)) {
     auto instance = TestContainerInnerStructNoId::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerInnerStructNoId.field with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mField, luaState, false);
+    LuaHelper::Push<false>(instance->mField, luaState);
   } else if (0 == strcmp("name", key)) {
     auto instance = TestContainerInnerStructNoId::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerInnerStructNoId.name with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mName, luaState, false);
+    LuaHelper::Push<false>(instance->mName, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestContainerInnerStructNoId.{}", key);
     return 0;

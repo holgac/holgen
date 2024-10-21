@@ -233,7 +233,7 @@ void TestVariantStructExplicitType::PushToLua(lua_State *luaState) const {
 void TestVariantStructExplicitType::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "type");
-  LuaHelper::Push(mType, luaState, true);
+  LuaHelper::Push<true>(mType, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -305,16 +305,16 @@ int TestVariantStructExplicitType::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("type", key)) {
     auto instance = TestVariantStructExplicitType::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructExplicitType.type with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mType, luaState, false);
+    LuaHelper::Push<false>(instance->mType, luaState);
   } else if (0 == strcmp("being1", key)) {
     auto instance = TestVariantStructExplicitType::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructExplicitType.being1 with an invalid lua proxy object!");
     switch (instance->mType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructCat(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing1AsTestVariantStructCat(), luaState);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing1AsTestVariantStructHuman(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing1AsTestVariantStructHuman(), luaState);
       break;
     default:
       lua_pushnil(luaState);
@@ -324,10 +324,10 @@ int TestVariantStructExplicitType::IndexMetaMethod(lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructExplicitType.being2 with an invalid lua proxy object!");
     switch (instance->mType.GetValue()) {
     case TestVariantStructType::Cat:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructCat(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing2AsTestVariantStructCat(), luaState);
       break;
     case TestVariantStructType::Human:
-      LuaHelper::Push(instance->GetBeing2AsTestVariantStructHuman(), luaState, false);
+      LuaHelper::Push<false>(instance->GetBeing2AsTestVariantStructHuman(), luaState);
       break;
     default:
       lua_pushnil(luaState);

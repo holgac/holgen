@@ -85,11 +85,11 @@ bool WeaponType::ParseJson(const rapidjson::Value &json, const Converter &conver
 }
 
 void WeaponType::PushToLua(lua_State *luaState) const {
-  LuaHelper::Push(WeaponType::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(WeaponType::UnderlyingType(mValue), luaState);
 }
 
 void WeaponType::PushMirrorToLua(lua_State *luaState) const {
-  LuaHelper::Push(WeaponType::UnderlyingType(mValue), luaState, true);
+  LuaHelper::Push<true>(WeaponType::UnderlyingType(mValue), luaState);
 }
 
 WeaponType WeaponType::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {

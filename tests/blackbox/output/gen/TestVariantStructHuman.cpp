@@ -91,10 +91,10 @@ void TestVariantStructHuman::PushToLua(lua_State *luaState) const {
 void TestVariantStructHuman::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "name");
-  LuaHelper::Push(mName, luaState, true);
+  LuaHelper::Push<true>(mName, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "nationality");
-  LuaHelper::Push(mNationality, luaState, true);
+  LuaHelper::Push<true>(mNationality, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -172,11 +172,11 @@ int TestVariantStructHuman::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("name", key)) {
     auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructHuman.name with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mName, luaState, false);
+    LuaHelper::Push<false>(instance->mName, luaState);
   } else if (0 == strcmp("nationality", key)) {
     auto instance = TestVariantStructHuman::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestVariantStructHuman.nationality with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mNationality, luaState, false);
+    LuaHelper::Push<false>(instance->mNationality, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructHuman.{}", key);
     return 0;

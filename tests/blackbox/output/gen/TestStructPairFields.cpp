@@ -91,10 +91,10 @@ void TestStructPairFields::PushToLua(lua_State *luaState) const {
 void TestStructPairFields::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "intStringPair");
-  LuaHelper::Push(mIntStringPair, luaState, true);
+  LuaHelper::Push<true>(mIntStringPair, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "pairVector");
-  LuaHelper::Push(mPairVector, luaState, true);
+  LuaHelper::Push<true>(mPairVector, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -172,11 +172,11 @@ int TestStructPairFields::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("intStringPair", key)) {
     auto instance = TestStructPairFields::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructPairFields.intStringPair with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mIntStringPair, luaState, false);
+    LuaHelper::Push<false>(instance->mIntStringPair, luaState);
   } else if (0 == strcmp("pairVector", key)) {
     auto instance = TestStructPairFields::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructPairFields.pairVector with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mPairVector, luaState, false);
+    LuaHelper::Push<false>(instance->mPairVector, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructPairFields.{}", key);
     return 0;

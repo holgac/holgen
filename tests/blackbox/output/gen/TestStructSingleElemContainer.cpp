@@ -150,10 +150,10 @@ void TestStructSingleElemContainer::PushToLua(lua_State *luaState) const {
 void TestStructSingleElemContainer::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "singleElemStructs");
-  LuaHelper::Push(mSingleElemStructs, luaState, true);
+  LuaHelper::Push<true>(mSingleElemStructs, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "singleElemStructsWithId");
-  LuaHelper::Push(mSingleElemStructsWithId, luaState, true);
+  LuaHelper::Push<true>(mSingleElemStructsWithId, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -239,7 +239,7 @@ int TestStructSingleElemContainer::AddSingleElemStructCallerFromLua(lua_State *l
     arg0 = &arg0Mirror;
   }
   auto result = instance->AddSingleElemStruct(*arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -249,7 +249,7 @@ int TestStructSingleElemContainer::GetSingleElemStructCallerFromLua(lua_State *l
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetSingleElemStruct(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -266,7 +266,7 @@ int TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua(lua_Sta
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructCount method with an invalid lua proxy object!");
   auto result = instance->GetSingleElemStructCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -275,7 +275,7 @@ int TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua(lua_St
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.AddSingleElemStructWithId method with an invalid lua proxy object!");
   auto arg0 = TestStructSingleElemWithId::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddSingleElemStructWithId(*arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -285,7 +285,7 @@ int TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua(lua_St
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetSingleElemStructWithId(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -293,7 +293,7 @@ int TestStructSingleElemContainer::GetSingleElemStructWithIdCountCallerFromLua(l
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructWithIdCount method with an invalid lua proxy object!");
   auto result = instance->GetSingleElemStructWithIdCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -302,11 +302,11 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("singleElemStructs", key)) {
     auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElemContainer.singleElemStructs with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mSingleElemStructs, luaState, false);
+    LuaHelper::Push<false>(instance->mSingleElemStructs, luaState);
   } else if (0 == strcmp("singleElemStructsWithId", key)) {
     auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructSingleElemContainer.singleElemStructsWithId with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mSingleElemStructsWithId, luaState, false);
+    LuaHelper::Push<false>(instance->mSingleElemStructsWithId, luaState);
   } else if (0 == strcmp("AddSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::AddSingleElemStructCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStruct", key)) {

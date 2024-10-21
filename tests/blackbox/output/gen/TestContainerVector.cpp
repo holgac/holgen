@@ -305,16 +305,16 @@ void TestContainerVector::PushToLua(lua_State *luaState) const {
 void TestContainerVector::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "innerStructsWithId");
-  LuaHelper::Push(mInnerStructsWithId, luaState, true);
+  LuaHelper::Push<true>(mInnerStructsWithId, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "innerStructsNoId");
-  LuaHelper::Push(mInnerStructsNoId, luaState, true);
+  LuaHelper::Push<true>(mInnerStructsNoId, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "stringContainer");
-  LuaHelper::Push(mStringContainer, luaState, true);
+  LuaHelper::Push<true>(mStringContainer, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "unsignedContainer");
-  LuaHelper::Push(mUnsignedContainer, luaState, true);
+  LuaHelper::Push<true>(mUnsignedContainer, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -405,7 +405,7 @@ int TestContainerVector::GetInnerStructWithIdFromNameCallerFromLua(lua_State *lu
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetInnerStructWithIdFromName(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -414,7 +414,7 @@ int TestContainerVector::AddInnerStructWithIdCallerFromLua(lua_State *luaState) 
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerVector.AddInnerStructWithId method with an invalid lua proxy object!");
   auto arg0 = TestContainerInnerStructWithId::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddInnerStructWithId(*arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -424,7 +424,7 @@ int TestContainerVector::GetInnerStructWithIdCallerFromLua(lua_State *luaState) 
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetInnerStructWithId(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -432,7 +432,7 @@ int TestContainerVector::GetInnerStructWithIdCountCallerFromLua(lua_State *luaSt
   auto instance = TestContainerVector::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerVector.GetInnerStructWithIdCount method with an invalid lua proxy object!");
   auto result = instance->GetInnerStructWithIdCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -442,7 +442,7 @@ int TestContainerVector::GetInnerStructNoIdFromNameCallerFromLua(lua_State *luaS
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetInnerStructNoIdFromName(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -459,7 +459,7 @@ int TestContainerVector::AddInnerStructNoIdCallerFromLua(lua_State *luaState) {
     arg0 = &arg0Mirror;
   }
   auto result = instance->AddInnerStructNoId(*arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -469,7 +469,7 @@ int TestContainerVector::GetInnerStructNoIdCallerFromLua(lua_State *luaState) {
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetInnerStructNoId(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -486,7 +486,7 @@ int TestContainerVector::GetInnerStructNoIdCountCallerFromLua(lua_State *luaStat
   auto instance = TestContainerVector::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerVector.GetInnerStructNoIdCount method with an invalid lua proxy object!");
   auto result = instance->GetInnerStructNoIdCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -496,7 +496,7 @@ int TestContainerVector::AddStringElemCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->AddStringElem(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -506,7 +506,7 @@ int TestContainerVector::GetStringElemCallerFromLua(lua_State *luaState) {
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetStringElem(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -523,7 +523,7 @@ int TestContainerVector::GetStringElemCountCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerVector::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerVector.GetStringElemCount method with an invalid lua proxy object!");
   auto result = instance->GetStringElemCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -533,7 +533,7 @@ int TestContainerVector::AddUnsignedElemCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->AddUnsignedElem(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -543,7 +543,7 @@ int TestContainerVector::GetUnsignedElemCallerFromLua(lua_State *luaState) {
   size_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetUnsignedElem(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -560,7 +560,7 @@ int TestContainerVector::GetUnsignedElemCountCallerFromLua(lua_State *luaState) 
   auto instance = TestContainerVector::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerVector.GetUnsignedElemCount method with an invalid lua proxy object!");
   auto result = instance->GetUnsignedElemCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -569,19 +569,19 @@ int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("innerStructsWithId", key)) {
     auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.innerStructsWithId with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mInnerStructsWithId, luaState, false);
+    LuaHelper::Push<false>(instance->mInnerStructsWithId, luaState);
   } else if (0 == strcmp("innerStructsNoId", key)) {
     auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.innerStructsNoId with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mInnerStructsNoId, luaState, false);
+    LuaHelper::Push<false>(instance->mInnerStructsNoId, luaState);
   } else if (0 == strcmp("stringContainer", key)) {
     auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.stringContainer with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mStringContainer, luaState, false);
+    LuaHelper::Push<false>(instance->mStringContainer, luaState);
   } else if (0 == strcmp("unsignedContainer", key)) {
     auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerVector.unsignedContainer with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mUnsignedContainer, luaState, false);
+    LuaHelper::Push<false>(instance->mUnsignedContainer, luaState);
   } else if (0 == strcmp("GetInnerStructWithIdFromName", key)) {
     lua_pushcfunction(luaState, TestContainerVector::GetInnerStructWithIdFromNameCallerFromLua);
   } else if (0 == strcmp("AddInnerStructWithId", key)) {

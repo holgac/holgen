@@ -37,7 +37,7 @@ void TestLuaFuncTableStatic::SetField(lua_State *luaState, const TestLuaFuncTabl
     lua_pop(luaState, 1);
     return void();
   }
-  LuaHelper::Push(container, luaState, false);
+  LuaHelper::Push<false>(container, luaState);
   lua_call(luaState, 1, 0);
   lua_pop(luaState, 1);
 }
@@ -57,7 +57,7 @@ int32_t TestLuaFuncTableStatic::GetField(lua_State *luaState, const TestLuaFuncT
     lua_pop(luaState, 1);
     return {};
   }
-  LuaHelper::Push(container, luaState, false);
+  LuaHelper::Push<false>(container, luaState);
   lua_call(luaState, 1, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
@@ -155,7 +155,7 @@ int TestLuaFuncTableStatic::GetFieldCallerFromLua(lua_State *luaState) {
     arg0 = &arg0Mirror;
   }
   auto result = instance->GetField(luaState, *arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -167,7 +167,7 @@ int TestLuaFuncTableStatic::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestLuaFuncTableStatic::GetFieldCallerFromLua);
   } else if (0 == strcmp("TABLE", key)) {
     auto instance = TestLuaFuncTableStatic::ReadProxyFromLua(luaState, -2);
-    LuaHelper::Push(instance->mTable, luaState, false);
+    LuaHelper::Push<false>(instance->mTable, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestLuaFuncTableStatic.{}", key);
     return 0;

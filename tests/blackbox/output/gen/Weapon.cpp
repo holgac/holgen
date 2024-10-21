@@ -127,16 +127,16 @@ void Weapon::PushToLua(lua_State *luaState) const {
 void Weapon::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "damageMin");
-  LuaHelper::Push(mDamageMin, luaState, true);
+  LuaHelper::Push<true>(mDamageMin, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "damageMax");
-  LuaHelper::Push(mDamageMax, luaState, true);
+  LuaHelper::Push<true>(mDamageMax, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "damageMultipliers");
-  LuaHelper::Push(mDamageMultipliers, luaState, true);
+  LuaHelper::Push<true>(mDamageMultipliers, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "modifiers");
-  LuaHelper::Push(mModifiers, luaState, true);
+  LuaHelper::Push<true>(mModifiers, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -225,7 +225,7 @@ int Weapon::GetAverageDamageCallerFromLua(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Weapon.GetAverageDamage method with an invalid lua proxy object!");
   auto result = instance->GetAverageDamage();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -234,19 +234,19 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("damageMin", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.damageMin with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mDamageMin, luaState, false);
+    LuaHelper::Push<false>(instance->mDamageMin, luaState);
   } else if (0 == strcmp("damageMax", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.damageMax with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mDamageMax, luaState, false);
+    LuaHelper::Push<false>(instance->mDamageMax, luaState);
   } else if (0 == strcmp("damageMultipliers", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.damageMultipliers with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mDamageMultipliers, luaState, false);
+    LuaHelper::Push<false>(instance->mDamageMultipliers, luaState);
   } else if (0 == strcmp("modifiers", key)) {
     auto instance = Weapon::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for Weapon.modifiers with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mModifiers, luaState, false);
+    LuaHelper::Push<false>(instance->mModifiers, luaState);
   } else if (0 == strcmp("GetAverageDamage", key)) {
     lua_pushcfunction(luaState, Weapon::GetAverageDamageCallerFromLua);
   } else {

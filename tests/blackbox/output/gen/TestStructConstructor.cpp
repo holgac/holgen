@@ -110,13 +110,13 @@ void TestStructConstructor::PushToLua(lua_State *luaState) const {
 void TestStructConstructor::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "x");
-  LuaHelper::Push(mX, luaState, true);
+  LuaHelper::Push<true>(mX, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "y");
-  LuaHelper::Push(mY, luaState, true);
+  LuaHelper::Push<true>(mY, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "z");
-  LuaHelper::Push(mZ, luaState, true);
+  LuaHelper::Push<true>(mZ, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -205,7 +205,7 @@ int TestStructConstructor::Construct1CallerFromLua(lua_State *luaState) {
   float arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = TestStructConstructor::Construct1(arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -217,7 +217,7 @@ int TestStructConstructor::Construct3CallerFromLua(lua_State *luaState) {
   float arg2;
   LuaHelper::Read(arg2, luaState, -1);
   auto result = TestStructConstructor::Construct3(arg0, arg1, arg2);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -226,15 +226,15 @@ int TestStructConstructor::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("x", key)) {
     auto instance = TestStructConstructor::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructConstructor.x with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mX, luaState, false);
+    LuaHelper::Push<false>(instance->mX, luaState);
   } else if (0 == strcmp("y", key)) {
     auto instance = TestStructConstructor::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructConstructor.y with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mY, luaState, false);
+    LuaHelper::Push<false>(instance->mY, luaState);
   } else if (0 == strcmp("z", key)) {
     auto instance = TestStructConstructor::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructConstructor.z with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mZ, luaState, false);
+    LuaHelper::Push<false>(instance->mZ, luaState);
   } else if (0 == strcmp("Construct1", key)) {
     lua_pushcfunction(luaState, TestStructConstructor::Construct1CallerFromLua);
   } else if (0 == strcmp("Construct3", key)) {

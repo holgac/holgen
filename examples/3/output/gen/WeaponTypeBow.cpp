@@ -87,10 +87,10 @@ void WeaponTypeBow::PushToLua(lua_State *luaState) const {
 void WeaponTypeBow::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "range");
-  LuaHelper::Push(mRange, luaState, true);
+  LuaHelper::Push<true>(mRange, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "material");
-  LuaHelper::Push(mMaterial, luaState, true);
+  LuaHelper::Push<true>(mMaterial, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -168,11 +168,11 @@ int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("range", key)) {
     auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeBow.range with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mRange, luaState, false);
+    LuaHelper::Push<false>(instance->mRange, luaState);
   } else if (0 == strcmp("material", key)) {
     auto instance = WeaponTypeBow::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for WeaponTypeBow.material with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mMaterial, luaState, false);
+    LuaHelper::Push<false>(instance->mMaterial, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponTypeBow.{}", key);
     return 0;

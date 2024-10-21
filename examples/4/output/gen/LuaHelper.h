@@ -19,111 +19,152 @@
 namespace ex4_schemas {
 class LuaHelper {
 public:
-  template <typename T>
-  static void Push(const T &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename T>
+  static void Push(const T &data, lua_State *luaState) {
     if constexpr(std::is_pointer_v<T>) {
       if (data) {
-        LuaHelper::Push(*data, luaState, pushMirror);
+        LuaHelper::Push<PushMirror>(*data, luaState);
       } else {
         lua_pushnil(luaState);
       }
-    } else if (pushMirror) {
-      data.PushMirrorToLua(luaState);
     } else {
-      data.PushToLua(luaState);
+      if constexpr (PushMirror) {
+        data.PushMirrorToLua(luaState);
+      } else {
+        data.PushToLua(luaState);
+      }
     }
   }
-  static void Push(std::nullptr_t , lua_State *luaState, bool pushMirror);
-  static void Push(bool data, lua_State *luaState, bool pushMirror);
-  static void Push(double data, lua_State *luaState, bool pushMirror);
-  static void Push(float data, lua_State *luaState, bool pushMirror);
-  static void Push(int16_t data, lua_State *luaState, bool pushMirror);
-  static void Push(int32_t data, lua_State *luaState, bool pushMirror);
-  static void Push(int64_t data, lua_State *luaState, bool pushMirror);
-  static void Push(int8_t data, lua_State *luaState, bool pushMirror);
-  static void Push(const std::string &data, lua_State *luaState, bool pushMirror);
-  static void Push(uint16_t data, lua_State *luaState, bool pushMirror);
-  static void Push(uint32_t data, lua_State *luaState, bool pushMirror);
-  static void Push(uint64_t data, lua_State *luaState, bool pushMirror);
-  static void Push(uint8_t data, lua_State *luaState, bool pushMirror);
-  template <typename T, size_t C>
-  static void Push(const std::array<T, C> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror>
+  static void Push(std::nullptr_t , lua_State *luaState) {
+    lua_pushnil(luaState);
+  }
+  template <bool PushMirror>
+  static void Push(bool data, lua_State *luaState) {
+    lua_pushboolean(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(double data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(float data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(int16_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(int32_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(int64_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(int8_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(const std::string &data, lua_State *luaState) {
+    lua_pushstring(luaState, data.c_str());
+  }
+  template <bool PushMirror>
+  static void Push(uint16_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(uint32_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(uint64_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror>
+  static void Push(uint8_t data, lua_State *luaState) {
+    lua_pushnumber(luaState, data);
+  }
+  template <bool PushMirror, typename T, size_t C>
+  static void Push(const std::array<T, C> &data, lua_State *luaState) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
-      Push(elem, luaState, pushMirror);
+      Push<PushMirror>(elem, luaState);
       lua_rawseti(luaState, -2, index++);
     }
   }
-  template <typename T>
-  static void Push(const std::deque<T> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename T>
+  static void Push(const std::deque<T> &data, lua_State *luaState) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
-      Push(elem, luaState, pushMirror);
+      Push<PushMirror>(elem, luaState);
       lua_rawseti(luaState, -2, index++);
     }
   }
-  template <typename T>
-  static void Push(const std::vector<T> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename T>
+  static void Push(const std::vector<T> &data, lua_State *luaState) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
-      Push(elem, luaState, pushMirror);
+      Push<PushMirror>(elem, luaState);
       lua_rawseti(luaState, -2, index++);
     }
   }
-  template <typename T>
-  static void Push(const std::list<T> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename T>
+  static void Push(const std::list<T> &data, lua_State *luaState) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
-      Push(elem, luaState, pushMirror);
+      Push<PushMirror>(elem, luaState);
       lua_rawseti(luaState, -2, index++);
     }
   }
-  template <typename T>
-  static void Push(const std::set<T> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename T>
+  static void Push(const std::set<T> &data, lua_State *luaState) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
-      Push(elem, luaState, pushMirror);
+      Push<PushMirror>(elem, luaState);
       lua_rawseti(luaState, -2, index++);
     }
   }
-  template <typename T>
-  static void Push(const std::unordered_set<T> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename T>
+  static void Push(const std::unordered_set<T> &data, lua_State *luaState) {
     lua_newtable(luaState);
     int index = 0;
     for (auto& elem: data) {
-      Push(elem, luaState, pushMirror);
+      Push<PushMirror>(elem, luaState);
       lua_rawseti(luaState, -2, index++);
     }
   }
-  template <typename K, typename V>
-  static void Push(const std::map<K, V> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename K, typename V>
+  static void Push(const std::map<K, V> &data, lua_State *luaState) {
     lua_newtable(luaState);
     for (auto& [key, value]: data) {
-      Push(key, luaState, pushMirror);
-      Push(value, luaState, pushMirror);
+      Push<true>(key, luaState);
+      Push<PushMirror>(value, luaState);
       lua_settable(luaState, -3);
     }
   }
-  template <typename K, typename V>
-  static void Push(const std::unordered_map<K, V> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename K, typename V>
+  static void Push(const std::unordered_map<K, V> &data, lua_State *luaState) {
     lua_newtable(luaState);
     for (auto& [key, value]: data) {
-      Push(key, luaState, pushMirror);
-      Push(value, luaState, pushMirror);
+      Push<true>(key, luaState);
+      Push<PushMirror>(value, luaState);
       lua_settable(luaState, -3);
     }
   }
-  template <typename T0, typename T1>
-  static void Push(const std::pair<T0, T1> &data, lua_State *luaState, bool pushMirror) {
+  template <bool PushMirror, typename T0, typename T1>
+  static void Push(const std::pair<T0, T1> &data, lua_State *luaState) {
     lua_newtable(luaState);
-    Push(std::get<0>(data), luaState, pushMirror);
+    Push<PushMirror>(std::get<0>(data), luaState);
     lua_rawseti(luaState, -2, 0);
-    Push(std::get<1>(data), luaState, pushMirror);
+    Push<PushMirror>(std::get<1>(data), luaState);
     lua_rawseti(luaState, -2, 1);
   }
   template <typename T>

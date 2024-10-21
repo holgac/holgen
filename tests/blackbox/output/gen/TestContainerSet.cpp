@@ -133,10 +133,10 @@ void TestContainerSet::PushToLua(lua_State *luaState) const {
 void TestContainerSet::PushMirrorToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "stringContainer");
-  LuaHelper::Push(mStringContainer, luaState, true);
+  LuaHelper::Push<true>(mStringContainer, luaState);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "unsignedContainer");
-  LuaHelper::Push(mUnsignedContainer, luaState, true);
+  LuaHelper::Push<true>(mUnsignedContainer, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -215,7 +215,7 @@ int TestContainerSet::AddStringElemCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->AddStringElem(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -225,7 +225,7 @@ int TestContainerSet::HasStringElemCallerFromLua(lua_State *luaState) {
   std::string arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->HasStringElem(arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -242,7 +242,7 @@ int TestContainerSet::GetStringElemCountCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerSet::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerSet.GetStringElemCount method with an invalid lua proxy object!");
   auto result = instance->GetStringElemCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -252,7 +252,7 @@ int TestContainerSet::AddUnsignedElemCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->AddUnsignedElem(arg0);
-  LuaHelper::Push(result, luaState, false);
+  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -262,7 +262,7 @@ int TestContainerSet::HasUnsignedElemCallerFromLua(lua_State *luaState) {
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->HasUnsignedElem(arg0);
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -279,7 +279,7 @@ int TestContainerSet::GetUnsignedElemCountCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerSet::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerSet.GetUnsignedElemCount method with an invalid lua proxy object!");
   auto result = instance->GetUnsignedElemCount();
-  LuaHelper::Push(result, luaState, true);
+  LuaHelper::Push<true>(result, luaState);
   return 1;
 }
 
@@ -288,11 +288,11 @@ int TestContainerSet::IndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("stringContainer", key)) {
     auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerSet.stringContainer with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mStringContainer, luaState, false);
+    LuaHelper::Push<false>(instance->mStringContainer, luaState);
   } else if (0 == strcmp("unsignedContainer", key)) {
     auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestContainerSet.unsignedContainer with an invalid lua proxy object!");
-    LuaHelper::Push(instance->mUnsignedContainer, luaState, false);
+    LuaHelper::Push<false>(instance->mUnsignedContainer, luaState);
   } else if (0 == strcmp("AddStringElem", key)) {
     lua_pushcfunction(luaState, TestContainerSet::AddStringElemCallerFromLua);
   } else if (0 == strcmp("HasStringElem", key)) {
