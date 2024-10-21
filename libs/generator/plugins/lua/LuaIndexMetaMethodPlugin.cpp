@@ -102,7 +102,7 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
     callPrefix = std::format("instance->", cls.mName);
   }
   std::string funcArgs =
-      GenerateReadExposedMethodArgsAndGetArgsString(method, methodCaller.mBody, isLuaFunc);
+      GenerateReadExposedMethodArgsAndGetArgsString(cls, method, methodCaller.mBody, isLuaFunc);
 
   if (isLuaFunc) {
     if (funcArgs.empty()) {
@@ -181,7 +181,7 @@ void LuaIndexMetaMethodPlugin::GenerateIndexForField(Class &cls, ClassField &fie
 }
 
 std::string LuaIndexMetaMethodPlugin::GenerateReadExposedMethodArgsAndGetArgsString(
-    const ClassMethod &exposedMethod, CodeBlock &switchBlock, bool isLuaFunc) {
+    const Class &cls, const ClassMethod &exposedMethod, CodeBlock &switchBlock, bool isLuaFunc) {
   std::stringstream funcArgs;
   size_t i = 0;
   for (auto &arg: exposedMethod.mArguments) {
@@ -193,7 +193,7 @@ std::string LuaIndexMetaMethodPlugin::GenerateReadExposedMethodArgsAndGetArgsStr
       funcArgs << ", ";
     ptrdiff_t stackIdx = ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()) + isLuaFunc;
     if (auto argClass = mProject.GetClass(arg.mType.mName)) {
-      bool canBeMirror = true;
+      bool canBeMirror = !cls.HasVirtualMethods();
       bool canBeProxy = true;
       bool canBeNull = arg.mType.mType == PassByType::Pointer;
       if (arg.mType.mType != PassByType::Value && arg.mType.mConstness == Constness::NotConst) {

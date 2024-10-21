@@ -305,7 +305,9 @@ void LuaPlugin::ProcessStruct(Class &cls) {
   GeneratePushMirrorStructToLua(cls);
   GeneratePushGlobalToLua(cls);
   GenerateReadProxyObjectFromLua(cls);
-  GenerateReadMirrorObjectFromLua(cls);
+  if (!cls.IsAbstract()) {
+    GenerateReadMirrorObjectFromLua(cls);
+  }
   GenerateNewIndexMetaMethod(cls);
   GenerateCreateLuaMetatable(cls);
 }

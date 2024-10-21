@@ -16,7 +16,7 @@ private:
   void GenerateIndexMetaMethodForExposedMethods(Class &cls, StringSwitcher &switcher);
   void GenerateIndexMetaMethodForFuncTable(Class &cls, StringSwitcher &switcher);
   void GenerateIndexForField(Class &cls, ClassField &field, CodeBlock &switchBlock);
-  std::string GenerateReadExposedMethodArgsAndGetArgsString(const ClassMethod &exposedMethod,
+  std::string GenerateReadExposedMethodArgsAndGetArgsString(const Class& cls, const ClassMethod &exposedMethod,
                                                             CodeBlock &switchBlock, bool isLuaFunc);
   void GenerateIndexForVariantField(Class &cls, ClassField &field, CodeBlock &switchBlock);
   void GenerateIndexForRegistryData(ClassField &field, CodeBlock &switchBlock);

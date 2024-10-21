@@ -279,7 +279,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   if (returnsVal) {
     std::string returnValue = "result";
     if (auto returnClass = mProject.GetClass(method.mReturnType.mName)) {
-      bool canBeMirror = true;
+      bool canBeMirror = !cls.HasVirtualMethods();
       bool canBeProxy = true;
       if (method.mReturnType.mType != PassByType::Value) {
         canBeMirror = false;

@@ -37,6 +37,12 @@ enum class DefaultDelete {
   Neither,
 };
 
+enum class Virtuality {
+  NotVirtual,
+  Virtual,
+  PureVirtual,
+};
+
 struct ClassField {
   ClassField(std::string name, Type type, Visibility visibility = Visibility::Private,
              Staticness staticness = Staticness::NotStatic,
@@ -109,6 +115,7 @@ struct ClassMethod : ClassMethodBase {
   Constness mConstness;
   Staticness mStaticness;
   Constexprness mConstexprness = Constexprness::NotConstexpr;
+  Virtuality mVirtuality = Virtuality::NotVirtual;
   bool mExposeToLua = false;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
 };
@@ -211,6 +218,8 @@ struct Class {
   using VariantData = std::map<std::string, std::vector<ClassField *>>;
   // returns a {variant type field name -> [variant field name]} dict
   [[nodiscard]] VariantData GetVariantData();
+  [[nodiscard]] bool HasVirtualMethods() const;
+  [[nodiscard]] bool IsAbstract() const;
 };
 
 struct TranslatedProject {

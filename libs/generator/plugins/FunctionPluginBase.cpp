@@ -135,6 +135,12 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
     ProcessToStringFunction(cls, method);
   }
 
+  if (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Virtual)) {
+    method.mVirtuality = Virtuality::Virtual;
+  } else if (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_PureVirtual)) {
+    method.mVirtuality = Virtuality::PureVirtual;
+  }
+
   return method;
 }
 

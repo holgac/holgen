@@ -101,3 +101,10 @@ struct TestStructConstructor {
     @func(constructor)
     func Construct3(float x, float y, float z) -> string;
 }
+
+struct TestStructVirtualMethods {
+    @func(virtual)
+    func VirtualFunc() -> u32;
+    @func(pureVirtual)
+    func PureVirtualFunc() -> u32;
+}

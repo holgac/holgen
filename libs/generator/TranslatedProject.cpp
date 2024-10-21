@@ -20,6 +20,24 @@ Class::VariantData Class::GetVariantData() {
   return variantTypeFieldToVariantFields;
 }
 
+bool Class::HasVirtualMethods() const {
+  for (auto &method: mMethods) {
+    if (method.mVirtuality != Virtuality::NotVirtual) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool Class::IsAbstract() const {
+  for (auto &method: mMethods) {
+    if (method.mVirtuality == Virtuality::PureVirtual) {
+      return true;
+    }
+  }
+  return false;
+}
+
 TranslatedProject::TranslatedProject(const ProjectDefinition &projectDefinition) :
     mProject(projectDefinition), mDependencyGraph(mProject) {}
 

@@ -21,6 +21,7 @@
 #include "TestLuaStaticCppFunction.h"
 #include "TestStructPairFields.h"
 #include <rapidjson/document.h>
+#include "TestStructVirtualMethods.h"
 
 using namespace holgen_blackbox_test;
 
@@ -572,6 +573,29 @@ TEST_F(LuaTest, ParsingPairFields) {
 TEST_F(LuaTest, Constructor) {
   LuaHelper::CreateMetatables(mState);
   luaL_dostring(mState, "return TestStructConstructorMeta.Construct3(1,2,3).y");
+  LuaTestHelper::ExpectStack(mState, {"2"});
+  lua_pop(mState, 1);
+}
+
+struct TestStructVirtualMethodsDerived : public TestStructVirtualMethods {
+  uint32_t PureVirtualFunc() override {
+    ++mCounter;
+    return mCounter;
+  };
+
+  uint32_t mCounter = 0;
+};
+
+TEST_F(LuaTest, Virtuals) {
+  TestStructVirtualMethodsDerived data;
+  LuaHelper::CreateMetatables(mState);
+  EXPECT_EQ(data.VirtualFunc(), 42);
+  EXPECT_EQ(data.PureVirtualFunc(), 1);
+  data.PushGlobalToLua(mState, "data");
+  luaL_dostring(mState, "return data:VirtualFunc()");
+  LuaTestHelper::ExpectStack(mState, {"42"});
+  lua_pop(mState, 1);
+  luaL_dostring(mState, "return data:PureVirtualFunc()");
   LuaTestHelper::ExpectStack(mState, {"2"});
   lua_pop(mState, 1);
 }

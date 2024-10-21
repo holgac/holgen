@@ -250,6 +250,10 @@ public:
    *              staticness.
    *
    * noexcept: User defined functions without this attribute are not marked as noexcept.
+   *
+   * virtual: A user defined function that's marked as virtual.
+   *
+   * pureVirtual: A function with no definition that's marked as pure virtual.
    */
   inline static const std::string Func = "func";
   inline static const std::string Func_OnDestroy = "onDestroy";
@@ -262,6 +266,8 @@ public:
   inline static const std::string Func_ToString = "toString";
   inline static const std::string Func_Constructor = "constructor";
   inline static const std::string Func_Noexcept = "noexcept";
+  inline static const std::string Func_Virtual = "virtual";
+  inline static const std::string Func_PureVirtual = "pureVirtual";
 
   /**
    * Adds a comment to a struct, field or function.

@@ -49,6 +49,7 @@ set(gen_sources
     gen/TestStructSingleElemContainer.cpp
     gen/TestStructSingleElemWithId.cpp
     gen/TestStructToString.cpp
+    gen/TestStructVirtualMethods.cpp
     gen/TestVariantStructCat.cpp
     gen/TestVariantStructDifferentTypes.cpp
     gen/TestVariantStructExplicitType.cpp
@@ -77,6 +78,7 @@ set(src_sources
     src/TestStructConstructor.cpp
     src/TestStructHashable.cpp
     src/TestStructToString.cpp
+    src/TestStructVirtualMethods.cpp
     src/Weapon.cpp
 )
 set(custom_sources)

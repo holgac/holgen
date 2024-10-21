@@ -385,7 +385,10 @@ void CodeGenerator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Class &
       codeBlock.Line() << "template <>";
 
     auto signature = GenerateFunctionSignature(cls, method, true, isInsideClass);
-    if (!CanBeDefinedInHeader(cls, method) || method.mUserDefined) {
+    if (method.mVirtuality == Virtuality::PureVirtual) {
+      codeBlock.Line() << signature << " = 0;";
+      continue;
+    } else if (!CanBeDefinedInHeader(cls, method) || method.mUserDefined) {
       codeBlock.Line() << signature << ";";
       continue;
     }
@@ -685,6 +688,9 @@ std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const Cla
     ss << "constexpr ";
   if (method.mStaticness == Staticness::Static && isInsideClass && isInHeader)
     ss << "static ";
+  if (isInHeader && isInsideClass && method.mVirtuality != Virtuality::NotVirtual) {
+    ss << "virtual ";
+  }
   if (!isInHeader && cls.GetUsing(method.mReturnType.mName))
     ss << cls.mName << "::";
   ss << method.mReturnType.ToString(false);
@@ -741,15 +747,20 @@ CodeBlock CodeGenerator::GenerateDestructor(const Class &cls, Visibility visibil
   if (cls.mDestructor.IsEmpty() || (isHeader && cls.mDestructor.mVisibility != visibility))
     return {};
   bool definedInHeader = CanBeDefinedInHeader(cls, cls.mDestructor);
+  std::string virtualPrefix = cls.HasVirtualMethods() ? "virtual " : "";
   if (isHeader) {
     if (!definedInHeader) {
-      codeBlock.Add("~{}();", cls.mName);
+      codeBlock.Add("{}~{}();", virtualPrefix, cls.mName);
     } else if (cls.mDestructor.mDefaultDelete == DefaultDelete::Default) {
-      codeBlock.Add("~{}() = default;", cls.mName);
+      codeBlock.Add("{}~{}() = default;", virtualPrefix, cls.mName);
     } else if (cls.mDestructor.mDefaultDelete == DefaultDelete::Delete) {
-      codeBlock.Add("~{}() = delete;", cls.mName);
+      codeBlock.Add("{}~{}() = delete;", virtualPrefix, cls.mName);
     } else {
-      codeBlock.Add("~{}() {{", cls.mName);
+      if (isHeader) {
+        codeBlock.Add("{}~{}() {{", virtualPrefix, cls.mName);
+      } else {
+        codeBlock.Add("~{}() {{", cls.mName);
+      }
       codeBlock.Indent(1);
       codeBlock.Add(cls.mDestructor.mBody);
       codeBlock.Indent(-1);
@@ -777,7 +788,7 @@ void CodeGenerator::GenerateClassModifiableSource(GeneratedContent &source,
   if (!cls.mNamespace.empty())
     codeBlock.Add("namespace {} {{", cls.mNamespace);
   for (auto &method: cls.mMethods) {
-    if (!method.mUserDefined)
+    if (!method.mUserDefined || method.mVirtuality == Virtuality::PureVirtual)
       continue;
     codeBlock.Add("{} {{", GenerateFunctionSignature(cls, method, false, false));
     codeBlock.UserDefined("{}_{}{}", cls.mName, method.mName,
