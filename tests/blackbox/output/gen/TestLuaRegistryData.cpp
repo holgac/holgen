@@ -131,13 +131,6 @@ void TestLuaRegistryData::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
-void TestLuaRegistryData::PushMirrorToLua(lua_State *luaState) const {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "data");
-  lua_rawgeti(luaState, LUA_REGISTRYINDEX, mData);
-  lua_settable(luaState, -3);
-}
-
 void TestLuaRegistryData::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -158,23 +151,6 @@ TestLuaRegistryData *TestLuaRegistryData::ReadProxyFromLua(lua_State *luaState, 
   auto ptr = (TestLuaRegistryData *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
-}
-
-TestLuaRegistryData TestLuaRegistryData::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
-  auto result = TestLuaRegistryData{};
-  lua_pushvalue(luaState, idx);
-  lua_pushnil(luaState);
-  while (lua_next(luaState, -2)) {
-    auto key = lua_tostring(luaState, -2);
-    if (0 == strcmp("data", key)) {
-      result.mData = luaL_ref(luaState, LUA_REGISTRYINDEX);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestLuaRegistryData.{}", key);
-      lua_pop(luaState, 1);
-    }
-  }
-  lua_pop(luaState, 1);
-  return result;
 }
 
 int TestLuaRegistryData::NewIndexMetaMethod(lua_State *luaState) {

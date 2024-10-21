@@ -108,3 +108,14 @@ struct TestStructVirtualMethods {
     @func(pureVirtual)
     func PureVirtualFunc() -> u32;
 }
+
+struct TestStructSmartPointers {
+    @noJson
+    shared_ptr<TestStructVirtualMethods> sharedPtr;
+    @noJson
+    vector<shared_ptr<TestStructVirtualMethods>> sharedPtrs;
+    @noJson
+    unique_ptr<TestStructVirtualMethods> uniquePtr;
+    @noJson
+    vector<unique_ptr<TestStructVirtualMethods>> uniquePtrs;
+}

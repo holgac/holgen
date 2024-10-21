@@ -12,6 +12,8 @@ void JsonHelperPlugin::Run() {
   GenerateBaseParse(cls);
   GenerateParseSingleElem(cls);
   GenerateParseTuple(cls, 2, "std::pair");
+  GenerateParseJsonForSmartPointer(cls, "std::shared_ptr", "std::make_shared");
+  GenerateParseJsonForSmartPointer(cls, "std::unique_ptr", "std::make_unique");
   for (const auto &container: TypeInfo::Get().CppIndexedContainers) {
     GenerateParseJsonForSingleElemContainer(cls, container, true);
     GenerateParseJsonForSingleElemContainer(cls, container, false);
@@ -33,6 +35,28 @@ void JsonHelperPlugin::Run() {
   }
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
+}
+
+void JsonHelperPlugin::GenerateParseJsonForSmartPointer(Class &cls, const std::string &pointerType,
+                                                        const std::string &pointerGenerator) {
+  auto method = ClassMethod{St::JsonHelper_Parse, Type{"bool"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  method.mTemplateParameters.emplace_back("typename", "T");
+
+  {
+    auto &out = method.mArguments.emplace_back(
+        "out", Type{std::format("{}", pointerType), PassByType::Reference});
+    out.mType.mTemplateParameters.emplace_back("T");
+  }
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("converter",
+                                 Type{St::Converter, PassByType::Reference, Constness::Const});
+
+  method.mBody.Add("out = {}<T>();", pointerGenerator);
+  method.mBody.Add("return Parse(*out.get(), json, converter);");
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,

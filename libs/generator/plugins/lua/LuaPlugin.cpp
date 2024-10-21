@@ -40,8 +40,9 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
       continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
-    if (field.mType.mType == PassByType::Pointer)
+    if (!field.mType.IsEmbeddable(mProject)) {
       continue;
+    }
     // TODO: Make this work with nested structs
     // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
     switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
@@ -302,10 +303,12 @@ void LuaPlugin::ProcessStruct(Class &cls) {
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   GeneratePushToLua(cls);
-  GeneratePushMirrorStructToLua(cls);
+  if (Type{cls.mName}.IsEmbeddable(mProject)) {
+    GeneratePushMirrorStructToLua(cls);
+  }
   GeneratePushGlobalToLua(cls);
   GenerateReadProxyObjectFromLua(cls);
-  if (!cls.IsAbstract()) {
+  if (!cls.IsAbstract() && Type{cls.mName}.IsEmbeddable(mProject)) {
     GenerateReadMirrorObjectFromLua(cls);
   }
   GenerateNewIndexMetaMethod(cls);

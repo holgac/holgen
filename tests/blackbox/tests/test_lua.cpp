@@ -22,6 +22,7 @@
 #include "TestStructPairFields.h"
 #include <rapidjson/document.h>
 #include "TestStructVirtualMethods.h"
+#include "TestStructSmartPointers.h"
 
 using namespace holgen_blackbox_test;
 
@@ -587,15 +588,49 @@ struct TestStructVirtualMethodsDerived : public TestStructVirtualMethods {
 };
 
 TEST_F(LuaTest, Virtuals) {
-  TestStructVirtualMethodsDerived data;
   LuaHelper::CreateMetatables(mState);
+  TestStructVirtualMethodsDerived data;
   EXPECT_EQ(data.VirtualFunc(), 42);
   EXPECT_EQ(data.PureVirtualFunc(), 1);
   data.PushGlobalToLua(mState, "data");
+
   luaL_dostring(mState, "return data:VirtualFunc()");
   LuaTestHelper::ExpectStack(mState, {"42"});
   lua_pop(mState, 1);
+
   luaL_dostring(mState, "return data:PureVirtualFunc()");
+  LuaTestHelper::ExpectStack(mState, {"2"});
+  lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, UniquePtr) {
+  LuaHelper::CreateMetatables(mState);
+  TestStructSmartPointers smartPointers;
+  smartPointers.SetUniquePtr(std::make_unique<TestStructVirtualMethodsDerived>());
+  smartPointers.PushGlobalToLua(mState, "data");
+  EXPECT_EQ(smartPointers.GetUniquePtr()->PureVirtualFunc(), 1);
+
+  luaL_dostring(mState, "return data.uniquePtr:VirtualFunc()");
+  LuaTestHelper::ExpectStack(mState, {"42"});
+  lua_pop(mState, 1);
+
+  luaL_dostring(mState, "return data.uniquePtr:PureVirtualFunc()");
+  LuaTestHelper::ExpectStack(mState, {"2"});
+  lua_pop(mState, 1);
+}
+
+TEST_F(LuaTest, SharedPtr) {
+  LuaHelper::CreateMetatables(mState);
+  TestStructSmartPointers smartPointers;
+  smartPointers.SetSharedPtr(std::make_unique<TestStructVirtualMethodsDerived>());
+  smartPointers.PushGlobalToLua(mState, "data");
+  EXPECT_EQ(smartPointers.GetSharedPtr()->PureVirtualFunc(), 1);
+
+  luaL_dostring(mState, "return data.sharedPtr:VirtualFunc()");
+  LuaTestHelper::ExpectStack(mState, {"42"});
+  lua_pop(mState, 1);
+
+  luaL_dostring(mState, "return data.sharedPtr:PureVirtualFunc()");
   LuaTestHelper::ExpectStack(mState, {"2"});
   lua_pop(mState, 1);
 }

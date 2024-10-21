@@ -55,6 +55,7 @@
 #include "TestStructSingleElem.h"
 #include "TestStructSingleElemContainer.h"
 #include "TestStructSingleElemWithId.h"
+#include "TestStructSmartPointers.h"
 #include "TestStructToString.h"
 #include "TestStructVirtualMethods.h"
 #include "TestVariantStructCat.h"
@@ -197,6 +198,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestStructSingleElem::CreateLuaMetatable(luaState);
   TestStructSingleElemContainer::CreateLuaMetatable(luaState);
   TestStructSingleElemWithId::CreateLuaMetatable(luaState);
+  TestStructSmartPointers::CreateLuaMetatable(luaState);
   TestStructToString::CreateLuaMetatable(luaState);
   TestStructVirtualMethods::CreateLuaMetatable(luaState);
   TestVariantStructCat::CreateLuaMetatable(luaState);

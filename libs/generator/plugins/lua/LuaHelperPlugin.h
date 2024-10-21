@@ -13,6 +13,7 @@ private:
   void GeneratePush(Class &cls);
   void GenerateBasePush(Class &cls);
   void GeneratePushNil(Class &cls);
+  void GeneratePushForSmartPointer(Class &cls, const std::string &pointerType);
   void GeneratePushForSingleElemContainer(Class &cls, const std::string &container);
   void GenerateReadForSingleElemContainer(Class &cls, const std::string &container);
   void GeneratePushForPrimitives(Class &cls);

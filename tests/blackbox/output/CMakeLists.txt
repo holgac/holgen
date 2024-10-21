@@ -48,6 +48,7 @@ set(gen_sources
     gen/TestStructSingleElem.cpp
     gen/TestStructSingleElemContainer.cpp
     gen/TestStructSingleElemWithId.cpp
+    gen/TestStructSmartPointers.cpp
     gen/TestStructToString.cpp
     gen/TestStructVirtualMethods.cpp
     gen/TestVariantStructCat.cpp

@@ -158,8 +158,15 @@ void Validator::ValidateType(const Type &type, const Class &cls, bool acceptVoid
   if (TypeInfo::Get().CppBasicTypes.contains(type.mName)) {
     THROW_IF(type.mTemplateParameters.size() > 0,
              "Primitive type {} used by {} cannot have template parameters", type.mName, source);
-    THROW_IF(type.mFunctionalTemplateParameters.size() > 0,
+    THROW_IF(!type.mFunctionalTemplateParameters.empty(),
              "Primitive type {} used by {} cannot have functional template parameters", type.mName,
+             source);
+  } else if (TypeInfo::Get().CppSmartPointers.contains(type.mName)) {
+    THROW_IF(type.mTemplateParameters.size() != 1,
+             "Smart pointer {} used by {} should have a single template parameter", type.mName,
+             source);
+    THROW_IF(!type.mFunctionalTemplateParameters.empty(),
+             "Smart pointer {} used by {} cannot have functional template parameters", type.mName,
              source);
   } else if (TypeInfo::Get().CppLists.contains(type.mName) ||
              TypeInfo::Get().CppIndexedContainers.contains(type.mName)) {

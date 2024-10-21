@@ -9,16 +9,28 @@
 namespace holgen {
 TypeInfo::TypeInfo() {
   TypeToCppType = {
-      {"s8", "int8_t"},          {"s16", "int16_t"},
-      {"s32", "int32_t"},        {"s64", "int64_t"},
-      {"u8", "uint8_t"},         {"u16", "uint16_t"},
-      {"u32", "uint32_t"},       {"u64", "uint64_t"},
-      {"float", "float"},        {"double", "double"},
-      {"bool", "bool"},          {"string", "std::string"},
-      {"vector", "std::vector"}, {"deque", "std::deque"},
-      {"map", "std::map"},       {"unordered_map", "std::unordered_map"},
-      {"set", "std::set"},       {"unordered_set", "std::unordered_set"},
-      {"list", "std::list"},     {"pair", "std::pair"},
+      {"s8", "int8_t"},
+      {"s16", "int16_t"},
+      {"s32", "int32_t"},
+      {"s64", "int64_t"},
+      {"u8", "uint8_t"},
+      {"u16", "uint16_t"},
+      {"u32", "uint32_t"},
+      {"u64", "uint64_t"},
+      {"float", "float"},
+      {"double", "double"},
+      {"bool", "bool"},
+      {"string", "std::string"},
+      {"vector", "std::vector"},
+      {"deque", "std::deque"},
+      {"map", "std::map"},
+      {"unordered_map", "std::unordered_map"},
+      {"set", "std::set"},
+      {"unordered_set", "std::unordered_set"},
+      {"list", "std::list"},
+      {"pair", "std::pair"},
+      {"shared_ptr", "std::shared_ptr"},
+      {"unique_ptr", "std::unique_ptr"},
   };
 
   SignedIntegralTypes = {
@@ -37,6 +49,7 @@ TypeInfo::TypeInfo() {
   CppPrimitives = IntegralTypes;
   CppPrimitives.insert(FloatingPointTypes.begin(), FloatingPointTypes.end());
   CppPrimitives.insert("bool");
+  CppSmartPointers = {"std::shared_ptr", "std::unique_ptr"};
   CppBasicTypes = CppPrimitives;
   CppBasicTypes.insert("char");
   CppBasicTypes.insert("std::string");
@@ -199,13 +212,28 @@ void Type::PreventCopying(bool addConst) {
 
 bool Type::IsCopyable(TranslatedProject &project) const {
   std::set<std::string> seenClasses;
-  return IsCopyable(project, seenClasses);
+  return IsCopyableOrEmbeddable(project, seenClasses, true);
 }
 
-bool Type::IsCopyable(TranslatedProject &project, std::set<std::string> &seenClasses) const {
+bool Type::IsEmbeddable(TranslatedProject &project) const {
+  std::set<std::string> seenClasses;
+  return IsCopyableOrEmbeddable(project, seenClasses, false);
+}
+
+bool Type::IsCopyableOrEmbeddable(TranslatedProject &project, std::set<std::string> &seenClasses,
+                                  bool forCopy) const {
   // class A has a vector<A>, which doesn't prevent A from being copyable
   if (seenClasses.contains(mName)) {
     return true;
+  }
+  if (mName == "std::unique_ptr") {
+    return false;
+  }
+  if (!forCopy && mType == PassByType::Pointer) {
+    return false;
+  }
+  if (!forCopy && mName == "std::shared_ptr") {
+    return false;
   }
   auto cls = project.GetClass(mName);
   if (cls) {
@@ -215,8 +243,7 @@ bool Type::IsCopyable(TranslatedProject &project, std::set<std::string> &seenCla
       return false;
     }
     for (auto &field: cls->mFields) {
-
-      if (!field.mType.IsCopyable(project, seenClasses)) {
+      if (!field.mType.IsCopyableOrEmbeddable(project, seenClasses, forCopy)) {
         return false;
       }
       if (!field.mField) {
@@ -235,7 +262,7 @@ bool Type::IsCopyable(TranslatedProject &project, std::set<std::string> &seenCla
     }
   }
   for (auto &templateParameter: mTemplateParameters) {
-    if (!templateParameter.IsCopyable(project, seenClasses)) {
+    if (!templateParameter.IsCopyableOrEmbeddable(project, seenClasses, forCopy)) {
       return false;
     }
   }

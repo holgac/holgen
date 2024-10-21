@@ -48,6 +48,8 @@ void LuaHelperPlugin::GeneratePush(Class &cls) {
   GeneratePushForPrimitives(cls);
   GeneratePushForContainers(cls);
   GeneratePushTuple(cls, 2, "std::pair");
+  GeneratePushForSmartPointer(cls, "std::shared_ptr");
+  GeneratePushForSmartPointer(cls, "std::unique_ptr");
 }
 
 void LuaHelperPlugin::GeneratePushForContainers(Class &cls) {
@@ -180,6 +182,23 @@ void LuaHelperPlugin::GeneratePushNil(Class &cls) {
   method.mArguments.emplace_back("", Type{"std::nullptr_t"});
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Line() << "lua_pushnil(luaState);";
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void LuaHelperPlugin::GeneratePushForSmartPointer(Class &cls, const std::string &pointerType) {
+  auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
+                            Staticness::Static};
+  method.mTemplateParameters.emplace_back("bool", "PushMirror");
+  method.mTemplateParameters.emplace_back("typename", "T");
+  {
+    auto &arg = method.mArguments.emplace_back(
+        "data", Type{pointerType, PassByType::Reference, Constness::Const});
+    arg.mType.mTemplateParameters.emplace_back(Type{"T"});
+  }
+  method.mBody.Add("static_assert(!PushMirror, \"Smart pointers cannot be pushed as mirror!\");");
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mBody.Add("Push<PushMirror>(*data.get(), luaState);");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

@@ -70,13 +70,6 @@ void TestStructNonCopyable::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
-void TestStructNonCopyable::PushMirrorToLua(lua_State *luaState) const {
-  lua_newtable(luaState);
-  lua_pushstring(luaState, "bigVector");
-  LuaHelper::Push<true>(mBigVector, luaState);
-  lua_settable(luaState, -3);
-}
-
 void TestStructNonCopyable::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);
@@ -97,24 +90,6 @@ TestStructNonCopyable *TestStructNonCopyable::ReadProxyFromLua(lua_State *luaSta
   auto ptr = (TestStructNonCopyable *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
-}
-
-TestStructNonCopyable TestStructNonCopyable::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
-  auto result = TestStructNonCopyable{};
-  lua_pushvalue(luaState, idx);
-  lua_pushnil(luaState);
-  while (lua_next(luaState, -2)) {
-    auto key = lua_tostring(luaState, -2);
-    if (0 == strcmp("bigVector", key)) {
-      LuaHelper::Read(result.mBigVector, luaState, -1);
-      lua_pop(luaState, 1);
-    } else {
-      HOLGEN_WARN("Unexpected lua field: TestStructNonCopyable.{}", key);
-      lua_pop(luaState, 1);
-    }
-  }
-  lua_pop(luaState, 1);
-  return result;
 }
 
 int TestStructNonCopyable::NewIndexMetaMethod(lua_State *luaState) {

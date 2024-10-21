@@ -13,6 +13,8 @@ public:
   void Run() override;
 
 private:
+  void GenerateParseJsonForSmartPointer(Class &cls, const std::string &pointerType,
+                                        const std::string &pointerGenerator);
   void GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container,
                                                bool withConverter);
   void GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container,

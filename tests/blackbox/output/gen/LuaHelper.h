@@ -9,6 +9,7 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -166,6 +167,16 @@ public:
     lua_rawseti(luaState, -2, 0);
     Push<PushMirror>(std::get<1>(data), luaState);
     lua_rawseti(luaState, -2, 1);
+  }
+  template <bool PushMirror, typename T>
+  static void Push(const std::shared_ptr<T> &data, lua_State *luaState) {
+    static_assert(!PushMirror, "Smart pointers cannot be pushed as mirror!");
+    Push<PushMirror>(*data.get(), luaState);
+  }
+  template <bool PushMirror, typename T>
+  static void Push(const std::unique_ptr<T> &data, lua_State *luaState) {
+    static_assert(!PushMirror, "Smart pointers cannot be pushed as mirror!");
+    Push<PushMirror>(*data.get(), luaState);
   }
   template <typename T>
   static bool Read(T &data, lua_State *luaState, int32_t luaIndex) {

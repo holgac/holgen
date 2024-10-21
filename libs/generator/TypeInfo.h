@@ -58,10 +58,10 @@ struct Type {
   [[nodiscard]] std::string ToString(bool noTrailingSpace) const;
   void PreventCopying(bool addConst = true);
   [[nodiscard]] bool IsCopyable(TranslatedProject &project) const;
-
+  [[nodiscard]] bool IsEmbeddable(TranslatedProject &project) const;
 private:
-  [[nodiscard]] bool IsCopyable(TranslatedProject &project,
-                                std::set<std::string> &seenClasses) const;
+  [[nodiscard]] bool IsCopyableOrEmbeddable(TranslatedProject &project,
+                                std::set<std::string> &seenClasses, bool forCopy) const;
 };
 
 enum class TypeUseCase {
@@ -80,6 +80,7 @@ public:
   std::set<std::string> FloatingPointTypes;
   std::set<std::string> CppPrimitives;
   std::set<std::string> CppBasicTypes;
+  std::set<std::string> CppSmartPointers;
   // Containers that allow random access
   std::set<std::string> CppIndexedContainers;
   // std::list
