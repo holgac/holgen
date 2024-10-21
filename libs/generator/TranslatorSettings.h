@@ -17,7 +17,7 @@ struct TranslatorSettings {
   TranslatorFeatureFlag::Entry mFeatureFlags = TranslatorFeatureFlag::Entry(0);
 
   [[nodiscard]] bool IsFeatureEnabled(const TranslatorFeatureFlag::Entry featureFlag) const {
-    return (mFeatureFlags & featureFlag) == featureFlag;
+    return (mFeatureFlags & featureFlag) != 0;
   }
 
   void EnableFeature(const TranslatorFeatureFlag::Entry featureFlag) {

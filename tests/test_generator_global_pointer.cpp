@@ -16,7 +16,7 @@ TEST(GeneratorGlobalPointerTest, HeaderAndSource) {
   GlobalPointerPlugin ggp(tp, translatorSettings);
   ggp.Run();
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);

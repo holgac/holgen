@@ -6,3 +6,4 @@ cmake-build-release/
 tests/blackbox/.run/
 tests/blackbox/.idea/
 tests/blackbox_swig/.idea/
+tests/blackbox_swig/output/

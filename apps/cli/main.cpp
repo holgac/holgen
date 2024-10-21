@@ -2,13 +2,14 @@
 #include <fstream>
 #include <iostream>
 #include <queue>
+#include "cargs.h"
 #include "core/Exception.h"
 #include "generator/CodeGenerator.h"
 #include "generator/Translator.h"
 #include "generator/UserDefinedSectionExtractor.h"
 #include "parser/Parser.h"
 #include "tokenizer/Tokenizer.h"
-#include "cargs.h"
+#include "core/St.h"
 
 using namespace holgen;
 
@@ -31,6 +32,8 @@ struct CliOptions {
   std::string mConfigHeader;
   bool mLuaEnabled = false;
   bool mJsonEnabled = false;
+  bool mSwigLuaEnabled = false;
+  bool mSwigCSharpEnabled = false;
 };
 
 bool ParseArgs(CliOptions &out, int argc, char **argv) {
@@ -64,12 +67,22 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
        .access_letters = nullptr,
        .access_name = "lua",
        .value_name = nullptr,
-       .description = "Enable lua bindings (requires lua)"},
+       .description = "Enable lua bindings (optional, requires lua)"},
       {.identifier = 'j',
        .access_letters = nullptr,
        .access_name = "json",
        .value_name = nullptr,
-       .description = "Enable json parsing (requires rapidjson)"},
+       .description = "Enable json parsing (optional, requires rapidjson)"},
+      {.identifier = 'L',
+       .access_letters = nullptr,
+       .access_name = "swig_lua",
+       .value_name = nullptr,
+       .description = "Enable SWIG lua bindings (optional, requires swig in PATH, and lua)"},
+      {.identifier = 'C',
+       .access_letters = nullptr,
+       .access_name = "swig_csharp",
+       .value_name = nullptr,
+       .description = "Enable SWIG csharp bindings (optional, requires swig in PATH, and dotnet)"},
   };
   cag_option_context context;
   cag_option_init(&context, cargsCliOptions, std::size(cargsCliOptions), argc, argv);
@@ -95,6 +108,12 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
       break;
     case 'j':
       out.mJsonEnabled = true;
+      break;
+    case 'L':
+      out.mSwigLuaEnabled = true;
+      break;
+    case 'C':
+      out.mSwigCSharpEnabled = true;
       break;
     default:
     case '?':
@@ -152,15 +171,17 @@ TranslatorSettings GetTranslatorSettings(const CliOptions &cliOptions) {
   return translatorSettings;
 }
 
-int Run(const CliOptions &cliOptions) {
-  auto projectDefinition = ParseProjectDefinition(cliOptions);
-  TranslatorSettings translatorSettings = GetTranslatorSettings(cliOptions);
+GeneratorSettings GetGeneratorSettings(const CliOptions &cliOptions) {
+  GeneratorSettings generatorSettings{cliOptions.mProjectName, cliOptions.mConfigHeader};
+  if (cliOptions.mSwigLuaEnabled)
+    generatorSettings.EnableFeature(GeneratorFeatureFlag::SwigLua);
+  if (cliOptions.mSwigCSharpEnabled)
+    generatorSettings.EnableFeature(GeneratorFeatureFlag::SwigCSharp);
+  return generatorSettings;
+}
 
-  Translator translator{translatorSettings};
-  auto project = translator.Translate(projectDefinition);
-  auto generator = CodeGenerator({cliOptions.mProjectName, cliOptions.mConfigHeader});
-  auto results = generator.Generate(project);
-  std::filesystem::path outDir(cliOptions.mOutDir);
+void WriteToFiles(const std::vector<GeneratedContent> &results,
+                  const std::filesystem::path &outDir) {
   for (auto &result: results) {
     auto target = outDir / result.mName;
     auto dirname = target.parent_path();
@@ -179,6 +200,74 @@ int Run(const CliOptions &cliOptions) {
     std::ofstream fout(target, std::ios::binary);
     fout.write(newContents.c_str(), newContents.size());
   }
+}
+
+void RunSwigWithTarget(const CliOptions &cliOptions, const char *languageName,
+                       const std::string &extra = "") {
+
+  auto outDir = cliOptions.mOutDir + "/swig";
+  auto tempDir = cliOptions.mOutDir + "/swig_tmp";
+
+  if (!std::filesystem::exists(outDir))
+    std::filesystem::create_directory(outDir);
+  if (!std::filesystem::exists(tempDir))
+    std::filesystem::create_directory(tempDir);
+
+  auto filename = std::format("{}_{}_wrap.cpp", cliOptions.mProjectName, languageName);
+  auto outputFile = outDir + "/" + filename;
+  auto tempFile = tempDir + "/" + filename;
+
+  auto cmd = std::format("swig -c++ -{} -Wall -o {} {} {}/swig.i", languageName, tempFile, extra,
+                         cliOptions.mOutDir);
+
+  std::cout << cmd << ": ";
+  auto res = system(cmd.c_str());
+  std::cout << res << std::endl;
+}
+
+void CopySwigFilesIfModified(const CliOptions &cliOptions) {
+  auto outDir = cliOptions.mOutDir + "/swig";
+  auto tempDir = cliOptions.mOutDir + "/swig_tmp";
+  if (!std::filesystem::exists(tempDir))
+    return;
+  for (auto &entry: std::filesystem::directory_iterator(std::filesystem::path(tempDir))) {
+    if (!std::filesystem::is_regular_file(entry)) {
+      std::cerr << "Unexpected file type: " << entry.path().string() << std::endl;
+      continue;
+    }
+    auto contents = ReadFile(entry.path());
+    auto oldFile = std::format("{}/{}", outDir, entry.path().filename().string());
+    if (std::filesystem::exists(oldFile)) {
+      auto oldContents = ReadFile(oldFile);
+      if (oldContents == contents)
+        continue;
+    }
+    std::filesystem::copy(entry, oldFile, std::filesystem::copy_options::overwrite_existing);
+  }
+  std::filesystem::remove_all(tempDir);
+}
+
+void RunSwig(const CliOptions &cliOptions) {
+  if (cliOptions.mSwigCSharpEnabled) {
+    RunSwigWithTarget(cliOptions, "csharp",
+                      std::format("-namespace {}", St::Replace(cliOptions.mNamespace, "::", ".")));
+  }
+  if (cliOptions.mSwigLuaEnabled) {
+    RunSwigWithTarget(cliOptions, "lua", "");
+  }
+  CopySwigFilesIfModified(cliOptions);
+}
+
+int Run(const CliOptions &cliOptions) {
+  auto projectDefinition = ParseProjectDefinition(cliOptions);
+  Translator translator{GetTranslatorSettings(cliOptions)};
+  auto project = translator.Translate(projectDefinition);
+  auto generatorSettings = GetGeneratorSettings(cliOptions);
+  auto generator = CodeGenerator(generatorSettings);
+  auto results = generator.Generate(project);
+  std::filesystem::path outDir(cliOptions.mOutDir);
+  WriteToFiles(results, outDir);
+  RunSwig(cliOptions);
   // TODO: warn if there are files in the directory not created by us in case the schema changed
   // but the dangling files weren't deleted.
   return 0;

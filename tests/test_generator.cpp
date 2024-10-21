@@ -26,7 +26,7 @@ TEST(GeneratorTest, Helpers) {
   };
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);
@@ -79,7 +79,7 @@ TEST(GeneratorTest, ClassWithGetters) {
   };
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);
@@ -175,7 +175,7 @@ TEST(GeneratorTest, ClassWithContainers) {
   };
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);
@@ -321,7 +321,7 @@ TEST(GeneratorTest, NestedClasses) {
   };
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);
@@ -561,7 +561,7 @@ TEST(GeneratorTest, Converters) {
   };
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);
@@ -863,7 +863,7 @@ TEST(GeneratorTest, DataManager) {
   };
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);
@@ -984,7 +984,7 @@ TEST(GeneratorTest, NonCopyableStruct) {
   };
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
-      .mCMakeTarget = "generator_test_cmake",
+      .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
   };
   CodeGenerator generator(generatorSettings);

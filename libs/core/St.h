@@ -16,6 +16,7 @@ public:
   static bool IsIntegral(const std::string_view &str);
   static std::string Capitalize(const std::string &str);
   static std::string GetFieldNameInLua(const std::string &fieldName, bool isRef = false);
+  static std::string Replace(const std::string &source, const std::string& from, const std::string& to);
   inline static const std::string GlobalPointer = "GlobalPointer";
   inline static const std::string GlobalPointer_GetInstance = "GetInstance";
   inline static const std::string GlobalPointer_SetInstance = "SetInstance";

@@ -111,6 +111,10 @@ std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &t
   GenerateHolgenHeader(contents.emplace_back());
   GenerateCMakeLists(contents.emplace_back(), translatedProject);
 
+  if (mGeneratorSettings.IsFeatureEnabled(GeneratorFeatureFlag::SwigMask)) {
+    GenerateSwigInterface(contents.emplace_back(), translatedProject);
+  }
+
   mTranslatedProject = nullptr;
 
   return contents;
@@ -156,6 +160,73 @@ void CodeGenerator::GenerateClassDefinition(const Class &cls, CodeBlock &codeBlo
   GenerateMethodsForHeader(codeBlock, cls, Visibility::Private, false);
   if (!cls.mNamespace.empty())
     codeBlock.Add("}}");
+}
+
+void CodeGenerator::GenerateSwigInterface(GeneratedContent &swig,
+                                          const TranslatedProject &translatedProject) const {
+  swig.mType = FileType::SwigInterface;
+  swig.mName = std::format("swig.i", mGeneratorSettings.mProjectName);
+  CodeBlock includes;
+  CodeBlock body;
+  for (auto &cls: translatedProject.mClasses) {
+    if (cls.mStruct) {
+      GenerateSwigInterfaceIncludes(cls, includes);
+      GenerateSwigInterfaceForStruct(cls, body);
+    } else if (cls.mEnum) {
+      GenerateSwigInterfaceIncludes(cls, includes);
+      GenerateSwigInterfaceForEnum(cls, body);
+    }
+  }
+  swig.mBody.Add("%module {}", mGeneratorSettings.mProjectName);
+  swig.mBody.Add("%{{", mGeneratorSettings.mProjectName);
+  swig.mBody.Add(std::move(includes));
+  swig.mBody.Add("%}}", mGeneratorSettings.mProjectName);
+  swig.mBody.Add(std::move(body));
+}
+
+void CodeGenerator::GenerateSwigInterfaceIncludes(const Class &cls, CodeBlock &codeBlock) const {
+  codeBlock.Add("#include \"../gen/{}.h\"", cls.mName);
+}
+
+void CodeGenerator::GenerateSwigInterfaceForStruct(const Class &cls, CodeBlock &codeBlock) const {
+  codeBlock.Add("class {} {{", cls.mName);
+  codeBlock.Add("public:");
+  codeBlock.Indent(1);
+  for (auto &ctor: cls.mConstructors) {
+    if (ctor.mVisibility == Visibility::Public)
+      codeBlock.Add("{};", GenerateFunctionSignature(cls, ctor, true, true));
+  }
+  // dtor
+  codeBlock.Add("~{}();", cls.mName);
+  for (auto &method: cls.mMethods) {
+    if (method.mVisibility == Visibility::Public)
+      codeBlock.Add("{};", GenerateFunctionSignature(cls, method, true, true));
+  }
+  codeBlock.Indent(-1);
+  codeBlock.Add("}};");
+}
+
+void CodeGenerator::GenerateSwigInterfaceForEnum(const Class &cls, CodeBlock &codeBlock) const {
+  codeBlock.Add("class {} {{", cls.mName);
+  codeBlock.Add("public:");
+  codeBlock.Indent(1);
+  {
+    auto line = codeBlock.Line();
+    line << "enum {";
+    auto &enumDefinition = *cls.mEnum;
+    bool isFirst = true;
+    for (auto &entry: enumDefinition.mEntries) {
+      if (isFirst) {
+        isFirst = false;
+      } else {
+        line << ", ";
+      }
+      line << entry.mName << "=" << entry.mValue;
+    }
+    line << "}";
+  }
+  codeBlock.Indent(-1);
+  codeBlock.Add("}};");
 }
 
 std::string CodeGenerator::GenerateClassDeclaration(const Class &cls) const {
@@ -452,14 +523,14 @@ void CodeGenerator::GenerateCMakeLists(GeneratedContent &cmake,
   codeBlock.Add("set(custom_sources)");
   codeBlock.UserDefined("CustomSources");
   codeBlock.Add("add_library({} STATIC ${{gen_sources}} ${{src_sources}} ${{custom_sources}})",
-                mGeneratorSettings.mCMakeTarget);
+                mGeneratorSettings.mProjectName);
   codeBlock.UserDefined("CustomDependencies");
   // TODO: complete lua generator, fix unused parameters and enable this
   codeBlock.Add("if (UNIX)");
   codeBlock.Indent(1);
   codeBlock.Add("target_compile_options({} PRIVATE -Wall -Wextra -Wpedantic -Werror "
                 "-Wno-unused-parameter -Wno-unused-variable)",
-                mGeneratorSettings.mCMakeTarget);
+                mGeneratorSettings.mProjectName);
   codeBlock.Indent(-1);
   codeBlock.Add("endif ()");
   cmake.mBody = std::move(codeBlock);

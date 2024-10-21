@@ -17,6 +17,18 @@ std::string St::GetFieldNameInLua(const std::string &fieldName, bool isRef) {
   return fieldName;
 }
 
+std::string St::Replace(const std::string &source, const std::string &from, const std::string &to) {
+  if (from.empty())
+    return source;
+  std::string out = source;
+  size_t idx = 0;
+  while ((idx = out.find(from, idx)) != std::string::npos) {
+    out.replace(idx, from.length(), to);
+    idx += to.size();
+  }
+  return out;
+}
+
 bool St::IsIntegral(const std::string_view &str) {
   if (str.empty() || (str.size() == 1 && str[0] == '-'))
     return false;
