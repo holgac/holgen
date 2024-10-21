@@ -46,7 +46,7 @@ void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFuncTable(Class &cls,
                                                                    StringSwitcher &switcher) {
   switcher.AddCase(St::LuaTable_TableFieldInIndexMethod, [&](CodeBlock &switchBlock) {
     GenerateInstanceGetter(cls, switchBlock, -2, "instance");
-    switchBlock.Add("{}::{}(instance->{}, luaState, false);", St::LuaHelper, St::LuaHelper_Push,
+    switchBlock.Add("{}::{}<false>(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
                     Naming().FieldNameInCpp(St::LuaTable_TableField));
   });
 }
@@ -68,7 +68,7 @@ void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFields(Class &cls,
       if (underlyingStruct->GetAnnotation(Annotations::Managed)) {
         switcher.AddCase(Naming().FieldNameInLua(*field.mField, true), [&](CodeBlock &switchBlock) {
           GenerateInstanceGetter(cls, switchBlock, -2, "instance");
-          switchBlock.Add("{}::{}({}::{}(instance->{}), luaState, false);", St::LuaHelper,
+          switchBlock.Add("{}::{}<false>({}::{}(instance->{}), luaState);", St::LuaHelper,
                           St::LuaHelper_Push, field.mField->mType.mTemplateParameters[0].mName,
                           St::ManagedObject_Getter, field.mName);
         });
@@ -125,8 +125,8 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
     auto returnedClass = mProject.GetClass(method.mReturnType.mName);
     if (returnedClass && !returnedClass->mEnum) {
       bool pushMirror = method.mReturnType.mType == PassByType::Value;
-      methodCaller.mBody.Add("{}::{}(result, luaState, {});", St::LuaHelper, St::LuaHelper_Push,
-                             pushMirror);
+      methodCaller.mBody.Add("{}::{}<{}>(result, luaState);", St::LuaHelper, St::LuaHelper_Push,
+                             pushMirror ? "true" : "false");
     } else {
       bool shouldBeMirror = false;
       if (method.mReturnType.mType == PassByType::Value) {
@@ -138,7 +138,7 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
           }
         }
       }
-      methodCaller.mBody.Add("{}::{}(result, luaState, {});", St::LuaHelper, St::LuaHelper_Push,
+      methodCaller.mBody.Add("{}::{}<{}>(result, luaState);", St::LuaHelper, St::LuaHelper_Push,
                              shouldBeMirror ? "true" : "false");
     }
     methodCaller.mBody.Add("return 1;");
@@ -175,7 +175,7 @@ void LuaIndexMetaMethodPlugin::GenerateIndexForField(Class &cls, ClassField &fie
   } else if (field.mField->mType.mName == St::Lua_CustomData) {
     GenerateIndexForRegistryData(field, switchBlock);
   } else {
-    switchBlock.Add("{}::{}(instance->{}, luaState, false);", St::LuaHelper, St::LuaHelper_Push,
+    switchBlock.Add("{}::{}<false>(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
                     field.mName);
   }
 }
@@ -279,7 +279,7 @@ void LuaIndexMetaMethodPlugin::GenerateIndexForVariantField(Class &cls, ClassFie
     switchBlock.Add("case {}::{}:", enumField->mType.ToString(true),
                     variantAnnotation->GetAttribute(Annotations::Variant_Entry)->mValue.mName);
     switchBlock.Indent(1);
-    switchBlock.Add("{}::{}(instance->{}(), luaState, false);", St::LuaHelper, St::LuaHelper_Push,
+    switchBlock.Add("{}::{}<false>(instance->{}(), luaState);", St::LuaHelper, St::LuaHelper_Push,
                     Naming().VariantGetterNameInCpp(*field.mField, *otherCls.mStruct));
     switchBlock.Add("break;");
     switchBlock.Indent(-1);

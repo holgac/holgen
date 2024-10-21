@@ -147,7 +147,7 @@ TEST_F(LuaTest, Func) {
     LuaHelper::Read(val, ls, -1);
     val += calc->GetCurVal().GetValue();
     calc->GetCurVal().SetValue(val);
-    LuaHelper::Push(val, ls, false);
+    LuaHelper::Push<false>(val, ls);
     return 1;
   });
   lua_setglobal(mState, "calc_add");
@@ -167,7 +167,7 @@ TEST_F(LuaTest, Func) {
     auto calc = Calculator::ReadProxyFromLua(ls, -2);
     auto num = Number::ReadProxyFromLua(ls, -1);
     calc->GetCurVal().SetValue(calc->GetCurVal().GetValue() - num->GetValue());
-    LuaHelper::Push(calc->GetCurVal(), ls, false);
+    LuaHelper::Push<false>(calc->GetCurVal(), ls);
     return 1;
   });
   lua_settable(mState, -3);

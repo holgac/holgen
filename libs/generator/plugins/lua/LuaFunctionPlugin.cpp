@@ -101,7 +101,7 @@ void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
       method.mBody.Add("{}(luaState);", funcArg.mName);
     } else {
       // There could be a function modifier specifying whether to push mirror or proxy to lua
-      method.mBody.Add("{}::{}({}, luaState, false);", St::LuaHelper, St::LuaHelper_Push,
+      method.mBody.Add("{}::{}<false>({}, luaState);", St::LuaHelper, St::LuaHelper_Push,
                        funcArg.mName);
     }
   }
@@ -268,7 +268,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   }
 
   if (!isStatic) {
-    method.mBody.Add("{}::{}(*this, luaState, false);", St::LuaHelper, St::LuaHelper_Push);
+    method.mBody.Add("{}::{}<false>(*this, luaState);", St::LuaHelper, St::LuaHelper_Push);
   }
   GenerateFunctionPushArgs(method, functionDefinition);
 

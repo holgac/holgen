@@ -283,7 +283,7 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
     } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, {});", field.mName);
     } else {
-      method.mBody.Add("{}::{}({}, luaState, true);", St::LuaHelper, St::LuaHelper_Push,
+      method.mBody.Add("{}::{}<true>({}, luaState);", St::LuaHelper, St::LuaHelper_Push,
                        Naming().FieldNameInCpp(*field.mField, false));
     }
     method.mBody.Add("lua_settable(luaState, -3);");
@@ -390,7 +390,7 @@ void LuaPlugin::ProcessEnum(Class &cls) {
     else
       valueToPush = std::format("{}::UnderlyingType(mValue)", cls.mName);
 
-    method.mBody.Add("{}::{}({}, luaState, true);", St::LuaHelper, St::LuaHelper_Push, valueToPush);
+    method.mBody.Add("{}::{}<true>({}, luaState);", St::LuaHelper, St::LuaHelper_Push, valueToPush);
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }

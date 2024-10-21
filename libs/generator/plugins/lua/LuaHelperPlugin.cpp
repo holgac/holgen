@@ -76,13 +76,13 @@ void LuaHelperPlugin::GeneratePushTuple(Class &cls, size_t size,
   tupleArg.mType.mType = PassByType::Reference;
   tupleArg.mType.mConstness = Constness::Const;
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mArguments.emplace_back("pushMirror", Type{"bool"});
   method.mBody.Add("lua_newtable(luaState);");
+  method.mTemplateParameters.emplace_back("bool", "PushMirror");
   for (size_t i = 0; i < size; ++i) {
     auto templateParameter = std::format("T{}", i);
     tupleArg.mType.mTemplateParameters.emplace_back(templateParameter);
     method.mTemplateParameters.emplace_back("typename", templateParameter);
-    method.mBody.Add("Push(std::get<{}>(data), luaState, pushMirror);", i);
+    method.mBody.Add("Push<PushMirror>(std::get<{}>(data), luaState);", i);
     method.mBody.Add("lua_rawseti(luaState, -2, {});", i);
   }
   Validate().NewMethod(cls, method);
@@ -93,6 +93,7 @@ void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls,
                                                     const std::string &container) const {
   auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
                             Staticness::Static};
+  method.mTemplateParameters.emplace_back("bool", "PushMirror");
   method.mTemplateParameters.emplace_back("typename", "K");
   method.mTemplateParameters.emplace_back("typename", "V");
 
@@ -103,13 +104,12 @@ void LuaHelperPlugin::GeneratePushForKeyedContainer(Class &cls,
     data.mType.mTemplateParameters.emplace_back("V");
   }
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mArguments.emplace_back("pushMirror", Type{"bool"});
   method.mBody.Add("lua_newtable(luaState);");
   method.mBody.Add("for (auto& [key, value]: data) {{");
   method.mBody.Indent(1);
-  // proxy keys don't make sense but passing pushMirror for consistency
-  method.mBody.Add("Push(key, luaState, pushMirror);");
-  method.mBody.Add("Push(value, luaState, pushMirror);");
+  // proxy keys don't make sense but passing PushMirror for consistency
+  method.mBody.Add("Push<true>(key, luaState);");
+  method.mBody.Add("Push<PushMirror>(value, luaState);");
   method.mBody.Add("lua_settable(luaState, -3);");
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
@@ -122,12 +122,12 @@ void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
     auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
                               Staticness::Static};
 
+    method.mTemplateParameters.emplace_back("bool", "PushMirror");
     {
       auto &data = method.mArguments.emplace_back("data", Type{type});
       data.mType.PreventCopying();
     }
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    method.mArguments.emplace_back("pushMirror", Type{"bool"});
 
     method.mBody.Line() << usage.mPusher << "(luaState, data" << usage.mFieldExtra << ");";
     Validate().NewMethod(cls, method);
@@ -138,17 +138,17 @@ void LuaHelperPlugin::GeneratePushForPrimitives(Class &cls) {
 void LuaHelperPlugin::GenerateBasePush(Class &cls) {
   auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
                             Staticness::Static};
+  method.mTemplateParameters.emplace_back("bool", "PushMirror");
   method.mTemplateParameters.emplace_back("typename", "T");
 
   method.mArguments.emplace_back("data", Type{"T", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mArguments.emplace_back("pushMirror", Type{"bool"});
 
   method.mBody.Add("if constexpr(std::is_pointer_v<T>) {{");
   method.mBody.Indent(1);
   method.mBody.Add("if (data) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("{}::{}(*data, luaState, pushMirror);", St::LuaHelper, St::LuaHelper_Push);
+  method.mBody.Add("{}::{}<PushMirror>(*data, luaState);", St::LuaHelper, St::LuaHelper_Push);
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
@@ -156,13 +156,17 @@ void LuaHelperPlugin::GenerateBasePush(Class &cls) {
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
   method.mBody.Indent(-1);
-  method.mBody.Add("}} else if (pushMirror) {{");
+  method.mBody.Add("}} else {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("if constexpr (PushMirror) {{");
   method.mBody.Indent(1);
   method.mBody.Add("data.{}(luaState);", St::Lua_PushMirrorObject);
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
   method.mBody.Line() << "data.PushToLua(luaState);";
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
   Validate().NewMethod(cls, method);
@@ -172,9 +176,9 @@ void LuaHelperPlugin::GenerateBasePush(Class &cls) {
 void LuaHelperPlugin::GeneratePushNil(Class &cls) {
   auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
                             Staticness::Static};
+  method.mTemplateParameters.emplace_back("bool", "PushMirror");
   method.mArguments.emplace_back("", Type{"std::nullptr_t"});
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mArguments.emplace_back("pushMirror", Type{"bool"});
   method.mBody.Line() << "lua_pushnil(luaState);";
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
@@ -378,6 +382,7 @@ void LuaHelperPlugin::GenerateInitializeLua(Class &cls) {
 void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::string &container) {
   auto method = ClassMethod{"Push", Type{"void"}, Visibility::Public, Constness::NotConst,
                             Staticness::Static};
+  method.mTemplateParameters.emplace_back("bool", "PushMirror");
   method.mTemplateParameters.emplace_back("typename", "T");
   bool isFixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(container);
   if (isFixedSize)
@@ -390,12 +395,11 @@ void LuaHelperPlugin::GeneratePushForSingleElemContainer(Class &cls, const std::
       data.mType.mTemplateParameters.emplace_back("C");
   }
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mArguments.emplace_back("pushMirror", Type{"bool"});
   method.mBody.Add("lua_newtable(luaState);");
   method.mBody.Add("int index = 0;");
   method.mBody.Add("for (auto& elem: data) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("Push(elem, luaState, pushMirror);");
+  method.mBody.Add("Push<PushMirror>(elem, luaState);");
   method.mBody.Add("lua_rawseti(luaState, -2, index++);");
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
