@@ -11,13 +11,15 @@
 class LuaPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project, {}).Run();
-    EnumPlugin(project, {}).Run();
-    ClassIdFieldPlugin(project, {}).Run();
-    ClassFieldPlugin(project, {}).Run();
-    CppFunctionPlugin(project, {}).Run();
-    LuaPlugin(project, {}).Run();
-    LuaIndexMetaMethodPlugin(project, {}).Run();
+    TranslatorSettings translatorSettings;
+    translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
+    ClassPlugin(project, translatorSettings).Run();
+    EnumPlugin(project, translatorSettings).Run();
+    ClassIdFieldPlugin(project, translatorSettings).Run();
+    ClassFieldPlugin(project, translatorSettings).Run();
+    CppFunctionPlugin(project, translatorSettings).Run();
+    LuaPlugin(project, translatorSettings).Run();
+    LuaIndexMetaMethodPlugin(project, translatorSettings).Run();
   }
 };
 
@@ -34,7 +36,7 @@ enum TestData {}
     auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method,
-                         "LuaHelper::Push(TestData::UnderlyingType(mValue), luaState, true);");
+                         "LuaHelper::Push<true>(TestData::UnderlyingType(mValue), luaState);");
   }
 }
 
@@ -221,19 +223,19 @@ const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testFieldUnsigned", key)) {
   auto instance = TestData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldUnsigned with an invalid lua proxy object!");
-  LuaHelper::Push(instance->mTestFieldUnsigned, luaState, false);
+  LuaHelper::Push<false>(instance->mTestFieldUnsigned, luaState);
 } else if (0 == strcmp("testFieldString", key)) {
   auto instance = TestData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldString with an invalid lua proxy object!");
-  LuaHelper::Push(instance->mTestFieldString, luaState, false);
+  LuaHelper::Push<false>(instance->mTestFieldString, luaState);
 } else if (0 == strcmp("testFieldBool", key)) {
   auto instance = TestData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldBool with an invalid lua proxy object!");
-  LuaHelper::Push(instance->mTestFieldBool, luaState, false);
+  LuaHelper::Push<false>(instance->mTestFieldBool, luaState);
 } else if (0 == strcmp("testFieldInnerStruct", key)) {
   auto instance = TestData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testFieldInnerStruct with an invalid lua proxy object!");
-  LuaHelper::Push(instance->mTestFieldInnerStruct, luaState, false);
+  LuaHelper::Push<false>(instance->mTestFieldInnerStruct, luaState);
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
   return 0;
@@ -301,7 +303,7 @@ return 0;
 auto instance = TestData::ReadProxyFromLua(luaState, -1);
 HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestData.functionReturningString method with an invalid lua proxy object!");
 auto result = instance->functionReturningString();
-LuaHelper::Push(result, luaState, true);
+LuaHelper::Push<true>(result, luaState);
 return 1;
   )R");
   }
@@ -333,11 +335,11 @@ const char *key = lua_tostring(luaState, -1);
 if (0 == strcmp("testStructWithIdRefId", key)) {
   auto instance = TestData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testStructWithIdRef with an invalid lua proxy object!");
-  LuaHelper::Push(instance->mTestStructWithIdRefId, luaState, false);
+  LuaHelper::Push<false>(instance->mTestStructWithIdRefId, luaState);
 } else if (0 == strcmp("testStructNoIdRef", key)) {
   auto instance = TestData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestData.testStructNoIdRef with an invalid lua proxy object!");
-  LuaHelper::Push(instance->mTestStructNoIdRef, luaState, false);
+  LuaHelper::Push<false>(instance->mTestStructNoIdRef, luaState);
 } else {
   HOLGEN_WARN("Unexpected lua field: TestData.{}", key);
   return 0;

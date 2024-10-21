@@ -40,7 +40,7 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
       continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
-    if (!field.mType.IsEmbeddable(mProject)) {
+    if (!field.mType.SupportsCopy(mProject)) {
       continue;
     }
     // TODO: Make this work with nested structs
@@ -148,7 +148,7 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
     if (fieldClass && fieldClass->mStruct) {
       switcher.AddCase(
           Naming().FieldNameInLua(*field.mField), [&, fieldClass](CodeBlock &switchBlock) {
-            bool canBeProxy = field.mType.IsCopyable(mProject);
+            bool canBeProxy = field.mType.SupportsCopy(mProject);
             if (canBeProxy) {
               switchBlock.Add("if (lua_getmetatable(luaState, -1)) {{");
               switchBlock.Indent(1);
@@ -303,12 +303,12 @@ void LuaPlugin::ProcessStruct(Class &cls) {
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   GeneratePushToLua(cls);
-  if (Type{cls.mName}.IsEmbeddable(mProject)) {
+  if (!cls.IsAbstract() && Type{cls.mName}.SupportsMirroring(mProject)) {
     GeneratePushMirrorStructToLua(cls);
   }
   GeneratePushGlobalToLua(cls);
   GenerateReadProxyObjectFromLua(cls);
-  if (!cls.IsAbstract() && Type{cls.mName}.IsEmbeddable(mProject)) {
+  if (!cls.IsAbstract() && Type{cls.mName}.SupportsMirroring(mProject)) {
     GenerateReadMirrorObjectFromLua(cls);
   }
   GenerateNewIndexMetaMethod(cls);

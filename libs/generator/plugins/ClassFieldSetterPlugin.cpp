@@ -42,7 +42,7 @@ void ClassFieldSetterPlugin::Run() {
           arg.mType.mName = "T";
           method.mBody.Add("{} = reinterpret_cast<void*>(val);", field.mName);
         } else {
-          if (!field.mType.IsCopyable(mProject) && field.mType.mType != PassByType::Pointer) {
+          if (!field.mType.SupportsCopy(mProject) && field.mType.mType != PassByType::Pointer) {
             arg.mType.mType = PassByType::MoveReference;
             arg.mType.mConstness = Constness::NotConst;
             method.mBody.Add("{} = std::move(val);", field.mName);

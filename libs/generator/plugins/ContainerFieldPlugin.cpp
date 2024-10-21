@@ -102,7 +102,7 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
   if (useMoveRef && (isPointer || TypeInfo::Get().CppPrimitives.contains(underlyingType.mName))) {
     return;
   }
-  if (!useMoveRef && !isPointer && !field.mType.IsCopyable(mProject)) {
+  if (!useMoveRef && !isPointer && !field.mType.SupportsCopy(mProject)) {
     return;
   }
   auto underlyingClass = mProject.GetClass(underlyingType.mName);
@@ -397,7 +397,7 @@ void ContainerFieldPlugin::GenerateSetElem(Class &cls, const ClassField &field) 
   method.mArguments.emplace_back("idx", Type{fixedSizeEnumArray->mName});
   method.mArguments.back().mType.PreventCopying();
   method.mArguments.emplace_back("val", field.mType.mTemplateParameters.front());
-  if (!field.mType.IsCopyable(mProject)) {
+  if (!field.mType.SupportsCopy(mProject)) {
     method.mArguments.back().mType.mType = PassByType::MoveReference;
     method.mBody.Add("{}[idx.GetValue()] = std::move(val);", field.mName);
   } else {

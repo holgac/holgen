@@ -223,8 +223,16 @@ void LuaHelperPlugin::GenerateBaseRead(Class &cls) {
   // DataManager (or container fields) should have a lua ConstructElem method
   // that reads from a lua table, calls AddElem and returns the new element.
   // Useful for mods for programmatic insertions
+  method.mBody.Add("if constexpr(std::is_pointer_v<T>) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("return Read(*data, luaState, luaIndex);");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}} else {{");
+  method.mBody.Indent(1);
   method.mBody.Add("data = T::{}(luaState, luaIndex);", St::Lua_ReadMirrorObject);
   method.mBody.Add("return true;");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

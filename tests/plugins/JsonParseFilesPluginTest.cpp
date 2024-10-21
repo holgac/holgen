@@ -8,11 +8,13 @@
 class JsonParseFilesPluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
-    ClassPlugin(project, {}).Run();
-    ClassIdFieldPlugin(project, {}).Run();
-    ClassFieldPlugin(project, {}).Run();
-    JsonConverterPlugin(project, {}).Run();
-    JsonParseFilesPlugin(project, {}).Run();
+    TranslatorSettings translatorSettings;
+    translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+    ClassPlugin(project, translatorSettings).Run();
+    ClassIdFieldPlugin(project, translatorSettings).Run();
+    ClassFieldPlugin(project, translatorSettings).Run();
+    JsonConverterPlugin(project, translatorSettings).Run();
+    JsonParseFilesPlugin(project, translatorSettings).Run();
   }
 };
 

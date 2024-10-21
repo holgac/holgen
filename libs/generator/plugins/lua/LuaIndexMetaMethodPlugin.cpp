@@ -193,7 +193,7 @@ std::string LuaIndexMetaMethodPlugin::GenerateReadExposedMethodArgsAndGetArgsStr
       funcArgs << ", ";
     ptrdiff_t stackIdx = ptrdiff_t(i) - ptrdiff_t(exposedMethod.mArguments.size()) + isLuaFunc;
     if (auto argClass = mProject.GetClass(arg.mType.mName)) {
-      bool canBeMirror = !cls.HasVirtualMethods() && Type{cls.mName}.IsCopyable(mProject);
+      bool canBeMirror = !cls.HasVirtualMethods() && arg.mType.SupportsMirroring(mProject);
       bool canBeProxy = true;
       bool canBeNull = arg.mType.mType == PassByType::Pointer;
       if (arg.mType.mType != PassByType::Value && arg.mType.mConstness == Constness::NotConst) {

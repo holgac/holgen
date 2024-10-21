@@ -210,18 +210,18 @@ void Type::PreventCopying(bool addConst) {
   }
 }
 
-bool Type::IsCopyable(TranslatedProject &project) const {
+bool Type::SupportsCopy(TranslatedProject &project) const {
   std::set<std::string> seenClasses;
-  return IsCopyableOrEmbeddable(project, seenClasses, true);
+  return SupportsCopyOrMirroring(project, seenClasses, true);
 }
 
-bool Type::IsEmbeddable(TranslatedProject &project) const {
+bool Type::SupportsMirroring(TranslatedProject &project) const {
   std::set<std::string> seenClasses;
-  return IsCopyableOrEmbeddable(project, seenClasses, false);
+  return SupportsCopyOrMirroring(project, seenClasses, false);
 }
 
-bool Type::IsCopyableOrEmbeddable(TranslatedProject &project, std::set<std::string> &seenClasses,
-                                  bool forCopy) const {
+bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::string> &seenClasses,
+                                   bool forCopy) const {
   // class A has a vector<A>, which doesn't prevent A from being copyable
   if (seenClasses.contains(mName)) {
     return true;
@@ -229,7 +229,7 @@ bool Type::IsCopyableOrEmbeddable(TranslatedProject &project, std::set<std::stri
   if (mName == "std::unique_ptr") {
     return false;
   }
-  if (!forCopy && mType == PassByType::Pointer) {
+  if (forCopy && mType == PassByType::Pointer) {
     return false;
   }
   if (!forCopy && mName == "std::shared_ptr") {
@@ -238,12 +238,12 @@ bool Type::IsCopyableOrEmbeddable(TranslatedProject &project, std::set<std::stri
   auto cls = project.GetClass(mName);
   if (cls) {
     seenClasses.insert(cls->mName);
-    if (cls->mStruct &&
+    if (forCopy && cls->mStruct &&
         cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
       return false;
     }
     for (auto &field: cls->mFields) {
-      if (!field.mType.IsCopyableOrEmbeddable(project, seenClasses, forCopy)) {
+      if (!field.mType.SupportsCopyOrMirroring(project, seenClasses, forCopy)) {
         return false;
       }
       if (!field.mField) {
@@ -262,7 +262,7 @@ bool Type::IsCopyableOrEmbeddable(TranslatedProject &project, std::set<std::stri
     }
   }
   for (auto &templateParameter: mTemplateParameters) {
-    if (!templateParameter.IsCopyableOrEmbeddable(project, seenClasses, forCopy)) {
+    if (!templateParameter.SupportsCopyOrMirroring(project, seenClasses, forCopy)) {
       return false;
     }
   }

@@ -57,10 +57,10 @@ struct Type {
   std::vector<Type> mFunctionalTemplateParameters;
   [[nodiscard]] std::string ToString(bool noTrailingSpace) const;
   void PreventCopying(bool addConst = true);
-  [[nodiscard]] bool IsCopyable(TranslatedProject &project) const;
-  [[nodiscard]] bool IsEmbeddable(TranslatedProject &project) const;
+  [[nodiscard]] bool SupportsCopy(TranslatedProject &project) const;
+  [[nodiscard]] bool SupportsMirroring(TranslatedProject &project) const;
 private:
-  [[nodiscard]] bool IsCopyableOrEmbeddable(TranslatedProject &project,
+  [[nodiscard]] bool SupportsCopyOrMirroring(TranslatedProject &project,
                                 std::set<std::string> &seenClasses, bool forCopy) const;
 };
 

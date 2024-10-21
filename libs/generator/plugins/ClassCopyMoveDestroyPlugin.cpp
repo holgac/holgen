@@ -16,7 +16,7 @@ void ClassCopyMoveDestroyPlugin::Run() {
 
 void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
   auto variantData = cls.GetVariantData();
-  bool isCopyable = Type{cls.mName}.IsCopyable(mProject);
+  bool isCopyable = Type{cls.mName}.SupportsCopy(mProject);
   bool needsCustomCopy = NeedsCustomCopyOperator(cls);
 
   auto defaultConstructor = ClassConstructor{};
