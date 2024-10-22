@@ -29,8 +29,8 @@ public:
   std::unique_ptr<TestStructVirtualMethods> &GetUniquePtr();
   const std::vector<std::unique_ptr<TestStructVirtualMethods>> &GetUniquePtrs() const;
   std::vector<std::unique_ptr<TestStructVirtualMethods>> &GetUniquePtrs();
-  void SetSharedPtr(const std::shared_ptr<TestStructVirtualMethods> &val);
-  void SetSharedPtrs(const std::vector<std::shared_ptr<TestStructVirtualMethods>> &val);
+  void SetSharedPtr(std::shared_ptr<TestStructVirtualMethods> &&val);
+  void SetSharedPtrs(std::vector<std::shared_ptr<TestStructVirtualMethods>> &&val);
   void SetUniquePtr(std::unique_ptr<TestStructVirtualMethods> &&val);
   void SetUniquePtrs(std::vector<std::unique_ptr<TestStructVirtualMethods>> &&val);
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);

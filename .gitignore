@@ -3,6 +3,7 @@ cmake-build-release/
 *.swp
 *.swo
 .idea/misc.xml
+.idea/editor.xml
 tests/blackbox/.run/
 tests/blackbox/.idea/
 tests/blackbox_swig/.idea/

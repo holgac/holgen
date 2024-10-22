@@ -57,12 +57,12 @@ std::vector<std::unique_ptr<TestStructVirtualMethods>> &TestStructSmartPointers:
   return mUniquePtrs;
 }
 
-void TestStructSmartPointers::SetSharedPtr(const std::shared_ptr<TestStructVirtualMethods> &val) {
-  mSharedPtr = val;
+void TestStructSmartPointers::SetSharedPtr(std::shared_ptr<TestStructVirtualMethods> &&val) {
+  mSharedPtr = std::move(val);
 }
 
-void TestStructSmartPointers::SetSharedPtrs(const std::vector<std::shared_ptr<TestStructVirtualMethods>> &val) {
-  mSharedPtrs = val;
+void TestStructSmartPointers::SetSharedPtrs(std::vector<std::shared_ptr<TestStructVirtualMethods>> &&val) {
+  mSharedPtrs = std::move(val);
 }
 
 void TestStructSmartPointers::SetUniquePtr(std::unique_ptr<TestStructVirtualMethods> &&val) {

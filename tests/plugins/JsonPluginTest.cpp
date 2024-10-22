@@ -11,6 +11,7 @@ protected:
   static void Run(TranslatedProject &project) {
     TranslatorSettings translatorSettings;
     translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+    translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
     ClassPlugin(project, translatorSettings).Run();
     ClassIdFieldPlugin(project, translatorSettings).Run();
     ClassFieldPlugin(project, translatorSettings).Run();

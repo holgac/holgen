@@ -29,10 +29,6 @@ void TestStructVirtualMethods::PushToLua(lua_State *luaState) const {
   lua_setmetatable(luaState, -2);
 }
 
-void TestStructVirtualMethods::PushMirrorToLua(lua_State *luaState) const {
-  lua_newtable(luaState);
-}
-
 void TestStructVirtualMethods::PushGlobalToLua(lua_State *luaState, const char *name) const {
   PushToLua(luaState);
   lua_setglobal(luaState, name);

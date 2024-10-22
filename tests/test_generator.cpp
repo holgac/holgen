@@ -24,6 +24,8 @@ TEST(GeneratorTest, Helpers) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
@@ -77,6 +79,8 @@ TEST(GeneratorTest, ClassWithGetters) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
@@ -173,6 +177,8 @@ TEST(GeneratorTest, ClassWithContainers) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
@@ -319,6 +325,8 @@ TEST(GeneratorTest, NestedClasses) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
@@ -559,6 +567,8 @@ TEST(GeneratorTest, Converters) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
@@ -861,6 +871,8 @@ TEST(GeneratorTest, DataManager) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
@@ -982,6 +994,8 @@ TEST(GeneratorTest, NonCopyableStruct) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",

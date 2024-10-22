@@ -166,7 +166,7 @@ std::string Type::ToString(bool noTrailingSpace) const {
 
 Type::Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
            const TypeDefinition &typeDefinition, PassByType passByType, Constness constness) :
-    mConstness(constness), mType(passByType) {
+  mConstness(constness), mType(passByType) {
   if (typeDefinition.mName == "Ref") {
     auto underlyingClass = project.GetClass(typeDefinition.mTemplateParameters[0].mName);
     THROW_IF(!underlyingClass, "Class {} referenced in {} does not exist!",
@@ -226,20 +226,17 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
   if (seenClasses.contains(mName)) {
     return true;
   }
-  if (mName == "std::unique_ptr") {
+  if (mName == "std::unique_ptr" || mName == "std::shared_ptr") {
     return false;
   }
   if (forCopy && mType == PassByType::Pointer) {
-    return false;
-  }
-  if (!forCopy && mName == "std::shared_ptr") {
     return false;
   }
   auto cls = project.GetClass(mName);
   if (cls) {
     seenClasses.insert(cls->mName);
     if (forCopy && cls->mStruct &&
-        cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
+      cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
       return false;
     }
     for (auto &field: cls->mFields) {
