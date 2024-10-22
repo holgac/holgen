@@ -229,9 +229,6 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
   if (mName == "std::unique_ptr" || mName == "std::shared_ptr") {
     return false;
   }
-  if (forCopy && mType == PassByType::Pointer) {
-    return false;
-  }
   auto cls = project.GetClass(mName);
   if (cls) {
     seenClasses.insert(cls->mName);

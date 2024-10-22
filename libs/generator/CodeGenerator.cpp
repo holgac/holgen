@@ -223,7 +223,7 @@ void CodeGenerator::GenerateSwigInterfaceForEnum(const Class &cls, CodeBlock &co
       }
       line << entry.mName << "=" << entry.mValue;
     }
-    line << "}";
+    line << "};";
   }
   codeBlock.Indent(-1);
   codeBlock.Add("}};");
