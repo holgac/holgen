@@ -32,6 +32,7 @@ struct CliOptions {
   std::string mConfigHeader;
   bool mLuaEnabled = false;
   bool mJsonEnabled = false;
+  bool mCSharpEnabled = false;
   bool mSwigLuaEnabled = false;
   bool mSwigCSharpEnabled = false;
 };
@@ -68,6 +69,11 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
        .access_name = "lua",
        .value_name = nullptr,
        .description = "Enable lua bindings (optional, requires lua)"},
+      {.identifier = 'c',
+       .access_letters = nullptr,
+       .access_name = "csharp",
+       .value_name = nullptr,
+       .description = "Enable coreclr csharp bindings (optional, requires dotnet)"},
       {.identifier = 'j',
        .access_letters = nullptr,
        .access_name = "json",
@@ -87,7 +93,8 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
   cag_option_context context;
   cag_option_init(&context, cargsCliOptions, std::size(cargsCliOptions), argc, argv);
   while (cag_option_fetch(&context)) {
-    switch (cag_option_get_identifier(&context)) {
+    auto identifier = cag_option_get_identifier(&context);
+    switch (identifier) {
     case 'i':
       out.mSchemaDirs.emplace_back(cag_option_get_value(&context));
       break;
@@ -105,6 +112,9 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
       break;
     case 'l':
       out.mLuaEnabled = true;
+      break;
+    case 'c':
+      out.mCSharpEnabled = true;
       break;
     case 'j':
       out.mJsonEnabled = true;

@@ -2,7 +2,7 @@
 #pragma once
 
 #include "../holgen.h"
-namespace holgen_blackbox_swig {
+namespace holgen_blackbox_csharp {
 template <typename T>
 class GlobalPointer {
 public:

@@ -5,7 +5,7 @@
 
 // HOLGEN_USER_DEFINED_END:Vector_CustomIncludes
 
-namespace holgen_blackbox_swig {
+namespace holgen_blackbox_csharp {
 float Vector::LengthSquared() const {
 // HOLGEN_USER_DEFINED_BEGIN:Vector_LengthSquared_Const
   return mX * mX + mY * mY + mZ * mZ;

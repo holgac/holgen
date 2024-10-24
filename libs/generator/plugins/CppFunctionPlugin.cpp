@@ -4,7 +4,8 @@
 namespace holgen {
 void CppFunctionPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
-    if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::LuaFuncTable))
+    if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::LuaFuncTable) || cls.
+      mStruct->GetAnnotation(Annotations::Interface))
       continue;
     ProcessStructDefinition(cls, *cls.mStruct);
   }

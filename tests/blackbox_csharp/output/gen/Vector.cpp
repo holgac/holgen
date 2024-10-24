@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-namespace holgen_blackbox_swig {
+namespace holgen_blackbox_csharp {
 bool Vector::operator==(const Vector &rhs) const {
   return !(
       std::fabs(mX - rhs.mX) >= 0.00001 ||

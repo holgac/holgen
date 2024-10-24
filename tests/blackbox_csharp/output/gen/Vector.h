@@ -2,8 +2,8 @@
 #pragma once
 
 #include "../holgen.h"
-namespace holgen_blackbox_swig {
-// Defined in tests/blackbox_swig/schemas/vector.hsc
+namespace holgen_blackbox_csharp {
+// Defined in tests/blackbox_csharp/schemas/vector.hsc
 class Vector {
 public:
   Vector(const float x, const float y, const float z);

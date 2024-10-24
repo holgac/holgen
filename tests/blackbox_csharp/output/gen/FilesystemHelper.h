@@ -5,7 +5,7 @@
 #include <filesystem>
 #include <string>
 
-namespace holgen_blackbox_swig {
+namespace holgen_blackbox_csharp {
 class FilesystemHelper {
 public:
   static std::string ReadFile(const std::filesystem::path &filePath);
