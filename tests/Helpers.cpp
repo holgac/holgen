@@ -102,7 +102,7 @@ void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
   EXPECT_EQ(actual.mStaticness, expected.mStaticness);
   EXPECT_EQ(actual.mConstness, expected.mConstness) << " in method " << actual.mName;
   EXPECT_EQ(actual.mUserDefined, expected.mUserDefined);
-  EXPECT_EQ(actual.mExposeToLua, expected.mExposeToLua);
+  EXPECT_EQ(actual.mExposeToScript, expected.mExposeToScript);
   EXPECT_EQ(actual.mFunction, expected.mFunction);
 }
 

@@ -118,7 +118,7 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
 
   method.mReturnType.mConstness = functionDefinition.mReturnType.mConstness;
 
-  method.mExposeToLua = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr &&
+  method.mExposeToScript = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr &&
       method.mVisibility == Visibility::Public;
   method.mFunction = &functionDefinition;
 

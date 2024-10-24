@@ -116,7 +116,7 @@ struct ClassMethod : ClassMethodBase {
   Staticness mStaticness;
   Constexprness mConstexprness = Constexprness::NotConstexpr;
   Virtuality mVirtuality = Virtuality::NotVirtual;
-  bool mExposeToLua = false;
+  bool mExposeToScript = false;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
 };
 

@@ -364,7 +364,7 @@ void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
   method.mBody.Add("lua_pushcfunction(luaState, {}::NewIndexMetaMethod);", cls.mName);
   method.mBody.Add("lua_settable(luaState, -3);");
   for (auto &clsMethod: cls.mMethods) {
-    if (!clsMethod.mExposeToLua || clsMethod.mStaticness != Staticness::Static) {
+    if (!clsMethod.mExposeToScript || clsMethod.mStaticness != Staticness::Static) {
       continue;
     }
     method.mBody.Add("lua_pushstring(luaState, \"{}\");", clsMethod.mName);
