@@ -6,5 +6,5 @@ cmake-build-release/
 .idea/editor.xml
 tests/blackbox/.run/
 tests/blackbox/.idea/
-tests/blackbox_swig/.idea/
-tests/blackbox_swig/output/
+tests/blackbox_csharp/.idea/
+tests/blackbox_csharp/output/
