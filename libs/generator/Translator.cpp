@@ -15,6 +15,7 @@
 #include "generator/plugins/ManagedClassPlugin.h"
 #include "generator/plugins/helpers/FilesystemHelperPlugin.h"
 #include "generator/plugins/helpers/GlobalPointerPlugin.h"
+#include "generator/plugins/helpers/SingletonPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
 #include "generator/plugins/json/JsonHelperPlugin.h"
 #include "generator/plugins/json/JsonParseFilesPlugin.h"
@@ -58,6 +59,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<LuaHelperPlugin>();
   AddPlugin<GlobalPointerPlugin>();
   AddPlugin<FilesystemHelperPlugin>();
+  AddPlugin<SingletonPlugin>();
   AddPlugin<ClassCopyMoveDestroyPlugin>();
   AddPlugin<ClassMetadataPlugin>();
 }

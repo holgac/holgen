@@ -185,10 +185,15 @@ public:
    */
   inline static const std::string DataManager = "dataManager";
 
- /**
- * Interfaces are classes fully implemented in C# that can be called from C++.
-  */
- inline static const std::string Interface = "interface";
+  /**
+   * Interfaces are classes fully implemented in C# that can be called from C++.
+   */
+  inline static const std::string Interface = "interface";
+
+  /**
+   * Singleton classes derive from Singleton<T>.
+   */
+  inline static const std::string Singleton = "singleton";
 
   /**
    * Marks the struct below as a function table where all functions are defined in lua and json

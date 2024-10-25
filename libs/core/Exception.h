@@ -10,7 +10,7 @@
   }
 
 #define THROW(msg, ...) \
-  throw Exception(std::format("{}:{}: " msg, __FILE__, __LINE__, ##__VA_ARGS__));
+  throw holgen::Exception(std::format("{}:{}: " msg, __FILE__, __LINE__, ##__VA_ARGS__));
 
 namespace holgen {
 

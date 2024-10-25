@@ -185,7 +185,9 @@ void EnumPluginBase::GenerateFormatter(Class &cls, bool forNestedEnum) {
   else
     formatter.mTemplateSpecializations.push_back(className);
   formatter.mClassType = ClassType::Struct;
-  formatter.mBaseClasses.emplace_back("formatter<string>");
+
+  auto &base = formatter.mBaseClasses.emplace_back(Visibility::Public, Type{"formatter"});
+  base.mType.mTemplateParameters.emplace_back("string");
 
   auto format = ClassMethod{"format", Type{"auto"}, Visibility::Public, Constness::Const};
   format.mTemplateParameters.emplace_back("typename", "FormatContext");

@@ -258,7 +258,7 @@ std::string CodeGenerator::GenerateClassDeclaration(const Class &cls) const {
       } else {
         line << ",";
       }
-      line << " public " << baseClass;
+      line << std::format(" {} {}", baseClass.mVisibility, baseClass.mType.ToString(true));
     }
   }
   return line.str();
@@ -278,17 +278,7 @@ void CodeGenerator::GenerateForVisibility(CodeBlock &codeBlock, const Class &cls
   GenerateMethodsForHeader(codeBlockForVisibility, cls, visibility, true);
   GenerateFieldDeclarations(codeBlockForVisibility, cls, visibility);
   if (!codeBlockForVisibility.mContents.empty()) {
-    switch (visibility) {
-    case Visibility::Public:
-      codeBlock.Line() << "public:";
-      break;
-    case Visibility::Protected:
-      codeBlock.Line() << "protected:";
-      break;
-    case Visibility::Private:
-      codeBlock.Line() << "private:";
-      break;
-    }
+    codeBlock.Add("{}:", visibility);
     codeBlock.Indent(1);
     codeBlock.Add(std::move(codeBlockForVisibility));
     codeBlock.Indent(-1);
@@ -545,6 +535,12 @@ HeaderContainer CodeGenerator::PrepareIncludes(const Class &cls, bool isHeader) 
     headers = cls.mHeaderIncludes;
   else
     headers = cls.mSourceIncludes;
+
+  if (isHeader) {
+    for (auto &baseClass: cls.mBaseClasses) {
+      headers.IncludeBaseClass(*mTranslatedProject, cls, baseClass);
+    }
+  }
 
   for (const auto &field: cls.mFields) {
     headers.IncludeClassField(*mTranslatedProject, cls, field, isHeader);

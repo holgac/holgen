@@ -38,6 +38,7 @@ set(gen_plugins
     plugins/TranslatorPlugin.cpp
     plugins/helpers/GlobalPointerPlugin.cpp
     plugins/helpers/FilesystemHelperPlugin.cpp
+    plugins/helpers/SingletonPlugin.cpp
     plugins/ClassIdFieldPlugin.cpp
     plugins/ClassFieldPlugin.cpp
     plugins/ClassFieldGetterPlugin.cpp

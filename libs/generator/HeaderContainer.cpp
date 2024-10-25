@@ -168,6 +168,14 @@ void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Using
   IncludeType(project, usingStatement.mSourceType, isHeader);
 }
 
+void HeaderContainer::IncludeBaseClass(const TranslatedProject &project, const Class &cls,
+                                         const BaeClass &baseClass) {
+  bool isLocalType =
+      cls.GetTemplateParameter(baseClass.mType.mName) || cls.GetUsing(baseClass.mType.mName);
+  if (!isLocalType)
+    IncludeType(project, baseClass.mType, true);
+}
+
 void HeaderContainer::AddForwardDeclaration(ForwardDeclaration declaration) {
   mForwardDeclarations.insert(std::move(declaration));
 }

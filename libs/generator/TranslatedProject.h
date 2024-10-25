@@ -7,6 +7,7 @@
 #include "HeaderContainer.h"
 #include "TypeInfo.h"
 #include "parser/DependencyGraph.h"
+#include "core/Exception.h"
 
 namespace holgen {
 
@@ -154,6 +155,14 @@ struct ClassEnumEntry {
       mName(std::move(name)), mValue(std::move(value)), mEntry(entry) {}
 };
 
+struct BaeClass {
+  BaeClass(Visibility visibility, Type type) :
+      mType(std::move(type)), mVisibility(visibility) {}
+
+  Type mType;
+  Visibility mVisibility = Visibility::Public;
+};
+
 struct ClassEnum {
   std::string mName;
   Visibility mVisibility = Visibility::Public;
@@ -195,7 +204,7 @@ struct Class {
   HeaderContainer mSourceIncludes;
   ClassType mClassType = ClassType::Class;
   std::string mNamespace;
-  std::list<std::string> mBaseClasses;
+  std::list<BaeClass> mBaseClasses;
   std::list<std::string> mComments;
   [[nodiscard]] ClassField *GetField(const std::string &name);
   [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);
@@ -235,3 +244,20 @@ public:
 };
 
 } // namespace holgen
+
+namespace std {
+template <>
+struct formatter<holgen::Visibility> : formatter<std::string> {
+  auto format(const holgen::Visibility &visibility, format_context &ctx) const {
+    switch (visibility) {
+    case holgen::Visibility::Public:
+      return std::format_to(ctx.out(), "public");
+    case holgen::Visibility::Protected:
+      return std::format_to(ctx.out(), "protected");
+    case holgen::Visibility::Private:
+      return std::format_to(ctx.out(), "private");
+    }
+    THROW("Unexpected visibility: {}", uint32_t(visibility));
+  }
+};
+} // namespace std

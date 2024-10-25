@@ -1,4 +1,6 @@
+@singleton
 struct CalculatorManager {
-    func RegisterCalculator(ICalculator calculator);
+    func NewCalculator(string name, ICalculator calculator);
+    func GetCalculator(string name) -> ICalculator nullable;
     vector<unique_ptr<ICalculator>> calculators;
 }
