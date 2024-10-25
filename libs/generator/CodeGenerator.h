@@ -17,7 +17,6 @@ public:
   std::vector<GeneratedContent> Generate(const TranslatedProject &translatedProject);
 
 private:
-  void GenerateHolgenHeader(GeneratedContent &header) const;
   void GenerateClassHeader(GeneratedContent &header, const Class &cls,
                            const HeaderContainer &headers) const;
   void GenerateClassSource(GeneratedContent &source, const Class &cls,

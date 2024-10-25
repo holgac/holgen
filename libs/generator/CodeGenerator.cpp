@@ -4,6 +4,7 @@
 #include <sstream>
 #include "HeaderContainer.h"
 #include "generators/CMakeGenerator.h"
+#include "generators/HolgenHeaderGenerator.h"
 
 namespace holgen {
 namespace {
@@ -109,7 +110,7 @@ std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &t
       GenerateClassModifiableSource(contents.emplace_back(), cls);
     }
   }
-  GenerateHolgenHeader(contents.emplace_back());
+  HolgenHeaderGenerator(mGeneratorSettings, translatedProject).Run(contents);
   CMakeGenerator(mGeneratorSettings, translatedProject).Run(contents);
 
   if (mGeneratorSettings.IsFeatureEnabled(GeneratorFeatureFlag::SwigMask)) {
@@ -518,71 +519,6 @@ HeaderContainer CodeGenerator::PrepareIncludes(const Class &cls, bool isHeader) 
 
 void CodeGenerator::GenerateClassDeclarationsForHeader(
     CodeBlock &codeBlock HOLGEN_ATTRIBUTE_UNUSED, const Class &cls HOLGEN_ATTRIBUTE_UNUSED) const {}
-
-void CodeGenerator::GenerateHolgenHeader(GeneratedContent &header) const {
-  header.mType = FileType::CppHeader;
-  header.mName = "holgen.h";
-  CodeBlock codeBlock;
-  codeBlock.Add("// {}", GenMessage);
-  codeBlock.Add("#pragma once");
-  codeBlock.Line();
-  codeBlock.Add("#include <iostream>");
-  codeBlock.Add("#include <format>");
-  if (!mGeneratorSettings.mConfigHeader.empty()) {
-    codeBlock.Add("#include \"{}\"", mGeneratorSettings.mConfigHeader);
-  }
-
-  codeBlock.Line();
-  codeBlock.Add("#ifndef HOLGEN_FAIL");
-  codeBlock.Add(
-      R"(#define HOLGEN_FAIL(msg, ...) throw std::runtime_error(std::format("{{}}:{{}} " msg, __FILE__, __LINE__, ## __VA_ARGS__)))");
-  codeBlock.Add("#endif // ifndef HOLGEN_FAIL");
-
-  codeBlock.Line();
-  codeBlock.Add("#ifndef HOLGEN_FAIL_IF");
-  codeBlock.Add("#define HOLGEN_FAIL_IF(cond, msg, ...) if (cond) {{ \\");
-  codeBlock.Add("HOLGEN_FAIL(msg, ## __VA_ARGS__); \\");
-  codeBlock.Add("}}");
-  codeBlock.Add("#endif // ifndef HOLGEN_FAIL_IF");
-
-  codeBlock.Line();
-  codeBlock.Add("#ifndef HOLGEN_WARN");
-  codeBlock.Add(
-      R"(#define HOLGEN_WARN(msg, ...) std::cerr << std::format("{{}}:{{}} " msg, __FILE__, __LINE__, ## __VA_ARGS__) << std::endl)");
-  codeBlock.Add("#endif // ifndef HOLGEN_WARN");
-
-  codeBlock.Line();
-  codeBlock.Add("#ifndef HOLGEN_WARN_IF");
-  codeBlock.Add("#define HOLGEN_WARN_IF(cond, msg, ...) if (cond) {{ \\");
-  codeBlock.Add("HOLGEN_WARN(msg, ## __VA_ARGS__); \\");
-  codeBlock.Add("}}");
-  codeBlock.Add("#endif // ifndef HOLGEN_WARN_IF");
-
-  codeBlock.Line();
-  codeBlock.Add("#ifndef HOLGEN_WARN_AND_RETURN_IF");
-  codeBlock.Add("#define HOLGEN_WARN_AND_RETURN_IF(cond, retVal, msg, ...) if (cond) {{ \\");
-  codeBlock.Add("HOLGEN_WARN(msg, ## __VA_ARGS__); \\");
-  codeBlock.Add("return retVal; \\");
-  codeBlock.Add("}}");
-  codeBlock.Add("#endif // ifndef HOLGEN_WARN_AND_RETURN_IF");
-
-  codeBlock.Line();
-  codeBlock.Add("#ifndef HOLGEN_WARN_AND_CONTINUE_IF");
-  codeBlock.Add("#define HOLGEN_WARN_AND_CONTINUE_IF(cond, msg, ...) if (cond) {{ \\");
-  codeBlock.Add("HOLGEN_WARN(msg, ## __VA_ARGS__); \\");
-  codeBlock.Add("continue; \\");
-  codeBlock.Add("}}");
-  codeBlock.Add("#endif // ifndef HOLGEN_WARN_AND_CONTINUE_IF");
-  codeBlock.Add("#if WINDOWS");
-  codeBlock.Add("#define HOLGEN_EXPORT __declspec(dllexport)");
-  codeBlock.Add("#elif __GNUC__ >= 4");
-  codeBlock.Add("#define HOLGEN_EXPORT __attribute__ ((visibility (\"default\")))");
-  codeBlock.Add("#else");
-  codeBlock.Add("#define HOLGEN_EXPORT");
-  codeBlock.Add("#endif");
-
-  header.mBody = std::move(codeBlock);
-}
 
 void CodeGenerator::GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const {
   for (auto &usingStatement: cls.mUsings) {

@@ -1,6 +1,6 @@
 #include "CMakeGenerator.h"
 
-#include <core/St.h>
+#include "core/St.h"
 
 namespace holgen {
 void CMakeGenerator::Run(std::vector<GeneratedContent> &contents) {
