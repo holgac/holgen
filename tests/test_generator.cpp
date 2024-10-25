@@ -43,6 +43,7 @@ set(gen_sources
     gen/LuaHelper.cpp
     gen/GlobalPointer.cpp
     gen/FilesystemHelper.cpp
+    gen/Singleton.cpp
 )
 set(src_sources
 )
@@ -226,6 +227,9 @@ private:
   std::map<std::string, double> mPrices;
 };
 }
+extern "C" {
+  HOLGEN_EXPORT void generator_test_namespace_Market_OnNewTrade(generator_test_namespace::Market *instance, const std::string &instrument, const double price);
+}
           )R");
   ExpectGeneratedContent(files["gen/Market.cpp"], FileType::CppSource, "gen/Market.cpp",
                          R"R(
@@ -303,6 +307,11 @@ bool Market::ParseJson(const rapidjson::Value &json, const Converter &converter)
   }
   return true;
 }
+}
+extern "C" {
+  void generator_test_namespace_Market_OnNewTrade(generator_test_namespace::Market *instance, const std::string &instrument, const double price) {
+    return instance->OnNewTrade(instrument, price);
+  }
 }
           )R");
 }

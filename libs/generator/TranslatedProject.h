@@ -77,7 +77,7 @@ struct TemplateParameter {
   std::string mName;
 };
 
-struct ClassMethodBase {
+struct MethodBase {
   Visibility mVisibility = Visibility::Public;
   CodeBlock mBody;
   std::list<ClassMethodArgument> mArguments;
@@ -90,7 +90,7 @@ struct ClassMethodBase {
   Noexceptness mNoexceptness = Noexceptness::NotNoexcept;
 
 protected:
-  ClassMethodBase() = default;
+  MethodBase() = default;
 };
 
 struct Using {
@@ -101,7 +101,16 @@ struct Using {
   std::string mTargetType;
 };
 
-struct ClassMethod : ClassMethodBase {
+struct CFunction : MethodBase {
+  CFunction(std::string name, Type returnType, const ClassMethod *method) :
+      mName(std::move(name)), mReturnType(std::move(returnType)), mMethod(method) {}
+
+  std::string mName;
+  Type mReturnType;
+  const ClassMethod *mMethod;
+};
+
+struct ClassMethod : MethodBase {
   ClassMethod(std::string name, Type returnType, Visibility visibility = Visibility::Public,
               Constness constness = Constness::Const,
               Staticness staticness = Staticness::NotStatic) :
@@ -129,13 +138,13 @@ struct ClassConstructorInitializer {
       mDestination(std::move(destination)), mValue(std::move(value)) {}
 };
 
-struct ClassConstructor : ClassMethodBase {
+struct ClassConstructor : MethodBase {
   ClassConstructor() = default;
   std::list<ClassConstructorInitializer> mInitializerList;
   Explicitness mExplicitness = Explicitness::NotExplicit;
 };
 
-struct ClassDestructor : ClassMethodBase {
+struct ClassDestructor : MethodBase {
   ClassDestructor() = default;
   bool IsEmpty() const;
 };
@@ -155,9 +164,8 @@ struct ClassEnumEntry {
       mName(std::move(name)), mValue(std::move(value)), mEntry(entry) {}
 };
 
-struct BaeClass {
-  BaeClass(Visibility visibility, Type type) :
-      mType(std::move(type)), mVisibility(visibility) {}
+struct BaseClass {
+  BaseClass(Visibility visibility, Type type) : mType(std::move(type)), mVisibility(visibility) {}
 
   Type mType;
   Visibility mVisibility = Visibility::Public;
@@ -192,6 +200,8 @@ struct Class {
   const EnumDefinition *mEnum = nullptr;
   std::string mName;
   std::list<ClassMethod> mMethods;
+  // functions defined in extern C in the class header, typically used to wrap methods
+  std::list<CFunction> mCFunctions;
   std::list<ClassConstructor> mConstructors;
   ClassDestructor mDestructor;
   std::list<ClassField> mFields;
@@ -204,7 +214,7 @@ struct Class {
   HeaderContainer mSourceIncludes;
   ClassType mClassType = ClassType::Class;
   std::string mNamespace;
-  std::list<BaeClass> mBaseClasses;
+  std::list<BaseClass> mBaseClasses;
   std::list<std::string> mComments;
   [[nodiscard]] ClassField *GetField(const std::string &name);
   [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);

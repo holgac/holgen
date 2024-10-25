@@ -9,7 +9,7 @@ namespace holgen {
 
 struct TranslatedProject;
 struct Class;
-struct BaeClass;
+struct BaseClass;
 struct ClassMethod;
 struct ClassField;
 struct Type;
@@ -36,7 +36,7 @@ public:
   void AddForwardDeclaration(ForwardDeclaration declaration);
   void Write(CodeBlock &codeBlock) const;
   void IncludeUsing(const TranslatedProject &project, const Using &usingStatement, bool isHeader);
-  void IncludeBaseClass(const TranslatedProject &project, const Class &cls, const BaeClass& baseClass);
+  void IncludeBaseClass(const TranslatedProject &project, const Class &cls, const BaseClass& baseClass);
   void IncludeClassField(const TranslatedProject &project, const Class &cls,
                          const ClassField &classField, bool isHeader);
   void IncludeClassMethod(const TranslatedProject &project, const Class &cls,

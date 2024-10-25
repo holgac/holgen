@@ -3,7 +3,7 @@
 #include "core/Exception.h"
 
 namespace holgen {
-void FunctionPluginBase::ProcessFunctionArgument(ClassMethodBase &method,
+void FunctionPluginBase::ProcessFunctionArgument(MethodBase &method,
                                                  const FunctionArgumentDefinition &funcArg) {
   auto &arg = method.mArguments.emplace_back(
       funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
@@ -77,7 +77,7 @@ void FunctionPluginBase::ProcessToStringFunction(Class &cls, ClassMethod &method
   cls.mSpecializations.push_back(std::move(formatter));
 }
 
-void FunctionPluginBase::ProcessMethodVisibility(ClassMethodBase &method,
+void FunctionPluginBase::ProcessMethodVisibility(MethodBase &method,
                                                  const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   if (!funcAnnotation) {

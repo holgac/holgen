@@ -12,13 +12,13 @@ const char *PartialGenMessage =
 } // namespace
 
 namespace {
-bool CanBeDefinedInHeader(const Class &cls, const ClassMethodBase &method) {
+bool CanBeDefinedInHeader(const Class &cls, const MethodBase &method) {
   return !method.mTemplateParameters.empty() || !cls.mTemplateParameters.empty() ||
       !cls.mTemplateSpecializations.empty() || method.mDefaultDelete != DefaultDelete::Neither;
 }
 
 bool CanBeDefinedInHeader(const Class &cls, const ClassMethod &method) {
-  return CanBeDefinedInHeader(cls, (const ClassMethodBase &)method) ||
+  return CanBeDefinedInHeader(cls, (const MethodBase &)method) ||
       method.mConstexprness == Constexprness::Constexpr;
 }
 
@@ -134,6 +134,7 @@ void CodeGenerator::GenerateClassHeader(GeneratedContent &header, const Class &c
   for (auto &specialization: cls.mSpecializations) {
     GenerateClassDefinition(specialization, codeBlock);
   }
+  GenerateCFunctionsForHeader(codeBlock, cls);
   header.mBody = std::move(codeBlock);
 }
 
@@ -311,8 +312,7 @@ void CodeGenerator::GenerateFieldDeclarations(CodeBlock &codeBlock, const Class 
 }
 
 namespace {
-bool ShouldGenerateMethod(const ClassMethodBase &method, Visibility visibility,
-                          bool isInsideClass) {
+bool ShouldGenerateMethod(const MethodBase &method, Visibility visibility, bool isInsideClass) {
   if (method.mVisibility != visibility)
     return false;
   if (method.mDefaultDelete != DefaultDelete::Neither)
@@ -446,6 +446,8 @@ void CodeGenerator::GenerateClassSource(GeneratedContent &source, const Class &c
 
   if (!cls.mNamespace.empty())
     codeBlock.Add("}}"); // namespace
+
+  GenerateCFunctionsForSource(codeBlock, cls);
 
   source.mBody = std::move(codeBlock);
 }
@@ -611,6 +613,13 @@ void CodeGenerator::GenerateHolgenHeader(GeneratedContent &header) const {
   codeBlock.Add("continue; \\");
   codeBlock.Add("}}");
   codeBlock.Add("#endif // ifndef HOLGEN_WARN_AND_CONTINUE_IF");
+  codeBlock.Add("#if WINDOWS");
+  codeBlock.Add("#define HOLGEN_EXPORT __declspec(dllexport)");
+  codeBlock.Add("#elif __GNUC__ >= 4");
+  codeBlock.Add("#define HOLGEN_EXPORT __attribute__ ((visibility (\"default\")))");
+  codeBlock.Add("#else");
+  codeBlock.Add("#define HOLGEN_EXPORT");
+  codeBlock.Add("#endif");
 
   header.mBody = std::move(codeBlock);
 }
@@ -620,6 +629,18 @@ void CodeGenerator::GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &c
     codeBlock.Add("using {}={};", usingStatement.mTargetType,
                   usingStatement.mSourceType.ToString(true));
   }
+}
+
+void CodeGenerator::GenerateCFunctionsForHeader(CodeBlock &codeBlock, const Class &cls) const {
+  if (cls.mCFunctions.empty())
+    return;
+  codeBlock.Add("extern \"C\" {{");
+  codeBlock.Indent(1);
+  for (auto &func: cls.mCFunctions) {
+    codeBlock.Add("{};", GenerateFunctionSignature(func, true));
+  }
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
 }
 
 CodeBlock CodeGenerator::GenerateConstructorsForSource(const Class &cls) const {
@@ -677,6 +698,22 @@ CodeBlock CodeGenerator::GenerateConstructorsForSource(const Class &cls) const {
   return codeBlock;
 }
 
+void CodeGenerator::GenerateCFunctionsForSource(CodeBlock &codeBlock, const Class &cls) const {
+  if (cls.mCFunctions.empty())
+    return;
+  codeBlock.Add("extern \"C\" {{");
+  codeBlock.Indent(1);
+  for (auto &func: cls.mCFunctions) {
+    codeBlock.Add("{} {{", GenerateFunctionSignature(func, false));
+    codeBlock.Indent(1);
+    codeBlock.Add(func.mBody);
+    codeBlock.Indent(-1);
+    codeBlock.Add("}}");
+  }
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
+}
+
 std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const ClassMethod &method,
                                                      bool isInHeader, bool isInsideClass) const {
   std::stringstream ss;
@@ -687,6 +724,7 @@ std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const Cla
   if (isInHeader && isInsideClass && method.mVirtuality != Virtuality::NotVirtual) {
     ss << "virtual ";
   }
+  // TODO: this doesn't work if type is const
   if (!isInHeader && cls.GetUsing(method.mReturnType.mName))
     ss << cls.mName << "::";
   ss << method.mReturnType.ToString(false);
@@ -724,6 +762,7 @@ std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const Cla
       isFirst = false;
     else
       ss << ", ";
+    // TODO: this doesn't work if type is const
     if (cls.GetUsing(arg.mType.mName) && !isInsideClass)
       ss << cls.mName << "::";
     ss << arg.mType.ToString(false) << arg.mName;
@@ -734,6 +773,26 @@ std::string CodeGenerator::GenerateFunctionSignature(const Class &cls, const Cla
   ss << ")";
   if (ctor.mNoexceptness == Noexceptness::Noexcept)
     ss << " noexcept";
+  return ss.str();
+}
+
+std::string CodeGenerator::GenerateFunctionSignature(const CFunction &func, bool isInHeader) const {
+
+  std::stringstream ss;
+  if (isInHeader) {
+    ss << "HOLGEN_EXPORT ";
+  }
+  ss << func.mReturnType.ToFullyQualifiedString(*mTranslatedProject);
+
+  ss << func.mName << "(";
+  size_t idx = 0;
+  for (auto &arg: func.mArguments) {
+    if (idx != 0)
+      ss << ", ";
+    ss << arg.mType.ToFullyQualifiedString(*mTranslatedProject) << arg.mName;
+    ++idx;
+  }
+  ss << ")";
   return ss.str();
 }
 

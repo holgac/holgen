@@ -73,7 +73,7 @@ void ExpectEqual(const ClassField &actual, const ClassField &expected) {
   EXPECT_EQ(actual.mField, expected.mField) << " in field " << actual.mName;
 }
 
-void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected,
+void ExpectEqual(const MethodBase &actual, const MethodBase &expected,
                  const std::optional<std::string> &expectedBody, const std::string &name) {
   EXPECT_EQ(actual.mVisibility, expected.mVisibility) << " in method " << name;
   if (expectedBody)
@@ -96,7 +96,7 @@ void ExpectEqual(const ClassMethodBase &actual, const ClassMethodBase &expected,
 
 void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
                  const std::optional<std::string> &expectedBody) {
-  ExpectEqual((ClassMethodBase &)actual, (ClassMethodBase &)expected, expectedBody, actual.mName);
+  ExpectEqual((MethodBase &)actual, (MethodBase &)expected, expectedBody, actual.mName);
   EXPECT_EQ(actual.mName, expected.mName);
   ExpectEqual(actual.mReturnType, expected.mReturnType);
   EXPECT_EQ(actual.mStaticness, expected.mStaticness);
@@ -114,12 +114,12 @@ void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &e
 
 void ExpectEqual(const ClassDestructor &actual, const ClassDestructor &expected,
                  const std::optional<std::string> &expectedBody) {
-  ExpectEqual((ClassMethodBase &)actual, (ClassMethodBase &)expected, expectedBody, "destructor");
+  ExpectEqual((MethodBase &)actual, (MethodBase &)expected, expectedBody, "destructor");
 }
 
 void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expected,
                  const std::optional<std::string> &expectedBody) {
-  ExpectEqual((ClassMethodBase &)actual, (ClassMethodBase &)expected, expectedBody, "constructor");
+  ExpectEqual((MethodBase &)actual, (MethodBase &)expected, expectedBody, "constructor");
   EXPECT_EQ(actual.mExplicitness, expected.mExplicitness);
   for (auto itExpected = expected.mInitializerList.begin(),
             itActual = actual.mInitializerList.begin();

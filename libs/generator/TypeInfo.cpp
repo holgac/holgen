@@ -118,30 +118,38 @@ std::string TypeInfo::GetUnsigned(const std::string &signedType) {
   return "u" + signedType;
 }
 
-std::string Type::ToString(bool noTrailingSpace) const {
+namespace {
+template <bool FullyQualified>
+std::string ToStringGeneric(const Type &type, bool noTrailingSpace,
+                            const TranslatedProject *project) {
   std::stringstream ss;
 
-  if (mConstexprness == Constexprness::Constexpr)
+  if (type.mConstexprness == Constexprness::Constexpr)
     ss << "constexpr ";
-  if (mConstness == Constness::Const)
+  if (type.mConstness == Constness::Const)
     ss << "const ";
-  ss << mName;
-  if (!mTemplateParameters.empty()) {
+  if constexpr (FullyQualified) {
+    auto cls = project->GetClass(type.mName);
+    if (cls)
+      ss << cls->mNamespace << "::";
+  }
+  ss << type.mName;
+  if (!type.mTemplateParameters.empty()) {
     ss << "<";
     bool isFirst = true;
-    for (const auto &templateParameter: mTemplateParameters) {
+    for (const auto &templateParameter: type.mTemplateParameters) {
       if (isFirst) {
         isFirst = false;
       } else {
         ss << ", ";
       }
-      ss << templateParameter.ToString(true);
+      ss << ToStringGeneric<FullyQualified>(templateParameter, true, project);
     }
     ss << ">";
   }
-  if (!mFunctionalTemplateParameters.empty()) {
+  if (!type.mFunctionalTemplateParameters.empty()) {
     ss << "<";
-    for (size_t i = 0; i < mFunctionalTemplateParameters.size(); ++i) {
+    for (size_t i = 0; i < type.mFunctionalTemplateParameters.size(); ++i) {
       if (i == 0) {
         // nothing special
       } else if (i == 1) {
@@ -149,24 +157,33 @@ std::string Type::ToString(bool noTrailingSpace) const {
       } else {
         ss << ", ";
       }
-      ss << mFunctionalTemplateParameters[i].ToString(true);
+      ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], noTrailingSpace, project);
     }
     ss << ")>";
   }
-  if (mType == PassByType::Reference)
+  if (type.mType == PassByType::Reference)
     ss << " &";
-  else if (mType == PassByType::Pointer)
+  else if (type.mType == PassByType::Pointer)
     ss << " *";
-  else if (mType == PassByType::MoveReference)
+  else if (type.mType == PassByType::MoveReference)
     ss << " &&";
   else if (!noTrailingSpace)
     ss << " ";
   return ss.str();
 }
+} // namespace
+
+std::string Type::ToString(bool noTrailingSpace) const {
+  return ToStringGeneric<false>(*this, noTrailingSpace, nullptr);
+}
+
+std::string Type::ToFullyQualifiedString(const TranslatedProject &project) const {
+  return ToStringGeneric<true>(*this, false, &project);
+}
 
 Type::Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
            const TypeDefinition &typeDefinition, PassByType passByType, Constness constness) :
-  mConstness(constness), mType(passByType) {
+    mConstness(constness), mType(passByType) {
   if (typeDefinition.mName == "Ref") {
     auto underlyingClass = project.GetClass(typeDefinition.mTemplateParameters[0].mName);
     THROW_IF(!underlyingClass, "Class {} referenced in {} does not exist!",
@@ -233,7 +250,7 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
   if (cls) {
     seenClasses.insert(cls->mName);
     if (forCopy && cls->mStruct &&
-      cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
+        cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
       return false;
     }
     for (auto &field: cls->mFields) {

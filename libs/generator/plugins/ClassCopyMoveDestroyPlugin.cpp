@@ -78,7 +78,7 @@ void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
   }
 }
 
-void ClassCopyMoveDestroyPlugin::PopulateMethod(Class &cls, ClassMethodBase &method,
+void ClassCopyMoveDestroyPlugin::PopulateMethod(Class &cls, MethodBase &method,
                                                 VariantData &variantData, bool isMove,
                                                 bool returnThis) {
   // First handle variants, if any
@@ -127,7 +127,7 @@ bool ClassCopyMoveDestroyPlugin::NeedsCustomCopyOperator(Class &cls) {
   return false;
 }
 
-void ClassCopyMoveDestroyPlugin::PopulateMethodVariantFields(Class &cls, ClassMethodBase &method,
+void ClassCopyMoveDestroyPlugin::PopulateMethodVariantFields(Class &cls, MethodBase &method,
                                                              VariantData &variantData,
                                                              bool isMove) {
   for (auto &[variantTypeFieldName, variantFields]: variantData) {

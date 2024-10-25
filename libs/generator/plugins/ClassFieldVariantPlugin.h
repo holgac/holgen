@@ -18,7 +18,7 @@ private:
     Mover,
     Copier,
   };
-  void ProcessVariantTypeCommon(Class &cls, const std::string &typeFieldName,
-                                ClassMethodBase &method, VariantTypeProcessType processType);
+  void ProcessVariantTypeCommon(Class &cls, const std::string &typeFieldName, MethodBase &method,
+                                VariantTypeProcessType processType);
 };
 } // namespace holgen

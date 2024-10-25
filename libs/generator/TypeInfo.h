@@ -56,6 +56,7 @@ struct Type {
   // TODO: Instead of a separate field, Type should natively support function types
   std::vector<Type> mFunctionalTemplateParameters;
   [[nodiscard]] std::string ToString(bool noTrailingSpace) const;
+  [[nodiscard]] std::string ToFullyQualifiedString(const TranslatedProject& project) const;
   void PreventCopying(bool addConst = true);
   [[nodiscard]] bool SupportsCopy(TranslatedProject &project) const;
   [[nodiscard]] bool SupportsMirroring(TranslatedProject &project) const;

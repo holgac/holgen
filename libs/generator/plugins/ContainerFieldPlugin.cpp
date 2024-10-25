@@ -125,16 +125,15 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     method.mArguments.back().mType.mConstness = Constness::NotConst;
   }
 
-  // TODO: change to useMoveRef after implementing ReadFromLua
-  if (!useMoveRef)
-    method.mExposeToScript = true;
-
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
                                          Annotations::MethodOption_Private)) {
     method.mVisibility = Visibility::Private;
   } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
                                                 Annotations::MethodOption_Protected)) {
     method.mVisibility = Visibility::Protected;
+  } else if (!useMoveRef) {
+    // TODO: change to useMoveRef after implementing ReadFromLua
+    method.mExposeToScript = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
                                          Annotations::MethodOption_Custom)) {
@@ -225,8 +224,6 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
                               Visibility::Public, constness};
     method.mReturnType.mType = PassByType::Pointer;
     method.mReturnType.mConstness = constness;
-    if (i == 0)
-      method.mExposeToScript = true;
     std::string idxExpression = "idx";
     if (underlyingIdField) {
       method.mArguments.emplace_back("idx",
@@ -251,6 +248,8 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
                                                   Annotations::Container_Get,
                                                   Annotations::MethodOption_Protected)) {
       method.mVisibility = Visibility::Protected;
+    } else if (i == 0) {
+      method.mExposeToScript = true;
     }
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
                                            Annotations::MethodOption_Custom)) {
@@ -286,7 +285,6 @@ void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field)
                                          Annotations::MethodOption_None))
     return;
   auto method = ClassMethod{Naming().ContainerElemCountNameInCpp(*field.mField), Type{"size_t"}};
-  method.mExposeToScript = true;
 
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
                                          Annotations::MethodOption_Private)) {
@@ -295,6 +293,8 @@ void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field)
                                                 Annotations::Container_Count,
                                                 Annotations::MethodOption_Protected)) {
     method.mVisibility = Visibility::Protected;
+  } else {
+    method.mExposeToScript = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
                                          Annotations::MethodOption_Custom)) {
@@ -332,7 +332,6 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
       method.mArguments.emplace_back("idx", Type{"size_t"});
   }
 
-  method.mExposeToScript = true;
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
                                          Annotations::MethodOption_Private)) {
     method.mVisibility = Visibility::Private;
@@ -340,6 +339,8 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
                                                 Annotations::Container_Delete,
                                                 Annotations::MethodOption_Protected)) {
     method.mVisibility = Visibility::Protected;
+  } else {
+    method.mExposeToScript = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
                                          Annotations::MethodOption_Custom)) {
@@ -413,7 +414,6 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
     return;
   auto method =
       ClassMethod{Naming().ContainerElemExistenceCheckerNameInCpp(*field.mField), Type{"bool"}};
-  method.mExposeToScript = true;
   auto &arg = method.mArguments.emplace_back("elem", field.mType.mTemplateParameters.front());
   if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
     arg.mName = "key";
@@ -425,6 +425,8 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
   } else if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
                                                 Annotations::MethodOption_Protected)) {
     method.mVisibility = Visibility::Protected;
+  } else {
+    method.mExposeToScript = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
                                          Annotations::MethodOption_Custom)) {

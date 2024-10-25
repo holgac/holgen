@@ -138,7 +138,7 @@ void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &
 }
 
 void ClassFieldVariantPlugin::ProcessVariantTypeCommon(Class &cls, const std::string &typeFieldName,
-                                                       ClassMethodBase &method,
+                                                       MethodBase &method,
                                                        VariantTypeProcessType processType) {
   auto typeField = cls.GetField(Naming().FieldNameInCpp(typeFieldName));
   if (processType == VariantTypeProcessType::Resetter) {

@@ -53,6 +53,7 @@ set(gen_plugins
     plugins/FunctionPluginBase.cpp
     plugins/ClassCopyMoveDestroyPlugin.cpp
     plugins/ClassMetadataPlugin.cpp
+    plugins/CWrappersPlugin.cpp
 )
 
 add_library(generator

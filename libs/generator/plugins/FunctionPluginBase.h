@@ -10,10 +10,10 @@ public:
   ClassConstructor NewConstructor(Class &cls, const FunctionDefinition &functionDefinition);
 
 private:
-  void ProcessFunctionArgument(ClassMethodBase &method, const FunctionArgumentDefinition &funcArg);
+  void ProcessFunctionArgument(MethodBase &method, const FunctionArgumentDefinition &funcArg);
   void ProcessHashFunction(Class &cls, ClassMethod &method);
   void ProcessToStringFunction(Class &cls, ClassMethod &method);
-  void ProcessMethodVisibility(ClassMethodBase &method,
+  void ProcessMethodVisibility(MethodBase &method,
                                const FunctionDefinition &functionDefinition);
 };
 } // namespace holgen

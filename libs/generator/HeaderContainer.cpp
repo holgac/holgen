@@ -169,7 +169,7 @@ void HeaderContainer::IncludeUsing(const TranslatedProject &project, const Using
 }
 
 void HeaderContainer::IncludeBaseClass(const TranslatedProject &project, const Class &cls,
-                                         const BaeClass &baseClass) {
+                                         const BaseClass &baseClass) {
   bool isLocalType =
       cls.GetTemplateParameter(baseClass.mType.mName) || cls.GetUsing(baseClass.mType.mName);
   if (!isLocalType)

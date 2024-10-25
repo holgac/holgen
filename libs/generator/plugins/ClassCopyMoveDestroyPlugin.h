@@ -11,10 +11,10 @@ public:
 private:
   using VariantData = std::map<std::string, std::vector<ClassField *>>;
   void ProcessClass(Class &cls);
-  void PopulateMethod(Class &cls, ClassMethodBase &method, VariantData &variantData, bool isMove,
+  void PopulateMethod(Class &cls, MethodBase &method, VariantData &variantData, bool isMove,
                       bool returnThis);
   bool NeedsCustomCopyOperator(Class &cls);
-  void PopulateMethodVariantFields(Class &cls, ClassMethodBase &method, VariantData &variantData,
+  void PopulateMethodVariantFields(Class &cls, MethodBase &method, VariantData &variantData,
                                    bool isMove);
 };
 } // namespace holgen

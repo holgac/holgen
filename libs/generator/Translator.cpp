@@ -27,6 +27,7 @@
 #include "generator/plugins/lua/LuaIndexMetaMethodPlugin.h"
 #include "generator/plugins/ClassCopyMoveDestroyPlugin.h"
 #include "generator/plugins/ClassMetadataPlugin.h"
+#include "generator/plugins/CWrappersPlugin.h"
 
 namespace holgen {
 
@@ -49,6 +50,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<EnumPlugin>();
   AddPlugin<BitmapPlugin>();
   AddPlugin<BitmapFieldPlugin>();
+  AddPlugin<CWrappersPlugin>();
   AddPlugin<JsonConverterPlugin>();
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();
