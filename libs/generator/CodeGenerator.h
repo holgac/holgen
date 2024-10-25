@@ -21,7 +21,6 @@ private:
                            const HeaderContainer &headers) const;
   void GenerateClassSource(GeneratedContent &source, const Class &cls,
                            const HeaderContainer &headers) const;
-  void GenerateClassModifiableSource(GeneratedContent &source, const Class &cls) const;
   void GenerateClassDeclarationsForHeader(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateCFunctionsForHeader(CodeBlock &codeBlock, const Class &cls) const;

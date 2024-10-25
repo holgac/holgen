@@ -60,6 +60,7 @@ set(gen_generators
     generators/Generator.cpp
     generators/CMakeGenerator.cpp
     generators/HolgenHeaderGenerator.cpp
+    generators/CPPModifiableSourceGenerator.cpp
 )
 
 add_library(generator
