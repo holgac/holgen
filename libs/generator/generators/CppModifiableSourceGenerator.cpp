@@ -1,8 +1,8 @@
-#include "CPPModifiableSourceGenerator.h"
+#include "CppModifiableSourceGenerator.h"
 #include "core/St.h"
 
 namespace holgen {
-void CPPModifiableSourceGenerator::Run(std::vector<GeneratedContent> &contents) {
+void CppModifiableSourceGenerator::Run(std::vector<GeneratedContent> &contents) const {
   for (auto &cls: mTranslatedProject.mClasses) {
     if (!cls.HasUserDefinedMethods())
       continue;
@@ -10,9 +10,9 @@ void CPPModifiableSourceGenerator::Run(std::vector<GeneratedContent> &contents) 
   }
 }
 
-void CPPModifiableSourceGenerator::Generate(GeneratedContent &source, const Class &cls) {
-  source.mType = FileType::CppSource;
-  source.mName = std::format("src/{}.cpp", cls.mName);
+void CppModifiableSourceGenerator::Generate(GeneratedContent &out, const Class &cls) const {
+  out.mType = FileType::CppSource;
+  out.mName = std::format("src/{}.cpp", cls.mName);
   CodeBlock codeBlock;
   codeBlock.Add("// {}", St::PartialGenMessage);
   codeBlock.Add("#include \"../gen/{}.h\"", cls.mName);
@@ -42,6 +42,6 @@ void CPPModifiableSourceGenerator::Generate(GeneratedContent &source, const Clas
   }
   if (!cls.mNamespace.empty())
     codeBlock.Add("}}");
-  source.mBody = std::move(codeBlock);
+  out.mBody = std::move(codeBlock);
 }
 } // namespace holgen

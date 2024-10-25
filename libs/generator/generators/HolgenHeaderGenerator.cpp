@@ -3,8 +3,8 @@
 #include "core/St.h"
 
 namespace holgen {
-void HolgenHeaderGenerator::Run(std::vector<GeneratedContent> &contents) {
-  auto& header = contents.emplace_back();
+void HolgenHeaderGenerator::Run(std::vector<GeneratedContent> &contents) const {
+  auto &header = contents.emplace_back();
   header.mType = FileType::CppHeader;
   header.mName = "holgen.h";
   CodeBlock codeBlock;

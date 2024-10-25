@@ -5,6 +5,6 @@ namespace holgen {
 class HolgenHeaderGenerator : public Generator {
 public:
   using Generator::Generator;
-  void Run(std::vector<GeneratedContent> &contents) override;
+  void Run(std::vector<GeneratedContent> &contents) const override;
 };
 } // namespace holgen

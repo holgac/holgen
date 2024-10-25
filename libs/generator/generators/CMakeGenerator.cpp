@@ -3,7 +3,7 @@
 #include "core/St.h"
 
 namespace holgen {
-void CMakeGenerator::Run(std::vector<GeneratedContent> &contents) {
+void CMakeGenerator::Run(std::vector<GeneratedContent> &contents) const {
   auto &cmake = contents.emplace_back();
   cmake.mType = FileType::CMakeFile;
   cmake.mName = "CMakeLists.txt";
