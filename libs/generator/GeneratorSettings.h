@@ -13,9 +13,6 @@ struct GeneratedContent {
 
 namespace GeneratorFeatureFlag {
 enum Entry : uint64_t {
-  SwigLua = 1,
-  SwigCSharp = 2,
-  SwigMask = SwigLua | SwigCSharp,
 };
 }; // namespace GeneratorFeatureFlag
 

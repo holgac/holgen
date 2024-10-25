@@ -5,6 +5,5 @@ enum class FileType {
   CppHeader,
   CppSource,
   CMakeFile,
-  SwigInterface,
 };
 } // namespace holgen
