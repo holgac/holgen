@@ -229,6 +229,7 @@ struct Class {
   [[nodiscard]] ClassConstructor *GetDefaultConstructor();
   [[nodiscard]] ClassMethod *GetMoveAssignment();
   [[nodiscard]] ClassMethod *GetCopyAssignment();
+  [[nodiscard]] bool HasUserDefinedMethods() const;
 
   [[nodiscard]] auto GetMethods(const std::string &name) const {
     return NameFilterForEachWrapper(name, mMethods);

@@ -56,10 +56,16 @@ set(gen_plugins
     plugins/CWrappersPlugin.cpp
 )
 
+set(gen_generators
+    generators/Generator.cpp
+    generators/CMakeGenerator.cpp
+)
+
 add_library(generator
     ${gen_base}
     ${gen_plugins}
     ${gen_enum_plugins}
     ${gen_json_plugins}
     ${gen_lua_plugins}
+    ${gen_generators}
 )

@@ -3,6 +3,7 @@
 #include <holgen.h>
 #include <sstream>
 #include "HeaderContainer.h"
+#include "generators/CMakeGenerator.h"
 
 namespace holgen {
 namespace {
@@ -109,7 +110,7 @@ std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &t
     }
   }
   GenerateHolgenHeader(contents.emplace_back());
-  GenerateCMakeLists(contents.emplace_back(), translatedProject);
+  CMakeGenerator(mGeneratorSettings, translatedProject).Run(contents);
 
   if (mGeneratorSettings.IsFeatureEnabled(GeneratorFeatureFlag::SwigMask)) {
     GenerateSwigInterface(contents.emplace_back(), translatedProject);
@@ -488,47 +489,6 @@ CodeBlock CodeGenerator::GenerateMethodsForSource(const Class &cls) const {
     codeBlock.Add("}}");
   }
   return codeBlock;
-}
-
-void CodeGenerator::GenerateCMakeLists(GeneratedContent &cmake,
-                                       const TranslatedProject &translatedProject) const {
-  cmake.mType = FileType::CMakeFile;
-  cmake.mName = "CMakeLists.txt";
-  CodeBlock codeBlock;
-  codeBlock.Add("# {}", PartialGenMessage);
-  codeBlock.Add("set(gen_sources");
-  codeBlock.Indent(2);
-
-  for (auto &cls: translatedProject.mClasses) {
-    codeBlock.Add("gen/{}.cpp", cls.mName);
-  }
-  codeBlock.Indent(-2);
-  codeBlock.Add(")");
-  codeBlock.Add("set(src_sources");
-  codeBlock.Indent(2);
-
-  for (auto &cls: translatedProject.mClasses) {
-    if (HasUserDefinedMethods(cls)) {
-      codeBlock.Add("src/{}.cpp", cls.mName);
-    }
-  }
-  codeBlock.Indent(-2);
-  codeBlock.Add(")");
-
-  codeBlock.Add("set(custom_sources)");
-  codeBlock.UserDefined("CustomSources");
-  codeBlock.Add("add_library({} STATIC ${{gen_sources}} ${{src_sources}} ${{custom_sources}})",
-                mGeneratorSettings.mProjectName);
-  codeBlock.UserDefined("CustomDependencies");
-  // TODO: complete lua generator, fix unused parameters and enable this
-  codeBlock.Add("if (UNIX)");
-  codeBlock.Indent(1);
-  codeBlock.Add("target_compile_options({} PRIVATE -Wall -Wextra -Wpedantic -Werror "
-                "-Wno-unused-parameter -Wno-unused-variable)",
-                mGeneratorSettings.mProjectName);
-  codeBlock.Indent(-1);
-  codeBlock.Add("endif ()");
-  cmake.mBody = std::move(codeBlock);
 }
 
 HeaderContainer CodeGenerator::PrepareIncludes(const Class &cls, bool isHeader) const {

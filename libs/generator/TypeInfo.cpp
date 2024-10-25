@@ -157,7 +157,7 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace,
       } else {
         ss << ", ";
       }
-      ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], noTrailingSpace, project);
+      ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], true, project);
     }
     ss << ")>";
   }

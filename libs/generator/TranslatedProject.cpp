@@ -134,6 +134,20 @@ ClassMethod *Class::GetCopyAssignment() {
   return nullptr;
 }
 
+bool Class::HasUserDefinedMethods() const {
+  for (const auto &method: mMethods) {
+    if (method.mUserDefined) {
+      return true;
+    }
+  }
+  for (const auto &ctor: mConstructors) {
+    if (ctor.mUserDefined) {
+      return true;
+    }
+  }
+  return false;
+}
+
 ClassField *Class::GetFieldFromDefinitionName(const std::string &name) {
   for (auto &field: mFields) {
     if (field.mField && field.mField->mName == name) {

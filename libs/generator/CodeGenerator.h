@@ -1,38 +1,10 @@
 #pragma once
 
 #include <string>
-#include "FileType.h"
 #include "Translator.h"
+#include "GeneratorSettings.h"
 
 namespace holgen {
-struct GeneratedContent {
-  FileType mType;
-  std::string mName;
-  CodeBlock mBody;
-};
-
-namespace GeneratorFeatureFlag {
-enum Entry : uint64_t {
-  SwigLua = 1,
-  SwigCSharp = 2,
-  SwigMask = SwigLua | SwigCSharp,
-};
-}; // namespace GeneratorFeatureFlag
-
-// This is read from CLI args
-struct GeneratorSettings {
-  std::string mProjectName;
-  std::string mConfigHeader;
-  GeneratorFeatureFlag::Entry mFeatureFlags = GeneratorFeatureFlag::Entry(0);
-
-  [[nodiscard]] bool IsFeatureEnabled(const GeneratorFeatureFlag::Entry featureFlag) const {
-    return (mFeatureFlags & featureFlag) != 0;
-  }
-
-  void EnableFeature(const GeneratorFeatureFlag::Entry featureFlag) {
-    mFeatureFlags = GeneratorFeatureFlag::Entry(mFeatureFlags | featureFlag);
-  }
-};
 
 class CodeGenerator {
   GeneratorSettings mGeneratorSettings;
@@ -45,8 +17,6 @@ public:
   std::vector<GeneratedContent> Generate(const TranslatedProject &translatedProject);
 
 private:
-  void GenerateCMakeLists(GeneratedContent &cmake,
-                          const TranslatedProject &translatedProject) const;
   void GenerateHolgenHeader(GeneratedContent &header) const;
   void GenerateClassHeader(GeneratedContent &header, const Class &cls,
                            const HeaderContainer &headers) const;
