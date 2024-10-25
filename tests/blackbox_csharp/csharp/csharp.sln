@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestModule", "TestModule\TestModule.csproj", "{A203E987-FFB7-4157-8D93-B0B53F624F57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestModule2", "TestModule2\TestModule2.csproj", "{3C5F259D-C146-4013-AB67-EBF5276AA341}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A203E987-FFB7-4157-8D93-B0B53F624F57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A203E987-FFB7-4157-8D93-B0B53F624F57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A203E987-FFB7-4157-8D93-B0B53F624F57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A203E987-FFB7-4157-8D93-B0B53F624F57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C5F259D-C146-4013-AB67-EBF5276AA341}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C5F259D-C146-4013-AB67-EBF5276AA341}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C5F259D-C146-4013-AB67-EBF5276AA341}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C5F259D-C146-4013-AB67-EBF5276AA341}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

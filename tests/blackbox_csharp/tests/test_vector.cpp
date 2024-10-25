@@ -9,6 +9,6 @@ protected:
 };
 
 TEST_F(VectorTest, MemberFunctions) {
-  holgen_blackbox_swig::Vector vec(2, 0, 2);
+  holgen_blackbox_csharp::Vector vec(2, 0, 2);
   EXPECT_FLOAT_EQ(vec.LengthSquared(), 8);
 }
