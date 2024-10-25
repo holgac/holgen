@@ -62,6 +62,7 @@ set(gen_generators
     generators/HolgenHeaderGenerator.cpp
     generators/CppModifiableSourceGenerator.cpp
     generators/CppHeaderGenerator.cpp
+    generators/CppSourceGenerator.cpp
 )
 
 add_library(generator
