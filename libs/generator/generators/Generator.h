@@ -1,13 +1,16 @@
 #pragma once
 #include "../TranslatedProject.h"
 #include "../GeneratorSettings.h"
+#include "../NamingConvention.h"
 
 namespace holgen {
 class Generator {
 public:
   explicit Generator(const GeneratorSettings &generatorSettings,
-                     const TranslatedProject &translatedProject) :
-      mGeneratorSettings(generatorSettings), mTranslatedProject(translatedProject) {}
+                     const TranslatedProject &translatedProject,
+                     const NamingConvention &namingConvention) :
+      mGeneratorSettings(generatorSettings), mTranslatedProject(translatedProject),
+      mNamingConvention(namingConvention) {}
 
   virtual ~Generator() = default;
   virtual void Run(std::vector<GeneratedContent> &contents) const = 0;
@@ -15,6 +18,7 @@ public:
 protected:
   const GeneratorSettings &mGeneratorSettings;
   const TranslatedProject &mTranslatedProject;
+  const NamingConvention &mNamingConvention;
   [[nodiscard]] std::string GenerateFunctionSignature(const Class &cls, const ClassMethod &method,
                                                       bool isInHeader, bool isInsideClass) const;
   [[nodiscard]] std::string GenerateFunctionSignature(const Class &cls,

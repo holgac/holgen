@@ -11,6 +11,15 @@ std::string St::Capitalize(const std::string &str) {
   return capitalizedName;
 }
 
+std::string St::Uncapitalize(const std::string &str) {
+  auto uncapitalizedName = str;
+
+  if (uncapitalizedName[0] >= 'A' && uncapitalizedName[0] <= 'Z') {
+    uncapitalizedName[0] += 'a' - 'A';
+  }
+  return uncapitalizedName;
+}
+
 std::string St::GetFieldNameInLua(const std::string &fieldName, bool isRef) {
   if (isRef)
     return fieldName + "Id";

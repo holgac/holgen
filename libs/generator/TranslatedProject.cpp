@@ -62,6 +62,13 @@ GEN_GETTER_BY_NAME(TranslatedProject, Class, GetClass, mClasses)
 GEN_GETTER_BY_NAME_NONCONST(TranslatedProject, Class, GetClass, mClasses);
 
 GEN_GETTER_BY_NAME(ClassMethod, TemplateParameter, GetTemplateParameter, mTemplateParameters)
+bool ClassMethod::IsStatic(const Class& cls) const {
+  if (mStaticness == Staticness::Static)
+    return true;
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Singleton))
+    return true;
+  return false;
+}
 
 bool ClassDestructor::IsEmpty() const {
   return mBody.IsEmpty() && mDefaultDelete == DefaultDelete::Neither;

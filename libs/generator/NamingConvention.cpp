@@ -6,7 +6,7 @@
 #include "parser/ProjectDefinition.h"
 
 namespace holgen {
-NamingConvention::NamingConvention(TranslatedProject &project) : mProject(project) {}
+NamingConvention::NamingConvention(const TranslatedProject &project) : mProject(project) {}
 
 std::string NamingConvention::FieldNameInCpp(const FieldDefinition &fieldDefinition,
                                              bool dereferenceRef) const {
@@ -145,6 +145,24 @@ std::string NamingConvention::LuaMetatableName(const Class &cls) const {
 
 std::string NamingConvention::LuaMethodCaller(const ClassMethod &method) const {
   return method.mName + "CallerFromLua";
+}
+
+std::string NamingConvention::CSharpMethodName(const ClassMethod &method) const {
+  return St::Capitalize(method.mName);
+}
+
+std::string NamingConvention::CSharpMethodDelegateName(const Class &cls,
+                                                       const ClassMethod &method) const {
+  return CSharpMethodDelegateName(cls.mName, method.mName);
+}
+
+std::string NamingConvention::CSharpMethodDelegateName(const std::string &clsName,
+                                                       const std::string &methodName) const {
+ return St::Capitalize(clsName) + St::Capitalize(methodName) + St::CSharpDelegateSuffix;
+}
+
+std::string NamingConvention::CSharpMethodPointerName(const ClassMethod &method) const {
+  return std::format("_{}Impl", St::Uncapitalize(method.mName));
 }
 
 std::string NamingConvention::FieldNameInCpp(const std::string &fieldName) const {

@@ -12,14 +12,16 @@ namespace holgen {
 
 std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &translatedProject) {
   mTranslatedProject = &translatedProject;
+  // TODO(RELEASE): Move TranslatedProject arg to ctor, and get this from TranslatorSettings
+  NamingConvention namingConvention(*mTranslatedProject);
   std::vector<GeneratedContent> contents;
-  CppHeaderGenerator(mGeneratorSettings, translatedProject).Run(contents);
-  CppSourceGenerator(mGeneratorSettings, translatedProject).Run(contents);
-  CppModifiableSourceGenerator(mGeneratorSettings, translatedProject).Run(contents);
-  HolgenHeaderGenerator(mGeneratorSettings, translatedProject).Run(contents);
-  CMakeGenerator(mGeneratorSettings, translatedProject).Run(contents);
-  CSharpWrapperGenerator(mGeneratorSettings, translatedProject).Run(contents);
-  CSharpProjectGenerator(mGeneratorSettings, translatedProject).Run(contents);
+  CppHeaderGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  CppSourceGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  CppModifiableSourceGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  HolgenHeaderGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  CMakeGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  CSharpWrapperGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  CSharpProjectGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
 
   mTranslatedProject = nullptr;
   return contents;

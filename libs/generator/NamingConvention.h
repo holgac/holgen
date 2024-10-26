@@ -12,7 +12,7 @@ struct ClassMethod;
 
 class NamingConvention {
 public:
-  explicit NamingConvention(TranslatedProject &project);
+  explicit NamingConvention(const TranslatedProject &project);
   virtual std::string FieldNameInCpp(const std::string &fieldName) const;
   virtual std::string FieldNameInCpp(const FieldDefinition &fieldDefinition,
                                      bool dereferenceRef = false) const;
@@ -48,8 +48,12 @@ public:
       LuaFunctionHandleNameInCpp(const FunctionDefinition &functionDefinition) const;
   virtual std::string LuaMetatableName(const Class &cls) const;
   virtual std::string LuaMethodCaller(const ClassMethod &method) const;
+  virtual std::string CSharpMethodName(const ClassMethod &method) const;
+  virtual std::string CSharpMethodDelegateName(const Class& cls, const ClassMethod &method) const;
+  virtual std::string CSharpMethodDelegateName(const std::string& clsName, const std::string& methodName) const;
+  virtual std::string CSharpMethodPointerName(const ClassMethod &method) const;
 
 private:
-  TranslatedProject &mProject;
+  const TranslatedProject &mProject;
 };
 } // namespace holgen

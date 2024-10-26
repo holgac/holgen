@@ -43,8 +43,17 @@ public:
    *  @noLua()
    *  i8 field;
    * }
+   * TODO: use @no(lua)
    */
   inline static const std::string NoLua = "noLua";
+
+ /*
+  * Disables certain features for the object (field, class, method) below.
+  * @no(script) applies to any scripting and managed language.
+  */
+  inline static const std::string No = "no";
+  inline static const std::string No_CSharp = "csharp";
+  inline static const std::string No_Script = "script";
 
   /*
    * Disables json integration for the specified data type.
@@ -57,6 +66,7 @@ public:
    *  @noJson()
    *  i8 field;
    * }
+   * TODO: use @no(json)
    */
   inline static const std::string NoJson = "noJson";
 

@@ -128,6 +128,7 @@ struct ClassMethod : MethodBase {
   Virtuality mVirtuality = Virtuality::NotVirtual;
   bool mExposeToScript = false;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
+  [[nodiscard]] bool IsStatic(const Class& cls) const;
 };
 
 struct ClassConstructorInitializer {
