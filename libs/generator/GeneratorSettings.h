@@ -20,6 +20,7 @@ enum Entry : uint64_t {
 struct GeneratorSettings {
   std::string mProjectName;
   std::string mConfigHeader;
+  std::string mCSharpRoot;
   GeneratorFeatureFlag::Entry mFeatureFlags = GeneratorFeatureFlag::Entry(0);
 
   [[nodiscard]] bool IsFeatureEnabled(const GeneratorFeatureFlag::Entry featureFlag) const {

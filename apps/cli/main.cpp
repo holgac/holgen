@@ -165,14 +165,26 @@ TranslatorSettings GetTranslatorSettings(const CliOptions &cliOptions) {
 }
 
 GeneratorSettings GetGeneratorSettings(const CliOptions &cliOptions) {
-  GeneratorSettings generatorSettings{cliOptions.mProjectName, cliOptions.mConfigHeader};
+  GeneratorSettings generatorSettings{cliOptions.mProjectName, cliOptions.mConfigHeader,
+                                      cliOptions.mCSharpRoot};
   return generatorSettings;
 }
 
-void WriteToFiles(const std::vector<GeneratedContent> &results,
-                  const std::filesystem::path &outDir) {
+void WriteToFiles(const std::vector<GeneratedContent> &results, const CliOptions &cliOptions) {
   for (auto &result: results) {
-    auto target = outDir / result.mName;
+    std::filesystem::path target;
+    switch (result.mType) {
+    case FileType::CppHeader:
+    case FileType::CppSource:
+    case FileType::CMakeFile:
+      target = std::filesystem::path(cliOptions.mOutDir) / result.mName;
+      break;
+    case FileType::CSharpProject:
+    case FileType::CSharpWrapper:
+      target = std::filesystem::path(cliOptions.mCSharpRoot) / result.mName;
+      break;
+    }
+    THROW_IF(target.empty(), "Could not figure out where to put {}", result.mName);
     auto dirname = target.parent_path();
     if (!std::filesystem::exists(dirname)) {
       std::filesystem::create_directories(dirname);
@@ -198,8 +210,7 @@ int Run(const CliOptions &cliOptions) {
   auto generatorSettings = GetGeneratorSettings(cliOptions);
   auto generator = CodeGenerator(generatorSettings);
   auto results = generator.Generate(project);
-  std::filesystem::path outDir(cliOptions.mOutDir);
-  WriteToFiles(results, outDir);
+  WriteToFiles(results, cliOptions);
   // TODO: warn if there are files in the directory not created by us in case the schema changed
   // but the dangling files weren't deleted.
   return 0;

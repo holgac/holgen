@@ -63,6 +63,8 @@ set(gen_generators
     generators/CppModifiableSourceGenerator.cpp
     generators/CppHeaderGenerator.cpp
     generators/CppSourceGenerator.cpp
+    generators/CSharpWrapperGenerator.cpp
+    generators/CSharpProjectGenerator.cpp
 )
 
 add_library(generator
