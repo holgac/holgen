@@ -43,6 +43,11 @@ void ClassEqualsOperatorPlugin::ProcessClass(Class &cls) {
         lines.push_back(std::format("{0} != rhs.{0}", field.mName));
       }
     }
+    for (auto &classMethod: cls.mMethods) {
+      if (!classMethod.mFunctionPointer)
+        continue;
+      lines.push_back(std::format("{0} != rhs.{0}", classMethod.mName));
+    }
     for (size_t i = 0; i < lines.size(); ++i) {
       method.mBody.Add("{}{}", lines[i], i == lines.size() - 1 ? "" : " ||");
     }

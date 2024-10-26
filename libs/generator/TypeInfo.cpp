@@ -219,6 +219,22 @@ Type::Type(const TranslatedProject &project, const DefinitionSource &definitionS
   }
 }
 
+Type Type::ReturnType(const TranslatedProject &project, const FunctionDefinition &func) {
+  auto t = Type{project, func.mDefinitionSource, func.mReturnType.mType};
+  switch (func.mReturnType.mCategory) {
+  case FunctionReturnTypeCategory::Pointer:
+    t.mType = PassByType::Pointer;
+    break;
+  case FunctionReturnTypeCategory::Reference:
+    t.mType = PassByType::Reference;
+    break;
+  case FunctionReturnTypeCategory::NewObject:
+    t.mType = PassByType::Value;
+    break;
+  }
+  return t;
+}
+
 void Type::PreventCopying(bool addConst) {
   if (!TypeInfo::Get().CppPrimitives.contains(mName)) {
     mType = PassByType::Reference;
@@ -249,6 +265,9 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
   auto cls = project.GetClass(mName);
   if (cls) {
     seenClasses.insert(cls->mName);
+    if (cls->mStruct->GetAnnotation(Annotations::DotNetModule)) {
+      return false;
+    }
     if (forCopy && cls->mStruct &&
         cls->mStruct->GetMatchingAttribute(Annotations::Struct, Annotations::Struct_NonCopyable)) {
       return false;

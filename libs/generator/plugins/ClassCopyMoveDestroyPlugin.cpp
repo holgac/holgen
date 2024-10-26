@@ -7,9 +7,11 @@
 namespace holgen {
 void ClassCopyMoveDestroyPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
-    if (!cls.mStruct) {
+    if (!cls.mStruct)
       continue;
-    }
+    if (cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+      continue;
+
     ProcessClass(cls);
   }
 }

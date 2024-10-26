@@ -99,24 +99,12 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   auto method = ClassMethod{
       functionDefinition.mName,
-      Type{mProject, functionDefinition.mDefinitionSource, functionDefinition.mReturnType.mType},
+      Type::ReturnType(mProject, functionDefinition),
       Visibility::Public,
       (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Const))
           ? Constness::Const
           : Constness::NotConst};
   ProcessMethodVisibility(method, functionDefinition);
-
-  switch (functionDefinition.mReturnType.mCategory) {
-  case FunctionReturnTypeCategory::Pointer:
-    method.mReturnType.mType = PassByType::Pointer;
-    break;
-  case FunctionReturnTypeCategory::Reference:
-    method.mReturnType.mType = PassByType::Reference;
-    break;
-  case FunctionReturnTypeCategory::NewObject:
-    method.mReturnType.mType = PassByType::Value;
-    break;
-  }
 
   method.mReturnType.mConstness = functionDefinition.mReturnType.mConstness;
 

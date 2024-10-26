@@ -34,6 +34,11 @@ set(gen_lua_plugins
     plugins/lua/LuaFunctionPlugin.cpp
 )
 
+set(gen_csharp_plugins
+    plugins/csharp/DotNetModulePlugin.cpp
+    plugins/csharp/DotNetModuleFunctionsPlugin.cpp
+)
+
 set(gen_plugins
     plugins/TranslatorPlugin.cpp
     plugins/helpers/GlobalPointerPlugin.cpp
@@ -73,5 +78,6 @@ add_library(generator
     ${gen_enum_plugins}
     ${gen_json_plugins}
     ${gen_lua_plugins}
+    ${gen_csharp_plugins}
     ${gen_generators}
 )

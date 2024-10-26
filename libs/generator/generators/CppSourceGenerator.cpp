@@ -141,7 +141,7 @@ CodeBlock CppSourceGenerator::GenerateMethodsForSource(const Class &cls) const {
   bool isFirstMethod = true;
 
   for (auto &method: cls.mMethods) {
-    if (CanBeDefinedInHeader(cls, method) || method.mUserDefined) {
+    if (CanBeDefinedInHeader(cls, method) || method.mUserDefined || method.mFunctionPointer) {
       continue;
     }
     if (isFirstMethod)

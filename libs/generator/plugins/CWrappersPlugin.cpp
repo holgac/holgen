@@ -7,6 +7,8 @@ void CWrappersPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (!cls.mStruct)
       continue;
+    if (cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+      continue;
     auto singleton = cls.mStruct->GetAnnotation(Annotations::Singleton);
     ProcessClass(cls, singleton);
   }

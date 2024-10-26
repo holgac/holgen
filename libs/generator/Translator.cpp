@@ -28,6 +28,8 @@
 #include "generator/plugins/ClassCopyMoveDestroyPlugin.h"
 #include "generator/plugins/ClassMetadataPlugin.h"
 #include "generator/plugins/CWrappersPlugin.h"
+#include "generator/plugins/csharp/DotNetModulePlugin.h"
+#include "generator/plugins/csharp/DotNetModuleFunctionsPlugin.h"
 
 namespace holgen {
 
@@ -38,6 +40,8 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<ClassIdFieldPlugin>();
   AddPlugin<ClassFieldPlugin>();
   AddPlugin<CppDestructorPlugin>();
+  AddPlugin<DotNetModulePlugin>();
+  AddPlugin<DotNetModuleFunctionsPlugin>();
   AddPlugin<LuaFieldsPlugin>();
   AddPlugin<ClassFieldVariantPlugin>();
   AddPlugin<ClassEqualsOperatorPlugin>();

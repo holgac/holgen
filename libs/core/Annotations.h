@@ -47,13 +47,26 @@ public:
    */
   inline static const std::string NoLua = "noLua";
 
- /*
-  * Disables certain features for the object (field, class, method) below.
-  * @no(script) applies to any scripting and managed language.
-  */
+  /*
+   * Disables certain features for the object (field, class, method) below.
+   * @no(script) applies to any scripting and managed language.
+   */
   inline static const std::string No = "no";
   inline static const std::string No_CSharp = "csharp";
   inline static const std::string No_Script = "script";
+
+  /**
+   * A unique annotation that describes the main class of each runtime-loaded dotnet module.
+   * Does not support fields.
+   *
+   * @dotNetModule(main=ModuleMain)
+   * struct Module {
+   *   func InitializeModule(string name);
+   *   func UninitializeModule();
+   * }
+   */
+  inline static const std::string DotNetModule = "dotNetModule";
+  inline static const std::string DotNetModule_Main = "main";
 
   /*
    * Disables json integration for the specified data type.

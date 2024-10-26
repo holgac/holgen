@@ -29,6 +29,8 @@ struct Type {
        const TypeDefinition &typeDefinition, PassByType passByType = PassByType::Value,
        Constness constness = Constness::NotConst);
 
+  static Type ReturnType(const TranslatedProject& project, const FunctionDefinition& func);
+
   bool operator==(const Type &rhs) const {
     if (mName != rhs.mName || mConstness != rhs.mConstness || mType != rhs.mType ||
         mConstexprness != rhs.mConstexprness ||

@@ -18,7 +18,12 @@ std::string Generator::GenerateFunctionSignature(const Class &cls, const ClassMe
   ss << method.mReturnType.ToString(false);
   if (!isInHeader || !isInsideClass)
     ss << cls.mName << "::";
-  ss << method.mName << "(";
+  if (method.mFunctionPointer)
+    ss << "(*";
+  ss << method.mName;
+  if (method.mFunctionPointer)
+    ss << ")";
+  ss << "(";
   size_t idx = 0;
   for (auto &arg: method.mArguments) {
     if (idx != 0)
