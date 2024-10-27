@@ -55,23 +55,31 @@ bool CSharpWrapperGenerator::GenerateFields(CodeBlock &codeBlock, const Class &c
   if (!cls.mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror))
     return false;
   bool processed = false;
-  CodeBlock tempCodeBlock;
-  tempCodeBlock.Add("[StructLayout(LayoutKind.Sequential)]");
-  tempCodeBlock.Add("public struct Fields");
-  tempCodeBlock.Add("{{");
-  tempCodeBlock.Indent(1);
+  CodeBlock fieldsStruct;
+  CodeBlock accessors;
+  fieldsStruct.Add("[StructLayout(LayoutKind.Sequential)]");
+  fieldsStruct.Add("public struct Fields");
+  fieldsStruct.Add("{{");
+  fieldsStruct.Indent(1);
   for (auto &field: cls.mFields) {
     if (!ShouldProcess(field))
       continue;
     processed = true;
-    tempCodeBlock.Add("public {} {};", CSharpHelper::Get().TypeRepresentation(field.mType, mTranslatedProject),
-                      mNamingConvention.FieldNameInCSharp(field.mField->mName));
+    fieldsStruct.Add("public {} {};",
+                     CSharpHelper::Get().TypeRepresentation(field.mType, mTranslatedProject),
+                     mNamingConvention.FieldNameInCSharp(field.mField->mName));
+    accessors.Add("public {0} {1} => Data.{1};",
+                  CSharpHelper::Get().TypeRepresentation(field.mType, mTranslatedProject),
+                  mNamingConvention.FieldNameInCSharp(field.mField->mName));
   }
 
   if (processed) {
-    tempCodeBlock.Indent(-1);
-    tempCodeBlock.Add("}}");
-    codeBlock.Add(std::move(tempCodeBlock));
+    fieldsStruct.Indent(-1);
+    fieldsStruct.Add("}}");
+    codeBlock.Add(std::move(fieldsStruct));
+    codeBlock.Add("");
+    codeBlock.Add("public Fields Data;");
+    codeBlock.Add(std::move(accessors));
   }
   return processed;
 }
@@ -101,8 +109,8 @@ void CSharpWrapperGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &c
   bool returnsVoid = method.mReturnType.mName == "void";
   std::string staticnessString = isStatic ? " static" : "";
   codeBlock.Add("public{} {} {}({})", isStatic ? " static" : "",
-                CSharpHelper::Get().TypeRepresentation(method.mReturnType, mTranslatedProject), method.mName,
-                ConstructMethodSignatureArguments(method));
+                CSharpHelper::Get().TypeRepresentation(method.mReturnType, mTranslatedProject),
+                method.mName, ConstructMethodSignatureArguments(method));
   codeBlock.Add("{{");
   codeBlock.Indent(1);
   codeBlock.Add("{}Marshal.GetDelegateForFunctionPointer<{}>({})({});",
@@ -138,9 +146,11 @@ void CSharpWrapperGenerator::GenerateMethodDelegate(CodeBlock &codeBlock, const 
     } else {
       args << ", ";
     }
-    args << CSharpHelper::Get().TypeRepresentation(arg.mType, mTranslatedProject) << " " << arg.mName;
+    args << CSharpHelper::Get().TypeRepresentation(arg.mType, mTranslatedProject) << " "
+         << arg.mName;
   }
-  codeBlock.Add("public delegate {} {}({});", CSharpHelper::Get().TypeRepresentation(method.mReturnType, mTranslatedProject),
+  codeBlock.Add("public delegate {} {}({});",
+                CSharpHelper::Get().TypeRepresentation(method.mReturnType, mTranslatedProject),
                 mNamingConvention.CSharpMethodDelegateName(cls, method), args.str());
 }
 
@@ -207,7 +217,8 @@ std::string
     } else {
       ss << ", ";
     }
-    ss << std::format("{} {}", CSharpHelper::Get().TypeRepresentation(arg.mType, mTranslatedProject), arg.mName);
+    ss << std::format(
+        "{} {}", CSharpHelper::Get().TypeRepresentation(arg.mType, mTranslatedProject), arg.mName);
   }
   return ss.str();
 }
