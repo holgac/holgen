@@ -17,11 +17,10 @@ private:
   void GenerateInitializerDelegate(CodeBlock &codeBlock, const Class &cls) const;
   bool GenerateConstructors(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateEmptyConstructor(CodeBlock &codeBlock, const Class &cls) const;
-  void GenerateConstructor(CodeBlock &codeBlock, const Class &cls, const ClassConstructor &ctor) const;
+  void GenerateConstructor(CodeBlock &codeBlock, const Class &cls,
+                           const ClassConstructor &ctor) const;
   bool GenerateMethods(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
-  void GenerateMethodWrapper(CodeBlock &codeBlock, const Class &cls,
-                             const ClassMethod &method) const;
   bool GenerateMethodDelegates(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethodDelegate(CodeBlock &codeBlock, const Class &cls,
                               const ClassMethod &method) const;
@@ -32,9 +31,12 @@ private:
   [[nodiscard]] bool ShouldProcess(const ClassConstructor &ctor) const;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
   [[nodiscard]] std::string ConstructInitializerArguments(const Class &cls) const;
-  [[nodiscard]] std::string ConstructMethodSignatureArguments(const MethodBase &method,
-                                                              InteropType interopType) const;
-  [[nodiscard]] std::string ConstructMethodArguments(const MethodBase &method,
-                                                     InteropType interopType) const;
+  [[nodiscard]] std::string ConstructMethodSignatureArguments(const Class &cls,
+                                                              const MethodBase &method,
+                                                              InteropType interopType,
+                                                              bool addThisArgument) const;
+  [[nodiscard]] std::string ConstructMethodArguments(const Class &cls, const MethodBase &method,
+                                                     InteropType interopType,
+                                                     bool addThisArgument) const;
 };
 } // namespace holgen

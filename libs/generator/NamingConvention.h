@@ -53,6 +53,7 @@ public:
   virtual std::string CSharpMethodDelegateName(const std::string &clsName,
                                                const std::string &methodName) const;
   virtual std::string CSharpMethodPointerName(const ClassMethod &method) const;
+  virtual std::string CSharpMethodPointerName(const std::string &methodName) const;
   virtual std::string CWrapperName(const Class &cls, const ClassMethod &method) const;
   virtual std::string FieldNameInCSharp(const std::string &fieldName) const;
 

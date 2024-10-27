@@ -162,7 +162,11 @@ std::string NamingConvention::CSharpMethodDelegateName(const std::string &clsNam
 }
 
 std::string NamingConvention::CSharpMethodPointerName(const ClassMethod &method) const {
-  return std::format("_{}Impl", St::Uncapitalize(method.mName));
+  return CSharpMethodPointerName(method.mName);
+}
+
+std::string NamingConvention::CSharpMethodPointerName(const std::string &methodName) const {
+  return std::format("_{}Impl", St::Uncapitalize(methodName));
 }
 
 std::string NamingConvention::CWrapperName(const Class &cls, const ClassMethod &method) const {

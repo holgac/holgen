@@ -310,6 +310,10 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
     initFuncCallArgs << Naming().CWrapperName(projectCls, method);
 
     bool isFirstArg = true;
+    if (!method.IsStatic(projectCls)) {
+      initFuncDefinition << Type{projectCls.mName, PassByType::Pointer}.ToString(true, true);
+      isFirstArg = false;
+    }
     for (auto &arg: method.mArguments) {
       if (isFirstArg)
         isFirstArg = false;

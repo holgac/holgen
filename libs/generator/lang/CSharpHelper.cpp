@@ -8,7 +8,8 @@
 
 namespace holgen {
 std::string CSharpHelper::RepresentationInNative(const Type &other,
-                                                 const TranslatedProject &project) {
+                                                 const TranslatedProject &project,
+                                                 bool prependRef) {
   auto it = CppTypeToCSharpType.find(other.mName);
   if (it != CppTypeToCSharpType.end()) {
     // this ignores const qualifiers
@@ -17,7 +18,8 @@ std::string CSharpHelper::RepresentationInNative(const Type &other,
   if (auto cls = project.GetClass(other.mName)) {
     if (cls->mStruct &&
         cls->mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror)) {
-      return std::format("{}.{}", other.mName, St::CSharpMirroredStructStructName);
+      return std::format("{}{}.{}", prependRef ? "ref " : "", other.mName,
+                         St::CSharpMirroredStructStructName);
     }
   }
   return other.mName;
@@ -35,12 +37,12 @@ std::string CSharpHelper::RepresentationInManaged(const Type &other,
 }
 
 std::string CSharpHelper::Representation(const Type &other, const TranslatedProject &project,
-                                         InteropType interopType) {
+                                         InteropType interopType, bool prependRef) {
   switch (interopType) {
   case InteropType::Internal:
     return other.mName;
   case InteropType::ManagedToNative:
-    return RepresentationInNative(other, project);
+    return RepresentationInNative(other, project, prependRef);
   case InteropType::NativeToManaged:
     return RepresentationInManaged(other, project);
   }
@@ -49,21 +51,22 @@ std::string CSharpHelper::Representation(const Type &other, const TranslatedProj
 
 std::string CSharpHelper::VariableRepresentation(const Type &other, const std::string &variableName,
                                                  const TranslatedProject &project,
-                                                 InteropType interopType) {
+                                                 InteropType interopType, bool prependRef) {
   switch (interopType) {
   case InteropType::Internal:
     return variableName;
   case InteropType::ManagedToNative:
-    return ManagedVariableToNative(other, variableName, project);
+    return VariableRepresentationInNative(other, variableName, project, prependRef);
   case InteropType::NativeToManaged:
-    return NativeVariableToManaged(other, variableName, project);
+    return VariableRepresentationInManaged(other, variableName, project);
   }
   THROW("Unexpected interop type: {}", uint32_t(interopType));
 }
 
-std::string CSharpHelper::ManagedVariableToNative(const Type &other,
-                                                  const std::string &variableName,
-                                                  const TranslatedProject &project) {
+std::string CSharpHelper::VariableRepresentationInNative(const Type &other,
+                                                         const std::string &variableName,
+                                                         const TranslatedProject &project,
+                                                         bool prependRef) {
   auto it = CppTypeToCSharpType.find(other.mName);
   if (it != CppTypeToCSharpType.end()) {
     return variableName;
@@ -71,15 +74,16 @@ std::string CSharpHelper::ManagedVariableToNative(const Type &other,
   if (auto cls = project.GetClass(other.mName)) {
     if (cls->mStruct &&
         cls->mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror)) {
-      return std::format("{}.{}", variableName, St::CSharpMirroredStructFieldName);
+      return std::format("{}{}.{}", prependRef ? "ref " : "", variableName,
+                         St::CSharpMirroredStructFieldName);
     }
   }
   return variableName;
 }
 
-std::string CSharpHelper::NativeVariableToManaged(const Type &other,
-                                                  const std::string &variableName,
-                                                  const TranslatedProject &project) {
+std::string CSharpHelper::VariableRepresentationInManaged(const Type &other,
+                                                          const std::string &variableName,
+                                                          const TranslatedProject &project) {
   auto it = CppTypeToCSharpType.find(other.mName);
   if (it != CppTypeToCSharpType.end()) {
     return variableName;
