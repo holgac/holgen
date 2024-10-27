@@ -38,6 +38,10 @@ void CSharpWrapperGenerator::Generate(GeneratedContent &out, const Class &cls) c
 }
 
 void CSharpWrapperGenerator::GenerateClassBody(CodeBlock &codeBlock, const Class &cls) const {
+  if (GenerateConstructors(codeBlock, cls)) {
+    GenerateEmptyConstructor(codeBlock, cls);
+    codeBlock.Add("");
+  }
   if (GenerateFields(codeBlock, cls))
     codeBlock.Add("");
   if (GenerateMethods(codeBlock, cls))
@@ -94,13 +98,49 @@ void CSharpWrapperGenerator::GenerateInitializerDelegate(CodeBlock &codeBlock,
       ConstructInitializerArguments(cls));
 }
 
+bool CSharpWrapperGenerator::GenerateConstructors(CodeBlock &codeBlock, const Class &cls) const {
+  if (cls.mStruct &&
+      !cls.mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror))
+    return false;
+  bool processed = false;
+  for (auto &ctor: cls.mConstructors) {
+    if (!ShouldProcess(ctor))
+      continue;
+    processed = true;
+    GenerateConstructor(codeBlock, cls, ctor);
+  }
+  return processed;
+}
+
+void CSharpWrapperGenerator::GenerateEmptyConstructor(CodeBlock &codeBlock,
+                                                      const Class &cls) const {
+  codeBlock.Add("public {}()", cls.mName);
+  codeBlock.Add("{{");
+  codeBlock.Add("}}");
+}
+
+void CSharpWrapperGenerator::GenerateConstructor(CodeBlock &codeBlock, const Class &cls,
+                                                 const ClassConstructor &ctor) const {
+  codeBlock.Add("public {}({})", cls.mName,
+                ConstructMethodSignatureArguments(ctor, InteropType::NativeToManaged));
+  codeBlock.Add("{{");
+  codeBlock.Indent(1);
+  auto caller = std::format("{}Wrapper({})", ctor.mFunction->mName,
+                            ConstructMethodArguments(ctor, InteropType::ManagedToNative));
+  codeBlock.Add("{} = {};", St::CSharpMirroredStructFieldName, caller);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
+}
+
 bool CSharpWrapperGenerator::GenerateMethods(CodeBlock &codeBlock, const Class &cls) const {
   bool processed = false;
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
       continue;
     processed = true;
-    GenerateMethod(codeBlock, cls, method);
+    if (!method.mFunction ||
+        !method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_Constructor))
+      GenerateMethod(codeBlock, cls, method);
     GenerateMethodWrapper(codeBlock, cls, method);
   }
   return processed;
@@ -110,7 +150,6 @@ void CSharpWrapperGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &c
                                             const ClassMethod &method) const {
   bool isStatic = method.IsStatic(cls);
   bool returnsVoid = method.mReturnType.mName == "void";
-  std::string staticnessString = isStatic ? " static" : "";
   codeBlock.Add("public{} {} {}({})", isStatic ? " static" : "",
                 CSharpHelper::Get().Representation(method.mReturnType, mTranslatedProject,
                                                    InteropType::NativeToManaged),
@@ -126,13 +165,12 @@ void CSharpWrapperGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &c
     if (retClass->mStruct &&
         retClass->mStruct->GetMatchingAttribute(Annotations::Script,
                                                 Annotations::Script_AlwaysMirror)) {
-      codeBlock.Add("var holgenResultValue = new {}", method.mReturnType.mName);
+      codeBlock.Add("return new {}", method.mReturnType.mName);
       codeBlock.Add("{{");
       codeBlock.Indent(1);
       codeBlock.Add("{} = {}", St::CSharpMirroredStructFieldName, caller);
       codeBlock.Indent(-1);
       codeBlock.Add("}};");
-      codeBlock.Add("return holgenResultValue;");
     } else {
       THROW("Don't know how to return a {} yet", method.mReturnType.mName);
     }
@@ -147,7 +185,6 @@ void CSharpWrapperGenerator::GenerateMethodWrapper(CodeBlock &codeBlock, const C
                                                    const ClassMethod &method) const {
   bool isStatic = method.IsStatic(cls);
   bool returnsVoid = method.mReturnType.mName == "void";
-  std::string staticnessString = isStatic ? " static" : "";
   codeBlock.Add("private{} {} {}Wrapper({})", isStatic ? " static" : "",
                 CSharpHelper::Get().Representation(method.mReturnType, mTranslatedProject,
                                                    InteropType::ManagedToNative),
@@ -155,13 +192,14 @@ void CSharpWrapperGenerator::GenerateMethodWrapper(CodeBlock &codeBlock, const C
                 ConstructMethodSignatureArguments(method, InteropType::ManagedToNative));
   codeBlock.Add("{{");
   codeBlock.Indent(1);
-  codeBlock.Add("{}Marshal.GetDelegateForFunctionPointer<{}>({})({});",
-                returnsVoid ? "" : "var holgenResultValue = ",
-                mNamingConvention.CSharpMethodDelegateName(cls, method),
-                mNamingConvention.CSharpMethodPointerName(method),
-                ConstructMethodArguments(method, InteropType::Internal));
-  if (!returnsVoid) {
-    codeBlock.Add("return holgenResultValue;");
+  auto caller = std::format("Marshal.GetDelegateForFunctionPointer<{}>({})({})",
+                            mNamingConvention.CSharpMethodDelegateName(cls, method),
+                            mNamingConvention.CSharpMethodPointerName(method),
+                            ConstructMethodArguments(method, InteropType::Internal));
+  if (returnsVoid) {
+    codeBlock.Add("{};", caller);
+  } else {
+    codeBlock.Add("return {};", caller);
   }
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
@@ -224,6 +262,14 @@ bool CSharpWrapperGenerator::ShouldProcess(const ClassMethod &method) const {
   return true;
 }
 
+bool CSharpWrapperGenerator::ShouldProcess(const ClassConstructor &ctor) const {
+  if (!ctor.mFunction ||
+      ctor.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+      ctor.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp))
+    return false;
+  return true;
+}
+
 bool CSharpWrapperGenerator::ShouldProcess(const ClassField &field) const {
   if (!field.mField)
     return false;
@@ -251,7 +297,7 @@ std::string CSharpWrapperGenerator::ConstructInitializerArguments(const Class &c
 }
 
 std::string
-    CSharpWrapperGenerator::ConstructMethodSignatureArguments(const ClassMethod &method,
+    CSharpWrapperGenerator::ConstructMethodSignatureArguments(const MethodBase &method,
                                                               InteropType interopType) const {
   std::stringstream ss;
   bool isFirst = true;
@@ -268,7 +314,7 @@ std::string
   return ss.str();
 }
 
-std::string CSharpWrapperGenerator::ConstructMethodArguments(const ClassMethod &method,
+std::string CSharpWrapperGenerator::ConstructMethodArguments(const MethodBase &method,
                                                              InteropType interopType) const {
   std::stringstream ss;
   bool isFirst = true;

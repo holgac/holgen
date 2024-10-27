@@ -15,6 +15,9 @@ private:
   bool GenerateFields(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateInitializer(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateInitializerDelegate(CodeBlock &codeBlock, const Class &cls) const;
+  bool GenerateConstructors(CodeBlock &codeBlock, const Class &cls) const;
+  void GenerateEmptyConstructor(CodeBlock &codeBlock, const Class &cls) const;
+  void GenerateConstructor(CodeBlock &codeBlock, const Class &cls, const ClassConstructor &ctor) const;
   bool GenerateMethods(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
   void GenerateMethodWrapper(CodeBlock &codeBlock, const Class &cls,
@@ -26,11 +29,12 @@ private:
   void GenerateMethodPointer(CodeBlock &codeBlock, const ClassMethod &method) const;
 
   [[nodiscard]] bool ShouldProcess(const ClassMethod &method) const;
+  [[nodiscard]] bool ShouldProcess(const ClassConstructor &ctor) const;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
   [[nodiscard]] std::string ConstructInitializerArguments(const Class &cls) const;
-  [[nodiscard]] std::string ConstructMethodSignatureArguments(const ClassMethod &method,
+  [[nodiscard]] std::string ConstructMethodSignatureArguments(const MethodBase &method,
                                                               InteropType interopType) const;
-  [[nodiscard]] std::string ConstructMethodArguments(const ClassMethod &method,
+  [[nodiscard]] std::string ConstructMethodArguments(const MethodBase &method,
                                                      InteropType interopType) const;
 };
 } // namespace holgen
