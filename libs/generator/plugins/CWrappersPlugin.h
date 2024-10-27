@@ -10,8 +10,8 @@ public:
   void Run() override;
 
 private:
-  void ProcessClass(Class& cls, bool singleton);
-  void WrapMethod(Class& cls, const ClassMethod& method, bool singleton);
+  void ProcessClass(Class& cls);
+  void WrapMethod(Class& cls, const ClassMethod& method);
 
   Type ConvertType(const Type& type);
 };

@@ -1,6 +1,8 @@
 #pragma once
 #include "Generator.h"
 
+#include "generator/lang/CSharpHelper.h"
+
 namespace holgen {
 class CSharpWrapperGenerator : public Generator {
 public:
@@ -15,6 +17,8 @@ private:
   void GenerateInitializerDelegate(CodeBlock &codeBlock, const Class &cls) const;
   bool GenerateMethods(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
+  void GenerateMethodWrapper(CodeBlock &codeBlock, const Class &cls,
+                             const ClassMethod &method) const;
   bool GenerateMethodDelegates(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethodDelegate(CodeBlock &codeBlock, const Class &cls,
                               const ClassMethod &method) const;
@@ -24,7 +28,9 @@ private:
   [[nodiscard]] bool ShouldProcess(const ClassMethod &method) const;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
   [[nodiscard]] std::string ConstructInitializerArguments(const Class &cls) const;
-  [[nodiscard]] std::string ConstructMethodSignatureArguments(const ClassMethod &method) const;
-  [[nodiscard]] std::string ConstructMethodArguments(const ClassMethod &method) const;
+  [[nodiscard]] std::string ConstructMethodSignatureArguments(const ClassMethod &method,
+                                                              InteropType interopType) const;
+  [[nodiscard]] std::string ConstructMethodArguments(const ClassMethod &method,
+                                                     InteropType interopType) const;
 };
 } // namespace holgen

@@ -9,24 +9,25 @@ void CWrappersPlugin::Run() {
       continue;
     if (cls.mStruct->GetAnnotation(Annotations::DotNetModule))
       continue;
-    auto singleton = cls.mStruct->GetAnnotation(Annotations::Singleton);
-    ProcessClass(cls, singleton);
+    ProcessClass(cls);
   }
 }
 
-void CWrappersPlugin::ProcessClass(Class &cls, bool singleton) {
+void CWrappersPlugin::ProcessClass(Class &cls) {
   for (auto &method: cls.mMethods) {
     if (!method.mExposeToScript)
       continue;
-    WrapMethod(cls, method, singleton);
+    WrapMethod(cls, method);
   }
 }
 
-void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method, bool singleton) {
+void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
   auto func =
       CFunction{Naming().CWrapperName(cls, method), ConvertType(method.mReturnType), &method};
 
-  if (!singleton) {
+  bool isStatic = method.IsStatic(cls);
+
+  if (!isStatic) {
     func.mArguments.emplace_back("instance", ConvertType(Type{cls.mName, PassByType::Pointer}));
   }
 
@@ -42,8 +43,11 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method, bool sin
   }
 
   std::string prefix;
-  if (singleton) {
+  bool isSingleton = cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Singleton);
+  if (isSingleton) {
     prefix = std::format("{}::{}::GetInstance().", cls.mNamespace, cls.mName);
+  } else if (isStatic) {
+    prefix = std::format("{}::{}::", cls.mNamespace, cls.mName);
   } else {
     prefix = "instance->";
   }

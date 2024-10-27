@@ -66,5 +66,7 @@ public:
   static constexpr const char* CSharpDelegateSuffix = "Delegate";
   static constexpr const char* DotNetHostName = "DotNetHost";
   static constexpr const char* DotNetHost_Initialize = "Initialize";
+  static constexpr const char* CSharpMirroredStructStructName = "Fields";
+  static constexpr const char* CSharpMirroredStructFieldName = "Data";
 };
 } // namespace holgen
