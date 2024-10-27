@@ -161,6 +161,8 @@ TranslatorSettings GetTranslatorSettings(const CliOptions &cliOptions) {
     translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   if (cliOptions.mJsonEnabled)
     translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+  if (!cliOptions.mCSharpRoot.empty())
+    translatorSettings.EnableFeature(TranslatorFeatureFlag::CSharp);
   return translatorSettings;
 }
 
@@ -180,7 +182,7 @@ void WriteToFiles(const std::vector<GeneratedContent> &results, const CliOptions
       target = std::filesystem::path(cliOptions.mOutDir) / result.mName;
       break;
     case FileType::CSharpProject:
-    case FileType::CSharpWrapper:
+    case FileType::CSharpFile:
       target = std::filesystem::path(cliOptions.mCSharpRoot) / result.mName;
       break;
     }

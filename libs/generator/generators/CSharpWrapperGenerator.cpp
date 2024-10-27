@@ -12,14 +12,15 @@ void CSharpWrapperGenerator::Run(std::vector<GeneratedContent> &contents) const 
     if (!cls.mStruct)
       continue;
     if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
-        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp))
+        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp) ||
+        cls.mStruct->GetAnnotation(Annotations::DotNetModule))
       continue;
     Generate(contents.emplace_back(), cls);
   }
 }
 
 void CSharpWrapperGenerator::Generate(GeneratedContent &out, const Class &cls) const {
-  out.mType = FileType::CSharpWrapper;
+  out.mType = FileType::CSharpFile;
   out.mName = std::format("{}/{}.cs", St::CSharpProjectName, cls.mName);
   CodeBlock codeBlock;
   codeBlock.Add("namespace {};", St::CSharpProjectName);

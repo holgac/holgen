@@ -23,9 +23,8 @@ void CWrappersPlugin::ProcessClass(Class &cls, bool singleton) {
 }
 
 void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method, bool singleton) {
-  auto func = CFunction{
-      std::format("{}_{}_{}", St::Replace(cls.mNamespace, "::", "_"), cls.mName, method.mName),
-      ConvertType(method.mReturnType), &method};
+  auto func =
+      CFunction{Naming().CWrapperName(cls, method), ConvertType(method.mReturnType), &method};
 
   if (!singleton) {
     func.mArguments.emplace_back("instance", ConvertType(Type{cls.mName, PassByType::Pointer}));

@@ -3,7 +3,7 @@
 namespace holgen {
 void ClassEqualsOperatorPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
-    if (cls.mStruct == nullptr)
+    if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::DotNetModule))
       continue;
     ProcessClass(cls);
   }

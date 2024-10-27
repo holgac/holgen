@@ -64,5 +64,7 @@ public:
   static constexpr const char* CSharpProjectName = "CSharpBindings";
   static constexpr const char* CSharpInitializerMethodName = "HolgenInitialize";
   static constexpr const char* CSharpDelegateSuffix = "Delegate";
+  static constexpr const char* DotNetHostName = "DotNetHost";
+  static constexpr const char* DotNetHost_Initialize = "Initialize";
 };
 } // namespace holgen

@@ -49,9 +49,11 @@ public:
   virtual std::string LuaMetatableName(const Class &cls) const;
   virtual std::string LuaMethodCaller(const ClassMethod &method) const;
   virtual std::string CSharpMethodName(const ClassMethod &method) const;
-  virtual std::string CSharpMethodDelegateName(const Class& cls, const ClassMethod &method) const;
-  virtual std::string CSharpMethodDelegateName(const std::string& clsName, const std::string& methodName) const;
+  virtual std::string CSharpMethodDelegateName(const Class &cls, const ClassMethod &method) const;
+  virtual std::string CSharpMethodDelegateName(const std::string &clsName,
+                                               const std::string &methodName) const;
   virtual std::string CSharpMethodPointerName(const ClassMethod &method) const;
+  virtual std::string CWrapperName(const Class &cls, const ClassMethod &method) const;
 
 private:
   const TranslatedProject &mProject;

@@ -37,6 +37,7 @@ set(gen_lua_plugins
 set(gen_csharp_plugins
     plugins/csharp/DotNetModulePlugin.cpp
     plugins/csharp/DotNetModuleFunctionsPlugin.cpp
+    plugins/csharp/DotNetHostPlugin.cpp
 )
 
 set(gen_plugins
@@ -70,6 +71,7 @@ set(gen_generators
     generators/CppSourceGenerator.cpp
     generators/CSharpWrapperGenerator.cpp
     generators/CSharpProjectGenerator.cpp
+    generators/CSharpHolgenMainGenerator.cpp
 )
 
 add_library(generator

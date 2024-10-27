@@ -5,6 +5,7 @@ namespace TranslatorFeatureFlag {
 enum Entry : uint64_t {
   Lua = 1,
   Json = 2,
+  CSharp = 4,
 };
 }; // namespace TranslatorFeatureFlag
 

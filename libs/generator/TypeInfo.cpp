@@ -120,13 +120,15 @@ std::string TypeInfo::GetUnsigned(const std::string &signedType) {
 
 namespace {
 template <bool FullyQualified>
-std::string ToStringGeneric(const Type &type, bool noTrailingSpace,
+std::string ToStringGeneric(const Type &type, bool noTrailingSpace, bool ignoreConstForPrimitives,
                             const TranslatedProject *project) {
   std::stringstream ss;
 
+  bool isPrimitive = TypeInfo::Get().CppPrimitives.contains(type.mName);
+
   if (type.mConstexprness == Constexprness::Constexpr)
     ss << "constexpr ";
-  if (type.mConstness == Constness::Const)
+  if (type.mConstness == Constness::Const && (!isPrimitive || !ignoreConstForPrimitives))
     ss << "const ";
   if constexpr (FullyQualified) {
     auto cls = project->GetClass(type.mName);
@@ -143,7 +145,7 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace,
       } else {
         ss << ", ";
       }
-      ss << ToStringGeneric<FullyQualified>(templateParameter, true, project);
+      ss << ToStringGeneric<FullyQualified>(templateParameter, true, false, project);
     }
     ss << ">";
   }
@@ -157,7 +159,7 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace,
       } else {
         ss << ", ";
       }
-      ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], true, project);
+      ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], true, false, project);
     }
     ss << ")>";
   }
@@ -173,12 +175,12 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace,
 }
 } // namespace
 
-std::string Type::ToString(bool noTrailingSpace) const {
-  return ToStringGeneric<false>(*this, noTrailingSpace, nullptr);
+std::string Type::ToString(bool noTrailingSpace, bool ignoreConstForPrimitives) const {
+  return ToStringGeneric<false>(*this, noTrailingSpace, ignoreConstForPrimitives, nullptr);
 }
 
 std::string Type::ToFullyQualifiedString(const TranslatedProject &project) const {
-  return ToStringGeneric<true>(*this, false, &project);
+  return ToStringGeneric<true>(*this, false, false, &project);
 }
 
 Type::Type(const TranslatedProject &project, const DefinitionSource &definitionSource,

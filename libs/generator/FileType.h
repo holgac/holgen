@@ -5,7 +5,7 @@ enum class FileType {
   CppHeader,
   CppSource,
   CMakeFile,
-  CSharpWrapper,
+  CSharpFile,
   CSharpProject,
 };
 } // namespace holgen

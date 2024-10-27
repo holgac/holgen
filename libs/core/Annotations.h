@@ -56,17 +56,18 @@ public:
   inline static const std::string No_Script = "script";
 
   /**
-   * A unique annotation that describes the main class of each runtime-loaded dotnet module.
+   * An annotation that describes the runtime-loaded dotnet modules of this type. The runtime is
+   * expected to have a class named Module that matches the annotated struct. The functions should
+   * be static and marked with [UnmanagedCallersOnly].
    * Does not support fields.
    *
-   * @dotNetModule(main=ModuleMain)
-   * struct Module {
+   * @dotNetModule
+   * struct GameModule {
    *   func InitializeModule(string name);
    *   func UninitializeModule();
    * }
    */
   inline static const std::string DotNetModule = "dotNetModule";
-  inline static const std::string DotNetModule_Main = "main";
 
   /*
    * Disables json integration for the specified data type.

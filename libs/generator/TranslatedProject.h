@@ -214,6 +214,7 @@ struct Class {
   std::list<ClassEnum> mNestedEnums;
   HeaderContainer mHeaderIncludes;
   HeaderContainer mSourceIncludes;
+  CodeBlock mHeaderCustomSection;
   ClassType mClassType = ClassType::Class;
   std::string mNamespace;
   std::list<BaseClass> mBaseClasses;

@@ -30,18 +30,17 @@
 #include "generator/plugins/CWrappersPlugin.h"
 #include "generator/plugins/csharp/DotNetModulePlugin.h"
 #include "generator/plugins/csharp/DotNetModuleFunctionsPlugin.h"
+#include "generator/plugins/csharp/DotNetHostPlugin.h"
 
 namespace holgen {
 
 Translator::Translator(const TranslatorSettings &translatorSettings) :
-  mTranslatorSettings(translatorSettings) {
+    mTranslatorSettings(translatorSettings) {
   // TODO: Users should pick which plugins to run
   AddPlugin<ClassPlugin>();
   AddPlugin<ClassIdFieldPlugin>();
   AddPlugin<ClassFieldPlugin>();
   AddPlugin<CppDestructorPlugin>();
-  AddPlugin<DotNetModulePlugin>();
-  AddPlugin<DotNetModuleFunctionsPlugin>();
   AddPlugin<LuaFieldsPlugin>();
   AddPlugin<ClassFieldVariantPlugin>();
   AddPlugin<ClassEqualsOperatorPlugin>();
@@ -54,6 +53,9 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<EnumPlugin>();
   AddPlugin<BitmapPlugin>();
   AddPlugin<BitmapFieldPlugin>();
+  AddPlugin<DotNetModulePlugin>();
+  AddPlugin<DotNetModuleFunctionsPlugin>();
+  AddPlugin<DotNetHostPlugin>();
   AddPlugin<CWrappersPlugin>();
   AddPlugin<JsonConverterPlugin>();
   AddPlugin<JsonPlugin>();

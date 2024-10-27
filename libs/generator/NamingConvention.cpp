@@ -158,11 +158,15 @@ std::string NamingConvention::CSharpMethodDelegateName(const Class &cls,
 
 std::string NamingConvention::CSharpMethodDelegateName(const std::string &clsName,
                                                        const std::string &methodName) const {
- return St::Capitalize(clsName) + St::Capitalize(methodName) + St::CSharpDelegateSuffix;
+  return St::Capitalize(clsName) + St::Capitalize(methodName) + St::CSharpDelegateSuffix;
 }
 
 std::string NamingConvention::CSharpMethodPointerName(const ClassMethod &method) const {
   return std::format("_{}Impl", St::Uncapitalize(method.mName));
+}
+
+std::string NamingConvention::CWrapperName(const Class &cls, const ClassMethod &method) const {
+  return std::format("{}_{}_{}", St::Replace(cls.mNamespace, "::", "_"), cls.mName, method.mName);
 }
 
 std::string NamingConvention::FieldNameInCpp(const std::string &fieldName) const {

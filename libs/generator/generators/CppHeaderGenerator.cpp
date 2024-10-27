@@ -34,6 +34,7 @@ void CppHeaderGenerator::Generate(GeneratedContent &out, const Class &cls) const
   codeBlock.Line();
   codeBlock.Add("#include \"../holgen.h\"");
   headers.Write(codeBlock);
+  codeBlock.Add(cls.mHeaderCustomSection);
   GenerateClassDefinition(cls, codeBlock);
   for (auto &specialization: cls.mSpecializations) {
     GenerateClassDefinition(specialization, codeBlock);

@@ -20,6 +20,7 @@ std::map<std::string, std::string> STDHeaders = {
     {"std::array", "array"},
     {"std::shared_ptr", "memory"},
     {"std::unique_ptr", "memory"},
+    {"std::filesystem::path", "filesystem"},
 };
 std::set<std::string> NoHeaderTypes = {"float", "double", "void", "bool"};
 } // namespace
