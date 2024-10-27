@@ -3,6 +3,7 @@
 #include "core/St.h"
 
 #include "core/Annotations.h"
+#include "../lang/CSharpHelper.h"
 
 namespace holgen {
 void CSharpWrapperGenerator::Run(std::vector<GeneratedContent> &contents) const {
@@ -37,6 +38,8 @@ void CSharpWrapperGenerator::Generate(GeneratedContent &out, const Class &cls) c
 }
 
 void CSharpWrapperGenerator::GenerateClassBody(CodeBlock &codeBlock, const Class &cls) const {
+  if (GenerateFields(codeBlock, cls))
+    codeBlock.Add("");
   if (GenerateMethods(codeBlock, cls))
     codeBlock.Add("");
   if (GenerateMethodDelegates(codeBlock, cls))
@@ -46,6 +49,31 @@ void CSharpWrapperGenerator::GenerateClassBody(CodeBlock &codeBlock, const Class
   GenerateInitializerDelegate(codeBlock, cls);
   codeBlock.Add("");
   GenerateInitializer(codeBlock, cls);
+}
+
+bool CSharpWrapperGenerator::GenerateFields(CodeBlock &codeBlock, const Class &cls) const {
+  if (!cls.mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror))
+    return false;
+  bool processed = false;
+  CodeBlock tempCodeBlock;
+  tempCodeBlock.Add("[StructLayout(LayoutKind.Sequential)]");
+  tempCodeBlock.Add("public struct Fields");
+  tempCodeBlock.Add("{{");
+  tempCodeBlock.Indent(1);
+  for (auto &field: cls.mFields) {
+    if (!ShouldProcess(field))
+      continue;
+    processed = true;
+    tempCodeBlock.Add("public {} {};", CSharpHelper::Get().TypeRepresentation(field.mType, mTranslatedProject),
+                      mNamingConvention.FieldNameInCSharp(field.mField->mName));
+  }
+
+  if (processed) {
+    tempCodeBlock.Indent(-1);
+    tempCodeBlock.Add("}}");
+    codeBlock.Add(std::move(tempCodeBlock));
+  }
+  return processed;
 }
 
 void CSharpWrapperGenerator::GenerateInitializerDelegate(CodeBlock &codeBlock,
@@ -73,7 +101,7 @@ void CSharpWrapperGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &c
   bool returnsVoid = method.mReturnType.mName == "void";
   std::string staticnessString = isStatic ? " static" : "";
   codeBlock.Add("public{} {} {}({})", isStatic ? " static" : "",
-                ConvertAndStringify(method.mReturnType, true), method.mName,
+                CSharpHelper::Get().TypeRepresentation(method.mReturnType, mTranslatedProject), method.mName,
                 ConstructMethodSignatureArguments(method));
   codeBlock.Add("{{");
   codeBlock.Indent(1);
@@ -110,9 +138,9 @@ void CSharpWrapperGenerator::GenerateMethodDelegate(CodeBlock &codeBlock, const 
     } else {
       args << ", ";
     }
-    args << ConvertAndStringify(arg.mType, false) << " " << arg.mName;
+    args << CSharpHelper::Get().TypeRepresentation(arg.mType, mTranslatedProject) << " " << arg.mName;
   }
-  codeBlock.Add("public delegate {} {}({});", ConvertAndStringify(method.mReturnType, true),
+  codeBlock.Add("public delegate {} {}({});", CSharpHelper::Get().TypeRepresentation(method.mReturnType, mTranslatedProject),
                 mNamingConvention.CSharpMethodDelegateName(cls, method), args.str());
 }
 
@@ -143,9 +171,13 @@ bool CSharpWrapperGenerator::ShouldProcess(const ClassMethod &method) const {
   return true;
 }
 
-std::string CSharpWrapperGenerator::ConvertAndStringify(const Type &type, bool toManaged) const {
-  (void)toManaged;
-  return type.mName;
+bool CSharpWrapperGenerator::ShouldProcess(const ClassField &field) const {
+  if (!field.mField)
+    return false;
+  if (field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+      field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp))
+    return false;
+  return true;
 }
 
 std::string CSharpWrapperGenerator::ConstructInitializerArguments(const Class &cls) const {
@@ -175,7 +207,7 @@ std::string
     } else {
       ss << ", ";
     }
-    ss << std::format("{} {}", ConvertAndStringify(arg.mType, false), arg.mName);
+    ss << std::format("{} {}", CSharpHelper::Get().TypeRepresentation(arg.mType, mTranslatedProject), arg.mName);
   }
   return ss.str();
 }

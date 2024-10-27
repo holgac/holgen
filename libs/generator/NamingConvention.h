@@ -54,6 +54,7 @@ public:
                                                const std::string &methodName) const;
   virtual std::string CSharpMethodPointerName(const ClassMethod &method) const;
   virtual std::string CWrapperName(const Class &cls, const ClassMethod &method) const;
+  virtual std::string FieldNameInCSharp(const std::string &fieldName) const;
 
 private:
   const TranslatedProject &mProject;

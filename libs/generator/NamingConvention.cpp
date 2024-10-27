@@ -169,6 +169,10 @@ std::string NamingConvention::CWrapperName(const Class &cls, const ClassMethod &
   return std::format("{}_{}_{}", St::Replace(cls.mNamespace, "::", "_"), cls.mName, method.mName);
 }
 
+std::string NamingConvention::FieldNameInCSharp(const std::string &fieldName) const {
+  return St::Capitalize(fieldName);
+}
+
 std::string NamingConvention::FieldNameInCpp(const std::string &fieldName) const {
   return std::format("m{}", St::Capitalize(fieldName));
 }

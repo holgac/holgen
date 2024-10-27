@@ -69,6 +69,15 @@ public:
    */
   inline static const std::string DotNetModule = "dotNetModule";
 
+  /**
+   * An annotation to modify scripting behaviour of data structures.
+   *
+   * alwaysMirror: Do not create proxy objects for the given struct, always represent it natively
+   *               in the target language.
+   */
+  inline static const std::string Script = "script";
+  inline static const std::string Script_AlwaysMirror = "alwaysMirror";
+
   /*
    * Disables json integration for the specified data type.
    *

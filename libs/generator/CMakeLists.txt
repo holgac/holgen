@@ -74,6 +74,10 @@ set(gen_generators
     generators/CSharpHolgenMainGenerator.cpp
 )
 
+set(gen_lang
+    lang/CSharpHelper.cpp
+)
+
 add_library(generator
     ${gen_base}
     ${gen_plugins}
@@ -81,5 +85,6 @@ add_library(generator
     ${gen_json_plugins}
     ${gen_lua_plugins}
     ${gen_csharp_plugins}
+    ${gen_lang}
     ${gen_generators}
 )

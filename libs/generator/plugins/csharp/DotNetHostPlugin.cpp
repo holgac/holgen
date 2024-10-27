@@ -331,7 +331,9 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
       Naming().CSharpMethodDelegateName(projectCls.mName, St::CSharpInitializerMethodName));
   codeBlock.Add("nullptr, nullptr, (void**)(&initFunc));");
   codeBlock.Indent(-1);
-  codeBlock.Add("HOLGEN_FAIL_IF(res < 0 || !initFunc, \"Could not load init func!\");");
+  codeBlock.Add("HOLGEN_FAIL_IF(res < 0 || !initFunc, \"Could not initialize {}, was the project "
+                "built after the cs files were generated?!\");",
+                projectCls.mName);
   codeBlock.Add("initFunc({});", initFuncCallArgs.str());
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
