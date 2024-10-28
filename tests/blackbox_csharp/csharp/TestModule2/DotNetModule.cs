@@ -6,12 +6,24 @@ namespace TestModule2;
 public sealed class DotNetModule : IDotNetModule
 {
     private uint _bumpAmount = 1;
+    private string _counterName = "TestModule2";
     private static DotNetModule _instance = null!;
 
     public static void Initialize()
     {
         Console.WriteLine("Hello from TestModule2!");
         _instance = new DotNetModule();
+    }
+
+    public static uint BumpAndGetSingletonCounter()
+    {
+        SingletonCounter.Bump(_instance._bumpAmount * 2);
+        return SingletonCounter.Get();
+    }
+
+    public static void SetBumpAmount(uint amount)
+    {
+        _instance._bumpAmount = amount;
     }
 
     public static ModuleVersion.Fields Constructor()
@@ -48,24 +60,30 @@ public sealed class DotNetModule : IDotNetModule
         return v1.SumOfSelfAnd(v2, v3).Data;
     }
 
-
-    public static uint BumpAndGetCounter()
-    {
-        SingletonCounter.Bump(_instance._bumpAmount * 2);
-        return SingletonCounter.Get();
-    }
-
-    public static void SetBumpAmount(uint amount)
-    {
-        _instance._bumpAmount = amount;
-    }
-
     public static void SetCounterName([MarshalAs(UnmanagedType.LPStr)] string name)
     {
+        Console.WriteLine("TestModule2 set counter name to {0}", name);
+        _instance._counterName = name;
     }
 
     public static uint ProxyObjectNativeToManaged()
     {
-        return 0;
+        var counter = CounterManager.GetCounterPtr(_instance._counterName);
+        counter.Bump(_instance._bumpAmount * 2);
+        return counter.Get();
+    }
+
+    public static uint ProxyObjectMethodArgInModule(IntPtr counter)
+    {
+        var counterInstance = new Counter(counter);
+        return counterInstance.Get() * 2;
+    }
+
+    public static IntPtr ProxyObjectReturnValue(IntPtr counter1, IntPtr counter2)
+    {
+        var c1 = new Counter(counter1);
+        var c2 = new Counter(counter2);
+        var c1Again = c1.AddCounterAndReturnSelf(c2);
+        return c1Again.AddCounterAndReturnSelf(c2).HolgenPtr;
     }
 }

@@ -1,3 +1,4 @@
+/*
 @interface
 struct ICalculator {
     func Set(double val);
@@ -8,4 +9,4 @@ struct ICalculator {
     @func(const)
     func Get() -> double;
 }
-
+*/

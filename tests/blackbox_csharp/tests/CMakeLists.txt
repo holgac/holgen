@@ -32,7 +32,6 @@ endif ()
 
 
 add_executable(tests
-    DotNetHost.cpp
     test_vector.cpp
     test_module.cpp
 )
