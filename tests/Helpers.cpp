@@ -106,7 +106,7 @@ void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
   EXPECT_EQ(actual.mFunction, expected.mFunction);
 }
 
-void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected) {
+void ExpectEqual(const MethodArgument &actual, const MethodArgument &expected) {
   ExpectEqual(actual.mType, expected.mType);
   EXPECT_EQ(actual.mName, expected.mName);
   EXPECT_EQ(actual.mDefaultValue, expected.mDefaultValue);

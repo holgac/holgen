@@ -49,7 +49,7 @@ void ManagedClassPlugin::GenerateIndexGetter(Class &cls, const Class &manager,
                             Visibility::Public, Constness::NotConst, Staticness::Static};
   auto indexedOnField =
       cls.GetFieldFromDefinitionName(annotation.GetAttribute(Annotations::Index_On)->mValue.mName);
-  ClassMethodArgument &keyArg = method.mArguments.emplace_back(
+  MethodArgument &keyArg = method.mArguments.emplace_back(
       "key",
       Type{mProject, indexedOnField->mField->mDefinitionSource, indexedOnField->mField->mType});
   keyArg.mType.PreventCopying();

@@ -30,6 +30,7 @@ TEST(GeneratorTest, Helpers) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
@@ -86,6 +87,7 @@ TEST(GeneratorTest, ClassWithGetters) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
@@ -184,6 +186,7 @@ TEST(GeneratorTest, ClassWithContainers) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
@@ -228,7 +231,7 @@ private:
 };
 }
 extern "C" {
-  HOLGEN_EXPORT void generator_test_namespace_Market_OnNewTrade(generator_test_namespace::Market *instance, const std::string &instrument, const double price);
+  HOLGEN_EXPORT void generator_test_namespace_Market_OnNewTrade(generator_test_namespace::Market *instance, const char *instrument, const double price);
 }
           )R");
   ExpectGeneratedContent(files["gen/Market.cpp"], FileType::CppSource, "gen/Market.cpp",
@@ -309,7 +312,7 @@ bool Market::ParseJson(const rapidjson::Value &json, const Converter &converter)
 }
 }
 extern "C" {
-  void generator_test_namespace_Market_OnNewTrade(generator_test_namespace::Market *instance, const std::string &instrument, const double price) {
+  void generator_test_namespace_Market_OnNewTrade(generator_test_namespace::Market *instance, const char *instrument, const double price) {
     return instance->OnNewTrade(instrument, price);
   }
 }
@@ -340,6 +343,7 @@ TEST(GeneratorTest, NestedClasses) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
@@ -582,6 +586,7 @@ TEST(GeneratorTest, Converters) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
@@ -886,6 +891,7 @@ TEST(GeneratorTest, DataManager) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
@@ -1009,6 +1015,7 @@ TEST(GeneratorTest, NonCopyableStruct) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));

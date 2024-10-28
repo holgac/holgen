@@ -18,6 +18,7 @@ TEST(GeneratorGlobalPointerTest, HeaderAndSource) {
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
+      .mCSharpRoot = "",
   };
   CodeGenerator generator(generatorSettings);
   auto files = helpers::MapByName(generator.Generate(tp));

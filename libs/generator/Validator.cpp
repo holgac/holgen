@@ -68,7 +68,7 @@ std::string ToString(const AnnotationDefinition &annotation) {
   return std::format("{} ({})", annotation.mName, annotation.mDefinitionSource);
 }
 
-bool AreArgumentsCompatible(const ClassMethodArgument &arg1, const ClassMethodArgument &arg2) {
+bool AreArgumentsCompatible(const MethodArgument &arg1, const MethodArgument &arg2) {
   if (arg1.mType.mName != arg2.mType.mName)
     return false;
   if (arg1.mType.mType != arg2.mType.mType) {

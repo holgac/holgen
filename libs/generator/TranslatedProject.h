@@ -61,8 +61,8 @@ struct ClassField {
   const FieldDefinition *mField = nullptr;
 };
 
-struct ClassMethodArgument {
-  ClassMethodArgument(std::string name, Type type,
+struct MethodArgument {
+  MethodArgument(std::string name, Type type,
                       std::optional<std::string> defaultValue = std::nullopt) :
       mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {}
 
@@ -80,7 +80,7 @@ struct TemplateParameter {
 struct MethodBase {
   Visibility mVisibility = Visibility::Public;
   CodeBlock mBody;
-  std::list<ClassMethodArgument> mArguments;
+  std::list<MethodArgument> mArguments;
   std::list<TemplateParameter> mTemplateParameters;
   std::list<std::string> mComments;
   bool mIsTemplateSpecialization = false;

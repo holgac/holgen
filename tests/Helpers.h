@@ -19,7 +19,7 @@ void ExpectEqual(const ClassField &actual, const ClassField &expected);
 void ExpectEqual(const ClassEnumEntry &actual, const ClassEnumEntry &expected);
 void ExpectEqual(const ClassMethod &actual, const ClassMethod &expected,
                  const std::optional<std::string> &expectedBody = std::nullopt);
-void ExpectEqual(const ClassMethodArgument &actual, const ClassMethodArgument &expected);
+void ExpectEqual(const MethodArgument &actual, const MethodArgument &expected);
 void ExpectEqual(const ClassConstructor &actual, const ClassConstructor &expected,
                  const std::optional<std::string> &expectedBody = std::nullopt);
 void ExpectEqual(const ClassDestructor &actual, const ClassDestructor &expected,
