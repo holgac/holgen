@@ -72,6 +72,8 @@ set(gen_generators
     generators/CSharpWrapperGenerator.cpp
     generators/CSharpProjectGenerator.cpp
     generators/CSharpHolgenMainGenerator.cpp
+    generators/CSharpModuleInterfaceGenerator.cpp
+    generators/CSharpGeneratorBase.cpp
 )
 
 set(gen_lang

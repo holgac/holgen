@@ -8,6 +8,7 @@
 #include "generators/CSharpWrapperGenerator.h"
 #include "generators/CSharpProjectGenerator.h"
 #include "generators/CSharpHolgenMainGenerator.h"
+#include "generators/CSharpModuleInterfaceGenerator.h"
 
 namespace holgen {
 
@@ -24,6 +25,7 @@ std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &t
   CSharpWrapperGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
   CSharpProjectGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
   CSharpHolgenMainGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  CSharpModuleInterfaceGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
 
   mTranslatedProject = nullptr;
   return contents;

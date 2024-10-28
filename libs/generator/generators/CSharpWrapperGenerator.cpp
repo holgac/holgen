@@ -58,6 +58,11 @@ bool CSharpWrapperGenerator::GenerateFields(CodeBlock &codeBlock, const Class &c
     codeBlock.Add("public IntPtr {} {{ get; }}", St::CSharpProxyObjectPointerFieldName);
     return true;
   }
+
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Singleton)) {
+    return false;
+  }
+
   bool processed = false;
   CodeBlock fieldsStruct;
   CodeBlock accessors;
@@ -102,6 +107,10 @@ bool CSharpWrapperGenerator::GenerateConstructors(CodeBlock &codeBlock, const Cl
   if (cls.IsProxyable()) {
     GenerateProxyConstructor(codeBlock, cls);
     return true;
+  }
+
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Singleton)) {
+    return false;
   }
 
   bool processed = false;
@@ -159,70 +168,15 @@ bool CSharpWrapperGenerator::GenerateMethods(CodeBlock &codeBlock, const Class &
   return processed;
 }
 
-void CSharpWrapperGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cls,
-                                            const ClassMethod &method) const {
-  bool isStatic = method.IsStatic(cls);
-  bool returnsVoid = method.mReturnType.mName == "void";
-  codeBlock.Add(
-      "public{} {} {}({})", isStatic ? " static" : "",
-      CSharpHelper::Get().Representation(method.mReturnType, mTranslatedProject,
-                                         InteropType::NativeToManaged, false),
-      method.mName,
-      ConstructMethodSignatureArguments(cls, method, InteropType::NativeToManaged, false));
-  codeBlock.Add("{{");
-  codeBlock.Indent(1);
-  auto caller = ConstructWrapperCall(cls, method, method.mName, !isStatic);
-  if (returnsVoid) {
-    codeBlock.Add("{};", caller);
-  } else if (auto retClass = mTranslatedProject.GetClass(method.mReturnType.mName)) {
-    if (retClass->mStruct &&
-        retClass->mStruct->GetMatchingAttribute(Annotations::Script,
-                                                Annotations::Script_AlwaysMirror)) {
-      codeBlock.Add("return new {}", method.mReturnType.mName);
-      codeBlock.Add("{{");
-      codeBlock.Indent(1);
-      codeBlock.Add("{} = {}", St::CSharpMirroredStructFieldName, caller);
-      codeBlock.Indent(-1);
-      codeBlock.Add("}};");
-    } else {
-      codeBlock.Add("return new {}({});", method.mReturnType.mName, caller);
-    }
-  } else {
-    codeBlock.Add("return {};", caller);
-  }
-  codeBlock.Indent(-1);
-  codeBlock.Add("}}");
-}
-
 bool CSharpWrapperGenerator::GenerateMethodDelegates(CodeBlock &codeBlock, const Class &cls) const {
   bool processed = false;
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
       continue;
     processed = true;
-    GenerateMethodDelegate(codeBlock, cls, method);
+    GenerateMethodDelegate(codeBlock, cls, method, method.IsStatic(cls));
   }
   return processed;
-}
-
-void CSharpWrapperGenerator::GenerateMethodDelegate(CodeBlock &codeBlock, const Class &cls,
-                                                    const ClassMethod &method) const {
-  std::stringstream args;
-  bool isFirst = true;
-  for (auto &arg: method.mArguments) {
-    if (isFirst) {
-      isFirst = false;
-    } else {
-      args << ", ";
-    }
-    args << CSharpHelper::Get().RepresentationInNative(arg.mType, mTranslatedProject) << " "
-         << arg.mName;
-  }
-  codeBlock.Add("public delegate {} {}({});",
-                CSharpHelper::Get().RepresentationInNative(method.mReturnType, mTranslatedProject),
-                mNamingConvention.CSharpMethodDelegateName(cls, method),
-                ConstructMethodSignatureArguments(cls, method, InteropType::ManagedToNative,
-                                                  !method.IsStatic(cls)));
 }
 
 bool CSharpWrapperGenerator::GenerateMethodPointers(CodeBlock &codeBlock, const Class &cls) const {
@@ -284,64 +238,6 @@ std::string CSharpWrapperGenerator::ConstructInitializerArguments(const Class &c
                       St::Uncapitalize(method.mName));
   }
   return ss.str();
-}
-
-std::string CSharpWrapperGenerator::ConstructMethodSignatureArguments(const Class &cls,
-                                                                      const MethodBase &method,
-                                                                      InteropType interopType,
-                                                                      bool addThisArgument) const {
-  std::stringstream ss;
-  bool isFirst = true;
-  if (addThisArgument) {
-    isFirst = false;
-    ss << CSharpHelper::Get().Representation(Type{cls.mName}, mTranslatedProject, interopType, true)
-       << " holgenObject";
-  }
-  for (auto &arg: method.mArguments) {
-    if (isFirst) {
-      isFirst = false;
-    } else {
-      ss << ", ";
-    }
-    ss << std::format(
-        "{} {}",
-        CSharpHelper::Get().Representation(arg.mType, mTranslatedProject, interopType, true),
-        arg.mName);
-  }
-  return ss.str();
-}
-
-std::string CSharpWrapperGenerator::ConstructMethodArguments(const Class &cls,
-                                                             const MethodBase &method,
-                                                             InteropType interopType,
-                                                             bool addThisArgument) const {
-  std::stringstream ss;
-  bool isFirst = true;
-  if (addThisArgument) {
-    isFirst = false;
-    ss << CSharpHelper::Get().VariableRepresentation(Type{cls.mName}, "this", mTranslatedProject,
-                                                     interopType, true);
-  }
-  for (auto &arg: method.mArguments) {
-    if (isFirst) {
-      isFirst = false;
-    } else {
-      ss << ", ";
-    }
-    ss << CSharpHelper::Get().VariableRepresentation(arg.mType, arg.mName, mTranslatedProject,
-                                                     interopType, true);
-  }
-  return ss.str();
-}
-
-std::string CSharpWrapperGenerator::ConstructWrapperCall(const Class &cls, const MethodBase &method,
-                                                         const std::string &methodName,
-                                                         bool addThisArgument) const {
-  return std::format(
-      "Marshal.GetDelegateForFunctionPointer<{}>({})({})",
-      mNamingConvention.CSharpMethodDelegateName(cls.mName, methodName),
-      mNamingConvention.CSharpMethodPointerName(methodName),
-      ConstructMethodArguments(cls, method, InteropType::ManagedToNative, addThisArgument));
 }
 
 void CSharpWrapperGenerator::GenerateInitializer(CodeBlock &codeBlock, const Class &cls) const {

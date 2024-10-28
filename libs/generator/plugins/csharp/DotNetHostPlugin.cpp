@@ -262,18 +262,21 @@ void DotNetHostPlugin::CreateLoadModuleMethod(Class &cls, const Class &moduleCls
   method.mBody.Add("{}(dllPath.c_str());", Naming().FieldNameInCpp("loadModule"));
 
 
-  method.mBody.Add("auto className = std::format(\"{{0}}.Module, {{0}}\", module.{});",
+  method.mBody.Add("auto className = std::format(\"{{0}}.{}, {{0}}\", module.{});", moduleCls.mName,
                    moduleNameAccessor);
   for (auto &moduleClsMethod: moduleCls.mMethods) {
     if (!moduleClsMethod.mFunctionPointer)
       continue;
     method.mBody.Add("{{");
     method.mBody.Indent(1);
+    auto delegateName = std::format("{0}.{1}+{2}, {0}", St::CSharpProjectName,
+                                    Naming().ModuleInterfaceNameInCSharp(moduleCls.mName),
+                                    Naming().CSharpMethodDelegateName(moduleCls, moduleClsMethod));
     method.mBody.Add("auto res = {0}(className.c_str(), \"{1}\", "
-                     "UNMANAGEDCALLERSONLY_METHOD, nullptr, "
+                     "\"{2}\", nullptr, "
                      "nullptr, (void**)(&module.{1}));",
                      Naming().FieldNameInCpp("hostfxrDelegate_get_function_pointer"),
-                     moduleClsMethod.mName);
+                     moduleClsMethod.mName, delegateName);
     method.mBody.Add(
         "HOLGEN_FAIL_IF(res < 0 || !module.{0}, \"Required module method {0} not found "
         "in {{}}\", module.{1});",
@@ -297,7 +300,7 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
   std::stringstream initFuncCallArgs;
   initFuncDefinition << "void (*initFunc)(";
   bool isFirstMethod = true;
-  for(auto& func: projectCls.mCFunctions) {
+  for (auto &func: projectCls.mCFunctions) {
     if (!ShouldInitializeCFunction(func))
       continue;
     if (isFirstMethod) {

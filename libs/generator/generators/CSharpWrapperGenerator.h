@@ -1,12 +1,10 @@
 #pragma once
-#include "Generator.h"
-
-#include "generator/lang/CSharpHelper.h"
+#include "CSharpGeneratorBase.h"
 
 namespace holgen {
-class CSharpWrapperGenerator : public Generator {
+class CSharpWrapperGenerator : public CSharpGeneratorBase {
 public:
-  using Generator::Generator;
+  using CSharpGeneratorBase::CSharpGeneratorBase;
   void Run(std::vector<GeneratedContent> &contents) const override;
 
 private:
@@ -21,10 +19,7 @@ private:
   void GenerateConstructor(CodeBlock &codeBlock, const Class &cls,
                            const ClassConstructor &ctor) const;
   bool GenerateMethods(CodeBlock &codeBlock, const Class &cls) const;
-  void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
   bool GenerateMethodDelegates(CodeBlock &codeBlock, const Class &cls) const;
-  void GenerateMethodDelegate(CodeBlock &codeBlock, const Class &cls,
-                              const ClassMethod &method) const;
   bool GenerateMethodPointers(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethodPointer(CodeBlock &codeBlock, const ClassMethod &method) const;
 
@@ -32,15 +27,5 @@ private:
   [[nodiscard]] bool ShouldProcess(const ClassConstructor &ctor) const;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
   [[nodiscard]] std::string ConstructInitializerArguments(const Class &cls) const;
-  [[nodiscard]] std::string ConstructMethodSignatureArguments(const Class &cls,
-                                                              const MethodBase &method,
-                                                              InteropType interopType,
-                                                              bool addThisArgument) const;
-  [[nodiscard]] std::string ConstructMethodArguments(const Class &cls, const MethodBase &method,
-                                                     InteropType interopType,
-                                                     bool addThisArgument) const;
-  [[nodiscard]] std::string ConstructWrapperCall(const Class &cls, const MethodBase &method,
-                                                 const std::string &methodName,
-                                                 bool addThisArgument) const;
 };
 } // namespace holgen
