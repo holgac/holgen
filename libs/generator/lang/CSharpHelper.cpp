@@ -11,12 +11,20 @@ std::string CSharpHelper::RepresentationInNative(const Type &other,
                                                  const TranslatedProject &project,
                                                  bool prependRef) {
   if (other.mName == "char" && other.mType == PassByType::Pointer) {
-    return "string";
+    switch (other.mPointerDepth) {
+    case 0:
+      return "string";
+    case 1:
+      return "string[]";
+    default:
+      THROW("Unexpected pointer-to-pointer-to-pointer in {}", other.ToString(true, false));
+    }
   }
 
   auto it = CppTypeToCSharpType.find(other.mName);
   if (it != CppTypeToCSharpType.end()) {
-    // this ignores const qualifiers
+    if (other.mType == PassByType::Pointer)
+      return std::format("{}[]", it->second);
     return it->second;
   }
   if (auto cls = project.GetClass(other.mName)) {
@@ -33,13 +41,21 @@ std::string CSharpHelper::RepresentationInNative(const Type &other,
 std::string CSharpHelper::RepresentationInManaged(const Type &other,
                                                   const TranslatedProject &project) {
   if (other.mName == "char" && other.mType == PassByType::Pointer) {
-    return "string";
+    switch (other.mPointerDepth) {
+    case 0:
+      return "string";
+    case 1:
+      return "string[]";
+    default:
+      THROW("Unexpected pointer-to-pointer-to-pointer in {}", other.ToString(true, false));
+    }
   }
 
   (void)project;
   auto it = CppTypeToCSharpType.find(other.mName);
   if (it != CppTypeToCSharpType.end()) {
-    // this ignores const qualifiers
+    if (other.mType == PassByType::Pointer)
+      return std::format("{}[]", it->second);
     return it->second;
   }
   return other.mName;
@@ -66,6 +82,18 @@ std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedPro
   case InteropType::ManagedToNative:
   case InteropType::NativeToManaged:
     return MarshallingInfo(other, project);
+  }
+  THROW("Unexpected interop type: {}", uint32_t(interopType));
+}
+
+std::string CSharpHelper::ArrayMarshallingInfo(const Type &other, const TranslatedProject &project,
+                                               InteropType interopType, size_t sizeArgumentIdx) {
+  switch (interopType) {
+  case InteropType::Internal:
+    return other.mName;
+  case InteropType::ManagedToNative:
+  case InteropType::NativeToManaged:
+    return ArrayMarshallingInfo(other, project, sizeArgumentIdx);
   }
   THROW("Unexpected interop type: {}", uint32_t(interopType));
 }
@@ -127,15 +155,28 @@ std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedPro
   return "";
 }
 
+std::string CSharpHelper::ArrayMarshallingInfo(const Type &other, const TranslatedProject &project,
+                                               size_t sizeArgumentIdx) {
+  (void)project;
+  if (other.mName == "char" && other.mType == PassByType::Pointer) {
+    return std::format(
+        "[MarshalAs(UnmanagedType.LPArray, SizeParamIndex={}, ArraySubType=UnmanagedType.LPStr)] ",
+        sizeArgumentIdx);
+  }
+  return std::format("[MarshalAs(UnmanagedType.LPArray, SizeParamIndex={})] ", sizeArgumentIdx);
+}
+
 CSharpHelper &CSharpHelper::Get() {
   static CSharpHelper instance;
   return instance;
 }
 
 CSharpHelper::CSharpHelper() {
-  CppTypeToCSharpType = {{"int8_t", "sbyte"},  {"int16_t", "short"},     {"int32_t", "int"},
-                         {"int64_t", "long"},  {"uint8_t", "byte"},      {"uint16_t", "ushort"},
-                         {"uint32_t", "uint"}, {"uint64_t", "ulong"},    {"float", "float"},
-                         {"double", "double"}, {"std::string", "string"}};
+  CppTypeToCSharpType = {
+      {"int8_t", "sbyte"},      {"int16_t", "short"},       {"int32_t", "int"},
+      {"int64_t", "long"},      {"std::ptrdiff_t", "long"}, {"uint8_t", "byte"},
+      {"uint16_t", "ushort"},   {"uint32_t", "uint"},       {"uint64_t", "ulong"},
+      {"size_t", "ulong"},      {"float", "float"},         {"double", "double"},
+      {"std::string", "string"}};
 }
 } // namespace holgen

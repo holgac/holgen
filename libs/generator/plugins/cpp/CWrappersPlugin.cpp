@@ -1,4 +1,5 @@
 #include "CWrappersPlugin.h"
+#include <iostream>
 
 #include "core/St.h"
 #include "generator/lang/BridgingHelper.h"
@@ -42,15 +43,42 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
       isFirst = false;
     else
       args << ", ";
-    auto funcArgType = BridgingHelper::ConvertType(mProject, arg.mType, false,
-                                                   method.mFunction->mDefinitionSource);
-    func.mArguments.emplace_back(arg.mName, funcArgType);
-    if (funcArgType.mType == PassByType::Pointer && arg.mType.mType != PassByType::Pointer &&
-        funcArgType.mName != "char") {
+    auto &addedArg =
+        BridgingHelper::AddArgument(mProject, func, arg, method.mFunction->mDefinitionSource);
+    bool isSpan = arg.mType.mName == "std::span";
+    bool isPointer = arg.mType.mType == PassByType::Pointer;
+
+    if (isSpan && !isPointer && arg.mType.mTemplateParameters.front().mName != "std::string") {
+      args << std::format("std::span{{{0}, {0}{1}}}", arg.mName, St::CSharpAuxiliarySizeSuffix);
+      continue;
+    }
+
+    bool isVector = arg.mType.mName == "std::vector";
+    if (isSpan || isVector) {
+      func.mBody.Add("std::vector<{}> {}HolgenVector;",
+                     arg.mType.mTemplateParameters.front().ToString(true, false), arg.mName);
+      func.mBody.Add("{0}HolgenVector.reserve({0}{1});", arg.mName, St::CSharpAuxiliarySizeSuffix);
+      func.mBody.Add("for (size_t i = 0; i < {}{}; ++i) {{", arg.mName,
+                     St::CSharpAuxiliarySizeSuffix);
+      func.mBody.Indent(1);
+      func.mBody.Add("{0}HolgenVector.emplace_back({0}[i]);", arg.mName);
+      func.mBody.Indent(-1);
+      func.mBody.Add("}}");
+      if (isSpan)
+        args << std::format("std::span{{{0}HolgenVector.data(), {0}HolgenVector.size()}}", arg.mName);
+      else
+        args << std::format("{0}HolgenVector", arg.mName);
+      continue;
+    }
+    if (addedArg.mType.mType == PassByType::Pointer && arg.mType.mType != PassByType::Pointer &&
+        addedArg.mType.mName != "char") {
       args << "*";
     }
     args << arg.mName;
   }
+
+  BridgingHelper::AddAuxiliaryArguments(mProject, func, method.mReturnType,
+                                        St::CSharpAuxiliaryReturnTypeArgName);
 
   std::string prefix;
   bool isSingleton = cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Singleton);

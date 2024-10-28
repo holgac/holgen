@@ -35,7 +35,7 @@ void CSharpModuleInterfaceGenerator::Generate(GeneratedContent &out, const Class
   codeBlock.Add("");
 
   for (auto &method: cls.mMethods) {
-    GenerateMethodDelegate(codeBlock, cls, method, true);
+    GenerateMethodDelegate(codeBlock, cls, method, true, false);
   }
 
   codeBlock.Indent(-1);

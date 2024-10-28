@@ -12,6 +12,17 @@
 #define THROW(msg, ...) \
   throw holgen::Exception(std::format("{}:{}: " msg, __FILE__, __LINE__, ##__VA_ARGS__));
 
+#define WARN_IF(cond, msg, ...) \
+  { \
+    if (cond) { \
+      WARN(msg, ##__VA_ARGS__) \
+    } \
+  }
+
+#define WARN(msg, ...) \
+  std::cerr << std::format(msg, ##__VA_ARGS__) << std::endl;
+
+
 namespace holgen {
 
 class Exception : std::exception {

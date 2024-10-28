@@ -4,6 +4,12 @@ struct Counter {
     func Bump(u32 amount);
     func Reset();
     func AddCounterAndReturnSelf(Counter rhs) -> Counter ref;
+    func BumpMultiple(span<u32> amounts);
+    // Should this really be supported?
+    func BumpMultipleCopy(vector<u32> amounts);
+    // this is a span but it also incurs a copy when converting from char* to string
+    func BumpByStrlensOf(span<string> words);
+    func BumpByStrlensOfCopy(vector<string> words);
     u32 val;
 }
 

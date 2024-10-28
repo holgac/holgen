@@ -146,7 +146,8 @@ void CSharpWrapperGenerator::GenerateEmptyConstructor(CodeBlock &codeBlock,
 void CSharpWrapperGenerator::GenerateConstructor(CodeBlock &codeBlock, const Class &cls,
                                                  const ClassConstructor &ctor) const {
   codeBlock.Add("public {}({})", cls.mName,
-                ConstructMethodSignatureArguments(cls, ctor, InteropType::NativeToManaged, false));
+                ConstructMethodSignatureArguments(cls, ctor, InteropType::NativeToManaged, false,
+                                                  false, true));
   codeBlock.Add("{{");
   codeBlock.Indent(1);
   auto caller = ConstructWrapperCall(cls, ctor, ctor.mFunction->mName, false);
@@ -157,7 +158,7 @@ void CSharpWrapperGenerator::GenerateConstructor(CodeBlock &codeBlock, const Cla
 
 bool CSharpWrapperGenerator::GenerateMethods(CodeBlock &codeBlock, const Class &cls) const {
   bool processed = false;
-  for (auto &method: cls.mMethods) {
+  for (auto &method: cls.mCFunctions) {
     if (!ShouldProcess(method))
       continue;
     processed = true;
@@ -170,11 +171,12 @@ bool CSharpWrapperGenerator::GenerateMethods(CodeBlock &codeBlock, const Class &
 
 bool CSharpWrapperGenerator::GenerateMethodDelegates(CodeBlock &codeBlock, const Class &cls) const {
   bool processed = false;
-  for (auto &method: cls.mMethods) {
+  for (auto &method: cls.mCFunctions) {
     if (!ShouldProcess(method))
       continue;
     processed = true;
-    GenerateMethodDelegate(codeBlock, cls, method, method.IsStatic(cls));
+    bool isStatic = method.mMethod->IsStatic(cls);
+    GenerateMethodDelegate(codeBlock, cls, method, isStatic, !isStatic);
   }
   return processed;
 }
@@ -194,6 +196,12 @@ void CSharpWrapperGenerator::GenerateMethodPointer(CodeBlock &codeBlock,
                                                    const ClassMethod &method) const {
   codeBlock.Add("private static IntPtr {} = IntPtr.Zero;",
                 mNamingConvention.CSharpMethodPointerName(method));
+}
+
+bool CSharpWrapperGenerator::ShouldProcess(const CFunction &func) const {
+  if (!func.mMethod)
+    return false;
+  return ShouldProcess(*func.mMethod);
 }
 
 bool CSharpWrapperGenerator::ShouldProcess(const ClassMethod &method) const {

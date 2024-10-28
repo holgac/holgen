@@ -10,6 +10,7 @@ std::set<std::string> CstdIntTypes = {
 std::map<std::string, std::string> STDHeaders = {
     {"std::string", "string"},
     {"std::vector", "vector"},
+    {"std::span", "span"},
     {"std::list", "list"},
     {"std::deque", "deque"},
     {"std::map", "map"},

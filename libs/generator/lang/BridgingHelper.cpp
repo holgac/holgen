@@ -1,6 +1,6 @@
 #include "BridgingHelper.h"
 #include "core/Exception.h"
-#include "generator/TranslatedProject.h"
+#include "core/St.h"
 
 namespace holgen {
 Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &type,
@@ -11,6 +11,15 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
   }
   if (type.mName == "std::string") {
     return Type{"char", PassByType::Pointer, Constness::Const};
+  }
+  if (type.mName == "std::vector" || type.mName == "std::span") {
+    auto underlying = ConvertType(project, type.mTemplateParameters.front(), isReturnType, definitionSource);
+    if (underlying.mType == PassByType::Pointer) {
+      ++underlying.mPointerDepth;
+    } else {
+      underlying.mType = PassByType::Pointer;
+    }
+    return underlying;
   }
   if (auto cls = project.GetClass(type.mName)) {
     auto res = type;
@@ -25,5 +34,22 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
     return res;
   }
   THROW("Don't know how to represent {} objects in c wrappers!", type.ToString(false, true));
+}
+
+MethodArgument& BridgingHelper::AddArgument(const TranslatedProject &project, MethodBase &method,
+                                 const MethodArgument &arg,
+                                 const DefinitionSource &definitionSource) {
+  auto& addedArg = method.mArguments.emplace_back(arg.mName,
+                                 ConvertType(project, arg.mType, false, definitionSource));
+  AddAuxiliaryArguments(project, method, arg.mType, arg.mName);
+  return addedArg;
+}
+
+void BridgingHelper::AddAuxiliaryArguments(const TranslatedProject &project, MethodBase &method,
+                                          const Type &type, const std::string &argPrefix) {
+  (void)project;
+  if (type.mName == "std::vector" || type.mName == "std::span") {
+    method.mArguments.emplace_back(argPrefix + St::CSharpAuxiliarySizeSuffix, Type{"size_t"});
+  }
 }
 } // namespace holgen

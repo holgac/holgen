@@ -23,6 +23,7 @@ private:
   bool GenerateMethodPointers(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethodPointer(CodeBlock &codeBlock, const ClassMethod &method) const;
 
+  [[nodiscard]] bool ShouldProcess(const CFunction &func) const;
   [[nodiscard]] bool ShouldProcess(const ClassMethod &method) const;
   [[nodiscard]] bool ShouldProcess(const ClassConstructor &ctor) const;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;

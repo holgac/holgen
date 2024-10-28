@@ -86,4 +86,26 @@ public sealed class DotNetModule : IDotNetModule
         var c2 = new Counter(counter2);
         return c1.AddCounterAndReturnSelf(c2).HolgenPtr;
     }
+
+    public static uint PrimitiveArrays()
+    {
+        var c = CounterManager.GetCounter(_instance._counterName);
+        c.BumpMultiple([0, 1, 2]);
+        return c.Get();
+    }
+
+    public static void StringArraysNativeToManaged(string[] args, ulong argsHolgenCount)
+    {
+        foreach (var arg in args)
+        {
+            var c = CounterManager.GetCounter(arg);
+            c.Bump(_instance._bumpAmount);
+        }
+    }
+
+    public static void StringArraysManagedToNative()
+    {
+        var c = CounterManager.GetCounter(_instance._counterName);
+        c.BumpByStrlensOf(["hello", "how", "are", "you"]);
+    }
 }

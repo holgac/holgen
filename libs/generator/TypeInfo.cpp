@@ -22,6 +22,7 @@ TypeInfo::TypeInfo() {
       {"bool", "bool"},
       {"string", "std::string"},
       {"vector", "std::vector"},
+      {"span", "std::span"},
       {"deque", "std::deque"},
       {"map", "std::map"},
       {"unordered_map", "std::unordered_map"},
@@ -165,9 +166,12 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace, bool ignoreC
   }
   if (type.mType == PassByType::Reference)
     ss << " &";
-  else if (type.mType == PassByType::Pointer)
+  else if (type.mType == PassByType::Pointer) {
     ss << " *";
-  else if (type.mType == PassByType::MoveReference)
+    for (size_t i = 0; i < type.mPointerDepth; ++i) {
+      ss << "*";
+    }
+  } else if (type.mType == PassByType::MoveReference)
     ss << " &&";
   else if (!noTrailingSpace)
     ss << " ";

@@ -53,6 +53,8 @@ struct Type {
   PassByType mType;
   Constexprness mConstexprness = Constexprness::NotConstexpr;
   std::vector<Type> mTemplateParameters;
+  // non-zero when the type is a pointer to pointer [to pointer, ...].
+  uint32_t mPointerDepth = 0;
   // This is for std::function which uses a different syntax
   // It's converted to string as [0]([1],[2], ...)
   // TODO: Instead of a separate field, Type should natively support function types

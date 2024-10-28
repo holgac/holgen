@@ -174,3 +174,48 @@ TEST_F(ModuleTest, ProxyObjectReturnValue) {
   EXPECT_EQ(module2.ProxyObjectReturnValue(c1, c2), c1);
   EXPECT_EQ(c1->Get(), 210);
 }
+
+TEST_F(ModuleTest, PrimitiveArrays) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  auto &counterManager = CounterManager::GetInstance();
+  EXPECT_EQ(module1.PrimitiveArrays(), 3);
+  EXPECT_EQ(module2.PrimitiveArrays(), 12);
+}
+
+TEST_F(ModuleTest, StringArraysNativeToManaged) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  auto &counterManager = CounterManager::GetInstance();
+  std::vector counters{"counter1", "counter2", "counter3"};
+  module1.StringArraysNativeToManaged(counters.data(), counters.size());
+  counters.pop_back();
+  module1.StringArraysNativeToManaged(counters.data(), counters.size());
+  EXPECT_EQ(counterManager.GetCounter("counter1").Get(), 2);
+  EXPECT_EQ(counterManager.GetCounter("counter2").Get(), 2);
+  EXPECT_EQ(counterManager.GetCounter("counter3").Get(), 1);
+}
+
+TEST_F(ModuleTest, StringArraysManagedToNative) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  auto &counterManager = CounterManager::GetInstance();
+
+  module1.StringArraysManagedToNative();
+  EXPECT_EQ(counterManager.GetCounter("TestModule").Get(), 14);
+
+  module2.StringArraysManagedToNative();
+  EXPECT_EQ(counterManager.GetCounter("TestModule2").Get(), 14);
+}

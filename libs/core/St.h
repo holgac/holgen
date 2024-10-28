@@ -69,5 +69,7 @@ public:
   static constexpr const char* CSharpMirroredStructStructName = "Fields";
   static constexpr const char* CSharpMirroredStructFieldName = "Data";
   static constexpr const char* CSharpProxyObjectPointerFieldName = "HolgenPtr";
+  static constexpr const char* CSharpAuxiliarySizeSuffix = "HolgenCount";
+  static constexpr const char* CSharpAuxiliaryReturnTypeArgName = "holgenReturnType";
 };
 } // namespace holgen

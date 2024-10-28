@@ -19,14 +19,13 @@ void DotNetModuleFunctionsPlugin::Process(Class &cls) {
     method.mFunctionPointer = true;
     auto oldArgs = std::move(method.mArguments);
     method.mArguments.clear();
+    for (auto &arg: oldArgs) {
+      BridgingHelper::AddArgument(mProject, method, arg, func.mDefinitionSource);
+    }
+    BridgingHelper::AddAuxiliaryArguments(mProject, method, method.mReturnType,
+                                          St::CSharpAuxiliaryReturnTypeArgName);
     method.mReturnType =
         BridgingHelper::ConvertType(mProject, method.mReturnType, true, func.mDefinitionSource);
-    for (auto &arg: oldArgs) {
-      method.mArguments.emplace_back(
-          arg.mName,
-          BridgingHelper::ConvertType(mProject, arg.mType, false, func.mDefinitionSource),
-          arg.mDefaultValue);
-    }
     cls.mMethods.push_back(std::move(method));
   }
 }
