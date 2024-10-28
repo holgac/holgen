@@ -78,6 +78,7 @@ set(gen_generators
 
 set(gen_lang
     lang/CSharpHelper.cpp
+    lang/BridgingHelper.cpp
 )
 
 add_library(generator

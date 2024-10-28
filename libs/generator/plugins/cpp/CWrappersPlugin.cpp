@@ -1,6 +1,7 @@
 #include "CWrappersPlugin.h"
 
 #include "core/St.h"
+#include "generator/lang/BridgingHelper.h"
 
 namespace holgen {
 void CWrappersPlugin::Run() {
@@ -23,7 +24,8 @@ void CWrappersPlugin::ProcessClass(Class &cls) {
 
 void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
   auto func = CFunction{Naming().CWrapperName(cls, method),
-                        ConvertType(method.mReturnType, true, method.mFunction->mDefinitionSource),
+                        BridgingHelper::ConvertType(mProject, method.mReturnType, true,
+                                                    method.mFunction->mDefinitionSource),
                         &method};
 
   bool isStatic = method.IsStatic(cls);
@@ -40,7 +42,8 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
       isFirst = false;
     else
       args << ", ";
-    auto funcArgType = ConvertType(arg.mType, false, method.mFunction->mDefinitionSource);
+    auto funcArgType = BridgingHelper::ConvertType(mProject, arg.mType, false,
+                                                   method.mFunction->mDefinitionSource);
     func.mArguments.emplace_back(arg.mName, funcArgType);
     if (funcArgType.mType == PassByType::Pointer && arg.mType.mType != PassByType::Pointer &&
         funcArgType.mName != "char") {
@@ -65,28 +68,5 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
                  args.str());
 
   cls.mCFunctions.push_back(std::move(func));
-}
-
-Type CWrappersPlugin::ConvertType(const Type &type, bool isReturnType,
-                                  const DefinitionSource &definitionSource) {
-  if (TypeInfo::Get().CppPrimitives.contains(type.mName) || type.mName == "void") {
-    return type;
-  }
-  if (type.mName == "std::string") {
-    return Type{"char", PassByType::Pointer, Constness::Const};
-  }
-  if (auto cls = mProject.GetClass(type.mName)) {
-    auto res = type;
-    THROW_IF(res.mType == PassByType::Value && cls->IsProxyable(),
-             "Proxy class {} is returned from value in {}", cls->mName, definitionSource)
-    if (res.mType == PassByType::Reference) {
-      res.mType = PassByType::Pointer;
-    }
-    if (!isReturnType && res.mType == PassByType::Value) {
-      res.mType = PassByType::Pointer;
-    }
-    return res;
-  }
-  THROW("Don't know how to represent {} objects in c wrappers!", type.ToString(false, true));
 }
 } // namespace holgen

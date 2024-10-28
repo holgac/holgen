@@ -20,6 +20,8 @@ public:
   std::string RepresentationInManaged(const Type &other, const TranslatedProject &project);
   std::string Representation(const Type &other, const TranslatedProject &project,
                              InteropType interopType, bool prependRef);
+  std::string MarshallingInfo(const Type &other, const TranslatedProject &project,
+                             InteropType interopType);
   std::string VariableRepresentation(const Type &other, const std::string &variableName,
                                      const TranslatedProject &project, InteropType interopType,
                                      bool prependRef);
@@ -32,5 +34,6 @@ private:
                                              const TranslatedProject &project, bool prependRef);
   std::string VariableRepresentationInManaged(const Type &other, const std::string &variableName,
                                               const TranslatedProject &project);
+  std::string MarshallingInfo(const Type &other, const TranslatedProject &project);
 };
 } // namespace holgen

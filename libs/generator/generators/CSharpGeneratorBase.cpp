@@ -42,7 +42,7 @@ std::string CSharpGeneratorBase::ConstructMethodSignatureArguments(const Class &
       ss << ", ";
     }
     ss << std::format(
-        "{} {}",
+        "{}{} {}", CSharpHelper::Get().MarshallingInfo(arg.mType, mTranslatedProject, interopType),
         CSharpHelper::Get().Representation(arg.mType, mTranslatedProject, interopType, true),
         arg.mName);
   }

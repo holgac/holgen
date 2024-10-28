@@ -10,6 +10,10 @@ namespace holgen {
 std::string CSharpHelper::RepresentationInNative(const Type &other,
                                                  const TranslatedProject &project,
                                                  bool prependRef) {
+  if (other.mName == "char" && other.mType == PassByType::Pointer) {
+    return "string";
+  }
+
   auto it = CppTypeToCSharpType.find(other.mName);
   if (it != CppTypeToCSharpType.end()) {
     // this ignores const qualifiers
@@ -28,6 +32,10 @@ std::string CSharpHelper::RepresentationInNative(const Type &other,
 
 std::string CSharpHelper::RepresentationInManaged(const Type &other,
                                                   const TranslatedProject &project) {
+  if (other.mName == "char" && other.mType == PassByType::Pointer) {
+    return "string";
+  }
+
   (void)project;
   auto it = CppTypeToCSharpType.find(other.mName);
   if (it != CppTypeToCSharpType.end()) {
@@ -46,6 +54,18 @@ std::string CSharpHelper::Representation(const Type &other, const TranslatedProj
     return RepresentationInNative(other, project, prependRef);
   case InteropType::NativeToManaged:
     return RepresentationInManaged(other, project);
+  }
+  THROW("Unexpected interop type: {}", uint32_t(interopType));
+}
+
+std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedProject &project,
+                                          InteropType interopType) {
+  switch (interopType) {
+  case InteropType::Internal:
+    return other.mName;
+  case InteropType::ManagedToNative:
+  case InteropType::NativeToManaged:
+    return MarshallingInfo(other, project);
   }
   THROW("Unexpected interop type: {}", uint32_t(interopType));
 }
@@ -97,6 +117,14 @@ std::string CSharpHelper::VariableRepresentationInManaged(const Type &other,
     }
   }
   return variableName;
+}
+
+std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedProject &project) {
+  (void)project;
+  if (other.mName == "char" && other.mType == PassByType::Pointer) {
+    return "[MarshalAs(UnmanagedType.LPStr)] ";
+  }
+  return "";
 }
 
 CSharpHelper &CSharpHelper::Get() {

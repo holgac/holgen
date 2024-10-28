@@ -21,6 +21,8 @@ void CSharpModuleInterfaceGenerator::Generate(GeneratedContent &out, const Class
                           mNamingConvention.ModuleInterfaceNameInCSharp(cls.mName));
   CodeBlock codeBlock;
 
+  codeBlock.Add("using System.Runtime.InteropServices;");
+  codeBlock.Add("");
   codeBlock.Add("namespace {};", St::CSharpProjectName);
   codeBlock.Add("");
   codeBlock.Add("public interface {}", mNamingConvention.ModuleInterfaceNameInCSharp(cls.mName));
