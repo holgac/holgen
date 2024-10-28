@@ -38,6 +38,11 @@ bool Class::IsAbstract() const {
   return false;
 }
 
+bool Class::IsProxyable() const {
+  return mStruct &&
+      !mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror);
+}
+
 TranslatedProject::TranslatedProject(const ProjectDefinition &projectDefinition) :
     mProject(projectDefinition), mDependencyGraph(mProject) {}
 
@@ -62,7 +67,8 @@ GEN_GETTER_BY_NAME(TranslatedProject, Class, GetClass, mClasses)
 GEN_GETTER_BY_NAME_NONCONST(TranslatedProject, Class, GetClass, mClasses);
 
 GEN_GETTER_BY_NAME(ClassMethod, TemplateParameter, GetTemplateParameter, mTemplateParameters)
-bool ClassMethod::IsStatic(const Class& cls) const {
+
+bool ClassMethod::IsStatic(const Class &cls) const {
   if (mStaticness == Staticness::Static)
     return true;
   if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Singleton))

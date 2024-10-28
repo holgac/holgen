@@ -53,10 +53,10 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<EnumPlugin>();
   AddPlugin<BitmapPlugin>();
   AddPlugin<BitmapFieldPlugin>();
+  AddPlugin<CWrappersPlugin>();
   AddPlugin<DotNetModulePlugin>();
   AddPlugin<DotNetModuleFunctionsPlugin>();
   AddPlugin<DotNetHostPlugin>();
-  AddPlugin<CWrappersPlugin>();
   AddPlugin<JsonConverterPlugin>();
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();

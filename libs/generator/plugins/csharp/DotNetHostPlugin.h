@@ -24,7 +24,7 @@ private:
   void CreateLoadModuleMethod(Class &cls, const Class &moduleCls);
   void GenerateInitializeClass(Class &cls, CodeBlock &codeBlock, const Class &projectCls);
   [[nodiscard]] bool ShouldInitializeClass(const Class &cls);
-  [[nodiscard]] bool ShouldInitializeClassMethod(const ClassMethod &method);
+  [[nodiscard]] bool ShouldInitializeCFunction(const CFunction &function);
   [[nodiscard]] std::string LibraryHandleField() const;
   [[nodiscard]] std::string HostfxrMethodFieldName(const std::string &method) const;
   [[nodiscard]] std::string HostfxrMethodTypedefName(const std::string &method) const;

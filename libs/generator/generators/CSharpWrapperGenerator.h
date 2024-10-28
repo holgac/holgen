@@ -16,6 +16,7 @@ private:
   void GenerateInitializer(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateInitializerDelegate(CodeBlock &codeBlock, const Class &cls) const;
   bool GenerateConstructors(CodeBlock &codeBlock, const Class &cls) const;
+  void GenerateProxyConstructor(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateEmptyConstructor(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateConstructor(CodeBlock &codeBlock, const Class &cls,
                            const ClassConstructor &ctor) const;
@@ -38,5 +39,8 @@ private:
   [[nodiscard]] std::string ConstructMethodArguments(const Class &cls, const MethodBase &method,
                                                      InteropType interopType,
                                                      bool addThisArgument) const;
+  [[nodiscard]] std::string ConstructWrapperCall(const Class &cls, const MethodBase &method,
+                                                 const std::string &methodName,
+                                                 bool addThisArgument) const;
 };
 } // namespace holgen

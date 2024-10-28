@@ -243,6 +243,7 @@ struct Class {
   [[nodiscard]] VariantData GetVariantData();
   [[nodiscard]] bool HasVirtualMethods() const;
   [[nodiscard]] bool IsAbstract() const;
+  [[nodiscard]] bool IsProxyable() const;
 };
 
 struct TranslatedProject {

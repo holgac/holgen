@@ -297,8 +297,8 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
   std::stringstream initFuncCallArgs;
   initFuncDefinition << "void (*initFunc)(";
   bool isFirstMethod = true;
-  for (auto &method: projectCls.mMethods) {
-    if (!ShouldInitializeClassMethod(method))
+  for(auto& func: projectCls.mCFunctions) {
+    if (!ShouldInitializeCFunction(func))
       continue;
     if (isFirstMethod) {
       isFirstMethod = false;
@@ -306,15 +306,11 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
       initFuncDefinition << ", ";
       initFuncCallArgs << ", ";
     }
-    initFuncDefinition << method.mReturnType.ToString(false, true) << "(*)(";
-    initFuncCallArgs << Naming().CWrapperName(projectCls, method);
+    initFuncDefinition << func.mReturnType.ToString(false, true) << "(*)(";
+    initFuncCallArgs << func.mName;
 
     bool isFirstArg = true;
-    if (!method.IsStatic(projectCls)) {
-      initFuncDefinition << Type{projectCls.mName, PassByType::Pointer}.ToString(true, true);
-      isFirstArg = false;
-    }
-    for (auto &arg: method.mArguments) {
+    for (auto &arg: func.mArguments) {
       if (isFirstArg)
         isFirstArg = false;
       else
@@ -351,13 +347,15 @@ bool DotNetHostPlugin::ShouldInitializeClass(const Class &cls) {
   return true;
 }
 
-bool DotNetHostPlugin::ShouldInitializeClassMethod(const ClassMethod &method) {
+bool DotNetHostPlugin::ShouldInitializeCFunction(const CFunction &function) {
   // TODO: this is the same as CSharpWrapperGenerator::ShouldProcess. Put it in CSharpHelper
-  if (!method.mExposeToScript)
+  if (!function.mMethod)
     return false;
-  if (method.mFunction &&
-      (method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
-       method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp)))
+  if (!function.mMethod->mExposeToScript)
+    return false;
+  if (function.mMethod->mFunction &&
+      (function.mMethod->mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+       function.mMethod->mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp)))
     return false;
   return true;
 }

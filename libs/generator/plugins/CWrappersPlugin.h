@@ -13,7 +13,7 @@ private:
   void ProcessClass(Class& cls);
   void WrapMethod(Class& cls, const ClassMethod& method);
 
-  Type ConvertType(const Type& type);
+  Type ConvertType(const Type& type, bool isReturnType);
 };
 
 } // namespace holgen

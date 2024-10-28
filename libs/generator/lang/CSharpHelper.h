@@ -5,6 +5,7 @@
 #include "../TypeInfo.h"
 
 namespace holgen {
+class Class;
 enum class InteropType {
   ManagedToNative,
   NativeToManaged,

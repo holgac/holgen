@@ -68,5 +68,6 @@ public:
   static constexpr const char* DotNetHost_Initialize = "Initialize";
   static constexpr const char* CSharpMirroredStructStructName = "Fields";
   static constexpr const char* CSharpMirroredStructFieldName = "Data";
+  static constexpr const char* CSharpProxyObjectPointerFieldName = "HolgenPtr";
 };
 } // namespace holgen

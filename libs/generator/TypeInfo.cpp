@@ -33,9 +33,8 @@ TypeInfo::TypeInfo() {
       {"unique_ptr", "std::unique_ptr"},
   };
 
-  SignedIntegralTypes = {
-      "int8_t", "int16_t", "int32_t", "int64_t", "ptrdiff_t", "ssize_t", "int",
-  };
+  SignedIntegralTypes = {"int8_t",    "int16_t", "int32_t", "int64_t",
+                         "ptrdiff_t", "ssize_t", "int",     "char"};
   UnsignedIntegralTypes = {
       "uint8_t", "uint16_t", "uint32_t", "uint64_t", "size_t",
   };
@@ -51,7 +50,6 @@ TypeInfo::TypeInfo() {
   CppPrimitives.insert("bool");
   CppSmartPointers = {"std::shared_ptr", "std::unique_ptr"};
   CppBasicTypes = CppPrimitives;
-  CppBasicTypes.insert("char");
   CppBasicTypes.insert("std::string");
   CppBasicTypes.insert("std::string_view");
 
@@ -128,7 +126,8 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace, bool ignoreC
 
   if (type.mConstexprness == Constexprness::Constexpr)
     ss << "constexpr ";
-  if (type.mConstness == Constness::Const && (!isPrimitive || !ignoreConstForPrimitives))
+  if (type.mConstness == Constness::Const &&
+      (!isPrimitive || !ignoreConstForPrimitives || type.mType != PassByType::Value))
     ss << "const ";
   if constexpr (FullyQualified) {
     auto cls = project->GetClass(type.mName);
@@ -159,7 +158,8 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace, bool ignoreC
       } else {
         ss << ", ";
       }
-      ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], true, false, project);
+      ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], true, false,
+                                            project);
     }
     ss << ")>";
   }

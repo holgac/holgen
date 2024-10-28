@@ -23,12 +23,13 @@ void CWrappersPlugin::ProcessClass(Class &cls) {
 
 void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
   auto func =
-      CFunction{Naming().CWrapperName(cls, method), ConvertType(method.mReturnType), &method};
+      CFunction{Naming().CWrapperName(cls, method), ConvertType(method.mReturnType, true), &method};
 
   bool isStatic = method.IsStatic(cls);
 
   if (!isStatic) {
-    func.mArguments.emplace_back("instance", ConvertType(Type{cls.mName, PassByType::Pointer}));
+    func.mArguments.emplace_back("instance",
+                                 Type{cls.mName, PassByType::Pointer, method.mConstness});
   }
 
   std::stringstream args;
@@ -38,7 +39,7 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
       isFirst = false;
     else
       args << ", ";
-    func.mArguments.emplace_back(arg.mName, ConvertType(arg.mType));
+    func.mArguments.emplace_back(arg.mName, ConvertType(arg.mType, false));
     args << arg.mName;
   }
 
@@ -51,13 +52,32 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
   } else {
     prefix = "instance->";
   }
+  bool pointerMismatch = func.mReturnType.mType == PassByType::Pointer &&
+      method.mReturnType.mType != PassByType::Pointer;
 
-  func.mBody.Add("return {}{}({});", prefix, method.mName, args.str());
+  func.mBody.Add("return {}{}{}({});", pointerMismatch ? "&" : "", prefix, method.mName,
+                 args.str());
 
   cls.mCFunctions.push_back(std::move(func));
 }
 
-Type CWrappersPlugin::ConvertType(const Type &type) {
-  return type;
+Type CWrappersPlugin::ConvertType(const Type &type, bool isReturnType) {
+  if (TypeInfo::Get().CppPrimitives.contains(type.mName) || type.mName == "void") {
+    return type;
+  }
+  if (type.mName == "std::string") {
+    return Type{"char", PassByType::Pointer, Constness::Const};
+  }
+  if (mProject.GetClass(type.mName)) {
+    auto res = type;
+    if (res.mType == PassByType::Reference) {
+      res.mType = PassByType::Pointer;
+    }
+    if (!isReturnType && res.mType == PassByType::Value) {
+      res.mType = PassByType::Pointer;
+    }
+    return res;
+  }
+  THROW("Don't know how to represent {} objects in c wrappers!", type.ToString(false, true));
 }
 } // namespace holgen

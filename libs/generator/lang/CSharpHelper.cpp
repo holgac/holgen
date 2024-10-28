@@ -16,8 +16,9 @@ std::string CSharpHelper::RepresentationInNative(const Type &other,
     return it->second;
   }
   if (auto cls = project.GetClass(other.mName)) {
-    if (cls->mStruct &&
-        cls->mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror)) {
+    if (cls->IsProxyable()) {
+      return "IntPtr";
+    } else {
       return std::format("{}{}.{}", prependRef ? "ref " : "", other.mName,
                          St::CSharpMirroredStructStructName);
     }
@@ -72,8 +73,9 @@ std::string CSharpHelper::VariableRepresentationInNative(const Type &other,
     return variableName;
   }
   if (auto cls = project.GetClass(other.mName)) {
-    if (cls->mStruct &&
-        cls->mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror)) {
+    if (cls->IsProxyable()) {
+      return std::format("{}.{}", variableName, St::CSharpProxyObjectPointerFieldName);
+    } else {
       return std::format("{}{}.{}", prependRef ? "ref " : "", variableName,
                          St::CSharpMirroredStructFieldName);
     }
@@ -103,10 +105,9 @@ CSharpHelper &CSharpHelper::Get() {
 }
 
 CSharpHelper::CSharpHelper() {
-  CppTypeToCSharpType = {
-      {"int8_t", "sbyte"}, {"int16_t", "short"},   {"int32_t", "int"},   {"int64_t", "long"},
-      {"uint8_t", "byte"}, {"uint16_t", "ushort"}, {"uint32_t", "uint"}, {"uint64_t", "ulong"},
-      {"float", "float"},  {"double", "double"},
-  };
+  CppTypeToCSharpType = {{"int8_t", "sbyte"},  {"int16_t", "short"},     {"int32_t", "int"},
+                         {"int64_t", "long"},  {"uint8_t", "byte"},      {"uint16_t", "ushort"},
+                         {"uint32_t", "uint"}, {"uint64_t", "ulong"},    {"float", "float"},
+                         {"double", "double"}, {"std::string", "string"}};
 }
 } // namespace holgen

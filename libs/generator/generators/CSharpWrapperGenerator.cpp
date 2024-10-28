@@ -38,10 +38,8 @@ void CSharpWrapperGenerator::Generate(GeneratedContent &out, const Class &cls) c
 }
 
 void CSharpWrapperGenerator::GenerateClassBody(CodeBlock &codeBlock, const Class &cls) const {
-  if (GenerateConstructors(codeBlock, cls)) {
-    GenerateEmptyConstructor(codeBlock, cls);
+  if (GenerateConstructors(codeBlock, cls))
     codeBlock.Add("");
-  }
   if (GenerateFields(codeBlock, cls))
     codeBlock.Add("");
   if (GenerateMethods(codeBlock, cls))
@@ -56,8 +54,10 @@ void CSharpWrapperGenerator::GenerateClassBody(CodeBlock &codeBlock, const Class
 }
 
 bool CSharpWrapperGenerator::GenerateFields(CodeBlock &codeBlock, const Class &cls) const {
-  if (!cls.mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror))
-    return false;
+  if (cls.IsProxyable()) {
+    codeBlock.Add("public IntPtr {} {{ get; }}", St::CSharpProxyObjectPointerFieldName);
+    return true;
+  }
   bool processed = false;
   CodeBlock fieldsStruct;
   CodeBlock accessors;
@@ -99,9 +99,11 @@ void CSharpWrapperGenerator::GenerateInitializerDelegate(CodeBlock &codeBlock,
 }
 
 bool CSharpWrapperGenerator::GenerateConstructors(CodeBlock &codeBlock, const Class &cls) const {
-  if (cls.mStruct &&
-      !cls.mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror))
-    return false;
+  if (cls.IsProxyable()) {
+    GenerateProxyConstructor(codeBlock, cls);
+    return true;
+  }
+
   bool processed = false;
   for (auto &ctor: cls.mConstructors) {
     if (!ShouldProcess(ctor))
@@ -109,7 +111,20 @@ bool CSharpWrapperGenerator::GenerateConstructors(CodeBlock &codeBlock, const Cl
     processed = true;
     GenerateConstructor(codeBlock, cls, ctor);
   }
+  if (processed) {
+    GenerateEmptyConstructor(codeBlock, cls);
+  }
   return processed;
+}
+
+void CSharpWrapperGenerator::GenerateProxyConstructor(CodeBlock &codeBlock,
+                                                      const Class &cls) const {
+  codeBlock.Add("public {}(IntPtr ptr)", cls.mName);
+  codeBlock.Add("{{");
+  codeBlock.Indent(1);
+  codeBlock.Add("{} = ptr;", St::CSharpProxyObjectPointerFieldName);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
 }
 
 void CSharpWrapperGenerator::GenerateEmptyConstructor(CodeBlock &codeBlock,
@@ -125,11 +140,7 @@ void CSharpWrapperGenerator::GenerateConstructor(CodeBlock &codeBlock, const Cla
                 ConstructMethodSignatureArguments(cls, ctor, InteropType::NativeToManaged, false));
   codeBlock.Add("{{");
   codeBlock.Indent(1);
-  auto caller =
-      std::format("Marshal.GetDelegateForFunctionPointer<{}>({})({})",
-                  mNamingConvention.CSharpMethodDelegateName(cls.mName, ctor.mFunction->mName),
-                  mNamingConvention.CSharpMethodPointerName(ctor.mFunction->mName),
-                  ConstructMethodArguments(cls, ctor, InteropType::ManagedToNative, false));
+  auto caller = ConstructWrapperCall(cls, ctor, ctor.mFunction->mName, false);
   codeBlock.Add("{} = {};", St::CSharpMirroredStructFieldName, caller);
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
@@ -160,11 +171,7 @@ void CSharpWrapperGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &c
       ConstructMethodSignatureArguments(cls, method, InteropType::NativeToManaged, false));
   codeBlock.Add("{{");
   codeBlock.Indent(1);
-  auto caller =
-      std::format("Marshal.GetDelegateForFunctionPointer<{}>({})({})",
-                  mNamingConvention.CSharpMethodDelegateName(cls, method),
-                  mNamingConvention.CSharpMethodPointerName(method),
-                  ConstructMethodArguments(cls, method, InteropType::ManagedToNative, !isStatic));
+  auto caller = ConstructWrapperCall(cls, method, method.mName, !isStatic);
   if (returnsVoid) {
     codeBlock.Add("{};", caller);
   } else if (auto retClass = mTranslatedProject.GetClass(method.mReturnType.mName)) {
@@ -178,7 +185,7 @@ void CSharpWrapperGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &c
       codeBlock.Indent(-1);
       codeBlock.Add("}};");
     } else {
-      THROW("Don't know how to return a {} yet", method.mReturnType.mName);
+      codeBlock.Add("return new {}({});", method.mReturnType.mName, caller);
     }
   } else {
     codeBlock.Add("return {};", caller);
@@ -325,6 +332,16 @@ std::string CSharpWrapperGenerator::ConstructMethodArguments(const Class &cls,
                                                      interopType, true);
   }
   return ss.str();
+}
+
+std::string CSharpWrapperGenerator::ConstructWrapperCall(const Class &cls, const MethodBase &method,
+                                                         const std::string &methodName,
+                                                         bool addThisArgument) const {
+  return std::format(
+      "Marshal.GetDelegateForFunctionPointer<{}>({})({})",
+      mNamingConvention.CSharpMethodDelegateName(cls.mName, methodName),
+      mNamingConvention.CSharpMethodPointerName(methodName),
+      ConstructMethodArguments(cls, method, InteropType::ManagedToNative, addThisArgument));
 }
 
 void CSharpWrapperGenerator::GenerateInitializer(CodeBlock &codeBlock, const Class &cls) const {
