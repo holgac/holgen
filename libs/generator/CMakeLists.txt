@@ -42,24 +42,24 @@ set(gen_csharp_plugins
 
 set(gen_plugins
     plugins/TranslatorPlugin.cpp
+    plugins/FunctionPluginBase.cpp
     plugins/helpers/GlobalPointerPlugin.cpp
     plugins/helpers/FilesystemHelperPlugin.cpp
     plugins/helpers/SingletonPlugin.cpp
-    plugins/ClassIdFieldPlugin.cpp
-    plugins/ClassFieldPlugin.cpp
-    plugins/ClassFieldGetterPlugin.cpp
-    plugins/ClassFieldSetterPlugin.cpp
-    plugins/ContainerFieldPlugin.cpp
-    plugins/ClassPlugin.cpp
-    plugins/ManagedClassPlugin.cpp
-    plugins/CppFunctionPlugin.cpp
-    plugins/CppDestructorPlugin.cpp
-    plugins/ClassEqualsOperatorPlugin.cpp
-    plugins/ClassFieldVariantPlugin.cpp
-    plugins/FunctionPluginBase.cpp
-    plugins/ClassCopyMoveDestroyPlugin.cpp
-    plugins/ClassMetadataPlugin.cpp
-    plugins/CWrappersPlugin.cpp
+    plugins/cpp/ClassIdFieldPlugin.cpp
+    plugins/cpp/ClassFieldPlugin.cpp
+    plugins/cpp/ClassFieldGetterPlugin.cpp
+    plugins/cpp/ClassFieldSetterPlugin.cpp
+    plugins/cpp/ContainerFieldPlugin.cpp
+    plugins/cpp/ClassPlugin.cpp
+    plugins/cpp/ManagedClassPlugin.cpp
+    plugins/cpp/CppFunctionPlugin.cpp
+    plugins/cpp/CppDestructorPlugin.cpp
+    plugins/cpp/ClassEqualsOperatorPlugin.cpp
+    plugins/cpp/ClassFieldVariantPlugin.cpp
+    plugins/cpp/ClassCopyMoveDestroyPlugin.cpp
+    plugins/cpp/ClassMetadataPlugin.cpp
+    plugins/cpp/CWrappersPlugin.cpp
 )
 
 set(gen_generators

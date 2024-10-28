@@ -1,5 +1,4 @@
 #include "ContainerFieldPlugin.h"
-#include "../NamingConvention.h"
 #include "core/Annotations.h"
 #include "core/St.h"
 

@@ -1,7 +1,7 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
-#include "generator/plugins/CppDestructorPlugin.h"
-#include "generator/plugins/CppFunctionPlugin.h"
+#include "generator/plugins/cpp/ClassPlugin.h"
+#include "generator/plugins/cpp/CppDestructorPlugin.h"
+#include "generator/plugins/cpp/CppFunctionPlugin.h"
 
 class CppFunctionPluginTest : public TranslatorPluginTest {
 protected:

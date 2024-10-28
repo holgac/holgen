@@ -1,5 +1,5 @@
 #include "TranslatorPluginTest.h"
-#include "generator/plugins/ClassPlugin.h"
+#include "generator/plugins/cpp/ClassPlugin.h"
 #include "generator/plugins/enum/EnumPlugin.h"
 
 class EnumPluginTest : public TranslatorPluginTest {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FunctionPluginBase.h"
+#include "../FunctionPluginBase.h"
 
 namespace holgen {
 class CppFunctionPlugin : public FunctionPluginBase {

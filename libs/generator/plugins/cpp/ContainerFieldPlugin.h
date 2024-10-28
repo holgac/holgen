@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TranslatorPlugin.h"
+#include "../TranslatorPlugin.h"
 
 namespace holgen {
 class ContainerFieldPlugin : public TranslatorPlugin {
