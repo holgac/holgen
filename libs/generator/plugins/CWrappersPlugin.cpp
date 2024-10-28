@@ -22,8 +22,9 @@ void CWrappersPlugin::ProcessClass(Class &cls) {
 }
 
 void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
-  auto func =
-      CFunction{Naming().CWrapperName(cls, method), ConvertType(method.mReturnType, true), &method};
+  auto func = CFunction{Naming().CWrapperName(cls, method),
+                        ConvertType(method.mReturnType, true, method.mFunction->mDefinitionSource),
+                        &method};
 
   bool isStatic = method.IsStatic(cls);
 
@@ -39,7 +40,12 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
       isFirst = false;
     else
       args << ", ";
-    func.mArguments.emplace_back(arg.mName, ConvertType(arg.mType, false));
+    auto funcArgType = ConvertType(arg.mType, false, method.mFunction->mDefinitionSource);
+    func.mArguments.emplace_back(arg.mName, funcArgType);
+    if (funcArgType.mType == PassByType::Pointer && arg.mType.mType != PassByType::Pointer &&
+        funcArgType.mName != "char") {
+      args << "*";
+    }
     args << arg.mName;
   }
 
@@ -61,15 +67,18 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
   cls.mCFunctions.push_back(std::move(func));
 }
 
-Type CWrappersPlugin::ConvertType(const Type &type, bool isReturnType) {
+Type CWrappersPlugin::ConvertType(const Type &type, bool isReturnType,
+                                  const DefinitionSource &definitionSource) {
   if (TypeInfo::Get().CppPrimitives.contains(type.mName) || type.mName == "void") {
     return type;
   }
   if (type.mName == "std::string") {
     return Type{"char", PassByType::Pointer, Constness::Const};
   }
-  if (mProject.GetClass(type.mName)) {
+  if (auto cls = mProject.GetClass(type.mName)) {
     auto res = type;
+    THROW_IF(res.mType == PassByType::Value && cls->IsProxyable(),
+             "Proxy class {} is returned from value in {}", cls->mName, definitionSource)
     if (res.mType == PassByType::Reference) {
       res.mType = PassByType::Pointer;
     }
