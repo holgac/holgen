@@ -1,7 +1,7 @@
 #include "DotNetModuleFunctionsPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "generator/lang/BridgingHelper.h"
+#include "generator/utils/BridgingHelper.h"
 
 namespace holgen {
 void DotNetModuleFunctionsPlugin::Run() {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../NamingConvention.h"
+#include "generator/utils/NamingConvention.h"
 #include "../TranslatedProject.h"
 #include "../TranslatorSettings.h"
 #include "../Validator.h"

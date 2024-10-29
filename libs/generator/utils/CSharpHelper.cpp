@@ -7,20 +7,6 @@
 #include "core/Exception.h"
 
 namespace holgen {
-std::string CSharpHelper::Representation(const Type &other, const Type &originalType,
-                                         const TranslatedProject &project, InteropType interopType,
-                                         bool prependRef) {
-  switch (interopType) {
-  case InteropType::Internal:
-    return other.mName;
-  case InteropType::ManagedToNative:
-    return RepresentationInNative(other, originalType, project, prependRef);
-  case InteropType::NativeToManaged:
-    return RepresentationInManaged(other, originalType, project);
-  }
-  THROW("Unexpected interop type: {}", uint32_t(interopType));
-}
-
 bool CSharpHelper::NeedsDeleter(const Type &type) {
   return CppTypesConvertibleToCSharpArray.contains(type.mName);
 }
@@ -198,20 +184,6 @@ std::string CSharpHelper::ArrayMarshallingInfo(const Type &other, const Translat
   THROW("Unexpected interop type: {}", uint32_t(interopType));
 }
 
-std::string CSharpHelper::VariableRepresentation(const Type &other, const std::string &variableName,
-                                                 const TranslatedProject &project,
-                                                 InteropType interopType, bool prependRef) {
-  switch (interopType) {
-  case InteropType::Internal:
-    return variableName;
-  case InteropType::ManagedToNative:
-    return VariableRepresentationInNative(other, variableName, project, prependRef);
-  case InteropType::NativeToManaged:
-    return VariableRepresentationInManaged(other, variableName, project);
-  }
-  THROW("Unexpected interop type: {}", uint32_t(interopType));
-}
-
 std::string CSharpHelper::VariableRepresentation(const CSharpType &type,
                                                  const std::string &variableName,
                                                  const TranslatedProject &project,
@@ -225,41 +197,6 @@ std::string CSharpHelper::VariableRepresentation(const CSharpType &type,
     return VariableRepresentationInManaged(type, variableName, project);
   }
   THROW("Unexpected interop type: {}", uint32_t(interopType));
-}
-
-std::string CSharpHelper::VariableRepresentationInNative(const Type &other,
-                                                         const std::string &variableName,
-                                                         const TranslatedProject &project,
-                                                         bool prependRef) {
-  auto it = CppTypeToCSharpType.find(other.mName);
-  if (it != CppTypeToCSharpType.end()) {
-    return variableName;
-  }
-  if (auto cls = project.GetClass(other.mName)) {
-    if (cls->IsProxyable()) {
-      return std::format("{}.{}", variableName, St::CSharpProxyObjectPointerFieldName);
-    } else {
-      return std::format("{}{}.{}", prependRef ? "ref " : "", variableName,
-                         St::CSharpMirroredStructFieldName);
-    }
-  }
-  return variableName;
-}
-
-std::string CSharpHelper::VariableRepresentationInManaged(const Type &other,
-                                                          const std::string &variableName,
-                                                          const TranslatedProject &project) {
-  auto it = CppTypeToCSharpType.find(other.mName);
-  if (it != CppTypeToCSharpType.end()) {
-    return variableName;
-  }
-  if (auto cls = project.GetClass(other.mName)) {
-    if (cls->mStruct &&
-        cls->mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror)) {
-      return std::format("new {}({})", other.mName, variableName);
-    }
-  }
-  return variableName;
 }
 
 std::string CSharpHelper::VariableRepresentationInNative(const CSharpType &type,

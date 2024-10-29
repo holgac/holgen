@@ -2,7 +2,7 @@
 #include <vector>
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "generator/StringSwitcher.h"
+#include "generator/utils/StringSwitcher.h"
 #include "generator/TypeInfo.h"
 
 namespace holgen {

@@ -1,7 +1,7 @@
 #include "LuaPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
-#include "generator/StringSwitcher.h"
+#include "generator/utils/StringSwitcher.h"
 #include "core/Exception.h"
 
 namespace holgen {

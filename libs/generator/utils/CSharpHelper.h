@@ -31,18 +31,10 @@ public:
                                      const TranslatedProject &project, bool prependRef = false);
   std::string RepresentationInManaged(const Type &other, const Type &originalType,
                                       const TranslatedProject &project);
-  std::string Representation(const Type &other, const Type &originalType,
-                             const TranslatedProject &project, InteropType interopType,
-                             bool prependRef);
   std::string MarshallingInfo(const Type &other, const TranslatedProject &project,
                               InteropType interopType);
   std::string ArrayMarshallingInfo(const Type &other, const TranslatedProject &project,
                                    InteropType interopType, size_t sizeArgumentIdx);
-  // TODO: rm
-  std::string VariableRepresentation(const Type &other, const std::string &variableName,
-                                     const TranslatedProject &project, InteropType interopType,
-                                     bool prependRef);
-
   std::string VariableRepresentation(const CSharpType &type, const std::string &variableName,
                                      const TranslatedProject &project, InteropType interopType);
   static CSharpHelper &Get();
@@ -52,12 +44,6 @@ public:
 
 private:
   CSharpHelper();
-  // TODO: rm
-  std::string VariableRepresentationInNative(const Type &other, const std::string &variableName,
-                                             const TranslatedProject &project, bool prependRef);
-  // TODO: rm
-  std::string VariableRepresentationInManaged(const Type &other, const std::string &variableName,
-                                              const TranslatedProject &project);
   std::string VariableRepresentationInNative(const CSharpType &type,
                                              const std::string &variableName,
                                              const TranslatedProject &project);

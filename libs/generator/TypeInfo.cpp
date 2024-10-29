@@ -289,7 +289,7 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
   auto cls = project.GetClass(mName);
   if (cls) {
     seenClasses.insert(cls->mName);
-    if (cls->mStruct->GetAnnotation(Annotations::DotNetModule)) {
+    if (cls->mStruct && cls->mStruct->GetAnnotation(Annotations::DotNetModule)) {
       return false;
     }
     if (forCopy && cls->mStruct &&

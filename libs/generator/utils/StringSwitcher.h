@@ -1,8 +1,7 @@
 #pragma once
-
-
-#include <map>
-#include "CodeBlock.h"
+#include <string>
+#include <functional>
+#include "generator/CodeBlock.h"
 
 namespace holgen {
 struct StringSwitchCase {

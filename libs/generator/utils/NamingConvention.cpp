@@ -1,6 +1,6 @@
 #include "NamingConvention.h"
 #include <format>
-#include "TranslatedProject.h"
+#include "generator/TranslatedProject.h"
 #include "core/Annotations.h"
 #include "core/St.h"
 #include "parser/ProjectDefinition.h"

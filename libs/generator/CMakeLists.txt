@@ -1,13 +1,12 @@
 set(gen_base
+    types/CppTypes.cpp
+    types/CSharpTypes.cpp
     CodeGenerator.cpp
     Translator.cpp
-    HeaderContainer.cpp
     CodeBlock.cpp
     TypeInfo.cpp
     TranslatedProject.cpp
-    NamingConvention.cpp
     Validator.cpp
-    StringSwitcher.cpp
     UserDefinedSectionExtractor.cpp
 )
 
@@ -78,9 +77,12 @@ set(gen_generators
     generators/CSharpSourceGenerator.cpp
 )
 
-set(gen_lang
-    lang/CSharpHelper.cpp
-    lang/BridgingHelper.cpp
+set(gen_utils
+    utils/CSharpHelper.cpp
+    utils/BridgingHelper.cpp
+    utils/HeaderContainer.cpp
+    utils/NamingConvention.cpp
+    utils/StringSwitcher.cpp
 )
 
 add_library(generator
@@ -90,6 +92,6 @@ add_library(generator
     ${gen_json_plugins}
     ${gen_lua_plugins}
     ${gen_csharp_plugins}
-    ${gen_lang}
+    ${gen_utils}
     ${gen_generators}
 )

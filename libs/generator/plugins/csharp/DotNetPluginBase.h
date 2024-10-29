@@ -2,7 +2,7 @@
 
 #include "../TranslatorPlugin.h"
 
-#include "generator/lang/CSharpHelper.h"
+#include "generator/utils/CSharpHelper.h"
 
 namespace holgen {
 class DotNetPluginBase : public TranslatorPlugin {

@@ -1,6 +1,6 @@
 #include "HeaderContainer.h"
 #include <map>
-#include "Translator.h"
+#include "generator/TranslatedProject.h"
 
 namespace holgen {
 namespace {

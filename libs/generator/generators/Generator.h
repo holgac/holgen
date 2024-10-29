@@ -1,7 +1,7 @@
 #pragma once
 #include "../TranslatedProject.h"
 #include "../GeneratorSettings.h"
-#include "../NamingConvention.h"
+#include "generator/utils/NamingConvention.h"
 
 namespace holgen {
 class Generator {

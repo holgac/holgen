@@ -1,5 +1,5 @@
 #include "DotNetPluginBase.h"
-#include "generator/lang/CSharpHelper.h"
+#include "generator/utils/CSharpHelper.h"
 
 #include "core/St.h"
 

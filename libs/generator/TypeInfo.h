@@ -6,20 +6,10 @@
 #include <vector>
 #include "parser/ProjectDefinition.h"
 #include "core/Exception.h"
+#include "types/Common.h"
 
 namespace holgen {
 struct TranslatedProject;
-enum class PassByType {
-  Value,
-  Reference,
-  Pointer,
-  MoveReference,
-};
-
-enum class Constexprness {
-  Constexpr,
-  NotConstexpr,
-};
 
 template <typename RealType>
 struct TypeBase {

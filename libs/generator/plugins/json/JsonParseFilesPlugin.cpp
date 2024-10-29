@@ -1,6 +1,6 @@
 #include "JsonParseFilesPlugin.h"
 #include <vector>
-#include "../../NamingConvention.h"
+#include "generator/utils/NamingConvention.h"
 #include "core/Annotations.h"
 #include "core/St.h"
 #include "generator/TypeInfo.h"

@@ -1,6 +1,6 @@
 #pragma once
 #include "LuaPluginBase.h"
-#include "generator/StringSwitcher.h"
+#include "generator/utils/StringSwitcher.h"
 
 namespace holgen {
 

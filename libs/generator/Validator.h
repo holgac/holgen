@@ -1,6 +1,6 @@
 #pragma once
 
-#include "NamingConvention.h"
+#include "utils/NamingConvention.h"
 #include "TranslatedProject.h"
 
 namespace holgen {
