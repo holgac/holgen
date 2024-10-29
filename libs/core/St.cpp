@@ -38,6 +38,13 @@ std::string St::Replace(const std::string &source, const std::string &from, cons
   return out;
 }
 
+std::string St::StripNamespace(const std::string &str) {
+  auto idx = str.rfind(':');
+  if (idx == std::string::npos)
+    return str;
+  return str.substr(idx + 1);
+}
+
 bool St::IsIntegral(const std::string_view &str) {
   if (str.empty() || (str.size() == 1 && str[0] == '-'))
     return false;

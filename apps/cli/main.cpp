@@ -182,7 +182,7 @@ void WriteToFiles(const std::vector<GeneratedContent> &results, const CliOptions
       target = std::filesystem::path(cliOptions.mOutDir) / result.mName;
       break;
     case FileType::CSharpProject:
-    case FileType::CSharpFile:
+    case FileType::CSharpSource:
       target = std::filesystem::path(cliOptions.mCSharpRoot) / result.mName;
       break;
     }

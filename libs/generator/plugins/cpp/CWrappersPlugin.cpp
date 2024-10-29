@@ -7,15 +7,19 @@
 namespace holgen {
 void CWrappersPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
-    if (!cls.mStruct)
-      continue;
-    if (cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+    if (!ShouldProcess(cls))
       continue;
     ProcessClass(cls);
   }
 }
 
-void CWrappersPlugin::ProcessClass(Class &cls) {
+bool CWrappersPlugin::ShouldProcess(const Class &cls) const {
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+    return false;
+  return true;
+}
+
+void CWrappersPlugin::ProcessClass(Class &cls) const {
   for (auto &method: cls.mMethods) {
     if (!method.mExposeToScript)
       continue;
@@ -23,11 +27,13 @@ void CWrappersPlugin::ProcessClass(Class &cls) {
   }
 }
 
-void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
-  auto func = CFunction{Naming().CWrapperName(cls, method),
-                        BridgingHelper::ConvertType(mProject, method.mReturnType, true,
-                                                    method.mFunction->mDefinitionSource),
-                        &method};
+void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
+  DefinitionSource internalSource{"INTERNAL"};
+  auto func =
+      CFunction{Naming().CWrapperName(cls, method),
+                BridgingHelper::ConvertType(mProject, method.mReturnType, true,
+                                            method.mFunction ? method.mFunction->mDefinitionSource : internalSource),
+                &method};
 
   bool isStatic = method.IsStatic(cls);
 
@@ -44,7 +50,7 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
     else
       args << ", ";
     auto &addedArg =
-        BridgingHelper::AddArgument(mProject, func, arg, method.mFunction->mDefinitionSource);
+        BridgingHelper::AddArgument(mProject, func, arg, method.mFunction ? method.mFunction->mDefinitionSource : internalSource);
     bool isSpan = arg.mType.mName == "std::span";
     bool isPointer = arg.mType.mType == PassByType::Pointer;
 
@@ -65,7 +71,8 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
       func.mBody.Indent(-1);
       func.mBody.Add("}}");
       if (isSpan)
-        args << std::format("std::span{{{0}HolgenVector.data(), {0}HolgenVector.size()}}", arg.mName);
+        args << std::format("std::span{{{0}HolgenVector.data(), {0}HolgenVector.size()}}",
+                            arg.mName);
       else
         args << std::format("{0}HolgenVector", arg.mName);
       continue;
@@ -78,7 +85,7 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
   }
 
   BridgingHelper::AddAuxiliaryArguments(mProject, func, method.mReturnType,
-                                        St::CSharpAuxiliaryReturnTypeArgName);
+                                        St::CSharpAuxiliaryReturnValueArgName, true);
 
   std::string prefix;
   bool isSingleton = cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Singleton);
@@ -89,11 +96,50 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) {
   } else {
     prefix = "instance->";
   }
+  bool isContainer = func.mReturnType.mName == "std::span" ||
+      func.mReturnType.mName == "std::array" || func.mReturnType.mName == "std::vector";
   bool pointerMismatch = func.mReturnType.mType == PassByType::Pointer &&
-      method.mReturnType.mType != PassByType::Pointer;
+      method.mReturnType.mType != PassByType::Pointer && !isContainer;
+  auto funcCall = std::format("{}{}({})", prefix, method.mName, args.str());
+  if (method.mReturnType.mName == "void") {
+    func.mBody.Add("{};", funcCall);
+  } else if (method.mReturnType.mName == "std::array" ||
+             method.mReturnType.mName == "std::vector" || method.mReturnType.mName == "std::span") {
+    cls.mHeaderIncludes.AddLocalHeader("DeferredDeleter.h");
+    cls.mHeaderIncludes.AddStandardHeader("algorithm");
+    func.mBody.Add("using DeferredDeleter = {}::DeferredDeleter;", mSettings.mNamespace);
+    func.mBody.Add("constexpr size_t BufferSize = sizeof(DeferredDeleter) + "
+                   "(sizeof(DeferredDeleter)%8) + sizeof({});",
+                   method.mReturnType.ToFullyQualifiedString(mProject));
+    func.mBody.Add(
+        "constexpr size_t ObjectOffset = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8);");
+    func.mBody.Add("auto buffer = new char(BufferSize);");
+    bool canMove = method.mReturnType.mName == "std::vector";
+    func.mBody.Add("auto holgenRes = new (&buffer[ObjectOffset]) {}({}{}{});",
+                   method.mReturnType.ToFullyQualifiedString(mProject), canMove ? "std::move(" : "",
+                   funcCall, canMove ? ")" : "");
+    func.mBody.Add("auto deferredDeleter = new (buffer) DeferredDeleter([](void* ptr) {{ ");
+    func.mBody.Indent(1);
+    func.mBody.Add("static_cast<{0}*>(ptr)->~{1}();",
+                   method.mReturnType.ToFullyQualifiedString(mProject),
+                   St::StripNamespace(method.mReturnType.mName));
+    func.mBody.Indent(-1);
+    func.mBody.Add("}});");
+    if (method.mReturnType.mName == "std::vector" || method.mReturnType.mName == "std::span") {
+      func.mBody.Add("*{}{} = holgenRes->size();", St::CSharpAuxiliaryReturnValueArgName,
+                     St::CSharpAuxiliarySizeSuffix);
+    }
 
-  func.mBody.Add("return {}{}{}({});", pointerMismatch ? "&" : "", prefix, method.mName,
-                 args.str());
+    auto &arg = func.mArguments.emplace_back("holgenDeferredDeleter",
+                                             Type{"DeferredDeleter", PassByType::Pointer});
+    ++arg.mType.mPointerDepth;
+
+    func.mBody.Add("*holgenDeferredDeleter = deferredDeleter;");
+    func.mBody.Add("return holgenRes->data();");
+    func.mHasDeferredDeleter = true;
+  } else {
+    func.mBody.Add("return {}{};", pointerMismatch ? "&" : "", funcCall);
+  }
 
   cls.mCFunctions.push_back(std::move(func));
 }

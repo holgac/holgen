@@ -10,8 +10,9 @@ public:
   void Run() override;
 
 private:
-  void ProcessClass(Class& cls);
-  void WrapMethod(Class& cls, const ClassMethod& method);
+  bool ShouldProcess(const Class& cls) const;
+  void ProcessClass(Class& cls) const;
+  void WrapMethod(Class& cls, const ClassMethod& method) const;
 };
 
 } // namespace holgen

@@ -12,7 +12,7 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
   if (type.mName == "std::string") {
     return Type{"char", PassByType::Pointer, Constness::Const};
   }
-  if (type.mName == "std::vector" || type.mName == "std::span") {
+  if (type.mName == "std::vector" || type.mName == "std::span" || type.mName == "std::array") {
     auto underlying = ConvertType(project, type.mTemplateParameters.front(), isReturnType, definitionSource);
     if (underlying.mType == PassByType::Pointer) {
       ++underlying.mPointerDepth;
@@ -41,15 +41,17 @@ MethodArgument& BridgingHelper::AddArgument(const TranslatedProject &project, Me
                                  const DefinitionSource &definitionSource) {
   auto& addedArg = method.mArguments.emplace_back(arg.mName,
                                  ConvertType(project, arg.mType, false, definitionSource));
-  AddAuxiliaryArguments(project, method, arg.mType, arg.mName);
+  AddAuxiliaryArguments(project, method, arg.mType, arg.mName, false);
   return addedArg;
 }
 
 void BridgingHelper::AddAuxiliaryArguments(const TranslatedProject &project, MethodBase &method,
-                                          const Type &type, const std::string &argPrefix) {
+                                          const Type &type, const std::string &argPrefix, bool isReturnType) {
   (void)project;
   if (type.mName == "std::vector" || type.mName == "std::span") {
-    method.mArguments.emplace_back(argPrefix + St::CSharpAuxiliarySizeSuffix, Type{"size_t"});
+    auto& arg = method.mArguments.emplace_back(argPrefix + St::CSharpAuxiliarySizeSuffix, Type{"size_t"});
+    if (isReturnType)
+      arg.mType.mType = PassByType::Pointer;
   }
 }
 } // namespace holgen

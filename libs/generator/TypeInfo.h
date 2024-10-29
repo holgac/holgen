@@ -20,53 +20,65 @@ enum class Constexprness {
   NotConstexpr,
 };
 
-struct Type {
-  explicit Type(std::string name, PassByType passByType = PassByType::Value,
-                Constness constness = Constness::NotConst) :
-      mName(std::move(name)), mConstness(constness), mType(passByType) {}
+template <typename RealType>
+struct TypeBase {
+  explicit TypeBase(std::string name) : mName(std::move(name)) {}
 
-  Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
-       const TypeDefinition &typeDefinition, PassByType passByType = PassByType::Value,
-       Constness constness = Constness::NotConst);
+  TypeBase() = default;
 
-  static Type ReturnType(const TranslatedProject& project, const FunctionDefinition& func);
+  std::string mName = "void";
+  std::vector<RealType> mTemplateParameters;
 
-  bool operator==(const Type &rhs) const {
-    if (mName != rhs.mName || mConstness != rhs.mConstness || mType != rhs.mType ||
-        mConstexprness != rhs.mConstexprness ||
-        mTemplateParameters.size() != rhs.mTemplateParameters.size() ||
-        mFunctionalTemplateParameters.size() != rhs.mFunctionalTemplateParameters.size())
+  bool operator==(const TypeBase &rhs) const {
+    if (mName != rhs.mName || mTemplateParameters.size() != rhs.mTemplateParameters.size())
       return false;
     for (size_t i = 0; i < mTemplateParameters.size(); i++) {
       if (mTemplateParameters[i] != rhs.mTemplateParameters[i])
         return false;
     }
-    for (size_t i = 0; i < mFunctionalTemplateParameters.size(); i++) {
-      if (mFunctionalTemplateParameters[i] != rhs.mFunctionalTemplateParameters[i])
-        return false;
-    }
     return true;
   }
+};
 
-  std::string mName = "void";
+struct Type : TypeBase<Type> {
+  explicit Type(std::string name, PassByType passByType = PassByType::Value,
+                Constness constness = Constness::NotConst) :
+      TypeBase(std::move(name)), mConstness(constness), mType(passByType) {}
+
+  Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
+       const TypeDefinition &typeDefinition, PassByType passByType = PassByType::Value,
+       Constness constness = Constness::NotConst);
+
+  static Type ReturnType(const TranslatedProject &project, const FunctionDefinition &func);
+
+  bool operator==(const Type &rhs) const;
+
   Constness mConstness;
   PassByType mType;
   Constexprness mConstexprness = Constexprness::NotConstexpr;
-  std::vector<Type> mTemplateParameters;
   // non-zero when the type is a pointer to pointer [to pointer, ...].
   uint32_t mPointerDepth = 0;
   // This is for std::function which uses a different syntax
   // It's converted to string as [0]([1],[2], ...)
   // TODO: Instead of a separate field, Type should natively support function types
   std::vector<Type> mFunctionalTemplateParameters;
-  [[nodiscard]] std::string ToString(bool noTrailingSpace, bool ignoreConstForPrimitives = false) const;
-  [[nodiscard]] std::string ToFullyQualifiedString(const TranslatedProject& project) const;
+  [[nodiscard]] std::string ToString(bool noTrailingSpace,
+                                     bool ignoreConstForPrimitives = false) const;
+  [[nodiscard]] std::string ToFullyQualifiedString(const TranslatedProject &project) const;
   void PreventCopying(bool addConst = true);
   [[nodiscard]] bool SupportsCopy(TranslatedProject &project) const;
   [[nodiscard]] bool SupportsMirroring(TranslatedProject &project) const;
+
 private:
   [[nodiscard]] bool SupportsCopyOrMirroring(TranslatedProject &project,
-                                std::set<std::string> &seenClasses, bool forCopy) const;
+                                             std::set<std::string> &seenClasses,
+                                             bool forCopy) const;
+};
+
+struct CSharpType : TypeBase<CSharpType> {
+  [[nodiscard]] std::string ToString() const;
+  // non-zero when the type is an array [of array, ...].
+  uint32_t mArrayDepth = 0;
 };
 
 enum class TypeUseCase {

@@ -8,7 +8,7 @@ void CSharpHolgenMainGenerator::Run(std::vector<GeneratedContent> &contents) con
   if (mGeneratorSettings.mCSharpRoot.empty())
     return;
   auto &file = contents.emplace_back();
-  file.mType = FileType::CSharpFile;
+  file.mType = FileType::CSharpSource;
   file.mName = std::format("{}/HolgenMain.cs", St::CSharpProjectName);
   CodeBlock codeBlock;
   codeBlock.Add("using System.Runtime.InteropServices;");

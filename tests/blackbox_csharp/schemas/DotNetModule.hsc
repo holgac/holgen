@@ -11,6 +11,8 @@ struct ModuleVersion {
     func GetSum() -> u32;
     func BumpRevision();
     func SumOfSelfAnd(ModuleVersion v1, ModuleVersion v2) -> ModuleVersion;
+    func GetNextRevisions(u64 count) -> vector<ModuleVersion>;
+    func GetNextThreeRevisions() -> ModuleVersion[3];
 }
 
 @dotNetModule

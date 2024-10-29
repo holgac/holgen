@@ -16,7 +16,7 @@ void CSharpModuleInterfaceGenerator::Run(std::vector<GeneratedContent> &contents
 }
 
 void CSharpModuleInterfaceGenerator::Generate(GeneratedContent &out, const Class &cls) const {
-  out.mType = FileType::CSharpFile;
+  out.mType = FileType::CSharpSource;
   out.mName = std::format("{}/{}.cs", St::CSharpProjectName,
                           mNamingConvention.ModuleInterfaceNameInCSharp(cls.mName));
   CodeBlock codeBlock;

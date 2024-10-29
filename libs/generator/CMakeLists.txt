@@ -38,6 +38,8 @@ set(gen_csharp_plugins
     plugins/csharp/DotNetModulePlugin.cpp
     plugins/csharp/DotNetModuleFunctionsPlugin.cpp
     plugins/csharp/DotNetHostPlugin.cpp
+    plugins/csharp/DotNetModuleInterfacePlugin.cpp
+    plugins/csharp/DotNetPluginBase.cpp
 )
 
 set(gen_plugins
@@ -46,6 +48,7 @@ set(gen_plugins
     plugins/helpers/GlobalPointerPlugin.cpp
     plugins/helpers/FilesystemHelperPlugin.cpp
     plugins/helpers/SingletonPlugin.cpp
+    plugins/helpers/DeferredDeleterPlugin.cpp
     plugins/cpp/ClassIdFieldPlugin.cpp
     plugins/cpp/ClassFieldPlugin.cpp
     plugins/cpp/ClassFieldGetterPlugin.cpp
@@ -74,6 +77,7 @@ set(gen_generators
     generators/CSharpHolgenMainGenerator.cpp
     generators/CSharpModuleInterfaceGenerator.cpp
     generators/CSharpGeneratorBase.cpp
+    generators/CSharpSourceGenerator.cpp
 )
 
 set(gen_lang

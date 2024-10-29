@@ -39,9 +39,9 @@ bool Class::IsAbstract() const {
 }
 
 bool Class::IsProxyable() const {
-  return mStruct &&
-      !mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror) &&
-      !mStruct->GetAnnotation(Annotations::Singleton);
+  return !mStruct ||
+      (!mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror) &&
+       !mStruct->GetAnnotation(Annotations::Singleton));
 }
 
 TranslatedProject::TranslatedProject(const ProjectDefinition &projectDefinition) :

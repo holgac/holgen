@@ -19,6 +19,7 @@ public:
   static std::string GetFieldNameInLua(const std::string &fieldName, bool isRef = false);
   static std::string Replace(const std::string &source, const std::string &from,
                              const std::string &to);
+  static std::string StripNamespace(const std::string& str);
   inline static const std::string GlobalPointer = "GlobalPointer";
   inline static const std::string GlobalPointer_GetInstance = "GetInstance";
   inline static const std::string GlobalPointer_SetInstance = "SetInstance";
@@ -69,7 +70,7 @@ public:
   static constexpr const char* CSharpMirroredStructStructName = "Fields";
   static constexpr const char* CSharpMirroredStructFieldName = "Data";
   static constexpr const char* CSharpProxyObjectPointerFieldName = "HolgenPtr";
-  static constexpr const char* CSharpAuxiliarySizeSuffix = "HolgenCount";
-  static constexpr const char* CSharpAuxiliaryReturnTypeArgName = "holgenReturnType";
+  static constexpr const char* CSharpAuxiliarySizeSuffix = "HolgenSize";
+  static constexpr const char* CSharpAuxiliaryReturnValueArgName = "holgenReturnValue";
 };
 } // namespace holgen

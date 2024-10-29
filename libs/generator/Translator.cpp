@@ -19,6 +19,7 @@
 #include "generator/plugins/helpers/FilesystemHelperPlugin.h"
 #include "generator/plugins/helpers/GlobalPointerPlugin.h"
 #include "generator/plugins/helpers/SingletonPlugin.h"
+#include "generator/plugins/helpers/DeferredDeleterPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
 #include "generator/plugins/json/JsonHelperPlugin.h"
 #include "generator/plugins/json/JsonParseFilesPlugin.h"
@@ -31,6 +32,7 @@
 #include "generator/plugins/csharp/DotNetModulePlugin.h"
 #include "generator/plugins/csharp/DotNetModuleFunctionsPlugin.h"
 #include "generator/plugins/csharp/DotNetHostPlugin.h"
+#include "generator/plugins/csharp/DotNetModuleInterfacePlugin.h"
 
 namespace holgen {
 
@@ -53,10 +55,12 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<EnumPlugin>();
   AddPlugin<BitmapPlugin>();
   AddPlugin<BitmapFieldPlugin>();
+  AddPlugin<DeferredDeleterPlugin>();
   AddPlugin<CWrappersPlugin>();
   AddPlugin<DotNetModulePlugin>();
   AddPlugin<DotNetModuleFunctionsPlugin>();
   AddPlugin<DotNetHostPlugin>();
+  AddPlugin<DotNetModuleInterfacePlugin>();
   AddPlugin<JsonConverterPlugin>();
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();

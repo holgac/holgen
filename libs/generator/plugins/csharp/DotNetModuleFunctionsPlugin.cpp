@@ -23,7 +23,7 @@ void DotNetModuleFunctionsPlugin::Process(Class &cls) {
       BridgingHelper::AddArgument(mProject, method, arg, func.mDefinitionSource);
     }
     BridgingHelper::AddAuxiliaryArguments(mProject, method, method.mReturnType,
-                                          St::CSharpAuxiliaryReturnTypeArgName);
+                                          St::CSharpAuxiliaryReturnValueArgName, true);
     method.mReturnType =
         BridgingHelper::ConvertType(mProject, method.mReturnType, true, func.mDefinitionSource);
     cls.mMethods.push_back(std::move(method));

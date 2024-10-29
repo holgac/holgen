@@ -6,28 +6,13 @@ namespace holgen_blackbox_csharp {
 // Defined in tests/blackbox_csharp/schemas/vector.hsc
 class Vector {
 public:
-  Vector(const float x, const float y, const float z);
   Vector() = default;
   Vector(const Vector &rhs) = default;
   Vector(Vector &&rhs) noexcept = default;
   ~Vector() = default;
   bool operator==(const Vector &rhs) const;
-  float GetX() const;
-  float GetY() const;
-  float GetZ() const;
-  void SetX(float val);
-  void SetY(float val);
-  void SetZ(float val);
-  static Vector Construct(const float x, const float y, const float z);
-  float LengthSquared() const;
-  void Normalize();
-  Vector Normalized();
   Vector &operator=(const Vector &rhs) = default;
   Vector &operator=(Vector &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Vector";
-private:
-  float mX;
-  float mY;
-  float mZ;
 };
 }

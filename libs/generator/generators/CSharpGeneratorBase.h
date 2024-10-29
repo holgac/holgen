@@ -17,6 +17,7 @@ protected:
                                                      bool addThisArgument) const;
   [[nodiscard]] std::string ConstructMethodSignatureArguments(const Class &cls,
                                                               const MethodBase &method,
+                                                              const std::list<MethodArgument>& originalArguments,
                                                               InteropType interopType,
                                                               bool addThisArgument,
                                                               bool ignoreFirstArg, bool ignoreAuxiliaries) const;

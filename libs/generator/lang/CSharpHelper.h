@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <list>
 #include "../TypeInfo.h"
 
 namespace holgen {
@@ -14,12 +15,18 @@ enum class InteropType {
 
 class CSharpHelper {
 public:
+  CSharpType ConvertType(const Type &type, const TranslatedProject &project,
+                         InteropType interopType);
+  void AddAttributes(std::list<std::string> &attributes, const Type &type, const CSharpType &csType,
+                     InteropType interopType, bool isReturnType, size_t sizeArgIndex);
   // Returns a type string that can be used in c# to represent the provided type.
-  std::string RepresentationInNative(const Type &other, const TranslatedProject &project,
-                                     bool prependRef = false);
-  std::string RepresentationInManaged(const Type &other, const TranslatedProject &project);
-  std::string Representation(const Type &other, const TranslatedProject &project,
-                             InteropType interopType, bool prependRef);
+  std::string RepresentationInNative(const Type &other, const Type &originalType,
+                                     const TranslatedProject &project, bool prependRef = false);
+  std::string RepresentationInManaged(const Type &other, const Type &originalType,
+                                      const TranslatedProject &project);
+  std::string Representation(const Type &other, const Type &originalType,
+                             const TranslatedProject &project, InteropType interopType,
+                             bool prependRef);
   std::string MarshallingInfo(const Type &other, const TranslatedProject &project,
                               InteropType interopType);
   std::string ArrayMarshallingInfo(const Type &other, const TranslatedProject &project,

@@ -10,18 +10,14 @@ void CSharpWrapperGenerator::Run(std::vector<GeneratedContent> &contents) const 
   if (mGeneratorSettings.mCSharpRoot.empty())
     return;
   for (auto &cls: mTranslatedProject.mClasses) {
-    if (!cls.mStruct)
-      continue;
-    if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
-        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp) ||
-        cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+    if (!ShouldProcess(cls))
       continue;
     Generate(contents.emplace_back(), cls);
   }
 }
 
 void CSharpWrapperGenerator::Generate(GeneratedContent &out, const Class &cls) const {
-  out.mType = FileType::CSharpFile;
+  out.mType = FileType::CSharpSource;
   out.mName = std::format("{}/{}.cs", St::CSharpProjectName, cls.mName);
   CodeBlock codeBlock;
   codeBlock.Add("namespace {};", St::CSharpProjectName);
@@ -74,13 +70,15 @@ bool CSharpWrapperGenerator::GenerateFields(CodeBlock &codeBlock, const Class &c
     if (!ShouldProcess(field))
       continue;
     processed = true;
-    fieldsStruct.Add("public {} {};",
-                     CSharpHelper::Get().RepresentationInNative(field.mType, mTranslatedProject),
-                     mNamingConvention.FieldNameInCSharp(field.mField->mName));
-    accessors.Add("public {0} {1} => {2}.{1};",
-                  CSharpHelper::Get().RepresentationInNative(field.mType, mTranslatedProject),
-                  mNamingConvention.FieldNameInCSharp(field.mField->mName),
-                  St::CSharpMirroredStructFieldName);
+    fieldsStruct.Add(
+        "public {} {};",
+        CSharpHelper::Get().RepresentationInNative(field.mType, field.mType, mTranslatedProject),
+        mNamingConvention.FieldNameInCSharp(field.mField->mName));
+    accessors.Add(
+        "public {0} {1} => {2}.{1};",
+        CSharpHelper::Get().RepresentationInNative(field.mType, field.mType, mTranslatedProject),
+        mNamingConvention.FieldNameInCSharp(field.mField->mName),
+        St::CSharpMirroredStructFieldName);
   }
 
   if (processed) {
@@ -146,8 +144,8 @@ void CSharpWrapperGenerator::GenerateEmptyConstructor(CodeBlock &codeBlock,
 void CSharpWrapperGenerator::GenerateConstructor(CodeBlock &codeBlock, const Class &cls,
                                                  const ClassConstructor &ctor) const {
   codeBlock.Add("public {}({})", cls.mName,
-                ConstructMethodSignatureArguments(cls, ctor, InteropType::NativeToManaged, false,
-                                                  false, true));
+                ConstructMethodSignatureArguments(
+                    cls, ctor, ctor.mArguments, InteropType::NativeToManaged, false, false, true));
   codeBlock.Add("{{");
   codeBlock.Indent(1);
   auto caller = ConstructWrapperCall(cls, ctor, ctor.mFunction->mName, false);
@@ -196,6 +194,17 @@ void CSharpWrapperGenerator::GenerateMethodPointer(CodeBlock &codeBlock,
                                                    const ClassMethod &method) const {
   codeBlock.Add("private static IntPtr {} = IntPtr.Zero;",
                 mNamingConvention.CSharpMethodPointerName(method));
+}
+
+bool CSharpWrapperGenerator::ShouldProcess(const Class &cls) const {
+  if (!cls.mStruct) {
+    return cls.mName == "DeferredDeleter";
+  }
+  if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+      cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp) ||
+      cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+    return false;
+  return true;
 }
 
 bool CSharpWrapperGenerator::ShouldProcess(const CFunction &func) const {

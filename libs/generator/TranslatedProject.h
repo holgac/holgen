@@ -63,7 +63,7 @@ struct ClassField {
 
 struct MethodArgument {
   MethodArgument(std::string name, Type type,
-                      std::optional<std::string> defaultValue = std::nullopt) :
+                 std::optional<std::string> defaultValue = std::nullopt) :
       mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {}
 
   Type mType;
@@ -108,6 +108,7 @@ struct CFunction : MethodBase {
   std::string mName;
   Type mReturnType;
   const ClassMethod *mMethod;
+  bool mHasDeferredDeleter = false;
 };
 
 struct ClassMethod : MethodBase {
@@ -129,7 +130,7 @@ struct ClassMethod : MethodBase {
   bool mExposeToScript = false;
   bool mFunctionPointer = false;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
-  [[nodiscard]] bool IsStatic(const Class& cls) const;
+  [[nodiscard]] bool IsStatic(const Class &cls) const;
 };
 
 struct ClassConstructorInitializer {
@@ -185,6 +186,60 @@ struct ClassEnum {
       mName(std::move(name)), mVisibility(visibility), mUnderlyingType(std::move(underlyingType)) {}
 
   [[nodiscard]] const ClassEnumEntry *GetEntry(const std::string &name) const;
+};
+
+struct CSharpMethodArgument {
+  CSharpMethodArgument(std::string name, CSharpType type,
+                       std::optional<std::string> defaultValue = std::nullopt) :
+      mType(std::move(type)), mName(std::move(name)), mDefaultValue(std::move(defaultValue)) {}
+
+  CSharpType mType;
+  std::string mName;
+  std::optional<std::string> mDefaultValue;
+  std::list<std::string> mAttributes;
+};
+
+struct CSharpMethodBase {
+  Visibility mVisibility = Visibility::Public;
+  std::list<CSharpMethodArgument> mArguments;
+  std::list<std::string> mComments;
+  Staticness mStaticness = Staticness::NotStatic;
+  CodeBlock mBody;
+  Virtuality mVirtuality = Virtuality::NotVirtual;
+  std::list<std::string> mAttributes;
+};
+
+struct CSharpMethod : CSharpMethodBase {
+  std::string mName;
+  CSharpType mReturnType;
+
+  CSharpMethod(std::string name, CSharpType returnType, Visibility visibility = Visibility::Public,
+               Staticness staticness = Staticness::NotStatic) :
+      mName(std::move(name)), mReturnType(std::move(returnType)) {
+    mStaticness = staticness;
+    mVisibility = visibility;
+  }
+};
+
+enum class CSharpClassType {
+  Class,
+  Struct,
+  Interface
+};
+
+struct CSharpClass {
+  explicit CSharpClass(std::string name, Class *cls) : mClass(cls), mName(std::move(name)) {}
+
+  explicit CSharpClass(std::string name) : mName(std::move(name)) {}
+
+  Class *mClass = nullptr;
+  std::string mName;
+  Visibility mVisibility = Visibility::Public;
+  Staticness mStaticness = Staticness::NotStatic;
+  CSharpClassType mType = CSharpClassType::Class;
+  std::set<std::string> mUsingDirectives;
+  std::list<CSharpMethod> mDelegates;
+  std::list<CSharpMethod> mMethods;
 };
 
 // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
@@ -252,6 +307,7 @@ public:
   const ProjectDefinition &mProject;
   const DependencyGraph mDependencyGraph;
   std::list<Class> mClasses;
+  std::list<CSharpClass> mCSharpClasses;
   [[nodiscard]] Class *GetClass(const std::string &name);
   [[nodiscard]] const Class *GetClass(const std::string &name) const;
   [[nodiscard]] std::vector<std::pair<Class *, const EnumEntryDefinition *>>
@@ -273,6 +329,21 @@ struct formatter<holgen::Visibility> : formatter<std::string> {
       return std::format_to(ctx.out(), "private");
     }
     THROW("Unexpected visibility: {}", uint32_t(visibility));
+  }
+};
+
+template <>
+struct formatter<holgen::CSharpClassType> : formatter<std::string> {
+  auto format(const holgen::CSharpClassType &type, format_context &ctx) const {
+    switch (type) {
+    case holgen::CSharpClassType::Class:
+      return std::format_to(ctx.out(), "class");
+    case holgen::CSharpClassType::Struct:
+      return std::format_to(ctx.out(), "struct");
+    case holgen::CSharpClassType::Interface:
+      return std::format_to(ctx.out(), "interface");
+    }
+    THROW("Unexpected C# class type: {}", uint32_t(type));
   }
 };
 } // namespace std

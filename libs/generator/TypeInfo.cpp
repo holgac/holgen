@@ -151,7 +151,8 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace, bool ignoreC
   }
   if (!type.mFunctionalTemplateParameters.empty()) {
     ss << "<";
-    for (size_t i = 0; i < type.mFunctionalTemplateParameters.size(); ++i) {
+    size_t i = 0;
+    for (; i < type.mFunctionalTemplateParameters.size(); ++i) {
       if (i == 0) {
         // nothing special
       } else if (i == 1) {
@@ -162,6 +163,8 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace, bool ignoreC
       ss << ToStringGeneric<FullyQualified>(type.mFunctionalTemplateParameters[i], true, false,
                                             project);
     }
+    if (i == 1)
+      ss << "(";
     ss << ")>";
   }
   if (type.mType == PassByType::Reference)
@@ -241,6 +244,21 @@ Type Type::ReturnType(const TranslatedProject &project, const FunctionDefinition
   return t;
 }
 
+bool Type::operator==(const Type &rhs) const {
+  if (!TypeBase::operator==(rhs)) {
+    return false;
+  }
+
+  if (mConstness != rhs.mConstness || mType != rhs.mType || mConstexprness != rhs.mConstexprness ||
+      mFunctionalTemplateParameters.size() != rhs.mFunctionalTemplateParameters.size())
+    return false;
+  for (size_t i = 0; i < mFunctionalTemplateParameters.size(); i++) {
+    if (mFunctionalTemplateParameters[i] != rhs.mFunctionalTemplateParameters[i])
+      return false;
+  }
+  return true;
+}
+
 void Type::PreventCopying(bool addConst) {
   if (!TypeInfo::Get().CppPrimitives.contains(mName)) {
     mType = PassByType::Reference;
@@ -303,5 +321,14 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
     }
   }
   return true;
+}
+
+std::string CSharpType::ToString() const {
+  std::stringstream ss;
+  ss << mName;
+  for(uint32_t i =0; i<mArrayDepth; ++i) {
+    ss << "[]";
+  }
+  return ss.str();
 }
 } // namespace holgen

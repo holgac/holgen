@@ -12,6 +12,6 @@ public:
                           const MethodArgument &arg, const DefinitionSource &definitionSource);
   static void AddAuxiliaryArguments(const TranslatedProject &project,
                                    MethodBase& method, const Type &type,
-                                   const std::string &argPrefix);
+                                   const std::string &argPrefix, bool isReturnType);
 };
 } // namespace holgen
