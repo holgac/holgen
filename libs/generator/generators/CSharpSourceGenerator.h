@@ -14,26 +14,28 @@ private:
   void GenerateClassNamespace(CodeBlock &codeBlock) const;
   void GenerateClassBody(CodeBlock &codeBlock, const CSharpClass &csCls) const;
   void GenerateClassBody(CodeBlock &codeBlock, const CSharpClass &csCls,
-                         Visibility visibility) const;
+                         CSharpVisibility visibility) const;
   void GenerateConstructors(CodeBlock &codeBlock, const CSharpClass &csCls,
-                            Visibility visibility) const;
+                            CSharpVisibility visibility) const;
   void GenerateConstructor(CodeBlock &codeBlock, const CSharpClass &csCls,
                            const CSharpConstructor &ctor) const;
   void GenerateDelegates(CodeBlock &codeBlock, const CSharpClass &csCls,
-                         Visibility visibility) const;
+                         CSharpVisibility visibility) const;
   void GenerateDelegate(CodeBlock &codeBlock, const CSharpClass &csCls,
                         const CSharpMethod &method) const;
-  void GenerateMethods(CodeBlock &codeBlock, const CSharpClass &csCls, Visibility visibility) const;
+  void GenerateMethods(CodeBlock &codeBlock, const CSharpClass &csCls,
+                       CSharpVisibility visibility) const;
   void GenerateMethod(CodeBlock &codeBlock, const CSharpClass &csCls,
                       const CSharpMethod &method) const;
-  void GenerateFields(CodeBlock &codeBlock, const CSharpClass &csCls, Visibility visibility) const;
+  void GenerateFields(CodeBlock &codeBlock, const CSharpClass &csCls,
+                      CSharpVisibility visibility) const;
   void GenerateField(CodeBlock &codeBlock, const CSharpClass &csCls,
                      const CSharpClassField &field) const;
   void GenerateInnerClasses(CodeBlock &codeBlock, const CSharpClass &csCls,
-                            Visibility visibility) const;
+                            CSharpVisibility visibility) const;
 
   [[nodiscard]] std::string GenerateArgumentsInSignature(const CSharpMethodBase &method) const;
   [[nodiscard]] std::string GenerateAttributes(const std::list<std::string> &attributes) const;
-  void GenerateAttributes(CodeBlock& codeBlock, const std::list<std::string> &attributes) const;
+  void GenerateAttributes(CodeBlock &codeBlock, const std::list<std::string> &attributes) const;
 };
 } // namespace holgen

@@ -34,6 +34,7 @@
 #include "generator/plugins/csharp/DotNetHostPlugin.h"
 #include "generator/plugins/csharp/DotNetModuleInterfacePlugin.h"
 #include "generator/plugins/csharp/DotNetWrapperPlugin.h"
+#include "generator/plugins/csharp/DotNetClassPlugin.h"
 
 namespace holgen {
 
@@ -60,9 +61,10 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<CWrappersPlugin>();
   AddPlugin<DotNetModulePlugin>();
   AddPlugin<DotNetModuleFunctionsPlugin>();
+  AddPlugin<DotNetClassPlugin>();
+  AddPlugin<DotNetWrapperPlugin>();
   AddPlugin<DotNetHostPlugin>();
   AddPlugin<DotNetModuleInterfacePlugin>();
-  AddPlugin<DotNetWrapperPlugin>();
   AddPlugin<JsonConverterPlugin>();
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();

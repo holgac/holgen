@@ -29,7 +29,8 @@ CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &
   } else if (it != CppTypeToCSharpType.end()) {
     out.mName = it->second;
   } else if (cls) {
-    if (interopType == InteropType::NativeToManaged) {
+    auto csCls = project.GetCSharpClass(type.mName);
+    if (interopType == InteropType::NativeToManaged || (csCls && csCls->mStaticness == Staticness::Static)) {
       if (cls->IsProxyable()) {
         out.mName = "IntPtr";
       } else {

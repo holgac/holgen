@@ -6,6 +6,8 @@
 
 namespace holgen {
 void CWrappersPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::CSharp))
+    return;
   for (auto &cls: mProject.mClasses) {
     if (!ShouldProcess(cls))
       continue;
@@ -32,7 +34,8 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
   auto func =
       CFunction{Naming().CWrapperName(cls, method),
                 BridgingHelper::ConvertType(mProject, method.mReturnType, true,
-                                            method.mFunction ? method.mFunction->mDefinitionSource : internalSource),
+                                            method.mFunction ? method.mFunction->mDefinitionSource
+                                                             : internalSource),
                 &method};
 
   bool isStatic = method.IsStatic(cls);
@@ -49,8 +52,9 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
       isFirst = false;
     else
       args << ", ";
-    auto &addedArg =
-        BridgingHelper::AddArgument(mProject, func, arg, method.mFunction ? method.mFunction->mDefinitionSource : internalSource);
+    auto &addedArg = BridgingHelper::AddArgument(
+        mProject, func, arg,
+        method.mFunction ? method.mFunction->mDefinitionSource : internalSource);
     bool isSpan = arg.mType.mName == "std::span";
     bool isPointer = arg.mType.mType == PassByType::Pointer;
 

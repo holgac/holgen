@@ -142,9 +142,10 @@ public sealed class DotNetModule : IDotNetModule
         int res = 0;
         foreach (var result in v.GetDataAsSignedVector())
         {
-        Console.WriteLine("Adding {0} to {1}", result, res);
+            Console.WriteLine("Adding {0} to {1}", result, res);
             res += result;
         }
+
         return res;
     }
 
@@ -156,6 +157,7 @@ public sealed class DotNetModule : IDotNetModule
         {
             res += result;
         }
+
         return res;
     }
 }

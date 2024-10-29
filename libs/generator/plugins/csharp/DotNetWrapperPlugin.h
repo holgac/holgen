@@ -10,7 +10,7 @@ public:
   void Run() override;
 
 private:
-  void Process(Class &cls) const;
+  void Process(Class &cls, CSharpClass& csCls) const;
   void ProcessConstructors(const Class &cls, CSharpClass &csCls) const;
   void ProcessMethods(const Class &cls, CSharpClass &csCls) const;
   void ProcessMethodPointers(const Class &cls, CSharpClass &csCls) const;
@@ -23,6 +23,7 @@ private:
   [[nodiscard]] bool ShouldProcess(const ClassMethod &method) const;
   [[nodiscard]] bool ShouldProcess(const ClassConstructor &ctor) const;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
+  [[nodiscard]] bool IsStaticClass(const Class &cls) const;
   void GenerateConstructorWrapperCall(CodeBlock &codeBlock, const Class &cls,
                                       const CSharpClass &csCls, const ClassMethod &method,
                                       const CSharpMethodBase &csMethod) const;

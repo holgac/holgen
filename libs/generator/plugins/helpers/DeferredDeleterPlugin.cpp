@@ -3,10 +3,16 @@
 namespace holgen {
 
 void DeferredDeleterPlugin::Run() {
+  if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::CSharp))
+    return;
   auto &cls = GenerateClass();
   GenerateField(cls);
   GenerateConstructor(cls);
   GeneratePerformMethod(cls);
+
+  auto csCls = CSharpClass{cls.mName, &cls};
+  csCls.mVisibility = CSharpVisibility::Internal;
+  mProject.mCSharpClasses.push_back(std::move(csCls));
 }
 
 Class &DeferredDeleterPlugin::GenerateClass() {
@@ -33,7 +39,8 @@ void DeferredDeleterPlugin::GeneratePerformMethod(Class &cls) {
       "constexpr size_t ObjectOffset = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8);");
   method.mBody.Add("ptr->{}(reinterpret_cast<char*>(ptr) + ObjectOffset);",
                    Naming().FieldNameInCpp("func"));
-  method.mBody.Add("delete ptr;");
+  method.mBody.Add("ptr->~DeferredDeleter();");
+  method.mBody.Add("delete[] reinterpret_cast<char *>(ptr);");
   method.mExposeToScript = true;
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

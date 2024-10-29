@@ -10,8 +10,9 @@ TranslatedProject::TranslatedProject(const ProjectDefinition &projectDefinition)
     mProject(projectDefinition), mDependencyGraph(mProject) {}
 
 GEN_GETTER_BY_NAME(TranslatedProject, Class, GetClass, mClasses)
-
 GEN_GETTER_BY_NAME_NONCONST(TranslatedProject, Class, GetClass, mClasses);
+GEN_GETTER_BY_NAME(TranslatedProject, CSharpClass, GetCSharpClass, mCSharpClasses)
+GEN_GETTER_BY_NAME_NONCONST(TranslatedProject, CSharpClass, GetCSharpClass, mCSharpClasses);
 
 std::vector<std::pair<Class *, const EnumEntryDefinition *>>
     TranslatedProject::GetVariantClassesOfEnum(const std::string &enumName) {

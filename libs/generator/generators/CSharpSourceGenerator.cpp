@@ -47,13 +47,14 @@ void CSharpSourceGenerator::GenerateClassNamespace(CodeBlock &codeBlock) const {
 
 void CSharpSourceGenerator::GenerateClassBody(CodeBlock &codeBlock,
                                               const CSharpClass &csCls) const {
-  GenerateClassBody(codeBlock, csCls, Visibility::Public);
-  GenerateClassBody(codeBlock, csCls, Visibility::Protected);
-  GenerateClassBody(codeBlock, csCls, Visibility::Private);
+  GenerateClassBody(codeBlock, csCls, CSharpVisibility::Public);
+  GenerateClassBody(codeBlock, csCls, CSharpVisibility::Protected);
+  GenerateClassBody(codeBlock, csCls, CSharpVisibility::Private);
+  GenerateClassBody(codeBlock, csCls, CSharpVisibility::Internal);
 }
 
 void CSharpSourceGenerator::GenerateClassBody(CodeBlock &codeBlock, const CSharpClass &csCls,
-                                              Visibility visibility) const {
+                                              CSharpVisibility visibility) const {
   GenerateConstructors(codeBlock, csCls, visibility);
   GenerateFields(codeBlock, csCls, visibility);
   GenerateInnerClasses(codeBlock, csCls, visibility);
@@ -62,7 +63,7 @@ void CSharpSourceGenerator::GenerateClassBody(CodeBlock &codeBlock, const CSharp
 }
 
 void CSharpSourceGenerator::GenerateConstructors(CodeBlock &codeBlock, const CSharpClass &csCls,
-                                                 Visibility visibility) const {
+                                                 CSharpVisibility visibility) const {
   bool added = false;
   for (auto &ctor: csCls.mConstructors) {
     if (ctor.mVisibility != visibility)
@@ -85,7 +86,7 @@ void CSharpSourceGenerator::GenerateConstructor(CodeBlock &codeBlock, const CSha
 }
 
 void CSharpSourceGenerator::GenerateDelegates(CodeBlock &codeBlock, const CSharpClass &csCls,
-                                              Visibility visibility) const {
+                                              CSharpVisibility visibility) const {
   bool added = false;
   for (auto &delegate: csCls.mDelegates) {
     if (delegate.mVisibility != visibility)
@@ -106,7 +107,7 @@ void CSharpSourceGenerator::GenerateDelegate(CodeBlock &codeBlock, const CSharpC
 }
 
 void CSharpSourceGenerator::GenerateMethods(CodeBlock &codeBlock, const CSharpClass &csCls,
-                                            Visibility visibility) const {
+                                            CSharpVisibility visibility) const {
   bool added = false;
   for (auto &method: csCls.mMethods) {
     if (method.mVisibility != visibility)
@@ -144,7 +145,7 @@ void CSharpSourceGenerator::GenerateMethod(CodeBlock &codeBlock, const CSharpCla
 }
 
 void CSharpSourceGenerator::GenerateFields(CodeBlock &codeBlock, const CSharpClass &csCls,
-                                           Visibility visibility) const {
+                                           CSharpVisibility visibility) const {
   bool added = false;
   for (auto &field: csCls.mFields) {
     if (field.mVisibility != visibility)
@@ -195,8 +196,8 @@ void CSharpSourceGenerator::GenerateField(CodeBlock &codeBlock, const CSharpClas
 }
 
 void CSharpSourceGenerator::GenerateInnerClasses(CodeBlock &codeBlock, const CSharpClass &csCls,
-                                                 Visibility visibility) const {
-  if (visibility != Visibility::Public)
+                                                 CSharpVisibility visibility) const {
+  if (visibility != CSharpVisibility::Public)
     return;
   for (auto &innerClass: csCls.mInnerClasses) {
     GenerateClass(codeBlock, innerClass);

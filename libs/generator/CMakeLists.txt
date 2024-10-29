@@ -34,6 +34,7 @@ set(gen_lua_plugins
 )
 
 set(gen_csharp_plugins
+    plugins/csharp/DotNetClassPlugin.cpp
     plugins/csharp/DotNetModulePlugin.cpp
     plugins/csharp/DotNetModuleFunctionsPlugin.cpp
     plugins/csharp/DotNetHostPlugin.cpp

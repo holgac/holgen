@@ -4,15 +4,8 @@ using System.Runtime.InteropServices;
 
 namespace CSharpBindings;
 
-public class Vector
+public static class Vector
 {
-  public Vector(IntPtr ptr)
-  {
-    HolgenPtr = ptr;
-  }
-  
-  public IntPtr HolgenPtr { get; }
-  
   public static void HolgenInitialize()
   {
   }

@@ -214,10 +214,10 @@ void DotNetHostPlugin::CreateInitializeHolgenMethod(Class &cls) {
   cls.mSourceIncludes.AddStandardHeader("vector");
   auto method =
       ClassMethod{"InitializeHolgen", Type{"void"}, Visibility::Private, Constness::NotConst};
-  for (auto &projectCls: mProject.mClasses) {
-    if (!ShouldInitializeClass(projectCls))
+  for (auto &csCls: mProject.mCSharpClasses) {
+    if (!csCls.mClass || !ShouldInitializeClass(*csCls.mClass))
       continue;
-    GenerateInitializeClass(cls, method.mBody, projectCls);
+    GenerateInitializeClass(cls, method.mBody, *csCls.mClass);
   }
 
   method.mBody.Add("void (*baseModuleInitialize)();");
@@ -238,8 +238,6 @@ void DotNetHostPlugin::CreateInitializeHolgenMethod(Class &cls) {
   method.mBody.Add(
       "HOLGEN_FAIL_IF(res < 0 || !{}, \"LoadModule method not found in main module!\");",
       Naming().FieldNameInCpp("loadModule"));
-  method.mBody.Add("baseModuleInitialize();");
-
   cls.mMethods.push_back(std::move(method));
 }
 
@@ -343,9 +341,10 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
 }
 
 bool DotNetHostPlugin::ShouldInitializeClass(const Class &cls) {
-  if (!cls.mStruct || cls.mStruct->GetMatchingAnnotation(Annotations::No, Annotations::No_Script) ||
-      cls.mStruct->GetMatchingAnnotation(Annotations::No, Annotations::No_CSharp) ||
-      cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+  if (cls.mStruct &&
+      (cls.mStruct->GetMatchingAnnotation(Annotations::No, Annotations::No_Script) ||
+       cls.mStruct->GetMatchingAnnotation(Annotations::No, Annotations::No_CSharp) ||
+       cls.mStruct->GetAnnotation(Annotations::DotNetModule)))
     return false;
   return true;
 }

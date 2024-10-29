@@ -49,10 +49,8 @@ public class ModuleVersion
   }
   public ModuleVersion[] GetNextRevisions(ulong count)
   {
-    ulong holgenReturnValueHolgenSize;
-    IntPtr holgenDeferredDeleter;
-    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetNextRevisionsDelegate>(_getNextRevisionsImpl)(ref this.Data, count, out holgenReturnValueHolgenSize, out holgenDeferredDeleter);
-    int holgenReturnValueHolgenSizeInt = (int)holgenReturnValueHolgenSize;
+    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetNextRevisionsDelegate>(_getNextRevisionsImpl)(ref this.Data, count, out var holgenReturnValueHolgenSize, out var holgenDeferredDeleter);
+    var holgenReturnValueHolgenSizeInt = (int)holgenReturnValueHolgenSize;
     var holgenReturnValue = new ModuleVersion[holgenReturnValueHolgenSizeInt];
     Span<ModuleVersion.Fields> holgenResultSpan;
     unsafe
@@ -63,12 +61,12 @@ public class ModuleVersion
     {
       holgenReturnValue[i] = new ModuleVersion{ Data = holgenResultSpan[i] };
     }
+    DeferredDeleter.Perform(holgenDeferredDeleter);
     return holgenReturnValue;
   }
   public ModuleVersion[] GetNextThreeRevisions()
   {
-    IntPtr holgenDeferredDeleter;
-    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetNextThreeRevisionsDelegate>(_getNextThreeRevisionsImpl)(ref this.Data, out holgenDeferredDeleter);
+    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetNextThreeRevisionsDelegate>(_getNextThreeRevisionsImpl)(ref this.Data, out var holgenDeferredDeleter);
     var holgenReturnValue = new ModuleVersion[3];
     Span<ModuleVersion.Fields> holgenResultSpan;
     unsafe
@@ -79,14 +77,13 @@ public class ModuleVersion
     {
       holgenReturnValue[i] = new ModuleVersion{ Data = holgenResultSpan[i] };
     }
+    DeferredDeleter.Perform(holgenDeferredDeleter);
     return holgenReturnValue;
   }
   public uint[] GetDataAsVector()
   {
-    ulong holgenReturnValueHolgenSize;
-    IntPtr holgenDeferredDeleter;
-    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetDataAsVectorDelegate>(_getDataAsVectorImpl)(ref this.Data, out holgenReturnValueHolgenSize, out holgenDeferredDeleter);
-    int holgenReturnValueHolgenSizeInt = (int)holgenReturnValueHolgenSize;
+    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetDataAsVectorDelegate>(_getDataAsVectorImpl)(ref this.Data, out var holgenReturnValueHolgenSize, out var holgenDeferredDeleter);
+    var holgenReturnValueHolgenSizeInt = (int)holgenReturnValueHolgenSize;
     var holgenReturnValue = new uint[holgenReturnValueHolgenSizeInt];
     Span<uint> holgenResultSpan;
     unsafe
@@ -97,12 +94,12 @@ public class ModuleVersion
     {
       holgenReturnValue[i] = holgenResultSpan[i];
     }
+    DeferredDeleter.Perform(holgenDeferredDeleter);
     return holgenReturnValue;
   }
   public uint[] GetDataAsArray()
   {
-    IntPtr holgenDeferredDeleter;
-    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetDataAsArrayDelegate>(_getDataAsArrayImpl)(ref this.Data, out holgenDeferredDeleter);
+    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetDataAsArrayDelegate>(_getDataAsArrayImpl)(ref this.Data, out var holgenDeferredDeleter);
     var holgenReturnValue = new uint[3];
     Span<uint> holgenResultSpan;
     unsafe
@@ -113,24 +110,16 @@ public class ModuleVersion
     {
       holgenReturnValue[i] = holgenResultSpan[i];
     }
+    DeferredDeleter.Perform(holgenDeferredDeleter);
     return holgenReturnValue;
   }
   public int[] GetDataAsSignedVector()
   {
-    ulong holgenReturnValueHolgenSize;
-    IntPtr holgenDeferredDeleter;
-    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetDataAsSignedVectorDelegate>(_getDataAsSignedVectorImpl)(ref this.Data, out holgenReturnValueHolgenSize, out holgenDeferredDeleter);
-    int holgenReturnValueHolgenSizeInt = (int)holgenReturnValueHolgenSize;
+    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetDataAsSignedVectorDelegate>(_getDataAsSignedVectorImpl)(ref this.Data, out var holgenReturnValueHolgenSize, out var holgenDeferredDeleter);
+    var holgenReturnValueHolgenSizeInt = (int)holgenReturnValueHolgenSize;
     var holgenReturnValue = new int[holgenReturnValueHolgenSizeInt];
-    Span<int> holgenResultSpan;
-    unsafe
-    {
-      holgenResultSpan = new Span<int>(holgenResult.ToPointer(), holgenReturnValueHolgenSizeInt);
-    }
-    for (var i = 0; i < holgenReturnValueHolgenSizeInt; ++i)
-    {
-      holgenReturnValue[i] = holgenResultSpan[i];
-    }
+    Marshal.Copy(holgenResult, holgenReturnValue, 0, holgenReturnValueHolgenSizeInt);
+    DeferredDeleter.Perform(holgenDeferredDeleter);
     return holgenReturnValue;
   }
   public static void HolgenInitialize(ModuleVersionConstructDelegate moduleVersionConstructDelegate, ModuleVersionConstructDoubleDelegate moduleVersionConstructDoubleDelegate, ModuleVersionGetSumDelegate moduleVersionGetSumDelegate, ModuleVersionBumpRevisionDelegate moduleVersionBumpRevisionDelegate, ModuleVersionSumOfSelfAndDelegate moduleVersionSumOfSelfAndDelegate, ModuleVersionGetNextRevisionsDelegate moduleVersionGetNextRevisionsDelegate, ModuleVersionGetNextThreeRevisionsDelegate moduleVersionGetNextThreeRevisionsDelegate, ModuleVersionGetDataAsVectorDelegate moduleVersionGetDataAsVectorDelegate, ModuleVersionGetDataAsArrayDelegate moduleVersionGetDataAsArrayDelegate, ModuleVersionGetDataAsSignedVectorDelegate moduleVersionGetDataAsSignedVectorDelegate)

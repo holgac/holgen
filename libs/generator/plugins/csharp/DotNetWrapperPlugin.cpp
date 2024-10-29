@@ -4,22 +4,23 @@
 
 namespace holgen {
 void DotNetWrapperPlugin::Run() {
-  for (auto &cls: mProject.mClasses) {
-    if (!ShouldProcess(cls))
+  for (auto &csCls: mProject.mCSharpClasses) {
+    if (!csCls.mClass || !ShouldProcess(*csCls.mClass))
       continue;
-    Process(cls);
+    Process(*csCls.mClass, csCls);
   }
 }
 
-void DotNetWrapperPlugin::Process(Class &cls) const {
-  auto &csCls = mProject.mCSharpClasses.emplace_back(cls.mName, &cls);
-  csCls.mType = CSharpClassType::Class;
+void DotNetWrapperPlugin::Process(Class &cls, CSharpClass &csCls) const {
+  csCls.mStaticness = IsStaticClass(cls) ? Staticness::Static : Staticness::NotStatic;
   csCls.mUsingDirectives.insert("System.Runtime.InteropServices");
   ProcessConstructors(cls, csCls);
   ProcessMethods(cls, csCls);
   ProcessMethodPointers(cls, csCls);
   if (cls.IsProxyable()) {
-    ProcessProxy(cls, csCls);
+    if (csCls.mStaticness != Staticness::Static) {
+      ProcessProxy(cls, csCls);
+    }
   } else if (!cls.mStruct || !cls.mStruct->GetAnnotation(Annotations::Singleton)) {
     ProcessMirror(cls, csCls);
   }
@@ -78,7 +79,7 @@ void DotNetWrapperPlugin::ProcessMethodPointers(const Class &cls, CSharpClass &c
       continue;
     auto field =
         CSharpClassField(Naming().CSharpMethodPointerName(method.mName), CSharpType{"IntPtr"},
-                         Visibility::Private, Staticness::Static, "IntPtr.Zero");
+                         CSharpVisibility::Private, Staticness::Static, "IntPtr.Zero");
     csCls.mFields.push_back(std::move(field));
   }
 }
@@ -87,7 +88,7 @@ void DotNetWrapperPlugin::ProcessProxy(const Class &cls, CSharpClass &csCls) con
   (void)cls;
   auto &ptrField =
       csCls.mFields.emplace_back(St::CSharpProxyObjectPointerFieldName, CSharpType{"IntPtr"},
-                                 Visibility::Public, Staticness::NotStatic);
+                                 CSharpVisibility::Public, Staticness::NotStatic);
   ptrField.mGetter = CSharpMethodBase{};
   auto &ctor = csCls.mConstructors.emplace_back();
   ctor.mArguments.emplace_back("ptr", CSharpType{"IntPtr"});
@@ -104,17 +105,18 @@ void DotNetWrapperPlugin::ProcessMirror(const Class &cls, CSharpClass &csCls) co
     innerStruct.mFields.emplace_back(
         field.mField ? St::Capitalize(field.mField->mName) : field.mName,
         CSharpHelper::Get().ConvertType(field.mType, mProject, InteropType::ManagedToNative, false),
-        Visibility::Public);
+        CSharpVisibility::Public);
   }
 
   csCls.mFields.emplace_back(St::CSharpMirroredStructFieldName,
-                             CSharpType{St::CSharpMirroredStructStructName}, Visibility::Public);
+                             CSharpType{St::CSharpMirroredStructStructName},
+                             CSharpVisibility::Public);
 }
 
 void DotNetWrapperPlugin::ProcessInitializer(const Class &cls, CSharpClass &csCls) const {
   auto csMethod =
       CSharpMethod{Naming().CSharpMethodDelegateName(cls.mName, St::CSharpInitializerMethodName),
-                   CSharpType{"void"}, Visibility::Public, Staticness::Static};
+                   CSharpType{"void"}, CSharpVisibility::Public, Staticness::Static};
   ProcessInitializerArguments(cls, csCls, csMethod);
   csCls.mDelegates.push_back(csMethod);
 
@@ -141,12 +143,7 @@ void DotNetWrapperPlugin::ProcessInitializerArguments(const Class &cls, const CS
 }
 
 bool DotNetWrapperPlugin::ShouldProcess(const Class &cls) const {
-  if (!cls.mStruct) {
-    return false;
-  }
-  if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
-      cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp) ||
-      cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::DotNetModule))
     return false;
   return true;
 }
@@ -179,6 +176,18 @@ bool DotNetWrapperPlugin::ShouldProcess(const ClassField &field) const {
   if (field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
       field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp))
     return false;
+  return true;
+}
+
+bool DotNetWrapperPlugin::IsStaticClass(const Class &cls) const {
+  for (auto &method: cls.mMethods) {
+    if (ShouldProcess(method) && method.mStaticness != Staticness::Static)
+      return false;
+  }
+  for (auto &field: cls.mFields) {
+    if (ShouldProcess(field) && field.mStaticness != Staticness::Static)
+      return false;
+  }
   return true;
 }
 
@@ -231,16 +240,13 @@ void DotNetWrapperPlugin::GenerateWrapperCallReturningArray(CodeBlock &codeBlock
       ConstructWrapperCall(cls, method, csMethod, method.mName, addThisArgument, hasSizeArg, true);
   auto sizeParameter =
       std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
-  if (hasSizeArg) {
-    codeBlock.Add("ulong {};", sizeParameter);
-  }
+
   std::string sizeString;
   if (method.mReturnType.mName == "std::array")
     sizeString = method.mReturnType.mTemplateParameters.back().mName;
   else
     sizeString = std::format("{}Int", sizeParameter);
 
-  codeBlock.Add("IntPtr {};", St::DeferredDeleterArgumentName);
   auto retVal = method.mReturnType.mTemplateParameters.front();
   auto csRetVal = CSharpHelper::Get().ConvertType(retVal, mProject, InteropType::Internal, true);
   std::string underlyingType = csRetVal.mName;
@@ -261,11 +267,11 @@ void DotNetWrapperPlugin::GenerateWrapperCallReturningArray(CodeBlock &codeBlock
   }
   codeBlock.Add("var holgenResult = {};", caller);
   if (hasSizeArg) {
-    codeBlock.Add("int {0}Int = (int){0};", sizeParameter);
+    codeBlock.Add("var {0}Int = (int){0};", sizeParameter);
   }
   codeBlock.Add("var holgenReturnValue = new {}[{}];", csRetVal.ToString(), sizeString);
 
-  if (false && CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
+  if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
     codeBlock.Add("Marshal.Copy(holgenResult, holgenReturnValue, 0, {});", sizeString);
   } else {
     codeBlock.Add("Span<{}> holgenResultSpan;", underlyingType);
@@ -283,6 +289,7 @@ void DotNetWrapperPlugin::GenerateWrapperCallReturningArray(CodeBlock &codeBlock
     codeBlock.Indent(-1);
     codeBlock.Add("}}");
   }
+  codeBlock.Add("DeferredDeleter.Perform({});", St::DeferredDeleterArgumentName);
   codeBlock.Add("return holgenReturnValue;");
 }
 
@@ -372,7 +379,7 @@ std::string DotNetWrapperPlugin::ConstructMethodArguments(
   if (hasSizeArg) {
     if (!isFirst)
       ss << ", ";
-    ss << "out " << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
+    ss << "out var " << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
     isFirst = false;
   }
 
@@ -380,7 +387,7 @@ std::string DotNetWrapperPlugin::ConstructMethodArguments(
     if (!isFirst) {
       ss << ", ";
     }
-    ss << "out " << St::DeferredDeleterArgumentName;
+    ss << "out var " << St::DeferredDeleterArgumentName;
   }
   return ss.str();
 }
