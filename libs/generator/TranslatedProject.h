@@ -10,6 +10,7 @@
 #include "core/Exception.h"
 
 namespace holgen {
+class CSharpMethod;
 
 enum class Visibility {
   Private,
@@ -203,7 +204,6 @@ struct CSharpMethodBase {
   Visibility mVisibility = Visibility::Public;
   std::list<CSharpMethodArgument> mArguments;
   std::list<std::string> mComments;
-  Staticness mStaticness = Staticness::NotStatic;
   CodeBlock mBody;
   Virtuality mVirtuality = Virtuality::NotVirtual;
   std::list<std::string> mAttributes;
@@ -212,13 +212,36 @@ struct CSharpMethodBase {
 struct CSharpMethod : CSharpMethodBase {
   std::string mName;
   CSharpType mReturnType;
+  Staticness mStaticness = Staticness::NotStatic;
 
   CSharpMethod(std::string name, CSharpType returnType, Visibility visibility = Visibility::Public,
                Staticness staticness = Staticness::NotStatic) :
-      mName(std::move(name)), mReturnType(std::move(returnType)) {
-    mStaticness = staticness;
+      mName(std::move(name)), mReturnType(std::move(returnType)), mStaticness(staticness) {
     mVisibility = visibility;
   }
+};
+
+struct CSharpConstructor : CSharpMethodBase {
+  CSharpConstructor(Visibility visibility = Visibility::Public) {
+    mVisibility = visibility;
+  }
+};
+
+struct CSharpClassField {
+  CSharpClassField(std::string name, CSharpType type, Visibility visibility = Visibility::Private,
+                   Staticness staticness = Staticness::NotStatic,
+                   std::optional<std::string> defaultValue = std::nullopt) :
+      mType(std::move(type)), mName(std::move(name)), mStaticness(staticness),
+      mVisibility(visibility), mDefaultValue(std::move(defaultValue)) {}
+
+  CSharpType mType;
+  std::string mName;
+  Staticness mStaticness = Staticness::NotStatic;
+  Visibility mVisibility = Visibility::Private;
+  std::optional<std::string> mDefaultValue = std::nullopt;
+  std::list<std::string> mComments;
+  std::optional<CSharpMethodBase> mGetter;
+  std::optional<CSharpMethodBase> mSetter;
 };
 
 enum class CSharpClassType {
@@ -240,6 +263,10 @@ struct CSharpClass {
   std::set<std::string> mUsingDirectives;
   std::list<CSharpMethod> mDelegates;
   std::list<CSharpMethod> mMethods;
+  std::list<CSharpConstructor> mConstructors;
+  std::list<CSharpClassField> mFields;
+  std::list<CSharpClass> mInnerClasses;
+  std::list<std::string> mAttributes;
 };
 
 // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)

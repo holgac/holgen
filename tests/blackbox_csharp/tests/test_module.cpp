@@ -219,3 +219,53 @@ TEST_F(ModuleTest, StringArraysManagedToNative) {
   module2.StringArraysManagedToNative();
   EXPECT_EQ(counterManager.GetCounter("TestModule2").Get(), 14);
 }
+
+TEST_F(ModuleTest, MirroredStructReturnVector) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  auto mv = ModuleVersion(0, 1, 2);
+  uint32_t sum = 0;
+  for(auto& res: mv.GetNextRevisions(5)) {
+    sum += res.GetSum();
+  }
+  EXPECT_EQ(module1.MirroredStructReturnVector(), sum);
+}
+
+TEST_F(ModuleTest, MirroredStructReturnArray) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  auto mv = ModuleVersion(0, 1, 2);
+  uint32_t sum = 0;
+  for(auto& res: mv.GetNextThreeRevisions()) {
+    sum += res.GetSum();
+  }
+  EXPECT_EQ(module1.MirroredStructReturnArray(), sum);
+}
+
+TEST_F(ModuleTest, PrimitiveReturnVector) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  EXPECT_EQ(module1.PrimitiveReturnVector(), 3);
+}
+
+TEST_F(ModuleTest, PrimitiveReturnArray) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  EXPECT_EQ(module1.PrimitiveReturnArray(), 3);
+}

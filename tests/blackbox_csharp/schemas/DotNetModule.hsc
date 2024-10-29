@@ -13,6 +13,9 @@ struct ModuleVersion {
     func SumOfSelfAnd(ModuleVersion v1, ModuleVersion v2) -> ModuleVersion;
     func GetNextRevisions(u64 count) -> vector<ModuleVersion>;
     func GetNextThreeRevisions() -> ModuleVersion[3];
+    func GetDataAsVector() -> vector<u32>;
+    func GetDataAsArray() -> u32[3];
+    func GetDataAsSignedVector() -> vector<s32>;
 }
 
 @dotNetModule
@@ -32,4 +35,8 @@ struct DotNetModule {
     func PrimitiveArrays() -> u32;
     func StringArraysNativeToManaged(vector<string> args);
     func StringArraysManagedToNative();
+    func MirroredStructReturnVector() -> u32;
+    func MirroredStructReturnArray() -> u32;
+    func PrimitiveReturnVector() -> s32;
+    func PrimitiveReturnArray() -> u32;
 }

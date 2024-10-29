@@ -37,3 +37,12 @@ add_executable(tests
 )
 add_dependencies(tests gtest gtest_main gmock holgen_blackbox_csharp_lib)
 target_link_libraries(tests gtest gtest_main gmock holgen_blackbox_csharp_lib ${HOSTFXR_LIB} ${NETHOST_LIB})
+
+target_compile_options(tests PUBLIC -fsanitize=address)
+target_link_options(tests PUBLIC -fsanitize=address)
+
+add_executable(testMain
+    testMain.cpp
+)
+add_dependencies(testMain holgen_blackbox_csharp_lib)
+target_link_libraries(testMain holgen_blackbox_csharp_lib ${HOSTFXR_LIB} ${NETHOST_LIB})

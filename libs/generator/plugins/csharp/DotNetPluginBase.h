@@ -8,7 +8,15 @@ namespace holgen {
 class DotNetPluginBase : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
+
 protected:
-  CSharpMethod CreateMethod(const ClassMethod& method, InteropType interopType) const;
+  [[nodiscard]] CSharpMethod CreateMethod(const Class &cls, const ClassMethod &method,
+                                          InteropType interopType, bool addThisArgument,
+                                          bool ignoreAuxiliaries) const;
+  [[nodiscard]] CSharpConstructor CreateConstructor(const Class &cls, const ClassMethod &method,
+                                                    InteropType interopType) const;
+  void PopulateArguments(std::list<CSharpMethodArgument> &out,
+                         const std::list<MethodArgument> &arguments, InteropType interopType,
+                         bool ignoreAuxiliaries) const;
 };
 } // namespace holgen

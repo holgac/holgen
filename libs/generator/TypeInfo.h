@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include "parser/ProjectDefinition.h"
+#include "core/Exception.h"
 
 namespace holgen {
 struct TranslatedProject;
@@ -75,10 +76,22 @@ private:
                                              bool forCopy) const;
 };
 
+enum class CSharpPassByType {
+  Value,
+  In,
+  Ref,
+  Out,
+};
+
 struct CSharpType : TypeBase<CSharpType> {
+  CSharpType() = default;
+
+  explicit CSharpType(const std::string &name) : TypeBase(name) {}
+
   [[nodiscard]] std::string ToString() const;
   // non-zero when the type is an array [of array, ...].
   uint32_t mArrayDepth = 0;
+  CSharpPassByType mType = CSharpPassByType::Value;
 };
 
 enum class TypeUseCase {
@@ -120,3 +133,22 @@ public:
 };
 
 } // namespace holgen
+
+namespace std {
+template <>
+struct formatter<holgen::CSharpPassByType> : formatter<std::string> {
+  auto format(const holgen::CSharpPassByType &visibility, format_context &ctx) const {
+    switch (visibility) {
+    case holgen::CSharpPassByType::Value:
+      return std::format_to(ctx.out(), "");
+    case holgen::CSharpPassByType::In:
+      return std::format_to(ctx.out(), "in ");
+    case holgen::CSharpPassByType::Out:
+      return std::format_to(ctx.out(), "out ");
+    case holgen::CSharpPassByType::Ref:
+      return std::format_to(ctx.out(), "ref ");
+    }
+    THROW("Unexpected visibility: {}", uint32_t(visibility));
+  }
+};
+} // namespace std

@@ -38,8 +38,9 @@ set(gen_csharp_plugins
     plugins/csharp/DotNetModulePlugin.cpp
     plugins/csharp/DotNetModuleFunctionsPlugin.cpp
     plugins/csharp/DotNetHostPlugin.cpp
-    plugins/csharp/DotNetModuleInterfacePlugin.cpp
     plugins/csharp/DotNetPluginBase.cpp
+    plugins/csharp/DotNetModuleInterfacePlugin.cpp
+    plugins/csharp/DotNetWrapperPlugin.cpp
 )
 
 set(gen_plugins
@@ -72,11 +73,8 @@ set(gen_generators
     generators/CppModifiableSourceGenerator.cpp
     generators/CppHeaderGenerator.cpp
     generators/CppSourceGenerator.cpp
-    generators/CSharpWrapperGenerator.cpp
     generators/CSharpProjectGenerator.cpp
     generators/CSharpHolgenMainGenerator.cpp
-    generators/CSharpModuleInterfaceGenerator.cpp
-    generators/CSharpGeneratorBase.cpp
     generators/CSharpSourceGenerator.cpp
 )
 

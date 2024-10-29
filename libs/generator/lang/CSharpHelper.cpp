@@ -21,8 +21,16 @@ std::string CSharpHelper::Representation(const Type &other, const Type &original
   THROW("Unexpected interop type: {}", uint32_t(interopType));
 }
 
+bool CSharpHelper::NeedsDeleter(const Type &type) {
+  return CppTypesConvertibleToCSharpArray.contains(type.mName);
+}
+
+bool CSharpHelper::NeedsSizeArgument(const Type &type) {
+  return type.mName == "std::vector" || type.mName == "std::span";
+}
+
 CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &project,
-                                     InteropType interopType) {
+                                     InteropType interopType, bool returnType) {
   (void)interopType;
   CSharpType out;
   auto cls = project.GetClass(type.mName);
@@ -35,10 +43,22 @@ CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &
   } else if (it != CppTypeToCSharpType.end()) {
     out.mName = it->second;
   } else if (cls) {
-    if (cls->IsProxyable()) {
+    if (interopType == InteropType::NativeToManaged) {
+      if (cls->IsProxyable()) {
+        out.mName = "IntPtr";
+      } else {
+        out.mName = std::format("{}.{}", cls->mName, St::CSharpMirroredStructStructName);
+      }
+    } else {
+      out.mName = cls->mName;
+    }
+  } else if (type.mName == "std::span" || type.mName == "std::array" ||
+             type.mName == "std::vector") {
+    if (interopType == InteropType::NativeToManaged && returnType) {
       out.mName = "IntPtr";
     } else {
-      out.mName = std::format("{}.{}", cls->mName, St::CSharpMirroredStructStructName);
+      out = ConvertType(type.mTemplateParameters.front(), project, interopType, false);
+      ++out.mArrayDepth;
     }
   } else {
     THROW("Unexpected type: {}", type.mName);
@@ -49,10 +69,9 @@ CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &
 void CSharpHelper::AddAttributes(std::list<std::string> &attributes, const Type &type,
                                  const CSharpType &csType, InteropType interopType,
                                  bool isReturnType, size_t sizeArgIndex) {
-  (void)type;
   (void)interopType;
   std::string prefix = isReturnType ? "return: " : "";
-  if (csType.mName == "string") {
+  if (type.mName == "char" && type.mType == PassByType::Pointer) {
     if (csType.mArrayDepth == 0) {
       attributes.emplace_back(std::format("{}MarshalAs(UnmanagedType.LPStr)", prefix));
     } else {
@@ -61,6 +80,42 @@ void CSharpHelper::AddAttributes(std::list<std::string> &attributes, const Type 
           prefix, sizeArgIndex));
     }
   }
+  if (type.mName == "std::array") {
+    attributes.emplace_back(std::format("{}MarshalAs(UnmanagedType.LPArray, SizeConst={})", prefix,
+                                        type.mTemplateParameters.back().mName));
+  } else if (type.mName == "std::vector" || type.mName == "std::span") {
+    attributes.emplace_back(
+        std::format("{}MarshalAs(UnmanagedType.LPArray, SizeParamIndex={})", prefix, sizeArgIndex));
+  }
+}
+
+void CSharpHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &arguments, const Type &type,
+                                     const std::string &argPrefix, InteropType interopType,
+                                     bool isReturnValue) {
+  (void)interopType;
+  if (type.mName == "std::vector" || type.mName == "std::span") {
+    auto &arg = arguments.emplace_back(
+        std::format("{}{}", argPrefix, St::CSharpAuxiliarySizeSuffix), CSharpType{"ulong"});
+    if (isReturnValue) {
+      arg.mType.mType = CSharpPassByType::Out;
+    }
+  }
+  if (isReturnValue &&
+      (type.mName == "std::array" || type.mName == "std::vector" || type.mName == "std::span")) {
+    auto &deleterArg =
+        arguments.emplace_back(St::DeferredDeleterArgumentName, CSharpType{"IntPtr"});
+    deleterArg.mType.mType = CSharpPassByType::Out;
+  }
+}
+
+std::string CSharpHelper::StringifyPassedExtraArguments(const Type &type,
+                                                        const std::string &argPrefix,
+                                                        InteropType interopType) {
+  (void)interopType;
+  if (type.mName == "std::vector" || type.mName == "std::span") {
+    return std::format(", (ulong){}.Length", argPrefix);
+  }
+  return "";
 }
 
 std::string CSharpHelper::RepresentationInNative(const Type &other, const Type &originalType,
@@ -157,6 +212,21 @@ std::string CSharpHelper::VariableRepresentation(const Type &other, const std::s
   THROW("Unexpected interop type: {}", uint32_t(interopType));
 }
 
+std::string CSharpHelper::VariableRepresentation(const CSharpType &type,
+                                                 const std::string &variableName,
+                                                 const TranslatedProject &project,
+                                                 InteropType interopType) {
+  switch (interopType) {
+  case InteropType::Internal:
+    return variableName;
+  case InteropType::ManagedToNative:
+    return VariableRepresentationInNative(type, variableName, project);
+  case InteropType::NativeToManaged:
+    return VariableRepresentationInManaged(type, variableName, project);
+  }
+  THROW("Unexpected interop type: {}", uint32_t(interopType));
+}
+
 std::string CSharpHelper::VariableRepresentationInNative(const Type &other,
                                                          const std::string &variableName,
                                                          const TranslatedProject &project,
@@ -192,6 +262,31 @@ std::string CSharpHelper::VariableRepresentationInManaged(const Type &other,
   return variableName;
 }
 
+std::string CSharpHelper::VariableRepresentationInNative(const CSharpType &type,
+                                                         const std::string &variableName,
+                                                         const TranslatedProject &project) {
+  if (auto cls = project.GetClass(type.mName)) {
+    if (cls->IsProxyable()) {
+      return std::format("{}{}.{}", type.mType, variableName,
+                         St::CSharpProxyObjectPointerFieldName);
+    } else {
+      return std::format("{}{}.{}", type.mType, variableName, St::CSharpMirroredStructFieldName);
+    }
+  }
+  return std::format("{}{}", type.mType, variableName);
+}
+
+std::string CSharpHelper::VariableRepresentationInManaged(const CSharpType &type,
+                                                          const std::string &variableName,
+                                                          const TranslatedProject &project) {
+
+  if (auto cls = project.GetClass(type.mName)) {
+    if (!cls->IsProxyable())
+      return std::format("new {}({})", type.mName, variableName);
+  }
+  return std::format("{}{}", type.mType, variableName);
+}
+
 std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedProject &project) {
   (void)project;
   if (other.mName == "char" && other.mType == PassByType::Pointer) {
@@ -217,12 +312,13 @@ CSharpHelper &CSharpHelper::Get() {
 }
 
 CSharpHelper::CSharpHelper() {
-  CppTypeToCSharpType = {{"int8_t", "sbyte"},        {"int16_t", "short"},
-                         {"int32_t", "int"},         {"int64_t", "long"},
-                         {"std::ptrdiff_t", "long"}, {"uint8_t", "byte"},
-                         {"uint16_t", "ushort"},     {"uint32_t", "uint"},
-                         {"uint64_t", "ulong"},      {"size_t", "ulong"},
-                         {"float", "float"},         {"double", "double"},
-                         {"std::string", "string"},  {"void", "void"}};
+  CppTypeToCSharpType = {
+      {"int8_t", "sbyte"},       {"int16_t", "short"},       {"int32_t", "int"},
+      {"int64_t", "long"},       {"std::ptrdiff_t", "long"}, {"uint8_t", "byte"},
+      {"uint16_t", "ushort"},    {"uint32_t", "uint"},       {"uint64_t", "ulong"},
+      {"size_t", "ulong"},       {"float", "float"},         {"double", "double"},
+      {"std::string", "string"}, {"void", "void"},           {"bool", "bool"}};
+  CppTypesConvertibleToCSharpArray = {"std::vector", "std::array", "std::span"};
+  CSharpTypesSupportedByMarshalCopy = {"byte", "short", "int", "long", "float", "double"};
 }
 } // namespace holgen

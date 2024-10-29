@@ -113,7 +113,7 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
                    method.mReturnType.ToFullyQualifiedString(mProject));
     func.mBody.Add(
         "constexpr size_t ObjectOffset = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8);");
-    func.mBody.Add("auto buffer = new char(BufferSize);");
+    func.mBody.Add("auto buffer = new char[BufferSize];");
     bool canMove = method.mReturnType.mName == "std::vector";
     func.mBody.Add("auto holgenRes = new (&buffer[ObjectOffset]) {}({}{}{});",
                    method.mReturnType.ToFullyQualifiedString(mProject), canMove ? "std::move(" : "",
@@ -130,11 +130,11 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
                      St::CSharpAuxiliarySizeSuffix);
     }
 
-    auto &arg = func.mArguments.emplace_back("holgenDeferredDeleter",
+    auto &arg = func.mArguments.emplace_back(St::DeferredDeleterArgumentName,
                                              Type{"DeferredDeleter", PassByType::Pointer});
     ++arg.mType.mPointerDepth;
 
-    func.mBody.Add("*holgenDeferredDeleter = deferredDeleter;");
+    func.mBody.Add("*{} = deferredDeleter;", St::DeferredDeleterArgumentName);
     func.mBody.Add("return holgenRes->data();");
     func.mHasDeferredDeleter = true;
   } else {

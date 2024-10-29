@@ -107,4 +107,24 @@ public sealed class DotNetModule : IDotNetModule
         var c = CounterManager.GetCounter(_instance._counterName);
         c.BumpByStrlensOfCopy(["hello", "how", "are", "you"]);
     }
+
+    public static uint MirroredStructReturnVector()
+    {
+        throw new NotImplementedException();
+    }
+
+    public static uint MirroredStructReturnArray()
+    {
+        throw new NotImplementedException();
+    }
+
+    public static int PrimitiveReturnVector()
+    {
+        throw new NotImplementedException();
+    }
+
+    public static uint PrimitiveReturnArray()
+    {
+        throw new NotImplementedException();
+    }
 }

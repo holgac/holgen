@@ -108,4 +108,54 @@ public sealed class DotNetModule : IDotNetModule
         var c = CounterManager.GetCounter(_instance._counterName);
         c.BumpByStrlensOf(["hello", "how", "are", "you"]);
     }
+
+    public static uint MirroredStructReturnVector()
+    {
+        var v = new ModuleVersion(0, 1, 2);
+        var results = v.GetNextRevisions(5);
+        uint res = 0;
+        foreach (var result in results)
+        {
+            res += result.GetSum();
+        }
+
+        return res;
+    }
+
+    public static uint MirroredStructReturnArray()
+    {
+        var v = new ModuleVersion(0, 1, 2);
+        var results = v.GetNextThreeRevisions();
+        uint res = 0;
+        foreach (var result in results)
+        {
+            res += result.GetSum();
+        }
+
+        return res;
+    }
+
+    public static int PrimitiveReturnVector()
+    {
+        var v = new ModuleVersion(0, 1, 2);
+        Console.WriteLine("PrimitiveReturnVector");
+        int res = 0;
+        foreach (var result in v.GetDataAsSignedVector())
+        {
+        Console.WriteLine("Adding {0} to {1}", result, res);
+            res += result;
+        }
+        return res;
+    }
+
+    public static uint PrimitiveReturnArray()
+    {
+        var v = new ModuleVersion(0, 1, 2);
+        uint res = 0;
+        foreach (var result in v.GetDataAsArray())
+        {
+            res += result;
+        }
+        return res;
+    }
 }

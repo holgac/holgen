@@ -16,9 +16,9 @@ void DotNetModuleInterfacePlugin::Process(Class &cls) const {
   csCls.mType = CSharpClassType::Interface;
   csCls.mUsingDirectives.insert("System.Runtime.InteropServices");
   for (auto &method: cls.mMethods) {
-    auto csMethod = CreateMethod(method, InteropType::NativeToManaged);
+    auto csMethod = CreateMethod(cls, method, InteropType::NativeToManaged, false, false);
     auto oldName = csMethod.mName;
-    csMethod.mName = std::format("{}{}{}", cls.mName, csMethod.mName, St::CSharpDelegateSuffix);
+    csMethod.mName = Naming().CSharpMethodDelegateName(cls.mName, method.mName),
     csCls.mDelegates.push_back(csMethod);
     csMethod.mName = oldName;
     csMethod.mVirtuality = Virtuality::PureVirtual;

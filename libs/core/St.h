@@ -72,5 +72,6 @@ public:
   static constexpr const char* CSharpProxyObjectPointerFieldName = "HolgenPtr";
   static constexpr const char* CSharpAuxiliarySizeSuffix = "HolgenSize";
   static constexpr const char* CSharpAuxiliaryReturnValueArgName = "holgenReturnValue";
+  static constexpr const char* DeferredDeleterArgumentName = "holgenDeferredDeleter";
 };
 } // namespace holgen

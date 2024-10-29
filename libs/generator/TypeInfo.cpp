@@ -325,8 +325,8 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
 
 std::string CSharpType::ToString() const {
   std::stringstream ss;
-  ss << mName;
-  for(uint32_t i =0; i<mArrayDepth; ++i) {
+  ss << std::format("{}", mType) << mName;
+  for (uint32_t i = 0; i < mArrayDepth; ++i) {
     ss << "[]";
   }
   return ss.str();
