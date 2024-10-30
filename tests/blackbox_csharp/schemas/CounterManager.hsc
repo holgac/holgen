@@ -4,6 +4,8 @@ struct ICounterBumper {
     func Bump();
     func SetNameFromCounter(Counter ctr);
     func SetNameFromRevision(ModuleVersion version);
+    func GetVersion() -> ModuleVersion;
+    func GetCounter() -> Counter ref;
 //    func SplitName() -> vector<string>;
 //    func SetNameConcatVector(vector<string> name);
 //    func SetNameConcatArray(string[3] name);

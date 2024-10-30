@@ -17,8 +17,9 @@ void DotNetModuleInterfacePlugin::Process(Class &cls) const {
   csCls.mType = CSharpClassType::Interface;
   csCls.mUsingDirectives.insert("System.Runtime.InteropServices");
   for (auto &method: cls.mMethods) {
-    auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method,
-                                                     InteropType::NativeToManaged, false, false);
+    auto csMethod =
+        CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::NativeToManaged,
+                                         InteropType::NativeToManaged, false, false);
     auto oldName = csMethod.mName;
     csMethod.mName = Naming().CSharpMethodDelegateName(cls.mName, method.mName),
     csCls.mDelegates.push_back(csMethod);

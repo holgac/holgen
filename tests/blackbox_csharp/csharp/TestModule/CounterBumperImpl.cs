@@ -31,4 +31,14 @@ public class CounterBumperImpl : ICounterBumper
     {
         Name = $"Counter{version.Revision}";
     }
+
+    public override ModuleVersion GetVersion()
+    {
+        return new ModuleVersion(12, 13, 14);
+    }
+
+    public override Counter GetCounter()
+    {
+        return CounterManager.GetCounter(Name);
+    }
 }

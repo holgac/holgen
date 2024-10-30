@@ -77,7 +77,23 @@ void DotNetInterfaceClassPlugin::GenerateFunctionForCpp(
   auto method = GenerateFunction(cls, functionDefinition, false, false);
   method.mExposeToScript = true;
 
-  method.mBody.Add("return {};", GenerateFunctionPointerCall(cls, method));
+  auto caller = GenerateFunctionPointerCall(cls, method);
+
+  if (method.mReturnType.mName == "void") {
+    method.mBody.Add("{};", caller);
+  } else if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
+    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      method.mBody.Add("return {}({});", retClass->mName, caller);
+    } else if (retClass->IsProxyable()) {
+      method.mBody.Add("return *{};", caller);
+    } else {
+      method.mBody.Add("return {};", caller);
+    }
+  } else {
+    // TODO: handle vectors and such
+    method.mBody.Add("return {};", caller);
+  }
+
 
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
@@ -198,8 +214,8 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethods(const Class &cls, CSharpC
 CSharpMethod &DotNetInterfaceClassPlugin::GenerateCSharpAbstractMethod(const Class &cls,
                                                                        CSharpClass &csCls,
                                                                        const ClassMethod &method) {
-  auto csMethod =
-      CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal, false, true);
+  auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
+                                                   InteropType::Internal, false, true);
   csMethod.mVirtuality = Virtuality::PureVirtual;
   csCls.mMethods.push_back(std::move(csMethod));
   return csCls.mMethods.back();
@@ -209,8 +225,9 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &c
                                                                   CSharpClass &csCls,
                                                                   const ClassMethod &method,
                                                                   const CSharpMethod &csMethod) {
-  auto callerMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method,
-                                                       InteropType::NativeToManaged, true, false);
+  auto callerMethod =
+      CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::NativeToManaged,
+                                       InteropType::NativeToManaged, true, false);
 
   auto oldName = callerMethod.mName;
   callerMethod.mName = Naming().CSharpMethodDelegateName(cls.mName, method.mName);
@@ -223,11 +240,10 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &c
     callSuffix = std::format("(({})GCHandle.FromIntPtr({}).Target!).", csCls.mName,
                              St::CSharpHolgenObjectArg);
   }
-  auto caller = GenerateCSharpMethodCall(cls, csCls, method, csMethod);
 
-  if (callerMethod.mReturnType.mName == "void") {
-    callerMethod.mBody.Add("{}{};", callSuffix, caller);
-  }
+  CSharpHelper::Get().GenerateWrapperCall(
+      callerMethod.mBody, mProject, InteropType::NativeToManaged, InteropType::ManagedToNative,
+      callSuffix + method.mName, csCls, method, csMethod, false);
 
   csCls.mMethods.push_back(std::move(callerMethod));
 }

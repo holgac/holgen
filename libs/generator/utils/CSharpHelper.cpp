@@ -203,24 +203,25 @@ std::string CSharpHelper::VariableRepresentation(const CSharpType &type,
 }
 
 CSharpMethod CSharpHelper::CreateMethod(const TranslatedProject &project, const Class &cls,
-                                        const ClassMethod &method, InteropType interopType,
-                                        bool addThisArgument, bool ignoreAuxiliaries) const {
+                                        const ClassMethod &method, InteropType argsInteropType,
+                                        InteropType returnTypeInteropType, bool addThisArgument,
+                                        bool ignoreAuxiliaries) const {
 
-  auto csMethod =
-      CSharpMethod{method.mName, ConvertType(method.mReturnType, project, interopType, true)};
+  auto csMethod = CSharpMethod{
+      method.mName, ConvertType(method.mReturnType, project, returnTypeInteropType, true)};
   if (addThisArgument) {
     auto &arg = csMethod.mArguments.emplace_back(
-        St::CSharpHolgenObjectArg, ConvertType(Type{cls.mName}, project, interopType, true));
+        St::CSharpHolgenObjectArg, ConvertType(Type{cls.mName}, project, argsInteropType, true));
     if (!cls.IsProxyable())
       arg.mType.mType = CSharpPassByType::Ref;
   }
-  PopulateArguments(project, csMethod.mArguments, method.mArguments, interopType,
+  PopulateArguments(project, csMethod.mArguments, method.mArguments, argsInteropType,
                     ignoreAuxiliaries);
   // AddAttributes(csMethod.mAttributes, method.mReturnType,
-  // csMethod.mReturnType, interopType, true, csMethod.mArguments.size());
+  // csMethod.mReturnType, argsInteropType, true, csMethod.mArguments.size());
   if (!ignoreAuxiliaries) {
     AddAuxiliaryArguments(csMethod.mArguments, method.mReturnType,
-                          St::CSharpAuxiliaryReturnValueArgName, interopType, true);
+                          St::CSharpAuxiliaryReturnValueArgName, argsInteropType, true);
   }
   return csMethod;
 }
@@ -317,78 +318,88 @@ CSharpHelper::CSharpHelper() {
 }
 
 void CSharpHelper::GenerateWrapperCallReturningValue(
-    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
-    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
-    bool addThisArgument) const {
-  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+    CodeBlock &codeBlock, const TranslatedProject &project, InteropType argsInteropType,
+    const std::string &methodToCall, const CSharpClass &cls, const ClassMethod &method,
+    const CSharpMethodBase &csMethod, bool addThisArgument) const {
+  auto caller = ConstructWrapperCall(cls, project, argsInteropType, methodToCall, method, csMethod,
                                      addThisArgument, false, false);
   codeBlock.Add("return {};", caller);
 }
 
 void CSharpHelper::GenerateWrapperCallReturningClass(
-    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
-    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
-    bool addThisArgument, const Class &returnType) const {
-  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+    CodeBlock &codeBlock, const TranslatedProject &project, InteropType argsInteropType,
+    InteropType returnTypeInteropType, const std::string &methodToCall, const CSharpClass &cls,
+    const ClassMethod &method, const CSharpMethodBase &csMethod, bool addThisArgument,
+    const Class &returnType) const {
+  auto caller = ConstructWrapperCall(cls, project, argsInteropType, methodToCall, method, csMethod,
                                      addThisArgument, false, false);
-  if (returnType.IsProxyable()) {
-    codeBlock.Add("return new {}({});", returnType.mName, caller);
+  if (returnTypeInteropType == InteropType::NativeToManaged) {
+    if (returnType.IsProxyable()) {
+      codeBlock.Add("return new {}({});", returnType.mName, caller);
+    } else {
+      codeBlock.Add("return new {}", returnType.mName);
+      codeBlock.Add("{{");
+      codeBlock.Indent(1);
+      codeBlock.Add("{} = {}", St::CSharpMirroredStructFieldName, caller);
+      codeBlock.Indent(-1);
+      codeBlock.Add("}};");
+    }
   } else {
-    codeBlock.Add("return new {}", returnType.mName);
-    codeBlock.Add("{{");
-    codeBlock.Indent(1);
-    codeBlock.Add("{} = {}", St::CSharpMirroredStructFieldName, caller);
-    codeBlock.Indent(-1);
-    codeBlock.Add("}};");
+    if (returnType.IsProxyable()) {
+      codeBlock.Add("return {}.{};", caller, St::CSharpProxyObjectPointerFieldName);
+    } else {
+      codeBlock.Add("return {}.{};", caller, St::CSharpMirroredStructFieldName);
+    }
   }
 }
 
 std::string CSharpHelper::ConstructWrapperCall(
-    const CSharpClass &cls, const TranslatedProject &project, const NamingConvention &naming,
-    const MethodBase &method, const CSharpMethodBase &csMethod, const std::string &methodName,
+    const CSharpClass &cls, const TranslatedProject &project, InteropType interopType,
+    const std::string &methodToCall, const MethodBase &method, const CSharpMethodBase &csMethod,
     bool addThisArgument, bool hasSizeArg, bool hasDeleterArg) const {
-  return std::format("Marshal.GetDelegateForFunctionPointer<{}>({})({})",
-                     naming.CSharpMethodDelegateName(cls.mName, methodName),
-                     naming.CSharpMethodPointerName(methodName),
-                     ConstructMethodArguments(cls, project, method, csMethod,
-                                              InteropType::ManagedToNative, addThisArgument,
-                                              hasSizeArg, hasDeleterArg));
+  return std::format("{}({})", methodToCall,
+                     ConstructMethodArguments(cls, project, method, csMethod, interopType,
+                                              addThisArgument, hasSizeArg, hasDeleterArg));
 }
 
 void CSharpHelper::GenerateWrapperCall(CodeBlock &codeBlock, const TranslatedProject &project,
-                                       const NamingConvention &naming, const CSharpClass &cls,
+                                       InteropType argsInteropType,
+                                       InteropType returnTypeInteropType,
+                                       const std::string &methodToCall, const CSharpClass &cls,
                                        const ClassMethod &method, const CSharpMethodBase &csMethod,
                                        bool addThisArgument) const {
   if (method.mReturnType.mName == "void") {
-    GenerateWrapperCallReturningVoid(codeBlock, project, naming, cls, method, csMethod,
-                                     addThisArgument);
+    GenerateWrapperCallReturningVoid(codeBlock, project, argsInteropType, methodToCall, cls, method,
+                                     csMethod, addThisArgument);
   } else if (auto retClass = project.GetClass(method.mReturnType.mName)) {
-    GenerateWrapperCallReturningClass(codeBlock, project, naming, cls, method, csMethod,
-                                      addThisArgument, *retClass);
+    GenerateWrapperCallReturningClass(codeBlock, project, argsInteropType, returnTypeInteropType,
+                                      methodToCall, cls, method, csMethod, addThisArgument,
+                                      *retClass);
   } else if (CppTypesConvertibleToCSharpArray.contains(method.mReturnType.mName)) {
-    GenerateWrapperCallReturningArray(codeBlock, project, naming, cls, method, csMethod,
-                                      addThisArgument);
+    GenerateWrapperCallReturningArray(codeBlock, project, argsInteropType, returnTypeInteropType,
+                                      methodToCall, cls, method, csMethod, addThisArgument);
   } else {
-    GenerateWrapperCallReturningValue(codeBlock, project, naming, cls, method, csMethod,
-                                      addThisArgument);
+    GenerateWrapperCallReturningValue(codeBlock, project, argsInteropType, methodToCall, cls,
+                                      method, csMethod, addThisArgument);
   }
 }
 
 void CSharpHelper::GenerateWrapperCallReturningVoid(
-    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
-    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
-    bool addThisArgument) const {
-  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+    CodeBlock &codeBlock, const TranslatedProject &project, InteropType interopType,
+    const std::string &methodToCall, const CSharpClass &cls, const ClassMethod &method,
+    const CSharpMethodBase &csMethod, bool addThisArgument) const {
+  auto caller = ConstructWrapperCall(cls, project, interopType, methodToCall, method, csMethod,
                                      addThisArgument, false, false);
   codeBlock.Add("{};", caller);
 }
 
 void CSharpHelper::GenerateWrapperCallReturningArray(
-    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
-    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
-    bool addThisArgument) const {
+    CodeBlock &codeBlock, const TranslatedProject &project, InteropType argsInteropType,
+    InteropType returnTypeInteropType, const std::string &methodToCall, const CSharpClass &cls,
+    const ClassMethod &method, const CSharpMethodBase &csMethod, bool addThisArgument) const {
+  (void)returnTypeInteropType;
   bool hasSizeArg = NeedsSizeArgument(method.mReturnType);
-  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+  auto caller = ConstructWrapperCall(cls, project, argsInteropType, methodToCall, method, csMethod,
                                      addThisArgument, hasSizeArg, true);
   auto sizeParameter =
       std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
@@ -455,7 +466,7 @@ std::string CSharpHelper::ConstructMethodArguments(const CSharpClass &cls,
   bool isFirst = true;
 
   if (addThisArgument) {
-    if (cls.mClass && !cls.mClass->IsProxyable()) {
+    if (interopType != InteropType::NativeToManaged && cls.mClass && !cls.mClass->IsProxyable()) {
       ss << "ref ";
     }
 
@@ -480,7 +491,7 @@ std::string CSharpHelper::ConstructMethodArguments(const CSharpClass &cls,
       continue;
     }
     if (auto argClass = project.GetClass(it->mType.mName)) {
-      if (!argClass->IsProxyable()) {
+      if (interopType != InteropType::NativeToManaged && !argClass->IsProxyable()) {
         ss << "ref ";
       }
     }
@@ -502,6 +513,14 @@ std::string CSharpHelper::ConstructMethodArguments(const CSharpClass &cls,
     ss << "out var " << St::DeferredDeleterArgumentName;
   }
   return ss.str();
+}
+
+std::string CSharpHelper::GetWrapperTargetInWrappedClass(const CSharpClass &cls,
+                                                         const NamingConvention &naming,
+                                                         const std::string &methodName) const {
+  return std::format("Marshal.GetDelegateForFunctionPointer<{}>({})",
+                     naming.CSharpMethodDelegateName(cls.mName, methodName),
+                     naming.CSharpMethodPointerName(methodName));
 }
 
 } // namespace holgen
