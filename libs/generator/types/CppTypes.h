@@ -192,6 +192,7 @@ struct Class {
   [[nodiscard]] const ClassField *GetField(const std::string &name) const;
   [[nodiscard]] const ClassField *GetIdField() const;
   [[nodiscard]] ClassMethod *GetMethod(const std::string &name, Constness constness);
+  [[nodiscard]] const ClassMethod *GetMethod(const std::string &name, Constness constness) const;
   [[nodiscard]] const Using *GetUsing(const std::string &name) const;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
   [[nodiscard]] const ClassEnum *GetNestedEnum(const std::string &name) const;

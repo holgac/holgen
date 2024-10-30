@@ -24,6 +24,9 @@ void ClassFieldSetterPlugin::Run() {
 
       auto method = ClassMethod{Naming().FieldSetterNameInCpp(*field.mField), Type{"void"},
                                 Visibility::Public, Constness::NotConst};
+      method.mExposeToScript =
+          !field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Script) &&
+          cls.IsProxyable();
       auto &arg = method.mArguments.emplace_back("val", field.mType);
       if (field.mType.mType == PassByType::Pointer)
         arg.mType.mType = PassByType::Pointer;

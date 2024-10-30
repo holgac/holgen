@@ -86,7 +86,37 @@ void DotNetWrapperPlugin::ProcessMethodPointers(const Class &cls, CSharpClass &c
   }
 }
 
+void DotNetWrapperPlugin::ProcessProxyFields(const Class &cls, CSharpClass &csCls) const {
+  for (auto &field: cls.mFields) {
+    if (!field.mField || !ShouldProcess(field))
+      continue;
+    auto getter = GetGetter(cls, field);
+    auto setter = GetSetter(cls, field);
+    if (!getter && !setter)
+      continue;
+    auto &csField = csCls.mFields.emplace_back(
+        Naming().FieldNameInCSharp(field.mField->mName),
+        CSharpHelper::Get().ConvertType(field.mType, mProject, InteropType::Internal, false),
+        CSharpVisibility::Public);
+    if (getter) {
+      csField.mGetter = CSharpMethodBase{};
+      csField.mGetter->mBody.Add("{}();", getter->mName);
+      if (auto csMethod = csCls.GetFirstMethod(getter->mName)) {
+        csMethod->mVisibility = CSharpVisibility::Private;
+      }
+    }
+    if (setter) {
+      csField.mSetter = CSharpMethodBase{};
+      csField.mSetter->mBody.Add("{}(value);", setter->mName);
+      if (auto csMethod = csCls.GetFirstMethod(setter->mName)) {
+        csMethod->mVisibility = CSharpVisibility::Private;
+      }
+    }
+  }
+}
+
 void DotNetWrapperPlugin::ProcessProxy(const Class &cls, CSharpClass &csCls) const {
+  ProcessProxyFields(cls, csCls);
   (void)cls;
   auto &ptrField =
       csCls.mFields.emplace_back(St::CSharpProxyObjectPointerFieldName, CSharpType{"IntPtr"},
@@ -104,10 +134,12 @@ void DotNetWrapperPlugin::ProcessMirror(const Class &cls, CSharpClass &csCls) co
   for (auto &field: cls.mFields) {
     if (!ShouldProcess(field))
       continue;
-    innerStruct.mFields.emplace_back(
-        field.mField ? St::Capitalize(field.mField->mName) : field.mName,
-        CSharpHelper::Get().ConvertType(field.mType, mProject, InteropType::ManagedToNative, false),
-        CSharpVisibility::Public);
+    auto fieldName = field.mField ? St::Capitalize(field.mField->mName) : field.mName;
+    auto fieldType =
+        CSharpHelper::Get().ConvertType(field.mType, mProject, InteropType::ManagedToNative, false);
+    innerStruct.mFields.emplace_back(fieldName, fieldType, CSharpVisibility::Public);
+    auto &csField = csCls.mFields.emplace_back(fieldName, fieldType, CSharpVisibility::Public);
+    csField.mDirectTo = std::format("{}.{}", St::CSharpMirroredStructFieldName, fieldName);
   }
 
   csCls.mFields.emplace_back(St::CSharpMirroredStructFieldName,
@@ -394,6 +426,24 @@ std::string DotNetWrapperPlugin::ConstructMethodArguments(
     ss << "out var " << St::DeferredDeleterArgumentName;
   }
   return ss.str();
+}
+
+const ClassMethod *DotNetWrapperPlugin::GetGetter(const Class &cls, const ClassField &field) const {
+  if (!field.mField)
+    return nullptr;
+  auto attrib = field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Get);
+  if (attrib && attrib->mValue.mName != Annotations::MethodOption_Custom)
+    return nullptr;
+  return cls.GetMethod(Naming().FieldGetterNameInCpp(field.mField->mName), Constness::Const);
+}
+
+const ClassMethod *DotNetWrapperPlugin::GetSetter(const Class &cls, const ClassField &field) const {
+  if (!field.mField)
+    return nullptr;
+  auto attrib = field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Set);
+  if (attrib && attrib->mValue.mName != Annotations::MethodOption_Custom)
+    return nullptr;
+  return cls.GetMethod(Naming().FieldSetterNameInCpp(field.mField->mName), Constness::NotConst);
 }
 
 } // namespace holgen

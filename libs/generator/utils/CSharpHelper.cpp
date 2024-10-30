@@ -252,8 +252,11 @@ std::string CSharpHelper::VariableRepresentationInManaged(const CSharpType &type
                                                           const TranslatedProject &project) {
 
   if (auto cls = project.GetClass(type.mName)) {
-    if (!cls->IsProxyable())
+    if (cls->IsProxyable())
       return std::format("new {}({})", type.mName, variableName);
+    else
+      return std::format("new {}{{{} = {}}}", type.mName, St::CSharpMirroredStructFieldName,
+                         variableName);
   }
   return std::format("{}{}", type.mType, variableName);
 }

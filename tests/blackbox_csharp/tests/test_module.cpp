@@ -175,6 +175,18 @@ TEST_F(ModuleTest, ProxyObjectReturnValue) {
   EXPECT_EQ(c1->Get(), 210);
 }
 
+TEST_F(ModuleTest, ProxyObjectField) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  module1.Initialize();
+  module1.SetCounterName("TestCounter");
+  auto &counterManager = CounterManager::GetInstance();
+  counterManager.GetCounter("TestCounter").Bump(123);
+  module1.ProxyObjectField();
+  EXPECT_EQ(counterManager.GetCounter("TestCounter").Get(), 246);
+}
+
 TEST_F(ModuleTest, PrimitiveArrays) {
   DotNetHost mDotNetHost;
   mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
@@ -182,7 +194,6 @@ TEST_F(ModuleTest, PrimitiveArrays) {
   auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
   module1.Initialize();
   module2.Initialize();
-  auto &counterManager = CounterManager::GetInstance();
   EXPECT_EQ(module1.PrimitiveArrays(), 3);
   EXPECT_EQ(module2.PrimitiveArrays(), 12);
 }
@@ -280,7 +291,7 @@ TEST_F(ModuleTest, TrackedCSharpObject) {
   auto &counterManager = CounterManager::GetInstance();
   EXPECT_TRUE(counterManager.GetCounterBumpers().empty());
   module1.TrackedCSharpObject(5);
-  EXPECT_EQ(counterManager.GetCounterBumpers().size(), 5);
+  ASSERT_EQ(counterManager.GetCounterBumpers().size(), 5);
   counterManager.GetCounterBumpers()[0].SetName("Counter1");
   counterManager.GetCounterBumpers()[1].SetName("Counter2");
   counterManager.GetCounterBumpers()[0].Bump();
@@ -298,4 +309,36 @@ TEST_F(ModuleTest, TrackedCSharpObject) {
   counterManager.GetCounterBumpers()[0].SetName("Counter3");
   counterManager.GetCounterBumpers()[0].Bump();
   EXPECT_EQ(counterManager.GetCounter("Counter3").Get(), 1);
+}
+
+TEST_F(ModuleTest, TrackedCSharpObjectProxyArgument) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  module1.Initialize();
+  auto &counterManager = CounterManager::GetInstance();
+  counterManager.GetCounter("Test").Bump(100);
+  module1.TrackedCSharpObject(1);
+  ASSERT_EQ(counterManager.GetCounterBumpers().size(), 1);
+  counterManager.GetCounterBumpers()[0].SetNameFromCounter(counterManager.GetCounter("Test"));
+  counterManager.GetCounterBumpers()[0].Bump();
+  EXPECT_EQ(counterManager.GetCounter("Counter100").Get(), 1);
+  counterManager.GetCounterBumpers()[0].Bump();
+  EXPECT_EQ(counterManager.GetCounter("Counter100").Get(), 2);
+}
+
+TEST_F(ModuleTest, TrackedCSharpObjectMirrorArgument) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  module1.Initialize();
+  auto &counterManager = CounterManager::GetInstance();
+  counterManager.GetCounter("Test").Bump(100);
+  module1.TrackedCSharpObject(1);
+  ASSERT_EQ(counterManager.GetCounterBumpers().size(), 1);
+  counterManager.GetCounterBumpers()[0].SetNameFromRevision(ModuleVersion(1,2, 321));
+  counterManager.GetCounterBumpers()[0].Bump();
+  EXPECT_EQ(counterManager.GetCounter("Counter321").Get(), 1);
+  counterManager.GetCounterBumpers()[0].Bump();
+  EXPECT_EQ(counterManager.GetCounter("Counter321").Get(), 2);
 }

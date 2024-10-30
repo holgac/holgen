@@ -87,6 +87,11 @@ public sealed class DotNetModule : IDotNetModule
         return c1Again.AddCounterAndReturnSelf(c2).HolgenPtr;
     }
 
+    public static void ProxyObjectField()
+    {
+        throw new NotImplementedException();
+    }
+
     public static uint PrimitiveArrays()
     {
         var c = CounterManager.GetCounter(_instance._counterName);

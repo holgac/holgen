@@ -4,6 +4,14 @@
 
 namespace holgen {
 
+const ClassMethod *Class::GetMethod(const std::string &name, Constness constness) const {
+  for (auto &method: mMethods) {
+    if (method.mName == name && method.mConstness == constness)
+      return &method;
+  }
+  return nullptr;
+}
+
 ClassMethod *Class::GetMethod(const std::string &name, Constness constness) {
   for (auto &method: mMethods) {
     if (method.mName == name && method.mConstness == constness)

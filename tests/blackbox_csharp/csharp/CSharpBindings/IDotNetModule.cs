@@ -18,6 +18,7 @@ public interface IDotNetModule
   public static abstract uint ProxyObjectNativeToManaged();
   public static abstract uint ProxyObjectMethodArgInModule(IntPtr counter);
   public static abstract IntPtr ProxyObjectReturnValue(IntPtr counter1, IntPtr counter2);
+  public static abstract void ProxyObjectField();
   public static abstract uint PrimitiveArrays();
   public static abstract void StringArraysNativeToManaged([MarshalAs(UnmanagedType.LPArray, ArraySubType=UnmanagedType.LPStr, SizeParamIndex=1)] string[] args, ulong argsHolgenSize);
   public static abstract void StringArraysManagedToNative();
@@ -39,6 +40,7 @@ public interface IDotNetModule
   public delegate uint DotNetModuleProxyObjectNativeToManagedDelegate();
   public delegate uint DotNetModuleProxyObjectMethodArgInModuleDelegate(IntPtr counter);
   public delegate IntPtr DotNetModuleProxyObjectReturnValueDelegate(IntPtr counter1, IntPtr counter2);
+  public delegate void DotNetModuleProxyObjectFieldDelegate();
   public delegate uint DotNetModulePrimitiveArraysDelegate();
   public delegate void DotNetModuleStringArraysNativeToManagedDelegate([MarshalAs(UnmanagedType.LPArray, ArraySubType=UnmanagedType.LPStr, SizeParamIndex=1)] string[] args, ulong argsHolgenSize);
   public delegate void DotNetModuleStringArraysManagedToNativeDelegate();

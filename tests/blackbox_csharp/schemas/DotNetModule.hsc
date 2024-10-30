@@ -32,6 +32,7 @@ struct DotNetModule {
     func ProxyObjectNativeToManaged() -> u32;
     func ProxyObjectMethodArgInModule(Counter counter) -> u32;
     func ProxyObjectReturnValue(Counter counter1, Counter counter2) -> Counter ref;
+    func ProxyObjectField();
     func PrimitiveArrays() -> u32;
     func StringArraysNativeToManaged(vector<string> args);
     func StringArraysManagedToNative();

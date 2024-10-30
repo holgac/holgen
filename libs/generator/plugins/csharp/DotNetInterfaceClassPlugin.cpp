@@ -198,8 +198,8 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethods(const Class &cls, CSharpC
 CSharpMethod &DotNetInterfaceClassPlugin::GenerateCSharpAbstractMethod(const Class &cls,
                                                                        CSharpClass &csCls,
                                                                        const ClassMethod &method) {
-  auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method,
-                                                   InteropType::NativeToManaged, false, true);
+  auto csMethod =
+      CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal, false, true);
   csMethod.mVirtuality = Virtuality::PureVirtual;
   csCls.mMethods.push_back(std::move(csMethod));
   return csCls.mMethods.back();
@@ -252,7 +252,7 @@ std::string DotNetInterfaceClassPlugin::GenerateCSharpMethodCall(const Class &cl
     }
     THROW_IF(csIt == csEnd || csIt->mName != it->mName, "Argument order got messed up!")
     ss << CSharpHelper::Get().VariableRepresentation(csIt->mType, csIt->mName, mProject,
-                                                     InteropType::ManagedToNative);
+                                                     InteropType::NativeToManaged);
   }
 
   ss << ")";

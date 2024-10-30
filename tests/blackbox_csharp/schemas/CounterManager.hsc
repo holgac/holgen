@@ -2,8 +2,9 @@
 struct ICounterBumper {
     func SetName(string name);
     func Bump();
+    func SetNameFromCounter(Counter ctr);
+    func SetNameFromRevision(ModuleVersion version);
 //    func SplitName() -> vector<string>;
-//    func SetNameFromCounter(Counter ctr);
 //    func SetNameConcatVector(vector<string> name);
 //    func SetNameConcatArray(string[3] name);
 //    func BumpWithVector(vector<u32> counts) -> vector<u32>;
@@ -33,10 +34,12 @@ struct CounterManager {
 //    func NewCalculator(string name, ICalculator calculator nullable);
 //    func GetCalculator(string name) -> ICalculator nullable;
 //    vector<unique_ptr<ICalculator>> calculators;
+    @no(script)
     map<string, Counter> counters;
     func GetCounter(string name) -> Counter ref;
     func GetCounterPtr(string name) -> Counter nullable;
 
+    @no(script)
     vector<ICounterBumper> counterBumpers;
     func InsertCounterBumper(ICounterBumper bumper ref nullable);
 }

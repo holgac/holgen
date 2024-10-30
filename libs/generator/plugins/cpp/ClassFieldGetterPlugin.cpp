@@ -36,6 +36,10 @@ void ClassFieldGetterPlugin::ProcessRefField(Class &cls, ClassField &field) cons
                                    field.mField->mType.mTemplateParameters[0], PassByType::Pointer,
                                    constness},
                               Visibility::Public, constness};
+    if (i == 0)
+      method.mExposeToScript =
+          !field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Script) &&
+          cls.IsProxyable();
     method.mBody.Add("return {}::{}({});", underlyingType->mName, St::ManagedObject_Getter,
                      field.mName);
     Validate().NewMethod(cls, method);
@@ -53,6 +57,10 @@ void ClassFieldGetterPlugin::ProcessField(Class &cls, ClassField &field, bool is
   auto constness = isConst ? Constness::Const : Constness::NotConst;
   auto method = ClassMethod{Naming().FieldGetterNameInCpp(*field.mField), field.mType,
                             Visibility::Public, constness};
+  if (isConst)
+    method.mExposeToScript =
+        !field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Script) &&
+        cls.IsProxyable();
   method.mReturnType.PreventCopying(isConst);
   if (field.mType.mType == PassByType::Pointer)
     method.mReturnType.mType = PassByType::Pointer;

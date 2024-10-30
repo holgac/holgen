@@ -171,7 +171,9 @@ void CSharpSourceGenerator::GenerateField(CodeBlock &codeBlock, const CSharpClas
                                  field.mStaticness == Staticness::Static ? " static" : "",
                                  field.mType.ToString(), field.mName);
   if (simpleDefinition) {
-    if (!field.mGetter.has_value() && !field.mSetter.has_value()) {
+    if (field.mDirectTo.has_value()) {
+      codeBlock.Add("{}{} => {};", initialPart, defaultValPart, *field.mDirectTo);
+    } else if (!field.mGetter.has_value() && !field.mSetter.has_value()) {
       codeBlock.Add("{}{};", initialPart, defaultValPart);
     } else {
       std::stringstream innerPart;
@@ -223,6 +225,10 @@ void CSharpSourceGenerator::GenerateFieldAccessor(CodeBlock &codeBlock,
   std::string visibility;
   if (method.mVisibility != field.mVisibility) {
     visibility = std::format("{} ", method.mVisibility);
+  }
+  if (method.mBody.mContents.size() == 1 && method.mBody.mContents[0] == CodeUnitType::Code) {
+    codeBlock.Add("{}{} => {}", visibility, name, method.mBody.mLines[0]);
+    return;
   }
   codeBlock.Add("{}{}", visibility, name);
   codeBlock.Add("{{");

@@ -14,6 +14,7 @@ private:
   void ProcessConstructors(const Class &cls, CSharpClass &csCls) const;
   void ProcessMethods(const Class &cls, CSharpClass &csCls) const;
   void ProcessMethodPointers(const Class &cls, CSharpClass &csCls) const;
+  void ProcessProxyFields(const Class &cls, CSharpClass& csCls) const;
   void ProcessProxy(const Class &cls, CSharpClass &csCls) const;
   void ProcessMirror(const Class &cls, CSharpClass &csCls) const;
   void ProcessInitializer(const Class &cls, CSharpClass &csCls) const;
@@ -47,5 +48,7 @@ private:
                                                      const CSharpMethodBase &csMethod,
                                                      InteropType interopType, bool addThisArgument,
                                                      bool hasSizeArg, bool hasDeleterArg) const;
+  [[nodiscard]] const ClassMethod* GetGetter(const Class& cls, const ClassField& field) const;
+  [[nodiscard]] const ClassMethod* GetSetter(const Class& cls, const ClassField& field) const;
 };
 } // namespace holgen

@@ -11,6 +11,11 @@ public class Counter
     HolgenPtr = ptr;
   }
   
+  public uint Val
+  {
+    get => GetVal();
+    set => SetVal(value);
+  }
   public IntPtr HolgenPtr { get; }
   
   public uint Get()
@@ -45,8 +50,10 @@ public class Counter
   {
     Marshal.GetDelegateForFunctionPointer<CounterBumpByStrlensOfCopyDelegate>(_bumpByStrlensOfCopyImpl)(this.HolgenPtr, words, (ulong)words.Length);
   }
-  public static void HolgenInitialize(CounterGetDelegate counterGetDelegate, CounterBumpDelegate counterBumpDelegate, CounterResetDelegate counterResetDelegate, CounterAddCounterAndReturnSelfDelegate counterAddCounterAndReturnSelfDelegate, CounterBumpMultipleDelegate counterBumpMultipleDelegate, CounterBumpMultipleCopyDelegate counterBumpMultipleCopyDelegate, CounterBumpByStrlensOfDelegate counterBumpByStrlensOfDelegate, CounterBumpByStrlensOfCopyDelegate counterBumpByStrlensOfCopyDelegate)
+  public static void HolgenInitialize(CounterGetValDelegate counterGetValDelegate, CounterSetValDelegate counterSetValDelegate, CounterGetDelegate counterGetDelegate, CounterBumpDelegate counterBumpDelegate, CounterResetDelegate counterResetDelegate, CounterAddCounterAndReturnSelfDelegate counterAddCounterAndReturnSelfDelegate, CounterBumpMultipleDelegate counterBumpMultipleDelegate, CounterBumpMultipleCopyDelegate counterBumpMultipleCopyDelegate, CounterBumpByStrlensOfDelegate counterBumpByStrlensOfDelegate, CounterBumpByStrlensOfCopyDelegate counterBumpByStrlensOfCopyDelegate)
   {
+    _getValImpl = Marshal.GetFunctionPointerForDelegate(counterGetValDelegate);
+    _setValImpl = Marshal.GetFunctionPointerForDelegate(counterSetValDelegate);
     _getImpl = Marshal.GetFunctionPointerForDelegate(counterGetDelegate);
     _bumpImpl = Marshal.GetFunctionPointerForDelegate(counterBumpDelegate);
     _resetImpl = Marshal.GetFunctionPointerForDelegate(counterResetDelegate);
@@ -57,6 +64,8 @@ public class Counter
     _bumpByStrlensOfCopyImpl = Marshal.GetFunctionPointerForDelegate(counterBumpByStrlensOfCopyDelegate);
   }
   
+  public delegate uint CounterGetValDelegate(IntPtr holgenObject);
+  public delegate void CounterSetValDelegate(IntPtr holgenObject, uint val);
   public delegate uint CounterGetDelegate(IntPtr holgenObject);
   public delegate void CounterBumpDelegate(IntPtr holgenObject, uint amount);
   public delegate void CounterResetDelegate(IntPtr holgenObject);
@@ -65,8 +74,10 @@ public class Counter
   public delegate void CounterBumpMultipleCopyDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] uint[] amounts, ulong amountsHolgenSize);
   public delegate void CounterBumpByStrlensOfDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] string[] words, ulong wordsHolgenSize);
   public delegate void CounterBumpByStrlensOfCopyDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] string[] words, ulong wordsHolgenSize);
-  public delegate void CounterHolgenInitializeDelegate(CounterGetDelegate counterGetDelegate, CounterBumpDelegate counterBumpDelegate, CounterResetDelegate counterResetDelegate, CounterAddCounterAndReturnSelfDelegate counterAddCounterAndReturnSelfDelegate, CounterBumpMultipleDelegate counterBumpMultipleDelegate, CounterBumpMultipleCopyDelegate counterBumpMultipleCopyDelegate, CounterBumpByStrlensOfDelegate counterBumpByStrlensOfDelegate, CounterBumpByStrlensOfCopyDelegate counterBumpByStrlensOfCopyDelegate);
+  public delegate void CounterHolgenInitializeDelegate(CounterGetValDelegate counterGetValDelegate, CounterSetValDelegate counterSetValDelegate, CounterGetDelegate counterGetDelegate, CounterBumpDelegate counterBumpDelegate, CounterResetDelegate counterResetDelegate, CounterAddCounterAndReturnSelfDelegate counterAddCounterAndReturnSelfDelegate, CounterBumpMultipleDelegate counterBumpMultipleDelegate, CounterBumpMultipleCopyDelegate counterBumpMultipleCopyDelegate, CounterBumpByStrlensOfDelegate counterBumpByStrlensOfDelegate, CounterBumpByStrlensOfCopyDelegate counterBumpByStrlensOfCopyDelegate);
   
+  private static IntPtr _getValImpl = IntPtr.Zero;
+  private static IntPtr _setValImpl = IntPtr.Zero;
   private static IntPtr _getImpl = IntPtr.Zero;
   private static IntPtr _bumpImpl = IntPtr.Zero;
   private static IntPtr _resetImpl = IntPtr.Zero;
@@ -75,5 +86,14 @@ public class Counter
   private static IntPtr _bumpMultipleCopyImpl = IntPtr.Zero;
   private static IntPtr _bumpByStrlensOfImpl = IntPtr.Zero;
   private static IntPtr _bumpByStrlensOfCopyImpl = IntPtr.Zero;
+  
+  private uint GetVal()
+  {
+    return Marshal.GetDelegateForFunctionPointer<CounterGetValDelegate>(_getValImpl)(this.HolgenPtr);
+  }
+  private void SetVal(uint val)
+  {
+    Marshal.GetDelegateForFunctionPointer<CounterSetValDelegate>(_setValImpl)(this.HolgenPtr, val);
+  }
   
 }

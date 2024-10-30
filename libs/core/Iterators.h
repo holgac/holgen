@@ -49,6 +49,14 @@ struct NameFilterForEachWrapper {
     return NameFilterIterator("", mContainer.end(), mContainer.end());
   }
 
+  auto ToVector() {
+    std::vector<T*> vec;
+    for(auto& item: *this) {
+      vec.push_back(&item);
+    }
+    return vec;
+  }
+
   std::string mName;
   const T &mContainer;
 };

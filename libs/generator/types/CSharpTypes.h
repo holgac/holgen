@@ -76,6 +76,7 @@ struct CSharpClassField {
   Staticness mStaticness = Staticness::NotStatic;
   CSharpVisibility mVisibility = CSharpVisibility::Private;
   std::optional<std::string> mDefaultValue = std::nullopt;
+  std::optional<std::string> mDirectTo = std::nullopt;
   std::list<std::string> mComments;
   std::optional<CSharpMethodBase> mGetter;
   std::optional<CSharpMethodBase> mSetter;
@@ -98,6 +99,7 @@ struct CSharpClass {
   std::list<CSharpClassField> mFields;
   std::list<CSharpClass> mInnerClasses;
   std::list<std::string> mAttributes;
+  [[nodiscard]] CSharpMethod *GetFirstMethod(const std::string &name);
   bool mIsAbstract = false;
 };
 

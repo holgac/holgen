@@ -14,6 +14,9 @@ public class ModuleVersion
   {
   }
   
+  public ushort Major => Data.Major;
+  public ushort Minor => Data.Minor;
+  public uint Revision => Data.Revision;
   public Fields Data;
   
   [StructLayout(LayoutKind.Sequential)]

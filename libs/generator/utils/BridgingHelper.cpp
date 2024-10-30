@@ -33,7 +33,7 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
     }
     return res;
   }
-  THROW("Don't know how to represent {} objects in c wrappers!", type.ToString(false, true));
+  THROW("Don't know how to represent {} ({}) objects in c wrappers!", type.ToString(false, true), definitionSource);
 }
 
 MethodArgument& BridgingHelper::AddArgument(const TranslatedProject &project, MethodBase &method,

@@ -28,9 +28,21 @@ public abstract class ICounterBumper
   {
     ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).Bump();
   }
+  public abstract void SetNameFromCounter(Counter ctr);
+  public static void SetNameFromCounterCaller(IntPtr holgenObject, IntPtr ctr)
+  {
+    ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SetNameFromCounter(new Counter(ctr));
+  }
+  public abstract void SetNameFromRevision(ModuleVersion version);
+  public static void SetNameFromRevisionCaller(IntPtr holgenObject, ref ModuleVersion.Fields version)
+  {
+    ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SetNameFromRevision(new ModuleVersion{Data = version});
+  }
   
   public delegate void ICounterBumperSetNameDelegate(IntPtr holgenObject, string name);
   public delegate void ICounterBumperBumpDelegate(IntPtr holgenObject);
+  public delegate void ICounterBumperSetNameFromCounterDelegate(IntPtr holgenObject, IntPtr ctr);
+  public delegate void ICounterBumperSetNameFromRevisionDelegate(IntPtr holgenObject, ref ModuleVersion.Fields version);
   
   private GCHandle _holgenPtr;
   
