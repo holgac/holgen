@@ -25,6 +25,7 @@ public interface IDotNetModule
   public static abstract uint MirroredStructReturnArray();
   public static abstract int PrimitiveReturnVector();
   public static abstract uint PrimitiveReturnArray();
+  public static abstract void TrackedCSharpObject(uint addCount);
   
   public delegate void DotNetModuleInitializeDelegate();
   public delegate uint DotNetModuleBumpAndGetSingletonCounterDelegate();
@@ -45,5 +46,6 @@ public interface IDotNetModule
   public delegate uint DotNetModuleMirroredStructReturnArrayDelegate();
   public delegate int DotNetModulePrimitiveReturnVectorDelegate();
   public delegate uint DotNetModulePrimitiveReturnArrayDelegate();
+  public delegate void DotNetModuleTrackedCSharpObjectDelegate(uint addCount);
   
 }

@@ -160,4 +160,12 @@ public sealed class DotNetModule : IDotNetModule
 
         return res;
     }
+
+    public static void TrackedCSharpObject(uint addCount)
+    {
+        for (uint i = 0; i < addCount; i++)
+        {
+            CounterManager.InsertCounterBumper(new CounterBumperImpl());
+        }
+    }
 }

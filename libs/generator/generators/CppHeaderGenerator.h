@@ -10,6 +10,7 @@ public:
 private:
   void Generate(GeneratedContent &out, const Class &cls) const;
   void GenerateClassDefinition(const Class &cls, CodeBlock &codeBlock) const;
+  void GenerateClassFriends(const Class &cls, CodeBlock &codeBlock) const;
   std::string GenerateClassDeclaration(const Class &cls) const;
   void GenerateForVisibility(CodeBlock &codeBlock, const Class &cls, Visibility visibility) const;
   void GenerateUsingsForHeader(CodeBlock &codeBlock, const Class &cls) const;

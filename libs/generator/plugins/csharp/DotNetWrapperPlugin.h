@@ -1,12 +1,12 @@
 #pragma once
 
 #include "../TranslatorPlugin.h"
-#include "DotNetPluginBase.h"
+#include "generator/utils/CSharpHelper.h"
 
 namespace holgen {
-class DotNetWrapperPlugin : public DotNetPluginBase {
+class DotNetWrapperPlugin : public TranslatorPlugin {
 public:
-  using DotNetPluginBase::DotNetPluginBase;
+  using TranslatorPlugin::TranslatorPlugin;
   void Run() override;
 
 private:

@@ -127,4 +127,9 @@ public sealed class DotNetModule : IDotNetModule
     {
         throw new NotImplementedException();
     }
+
+    public static void TrackedCSharpObject(uint addCount)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -73,5 +73,12 @@ public:
   static constexpr const char* CSharpAuxiliarySizeSuffix = "HolgenSize";
   static constexpr const char* CSharpAuxiliaryReturnValueArgName = "holgenReturnValue";
   static constexpr const char* DeferredDeleterArgumentName = "holgenDeferredDeleter";
+  static constexpr const char* CSharpInterfaceName = "HolgenDotNetInterface";
+  static constexpr const char* CSharpInterfaceInstanceName = "holgenDotNetInstance";
+  static constexpr const char* CSharpInterfaceFree = "HolgenFree";
+  static constexpr const char* CSharpInterfaceFreePtr = "HolgenFreePtr";
+  static constexpr const char* CSharpInterfaceFunctionSuffix = "HolgenPtr";
+  static constexpr const char* CSharpInterfaceFunctionCallerSuffix = "Caller";
+  static constexpr const char* CSharpHolgenObjectArg = "holgenObject";
 };
 } // namespace holgen

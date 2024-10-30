@@ -39,4 +39,5 @@ struct DotNetModule {
     func MirroredStructReturnArray() -> u32;
     func PrimitiveReturnVector() -> s32;
     func PrimitiveReturnArray() -> u32;
+    func TrackedCSharpObject(u32 addCount);
 }

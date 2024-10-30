@@ -14,17 +14,24 @@ public class CounterManager
   {
     return new Counter(Marshal.GetDelegateForFunctionPointer<CounterManagerGetCounterPtrDelegate>(_getCounterPtrImpl)(name));
   }
-  public static void HolgenInitialize(CounterManagerGetCounterDelegate counterManagerGetCounterDelegate, CounterManagerGetCounterPtrDelegate counterManagerGetCounterPtrDelegate)
+  public static void InsertCounterBumper(ICounterBumper bumper)
+  {
+    Marshal.GetDelegateForFunctionPointer<CounterManagerInsertCounterBumperDelegate>(_insertCounterBumperImpl)(bumper.HolgenPtr);
+  }
+  public static void HolgenInitialize(CounterManagerGetCounterDelegate counterManagerGetCounterDelegate, CounterManagerGetCounterPtrDelegate counterManagerGetCounterPtrDelegate, CounterManagerInsertCounterBumperDelegate counterManagerInsertCounterBumperDelegate)
   {
     _getCounterImpl = Marshal.GetFunctionPointerForDelegate(counterManagerGetCounterDelegate);
     _getCounterPtrImpl = Marshal.GetFunctionPointerForDelegate(counterManagerGetCounterPtrDelegate);
+    _insertCounterBumperImpl = Marshal.GetFunctionPointerForDelegate(counterManagerInsertCounterBumperDelegate);
   }
   
   public delegate IntPtr CounterManagerGetCounterDelegate(string name);
   public delegate IntPtr CounterManagerGetCounterPtrDelegate(string name);
-  public delegate void CounterManagerHolgenInitializeDelegate(CounterManagerGetCounterDelegate counterManagerGetCounterDelegate, CounterManagerGetCounterPtrDelegate counterManagerGetCounterPtrDelegate);
+  public delegate void CounterManagerInsertCounterBumperDelegate(IntPtr bumper);
+  public delegate void CounterManagerHolgenInitializeDelegate(CounterManagerGetCounterDelegate counterManagerGetCounterDelegate, CounterManagerGetCounterPtrDelegate counterManagerGetCounterPtrDelegate, CounterManagerInsertCounterBumperDelegate counterManagerInsertCounterBumperDelegate);
   
   private static IntPtr _getCounterImpl = IntPtr.Zero;
   private static IntPtr _getCounterPtrImpl = IntPtr.Zero;
+  private static IntPtr _insertCounterBumperImpl = IntPtr.Zero;
   
 }

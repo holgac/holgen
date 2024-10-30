@@ -111,11 +111,11 @@ public:
   Person(const Person &rhs) = default;
   Person(Person &&rhs) noexcept = default;
   ~Person() = default;
-  bool operator==(const Person &rhs) const;
   uint32_t GetAge() const;
   float GetGender() const;
   void SetAge(uint32_t val);
   void SetGender(float val);
+  bool operator==(const Person &rhs) const;
   Person &operator=(const Person &rhs) = default;
   Person &operator=(Person &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Person";
@@ -138,13 +138,6 @@ private:
 #include <cmath>
 
 namespace generator_test_namespace {
-bool Person::operator==(const Person &rhs) const {
-  return !(
-      mAge != rhs.mAge ||
-      std::fabs(mGender - rhs.mGender) >= 0.1
-  );
-}
-
 uint32_t Person::GetAge() const {
   return mAge;
 }
@@ -159,6 +152,13 @@ void Person::SetAge(uint32_t val) {
 
 void Person::SetGender(float val) {
   mGender = val;
+}
+
+bool Person::operator==(const Person &rhs) const {
+  return !(
+      mAge != rhs.mAge ||
+      std::fabs(mGender - rhs.mGender) >= 0.1
+  );
 }
 }
           )R");
@@ -212,7 +212,6 @@ public:
   Market(const Market &rhs) = default;
   Market(Market &&rhs) noexcept = default;
   ~Market() = default;
-  bool operator==(const Market &rhs) const;
   const std::vector<std::string> &GetInstruments() const;
   std::vector<std::string> &GetInstruments();
   const std::map<std::string, double> &GetPrices() const;
@@ -221,6 +220,7 @@ public:
   void SetPrices(const std::map<std::string, double> &val);
   // Callback when a new trade is executed
   void OnNewTrade(const std::string &instrument, const double price);
+  bool operator==(const Market &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Market &operator=(const Market &rhs) = default;
   Market &operator=(Market &&rhs) noexcept = default;
@@ -241,13 +241,6 @@ private:
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
-bool Market::operator==(const Market &rhs) const {
-  return !(
-      mInstruments != rhs.mInstruments ||
-      mPrices != rhs.mPrices
-  );
-}
-
 const std::vector<std::string> &Market::GetInstruments() const {
   return mInstruments;
 }
@@ -270,6 +263,13 @@ void Market::SetInstruments(const std::vector<std::string> &val) {
 
 void Market::SetPrices(const std::map<std::string, double> &val) {
   mPrices = val;
+}
+
+bool Market::operator==(const Market &rhs) const {
+  return !(
+      mInstruments != rhs.mInstruments ||
+      mPrices != rhs.mPrices
+  );
 }
 
 bool Market::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -360,12 +360,12 @@ public:
   Sound(const Sound &rhs) = default;
   Sound(Sound &&rhs) noexcept = default;
   ~Sound() = default;
-  bool operator==(const Sound &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
   uint32_t GetVolume() const;
   void SetName(const std::string &val);
   void SetVolume(uint32_t val);
+  bool operator==(const Sound &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Sound &operator=(const Sound &rhs) = default;
   Sound &operator=(Sound &&rhs) noexcept = default;
@@ -387,13 +387,6 @@ private:
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
-bool Sound::operator==(const Sound &rhs) const {
-  return !(
-      mName != rhs.mName ||
-      mVolume != rhs.mVolume
-  );
-}
-
 const std::string &Sound::GetName() const {
   return mName;
 }
@@ -412,6 +405,13 @@ void Sound::SetName(const std::string &val) {
 
 void Sound::SetVolume(uint32_t val) {
   mVolume = val;
+}
+
+bool Sound::operator==(const Sound &rhs) const {
+  return !(
+      mName != rhs.mName ||
+      mVolume != rhs.mVolume
+  );
 }
 
 bool Sound::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -474,10 +474,10 @@ public:
   Animal(const Animal &rhs) = default;
   Animal(Animal &&rhs) noexcept = default;
   ~Animal() = default;
-  bool operator==(const Animal &rhs) const;
   const std::vector<Sound> &GetSounds() const;
   std::vector<Sound> &GetSounds();
   void SetSounds(const std::vector<Sound> &val);
+  bool operator==(const Animal &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Animal &operator=(const Animal &rhs) = default;
   Animal &operator=(Animal &&rhs) noexcept = default;
@@ -498,12 +498,6 @@ private:
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
-bool Animal::operator==(const Animal &rhs) const {
-  return !(
-      mSounds != rhs.mSounds
-  );
-}
-
 const std::vector<Sound> &Animal::GetSounds() const {
   return mSounds;
 }
@@ -514,6 +508,12 @@ std::vector<Sound> &Animal::GetSounds() {
 
 void Animal::SetSounds(const std::vector<Sound> &val) {
   mSounds = val;
+}
+
+bool Animal::operator==(const Animal &rhs) const {
+  return !(
+      mSounds != rhs.mSounds
+  );
 }
 
 bool Animal::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -602,7 +602,6 @@ public:
   Person(const Person &rhs) = default;
   Person(Person &&rhs) noexcept = default;
   ~Person() = default;
-  bool operator==(const Person &rhs) const;
   uint32_t GetCurrentCountry() const;
   uint32_t GetCurrentCity() const;
   uint32_t GetHomeCountry() const;
@@ -611,6 +610,7 @@ public:
   void SetCurrentCity(uint32_t val);
   void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
+  bool operator==(const Person &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Person &operator=(const Person &rhs) = default;
   Person &operator=(Person &&rhs) noexcept = default;
@@ -633,15 +633,6 @@ private:
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
-bool Person::operator==(const Person &rhs) const {
-  return !(
-      mCurrentCountry != rhs.mCurrentCountry ||
-      mCurrentCity != rhs.mCurrentCity ||
-      mHomeCountry != rhs.mHomeCountry ||
-      mPlaceOfBirth != rhs.mPlaceOfBirth
-  );
-}
-
 uint32_t Person::GetCurrentCountry() const {
   return mCurrentCountry;
 }
@@ -672,6 +663,15 @@ void Person::SetHomeCountry(uint32_t val) {
 
 void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;
+}
+
+bool Person::operator==(const Person &rhs) const {
+  return !(
+      mCurrentCountry != rhs.mCurrentCountry ||
+      mCurrentCity != rhs.mCurrentCity ||
+      mHomeCountry != rhs.mHomeCountry ||
+      mPlaceOfBirth != rhs.mPlaceOfBirth
+  );
 }
 
 bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -766,13 +766,13 @@ public:
   Country(const Country &rhs) = default;
   Country(Country &&rhs) noexcept = default;
   ~Country() = default;
-  bool operator==(const Country &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
   const Person &GetLeader() const;
   Person &GetLeader();
   void SetName(const std::string &val);
   void SetLeader(const Person &val);
+  bool operator==(const Country &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   Country &operator=(const Country &rhs) = default;
   Country &operator=(Country &&rhs) noexcept = default;
@@ -793,13 +793,6 @@ private:
 #include "JsonHelper.h"
 
 namespace generator_test_namespace {
-bool Country::operator==(const Country &rhs) const {
-  return !(
-      mName != rhs.mName ||
-      mLeader != rhs.mLeader
-  );
-}
-
 const std::string &Country::GetName() const {
   return mName;
 }
@@ -822,6 +815,13 @@ void Country::SetName(const std::string &val) {
 
 void Country::SetLeader(const Person &val) {
   mLeader = val;
+}
+
+bool Country::operator==(const Country &rhs) const {
+  return !(
+      mName != rhs.mName ||
+      mLeader != rhs.mLeader
+  );
 }
 
 bool Country::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -905,7 +905,6 @@ public:
   Person(const Person &rhs) = default;
   Person(Person &&rhs) noexcept = default;
   ~Person() = default;
-  bool operator==(const Person &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -916,6 +915,7 @@ public:
   void SetName(const std::string &val);
   void SetPartnerId(uint32_t val);
   static Person *Get(uint32_t id);
+  bool operator==(const Person &rhs) const;
   Person &operator=(const Person &rhs) = default;
   Person &operator=(Person &&rhs) noexcept = default;
   inline static const char *CLASS_NAME = "Person";
@@ -936,14 +936,6 @@ private:
 #include "GlobalPointer.h"
 
 namespace generator_test_namespace {
-bool Person::operator==(const Person &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName ||
-      mPartnerId != rhs.mPartnerId
-  );
-}
-
 uint32_t Person::GetId() const {
   return mId;
 }
@@ -982,6 +974,14 @@ void Person::SetPartnerId(uint32_t val) {
 
 Person *Person::Get(uint32_t id) {
   return GlobalPointer<Country>::GetInstance()->GetPerson(id);
+}
+
+bool Person::operator==(const Person &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mPartnerId != rhs.mPartnerId
+  );
 }
 }
           )R");

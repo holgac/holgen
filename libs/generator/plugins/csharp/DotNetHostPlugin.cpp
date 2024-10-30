@@ -214,6 +214,7 @@ void DotNetHostPlugin::CreateInitializeHolgenMethod(Class &cls) {
   cls.mSourceIncludes.AddStandardHeader("vector");
   auto method =
       ClassMethod{"InitializeHolgen", Type{"void"}, Visibility::Private, Constness::NotConst};
+  GenerateInitializeDotNetInterface(method.mBody);
   for (auto &csCls: mProject.mCSharpClasses) {
     if (!csCls.mClass || !ShouldInitializeClass(*csCls.mClass))
       continue;
@@ -288,11 +289,42 @@ void DotNetHostPlugin::CreateLoadModuleMethod(Class &cls, const Class &moduleCls
   cls.mMethods.push_back(std::move(method));
 }
 
+void DotNetHostPlugin::GenerateInitializeDotNetInterface(CodeBlock &codeBlock) {
+  codeBlock.Add("{{");
+  codeBlock.Indent(1);
+  codeBlock.Add("auto res = {}(", Naming().FieldNameInCpp("hostfxrDelegate_get_function_pointer"));
+  codeBlock.Indent(1);
+  codeBlock.Add(R"("{0}.{1}, {0}", "{2}",)", St::CSharpProjectName, St::CSharpInterfaceName,
+                St::CSharpInterfaceFree);
+  codeBlock.Add(
+      "\"{0}.{1}+{2}, {0}\",", St::CSharpProjectName, St::CSharpInterfaceName,
+      Naming().CSharpMethodDelegateName(St::CSharpInterfaceName, St::CSharpInterfaceFree));
+  codeBlock.Add("nullptr, nullptr, (void**)(&{}::{}));", St::CSharpInterfaceName,
+                St::CSharpInterfaceFreePtr);
+  codeBlock.Indent(-1);
+  codeBlock.Add("HOLGEN_FAIL_IF(res < 0 || !{0}::{1}, \"Could not get {1} of {0}, was the project "
+                "built after the cs files were generated?!\");",
+                St::CSharpInterfaceName, St::CSharpInterfaceFreePtr);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
+}
+
 void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
                                                const Class &projectCls) {
   cls.mSourceIncludes.AddLocalHeader(projectCls.mName + ".h");
   codeBlock.Add("{{");
   codeBlock.Indent(1);
+
+  if (projectCls.mStruct && projectCls.mStruct->GetAnnotation(Annotations::Interface))
+    GenerateInitializeInterface(codeBlock, projectCls);
+  else
+    GenerateInitializeNonInterface(codeBlock, projectCls);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
+}
+
+void DotNetHostPlugin::GenerateInitializeNonInterface(CodeBlock &codeBlock,
+                                                      const Class &projectCls) {
 
   std::stringstream initFuncDefinition;
   std::stringstream initFuncCallArgs;
@@ -336,8 +368,30 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
                 "built after the cs files were generated?!\");",
                 projectCls.mName);
   codeBlock.Add("initFunc({});", initFuncCallArgs.str());
-  codeBlock.Indent(-1);
-  codeBlock.Add("}}");
+}
+
+void DotNetHostPlugin::GenerateInitializeInterface(CodeBlock &codeBlock, const Class &projectCls) {
+  std::string resPrefix = "auto ";
+  for (auto &method: projectCls.mMethods) {
+    if (!method.mExposeToScript)
+      continue;
+
+    codeBlock.Add("{}res = {}(", resPrefix,
+                  Naming().FieldNameInCpp("hostfxrDelegate_get_function_pointer"));
+    resPrefix.clear();
+    codeBlock.Indent(1);
+    codeBlock.Add(R"("{0}.{1}, {0}", "{2}{3}",)", St::CSharpProjectName, projectCls.mName,
+                  method.mName, St::CSharpInterfaceFunctionCallerSuffix);
+    codeBlock.Add("\"{0}.{1}+{2}, {0}\",", St::CSharpProjectName, projectCls.mName,
+                  Naming().CSharpMethodDelegateName(projectCls.mName, method.mName));
+    codeBlock.Add("nullptr, nullptr, (void**)(&{}::{}));", projectCls.mName,
+                  method.mName + St::CSharpInterfaceFunctionSuffix);
+    codeBlock.Indent(-1);
+    codeBlock.Add(
+        "HOLGEN_FAIL_IF(res < 0 || !{0}::{1}, \"Could not get {1} of {0}, was the project "
+        "built after the cs files were generated?!\");",
+        projectCls.mName, method.mName + St::CSharpInterfaceFunctionSuffix);
+  }
 }
 
 bool DotNetHostPlugin::ShouldInitializeClass(const Class &cls) {

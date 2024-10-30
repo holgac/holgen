@@ -38,9 +38,10 @@ set(gen_csharp_plugins
     plugins/csharp/DotNetModulePlugin.cpp
     plugins/csharp/DotNetModuleFunctionsPlugin.cpp
     plugins/csharp/DotNetHostPlugin.cpp
-    plugins/csharp/DotNetPluginBase.cpp
     plugins/csharp/DotNetModuleInterfacePlugin.cpp
     plugins/csharp/DotNetWrapperPlugin.cpp
+    plugins/csharp/DotNetInterfacePlugin.cpp
+    plugins/csharp/DotNetInterfaceClassPlugin.cpp
 )
 
 set(gen_plugins

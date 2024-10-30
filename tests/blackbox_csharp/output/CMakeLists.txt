@@ -3,10 +3,12 @@ set(gen_sources
     gen/Counter.cpp
     gen/CounterManager.cpp
     gen/DotNetModule.cpp
+    gen/ICounterBumper.cpp
     gen/ModuleVersion.cpp
     gen/SingletonCounter.cpp
     gen/Vector.cpp
     gen/DeferredDeleter.cpp
+    gen/HolgenDotNetInterface.cpp
     gen/DotNetHost.cpp
     gen/GlobalPointer.cpp
     gen/FilesystemHelper.cpp

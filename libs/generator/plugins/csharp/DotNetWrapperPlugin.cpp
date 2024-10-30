@@ -38,12 +38,13 @@ void DotNetWrapperPlugin::ProcessConstructors(const Class &cls, CSharpClass &csC
     if (!method.mFunction ||
         !method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_Constructor))
       continue;
-    auto csDelegate =
-        CreateMethod(cls, method, InteropType::NativeToManaged, !method.IsStatic(cls), false);
+    auto csDelegate = CSharpHelper::Get().CreateMethod(
+        mProject, cls, method, InteropType::NativeToManaged, !method.IsStatic(cls), false);
     csDelegate.mName = Naming().CSharpMethodDelegateName(csCls.mName, method.mName),
     csCls.mDelegates.push_back(csDelegate);
 
-    auto csCtor = CreateConstructor(cls, method, InteropType::ManagedToNative);
+    auto csCtor =
+        CSharpHelper::Get().CreateConstructor(mProject, cls, method, InteropType::ManagedToNative);
     GenerateConstructorWrapperCall(csCtor.mBody, cls, csCls, method, csCtor);
     csCls.mConstructors.push_back(std::move(csCtor));
     added = true;
@@ -61,12 +62,13 @@ void DotNetWrapperPlugin::ProcessMethods(const Class &cls, CSharpClass &csCls) c
     if (method.mFunction &&
         method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_Constructor))
       continue;
-    auto csDelegate =
-        CreateMethod(cls, method, InteropType::NativeToManaged, !method.IsStatic(cls), false);
+    auto csDelegate = CSharpHelper::Get().CreateMethod(
+        mProject, cls, method, InteropType::NativeToManaged, !method.IsStatic(cls), false);
     csDelegate.mName = Naming().CSharpMethodDelegateName(csCls.mName, method.mName),
     csCls.mDelegates.push_back(std::move(csDelegate));
 
-    auto csMethod = CreateMethod(cls, method, InteropType::Internal, false, true);
+    auto csMethod =
+        CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal, false, true);
     csMethod.mStaticness = method.IsStatic(cls) ? Staticness::Static : Staticness::NotStatic;
     GenerateWrapperCall(csMethod.mBody, csCls, method, csMethod, !method.IsStatic(cls));
     csCls.mMethods.push_back(std::move(csMethod));
@@ -180,6 +182,8 @@ bool DotNetWrapperPlugin::ShouldProcess(const ClassField &field) const {
 }
 
 bool DotNetWrapperPlugin::IsStaticClass(const Class &cls) const {
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Interface))
+    return false;
   for (auto &method: cls.mMethods) {
     if (ShouldProcess(method) && method.mStaticness != Staticness::Static)
       return false;

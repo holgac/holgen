@@ -1,12 +1,11 @@
 #pragma once
 
 #include "../TranslatorPlugin.h"
-#include "DotNetPluginBase.h"
 
 namespace holgen {
-class DotNetModuleInterfacePlugin : public DotNetPluginBase {
+class DotNetModuleInterfacePlugin : public TranslatorPlugin {
 public:
-  using DotNetPluginBase::DotNetPluginBase;
+  using TranslatorPlugin::TranslatorPlugin;
   void Run() override;
 
 private:

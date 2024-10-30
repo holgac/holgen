@@ -177,6 +177,10 @@ std::string NamingConvention::FieldNameInCSharp(const std::string &fieldName) co
   return St::Capitalize(fieldName);
 }
 
+std::string NamingConvention::PrivateFieldNameInCSharp(const std::string &fieldName) const {
+  return std::format("_{}", St::Uncapitalize(fieldName));
+}
+
 std::string NamingConvention::ModuleInterfaceNameInCSharp(const std::string &moduleName) const {
   return std::format("I{}", moduleName);
 }

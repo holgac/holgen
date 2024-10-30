@@ -22,7 +22,10 @@ private:
   void PopulateForModule(Class &cls, const Class &moduleCls);
   void CreateInitializeHolgenMethod(Class &cls);
   void CreateLoadModuleMethod(Class &cls, const Class &moduleCls);
+  void GenerateInitializeDotNetInterface(CodeBlock &codeBlock);
   void GenerateInitializeClass(Class &cls, CodeBlock &codeBlock, const Class &projectCls);
+  void GenerateInitializeNonInterface(CodeBlock &codeBlock, const Class &projectCls);
+  void GenerateInitializeInterface(CodeBlock &codeBlock, const Class &projectCls);
   [[nodiscard]] bool ShouldInitializeClass(const Class &cls);
   [[nodiscard]] bool ShouldInitializeCFunction(const CFunction &function);
   [[nodiscard]] std::string LibraryHandleField() const;
@@ -32,7 +35,7 @@ private:
   static constexpr const std::array HostfxrMethods{"initialize_for_runtime_config",
                                                    "get_runtime_delegate", "close"};
 
-  static constexpr std::array<const char *, 2> HostfxrDelegates{
-      "load_assembly", "get_function_pointer"};
+  static constexpr std::array<const char *, 2> HostfxrDelegates{"load_assembly",
+                                                                "get_function_pointer"};
 };
 } // namespace holgen

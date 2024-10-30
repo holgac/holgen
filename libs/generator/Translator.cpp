@@ -35,6 +35,8 @@
 #include "generator/plugins/csharp/DotNetModuleInterfacePlugin.h"
 #include "generator/plugins/csharp/DotNetWrapperPlugin.h"
 #include "generator/plugins/csharp/DotNetClassPlugin.h"
+#include "generator/plugins/csharp/DotNetInterfacePlugin.h"
+#include "generator/plugins/csharp/DotNetInterfaceClassPlugin.h"
 
 namespace holgen {
 
@@ -47,7 +49,6 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<CppDestructorPlugin>();
   AddPlugin<LuaFieldsPlugin>();
   AddPlugin<ClassFieldVariantPlugin>();
-  AddPlugin<ClassEqualsOperatorPlugin>();
   AddPlugin<ClassFieldGetterPlugin>();
   AddPlugin<ClassFieldSetterPlugin>();
   AddPlugin<LuaFunctionPlugin>();
@@ -63,8 +64,12 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<DotNetModuleFunctionsPlugin>();
   AddPlugin<DotNetClassPlugin>();
   AddPlugin<DotNetWrapperPlugin>();
+  AddPlugin<DotNetInterfacePlugin>();
+  AddPlugin<DotNetInterfaceClassPlugin>();
+  // Any csharp class that needs initialization needs to be added before DotNetHostPlugin runs
   AddPlugin<DotNetHostPlugin>();
   AddPlugin<DotNetModuleInterfacePlugin>();
+  AddPlugin<ClassEqualsOperatorPlugin>();
   AddPlugin<JsonConverterPlugin>();
   AddPlugin<JsonPlugin>();
   AddPlugin<JsonParseFilesPlugin>();

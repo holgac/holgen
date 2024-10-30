@@ -16,7 +16,7 @@ bool CSharpHelper::NeedsSizeArgument(const Type &type) {
 }
 
 CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &project,
-                                     InteropType interopType, bool returnType) {
+                                     InteropType interopType, bool returnType) const {
   (void)interopType;
   CSharpType out;
   auto cls = project.GetClass(type.mName);
@@ -30,7 +30,8 @@ CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &
     out.mName = it->second;
   } else if (cls) {
     auto csCls = project.GetCSharpClass(type.mName);
-    if (interopType == InteropType::NativeToManaged || (csCls && csCls->mStaticness == Staticness::Static)) {
+    if (interopType == InteropType::NativeToManaged ||
+        (csCls && csCls->mStaticness == Staticness::Static)) {
       if (cls->IsProxyable()) {
         out.mName = "IntPtr";
       } else {
@@ -55,7 +56,7 @@ CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &
 
 void CSharpHelper::AddAttributes(std::list<std::string> &attributes, const Type &type,
                                  const CSharpType &csType, InteropType interopType,
-                                 bool isReturnType, size_t sizeArgIndex) {
+                                 bool isReturnType, size_t sizeArgIndex) const {
   (void)interopType;
   std::string prefix = isReturnType ? "return: " : "";
   if (type.mName == "char" && type.mType == PassByType::Pointer) {
@@ -76,9 +77,9 @@ void CSharpHelper::AddAttributes(std::list<std::string> &attributes, const Type 
   }
 }
 
-void CSharpHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &arguments, const Type &type,
-                                     const std::string &argPrefix, InteropType interopType,
-                                     bool isReturnValue) {
+void CSharpHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &arguments,
+                                         const Type &type, const std::string &argPrefix,
+                                         InteropType interopType, bool isReturnValue) const {
   (void)interopType;
   if (type.mName == "std::vector" || type.mName == "std::span") {
     auto &arg = arguments.emplace_back(
@@ -200,6 +201,38 @@ std::string CSharpHelper::VariableRepresentation(const CSharpType &type,
   THROW("Unexpected interop type: {}", uint32_t(interopType));
 }
 
+CSharpMethod CSharpHelper::CreateMethod(const TranslatedProject &project, const Class &cls,
+                                        const ClassMethod &method, InteropType interopType,
+                                        bool addThisArgument, bool ignoreAuxiliaries) const {
+
+  auto csMethod =
+      CSharpMethod{method.mName, ConvertType(method.mReturnType, project, interopType, true)};
+  if (addThisArgument) {
+    auto &arg = csMethod.mArguments.emplace_back(
+        St::CSharpHolgenObjectArg, ConvertType(Type{cls.mName}, project, interopType, true));
+    if (!cls.IsProxyable())
+      arg.mType.mType = CSharpPassByType::Ref;
+  }
+  PopulateArguments(project, csMethod.mArguments, method.mArguments, interopType,
+                    ignoreAuxiliaries);
+  // AddAttributes(csMethod.mAttributes, method.mReturnType,
+  // csMethod.mReturnType, interopType, true, csMethod.mArguments.size());
+  if (!ignoreAuxiliaries) {
+    AddAuxiliaryArguments(csMethod.mArguments, method.mReturnType,
+                          St::CSharpAuxiliaryReturnValueArgName, interopType, true);
+  }
+  return csMethod;
+}
+
+CSharpConstructor CSharpHelper::CreateConstructor(const TranslatedProject &project,
+                                                  const Class &cls, const ClassMethod &method,
+                                                  InteropType interopType) const {
+  (void)cls;
+  auto csCtor = CSharpConstructor{};
+  PopulateArguments(project, csCtor.mArguments, method.mArguments, interopType, true);
+  return csCtor;
+}
+
 std::string CSharpHelper::VariableRepresentationInNative(const CSharpType &type,
                                                          const std::string &variableName,
                                                          const TranslatedProject &project) {
@@ -242,6 +275,24 @@ std::string CSharpHelper::ArrayMarshallingInfo(const Type &other, const Translat
         sizeArgumentIdx);
   }
   return std::format("[MarshalAs(UnmanagedType.LPArray, SizeParamIndex={})] ", sizeArgumentIdx);
+}
+
+void CSharpHelper::PopulateArguments(const TranslatedProject &project,
+                                     std::list<CSharpMethodArgument> &out,
+                                     const std::list<MethodArgument> &arguments,
+                                     InteropType interopType, bool ignoreAuxiliaries) const {
+  for (auto &arg: arguments) {
+    auto csType = ConvertType(arg.mType, project, interopType, false);
+    auto &csArg = out.emplace_back(arg.mName, csType, arg.mDefaultValue);
+    AddAttributes(csArg.mAttributes, arg.mType, csType, interopType, false, out.size());
+    auto argClass = project.GetClass(arg.mType.mName);
+    if (argClass && !argClass->IsProxyable() && interopType != InteropType::Internal) {
+      csArg.mType.mType = CSharpPassByType::Ref;
+    }
+    if (!ignoreAuxiliaries) {
+      AddAuxiliaryArguments(out, arg.mType, csArg.mName, interopType, false);
+    }
+  }
 }
 
 CSharpHelper &CSharpHelper::Get() {

@@ -33,6 +33,8 @@ private:
                      const CSharpClassField &field) const;
   void GenerateInnerClasses(CodeBlock &codeBlock, const CSharpClass &csCls,
                             CSharpVisibility visibility) const;
+  void GenerateFieldAccessor(CodeBlock &codeBlock, const CSharpMethodBase &method,
+                        const CSharpClassField &field, const std::string &name) const;
 
   [[nodiscard]] std::string GenerateArgumentsInSignature(const CSharpMethodBase &method) const;
   [[nodiscard]] std::string GenerateAttributes(const std::list<std::string> &attributes) const;

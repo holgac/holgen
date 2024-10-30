@@ -57,6 +57,7 @@ void CppHeaderGenerator::GenerateClassDefinition(const Class &cls, CodeBlock &co
   if (!cls.mTemplateParameters.empty() || !cls.mTemplateSpecializations.empty())
     codeBlock.AddLine(StringifyTemplateParameters(cls.mTemplateParameters));
   codeBlock.Add("{} {{", GenerateClassDeclaration(cls));
+  GenerateClassFriends(cls, codeBlock);
   GenerateForVisibility(codeBlock, cls, Visibility::Public);
   GenerateForVisibility(codeBlock, cls, Visibility::Protected);
   GenerateForVisibility(codeBlock, cls, Visibility::Private);
@@ -66,6 +67,19 @@ void CppHeaderGenerator::GenerateClassDefinition(const Class &cls, CodeBlock &co
   GenerateMethodsForHeader(codeBlock, cls, Visibility::Private, false);
   if (!cls.mNamespace.empty())
     codeBlock.Add("}}");
+}
+
+void CppHeaderGenerator::GenerateClassFriends(const Class &cls, CodeBlock &codeBlock) const {
+  for (auto &friendClassType: cls.mFriendClasses) {
+    auto friendClass = mTranslatedProject.GetClass(friendClassType.mName);
+    if (friendClass) {
+      codeBlock.Add("friend {};", GenerateClassDeclaration(*friendClass));
+    } else {
+      codeBlock.Add("friend class {};", friendClassType.mName);
+    }
+  }
+  if (!cls.mFriendClasses.empty())
+    codeBlock.Add(""); // class
 }
 
 std::string CppHeaderGenerator::GenerateClassDeclaration(const Class &cls) const {
@@ -203,14 +217,17 @@ void CppHeaderGenerator::GenerateMethodsForHeader(CodeBlock &codeBlock, const Cl
       codeBlock.Line() << "template <>";
 
     auto signature = GenerateFunctionSignature(cls, method, true, isInsideClass);
-    if (method.mVirtuality == Virtuality::PureVirtual) {
+    if (method.mFunctionPointer) {
+      if (!method.IsStatic(cls)) {
+        codeBlock.Line() << signature << " = nullptr;";
+      } else {
+        codeBlock.Line() << "inline " << signature << " = nullptr;";
+      }
+    } else if (method.mVirtuality == Virtuality::PureVirtual) {
       codeBlock.Line() << signature << " = 0;";
-      continue;
     } else if (!CanBeDefinedInHeader(cls, method) || method.mUserDefined) {
       codeBlock.Line() << signature << ";";
-      continue;
-    }
-    if (method.mDefaultDelete == DefaultDelete::Default) {
+    } else if (method.mDefaultDelete == DefaultDelete::Default) {
       codeBlock.Line() << signature << " = default;";
     } else if (method.mDefaultDelete == DefaultDelete::Delete) {
       codeBlock.Line() << signature << " = delete;";

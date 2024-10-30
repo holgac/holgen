@@ -98,6 +98,7 @@ struct CSharpClass {
   std::list<CSharpClassField> mFields;
   std::list<CSharpClass> mInnerClasses;
   std::list<std::string> mAttributes;
+  bool mIsAbstract = false;
 };
 
 } // namespace holgen

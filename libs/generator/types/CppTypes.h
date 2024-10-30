@@ -185,6 +185,7 @@ struct Class {
   ClassType mClassType = ClassType::Class;
   std::string mNamespace;
   std::list<BaseClass> mBaseClasses;
+  std::list<Type> mFriendClasses;
   std::list<std::string> mComments;
   [[nodiscard]] ClassField *GetField(const std::string &name);
   [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);

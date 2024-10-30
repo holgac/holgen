@@ -22,8 +22,9 @@ void CSharpSourceGenerator::Process(GeneratedContent &out, const CSharpClass &cs
 
 void CSharpSourceGenerator::GenerateClass(CodeBlock &codeBlock, const CSharpClass &csCls) const {
   GenerateAttributes(codeBlock, csCls.mAttributes);
-  codeBlock.Add("{} {}{} {}", csCls.mVisibility,
-                csCls.mStaticness == Staticness::Static ? "static " : "", csCls.mType, csCls.mName);
+  codeBlock.Add("{} {}{}{} {}", csCls.mVisibility,
+                csCls.mStaticness == Staticness::Static ? "static " : "",
+                csCls.mIsAbstract ? "abstract " : "", csCls.mType, csCls.mName);
   codeBlock.Add("{{");
   codeBlock.Indent(1);
   GenerateClassBody(codeBlock, csCls);
@@ -191,7 +192,17 @@ void CSharpSourceGenerator::GenerateField(CodeBlock &codeBlock, const CSharpClas
       codeBlock.Add("{}{}{}", initialPart, innerPart.str(), defaultValPart);
     }
   } else {
-    THROW("Complex field getters not yet supported!");
+    codeBlock.Add("{}", initialPart);
+    codeBlock.Add("{{");
+    codeBlock.Indent(1);
+    if (field.mGetter.has_value()) {
+      GenerateFieldAccessor(codeBlock, *field.mGetter, field, "get");
+    }
+    if (field.mSetter.has_value()) {
+      GenerateFieldAccessor(codeBlock, *field.mSetter, field, "set");
+    }
+    codeBlock.Indent(-1);
+    codeBlock.Add("}}");
   }
 }
 
@@ -203,6 +214,22 @@ void CSharpSourceGenerator::GenerateInnerClasses(CodeBlock &codeBlock, const CSh
     GenerateClass(codeBlock, innerClass);
     codeBlock.Add("");
   }
+}
+
+void CSharpSourceGenerator::GenerateFieldAccessor(CodeBlock &codeBlock,
+                                                  const CSharpMethodBase &method,
+                                                  const CSharpClassField &field,
+                                                  const std::string &name) const {
+  std::string visibility;
+  if (method.mVisibility != field.mVisibility) {
+    visibility = std::format("{} ", method.mVisibility);
+  }
+  codeBlock.Add("{}{}", visibility, name);
+  codeBlock.Add("{{");
+  codeBlock.Indent(1);
+  codeBlock.Add(method.mBody);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
 }
 
 std::string
