@@ -6,6 +6,7 @@ struct ICounterBumper {
     func SetNameFromRevision(ModuleVersion version);
     func GetVersion() -> ModuleVersion;
     func GetCounter() -> Counter ref;
+    func Clone() -> ICounterBumper;
 //    func SplitName() -> vector<string>;
 //    func SetNameConcatVector(vector<string> name);
 //    func SetNameConcatArray(string[3] name);
@@ -43,5 +44,5 @@ struct CounterManager {
 
     @no(script)
     vector<ICounterBumper> counterBumpers;
-    func InsertCounterBumper(ICounterBumper bumper ref nullable);
+    func InsertCounterBumper(ICounterBumper bumper);
 }

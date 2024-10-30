@@ -107,6 +107,11 @@ void DotNetInterfaceClassPlugin::GenerateFunctionPointerForCpp(
   method.mFunctionPointer = true;
   method.mVisibility = Visibility::Private;
   method.mStaticness = Staticness::Static;
+  if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
+    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      method.mReturnType = Type{"void", PassByType::Pointer};
+    }
+  }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

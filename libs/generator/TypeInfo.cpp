@@ -182,6 +182,10 @@ std::string ToStringGeneric(const Type &type, bool noTrailingSpace, bool ignoreC
 }
 } // namespace
 
+const Type &Type::FinalType() const {
+  return mFinalType ? *mFinalType.get() : *this;
+}
+
 std::string Type::ToString(bool noTrailingSpace, bool ignoreConstForPrimitives) const {
   return ToStringGeneric<false>(*this, noTrailingSpace, ignoreConstForPrimitives, nullptr);
 }

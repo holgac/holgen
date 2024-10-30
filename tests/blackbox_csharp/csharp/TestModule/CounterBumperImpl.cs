@@ -41,4 +41,12 @@ public class CounterBumperImpl : ICounterBumper
     {
         return CounterManager.GetCounter(Name);
     }
+
+    public override ICounterBumper Clone()
+    {
+        return new CounterBumperImpl
+        {
+            Name = Name
+        };
+    }
 }

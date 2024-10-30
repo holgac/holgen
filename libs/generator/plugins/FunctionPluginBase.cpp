@@ -21,6 +21,11 @@ void FunctionPluginBase::ProcessFunctionArgument(MethodBase &method,
                                                                       : PassByType::Reference;
     }
     arg.mDefaultValue = funcArg.mDefaultValue;
+
+    auto argClass = mProject.GetClass(arg.mType.mName);
+    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      arg.mType.mFinalType = std::make_shared<Type>("void", PassByType::Pointer);
+    }
   }
 }
 
@@ -98,9 +103,7 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
                                             const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   auto method = ClassMethod{
-      functionDefinition.mName,
-      Type::ReturnType(mProject, functionDefinition),
-      Visibility::Public,
+      functionDefinition.mName, Type::ReturnType(mProject, functionDefinition), Visibility::Public,
       (funcAnnotation && funcAnnotation->GetAttribute(Annotations::Func_Const))
           ? Constness::Const
           : Constness::NotConst};

@@ -339,7 +339,7 @@ void DotNetHostPlugin::GenerateInitializeNonInterface(CodeBlock &codeBlock,
       initFuncDefinition << ", ";
       initFuncCallArgs << ", ";
     }
-    initFuncDefinition << func.mReturnType.ToString(false, true) << "(*)(";
+    initFuncDefinition << func.mReturnType.FinalType().ToString(false, true) << "(*)(";
     initFuncCallArgs << func.mName;
 
     bool isFirstArg = true;
@@ -348,7 +348,7 @@ void DotNetHostPlugin::GenerateInitializeNonInterface(CodeBlock &codeBlock,
         isFirstArg = false;
       else
         initFuncDefinition << ", ";
-      initFuncDefinition << arg.mType.ToString(true, true);
+      initFuncDefinition << arg.mType.FinalType().ToString(true, true);
     }
     initFuncDefinition << ")";
   }
