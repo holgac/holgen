@@ -16,6 +16,7 @@ void DotNetInterfacePlugin::GenerateForCpp() {
   GenerateConstructor(cls);
   GenerateDestructor(cls);
   GenerateField(cls);
+  GenerateFieldGetter(cls);
   GenerateFreeMethod(cls);
   GenerateFreeMethodPtr(cls);
 }
@@ -72,6 +73,13 @@ void DotNetInterfacePlugin::GenerateField(Class &cls) {
   cls.mFields.emplace_back(Naming().FieldNameInCpp(St::CSharpInterfaceInstanceName),
                            Type{"void", PassByType::Pointer}, Visibility::Protected,
                            Staticness::NotStatic, "nullptr");
+}
+
+void DotNetInterfacePlugin::GenerateFieldGetter(Class &cls) {
+  auto &method = cls.mMethods.emplace_back(
+      Naming().FieldGetterNameInCpp(St::CSharpInterfaceInstanceName),
+      Type{"void", PassByType::Pointer, Constness::NotConst}, Visibility::Public, Constness::Const);
+  method.mBody.Add("return {};", Naming().FieldNameInCpp(St::CSharpInterfaceInstanceName));
 }
 
 void DotNetInterfacePlugin::GenerateFreeMethod(Class &cls) {

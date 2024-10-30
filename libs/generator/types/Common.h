@@ -4,13 +4,6 @@
 
 namespace holgen {
 
-enum class PassByType {
-  Value,
-  Reference,
-  Pointer,
-  MoveReference,
-};
-
 enum class Constexprness {
   Constexpr,
   NotConstexpr,

@@ -15,7 +15,7 @@ std::string Generator::GenerateFunctionSignature(const Class &cls, const ClassMe
   // TODO: this doesn't work if type is const
   if (!isInHeader && cls.GetUsing(method.mReturnType.mName))
     ss << cls.mName << "::";
-  ss << method.mReturnType.FinalType().ToString(false);
+  ss << method.mReturnType.ToString(false);
   if (!isInHeader || !isInsideClass)
     ss << cls.mName << "::";
   if (method.mFunctionPointer)
@@ -28,7 +28,7 @@ std::string Generator::GenerateFunctionSignature(const Class &cls, const ClassMe
   for (auto &arg: method.mArguments) {
     if (idx != 0)
       ss << ", ";
-    ss << arg.mType.FinalType().ToString(false) << arg.mName;
+    ss << arg.mType.ToString(false) << arg.mName;
     if (isInHeader && arg.mDefaultValue.has_value())
       ss << " = " << *arg.mDefaultValue;
     ++idx;
@@ -81,7 +81,7 @@ std::string Generator::GenerateFunctionSignature(const CFunction &func, bool isI
   for (auto &arg: func.mArguments) {
     if (idx != 0)
       ss << ", ";
-    ss << arg.mType.FinalType().ToFullyQualifiedString(mTranslatedProject) << arg.mName;
+    ss << arg.mType.ToFullyQualifiedString(mTranslatedProject) << arg.mName;
     ++idx;
   }
   ss << ")";

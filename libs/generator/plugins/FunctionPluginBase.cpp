@@ -16,16 +16,11 @@ void FunctionPluginBase::ProcessFunctionArgument(MethodBase &method,
     if (TypeInfo::Get().CppPrimitives.contains(arg.mType.mName)) {
       auto pbt = funcArg.mConstness == Constness::Const ? PassByType::Value : PassByType::Reference;
       arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer : pbt;
-    } else {
+    } else if (funcArg.mNewness != Newness::New) {
       arg.mType.mType = funcArg.mNullability == Nullability::Nullable ? PassByType::Pointer
                                                                       : PassByType::Reference;
     }
     arg.mDefaultValue = funcArg.mDefaultValue;
-
-    auto argClass = mProject.GetClass(arg.mType.mName);
-    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::Interface)) {
-      arg.mType.mFinalType = std::make_shared<Type>("void", PassByType::Pointer);
-    }
   }
 }
 

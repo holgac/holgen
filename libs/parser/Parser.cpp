@@ -393,6 +393,9 @@ void Parser::ParseFunctionArgument(Token &curToken, FunctionArgumentDefinition &
       arg.mNullability = Nullability::Nullable;
     } else if (modifier == "ref") {
       arg.mConstness = Constness::NotConst;
+    } else if (modifier == "new") {
+      arg.mNewness = Newness::New;
+      arg.mConstness = Constness::NotConst;
     } else {
       PARSER_THROW_IF(true, "Unknown function argument modifier {}", modifier);
     }

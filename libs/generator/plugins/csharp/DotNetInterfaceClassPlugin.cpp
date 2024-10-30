@@ -112,6 +112,12 @@ void DotNetInterfaceClassPlugin::GenerateFunctionPointerForCpp(
       method.mReturnType = Type{"void", PassByType::Pointer};
     }
   }
+  for (auto &arg: method.mArguments) {
+    auto argClass = mProject.GetClass(arg.mType.mName);
+    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      arg.mType = Type{"void", PassByType::Pointer};
+    }
+  }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -147,8 +153,7 @@ std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class 
   ss << method.mName + St::CSharpInterfaceFunctionSuffix << "(";
   bool isFirst = true;
   if (!method.IsStatic(cls)) {
-    ss << std::format("static_cast<{} *>({})", cls.mName,
-                      Naming().FieldNameInCpp(St::CSharpInterfaceInstanceName));
+    ss << Naming().FieldNameInCpp(St::CSharpInterfaceInstanceName);
     isFirst = false;
   }
   for (auto &arg: method.mArguments) {
@@ -157,10 +162,16 @@ std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class 
     } else {
       ss << ", ";
     }
-    auto argCls = mProject.GetClass(arg.mType.mName);
+    auto argClass = mProject.GetClass(arg.mType.mName);
     std::string toPointer = arg.mType.mType != PassByType::Pointer ? "&" : "";
-    if (argCls) {
-      ss << toPointer << arg.mName;
+    if (argClass) {
+      if (argClass && argClass->mStruct &&
+          argClass->mStruct->GetAnnotation(Annotations::Interface)) {
+        ss << arg.mName << "." << Naming().FieldGetterNameInCpp(St::CSharpInterfaceInstanceName)
+           << "()";
+      } else {
+        ss << toPointer << arg.mName;
+      }
     } else if (CSharpHelper::Get().CppTypesConvertibleToCSharpArray.contains(arg.mType.mName)) {
       ss << std::format("{0}.data(), {0}.size()", arg.mName);
     } else if (arg.mType.mName == "std::string") {
@@ -242,8 +253,9 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &c
 
   std::string callSuffix;
   if (!method.IsStatic(cls)) {
-    callSuffix = std::format("(({})GCHandle.FromIntPtr({}).Target!).", csCls.mName,
-                             St::CSharpHolgenObjectArg);
+    auto repr = CSharpHelper::Get().VariableRepresentation(
+        CSharpType{csCls.mName}, St::CSharpHolgenObjectArg, mProject, InteropType::NativeToManaged);
+    callSuffix = std::format("{}.", repr);
   }
 
   CSharpHelper::Get().GenerateWrapperCall(

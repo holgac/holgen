@@ -15,6 +15,7 @@ private:
   void GenerateConstructor(Class &cls);
   void GenerateDestructor(Class &cls);
   void GenerateField(Class &cls);
+  void GenerateFieldGetter(Class &cls);
   void GenerateFreeMethod(Class &cls);
   void GenerateFreeMethodPtr(Class &cls);
   void GenerateForCSharp();

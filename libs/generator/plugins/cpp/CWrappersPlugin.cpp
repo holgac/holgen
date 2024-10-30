@@ -81,11 +81,17 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
         args << std::format("{0}HolgenVector", arg.mName);
       continue;
     }
-    if (addedArg.mType.mType == PassByType::Pointer && arg.mType.FinalType().mType != PassByType::Pointer &&
-        addedArg.mType.mName != "char") {
-      args << "*";
+    auto argClass = mProject.GetClass(addedArg.mType.mName);
+    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      addedArg.mType = Type{"void", PassByType::Pointer};
+      args << std::format("{}::{}({})", argClass->mNamespace, argClass->mName, arg.mName);
+    } else {
+      if (addedArg.mType.mType == PassByType::Pointer && arg.mType.mType != PassByType::Pointer &&
+          addedArg.mType.mName != "char") {
+        args << "*";
+      }
+      args << arg.mName;
     }
-    args << arg.mName;
   }
 
   BridgingHelper::AddAuxiliaryArguments(mProject, func, method.mReturnType,

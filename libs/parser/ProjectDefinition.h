@@ -14,6 +14,13 @@ enum class Constness {
   NotConst,
 };
 
+enum class PassByType {
+  Value,
+  Reference,
+  Pointer,
+  MoveReference,
+};
+
 struct DefinitionSource {
   std::string mSource;
   size_t mLine = -1;
@@ -74,11 +81,17 @@ enum class Nullability {
   NotNullable,
 };
 
+enum class Newness {
+  New,
+  NotNew,
+};
+
 struct FunctionArgumentDefinition {
   TypeDefinition mType;
   std::string mName;
   Constness mConstness = Constness::Const;
   Nullability mNullability = Nullability::NotNullable;
+  Newness mNewness = Newness::NotNew;
   std::optional<std::string> mDefaultValue = std::nullopt;
   DefinitionSource mDefinitionSource;
 };

@@ -49,4 +49,11 @@ public class CounterBumperImpl : ICounterBumper
             Name = Name
         };
     }
+
+    public override void CopyFrom(ICounterBumper other)
+    {
+        var impl = (CounterBumperImpl)other;
+        Console.WriteLine($"Copy from {impl.Name}, was {Name} before");
+        Name = impl.Name;
+    }
 }

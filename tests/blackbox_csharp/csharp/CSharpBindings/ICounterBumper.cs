@@ -53,6 +53,11 @@ public abstract class ICounterBumper
   {
     return ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).Clone().HolgenPtr;
   }
+  public abstract void CopyFrom(ICounterBumper other);
+  public static void CopyFromCaller(IntPtr holgenObject, IntPtr other)
+  {
+    ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).CopyFrom(((ICounterBumper)GCHandle.FromIntPtr(other).Target!));
+  }
   
   public delegate void ICounterBumperSetNameDelegate(IntPtr holgenObject, string name);
   public delegate void ICounterBumperBumpDelegate(IntPtr holgenObject);
@@ -61,6 +66,7 @@ public abstract class ICounterBumper
   public delegate ModuleVersion.Fields ICounterBumperGetVersionDelegate(IntPtr holgenObject);
   public delegate IntPtr ICounterBumperGetCounterDelegate(IntPtr holgenObject);
   public delegate IntPtr ICounterBumperCloneDelegate(IntPtr holgenObject);
+  public delegate void ICounterBumperCopyFromDelegate(IntPtr holgenObject, IntPtr other);
   
   private GCHandle _holgenPtr;
   

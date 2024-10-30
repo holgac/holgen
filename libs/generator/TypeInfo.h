@@ -56,7 +56,6 @@ struct Type : TypeBase<Type> {
   std::vector<Type> mFunctionalTemplateParameters;
   // Use this to specify a different type when generating the files.
   std::shared_ptr<Type> mFinalType;
-  const Type &FinalType() const;
   [[nodiscard]] std::string ToString(bool noTrailingSpace,
                                      bool ignoreConstForPrimitives = false) const;
   [[nodiscard]] std::string ToFullyQualifiedString(const TranslatedProject &project) const;
