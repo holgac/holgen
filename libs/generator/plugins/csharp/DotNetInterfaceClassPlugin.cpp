@@ -77,23 +77,34 @@ void DotNetInterfaceClassPlugin::GenerateFunctionForCpp(
   auto method = GenerateFunction(cls, functionDefinition, false, false);
   method.mExposeToScript = true;
 
-  auto caller = GenerateFunctionPointerCall(cls, method);
+  CodeBlock preWork, postWork;
+  auto caller = GenerateFunctionPointerCall(cls, method, preWork, postWork);
+
+  method.mBody.Add(std::move(preWork));
 
   if (method.mReturnType.mName == "void") {
     method.mBody.Add("{};", caller);
-  } else if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
-    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
-      method.mBody.Add("return {}({});", retClass->mName, caller);
-    } else if (retClass->IsProxyable()) {
-      method.mBody.Add("return *{};", caller);
-    } else {
-      method.mBody.Add("return {};", caller);
-    }
+    method.mBody.Add(std::move(postWork));
   } else {
-    // TODO: handle vectors and such
-    method.mBody.Add("return {};", caller);
+    if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
+      if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+        caller = std::format("{}({})", retClass->mName, caller);
+      } else if (retClass->IsProxyable()) {
+        caller = std::format("*{}", caller);
+      } else {
+        caller = std::format("{}", caller);
+      }
+    } else {
+      // TODO: handle vectors and such
+    }
+    if (postWork.IsEmpty())
+      method.mBody.Add("return {};", caller);
+    else {
+      method.mBody.Add("auto holgenFinalRes = {};", caller);
+      method.mBody.Add(std::move(postWork));
+      method.mBody.Add("return holgenFinalRes;");
+    }
   }
-
 
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
@@ -135,7 +146,12 @@ ClassMethod
   }
   if (convertArguments) {
     for (auto &oldArg: oldArgs) {
-      BridgingHelper::AddArgument(mProject, method, oldArg, functionDefinition.mDefinitionSource);
+      auto &newArg = BridgingHelper::AddArgument(mProject, method, oldArg,
+                                                 functionDefinition.mDefinitionSource);
+      if (newArg.mType.mType == PassByType::Pointer &&
+          CSharpHelper::Get().CppTypesConvertibleToCSharpArray.contains(oldArg.mType.mName)) {
+        newArg.mType.mConstness = Constness::Const;
+      }
     }
     BridgingHelper::AddAuxiliaryArguments(mProject, method, method.mReturnType,
                                           St::CSharpAuxiliaryReturnValueArgName, true);
@@ -148,7 +164,10 @@ ClassMethod
 }
 
 std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class &cls,
-                                                                    const ClassMethod &method) {
+                                                                    const ClassMethod &method,
+                                                                    CodeBlock &preWork,
+                                                                    CodeBlock &postWork) {
+  (void)postWork;
   std::stringstream ss;
   ss << method.mName + St::CSharpInterfaceFunctionSuffix << "(";
   bool isFirst = true;
@@ -173,7 +192,42 @@ std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class 
         ss << toPointer << arg.mName;
       }
     } else if (CSharpHelper::Get().CppTypesConvertibleToCSharpArray.contains(arg.mType.mName)) {
-      ss << std::format("{0}.data(), {0}.size()", arg.mName);
+      auto finalArgName = arg.mName;
+      auto underlying = arg.mType.mTemplateParameters.front();
+      auto underlyingCls = mProject.GetClass(underlying.mName);
+      if (underlying.mName == "std::string" || underlyingCls) {
+        bool isInterface = underlyingCls && underlyingCls->mStruct &&
+            underlyingCls->mStruct->GetAnnotation(Annotations::Interface);
+        finalArgName = std::format("{}HolgenTemp", arg.mName);
+        std::string convertedElemName = "elem";
+        if (isInterface)
+          convertedElemName =
+              "elem." + Naming().FieldGetterNameInCpp(St::CSharpInterfaceInstanceName);
+        else if (underlying.mName == "std::string")
+          convertedElemName = "elem.c_str()";
+
+
+        if (isInterface)
+          preWork.Add("std::vector<void*> {}HolgenTemp;", arg.mType.ToString(true, false),
+                      arg.mName);
+        else {
+          auto typ = BridgingHelper::ConvertType(mProject, underlying, false, {});
+          // typ.mConstness = Constness::NotConst;
+          // typ.mType = PassByType::Value;
+          preWork.Add("std::vector<{}> {}HolgenTemp;", typ.ToString(true, false), arg.mName);
+        }
+        preWork.Add("{0}HolgenTemp.reserve({0}.size());", arg.mName);
+        preWork.Add("for (auto& elem: {}) {{", arg.mName);
+        preWork.Indent(1);
+        preWork.Add("{}HolgenTemp.push_back({});", arg.mName, convertedElemName);
+        preWork.Indent(-1);
+        preWork.Add("}}");
+      }
+
+      ss << finalArgName << ".data()";
+      if (arg.mType.mName != "std::array") {
+        ss << ", " << finalArgName << ".size()";
+      }
     } else if (arg.mType.mName == "std::string") {
       ss << arg.mName << ".c_str()";
     } else {
@@ -233,6 +287,9 @@ CSharpMethod &DotNetInterfaceClassPlugin::GenerateCSharpAbstractMethod(const Cla
   auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
                                                    InteropType::Internal, false, true);
   csMethod.mVirtuality = Virtuality::PureVirtual;
+  for (auto &arg: csMethod.mArguments) {
+    arg.mAttributes.clear();
+  }
   csCls.mMethods.push_back(std::move(csMethod));
   return csCls.mMethods.back();
 }
@@ -260,7 +317,7 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &c
 
   CSharpHelper::Get().GenerateWrapperCall(
       callerMethod.mBody, mProject, InteropType::NativeToManaged, InteropType::ManagedToNative,
-      callSuffix + method.mName, csCls, method, csMethod, false);
+      callSuffix + method.mName, csCls, method, csMethod, false, true);
 
   csCls.mMethods.push_back(std::move(callerMethod));
 }

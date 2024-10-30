@@ -19,7 +19,7 @@ private:
   ClassMethod GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
                                bool convertArguments, bool addThisArgument);
   [[nodiscard]] std::string GenerateFunctionPointerCall(const Class &cls,
-                                                        const ClassMethod &method);
+                                                        const ClassMethod &method, CodeBlock& preWork, CodeBlock& postWork);
   void ProcessForCSharp(Class &cls);
   CSharpClass &GenerateCSharpClass(Class &cls);
   void GenerateCSharpPointerField(CSharpClass &csCls);

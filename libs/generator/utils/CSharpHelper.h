@@ -60,41 +60,42 @@ public:
                            InteropType argsInteropType, InteropType returnTypeInteropType,
                            const std::string &methodToCall, const CSharpClass &cls,
                            const ClassMethod &method, const CSharpMethodBase &csMethod,
-                           bool addThisArgument) const;
+                           bool addThisArgument, bool ignoreAuxiliaries) const;
   void GenerateWrapperCallReturningVoid(CodeBlock &codeBlock, const TranslatedProject &project,
                                         InteropType interopType, const std::string &methodToCall,
                                         const CSharpClass &cls, const ClassMethod &method,
-                                        const CSharpMethodBase &csMethod,
-                                        bool addThisArgument) const;
-  void GenerateWrapperCallReturningArray(
-      CodeBlock &codeBlock, const TranslatedProject &project, InteropType argsInteropType,
-      InteropType returnTypeInteropType, const std::string &methodToCall, const CSharpClass &cls,
-      const ClassMethod &method, const CSharpMethodBase &csMethod, bool addThisArgument) const;
+                                        const CSharpMethodBase &csMethod, bool addThisArgument,
+                                        bool ignoreAuxiliaries) const;
+  void GenerateWrapperCallReturningArray(CodeBlock &codeBlock, const TranslatedProject &project,
+                                         InteropType argsInteropType,
+                                         InteropType returnTypeInteropType,
+                                         const std::string &methodToCall, const CSharpClass &cls,
+                                         const ClassMethod &method,
+                                         const CSharpMethodBase &csMethod, bool addThisArgument,
+                                         bool ignoreAuxiliaries) const;
   void GenerateWrapperCallReturningValue(CodeBlock &codeBlock, const TranslatedProject &project,
                                          InteropType argsInteropType,
                                          const std::string &methodToCall, const CSharpClass &cls,
                                          const ClassMethod &method,
-                                         const CSharpMethodBase &csMethod,
-                                         bool addThisArgument) const;
+                                         const CSharpMethodBase &csMethod, bool addThisArgument,
+                                         bool ignoreAuxiliaries) const;
   void GenerateWrapperCallReturningClass(CodeBlock &codeBlock, const TranslatedProject &project,
                                          InteropType argsInteropType,
                                          InteropType returnTypeInteropType,
                                          const std::string &methodToCall, const CSharpClass &cls,
                                          const ClassMethod &method,
                                          const CSharpMethodBase &csMethod, bool addThisArgument,
-                                         const Class &returnType) const;
-  [[nodiscard]] std::string
-      ConstructWrapperCall(const CSharpClass &cls, const TranslatedProject &project,
-                           InteropType interopType, const std::string &methodToCall,
-                           const MethodBase &method, const CSharpMethodBase &csMethod,
-                           bool addThisArgument, bool hasSizeArg, bool hasDeleterArg) const;
+                                         const Class &returnType, bool ignoreAuxiliaries) const;
+  [[nodiscard]] std::string ConstructWrapperCall(
+      const CSharpClass &cls, const TranslatedProject &project, InteropType interopType,
+      const std::string &methodToCall, const MethodBase &method, const CSharpMethodBase &csMethod,
+      bool addThisArgument, bool hasSizeArg, bool hasDeleterArg, bool ignoreAuxiliaries) const;
 
-  [[nodiscard]] std::string ConstructMethodArguments(const CSharpClass &cls,
-                                                     const TranslatedProject &project,
-                                                     const MethodBase &method,
-                                                     const CSharpMethodBase &csMethod,
-                                                     InteropType interopType, bool addThisArgument,
-                                                     bool hasSizeArg, bool hasDeleterArg) const;
+  [[nodiscard]] std::string
+      ConstructMethodArguments(const CSharpClass &cls, const TranslatedProject &project,
+                               const MethodBase &method, const CSharpMethodBase &csMethod,
+                               InteropType interopType, bool addThisArgument, bool hasSizeArg,
+                               bool hasDeleterArg, bool ignoreAuxiliaries) const;
 
   [[nodiscard]] std::string GetWrapperTargetInWrappedClass(const CSharpClass &cls,
                                                            const NamingConvention &naming,

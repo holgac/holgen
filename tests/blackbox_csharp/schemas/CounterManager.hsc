@@ -8,9 +8,9 @@ struct ICounterBumper {
     func GetCounter() -> Counter ref;
     func Clone() -> ICounterBumper;
     func CopyFrom(ICounterBumper other);
+    func BumpMultiple(vector<string> names, vector<u32> counts);
+    func SetNameConcatArray(string[3] name);
 //    func SplitName() -> vector<string>;
-//    func SetNameConcatVector(vector<string> name);
-//    func SetNameConcatArray(string[3] name);
 //    func BumpWithVector(vector<u32> counts) -> vector<u32>;
 //    func BumpWithVector(vector<u32> counts);
 //    func GetValue() -> u32;

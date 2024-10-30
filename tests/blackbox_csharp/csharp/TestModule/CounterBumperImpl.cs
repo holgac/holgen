@@ -56,4 +56,18 @@ public class CounterBumperImpl : ICounterBumper
         Console.WriteLine($"Copy from {impl.Name}, was {Name} before");
         Name = impl.Name;
     }
+
+    public override void BumpMultiple(string[] names, uint[] counts)
+    {
+        for (int i = 0; i < names.Length; i++)
+        {
+            var c = CounterManager.GetCounter(names[i]);
+            c.Bump(counts[i]);
+        }
+    }
+
+    public override void SetNameConcatArray(string[] name)
+    {
+        Name = string.Join("", name);
+    }
 }

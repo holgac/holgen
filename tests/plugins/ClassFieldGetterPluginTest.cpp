@@ -28,6 +28,7 @@ struct TestData {
   {
     auto method =
         ClassMethod{"GetTestFieldUnsigned", Type{"uint32_t"}, Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUnsigned", Constness::Const), method,
                          "return mTestFieldUnsigned;");
   }
@@ -37,6 +38,7 @@ struct TestData {
   {
     auto method =
         ClassMethod{"GetTestFieldDouble", Type{"double"}, Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldDouble", Constness::Const), method,
                          "return mTestFieldDouble;");
   }
@@ -60,9 +62,11 @@ struct TestData {
     auto method = ClassMethod{"GetTestFieldString",
                               Type{"std::string", PassByType::Reference, Constness::Const},
                               Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     method.mBody.Add("return mTestFieldString;");
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldString", Constness::Const), method);
 
+    method.mExposeToScript = false;
     method.mConstness = Constness::NotConst;
     method.mReturnType.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldString", Constness::NotConst), method);
@@ -74,9 +78,11 @@ struct TestData {
     auto method = ClassMethod{"GetTestFieldStruct",
                               Type{"InnerStruct", PassByType::Reference, Constness::Const},
                               Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     method.mBody.Add("return mTestFieldStruct;");
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::Const), method);
 
+    method.mExposeToScript = false;
     method.mConstness = Constness::NotConst;
     method.mReturnType.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::NotConst), method);
@@ -112,10 +118,12 @@ struct TestData {
     auto method =
         ClassMethod{"GetTestFieldUserData", Type{"T", PassByType::Pointer, Constness::Const},
                     Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     method.mTemplateParameters.emplace_back("typename", "T");
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::Const), method,
                          "return reinterpret_cast<const T*>(mTestFieldUserData);");
 
+    method.mExposeToScript = false;
     method.mConstness = Constness::NotConst;
     method.mReturnType.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::NotConst), method,
@@ -139,9 +147,11 @@ struct TestData {
     auto method =
         ClassMethod{"GetTestFieldUserData", Type{"void", PassByType::Pointer, Constness::Const},
                     Visibility::Protected, Constness::Const};
+    method.mExposeToScript = true;
     method.mUserDefined = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::Const), method, "");
 
+    method.mExposeToScript = false;
     method.mConstness = Constness::NotConst;
     method.mReturnType.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldUserData", Constness::NotConst), method, "");
@@ -166,6 +176,7 @@ struct TestData {
   {
     auto method =
         ClassMethod{"GetTestFieldStructId", Type{"uint32_t"}, Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStructId", Constness::Const), method,
                          "return mTestFieldStructId;");
   }
@@ -197,6 +208,7 @@ struct TestData {
   {
     auto method =
         ClassMethod{"GetTestFieldStructId", Type{"uint32_t"}, Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStructId", Constness::Const), method,
                          "return mTestFieldStructId;");
   }
@@ -207,8 +219,10 @@ struct TestData {
     auto method = ClassMethod{"GetTestFieldStruct",
                               Type{"InnerStruct", PassByType::Pointer, Constness::Const},
                               Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     method.mBody.Add("return InnerStruct::Get(mTestFieldStructId);");
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::Const), method);
+    method.mExposeToScript = false;
     method.mConstness = Constness::NotConst;
     method.mReturnType.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::NotConst), method);
@@ -234,8 +248,11 @@ struct TestData {
     auto method = ClassMethod{"GetTestFieldStruct",
                               Type{"InnerStruct", PassByType::Pointer, Constness::Const},
                               Visibility::Public, Constness::Const};
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::Const), method,
                          "return mTestFieldStruct;");
+
+    method.mExposeToScript = false;
     method.mConstness = Constness::NotConst;
     method.mReturnType.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetTestFieldStruct", Constness::NotConst), method,

@@ -75,7 +75,7 @@ void DotNetWrapperPlugin::ProcessMethods(const Class &cls, CSharpClass &csCls) c
     CSharpHelper::Get().GenerateWrapperCall(
         csMethod.mBody, mProject, InteropType::ManagedToNative, InteropType::NativeToManaged,
         CSharpHelper::Get().GetWrapperTargetInWrappedClass(csCls, Naming(), method.mName), csCls,
-        method, csMethod, !method.IsStatic(cls));
+        method, csMethod, !method.IsStatic(cls), false);
     csCls.mMethods.push_back(std::move(csMethod));
   }
 }
@@ -240,7 +240,7 @@ void DotNetWrapperPlugin::GenerateConstructorWrapperCall(CodeBlock &codeBlock, c
   auto caller = CSharpHelper::Get().ConstructWrapperCall(
       csCls, mProject, InteropType::ManagedToNative,
       CSharpHelper::Get().GetWrapperTargetInWrappedClass(csCls, Naming(), method.mName), method,
-      csMethod, false, false, false);
+      csMethod, false, false, false, false);
   if (cls.IsProxyable()) {
     codeBlock.Add("{} = {};", St::CSharpProxyObjectPointerFieldName, caller);
   } else {

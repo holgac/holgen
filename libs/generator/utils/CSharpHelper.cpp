@@ -322,9 +322,9 @@ CSharpHelper::CSharpHelper() {
 void CSharpHelper::GenerateWrapperCallReturningValue(
     CodeBlock &codeBlock, const TranslatedProject &project, InteropType argsInteropType,
     const std::string &methodToCall, const CSharpClass &cls, const ClassMethod &method,
-    const CSharpMethodBase &csMethod, bool addThisArgument) const {
+    const CSharpMethodBase &csMethod, bool addThisArgument, bool ignoreAuxiliaries) const {
   auto caller = ConstructWrapperCall(cls, project, argsInteropType, methodToCall, method, csMethod,
-                                     addThisArgument, false, false);
+                                     addThisArgument, false, false, ignoreAuxiliaries);
   codeBlock.Add("return {};", caller);
 }
 
@@ -332,9 +332,9 @@ void CSharpHelper::GenerateWrapperCallReturningClass(
     CodeBlock &codeBlock, const TranslatedProject &project, InteropType argsInteropType,
     InteropType returnTypeInteropType, const std::string &methodToCall, const CSharpClass &cls,
     const ClassMethod &method, const CSharpMethodBase &csMethod, bool addThisArgument,
-    const Class &returnType) const {
+    const Class &returnType, bool ignoreAuxiliaries) const {
   auto caller = ConstructWrapperCall(cls, project, argsInteropType, methodToCall, method, csMethod,
-                                     addThisArgument, false, false);
+                                     addThisArgument, false, false, ignoreAuxiliaries);
   if (returnTypeInteropType == InteropType::NativeToManaged) {
     if (returnType.IsProxyable()) {
       codeBlock.Add("return new {}({});", returnType.mName, caller);
@@ -358,10 +358,11 @@ void CSharpHelper::GenerateWrapperCallReturningClass(
 std::string CSharpHelper::ConstructWrapperCall(
     const CSharpClass &cls, const TranslatedProject &project, InteropType interopType,
     const std::string &methodToCall, const MethodBase &method, const CSharpMethodBase &csMethod,
-    bool addThisArgument, bool hasSizeArg, bool hasDeleterArg) const {
+    bool addThisArgument, bool hasSizeArg, bool hasDeleterArg, bool ignoreAuxiliaries) const {
   return std::format("{}({})", methodToCall,
                      ConstructMethodArguments(cls, project, method, csMethod, interopType,
-                                              addThisArgument, hasSizeArg, hasDeleterArg));
+                                              addThisArgument, hasSizeArg, hasDeleterArg,
+                                              ignoreAuxiliaries));
 }
 
 void CSharpHelper::GenerateWrapperCall(CodeBlock &codeBlock, const TranslatedProject &project,
@@ -369,40 +370,42 @@ void CSharpHelper::GenerateWrapperCall(CodeBlock &codeBlock, const TranslatedPro
                                        InteropType returnTypeInteropType,
                                        const std::string &methodToCall, const CSharpClass &cls,
                                        const ClassMethod &method, const CSharpMethodBase &csMethod,
-                                       bool addThisArgument) const {
+                                       bool addThisArgument, bool ignoreAuxiliaries) const {
   if (method.mReturnType.mName == "void") {
     GenerateWrapperCallReturningVoid(codeBlock, project, argsInteropType, methodToCall, cls, method,
-                                     csMethod, addThisArgument);
+                                     csMethod, addThisArgument, ignoreAuxiliaries);
   } else if (auto retClass = project.GetClass(method.mReturnType.mName)) {
     GenerateWrapperCallReturningClass(codeBlock, project, argsInteropType, returnTypeInteropType,
                                       methodToCall, cls, method, csMethod, addThisArgument,
-                                      *retClass);
+                                      *retClass, ignoreAuxiliaries);
   } else if (CppTypesConvertibleToCSharpArray.contains(method.mReturnType.mName)) {
     GenerateWrapperCallReturningArray(codeBlock, project, argsInteropType, returnTypeInteropType,
-                                      methodToCall, cls, method, csMethod, addThisArgument);
+                                      methodToCall, cls, method, csMethod, addThisArgument,
+                                      ignoreAuxiliaries);
   } else {
     GenerateWrapperCallReturningValue(codeBlock, project, argsInteropType, methodToCall, cls,
-                                      method, csMethod, addThisArgument);
+                                      method, csMethod, addThisArgument, ignoreAuxiliaries);
   }
 }
 
 void CSharpHelper::GenerateWrapperCallReturningVoid(
     CodeBlock &codeBlock, const TranslatedProject &project, InteropType interopType,
     const std::string &methodToCall, const CSharpClass &cls, const ClassMethod &method,
-    const CSharpMethodBase &csMethod, bool addThisArgument) const {
+    const CSharpMethodBase &csMethod, bool addThisArgument, bool ignoreAuxiliaries) const {
   auto caller = ConstructWrapperCall(cls, project, interopType, methodToCall, method, csMethod,
-                                     addThisArgument, false, false);
+                                     addThisArgument, false, false, ignoreAuxiliaries);
   codeBlock.Add("{};", caller);
 }
 
 void CSharpHelper::GenerateWrapperCallReturningArray(
     CodeBlock &codeBlock, const TranslatedProject &project, InteropType argsInteropType,
     InteropType returnTypeInteropType, const std::string &methodToCall, const CSharpClass &cls,
-    const ClassMethod &method, const CSharpMethodBase &csMethod, bool addThisArgument) const {
+    const ClassMethod &method, const CSharpMethodBase &csMethod, bool addThisArgument,
+    bool ignoreAuxiliaries) const {
   (void)returnTypeInteropType;
   bool hasSizeArg = NeedsSizeArgument(method.mReturnType);
   auto caller = ConstructWrapperCall(cls, project, argsInteropType, methodToCall, method, csMethod,
-                                     addThisArgument, hasSizeArg, true);
+                                     addThisArgument, hasSizeArg, true, ignoreAuxiliaries);
   auto sizeParameter =
       std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
 
@@ -458,12 +461,10 @@ void CSharpHelper::GenerateWrapperCallReturningArray(
   codeBlock.Add("return holgenReturnValue;");
 }
 
-std::string CSharpHelper::ConstructMethodArguments(const CSharpClass &cls,
-                                                   const TranslatedProject &project,
-                                                   const MethodBase &method,
-                                                   const CSharpMethodBase &csMethod,
-                                                   InteropType interopType, bool addThisArgument,
-                                                   bool hasSizeArg, bool hasDeleterArg) const {
+std::string CSharpHelper::ConstructMethodArguments(
+    const CSharpClass &cls, const TranslatedProject &project, const MethodBase &method,
+    const CSharpMethodBase &csMethod, InteropType interopType, bool addThisArgument,
+    bool hasSizeArg, bool hasDeleterArg, bool ignoreAuxiliaries) const {
   std::stringstream ss;
   bool isFirst = true;
 
@@ -478,7 +479,6 @@ std::string CSharpHelper::ConstructMethodArguments(const CSharpClass &cls,
 
 
   auto csIt = csMethod.mArguments.begin(), csEnd = csMethod.mArguments.end();
-  auto prevCsIt = csIt;
   auto it = method.mArguments.begin(), end = method.mArguments.end();
   for (; csIt != csEnd; ++it, ++csIt) {
     if (isFirst) {
@@ -487,19 +487,15 @@ std::string CSharpHelper::ConstructMethodArguments(const CSharpClass &cls,
       ss << ", ";
     }
     THROW_IF(it == end || it->mName != csIt->mName, "Argument order got messed up!");
-    if (prevCsIt->mName + St::CSharpAuxiliarySizeSuffix == csIt->mName) {
-      auto variableName = std::format("(ulong){}.Length", prevCsIt->mName);
-      ss << VariableRepresentation(csIt->mType, variableName, project, interopType);
-      continue;
-    }
     if (auto argClass = project.GetClass(it->mType.mName)) {
       if (interopType != InteropType::NativeToManaged && !argClass->IsProxyable()) {
         ss << "ref ";
       }
     }
     ss << VariableRepresentation(csIt->mType, csIt->mName, project, interopType);
-    ss << StringifyPassedExtraArguments(it->mType, csIt->mName, interopType);
-    prevCsIt = csIt;
+    if (!ignoreAuxiliaries) {
+      ss << StringifyPassedExtraArguments(it->mType, csIt->mName, interopType);
+    }
   }
   if (hasSizeArg) {
     if (!isFirst)

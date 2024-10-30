@@ -58,6 +58,16 @@ public abstract class ICounterBumper
   {
     ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).CopyFrom(((ICounterBumper)GCHandle.FromIntPtr(other).Target!));
   }
+  public abstract void BumpMultiple(string[] names, uint[] counts);
+  public static void BumpMultipleCaller(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] string[] names, ulong namesHolgenSize, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=4)] uint[] counts, ulong countsHolgenSize)
+  {
+    ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).BumpMultiple(names, counts);
+  }
+  public abstract void SetNameConcatArray(string[] name);
+  public static void SetNameConcatArrayCaller(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeConst=3)] string[] name)
+  {
+    ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SetNameConcatArray(name);
+  }
   
   public delegate void ICounterBumperSetNameDelegate(IntPtr holgenObject, string name);
   public delegate void ICounterBumperBumpDelegate(IntPtr holgenObject);
@@ -67,6 +77,8 @@ public abstract class ICounterBumper
   public delegate IntPtr ICounterBumperGetCounterDelegate(IntPtr holgenObject);
   public delegate IntPtr ICounterBumperCloneDelegate(IntPtr holgenObject);
   public delegate void ICounterBumperCopyFromDelegate(IntPtr holgenObject, IntPtr other);
+  public delegate void ICounterBumperBumpMultipleDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] string[] names, ulong namesHolgenSize, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=4)] uint[] counts, ulong countsHolgenSize);
+  public delegate void ICounterBumperSetNameConcatArrayDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeConst=3)] string[] name);
   
   private GCHandle _holgenPtr;
   

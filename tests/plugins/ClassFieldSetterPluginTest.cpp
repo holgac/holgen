@@ -29,6 +29,7 @@ struct TestData {
     auto method =
         ClassMethod{"SetTestFieldUnsigned", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"uint32_t", PassByType::Value, Constness::NotConst});
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldUnsigned", Constness::NotConst), method,
                          "mTestFieldUnsigned = val;");
   }
@@ -39,6 +40,7 @@ struct TestData {
     auto method =
         ClassMethod{"SetTestFieldDouble", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"double", PassByType::Value, Constness::NotConst});
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldDouble", Constness::NotConst), method,
                          "mTestFieldDouble = val;");
   }
@@ -62,6 +64,7 @@ struct TestData {
         ClassMethod{"SetTestFieldString", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val",
                                    Type{"std::string", PassByType::Reference, Constness::Const});
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldString", Constness::NotConst), method,
                          "mTestFieldString = val;");
   }
@@ -73,6 +76,7 @@ struct TestData {
         ClassMethod{"SetTestFieldStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val",
                                    Type{"InnerStruct", PassByType::Reference, Constness::Const});
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStruct", Constness::NotConst), method,
                          "mTestFieldStruct = val;");
   }
@@ -105,6 +109,7 @@ struct TestData {
         ClassMethod{"SetTestFieldUserData", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"T", PassByType::Pointer});
     method.mTemplateParameters.emplace_back("typename", "T");
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldUserData", Constness::NotConst), method,
                          "mTestFieldUserData = reinterpret_cast<void*>(val);");
   }
@@ -125,6 +130,7 @@ struct TestData {
                               Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"void", PassByType::Pointer});
     method.mUserDefined = true;
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldUserData", Constness::NotConst), method, "");
   }
 }
@@ -147,6 +153,7 @@ struct TestData {
     auto method =
         ClassMethod{"SetTestFieldStructId", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"uint32_t"});
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStructId", Constness::NotConst), method,
                          "mTestFieldStructId = val;");
   }
@@ -177,6 +184,7 @@ struct TestData {
     auto method =
         ClassMethod{"SetTestFieldStructId", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val", Type{"uint32_t"});
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStructId", Constness::NotConst), method,
                          "mTestFieldStructId = val;");
   }
@@ -205,6 +213,7 @@ struct TestData {
         ClassMethod{"SetTestFieldStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("val",
                                    Type{"InnerStruct", PassByType::Pointer, Constness::NotConst});
+    method.mExposeToScript = true;
     helpers::ExpectEqual(*cls->GetMethod("SetTestFieldStruct", Constness::NotConst), method,
                          "mTestFieldStruct = val;");
   }
