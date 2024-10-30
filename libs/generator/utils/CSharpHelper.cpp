@@ -7,11 +7,11 @@
 #include "core/Exception.h"
 
 namespace holgen {
-bool CSharpHelper::NeedsDeleter(const Type &type) {
+bool CSharpHelper::NeedsDeleter(const Type &type) const {
   return CppTypesConvertibleToCSharpArray.contains(type.mName);
 }
 
-bool CSharpHelper::NeedsSizeArgument(const Type &type) {
+bool CSharpHelper::NeedsSizeArgument(const Type &type) const {
   return type.mName == "std::vector" || type.mName == "std::span";
 }
 
@@ -98,7 +98,7 @@ void CSharpHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &argume
 
 std::string CSharpHelper::StringifyPassedExtraArguments(const Type &type,
                                                         const std::string &argPrefix,
-                                                        InteropType interopType) {
+                                                        InteropType interopType) const {
   (void)interopType;
   if (type.mName == "std::vector" || type.mName == "std::span") {
     return std::format(", (ulong){}.Length", argPrefix);
@@ -108,7 +108,7 @@ std::string CSharpHelper::StringifyPassedExtraArguments(const Type &type,
 
 std::string CSharpHelper::RepresentationInNative(const Type &other, const Type &originalType,
                                                  const TranslatedProject &project,
-                                                 bool prependRef) {
+                                                 bool prependRef) const {
   (void)originalType;
   if (other.mName == "char" && other.mType == PassByType::Pointer) {
     switch (other.mPointerDepth) {
@@ -139,7 +139,7 @@ std::string CSharpHelper::RepresentationInNative(const Type &other, const Type &
 }
 
 std::string CSharpHelper::RepresentationInManaged(const Type &other, const Type &originalType,
-                                                  const TranslatedProject &project) {
+                                                  const TranslatedProject &project) const {
   (void)originalType;
   if (other.mName == "char" && other.mType == PassByType::Pointer) {
     switch (other.mPointerDepth) {
@@ -163,7 +163,7 @@ std::string CSharpHelper::RepresentationInManaged(const Type &other, const Type 
 }
 
 std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedProject &project,
-                                          InteropType interopType) {
+                                          InteropType interopType) const {
   switch (interopType) {
   case InteropType::Internal:
     return other.mName;
@@ -175,7 +175,8 @@ std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedPro
 }
 
 std::string CSharpHelper::ArrayMarshallingInfo(const Type &other, const TranslatedProject &project,
-                                               InteropType interopType, size_t sizeArgumentIdx) {
+                                               InteropType interopType,
+                                               size_t sizeArgumentIdx) const {
   switch (interopType) {
   case InteropType::Internal:
     return other.mName;
@@ -189,7 +190,7 @@ std::string CSharpHelper::ArrayMarshallingInfo(const Type &other, const Translat
 std::string CSharpHelper::VariableRepresentation(const CSharpType &type,
                                                  const std::string &variableName,
                                                  const TranslatedProject &project,
-                                                 InteropType interopType) {
+                                                 InteropType interopType) const {
   switch (interopType) {
   case InteropType::Internal:
     return variableName;
@@ -235,7 +236,7 @@ CSharpConstructor CSharpHelper::CreateConstructor(const TranslatedProject &proje
 
 std::string CSharpHelper::VariableRepresentationInNative(const CSharpType &type,
                                                          const std::string &variableName,
-                                                         const TranslatedProject &project) {
+                                                         const TranslatedProject &project) const {
   if (auto cls = project.GetClass(type.mName)) {
     if (cls->IsProxyable()) {
       return std::format("{}{}.{}", type.mType, variableName,
@@ -249,7 +250,7 @@ std::string CSharpHelper::VariableRepresentationInNative(const CSharpType &type,
 
 std::string CSharpHelper::VariableRepresentationInManaged(const CSharpType &type,
                                                           const std::string &variableName,
-                                                          const TranslatedProject &project) {
+                                                          const TranslatedProject &project) const {
 
   if (auto cls = project.GetClass(type.mName)) {
     if (cls->IsProxyable())
@@ -261,7 +262,8 @@ std::string CSharpHelper::VariableRepresentationInManaged(const CSharpType &type
   return std::format("{}{}", type.mType, variableName);
 }
 
-std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedProject &project) {
+std::string CSharpHelper::MarshallingInfo(const Type &other,
+                                          const TranslatedProject &project) const {
   (void)project;
   if (other.mName == "char" && other.mType == PassByType::Pointer) {
     return "[MarshalAs(UnmanagedType.LPStr)] ";
@@ -270,7 +272,7 @@ std::string CSharpHelper::MarshallingInfo(const Type &other, const TranslatedPro
 }
 
 std::string CSharpHelper::ArrayMarshallingInfo(const Type &other, const TranslatedProject &project,
-                                               size_t sizeArgumentIdx) {
+                                               size_t sizeArgumentIdx) const {
   (void)project;
   if (other.mName == "char" && other.mType == PassByType::Pointer) {
     return std::format(
@@ -313,4 +315,193 @@ CSharpHelper::CSharpHelper() {
   CppTypesConvertibleToCSharpArray = {"std::vector", "std::array", "std::span"};
   CSharpTypesSupportedByMarshalCopy = {"byte", "short", "int", "long", "float", "double"};
 }
+
+void CSharpHelper::GenerateWrapperCallReturningValue(
+    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
+    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
+    bool addThisArgument) const {
+  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+                                     addThisArgument, false, false);
+  codeBlock.Add("return {};", caller);
+}
+
+void CSharpHelper::GenerateWrapperCallReturningClass(
+    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
+    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
+    bool addThisArgument, const Class &returnType) const {
+  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+                                     addThisArgument, false, false);
+  if (returnType.IsProxyable()) {
+    codeBlock.Add("return new {}({});", returnType.mName, caller);
+  } else {
+    codeBlock.Add("return new {}", returnType.mName);
+    codeBlock.Add("{{");
+    codeBlock.Indent(1);
+    codeBlock.Add("{} = {}", St::CSharpMirroredStructFieldName, caller);
+    codeBlock.Indent(-1);
+    codeBlock.Add("}};");
+  }
+}
+
+std::string CSharpHelper::ConstructWrapperCall(
+    const CSharpClass &cls, const TranslatedProject &project, const NamingConvention &naming,
+    const MethodBase &method, const CSharpMethodBase &csMethod, const std::string &methodName,
+    bool addThisArgument, bool hasSizeArg, bool hasDeleterArg) const {
+  return std::format("Marshal.GetDelegateForFunctionPointer<{}>({})({})",
+                     naming.CSharpMethodDelegateName(cls.mName, methodName),
+                     naming.CSharpMethodPointerName(methodName),
+                     ConstructMethodArguments(cls, project, method, csMethod,
+                                              InteropType::ManagedToNative, addThisArgument,
+                                              hasSizeArg, hasDeleterArg));
+}
+
+void CSharpHelper::GenerateWrapperCall(CodeBlock &codeBlock, const TranslatedProject &project,
+                                       const NamingConvention &naming, const CSharpClass &cls,
+                                       const ClassMethod &method, const CSharpMethodBase &csMethod,
+                                       bool addThisArgument) const {
+  if (method.mReturnType.mName == "void") {
+    GenerateWrapperCallReturningVoid(codeBlock, project, naming, cls, method, csMethod,
+                                     addThisArgument);
+  } else if (auto retClass = project.GetClass(method.mReturnType.mName)) {
+    GenerateWrapperCallReturningClass(codeBlock, project, naming, cls, method, csMethod,
+                                      addThisArgument, *retClass);
+  } else if (CppTypesConvertibleToCSharpArray.contains(method.mReturnType.mName)) {
+    GenerateWrapperCallReturningArray(codeBlock, project, naming, cls, method, csMethod,
+                                      addThisArgument);
+  } else {
+    GenerateWrapperCallReturningValue(codeBlock, project, naming, cls, method, csMethod,
+                                      addThisArgument);
+  }
+}
+
+void CSharpHelper::GenerateWrapperCallReturningVoid(
+    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
+    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
+    bool addThisArgument) const {
+  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+                                     addThisArgument, false, false);
+  codeBlock.Add("{};", caller);
+}
+
+void CSharpHelper::GenerateWrapperCallReturningArray(
+    CodeBlock &codeBlock, const TranslatedProject &project, const NamingConvention &naming,
+    const CSharpClass &cls, const ClassMethod &method, const CSharpMethodBase &csMethod,
+    bool addThisArgument) const {
+  bool hasSizeArg = NeedsSizeArgument(method.mReturnType);
+  auto caller = ConstructWrapperCall(cls, project, naming, method, csMethod, method.mName,
+                                     addThisArgument, hasSizeArg, true);
+  auto sizeParameter =
+      std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
+
+  std::string sizeString;
+  if (method.mReturnType.mName == "std::array")
+    sizeString = method.mReturnType.mTemplateParameters.back().mName;
+  else
+    sizeString = std::format("{}Int", sizeParameter);
+
+  auto retVal = method.mReturnType.mTemplateParameters.front();
+  auto csRetVal = ConvertType(retVal, project, InteropType::Internal, true);
+  std::string underlyingType = csRetVal.mName;
+  auto retClass = project.GetClass(method.mReturnType.mTemplateParameters.front().mName);
+  std::string objectConstructor;
+  if (retClass) {
+    if (retClass->IsProxyable()) {
+      underlyingType = "IntPtr";
+      objectConstructor = std::format("new {}(holgenResultSpan[i])", retClass->mName);
+    } else {
+      underlyingType = std::format("{}.{}", retClass->mName, St::CSharpMirroredStructStructName);
+      objectConstructor = std::format("new {}{{ {} = holgenResultSpan[i] }}", retClass->mName,
+                                      St::CSharpMirroredStructFieldName);
+    }
+  } else {
+    // Marshal.Copy would work better for these
+    objectConstructor = "holgenResultSpan[i]";
+  }
+  codeBlock.Add("var holgenResult = {};", caller);
+  if (hasSizeArg) {
+    codeBlock.Add("var {0}Int = (int){0};", sizeParameter);
+  }
+  codeBlock.Add("var holgenReturnValue = new {}[{}];", csRetVal.ToString(), sizeString);
+
+  if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
+    codeBlock.Add("Marshal.Copy(holgenResult, holgenReturnValue, 0, {});", sizeString);
+  } else {
+    codeBlock.Add("Span<{}> holgenResultSpan;", underlyingType);
+    codeBlock.Add("unsafe");
+    codeBlock.Add("{{");
+    codeBlock.Indent(1);
+    codeBlock.Add("holgenResultSpan = new Span<{}>(holgenResult.ToPointer(), {});", underlyingType,
+                  sizeString);
+    codeBlock.Indent(-1);
+    codeBlock.Add("}}");
+    codeBlock.Add("for (var i = 0; i < {}; ++i)", sizeString);
+    codeBlock.Add("{{");
+    codeBlock.Indent(1);
+    codeBlock.Add("holgenReturnValue[i] = {};", objectConstructor);
+    codeBlock.Indent(-1);
+    codeBlock.Add("}}");
+  }
+  codeBlock.Add("DeferredDeleter.Perform({});", St::DeferredDeleterArgumentName);
+  codeBlock.Add("return holgenReturnValue;");
+}
+
+std::string CSharpHelper::ConstructMethodArguments(const CSharpClass &cls,
+                                                   const TranslatedProject &project,
+                                                   const MethodBase &method,
+                                                   const CSharpMethodBase &csMethod,
+                                                   InteropType interopType, bool addThisArgument,
+                                                   bool hasSizeArg, bool hasDeleterArg) const {
+  std::stringstream ss;
+  bool isFirst = true;
+
+  if (addThisArgument) {
+    if (cls.mClass && !cls.mClass->IsProxyable()) {
+      ss << "ref ";
+    }
+
+    ss << VariableRepresentation(CSharpType{cls.mName}, "this", project, interopType);
+    isFirst = false;
+  }
+
+
+  auto csIt = csMethod.mArguments.begin(), csEnd = csMethod.mArguments.end();
+  auto prevCsIt = csIt;
+  auto it = method.mArguments.begin(), end = method.mArguments.end();
+  for (; csIt != csEnd; ++it, ++csIt) {
+    if (isFirst) {
+      isFirst = false;
+    } else {
+      ss << ", ";
+    }
+    THROW_IF(it == end || it->mName != csIt->mName, "Argument order got messed up!");
+    if (prevCsIt->mName + St::CSharpAuxiliarySizeSuffix == csIt->mName) {
+      auto variableName = std::format("(ulong){}.Length", prevCsIt->mName);
+      ss << VariableRepresentation(csIt->mType, variableName, project, interopType);
+      continue;
+    }
+    if (auto argClass = project.GetClass(it->mType.mName)) {
+      if (!argClass->IsProxyable()) {
+        ss << "ref ";
+      }
+    }
+    ss << VariableRepresentation(csIt->mType, csIt->mName, project, interopType);
+    ss << StringifyPassedExtraArguments(it->mType, csIt->mName, interopType);
+    prevCsIt = csIt;
+  }
+  if (hasSizeArg) {
+    if (!isFirst)
+      ss << ", ";
+    ss << "out var " << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
+    isFirst = false;
+  }
+
+  if (hasDeleterArg) {
+    if (!isFirst) {
+      ss << ", ";
+    }
+    ss << "out var " << St::DeferredDeleterArgumentName;
+  }
+  return ss.str();
+}
+
 } // namespace holgen

@@ -28,26 +28,6 @@ private:
   void GenerateConstructorWrapperCall(CodeBlock &codeBlock, const Class &cls,
                                       const CSharpClass &csCls, const ClassMethod &method,
                                       const CSharpMethodBase &csMethod) const;
-  void GenerateWrapperCall(CodeBlock &codeBlock, const CSharpClass &cls, const ClassMethod &method,
-                           const CSharpMethodBase &csMethod, bool addThisArgument) const;
-  void GenerateWrapperCallReturningVoid(CodeBlock &codeBlock, const CSharpClass &cls, const ClassMethod &method,
-                           const CSharpMethodBase &csMethod, bool addThisArgument) const;
-  void GenerateWrapperCallReturningArray(CodeBlock &codeBlock, const CSharpClass &cls, const ClassMethod &method,
-                           const CSharpMethodBase &csMethod, bool addThisArgument) const;
-  void GenerateWrapperCallReturningValue(CodeBlock &codeBlock, const CSharpClass &cls, const ClassMethod &method,
-                           const CSharpMethodBase &csMethod, bool addThisArgument) const;
-  void GenerateWrapperCallReturningClass(CodeBlock &codeBlock, const CSharpClass &cls, const ClassMethod &method,
-                           const CSharpMethodBase &csMethod, bool addThisArgument, const Class& returnType) const;
-  [[nodiscard]] std::string ConstructWrapperCall(const CSharpClass &cls, const MethodBase &method,
-                                                 const CSharpMethodBase &csMethod,
-                                                 const std::string &methodName,
-                                                 bool addThisArgument, bool hasSizeArg,
-                                                 bool hasDeleterArg) const;
-  [[nodiscard]] std::string ConstructMethodArguments(const CSharpClass &cls,
-                                                     const MethodBase &method,
-                                                     const CSharpMethodBase &csMethod,
-                                                     InteropType interopType, bool addThisArgument,
-                                                     bool hasSizeArg, bool hasDeleterArg) const;
   [[nodiscard]] const ClassMethod* GetGetter(const Class& cls, const ClassField& field) const;
   [[nodiscard]] const ClassMethod* GetSetter(const Class& cls, const ClassField& field) const;
 };
