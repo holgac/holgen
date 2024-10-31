@@ -8,6 +8,7 @@ namespace holgen {
 
 enum class CSharpMethodType {
   WrappedClassDelegate,
+  WrappedClassCaller,
   ModuleInterfaceDelegate,
   ModuleInterfaceAbstractMethod,
 };
@@ -21,7 +22,7 @@ public:
   CSharpMethod GenerateMethod(const ClassMethod &method);
 
 private:
-  void PostProcess(const ClassMethod &method, CSharpMethod& csMethod);
+  void SetMethodProperties(const ClassMethod &method, CSharpMethod &csMethod);
   CSharpType ConvertReturnType(const Type &type);
   CSharpType ConvertArgumentType(const Type &type);
   [[nodiscard]] std::string GetMethodName(const std::string &rawName);
@@ -29,10 +30,10 @@ private:
   void PopulateArguments(std::list<CSharpMethodArgument> &out,
                          const std::list<MethodArgument> &arguments);
   void AddAttributes(std::list<std::string> &attributes, const Type &type, const CSharpType &csType,
-                     bool isReturnType, size_t sizeArgIndex) const;
+                     bool isReturnType, size_t sizeArgIndex);
   bool ShouldUseRefArgument(const Type &type, const CSharpType &csType);
   void AddAuxiliaryArguments(std::list<CSharpMethodArgument> &arguments, const Type &type,
-                             const std::string &argPrefix, bool isReturnValue) const;
+                             const std::string &argPrefix, bool isReturnValue);
   bool ShouldHaveSizeArgument(const Type &returnType);
   bool ShouldHaveDeleter(const Type &returnType);
   TranslatedProject &mProject;

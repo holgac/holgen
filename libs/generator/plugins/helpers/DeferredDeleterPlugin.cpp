@@ -34,13 +34,15 @@ void DeferredDeleterPlugin::GenerateField(Class &cls) {
 void DeferredDeleterPlugin::GeneratePerformMethod(Class &cls) {
   auto method = ClassMethod{"Perform", Type{"void"}, Visibility::Public, Constness::NotConst,
                             Staticness::Static};
-  method.mArguments.emplace_back("ptr", Type{cls.mName, PassByType::Pointer});
+  method.mArguments.emplace_back("rawPtr", Type{"void", PassByType::Pointer});
   method.mBody.Add(
       "constexpr size_t ObjectOffset = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8);");
+  method.mBody.Add("DeferredDeleter* ptr = rawPtr;",
+                   Naming().FieldNameInCpp("func"));
   method.mBody.Add("ptr->{}(reinterpret_cast<char*>(ptr) + ObjectOffset);",
                    Naming().FieldNameInCpp("func"));
   method.mBody.Add("ptr->~DeferredDeleter();");
-  method.mBody.Add("delete[] reinterpret_cast<char *>(ptr);");
+  method.mBody.Add("delete[] reinterpret_cast<char *>(rawPtr);");
   method.mExposeToScript = true;
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

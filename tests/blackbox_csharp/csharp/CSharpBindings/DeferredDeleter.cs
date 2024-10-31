@@ -6,16 +6,16 @@ namespace CSharpBindings;
 
 internal static class DeferredDeleter
 {
-  public static void Perform(IntPtr ptr)
+  public static void Perform(IntPtr rawPtr)
   {
-    Marshal.GetDelegateForFunctionPointer<DeferredDeleterPerformDelegate>(_performImpl)(ptr);
+    Marshal.GetDelegateForFunctionPointer<DeferredDeleterPerformDelegate>(_performImpl)(rawPtr);
   }
   public static void HolgenInitialize(DeferredDeleterPerformDelegate deferredDeleterPerformDelegate)
   {
     _performImpl = Marshal.GetFunctionPointerForDelegate(deferredDeleterPerformDelegate);
   }
   
-  public delegate void DeferredDeleterPerformDelegate(IntPtr ptr);
+  public delegate void DeferredDeleterPerformDelegate(IntPtr rawPtr);
   public delegate void DeferredDeleterHolgenInitializeDelegate(DeferredDeleterPerformDelegate deferredDeleterPerformDelegate);
   
   private static IntPtr _performImpl = IntPtr.Zero;

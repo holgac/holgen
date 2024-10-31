@@ -69,9 +69,11 @@ void DotNetWrapperPlugin::ProcessMethods(const Class &cls, CSharpClass &csCls) c
             .GenerateMethod(method);
     csCls.mDelegates.push_back(std::move(csDelegate));
 
-    auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
-                                                     InteropType::Internal, false, true, false);
-    csMethod.mStaticness = method.IsStatic(cls) ? Staticness::Static : Staticness::NotStatic;
+    auto csMethod =
+        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::WrappedClassCaller)
+            .GenerateMethod(method);
+    // auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
+    //                                                  InteropType::Internal, false, true, false);
     CSharpHelper::Get().GenerateWrapperCall(
         csMethod.mBody, mProject, InteropType::ManagedToNative, InteropType::NativeToManaged,
         CSharpHelper::Get().GetWrapperTargetInWrappedClass(csCls, Naming(), method.mName), csCls,
