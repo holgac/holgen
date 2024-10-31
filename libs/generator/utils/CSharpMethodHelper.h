@@ -9,6 +9,7 @@ namespace holgen {
 enum class CSharpMethodType {
   WrappedClassDelegate,
   ModuleInterfaceDelegate,
+  ModuleInterfaceAbstractMethod,
 };
 
 class CSharpMethodHelper {
@@ -20,6 +21,7 @@ public:
   CSharpMethod GenerateMethod(const ClassMethod &method);
 
 private:
+  void PostProcess(const ClassMethod &method, CSharpMethod& csMethod);
   CSharpType ConvertReturnType(const Type &type);
   CSharpType ConvertArgumentType(const Type &type);
   [[nodiscard]] std::string GetMethodName(const std::string &rawName);
