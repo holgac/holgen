@@ -25,9 +25,6 @@ private:
   [[nodiscard]] bool ShouldProcess(const ClassConstructor &ctor) const;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
   [[nodiscard]] bool IsStaticClass(const Class &cls) const;
-  void GenerateConstructorWrapperCall(CodeBlock &codeBlock, const Class &cls,
-                                      const CSharpClass &csCls, const ClassMethod &method,
-                                      const CSharpMethodBase &csMethod) const;
   [[nodiscard]] const ClassMethod* GetGetter(const Class& cls, const ClassField& field) const;
   [[nodiscard]] const ClassMethod* GetSetter(const Class& cls, const ClassField& field) const;
 };

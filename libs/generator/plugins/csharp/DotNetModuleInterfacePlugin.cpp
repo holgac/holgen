@@ -18,12 +18,12 @@ void DotNetModuleInterfacePlugin::Process(Class &cls) const {
   csCls.mType = CSharpClassType::Interface;
   csCls.mUsingDirectives.insert("System.Runtime.InteropServices");
   for (auto &method: cls.mMethods) {
-    csCls.mDelegates.push_back(
-        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::ModuleInterfaceDelegate)
-            .GenerateMethod(method));
-    csCls.mMethods.push_back(
-        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::ModuleInterfaceAbstractMethod)
-            .GenerateMethod(method));
+    csCls.mDelegates.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                                  CSharpMethodType::ModuleInterfaceDelegate)
+                                   .GenerateMethod(method));
+    csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                                CSharpMethodType::ModuleInterfaceAbstractMethod)
+                                 .GenerateMethod(method));
   }
 }
 } // namespace holgen

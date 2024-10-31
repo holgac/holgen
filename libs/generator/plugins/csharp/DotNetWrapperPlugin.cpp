@@ -41,14 +41,14 @@ void DotNetWrapperPlugin::ProcessConstructors(const Class &cls, CSharpClass &csC
         !method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_Constructor))
       continue;
     auto csDelegate =
-        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::WrappedClassDelegate)
+        CSharpMethodHelper(mProject, cls, csCls, Naming(), CSharpMethodType::WrappedClassDelegate)
             .GenerateMethod(method);
     csCls.mDelegates.push_back(csDelegate);
 
-    auto csCtor =
-        CSharpHelper::Get().CreateConstructor(mProject, cls, method, InteropType::ManagedToNative);
-    GenerateConstructorWrapperCall(csCtor.mBody, cls, csCls, method, csCtor);
-    csCls.mConstructors.push_back(std::move(csCtor));
+    csCls.mConstructors.push_back(
+        CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                           CSharpMethodType::WrappedClassCallerConstructor)
+            .GenerateConstructor(method));
     added = true;
   }
   if (added) {
@@ -65,15 +65,14 @@ void DotNetWrapperPlugin::ProcessMethods(const Class &cls, CSharpClass &csCls) c
         method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_Constructor))
       continue;
     auto csDelegate =
-        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::WrappedClassDelegate)
+        CSharpMethodHelper(mProject, cls, csCls, Naming(), CSharpMethodType::WrappedClassDelegate)
             .GenerateMethod(method);
     csCls.mDelegates.push_back(std::move(csDelegate));
 
-    auto csMethod =
-        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::WrappedClassCaller)
-            .GenerateMethod(method);
-    // auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
-    //                                                  InteropType::Internal, false, true, false);
+    auto csMethod = CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                       CSharpMethodType::WrappedClassCallerMethod)
+                        .GenerateMethod(method);
+
     CSharpHelper::Get().GenerateWrapperCall(
         csMethod.mBody, mProject, InteropType::ManagedToNative, InteropType::NativeToManaged,
         CSharpHelper::Get().GetWrapperTargetInWrappedClass(csCls, Naming(), method.mName), csCls,
@@ -232,22 +231,6 @@ bool DotNetWrapperPlugin::IsStaticClass(const Class &cls) const {
       return false;
   }
   return true;
-}
-
-void DotNetWrapperPlugin::GenerateConstructorWrapperCall(CodeBlock &codeBlock, const Class &cls,
-                                                         const CSharpClass &csCls,
-                                                         const ClassMethod &method,
-                                                         const CSharpMethodBase &csMethod) const {
-
-  auto caller = CSharpHelper::Get().ConstructWrapperCall(
-      csCls, mProject, InteropType::ManagedToNative,
-      CSharpHelper::Get().GetWrapperTargetInWrappedClass(csCls, Naming(), method.mName), method,
-      csMethod, false, false, false, false);
-  if (cls.IsProxyable()) {
-    codeBlock.Add("{} = {};", St::CSharpProxyObjectPointerFieldName, caller);
-  } else {
-    codeBlock.Add("{} = {};", St::CSharpMirroredStructFieldName, caller);
-  }
 }
 
 const ClassMethod *DotNetWrapperPlugin::GetGetter(const Class &cls, const ClassField &field) const {
