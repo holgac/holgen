@@ -34,19 +34,19 @@ public class Counter
   {
     return new Counter(Marshal.GetDelegateForFunctionPointer<CounterAddCounterAndReturnSelfDelegate>(_addCounterAndReturnSelfImpl)(this.HolgenPtr, rhs.HolgenPtr));
   }
-  public void BumpMultiple([MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] uint[] amounts)
+  public void BumpMultiple(uint[] amounts)
   {
     Marshal.GetDelegateForFunctionPointer<CounterBumpMultipleDelegate>(_bumpMultipleImpl)(this.HolgenPtr, amounts, (ulong)amounts.Length);
   }
-  public void BumpMultipleCopy([MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] uint[] amounts)
+  public void BumpMultipleCopy(uint[] amounts)
   {
     Marshal.GetDelegateForFunctionPointer<CounterBumpMultipleCopyDelegate>(_bumpMultipleCopyImpl)(this.HolgenPtr, amounts, (ulong)amounts.Length);
   }
-  public void BumpByStrlensOf([MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] string[] words)
+  public void BumpByStrlensOf(string[] words)
   {
     Marshal.GetDelegateForFunctionPointer<CounterBumpByStrlensOfDelegate>(_bumpByStrlensOfImpl)(this.HolgenPtr, words, (ulong)words.Length);
   }
-  public void BumpByStrlensOfCopy([MarshalAs(UnmanagedType.LPArray, SizeParamIndex=1)] string[] words)
+  public void BumpByStrlensOfCopy(string[] words)
   {
     Marshal.GetDelegateForFunctionPointer<CounterBumpByStrlensOfCopyDelegate>(_bumpByStrlensOfCopyImpl)(this.HolgenPtr, words, (ulong)words.Length);
   }

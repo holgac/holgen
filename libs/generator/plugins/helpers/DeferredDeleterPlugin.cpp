@@ -37,7 +37,7 @@ void DeferredDeleterPlugin::GeneratePerformMethod(Class &cls) {
   method.mArguments.emplace_back("rawPtr", Type{"void", PassByType::Pointer});
   method.mBody.Add(
       "constexpr size_t ObjectOffset = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8);");
-  method.mBody.Add("DeferredDeleter* ptr = rawPtr;",
+  method.mBody.Add("DeferredDeleter* ptr = static_cast<DeferredDeleter *>(rawPtr);",
                    Naming().FieldNameInCpp("func"));
   method.mBody.Add("ptr->{}(reinterpret_cast<char*>(ptr) + ObjectOffset);",
                    Naming().FieldNameInCpp("func"));

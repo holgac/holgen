@@ -38,19 +38,31 @@ private:
   void AddAuxiliaryArguments(std::list<CSharpMethodArgument> &arguments, const Type &type,
                              const std::string &argPrefix, bool isReturnValue);
   bool ShouldHaveSizeArgument(const Type &returnType);
-  bool ShouldHaveDeleter(const Type &returnType);
+  bool ShouldHaveDeleterArgument(const Type &returnType);
+  bool ShouldPassDeleterArgument(const Type &returnType);
+  bool ShouldPassThisArgument(const ClassMethod &method);
   // TODO: rename to ConstructWrappedMethodArguments
-  [[nodiscard]] std::string ConstructMethodArguments(const ClassMethod &method,
-                                                     const CSharpMethodBase &csMethod);
+  [[nodiscard]] std::string ConstructMethodArguments(const ClassMethod &method, const CSharpMethodBase &csMethod);
   [[nodiscard]] std::string VariableRepresentation(const CSharpType &type,
                                                    const std::string &variableName);
   [[nodiscard]] std::string
       GetWrapperTargetInWrappedClass(const std::string &wrappedMethodName) const;
   void GenerateMethodBody(const ClassMethod &method, CSharpMethodBase &csMethod);
   void GenerateMethodBodyForConstructor(const ClassMethod &method, CSharpMethodBase &csMethod);
+  void GenerateMethodBodyForWrapperMethod(const ClassMethod &method, CSharpMethodBase &csMethod);
+  void GenerateMethodBodyForWrapperMethodReturningVoid(const ClassMethod &method,
+                                                       CSharpMethodBase &csMethod);
+  void GenerateMethodBodyForWrapperMethodReturningClass(const ClassMethod &method,
+                                                        CSharpMethodBase &csMethod,
+                                                        const Class &cls);
+  void GenerateMethodBodyForWrapperMethodReturningArray(const ClassMethod &method,
+                                                        CSharpMethodBase &csMethod);
+  void GenerateMethodBodyForWrapperMethodReturningValue(const ClassMethod &method,
+                                                        CSharpMethodBase &csMethod);
   [[nodiscard]] std::string ConstructWrapperCall(const std::string &methodToCall,
                                                  const ClassMethod &method,
                                                  const CSharpMethodBase &csMethod);
+  [[nodiscard]] std::string PassAuxiliaryArguments(const Type& type, const std::string& argPrefix);
   TranslatedProject &mProject;
   const Class &mClass;
   const CSharpClass &mCsClass;

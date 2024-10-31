@@ -32,6 +32,14 @@ std::string CSharpMethodHelper::ConstructWrapperCall(const std::string &methodTo
   return std::format("{}({})", methodToCall, ConstructMethodArguments(method, csMethod));
 }
 
+std::string CSharpMethodHelper::PassAuxiliaryArguments(const Type &type,
+                                                       const std::string &argPrefix) {
+  if (type.mName == "std::vector" || type.mName == "std::span") {
+    return std::format(", (ulong){}.Length", argPrefix);
+  }
+  return "";
+}
+
 void CSharpMethodHelper::SetMethodProperties(const ClassMethod &method, CSharpMethod &csMethod) {
   switch (mMethodType) {
   case CSharpMethodType::WrappedClassDelegate:
@@ -204,6 +212,15 @@ void CSharpMethodHelper::PopulateArguments(std::list<CSharpMethodArgument> &out,
 void CSharpMethodHelper::AddAttributes(std::list<std::string> &attributes, const Type &type,
                                        const CSharpType &csType, bool isReturnType,
                                        size_t sizeArgIndex) {
+  switch (mMethodType) {
+  case CSharpMethodType::ModuleInterfaceDelegate:
+  case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::ModuleInterfaceAbstractMethod:
+    break;
+  case CSharpMethodType::WrappedClassCallerConstructor:
+  case CSharpMethodType::WrappedClassCallerMethod:
+    return;
+  }
   std::string prefix = isReturnType ? "return: " : "";
   if (type.mName == "char" && type.mType == PassByType::Pointer) {
     if (csType.mArrayDepth == 0) {
@@ -259,14 +276,19 @@ void CSharpMethodHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &
       arg.mType.mType = CSharpPassByType::Out;
     }
   }
-  if (isReturnValue && ShouldHaveDeleter(type)) {
+  if (isReturnValue && ShouldHaveDeleterArgument(type)) {
     auto &deleterArg =
         arguments.emplace_back(St::DeferredDeleterArgumentName, CSharpType{"IntPtr"});
     deleterArg.mType.mType = CSharpPassByType::Out;
   }
 }
 
-bool CSharpMethodHelper::ShouldHaveDeleter(const Type &returnType) {
+bool CSharpMethodHelper::ShouldHaveSizeArgument(const Type &returnType) {
+  // TODO: implement properly
+  return CSharpHelper::Get().NeedsSizeArgument(returnType);
+}
+
+bool CSharpMethodHelper::ShouldHaveDeleterArgument(const Type &returnType) {
   switch (mMethodType) {
   case CSharpMethodType::ModuleInterfaceDelegate:
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
@@ -274,10 +296,31 @@ bool CSharpMethodHelper::ShouldHaveDeleter(const Type &returnType) {
   case CSharpMethodType::WrappedClassCallerConstructor:
     return false;
   case CSharpMethodType::WrappedClassDelegate:
-    return (returnType.mName == "std::array" || returnType.mName == "std::vector" ||
-            returnType.mName == "std::span");
+    return returnType.mName == "std::array" || returnType.mName == "std::vector" ||
+        returnType.mName == "std::span";
   }
   THROW("Unexpected method type!");
+}
+
+bool CSharpMethodHelper::ShouldPassDeleterArgument(const Type &returnType) {
+
+  switch (mMethodType) {
+  case CSharpMethodType::ModuleInterfaceDelegate:
+  case CSharpMethodType::ModuleInterfaceAbstractMethod:
+  case CSharpMethodType::WrappedClassDelegate:
+    break;
+  case CSharpMethodType::WrappedClassCallerMethod:
+  case CSharpMethodType::WrappedClassCallerConstructor:
+    return returnType.mName == "std::array" || returnType.mName == "std::vector" ||
+        returnType.mName == "std::span";
+  }
+  THROW("Unexpected method type!");
+}
+
+bool CSharpMethodHelper::ShouldPassThisArgument(const ClassMethod &method) {
+  if (method.IsStatic(mClass) || mCsClass.mStaticness == Staticness::Static)
+    return false;
+  return true;
 }
 
 std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &method,
@@ -285,15 +328,14 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
   std::stringstream ss;
   bool isFirst = true;
 
-  // if (addThisArgument) {
-  //   if (interopType != InteropType::NativeToManaged && cls.mClass && !cls.mClass->IsProxyable())
-  //   {
-  //     ss << "ref ";
-  //   }
-  //
-  //   ss << VariableRepresentation(CSharpType{cls.mName}, "this", project, interopType);
-  //   isFirst = false;
-  // }
+  if (ShouldPassThisArgument(method)) {
+    if (!mClass.IsProxyable()) {
+      ss << "ref ";
+    }
+
+    ss << VariableRepresentation(CSharpType{mCsClass.mName}, "this");
+    isFirst = false;
+  }
 
 
   auto csIt = csMethod.mArguments.begin(), csEnd = csMethod.mArguments.end();
@@ -305,33 +347,35 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
       ss << ", ";
     }
     THROW_IF(it == end || it->mName != csIt->mName, "Argument order got messed up!");
-    // if (auto argClass = mProject.GetClass(it->mType.mName)) {
-    //   if (interopType != InteropType::NativeToManaged && !argClass->IsProxyable()) {
-    //     ss << "ref ";
-    //   }
-    // }
+    if (auto argClass = mProject.GetClass(it->mType.mName)) {
+      // if (mMethodType != InteropType::NativeToManaged && !argClass->IsProxyable()) {
+      if (!argClass->IsProxyable()) {
+        ss << "ref ";
+      }
+    }
     ss << VariableRepresentation(csIt->mType, csIt->mName);
     // if (!ignoreAuxiliaries) {
-    //   ss << StringifyPassedExtraArguments(it->mType, csIt->mName, interopType);
+    ss << PassAuxiliaryArguments(it->mType, csIt->mName);
     // }
   }
-  // if (hasSizeArg && !ignoreAuxiliaries) {
-  //   if (!isFirst)
-  //     ss << ", ";
-  //   if (interopType == InteropType::NativeToManaged)
-  //     ss << "out ";
-  //   else
-  //     ss << "out var ";
-  //   ss << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
-  //   isFirst = false;
-  // }
+  // if (mMethodType == CSharpMethodType::InterfaceCallerMethod) {
+  if (ShouldHaveSizeArgument(method.mReturnType)) {
+    if (!isFirst)
+      ss << ", ";
+    if (mMethodType == CSharpMethodType::WrappedClassCallerMethod)
+      ss << "out var ";
+    else
+      ss << "out ";
+    ss << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
+    isFirst = false;
+  }
 
-  // if (hasDeleterArg && !ignoreAuxiliaries) {
-  //   if (!isFirst) {
-  //     ss << ", ";
-  //   }
-  //   ss << "out var " << St::DeferredDeleterArgumentName;
-  // }
+  if (ShouldPassDeleterArgument(method.mReturnType)) {
+    if (!isFirst) {
+      ss << ", ";
+    }
+    ss << "out var " << St::DeferredDeleterArgumentName;
+  }
   return ss.str();
 }
 
@@ -371,9 +415,9 @@ void CSharpMethodHelper::GenerateMethodBody(const ClassMethod &method, CSharpMet
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
     return;
   case CSharpMethodType::WrappedClassCallerMethod:
-    return;
+    return GenerateMethodBodyForWrapperMethod(method, csMethod);
   case CSharpMethodType::WrappedClassCallerConstructor:
-    GenerateMethodBodyForConstructor(method, csMethod);
+    return GenerateMethodBodyForConstructor(method, csMethod);
   }
 }
 
@@ -386,6 +430,139 @@ void CSharpMethodHelper::GenerateMethodBodyForConstructor(const ClassMethod &met
   } else {
     csMethod.mBody.Add("{} = {};", St::CSharpMirroredStructFieldName, caller);
   }
+}
+
+void CSharpMethodHelper::GenerateMethodBodyForWrapperMethod(const ClassMethod &method,
+                                                            CSharpMethodBase &csMethod) {
+  if (method.mReturnType.mName == "void") {
+    GenerateMethodBodyForWrapperMethodReturningVoid(method, csMethod);
+  } else if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
+    GenerateMethodBodyForWrapperMethodReturningClass(method, csMethod, *retClass);
+  } else if (CSharpHelper::Get().CppTypesConvertibleToCSharpArray.contains(
+                 method.mReturnType.mName)) {
+    GenerateMethodBodyForWrapperMethodReturningArray(method, csMethod);
+  } else {
+    GenerateMethodBodyForWrapperMethodReturningValue(method, csMethod);
+  }
+}
+
+void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningVoid(
+    const ClassMethod &method, CSharpMethodBase &csMethod) {
+  csMethod.mBody.Add(
+      "{};", ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod));
+}
+
+void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningClass(
+    const ClassMethod &method, CSharpMethodBase &csMethod, const Class &cls) {
+  auto caller =
+      ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod);
+  if (mMethodType == CSharpMethodType::WrappedClassCallerMethod) {
+    if (cls.IsProxyable()) {
+      csMethod.mBody.Add("return new {}({});", cls.mName, caller);
+    } else {
+      csMethod.mBody.Add("return new {}", cls.mName);
+      csMethod.mBody.Add("{{");
+      csMethod.mBody.Indent(1);
+      csMethod.mBody.Add("{} = {}", St::CSharpMirroredStructFieldName, caller);
+      csMethod.mBody.Indent(-1);
+      csMethod.mBody.Add("}};");
+    }
+  } else if (false) {
+    if (cls.IsProxyable()) {
+      csMethod.mBody.Add("return {}.{};", caller, St::CSharpProxyObjectPointerFieldName);
+    } else {
+      csMethod.mBody.Add("return {}.{};", caller, St::CSharpMirroredStructFieldName);
+    }
+  } else {
+  }
+}
+
+void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningArray(
+    const ClassMethod &method, CSharpMethodBase &csMethod) {
+  auto caller =
+      ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod);
+  auto sizeParameter =
+      std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
+  auto retVal = method.mReturnType.mTemplateParameters.front();
+  auto csRetVal = ConvertReturnType(retVal);
+
+  // if (mMethodType == CSharpMethodType::InterfaceCallerMethod) {
+  if (false) {
+    csMethod.mBody.Add("var holgenResult = {};", caller);
+    if (method.mReturnType.mName != "std::array")
+      csMethod.mBody.Add("{} = (ulong)holgenResult.Length;", sizeParameter);
+    csMethod.mBody.Add("IntPtr holgenReturnValue = Marshal.AllocHGlobal((int)(sizeof({}) * {}));",
+                       csRetVal.ToString(), sizeParameter);
+    if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
+      csMethod.mBody.Add("Marshal.Copy(holgenResult, 0, holgenReturnValue, (int){});",
+                         sizeParameter);
+    } else {
+      csMethod.mBody.Add("for (int holgenIterator = 0; holgenIterator < {}; ++holgenIterator)",
+                         sizeParameter);
+      csMethod.mBody.Add("{{");
+      csMethod.mBody.Indent(1);
+      csMethod.mBody.Indent(-1);
+      csMethod.mBody.Add("}}");
+    }
+    csMethod.mBody.Add("return holgenReturnValue;", caller);
+    return;
+  }
+
+  std::string sizeString;
+  if (method.mReturnType.mName == "std::array")
+    sizeString = method.mReturnType.mTemplateParameters.back().mName;
+  else
+    sizeString = std::format("{}Int", sizeParameter);
+
+  std::string underlyingType = csRetVal.mName;
+  auto retClass = mProject.GetClass(method.mReturnType.mTemplateParameters.front().mName);
+  std::string objectConstructor;
+  if (retClass) {
+    if (retClass->IsProxyable()) {
+      underlyingType = "IntPtr";
+      objectConstructor = std::format("new {}(holgenResultSpan[i])", retClass->mName);
+    } else {
+      underlyingType = std::format("{}.{}", retClass->mName, St::CSharpMirroredStructStructName);
+      objectConstructor = std::format("new {}{{ {} = holgenResultSpan[i] }}", retClass->mName,
+                                      St::CSharpMirroredStructFieldName);
+    }
+  } else {
+    // Marshal.Copy would work better for these
+    objectConstructor = "holgenResultSpan[i]";
+  }
+  csMethod.mBody.Add("var holgenResult = {};", caller);
+  if (ShouldHaveSizeArgument(method.mReturnType)) {
+    csMethod.mBody.Add("var {0}Int = (int){0};", sizeParameter);
+  }
+  csMethod.mBody.Add("var holgenReturnValue = new {}[{}];", csRetVal.ToString(), sizeString);
+
+  if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
+    csMethod.mBody.Add("Marshal.Copy(holgenResult, holgenReturnValue, 0, {});", sizeString);
+  } else {
+    csMethod.mBody.Add("Span<{}> holgenResultSpan;", underlyingType);
+    csMethod.mBody.Add("unsafe");
+    csMethod.mBody.Add("{{");
+    csMethod.mBody.Indent(1);
+    csMethod.mBody.Add("holgenResultSpan = new Span<{}>(holgenResult.ToPointer(), {});",
+                       underlyingType, sizeString);
+    csMethod.mBody.Indent(-1);
+    csMethod.mBody.Add("}}");
+    csMethod.mBody.Add("for (var i = 0; i < {}; ++i)", sizeString);
+    csMethod.mBody.Add("{{");
+    csMethod.mBody.Indent(1);
+    csMethod.mBody.Add("holgenReturnValue[i] = {};", objectConstructor);
+    csMethod.mBody.Indent(-1);
+    csMethod.mBody.Add("}}");
+  }
+  csMethod.mBody.Add("DeferredDeleter.Perform({});", St::DeferredDeleterArgumentName);
+  csMethod.mBody.Add("return holgenReturnValue;");
+}
+
+void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningValue(
+    const ClassMethod &method, CSharpMethodBase &csMethod) {
+  csMethod.mBody.Add(
+      "return {};",
+      ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod));
 }
 
 } // namespace holgen

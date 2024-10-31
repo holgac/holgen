@@ -479,6 +479,7 @@ void CSharpHelper::GenerateWrapperCallReturningArray(
   }
   codeBlock.Add("DeferredDeleter.Perform({});", St::DeferredDeleterArgumentName);
   codeBlock.Add("return holgenReturnValue;");
+
 }
 
 std::string CSharpHelper::ConstructMethodArguments(
