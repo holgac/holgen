@@ -8,6 +8,7 @@ namespace holgen {
 
 enum class CSharpMethodType {
   WrappedClassDelegate,
+  ModuleInterfaceDelegate,
 };
 
 class CSharpMethodHelper {

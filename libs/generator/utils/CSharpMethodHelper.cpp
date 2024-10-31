@@ -29,6 +29,7 @@ CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
   if (auto cls = mProject.GetClass(type.mName)) {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassDelegate:
+    case CSharpMethodType::ModuleInterfaceDelegate:
       if (cls->IsProxyable()) {
         return CSharpType{"IntPtr"};
       } else {
@@ -39,6 +40,7 @@ CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
   if (type.mName == "std::span" || type.mName == "std::array" || type.mName == "std::vector") {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassDelegate:
+    case CSharpMethodType::ModuleInterfaceDelegate:
       return CSharpType{"IntPtr"};
     }
   }
@@ -47,6 +49,15 @@ CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
 }
 
 CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
+  if (mMethodType == CSharpMethodType::ModuleInterfaceDelegate && type.mName == "char" &&
+      type.mType == PassByType::Pointer && type.mConstness == Constness::Const) {
+    auto out = CSharpType{"string"};
+    out.mArrayDepth = type.mPointerDepth;
+    THROW_IF(out.mArrayDepth > 1, "{} cannot be represented in c#: pointer level too deep!",
+             type.ToString(true));
+    return out;
+  }
+
   auto it = CSharpHelper::Get().CppTypeToCSharpType.find(type.mName);
   if (it != CSharpHelper::Get().CppTypeToCSharpType.end()) {
     THROW_IF(type.mType == PassByType::Pointer,
@@ -56,6 +67,7 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
   if (auto cls = mProject.GetClass(type.mName)) {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassDelegate:
+    case CSharpMethodType::ModuleInterfaceDelegate:
       if (cls->IsProxyable()) {
         return CSharpType{"IntPtr"};
       } else {
@@ -66,6 +78,7 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
   if (type.mName == "std::span" || type.mName == "std::array" || type.mName == "std::vector") {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassDelegate:
+    case CSharpMethodType::ModuleInterfaceDelegate:
       {
         auto out = ConvertArgumentType(type.mTemplateParameters.front());
         ++out.mArrayDepth;
@@ -75,19 +88,25 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
     // return CSharpType{"IntPtr"};
   }
   THROW("Unhandled type: {}", type.ToString(true, true));
-  ;
 }
 
 std::string CSharpMethodHelper::GetMethodName(const std::string &rawName) {
   switch (mMethodType) {
   case CSharpMethodType::WrappedClassDelegate:
-    return std::format("{}{}{}", mCsClass.mName, rawName, St::CSharpDelegateSuffix);
+  case CSharpMethodType::ModuleInterfaceDelegate:
+    return std::format("{}{}{}", mClass.mName, rawName, St::CSharpDelegateSuffix);
   }
   THROW("Unexpected method type!");
 }
 
 bool CSharpMethodHelper::ShouldAddThisArgument(const ClassMethod &method) {
-  return !method.IsStatic(mClass);
+  switch (mMethodType) {
+  case CSharpMethodType::ModuleInterfaceDelegate:
+    return false;
+  case CSharpMethodType::WrappedClassDelegate:
+    return !method.IsStatic(mClass);
+  }
+  THROW("Unexpected method type!");
 }
 
 void CSharpMethodHelper::PopulateArguments(std::list<CSharpMethodArgument> &out,
@@ -130,6 +149,7 @@ bool CSharpMethodHelper::ShouldUseRefArgument(const Type &type, const CSharpType
     return false;
   switch (mMethodType) {
   case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::ModuleInterfaceDelegate:
     return true;
   }
   THROW("Unexpected method type!");
@@ -155,6 +175,7 @@ void CSharpMethodHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &
 bool CSharpMethodHelper::ShouldHaveDeleter(const Type &returnType) {
   switch (mMethodType) {
   case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::ModuleInterfaceDelegate:
     return (returnType.mName == "std::array" || returnType.mName == "std::vector" ||
             returnType.mName == "std::span");
   }

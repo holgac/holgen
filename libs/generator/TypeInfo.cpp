@@ -250,7 +250,8 @@ bool Type::operator==(const Type &rhs) const {
   }
 
   if (mConstness != rhs.mConstness || mType != rhs.mType || mConstexprness != rhs.mConstexprness ||
-      mFunctionalTemplateParameters.size() != rhs.mFunctionalTemplateParameters.size())
+      mFunctionalTemplateParameters.size() != rhs.mFunctionalTemplateParameters.size() ||
+      mPointerDepth != rhs.mPointerDepth)
     return false;
   for (size_t i = 0; i < mFunctionalTemplateParameters.size(); i++) {
     if (mFunctionalTemplateParameters[i] != rhs.mFunctionalTemplateParameters[i])

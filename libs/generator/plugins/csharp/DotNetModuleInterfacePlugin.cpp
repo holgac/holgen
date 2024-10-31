@@ -2,6 +2,7 @@
 #include "core/Annotations.h"
 #include "core/St.h"
 #include "generator/utils/CSharpHelper.h"
+#include "generator/utils/CSharpMethodHelper.h"
 
 namespace holgen {
 void DotNetModuleInterfacePlugin::Run() {
@@ -18,12 +19,10 @@ void DotNetModuleInterfacePlugin::Process(Class &cls) const {
   csCls.mUsingDirectives.insert("System.Runtime.InteropServices");
   for (auto &method: cls.mMethods) {
     auto csMethod =
-        CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::NativeToManaged,
-                                         InteropType::NativeToManaged, false, false, true);
-    auto oldName = csMethod.mName;
-    csMethod.mName = Naming().CSharpMethodDelegateName(cls.mName, method.mName),
+        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::ModuleInterfaceDelegate)
+            .GenerateMethod(method);
     csCls.mDelegates.push_back(csMethod);
-    csMethod.mName = oldName;
+    csMethod.mName = method.mName;
     csMethod.mVirtuality = Virtuality::PureVirtual;
     csMethod.mStaticness = Staticness::Static;
     csCls.mMethods.push_back(csMethod);
