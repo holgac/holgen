@@ -17,6 +17,11 @@ public class CounterBumperImpl : ICounterBumper
         Name = name;
     }
 
+    public override string GetName()
+    {
+        return Name;
+    }
+
     public override void Bump()
     {
         CounterManager.GetCounter(Name).Bump(1);
@@ -70,4 +75,39 @@ public class CounterBumperImpl : ICounterBumper
     {
         Name = string.Join("", name);
     }
+
+    public override int[] SplitNameAndParseSigned(sbyte delim)
+    {
+        var split = Name.Split((char)delim);
+        var result = new int[split.Length];
+        for (int i = 0; i < split.Length; i++)
+        {
+            result[i] = int.Parse(split[i]);
+        }
+
+        return result;
+    }
+    //
+    // public override uint[] SplitNameAndParse(sbyte delim)
+    // {
+    //     var split = Name.Split((char)delim);
+    //     var result = new uint[split.Length];
+    //     for (int i = 0; i < split.Length; i++)
+    //     {
+    //         result[i] = uint.Parse(split[i]);
+    //     }
+    //
+    //     return result;
+    // }
+
+    // public override string[] SplitName(sbyte delim)
+    // {
+    //     return Name.Split((char)delim);
+    // }
+    //
+    // public override string[] SplitNameIntoThree()
+    // {
+    //     var l = Name.Length / 3;
+    //     return [Name.Substring(0, l), Name.Substring(l, l * 2), Name.Substring(l + 2)];
+    // }
 }

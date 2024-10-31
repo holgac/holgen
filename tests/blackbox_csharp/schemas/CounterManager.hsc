@@ -1,6 +1,7 @@
 @interface
 struct ICounterBumper {
     func SetName(string name);
+    func GetName() -> string;
     func Bump();
     func SetNameFromCounter(Counter ctr);
     func SetNameFromRevision(ModuleVersion version);
@@ -10,10 +11,11 @@ struct ICounterBumper {
     func CopyFrom(ICounterBumper other);
     func BumpMultiple(vector<string> names, vector<u32> counts);
     func SetNameConcatArray(string[3] name);
-//    func SplitName() -> vector<string>;
-//    func BumpWithVector(vector<u32> counts) -> vector<u32>;
-//    func BumpWithVector(vector<u32> counts);
-//    func GetValue() -> u32;
+    func SplitNameAndParseSigned(s8 delim) -> vector<s32>;
+//    func SplitNameAndParse(s8 delim) -> vector<u32>;
+//    func GetOtherCounters() -> vector<ICounterBumper>;
+//    func SplitName(s8 delim) -> vector<string>;
+//    func SplitNameIntoThree() -> string[3];
 //    @func(static)
 //    func StaticFunction() -> string;
 }

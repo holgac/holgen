@@ -40,7 +40,7 @@ void DotNetWrapperPlugin::ProcessConstructors(const Class &cls, CSharpClass &csC
       continue;
     auto csDelegate = CSharpHelper::Get().CreateMethod(
         mProject, cls, method, InteropType::ManagedToNative, InteropType::NativeToManaged,
-        !method.IsStatic(cls), false);
+        !method.IsStatic(cls), false, false);
     csDelegate.mName = Naming().CSharpMethodDelegateName(csCls.mName, method.mName),
     csCls.mDelegates.push_back(csDelegate);
 
@@ -64,13 +64,13 @@ void DotNetWrapperPlugin::ProcessMethods(const Class &cls, CSharpClass &csCls) c
         method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_Constructor))
       continue;
     auto csDelegate = CSharpHelper::Get().CreateMethod(
-        mProject, cls, method, InteropType::NativeToManaged, InteropType::NativeToManaged,
-        !method.IsStatic(cls), false);
+        mProject, cls, method, InteropType::NativeToManaged, InteropType::ManagedToNative,
+        !method.IsStatic(cls), false, false);
     csDelegate.mName = Naming().CSharpMethodDelegateName(csCls.mName, method.mName),
     csCls.mDelegates.push_back(std::move(csDelegate));
 
     auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
-                                                     InteropType::Internal, false, true);
+                                                     InteropType::Internal, false, true, false);
     csMethod.mStaticness = method.IsStatic(cls) ? Staticness::Static : Staticness::NotStatic;
     CSharpHelper::Get().GenerateWrapperCall(
         csMethod.mBody, mProject, InteropType::ManagedToNative, InteropType::NativeToManaged,

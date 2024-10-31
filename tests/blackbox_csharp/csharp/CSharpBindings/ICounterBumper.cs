@@ -23,6 +23,11 @@ public abstract class ICounterBumper
   {
     ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SetName(name);
   }
+  public abstract string GetName();
+  public static string GetNameCaller(IntPtr holgenObject)
+  {
+    return ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).GetName();
+  }
   public abstract void Bump();
   public static void BumpCaller(IntPtr holgenObject)
   {
@@ -68,8 +73,18 @@ public abstract class ICounterBumper
   {
     ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SetNameConcatArray(name);
   }
+  public abstract int[] SplitNameAndParseSigned(sbyte delim);
+  public static IntPtr SplitNameAndParseSignedCaller(IntPtr holgenObject, sbyte delim, ulong holgenReturnValueHolgenSize)
+  {
+    var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SplitNameAndParseSigned(delim);
+    holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
+    IntPtr holgenReturnValue = Marshal.AllocHGlobal((int)(sizeof(int) * holgenReturnValueHolgenSize));
+    Marshal.Copy(holgenResult, 0, holgenReturnValue, (int)holgenReturnValueHolgenSize);
+    return holgenReturnValue;
+  }
   
   public delegate void ICounterBumperSetNameDelegate(IntPtr holgenObject, string name);
+  public delegate string ICounterBumperGetNameDelegate(IntPtr holgenObject);
   public delegate void ICounterBumperBumpDelegate(IntPtr holgenObject);
   public delegate void ICounterBumperSetNameFromCounterDelegate(IntPtr holgenObject, IntPtr ctr);
   public delegate void ICounterBumperSetNameFromRevisionDelegate(IntPtr holgenObject, ref ModuleVersion.Fields version);
@@ -79,6 +94,7 @@ public abstract class ICounterBumper
   public delegate void ICounterBumperCopyFromDelegate(IntPtr holgenObject, IntPtr other);
   public delegate void ICounterBumperBumpMultipleDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] string[] names, ulong namesHolgenSize, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=4)] uint[] counts, ulong countsHolgenSize);
   public delegate void ICounterBumperSetNameConcatArrayDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeConst=3)] string[] name);
+  public delegate IntPtr ICounterBumperSplitNameAndParseSignedDelegate(IntPtr holgenObject, sbyte delim, ulong holgenReturnValueHolgenSize);
   
   private GCHandle _holgenPtr;
   

@@ -78,34 +78,9 @@ void DotNetInterfaceClassPlugin::GenerateFunctionForCpp(
   method.mExposeToScript = true;
 
   CodeBlock preWork, postWork;
-  auto caller = GenerateFunctionPointerCall(cls, method, preWork, postWork);
-
+  auto caller = GenerateFunctionPointerCall(cls, method, preWork);
   method.mBody.Add(std::move(preWork));
-
-  if (method.mReturnType.mName == "void") {
-    method.mBody.Add("{};", caller);
-    method.mBody.Add(std::move(postWork));
-  } else {
-    if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
-      if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
-        caller = std::format("{}({})", retClass->mName, caller);
-      } else if (retClass->IsProxyable()) {
-        caller = std::format("*{}", caller);
-      } else {
-        caller = std::format("{}", caller);
-      }
-    } else {
-      // TODO: handle vectors and such
-    }
-    if (postWork.IsEmpty())
-      method.mBody.Add("return {};", caller);
-    else {
-      method.mBody.Add("auto holgenFinalRes = {};", caller);
-      method.mBody.Add(std::move(postWork));
-      method.mBody.Add("return holgenFinalRes;");
-    }
-  }
-
+  GenerateReturnStatement(method, caller);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -165,9 +140,7 @@ ClassMethod
 
 std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class &cls,
                                                                     const ClassMethod &method,
-                                                                    CodeBlock &preWork,
-                                                                    CodeBlock &postWork) {
-  (void)postWork;
+                                                                    CodeBlock &preWork) {
   std::stringstream ss;
   ss << method.mName + St::CSharpInterfaceFunctionSuffix << "(";
   bool isFirst = true;
@@ -235,8 +208,77 @@ std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class 
     }
   }
 
+  if (CSharpHelper::Get().NeedsSizeArgument(method.mReturnType)) {
+    preWork.Add("size_t {}{} = 0;", St::CSharpAuxiliaryReturnValueArgName,
+                St::CSharpAuxiliarySizeSuffix);
+    if (isFirst)
+      isFirst = false;
+    else
+      ss << ", ";
+    ss << "&" << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
+  }
+
   ss << ")";
   return ss.str();
+}
+
+void DotNetInterfaceClassPlugin::GenerateReturnStatement(ClassMethod &method,
+                                                         const std::string &valueToReturn) {
+  if (method.mReturnType.mName == "void") {
+    method.mBody.Add("{};", valueToReturn);
+    return;
+  }
+  bool isBasicReturnableStatement =
+      TypeInfo::Get().CppPrimitives.contains(method.mReturnType.mName) ||
+      method.mReturnType.mName == "std::string" || mProject.GetClass(method.mReturnType.mName);
+  if (isBasicReturnableStatement) {
+    method.mBody.Add("return {};",
+                     ConvertBasicStatementForReturn(valueToReturn, method.mReturnType));
+    return;
+  }
+  method.mBody.Add("auto holgenTempValue = {};", valueToReturn);
+
+  method.mBody.Add("{} holgenFinalValue;", method.mReturnType.ToString(true, false));
+  std::string sizeParameter;
+  if (method.mReturnType.mName == "std::array") {
+    sizeParameter = method.mReturnType.mTemplateParameters.back().mName;
+  } else {
+    method.mBody.Add("holgenFinalValue.reserve({}{});", St::CSharpAuxiliaryReturnValueArgName,
+                     St::CSharpAuxiliarySizeSuffix);
+    sizeParameter =
+        std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
+  }
+  method.mBody.Add("for (size_t holgenIterator = 0; holgenIterator < {}; ++holgenIterator) {{",
+                   sizeParameter);
+  method.mBody.Indent(1);
+  auto &underlyingType = method.mReturnType.mTemplateParameters.front();
+  auto converted =
+      ConvertBasicStatementForReturn("holgenTempValue[holgenIterator]", underlyingType);
+  if (method.mReturnType.mName == "std::array")
+    method.mBody.Add("holgenFinalValue[holgenIterator] = {};", converted);
+  else
+    method.mBody.Add("holgenFinalValue.emplace_back({});", converted);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Add("return holgenFinalValue;", converted);
+}
+
+std::string DotNetInterfaceClassPlugin::ConvertBasicStatementForReturn(const std::string &statement,
+                                                                       const Type &type) {
+
+  THROW_IF(type.mName == "void", "voids cant be returned");
+  if (auto retClass = mProject.GetClass(type.mName)) {
+    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      return std::format("{}({})", retClass->mName, statement);
+    } else if (retClass->IsProxyable()) {
+      return std::format("*{}", statement);
+    } else {
+      return statement;
+    }
+  } else if (TypeInfo::Get().CppPrimitives.contains(type.mName) || type.mName == "std::string") {
+    return statement;
+  }
+  THROW("Cannot convert {} for return!", type.ToString(false, false));
 }
 
 void DotNetInterfaceClassPlugin::ProcessForCSharp(Class &cls) {
@@ -285,7 +327,7 @@ CSharpMethod &DotNetInterfaceClassPlugin::GenerateCSharpAbstractMethod(const Cla
                                                                        CSharpClass &csCls,
                                                                        const ClassMethod &method) {
   auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
-                                                   InteropType::Internal, false, true);
+                                                   InteropType::Internal, false, true, true);
   csMethod.mVirtuality = Virtuality::PureVirtual;
   for (auto &arg: csMethod.mArguments) {
     arg.mAttributes.clear();
@@ -300,7 +342,7 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &c
                                                                   const CSharpMethod &csMethod) {
   auto callerMethod =
       CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::NativeToManaged,
-                                       InteropType::NativeToManaged, true, false);
+                                       InteropType::ManagedToNative, true, false, true);
 
   auto oldName = callerMethod.mName;
   callerMethod.mName = Naming().CSharpMethodDelegateName(cls.mName, method.mName);
@@ -320,33 +362,6 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &c
       callSuffix + method.mName, csCls, method, csMethod, false, true);
 
   csCls.mMethods.push_back(std::move(callerMethod));
-}
-
-std::string DotNetInterfaceClassPlugin::GenerateCSharpMethodCall(const Class &cls,
-                                                                 CSharpClass &csCls,
-                                                                 const ClassMethod &method,
-                                                                 const CSharpMethod &csMethod) {
-  (void)cls;
-  (void)csCls;
-  std::stringstream ss;
-  ss << method.mName << "(";
-  bool isFirst = true;
-  auto it = method.mArguments.begin(), end = method.mArguments.end();
-  auto csIt = csMethod.mArguments.begin(), csEnd = csMethod.mArguments.end();
-
-  for (; it != end; ++it, ++csIt) {
-    if (isFirst) {
-      isFirst = false;
-    } else {
-      ss << ", ";
-    }
-    THROW_IF(csIt == csEnd || csIt->mName != it->mName, "Argument order got messed up!")
-    ss << CSharpHelper::Get().VariableRepresentation(csIt->mType, csIt->mName, mProject,
-                                                     InteropType::NativeToManaged);
-  }
-
-  ss << ")";
-  return ss.str();
 }
 
 } // namespace holgen

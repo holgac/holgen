@@ -19,7 +19,7 @@ void DotNetModuleInterfacePlugin::Process(Class &cls) const {
   for (auto &method: cls.mMethods) {
     auto csMethod =
         CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::NativeToManaged,
-                                         InteropType::NativeToManaged, false, false);
+                                         InteropType::NativeToManaged, false, false, true);
     auto oldName = csMethod.mName;
     csMethod.mName = Naming().CSharpMethodDelegateName(cls.mName, method.mName),
     csCls.mDelegates.push_back(csMethod);

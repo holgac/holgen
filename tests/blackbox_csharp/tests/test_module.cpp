@@ -447,3 +447,49 @@ TEST_F(ModuleTest, TrackedCSharpObjectArrayArg) {
   counterManager.GetCounterBumpers()[0].Bump();
   EXPECT_EQ(counterManager.GetCounter("Counter12345").Get(), 1);
 }
+
+TEST_F(ModuleTest, TrackedCSharpObjectReturnPrimitiveVector) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  auto &counterManager = CounterManager::GetInstance();
+  module1.TrackedCSharpObject(1);
+  counterManager.GetCounterBumpers()[0].SetName("1_2_3_4");
+  auto res = counterManager.GetCounterBumpers()[0].SplitNameAndParseSigned('_');
+  auto expected = std::vector<int32_t>{1, 2, 3, 4};
+  EXPECT_EQ(res, expected);
+}
+
+//
+// TEST_F(ModuleTest, TrackedCSharpObjectReturnVector) {
+//   DotNetHost mDotNetHost;
+//   mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+//   auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+//   auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+//   module1.Initialize();
+//   module2.Initialize();
+//   auto &counterManager = CounterManager::GetInstance();
+//   module1.TrackedCSharpObject(1);
+//   counterManager.GetCounterBumpers()[0].SetName("c1_c2_c3_c4");
+//   auto res = counterManager.GetCounterBumpers()[0].SplitName('_');
+//   auto expected = std::vector<std::string>{"c1", "c2", "c3", "c4"};
+//   EXPECT_EQ(res, expected);
+// }
+//
+// TEST_F(ModuleTest, TrackedCSharpObjectReturnArray) {
+//   DotNetHost mDotNetHost;
+//   mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+//   auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+//   auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+//   module1.Initialize();
+//   module2.Initialize();
+//   auto &counterManager = CounterManager::GetInstance();
+//   module1.TrackedCSharpObject(1);
+//   counterManager.GetCounterBumpers()[0].SetName("abcdefghi");
+//   auto res = counterManager.GetCounterBumpers()[0].SplitNameIntoThree();
+//   auto expected = std::array<std::string, 3>{"abc", "def", "ghi"};
+//   EXPECT_EQ(res, expected);
+// }

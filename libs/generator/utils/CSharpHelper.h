@@ -47,7 +47,7 @@ public:
   [[nodiscard]] CSharpMethod CreateMethod(const TranslatedProject &project, const Class &cls,
                                           const ClassMethod &method, InteropType argsInteropType,
                                           InteropType returnTypeInteropType, bool addThisArgument,
-                                          bool ignoreAuxiliaries) const;
+                                          bool ignoreAuxiliaries, bool ignoreDeleter) const;
   [[nodiscard]] CSharpConstructor CreateConstructor(const TranslatedProject &project,
                                                     const Class &cls, const ClassMethod &method,
                                                     InteropType interopType) const;

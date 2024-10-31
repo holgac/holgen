@@ -30,7 +30,7 @@ CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &
     out.mName = it->second;
   } else if (cls) {
     auto csCls = project.GetCSharpClass(type.mName);
-    if (interopType == InteropType::NativeToManaged ||
+    if (interopType != InteropType::Internal ||
         (csCls && csCls->mStaticness == Staticness::Static)) {
       if (cls->IsProxyable()) {
         out.mName = "IntPtr";
@@ -42,7 +42,7 @@ CSharpType CSharpHelper::ConvertType(const Type &type, const TranslatedProject &
     }
   } else if (type.mName == "std::span" || type.mName == "std::array" ||
              type.mName == "std::vector") {
-    if (interopType == InteropType::NativeToManaged && returnType) {
+    if (interopType != InteropType::Internal && returnType) {
       out.mName = "IntPtr";
     } else {
       out = ConvertType(type.mTemplateParameters.front(), project, interopType, false);
@@ -205,7 +205,7 @@ std::string CSharpHelper::VariableRepresentation(const CSharpType &type,
 CSharpMethod CSharpHelper::CreateMethod(const TranslatedProject &project, const Class &cls,
                                         const ClassMethod &method, InteropType argsInteropType,
                                         InteropType returnTypeInteropType, bool addThisArgument,
-                                        bool ignoreAuxiliaries) const {
+                                        bool ignoreAuxiliaries, bool ignoreDeleter) const {
 
   auto csMethod = CSharpMethod{
       method.mName, ConvertType(method.mReturnType, project, returnTypeInteropType, true)};
@@ -221,7 +221,8 @@ CSharpMethod CSharpHelper::CreateMethod(const TranslatedProject &project, const 
   // csMethod.mReturnType, argsInteropType, true, csMethod.mArguments.size());
   if (!ignoreAuxiliaries) {
     AddAuxiliaryArguments(csMethod.mArguments, method.mReturnType,
-                          St::CSharpAuxiliaryReturnValueArgName, argsInteropType, true);
+                          St::CSharpAuxiliaryReturnValueArgName, returnTypeInteropType,
+                          !ignoreDeleter);
   }
   return csMethod;
 }
@@ -402,12 +403,33 @@ void CSharpHelper::GenerateWrapperCallReturningArray(
     InteropType returnTypeInteropType, const std::string &methodToCall, const CSharpClass &cls,
     const ClassMethod &method, const CSharpMethodBase &csMethod, bool addThisArgument,
     bool ignoreAuxiliaries) const {
-  (void)returnTypeInteropType;
   bool hasSizeArg = NeedsSizeArgument(method.mReturnType);
   auto caller = ConstructWrapperCall(cls, project, argsInteropType, methodToCall, method, csMethod,
                                      addThisArgument, hasSizeArg, true, ignoreAuxiliaries);
   auto sizeParameter =
       std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
+  auto retVal = method.mReturnType.mTemplateParameters.front();
+  auto csRetVal = ConvertType(retVal, project, InteropType::Internal, true);
+
+  if (returnTypeInteropType == InteropType::ManagedToNative) {
+    codeBlock.Add("var holgenResult = {};", caller);
+    if (method.mReturnType.mName != "std::array")
+      codeBlock.Add("{} = (ulong)holgenResult.Length;", sizeParameter);
+    codeBlock.Add("IntPtr holgenReturnValue = Marshal.AllocHGlobal((int)(sizeof({}) * {}));",
+                  csRetVal.ToString(), sizeParameter);
+    if (CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
+      codeBlock.Add("Marshal.Copy(holgenResult, 0, holgenReturnValue, (int){});", sizeParameter);
+    } else {
+      codeBlock.Add("for (int holgenIterator = 0; holgenIterator < {}; ++holgenIterator)",
+                    sizeParameter);
+      codeBlock.Add("{{");
+      codeBlock.Indent(1);
+      codeBlock.Indent(-1);
+      codeBlock.Add("}}");
+    }
+    codeBlock.Add("return holgenReturnValue;", caller);
+    return;
+  }
 
   std::string sizeString;
   if (method.mReturnType.mName == "std::array")
@@ -415,8 +437,6 @@ void CSharpHelper::GenerateWrapperCallReturningArray(
   else
     sizeString = std::format("{}Int", sizeParameter);
 
-  auto retVal = method.mReturnType.mTemplateParameters.front();
-  auto csRetVal = ConvertType(retVal, project, InteropType::Internal, true);
   std::string underlyingType = csRetVal.mName;
   auto retClass = project.GetClass(method.mReturnType.mTemplateParameters.front().mName);
   std::string objectConstructor;
@@ -497,14 +517,18 @@ std::string CSharpHelper::ConstructMethodArguments(
       ss << StringifyPassedExtraArguments(it->mType, csIt->mName, interopType);
     }
   }
-  if (hasSizeArg) {
+  if (hasSizeArg && !ignoreAuxiliaries) {
     if (!isFirst)
       ss << ", ";
-    ss << "out var " << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
+    if (interopType == InteropType::NativeToManaged)
+      ss << "out ";
+    else
+      ss << "out var ";
+    ss << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
     isFirst = false;
   }
 
-  if (hasDeleterArg) {
+  if (hasDeleterArg && !ignoreAuxiliaries) {
     if (!isFirst) {
       ss << ", ";
     }
