@@ -81,6 +81,7 @@ set(gen_generators
 
 set(gen_utils
     utils/CSharpHelper.cpp
+    utils/CSharpMethodHelper.cpp
     utils/BridgingHelper.cpp
     utils/HeaderContainer.cpp
     utils/NamingConvention.cpp

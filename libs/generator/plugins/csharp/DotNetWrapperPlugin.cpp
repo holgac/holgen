@@ -2,6 +2,8 @@
 #include "core/Annotations.h"
 #include "core/St.h"
 
+#include "generator/utils/CSharpMethodHelper.h"
+
 namespace holgen {
 void DotNetWrapperPlugin::Run() {
   for (auto &csCls: mProject.mCSharpClasses) {
@@ -38,10 +40,9 @@ void DotNetWrapperPlugin::ProcessConstructors(const Class &cls, CSharpClass &csC
     if (!method.mFunction ||
         !method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_Constructor))
       continue;
-    auto csDelegate = CSharpHelper::Get().CreateMethod(
-        mProject, cls, method, InteropType::ManagedToNative, InteropType::NativeToManaged,
-        !method.IsStatic(cls), false, false);
-    csDelegate.mName = Naming().CSharpMethodDelegateName(csCls.mName, method.mName),
+    auto csDelegate =
+        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::WrappedClassDelegate)
+            .GenerateMethod(method);
     csCls.mDelegates.push_back(csDelegate);
 
     auto csCtor =
@@ -63,10 +64,9 @@ void DotNetWrapperPlugin::ProcessMethods(const Class &cls, CSharpClass &csCls) c
     if (method.mFunction &&
         method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_Constructor))
       continue;
-    auto csDelegate = CSharpHelper::Get().CreateMethod(
-        mProject, cls, method, InteropType::NativeToManaged, InteropType::ManagedToNative,
-        !method.IsStatic(cls), false, false);
-    csDelegate.mName = Naming().CSharpMethodDelegateName(csCls.mName, method.mName),
+    auto csDelegate =
+        CSharpMethodHelper(mProject, cls, csCls, CSharpMethodType::WrappedClassDelegate)
+            .GenerateMethod(method);
     csCls.mDelegates.push_back(std::move(csDelegate));
 
     auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
