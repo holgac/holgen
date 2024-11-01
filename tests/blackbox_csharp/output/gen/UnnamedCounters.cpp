@@ -23,23 +23,15 @@ bool UnnamedCounters::operator==(const UnnamedCounters &rhs) const {
 extern "C" {
   holgen_blackbox_csharp::Counter *holgen_blackbox_csharp_UnnamedCounters_GetCounters(const holgen_blackbox_csharp::UnnamedCounters *instance, size_t *holgenReturnValueHolgenSize, holgen_blackbox_csharp::DeferredDeleter **holgenDeferredDeleter) {
     using DeferredDeleter = holgen_blackbox_csharp::DeferredDeleter;
-    constexpr size_t BufferSize = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8) + sizeof(const std::vector<holgen_blackbox_csharp::Counter> &);
+    constexpr size_t BufferSize = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8) + sizeof(std::vector<holgen_blackbox_csharp::Counter> );
     constexpr size_t ObjectOffset = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8);
     auto buffer = new char[BufferSize];
-    auto holgenRes = new (&buffer[ObjectOffset]) const std::vector<holgen_blackbox_csharp::Counter> &(std::move(instance->GetCounters()));
+    auto holgenRes = new (&buffer[ObjectOffset]) std::vector<holgen_blackbox_csharp::Counter> (instance->GetCounters());
     auto deferredDeleter = new (buffer) DeferredDeleter([](void* ptr) { 
-      static_cast<const std::vector<holgen_blackbox_csharp::Counter> &*>(ptr)->~vector();
+      static_cast<std::vector<holgen_blackbox_csharp::Counter> *>(ptr)->~vector();
     });
     *holgenReturnValueHolgenSize = holgenRes->size();
     *holgenDeferredDeleter = deferredDeleter;
     return holgenRes->data();
-  }
-  void holgen_blackbox_csharp_UnnamedCounters_SetCounters(holgen_blackbox_csharp::UnnamedCounters *instance, holgen_blackbox_csharp::Counter **val, size_t valHolgenSize) {
-    std::vector<holgen_blackbox_csharp::Counter > valHolgenVector;
-    valHolgenVector.reserve(valHolgenSize);
-    for (size_t i = 0; i < valHolgenSize; ++i) {
-      valHolgenVector.emplace_back(val[i]);
-    }
-    instance->SetCounters(valHolgenVector);
   }
 }

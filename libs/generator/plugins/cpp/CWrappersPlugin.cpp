@@ -66,7 +66,8 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
     bool isVector = arg.mType.mName == "std::vector";
     if (isSpan || isVector) {
       func.mBody.Add("std::vector<{}> {}HolgenVector;",
-                     arg.mType.mTemplateParameters.front().ToFullyQualifiedString(mProject), arg.mName);
+                     arg.mType.mTemplateParameters.front().ToFullyQualifiedString(mProject),
+                     arg.mName);
       func.mBody.Add("{0}HolgenVector.reserve({0}{1});", arg.mName, St::CSharpAuxiliarySizeSuffix);
       func.mBody.Add("for (size_t i = 0; i < {}{}; ++i) {{", arg.mName,
                      St::CSharpAuxiliarySizeSuffix);
@@ -120,18 +121,19 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
     func.mBody.Add("using DeferredDeleter = {}::DeferredDeleter;", mSettings.mNamespace);
     func.mBody.Add("constexpr size_t BufferSize = sizeof(DeferredDeleter) + "
                    "(sizeof(DeferredDeleter)%8) + sizeof({});",
-                   method.mReturnType.ToFullyQualifiedString(mProject));
+                   SanitizeType(method.mReturnType).ToFullyQualifiedString(mProject));
     func.mBody.Add(
         "constexpr size_t ObjectOffset = sizeof(DeferredDeleter) + (sizeof(DeferredDeleter)%8);");
     func.mBody.Add("auto buffer = new char[BufferSize];");
-    bool canMove = method.mReturnType.mName == "std::vector";
+    bool canMove = method.mReturnType.mName == "std::vector" &&
+        method.mReturnType.mConstness != Constness::Const;
     func.mBody.Add("auto holgenRes = new (&buffer[ObjectOffset]) {}({}{}{});",
-                   method.mReturnType.ToFullyQualifiedString(mProject), canMove ? "std::move(" : "",
-                   funcCall, canMove ? ")" : "");
+                   SanitizeType(method.mReturnType).ToFullyQualifiedString(mProject),
+                   canMove ? "std::move(" : "", funcCall, canMove ? ")" : "");
     func.mBody.Add("auto deferredDeleter = new (buffer) DeferredDeleter([](void* ptr) {{ ");
     func.mBody.Indent(1);
     func.mBody.Add("static_cast<{0}*>(ptr)->~{1}();",
-                   method.mReturnType.ToFullyQualifiedString(mProject),
+                   SanitizeType(method.mReturnType).ToFullyQualifiedString(mProject),
                    St::StripNamespace(method.mReturnType.mName));
     func.mBody.Indent(-1);
     func.mBody.Add("}});");
@@ -152,5 +154,13 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
   }
 
   cls.mCFunctions.push_back(std::move(func));
+}
+
+Type CWrappersPlugin::SanitizeType(const Type &type) const {
+  Type res = type;
+  if (res.mType == PassByType::Reference)
+    res.mType = PassByType::Value;
+  res.mConstness = Constness::NotConst;
+  return res;
 }
 } // namespace holgen

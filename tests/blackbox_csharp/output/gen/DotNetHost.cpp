@@ -8,6 +8,7 @@
 #include "ICounterBumper.h"
 #include "ModuleVersion.h"
 #include "SingletonCounter.h"
+#include "UnnamedCounters.h"
 #include "Vector.h"
 
 namespace holgen_blackbox_csharp {
@@ -141,6 +142,15 @@ void DotNetHost::InitializeHolgen() {
       nullptr, nullptr, (void**)(&initFunc));
     HOLGEN_FAIL_IF(res < 0 || !initFunc, "Could not initialize SingletonCounter, was the project built after the cs files were generated?");
     initFunc(holgen_blackbox_csharp_SingletonCounter_Get, holgen_blackbox_csharp_SingletonCounter_Bump, holgen_blackbox_csharp_SingletonCounter_Reset);
+  }
+  {
+    void (*initFunc)(Counter *(*)(const UnnamedCounters *, size_t *, DeferredDeleter **));
+    auto res = mHostfxrDelegate_get_function_pointer(
+      "CSharpBindings.UnnamedCounters, CSharpBindings", "HolgenInitialize",
+      "CSharpBindings.UnnamedCounters+UnnamedCountersHolgenInitializeDelegate, CSharpBindings",
+      nullptr, nullptr, (void**)(&initFunc));
+    HOLGEN_FAIL_IF(res < 0 || !initFunc, "Could not initialize UnnamedCounters, was the project built after the cs files were generated?");
+    initFunc(holgen_blackbox_csharp_UnnamedCounters_GetCounters);
   }
   {
     void (*initFunc)();

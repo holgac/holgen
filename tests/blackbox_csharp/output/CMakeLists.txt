@@ -6,6 +6,7 @@ set(gen_sources
     gen/ICounterBumper.cpp
     gen/ModuleVersion.cpp
     gen/SingletonCounter.cpp
+    gen/UnnamedCounters.cpp
     gen/Vector.cpp
     gen/BitmapTest.cpp
     gen/EnumTest.cpp

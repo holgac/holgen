@@ -8,6 +8,7 @@
 #include "Counter.h"
 #include "ICounterBumper.h"
 #include "Singleton.h"
+#include "UnnamedCounters.h"
 
 namespace holgen_blackbox_csharp {
 // Defined in tests/blackbox_csharp/schemas/CounterManager.hsc
@@ -19,9 +20,12 @@ public:
   ~CounterManager() = default;
   const std::map<std::string, Counter> &GetCounters() const;
   std::map<std::string, Counter> &GetCounters();
+  const UnnamedCounters &GetUnnamedCounters() const;
+  UnnamedCounters &GetUnnamedCounters();
   const std::vector<ICounterBumper> &GetCounterBumpers() const;
   std::vector<ICounterBumper> &GetCounterBumpers();
   void SetCounters(const std::map<std::string, Counter> &val);
+  void SetUnnamedCounters(const UnnamedCounters &val);
   void SetCounterBumpers(std::vector<ICounterBumper> &&val);
   Counter &GetCounter(const std::string &name);
   Counter *GetCounterPtr(const std::string &name);
@@ -32,6 +36,7 @@ public:
   inline static const char *CLASS_NAME = "CounterManager";
 private:
   std::map<std::string, Counter> mCounters;
+  UnnamedCounters mUnnamedCounters;
   std::vector<ICounterBumper> mCounterBumpers;
 };
 }

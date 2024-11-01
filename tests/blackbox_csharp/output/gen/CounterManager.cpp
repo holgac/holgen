@@ -4,6 +4,7 @@
 namespace holgen_blackbox_csharp {
 CounterManager::CounterManager(CounterManager &&rhs) noexcept {
   mCounters = std::move(rhs.mCounters);
+  mUnnamedCounters = std::move(rhs.mUnnamedCounters);
   mCounterBumpers = std::move(rhs.mCounterBumpers);
 }
 
@@ -13,6 +14,14 @@ const std::map<std::string, Counter> &CounterManager::GetCounters() const {
 
 std::map<std::string, Counter> &CounterManager::GetCounters() {
   return mCounters;
+}
+
+const UnnamedCounters &CounterManager::GetUnnamedCounters() const {
+  return mUnnamedCounters;
+}
+
+UnnamedCounters &CounterManager::GetUnnamedCounters() {
+  return mUnnamedCounters;
 }
 
 const std::vector<ICounterBumper> &CounterManager::GetCounterBumpers() const {
@@ -27,6 +36,10 @@ void CounterManager::SetCounters(const std::map<std::string, Counter> &val) {
   mCounters = val;
 }
 
+void CounterManager::SetUnnamedCounters(const UnnamedCounters &val) {
+  mUnnamedCounters = val;
+}
+
 void CounterManager::SetCounterBumpers(std::vector<ICounterBumper> &&val) {
   mCounterBumpers = std::move(val);
 }
@@ -34,12 +47,14 @@ void CounterManager::SetCounterBumpers(std::vector<ICounterBumper> &&val) {
 bool CounterManager::operator==(const CounterManager &rhs) const {
   return !(
       mCounters != rhs.mCounters ||
+      mUnnamedCounters != rhs.mUnnamedCounters ||
       mCounterBumpers != rhs.mCounterBumpers
   );
 }
 
 CounterManager &CounterManager::operator=(CounterManager &&rhs) noexcept {
   mCounters = std::move(rhs.mCounters);
+  mUnnamedCounters = std::move(rhs.mUnnamedCounters);
   mCounterBumpers = std::move(rhs.mCounterBumpers);
   return *this;
 }
