@@ -104,6 +104,16 @@ public class CounterBumperImpl : ICounterBumper
         return res;
     }
 
+    public override ModuleVersion[] GetVersions(ulong count)
+    {
+        var res = new ModuleVersion[count];
+        for (int i = 0; i < res.Length; i++)
+        {
+            res[i] = new ModuleVersion(0, 1, (uint)i);
+        }
+        return res;
+    }
+
     //
     // public override uint[] SplitNameAndParse(sbyte delim)
     // {

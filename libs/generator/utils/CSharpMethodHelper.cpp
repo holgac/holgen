@@ -682,11 +682,17 @@ void CSharpMethodHelper::GenerateMethodBodyForInterfaceClassMethodCallerReturnin
   csMethod.mBody.Add("var holgenResult = {};", caller);
   if (method.mReturnType.mName != "std::array")
     csMethod.mBody.Add("{} = (ulong)holgenResult.Length;", sizeParameter);
-  csMethod.mBody.Add("IntPtr holgenReturnValue = Marshal.AllocHGlobal({} * (int){});",
+  csMethod.mBody.Add("IntPtr holgenReturnValue;");
+  csMethod.mBody.Add("unsafe");
+  csMethod.mBody.Add("{{");
+  csMethod.mBody.Indent(1);
+  csMethod.mBody.Add("holgenReturnValue = Marshal.AllocHGlobal({} * (int){});",
                      isStringContainer || csRetVal.mName == "IntPtr"
                          ? "IntPtr.Size"
                          : std::format("sizeof({})", csRetVal.ToString()),
                      sizeParameter);
+  csMethod.mBody.Indent(-1);
+  csMethod.mBody.Add("}}");
   if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
     csMethod.mBody.Add("Marshal.Copy(holgenResult, 0, holgenReturnValue, (int){});", sizeParameter);
   } else {
@@ -707,7 +713,9 @@ void CSharpMethodHelper::GenerateMethodBodyForInterfaceClassMethodCallerReturnin
       } else {
         csMethod.mBody.Add(
             "IntPtr destPtr = IntPtr.Add(holgenReturnValue, holgenIterator * IntPtr.Size);");
-        csMethod.mBody.Add("Marshal.StructureToPtr(holgenResult[holgenIterator], destPtr, false);");
+        csMethod.mBody.Add(
+            "Marshal.StructureToPtr(holgenResult[holgenIterator].{}, destPtr, false);",
+            St::CSharpMirroredStructFieldName);
       }
     } else if (csRetVal.mName == "ulong") {
       csMethod.mBody.Add("Marshal.WriteInt64(holgenReturnValue, holgenIterator * sizeof({}), "

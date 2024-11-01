@@ -78,7 +78,11 @@ public abstract class ICounterBumper
   {
     var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SplitNameAndParseSigned(delim);
     holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
-    IntPtr holgenReturnValue = Marshal.AllocHGlobal(sizeof(int) * (int)holgenReturnValueHolgenSize);
+    IntPtr holgenReturnValue;
+    unsafe
+    {
+      holgenReturnValue = Marshal.AllocHGlobal(sizeof(int) * (int)holgenReturnValueHolgenSize);
+    }
     Marshal.Copy(holgenResult, 0, holgenReturnValue, (int)holgenReturnValueHolgenSize);
     return holgenReturnValue;
   }
@@ -87,7 +91,11 @@ public abstract class ICounterBumper
   {
     var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SplitName(delim);
     holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
-    IntPtr holgenReturnValue = Marshal.AllocHGlobal(IntPtr.Size * (int)holgenReturnValueHolgenSize);
+    IntPtr holgenReturnValue;
+    unsafe
+    {
+      holgenReturnValue = Marshal.AllocHGlobal(IntPtr.Size * (int)holgenReturnValueHolgenSize);
+    }
     for (int holgenIterator = 0; holgenIterator < (int)holgenReturnValueHolgenSize; ++holgenIterator)
     {
       IntPtr elemPtr = Marshal.StringToHGlobalAnsi(holgenResult[holgenIterator]);
@@ -100,10 +108,31 @@ public abstract class ICounterBumper
   {
     var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).CloneMultiple(count);
     holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
-    IntPtr holgenReturnValue = Marshal.AllocHGlobal(IntPtr.Size * (int)holgenReturnValueHolgenSize);
+    IntPtr holgenReturnValue;
+    unsafe
+    {
+      holgenReturnValue = Marshal.AllocHGlobal(IntPtr.Size * (int)holgenReturnValueHolgenSize);
+    }
     for (int holgenIterator = 0; holgenIterator < (int)holgenReturnValueHolgenSize; ++holgenIterator)
     {
       Marshal.WriteIntPtr(holgenReturnValue, holgenIterator * IntPtr.Size, holgenResult[holgenIterator].HolgenPtr);
+    }
+    return holgenReturnValue;
+  }
+  public abstract ModuleVersion[] GetVersions(ulong count);
+  public static IntPtr GetVersionsCaller(IntPtr holgenObject, ulong count, out ulong holgenReturnValueHolgenSize)
+  {
+    var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).GetVersions(count);
+    holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
+    IntPtr holgenReturnValue;
+    unsafe
+    {
+      holgenReturnValue = Marshal.AllocHGlobal(sizeof(ModuleVersion.Fields) * (int)holgenReturnValueHolgenSize);
+    }
+    for (int holgenIterator = 0; holgenIterator < (int)holgenReturnValueHolgenSize; ++holgenIterator)
+    {
+      IntPtr destPtr = IntPtr.Add(holgenReturnValue, holgenIterator * IntPtr.Size);
+      Marshal.StructureToPtr(holgenResult[holgenIterator].Data, destPtr, false);
     }
     return holgenReturnValue;
   }
@@ -122,6 +151,7 @@ public abstract class ICounterBumper
   public delegate IntPtr ICounterBumperSplitNameAndParseSignedDelegate(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize);
   public delegate IntPtr ICounterBumperSplitNameDelegate(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize);
   public delegate IntPtr ICounterBumperCloneMultipleDelegate(IntPtr holgenObject, ulong count, out ulong holgenReturnValueHolgenSize);
+  public delegate IntPtr ICounterBumperGetVersionsDelegate(IntPtr holgenObject, ulong count, out ulong holgenReturnValueHolgenSize);
   
   private GCHandle _holgenPtr;
   
