@@ -78,6 +78,7 @@ set(gen_generators
     generators/CSharpProjectGenerator.cpp
     generators/CSharpHolgenMainGenerator.cpp
     generators/CSharpSourceGenerator.cpp
+    generators/CSharpEnumGenerator.cpp
 )
 
 set(gen_utils

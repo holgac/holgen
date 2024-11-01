@@ -7,6 +7,8 @@ set(gen_sources
     gen/ModuleVersion.cpp
     gen/SingletonCounter.cpp
     gen/Vector.cpp
+    gen/BitmapTest.cpp
+    gen/EnumTest.cpp
     gen/DeferredDeleter.cpp
     gen/HolgenDotNetInterface.cpp
     gen/DotNetHost.cpp
