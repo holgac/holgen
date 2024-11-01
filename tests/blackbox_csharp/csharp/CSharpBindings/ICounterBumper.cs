@@ -74,7 +74,7 @@ public abstract class ICounterBumper
     ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SetNameConcatArray(name);
   }
   public abstract int[] SplitNameAndParseSigned(sbyte delim);
-  public static IntPtr SplitNameAndParseSignedCaller(IntPtr holgenObject, sbyte delim, ulong holgenReturnValueHolgenSize)
+  public static IntPtr SplitNameAndParseSignedCaller(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize)
   {
     var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SplitNameAndParseSigned(delim);
     holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
@@ -94,7 +94,7 @@ public abstract class ICounterBumper
   public delegate void ICounterBumperCopyFromDelegate(IntPtr holgenObject, IntPtr other);
   public delegate void ICounterBumperBumpMultipleDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] string[] names, ulong namesHolgenSize, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=4)] uint[] counts, ulong countsHolgenSize);
   public delegate void ICounterBumperSetNameConcatArrayDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeConst=3)] string[] name);
-  public delegate IntPtr ICounterBumperSplitNameAndParseSignedDelegate(IntPtr holgenObject, sbyte delim, ulong holgenReturnValueHolgenSize);
+  public delegate IntPtr ICounterBumperSplitNameAndParseSignedDelegate(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize);
   
   private GCHandle _holgenPtr;
   

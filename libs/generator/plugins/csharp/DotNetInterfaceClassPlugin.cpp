@@ -337,15 +337,12 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &c
                                                                   CSharpClass &csCls,
                                                                   const ClassMethod &method,
                                                                   const CSharpMethod &csMethod) {
-  auto callerMethod =
-      CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::NativeToManaged,
-                                       InteropType::ManagedToNative, true, false, true);
-
-  auto oldName = callerMethod.mName;
-  callerMethod.mName = Naming().CSharpMethodDelegateName(cls.mName, method.mName);
-  callerMethod.mStaticness = Staticness::Static;
-  csCls.mDelegates.push_back(callerMethod);
-  callerMethod.mName = oldName + St::CSharpInterfaceFunctionCallerSuffix;
+  csCls.mDelegates.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                              CSharpMethodType::InterfaceClassMethodDelegate)
+                               .GenerateMethod(method));
+  auto callerMethod = CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                         CSharpMethodType::InterfaceClassMethodCaller)
+                          .GenerateMethod(method);
 
   std::string callSuffix;
   if (!method.IsStatic(cls)) {

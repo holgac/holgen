@@ -388,9 +388,9 @@ void DotNetHostPlugin::GenerateInitializeInterface(CodeBlock &codeBlock, const C
                   method.mName + St::CSharpInterfaceFunctionSuffix);
     codeBlock.Indent(-1);
     codeBlock.Add(
-        "HOLGEN_FAIL_IF(res < 0 || !{0}::{1}, \"Could not get {1} of {0}, was the project "
+        "HOLGEN_FAIL_IF(res < 0 || !{0}::{1}{2}, \"Could not get {1} of {0}, was the project "
         "built after the cs files were generated?!\");",
-        projectCls.mName, method.mName + St::CSharpInterfaceFunctionSuffix);
+        projectCls.mName, method.mName, St::CSharpInterfaceFunctionSuffix);
   }
 }
 

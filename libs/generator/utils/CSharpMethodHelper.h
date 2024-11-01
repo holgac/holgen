@@ -11,6 +11,8 @@ enum class CSharpMethodType {
   WrappedClassCallerMethod,
   WrappedClassCallerConstructor,
   InterfaceClassAbstractMethod,
+  InterfaceClassMethodDelegate,
+  InterfaceClassMethodCaller,
   ModuleInterfaceDelegate,
   ModuleInterfaceAbstractMethod,
 };
