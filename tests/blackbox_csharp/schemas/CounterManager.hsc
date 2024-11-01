@@ -13,6 +13,7 @@ struct ICounterBumper {
     func SetNameConcatArray(string[3] name);
     func SplitNameAndParseSigned(s8 delim) -> vector<s32>;
     func SplitName(s8 delim) -> vector<string>;
+    func CloneMultiple(u64 count) -> vector<ICounterBumper>;
 //    func SplitNameAndParse(s8 delim) -> vector<u32>;
 //    func GetOtherCounters() -> vector<ICounterBumper>;
 //    func SplitNameIntoThree() -> string[3];

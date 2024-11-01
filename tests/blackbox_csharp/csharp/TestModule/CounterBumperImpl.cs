@@ -93,6 +93,17 @@ public class CounterBumperImpl : ICounterBumper
         return Name.Split((char)delim);
     }
 
+    public override ICounterBumper[] CloneMultiple(ulong count)
+    {
+        var res = new CounterBumperImpl[count];
+        for (int i = 0; i < res.Length; i++)
+        {
+            res[i] = new CounterBumperImpl();
+            res[i].Name = $"{Name}{i}";
+        }
+        return res;
+    }
+
     //
     // public override uint[] SplitNameAndParse(sbyte delim)
     // {

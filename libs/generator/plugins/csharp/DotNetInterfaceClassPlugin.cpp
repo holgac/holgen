@@ -255,6 +255,12 @@ void DotNetInterfaceClassPlugin::GenerateReturnStatement(ClassMethod &method,
   auto &underlyingType = method.mReturnType.mTemplateParameters.front();
   auto converted =
       ConvertBasicStatementForReturn("holgenTempValue[holgenIterator]", underlyingType);
+  if (auto underlyingClass = mProject.GetClass(underlyingType.mName)) {
+    if (underlyingClass->mStruct &&
+        underlyingClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      converted = "static_cast<void **>(holgenTempValue)[holgenIterator]";
+    }
+  }
   if (method.mReturnType.mName == "std::array")
     method.mBody.Add("holgenFinalValue[holgenIterator] = {};", converted);
   else

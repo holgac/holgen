@@ -683,8 +683,9 @@ void CSharpMethodHelper::GenerateMethodBodyForInterfaceClassMethodCallerReturnin
   if (method.mReturnType.mName != "std::array")
     csMethod.mBody.Add("{} = (ulong)holgenResult.Length;", sizeParameter);
   csMethod.mBody.Add("IntPtr holgenReturnValue = Marshal.AllocHGlobal({} * (int){});",
-                     isStringContainer ? "IntPtr.Size"
-                                       : std::format("sizeof({})", csRetVal.ToString()),
+                     isStringContainer || csRetVal.mName == "IntPtr"
+                         ? "IntPtr.Size"
+                         : std::format("sizeof({})", csRetVal.ToString()),
                      sizeParameter);
   if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
     csMethod.mBody.Add("Marshal.Copy(holgenResult, 0, holgenReturnValue, (int){});", sizeParameter);
