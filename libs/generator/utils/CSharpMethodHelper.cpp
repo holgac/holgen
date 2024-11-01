@@ -412,37 +412,44 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
   std::stringstream ss;
   bool isFirst = true;
 
+  auto csIt = csMethod.mArguments.begin(), csEnd = csMethod.mArguments.end();
+  auto it = method.mArguments.begin(), end = method.mArguments.end();
+
   if (ShouldPassThisArgument(method)) {
     if (!mClass.IsProxyable()) {
       ss << "ref ";
     }
 
-    ss << VariableRepresentation(CSharpType{mCsClass.mName}, "this");
+    ss << VariableRepresentation(Type{mCsClass.mName}, "this");
     isFirst = false;
+  } else if (ShouldAddThisArgument(method)) {
+    THROW_IF(csIt == csMethod.mArguments.end() && csIt->mName == St::CSharpHolgenObjectArg,
+             "Unexpected method structure")
+    ++csIt;
   }
 
-
-  auto csIt = csMethod.mArguments.begin(), csEnd = csMethod.mArguments.end();
-  auto it = method.mArguments.begin(), end = method.mArguments.end();
-  for (; csIt != csEnd; ++it, ++csIt) {
+  for (; it != end; ++it, ++csIt) {
     if (isFirst) {
       isFirst = false;
     } else {
       ss << ", ";
     }
-    THROW_IF(it == end || it->mName != csIt->mName, "Argument order got messed up!");
+    THROW_IF(csIt == csEnd || it->mName != csIt->mName, "Argument order got messed up!");
     if (auto argClass = mProject.GetClass(it->mType.mName)) {
       // if (mMethodType != InteropType::NativeToManaged && !argClass->IsProxyable()) {
-      if (!argClass->IsProxyable()) {
+      if (!argClass->IsProxyable() &&
+          (mMethodType == CSharpMethodType::WrappedClassCallerConstructor ||
+           mMethodType == CSharpMethodType::WrappedClassCallerMethod)) {
         ss << "ref ";
       }
     }
-    ss << VariableRepresentation(csIt->mType, csIt->mName);
-    // if (!ignoreAuxiliaries) {
-    ss << PassAuxiliaryArguments(it->mType, csIt->mName);
-    // }
+    ss << VariableRepresentation(it->mType, csIt->mName);
+    if (ShouldPassSizeArgument(it->mType)) {
+      ss << std::format(", (ulong){}.Length", csIt->mName);
+    } else if (ShouldHaveSizeArgument(it->mType)) {
+      ++csIt;
+    }
   }
-  // if (mMethodType == CSharpMethodType::InterfaceCallerMethod) {
   if (ShouldPassSizeArgument(method.mReturnType)) {
     if (!isFirst)
       ss << ", ";
@@ -452,6 +459,9 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
       ss << "out ";
     ss << St::CSharpAuxiliaryReturnValueArgName << St::CSharpAuxiliarySizeSuffix;
     isFirst = false;
+  } else if (ShouldHaveSizeArgument(method.mReturnType)) {
+    THROW_IF(csIt == csEnd, "Unexpected method structure");
+    ++csIt;
   }
 
   if (ShouldPassDeleterArgument(method.mReturnType)) {
@@ -459,11 +469,15 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
       ss << ", ";
     }
     ss << "out var " << St::DeferredDeleterArgumentName;
+  } else if (ShouldHaveDeleterArgument(method.mReturnType)) {
+    THROW_IF(csIt == csEnd, "Unexpected method structure");
+    ++csIt;
   }
+  THROW_IF(csIt != csEnd, "Unexpected method structure");
   return ss.str();
 }
 
-std::string CSharpMethodHelper::VariableRepresentation(const CSharpType &type,
+std::string CSharpMethodHelper::VariableRepresentation(const Type &type,
                                                        const std::string &variableName) {
   auto cls = mProject.GetClass(type.mName);
   switch (mMethodType) {
@@ -483,26 +497,43 @@ std::string CSharpMethodHelper::VariableRepresentation(const CSharpType &type,
         return std::format("new {}{{{} = {}}}", type.mName, St::CSharpMirroredStructFieldName,
                            variableName);
     }
-    return std::format("{}{}", type.mType, variableName);
+    return std::format("{}", variableName);
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
     if (cls && cls->IsProxyable()) {
-      return std::format("{}{}.{}", type.mType, variableName,
-                         St::CSharpProxyObjectPointerFieldName);
+      return std::format("{}.{}", variableName, St::CSharpProxyObjectPointerFieldName);
     } else if (cls) {
-      return std::format("{}{}.{}", type.mType, variableName, St::CSharpMirroredStructFieldName);
+      return std::format("{}.{}", variableName, St::CSharpMirroredStructFieldName);
     } else {
-      return std::format("{}{}", type.mType, variableName);
+      return std::format("{}", variableName);
     }
   }
   THROW("Unexpected VariableRepresentation operation for the given method type!");
 }
 
-std::string
-    CSharpMethodHelper::GetWrapperTargetInWrappedClass(const std::string &wrappedMethodName) const {
-  return std::format("Marshal.GetDelegateForFunctionPointer<{}>({})",
-                     mNaming.CSharpMethodDelegateName(mClass.mName, wrappedMethodName),
-                     mNaming.CSharpMethodPointerName(wrappedMethodName));
+std::string CSharpMethodHelper::GetWrapperTargetInWrappedClass(const ClassMethod &method) {
+  switch (mMethodType) {
+  case CSharpMethodType::ModuleInterfaceDelegate:
+  case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::ModuleInterfaceAbstractMethod:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
+  case CSharpMethodType::InterfaceClassMethodDelegate:
+    break;
+  case CSharpMethodType::InterfaceClassMethodCaller:
+    {
+      std::string callSuffix;
+      if (!method.IsStatic(mClass)) {
+        callSuffix = VariableRepresentation(Type{mCsClass.mName}, St::CSharpHolgenObjectArg) + ".";
+      }
+      return callSuffix + method.mName;
+    }
+  case CSharpMethodType::WrappedClassCallerMethod:
+  case CSharpMethodType::WrappedClassCallerConstructor:
+    return std::format("Marshal.GetDelegateForFunctionPointer<{}>({})",
+                       mNaming.CSharpMethodDelegateName(mClass.mName, method.mName),
+                       mNaming.CSharpMethodPointerName(method.mName));
+  }
+  THROW("Unexpected GetWrapperTargetInWrappedClass operation for the given method type!");
 }
 
 void CSharpMethodHelper::GenerateMethodBody(const ClassMethod &method, CSharpMethodBase &csMethod) {
@@ -512,11 +543,10 @@ void CSharpMethodHelper::GenerateMethodBody(const ClassMethod &method, CSharpMet
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
   case CSharpMethodType::InterfaceClassAbstractMethod:
   case CSharpMethodType::InterfaceClassMethodDelegate:
-  // TODO: fix
-  case CSharpMethodType::InterfaceClassMethodCaller:
     return;
   case CSharpMethodType::WrappedClassCallerMethod:
-    return GenerateMethodBodyForWrapperMethod(method, csMethod);
+  case CSharpMethodType::InterfaceClassMethodCaller:
+    return GenerateMethodBodyForMethod(method, csMethod);
   case CSharpMethodType::WrappedClassCallerConstructor:
     return GenerateMethodBodyForConstructor(method, csMethod);
   }
@@ -524,8 +554,7 @@ void CSharpMethodHelper::GenerateMethodBody(const ClassMethod &method, CSharpMet
 
 void CSharpMethodHelper::GenerateMethodBodyForConstructor(const ClassMethod &method,
                                                           CSharpMethodBase &csMethod) {
-  auto caller =
-      ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod);
+  auto caller = ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod);
   if (mClass.IsProxyable()) {
     csMethod.mBody.Add("{} = {};", St::CSharpProxyObjectPointerFieldName, caller);
   } else {
@@ -533,30 +562,30 @@ void CSharpMethodHelper::GenerateMethodBodyForConstructor(const ClassMethod &met
   }
 }
 
-void CSharpMethodHelper::GenerateMethodBodyForWrapperMethod(const ClassMethod &method,
-                                                            CSharpMethodBase &csMethod) {
+void CSharpMethodHelper::GenerateMethodBodyForMethod(const ClassMethod &method,
+                                                     CSharpMethodBase &csMethod) {
   if (method.mReturnType.mName == "void") {
-    GenerateMethodBodyForWrapperMethodReturningVoid(method, csMethod);
+    GenerateMethodBodyForMethodReturningVoid(method, csMethod);
   } else if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
-    GenerateMethodBodyForWrapperMethodReturningClass(method, csMethod, *retClass);
+    GenerateMethodBodyForMethodReturningClass(method, csMethod, *retClass);
   } else if (CSharpHelper::Get().CppTypesConvertibleToCSharpArray.contains(
                  method.mReturnType.mName)) {
-    GenerateMethodBodyForWrapperMethodReturningArray(method, csMethod);
+    GenerateMethodBodyForMethodReturningArray(method, csMethod);
   } else {
-    GenerateMethodBodyForWrapperMethodReturningValue(method, csMethod);
+    GenerateMethodBodyForMethodReturningValue(method, csMethod);
   }
 }
 
-void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningVoid(
-    const ClassMethod &method, CSharpMethodBase &csMethod) {
+void CSharpMethodHelper::GenerateMethodBodyForMethodReturningVoid(const ClassMethod &method,
+                                                                  CSharpMethodBase &csMethod) {
   csMethod.mBody.Add(
-      "{};", ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod));
+      "{};", ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod));
 }
 
-void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningClass(
-    const ClassMethod &method, CSharpMethodBase &csMethod, const Class &cls) {
-  auto caller =
-      ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod);
+void CSharpMethodHelper::GenerateMethodBodyForMethodReturningClass(const ClassMethod &method,
+                                                                   CSharpMethodBase &csMethod,
+                                                                   const Class &cls) {
+  auto caller = ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod);
   if (mMethodType == CSharpMethodType::WrappedClassCallerMethod) {
     if (cls.IsProxyable()) {
       csMethod.mBody.Add("return new {}({});", cls.mName, caller);
@@ -568,27 +597,26 @@ void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningClass(
       csMethod.mBody.Indent(-1);
       csMethod.mBody.Add("}};");
     }
-  } else if (false) {
+  } else if (mMethodType == CSharpMethodType::InterfaceClassMethodCaller) {
     if (cls.IsProxyable()) {
       csMethod.mBody.Add("return {}.{};", caller, St::CSharpProxyObjectPointerFieldName);
     } else {
       csMethod.mBody.Add("return {}.{};", caller, St::CSharpMirroredStructFieldName);
     }
   } else {
+    THROW("Unexpected method type!")
   }
 }
 
-void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningArray(
-    const ClassMethod &method, CSharpMethodBase &csMethod) {
-  auto caller =
-      ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod);
+void CSharpMethodHelper::GenerateMethodBodyForMethodReturningArray(const ClassMethod &method,
+                                                                   CSharpMethodBase &csMethod) {
+  auto caller = ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod);
   auto sizeParameter =
       std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
   auto retVal = method.mReturnType.mTemplateParameters.front();
   auto csRetVal = ConvertReturnType(retVal);
 
-  // if (mMethodType == CSharpMethodType::InterfaceCallerMethod) {
-  if (false) {
+  if (mMethodType == CSharpMethodType::InterfaceClassMethodCaller) {
     csMethod.mBody.Add("var holgenResult = {};", caller);
     if (method.mReturnType.mName != "std::array")
       csMethod.mBody.Add("{} = (ulong)holgenResult.Length;", sizeParameter);
@@ -659,11 +687,10 @@ void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningArray(
   csMethod.mBody.Add("return holgenReturnValue;");
 }
 
-void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningValue(
-    const ClassMethod &method, CSharpMethodBase &csMethod) {
+void CSharpMethodHelper::GenerateMethodBodyForMethodReturningValue(const ClassMethod &method,
+                                                                   CSharpMethodBase &csMethod) {
   csMethod.mBody.Add(
-      "return {};",
-      ConstructWrapperCall(GetWrapperTargetInWrappedClass(method.mName), method, csMethod));
+      "return {};", ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod));
 }
 
 } // namespace holgen

@@ -27,10 +27,6 @@ private:
   CSharpClass &GenerateCSharpClass(Class &cls);
   void GenerateCSharpPointerField(CSharpClass &csCls);
   void GenerateCSharpMethods(const Class &cls, CSharpClass &csCls);
-  CSharpMethod &GenerateCSharpAbstractMethod(const Class &cls, CSharpClass &csCls,
-                                             const ClassMethod &method);
-  void GenerateCSharpMethodCallerMethod(const Class &cls, CSharpClass &csCls,
-                                        const ClassMethod &method, const CSharpMethod &csMethod);
 };
 
 } // namespace holgen

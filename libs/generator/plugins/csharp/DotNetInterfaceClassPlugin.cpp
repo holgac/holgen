@@ -319,43 +319,15 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethods(const Class &cls, CSharpC
     // work with unprocessed methods to retain more info about user intent
     if (!method.mExposeToScript)
       continue;
-    auto &csMethod = GenerateCSharpAbstractMethod(cls, csCls, method);
-    GenerateCSharpMethodCallerMethod(cls, csCls, method, csMethod);
-  }
-}
-
-CSharpMethod &DotNetInterfaceClassPlugin::GenerateCSharpAbstractMethod(const Class &cls,
-                                                                       CSharpClass &csCls,
-                                                                       const ClassMethod &method) {
-  csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
-                                              CSharpMethodType::InterfaceClassAbstractMethod)
-                               .GenerateMethod(method));
-  return csCls.mMethods.back();
-}
-
-void DotNetInterfaceClassPlugin::GenerateCSharpMethodCallerMethod(const Class &cls,
-                                                                  CSharpClass &csCls,
-                                                                  const ClassMethod &method,
-                                                                  const CSharpMethod &csMethod) {
+    csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                                CSharpMethodType::InterfaceClassAbstractMethod)
+                                 .GenerateMethod(method));
   csCls.mDelegates.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
-                                              CSharpMethodType::InterfaceClassMethodDelegate)
-                               .GenerateMethod(method));
-  auto callerMethod = CSharpMethodHelper(mProject, cls, csCls, Naming(),
-                                         CSharpMethodType::InterfaceClassMethodCaller)
-                          .GenerateMethod(method);
-
-  std::string callSuffix;
-  if (!method.IsStatic(cls)) {
-    auto repr = CSharpHelper::Get().VariableRepresentation(
-        CSharpType{csCls.mName}, St::CSharpHolgenObjectArg, mProject, InteropType::NativeToManaged);
-    callSuffix = std::format("{}.", repr);
+                                                CSharpMethodType::InterfaceClassMethodDelegate)
+                                 .GenerateMethod(method));
+  csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                                CSharpMethodType::InterfaceClassMethodCaller)
+                                 .GenerateMethod(method));
   }
-
-  CSharpHelper::Get().GenerateWrapperCall(
-      callerMethod.mBody, mProject, InteropType::NativeToManaged, InteropType::ManagedToNative,
-      callSuffix + method.mName, csCls, method, csMethod, false, true);
-
-  csCls.mMethods.push_back(std::move(callerMethod));
 }
-
 } // namespace holgen
