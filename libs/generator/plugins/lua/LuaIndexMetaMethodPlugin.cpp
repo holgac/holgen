@@ -153,7 +153,7 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
 void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls,
                                                                         StringSwitcher &switcher) {
   for (auto &exposedMethod: cls.mMethods) {
-    if (!exposedMethod.mExposeToScript)
+    if (!exposedMethod.mExposeToLua)
       continue;
     GenerateMethodCaller(cls, exposedMethod);
     switcher.AddCase(exposedMethod.mName, [&](CodeBlock &switchBlock) {

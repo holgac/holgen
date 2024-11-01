@@ -5,6 +5,8 @@
 
 namespace holgen {
 void CSharpEnumGenerator::Run(std::vector<GeneratedContent> &contents) const {
+  if (!mGeneratorSettings.IsFeatureEnabled(GeneratorFeatureFlag::CSharp))
+    return;
   for (auto &cls: mTranslatedProject.mClasses) {
     if (!cls.mEnum)
       continue;

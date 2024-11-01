@@ -69,7 +69,7 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
        .description = "Enable lua bindings (optional, requires lua)"},
       {.identifier = 'c',
        .access_letters = nullptr,
-       .access_name = "csharpRoot",
+       .access_name = "csharp_root",
        .value_name = "VALUE",
        .description = "Directory to put the C# output files (enables hostfxr based csharp "
                       "bindings, optional, requires dotnet)"},
@@ -169,6 +169,8 @@ TranslatorSettings GetTranslatorSettings(const CliOptions &cliOptions) {
 GeneratorSettings GetGeneratorSettings(const CliOptions &cliOptions) {
   GeneratorSettings generatorSettings{cliOptions.mProjectName, cliOptions.mConfigHeader,
                                       cliOptions.mCSharpRoot};
+  if (!cliOptions.mCSharpRoot.empty())
+    generatorSettings.EnableFeature(GeneratorFeatureFlag::CSharp);
   return generatorSettings;
 }
 

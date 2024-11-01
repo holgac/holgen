@@ -220,6 +220,8 @@ Type::Type(const TranslatedProject &project, const DefinitionSource &definitionS
     case TypeDefinitionType::Value:
       mType = PassByType::Value;
       break;
+    case TypeDefinitionType::Unspecified:
+      break;
     }
 
     for (const auto &templateParameter: typeDefinition.mTemplateParameters) {

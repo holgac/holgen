@@ -403,7 +403,7 @@ void DotNetHostPlugin::GenerateInitializeNonInterface(CodeBlock &codeBlock,
 void DotNetHostPlugin::GenerateInitializeInterface(CodeBlock &codeBlock, const Class &projectCls) {
   std::string resPrefix = "auto ";
   for (auto &method: projectCls.mMethods) {
-    if (!method.mExposeToScript)
+    if (!method.mExposeToCSharp)
       continue;
 
     codeBlock.Add("{}res = {}(", resPrefix,
@@ -437,7 +437,7 @@ bool DotNetHostPlugin::ShouldInitializeCFunction(const CFunction &function) {
   // TODO: this is the same as CSharpWrapperGenerator::ShouldProcess. Put it in CSharpHelper
   if (!function.mMethod)
     return false;
-  if (!function.mMethod->mExposeToScript)
+  if (!function.mMethod->mExposeToCSharp)
     return false;
   if (function.mMethod->mFunction &&
       (function.mMethod->mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||

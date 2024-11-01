@@ -106,8 +106,13 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
 
   method.mReturnType.mConstness = functionDefinition.mReturnType.mConstness;
 
-  method.mExposeToScript = functionDefinition.GetAnnotation(Annotations::NoLua) == nullptr &&
+  bool exposeToScript =
+      !functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_Script) &&
       method.mVisibility == Visibility::Public;
+  method.mExposeToCSharp = exposeToScript &&
+      !functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_CSharp);
+  method.mExposeToLua = exposeToScript &&
+      !functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_Lua);
   method.mFunction = &functionDefinition;
 
   for (const auto &funcArg: functionDefinition.mArguments) {

@@ -98,7 +98,8 @@ struct ClassMethod : MethodBase {
   Staticness mStaticness;
   Constexprness mConstexprness = Constexprness::NotConstexpr;
   Virtuality mVirtuality = Virtuality::NotVirtual;
-  bool mExposeToScript = false;
+  bool mExposeToCSharp = false;
+  bool mExposeToLua = false;
   bool mFunctionPointer = false;
   [[nodiscard]] const TemplateParameter *GetTemplateParameter(const std::string &name) const;
   [[nodiscard]] bool IsStatic(const Class &cls) const;

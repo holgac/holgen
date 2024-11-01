@@ -44,7 +44,8 @@ void BitmapFieldPlugin::AddMethod(Class &cls, const ClassField &field, const Cla
   method.mBody.Add("{}{}.{}({}(val));", isMutator ? "" : "return ", field.mName, name,
                    fieldClass.mName);
 
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
+  method.mExposeToLua = true;
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

@@ -81,7 +81,7 @@ struct TestData {
         "GetInnerStructFromUuid",
         Type{"InnerStruct", PassByType::Pointer, Constness::Const},
     };
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     const char *body = R"R(
 auto it = mInnerStructsUuidIndex.find(key);
 if (it == mInnerStructsUuidIndex.end())
@@ -90,7 +90,7 @@ return &mInnerStructs[it->second];
     )R";
     method.mArguments.emplace_back("key", Type{"uint64_t"});
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromUuid", Constness::Const), method, body);
-    method.mExposeToScript = false;
+    method.mExposeToCSharp = false;
     method.mReturnType.mConstness = Constness::NotConst;
     method.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromUuid", Constness::NotConst), method,
@@ -104,7 +104,7 @@ return &mInnerStructs[it->second];
         "GetInnerStructFromGuid",
         Type{"InnerStruct", PassByType::Pointer, Constness::Const},
     };
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     const char *body = R"R(
 auto it = mInnerStructsGuidIndex.find(key);
 if (it == mInnerStructsGuidIndex.end())
@@ -114,7 +114,7 @@ return &mInnerStructs[it->second];
     method.mArguments.emplace_back("key",
                                    Type{"std::string", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromGuid", Constness::Const), method, body);
-    method.mExposeToScript = false;
+    method.mExposeToCSharp = false;
     method.mReturnType.mConstness = Constness::NotConst;
     method.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromGuid", Constness::NotConst), method,
@@ -148,7 +148,7 @@ struct TestData {
         "GetInnerStructFromUuid",
         Type{"InnerStruct", PassByType::Pointer, Constness::Const},
     };
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     const char *body = R"R(
 auto it = mInnerStructsUuidIndex.find(key);
 if (it == mInnerStructsUuidIndex.end())
@@ -157,7 +157,7 @@ return &mInnerStructs.at(it->second);
     )R";
     method.mArguments.emplace_back("key", Type{"uint64_t"});
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromUuid", Constness::Const), method, body);
-    method.mExposeToScript = false;
+    method.mExposeToCSharp = false;
     method.mReturnType.mConstness = Constness::NotConst;
     method.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromUuid", Constness::NotConst), method,
@@ -171,7 +171,7 @@ return &mInnerStructs.at(it->second);
         "GetInnerStructFromGuid",
         Type{"InnerStruct", PassByType::Pointer, Constness::Const},
     };
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     const char *body = R"R(
 auto it = mInnerStructsGuidIndex.find(key);
 if (it == mInnerStructsGuidIndex.end())
@@ -181,7 +181,7 @@ return &mInnerStructs.at(it->second);
     method.mArguments.emplace_back("key",
                                    Type{"std::string", PassByType::Reference, Constness::Const});
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromGuid", Constness::Const), method, body);
-    method.mExposeToScript = false;
+    method.mExposeToCSharp = false;
     method.mReturnType.mConstness = Constness::NotConst;
     method.mConstness = Constness::NotConst;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructFromGuid", Constness::NotConst), method,
@@ -403,7 +403,7 @@ struct TestData {
         ClassMethod{"GetInnerStruct", Type{"InnerStruct", PassByType::Pointer, Constness::Const},
                     Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("idx", Type{"size_t"});
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     const char *body = R"R(
 if (idx >= mInnerStructs.size())
   return nullptr;
@@ -412,7 +412,7 @@ return &mInnerStructs[idx];
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStruct", Constness::Const), method, body);
     method.mReturnType.mConstness = Constness::NotConst;
     method.mConstness = Constness::NotConst;
-    method.mExposeToScript = false;
+    method.mExposeToCSharp = false;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStruct", Constness::NotConst), method, body);
   }
 }
@@ -440,7 +440,7 @@ struct TestData {
         ClassMethod{"GetInnerStruct", Type{"InnerStruct", PassByType::Pointer, Constness::Const},
                     Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("idx", Type{"int32_t"});
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     const char *body = R"R(
 if (size_t(uint32_t(idx)) >= mInnerStructs.size())
   return nullptr;
@@ -449,7 +449,7 @@ return &mInnerStructs[size_t(uint32_t(idx))];
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStruct", Constness::Const), method, body);
     method.mReturnType.mConstness = Constness::NotConst;
     method.mConstness = Constness::NotConst;
-    method.mExposeToScript = false;
+    method.mExposeToCSharp = false;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStruct", Constness::NotConst), method, body);
   }
 }
@@ -474,7 +474,7 @@ struct TestData {
   {
     auto method =
         ClassMethod{"GetInnerStructCount", Type{"size_t"}, Visibility::Public, Constness::Const};
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructCount", Constness::Const), method, R"R(
 return mInnerStructs.size();
     )R");
@@ -501,7 +501,7 @@ struct TestData {
   {
     auto method =
         ClassMethod{"GetInnerStructCount", Type{"size_t"}, Visibility::Public, Constness::Const};
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStructCount", Constness::Const), method, R"R(
 return mInnerStructs.size();
     )R");
@@ -528,7 +528,7 @@ struct TestData {
     auto method =
         ClassMethod{"DeleteInnerStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("idx", Type{"size_t"});
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
 if (idx != mInnerStructs.size() - 1) {
   mInnerStructs[idx] = std::move(mInnerStructs.back());
@@ -580,7 +580,7 @@ struct TestData {
   {
     auto method =
         ClassMethod{"DeleteInnerStruct", Type{"void"}, Visibility::Public, Constness::NotConst};
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
     method.mArguments.emplace_back("idx", Type{"size_t"});
     helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
 auto ptr = GetInnerStruct(idx);

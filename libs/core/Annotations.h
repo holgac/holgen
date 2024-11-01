@@ -54,6 +54,7 @@ public:
   inline static const std::string No = "no";
   inline static const std::string No_CSharp = "csharp";
   inline static const std::string No_Script = "script";
+  inline static const std::string No_Lua = "lua";
 
   /**
    * An annotation that describes the runtime-loaded dotnet modules of this type. The runtime is

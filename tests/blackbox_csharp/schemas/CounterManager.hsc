@@ -38,6 +38,10 @@ struct Counter {
     u32 val;
 }
 
+//struct UnnamedCounters {
+//    vector<Counter> counters;
+//}
+
 @singleton
 struct CounterManager {
 //    func NewCalculator(string name, ICalculator calculator nullable);
@@ -45,6 +49,7 @@ struct CounterManager {
 //    vector<unique_ptr<ICalculator>> calculators;
     @no(script)
     map<string, Counter> counters;
+    // UnnamedCounters unnamedCounters;
     func GetCounter(string name) -> Counter ref;
     func GetCounterPtr(string name) -> Counter nullable;
 

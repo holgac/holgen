@@ -32,7 +32,7 @@ struct TestData {
   method.mArguments.emplace_back("a3",
                                  Type{"InnerStruct", PassByType::Reference, Constness::Const});
   method.mUserDefined = true;
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
 }
 
@@ -54,7 +54,7 @@ struct TestData {
   method.mArguments.emplace_back("a2", Type{"std::string", PassByType::Reference});
   method.mArguments.emplace_back("a3", Type{"InnerStruct", PassByType::Reference});
   method.mUserDefined = true;
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
 }
 
@@ -75,7 +75,7 @@ struct TestData {
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("a1", Type{"int32_t", PassByType::Value, Constness::Const});
   method.mUserDefined = true;
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
 }
 
@@ -93,7 +93,7 @@ struct TestData {
                   Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mUserDefined = true;
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
 }
 
@@ -110,7 +110,7 @@ struct TestData {
                             Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mUserDefined = true;
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
 }
 
@@ -127,7 +127,7 @@ struct TestData {
                             Visibility::Public, Constness::NotConst};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mUserDefined = true;
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::NotConst), method);
 }
 

@@ -24,9 +24,6 @@ void ClassFieldSetterPlugin::Run() {
 
       auto method = ClassMethod{Naming().FieldSetterNameInCpp(*field.mField), Type{"void"},
                                 Visibility::Public, Constness::NotConst};
-      method.mExposeToScript =
-          !field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Script) &&
-          cls.IsProxyable();
       auto &arg = method.mArguments.emplace_back("val", field.mType);
       if (field.mType.mType == PassByType::Pointer)
         arg.mType.mType = PassByType::Pointer;
@@ -61,6 +58,12 @@ void ClassFieldSetterPlugin::Run() {
                                                     Annotations::MethodOption_Protected)) {
         method.mVisibility = Visibility::Protected;
       }
+      method.mExposeToCSharp =
+          !field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Script) &&
+          !field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp) &&
+          cls.IsProxyable() && method.mVisibility == Visibility::Public &&
+          field.mField->mType.mName != St::UserData &&
+          !cls.mStruct->GetAnnotation(Annotations::LuaFuncTable);
       Validate().NewMethod(cls, method);
       cls.mMethods.push_back(std::move(method));
     }

@@ -25,9 +25,6 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
   }
   if (auto cls = project.GetClass(type.mName)) {
     auto res = type;
-    THROW_IF(res.mType == PassByType::Value && cls->IsProxyable() &&
-                 (!cls->mStruct || !cls->mStruct->GetAnnotation(Annotations::Interface)),
-             "Proxy class {} is returned by value in {}", cls->mName, definitionSource);
     THROW_IF(isReturnType && res.mType != PassByType::Value && cls->mStruct &&
                  cls->mStruct->GetAnnotation(Annotations::Interface),
              "Interface class {} is NOT returned by value in {}", cls->mName, definitionSource);

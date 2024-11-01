@@ -76,7 +76,8 @@ void DotNetInterfaceClassPlugin::GenerateConstructorsForCpp(Class &cls) {
 void DotNetInterfaceClassPlugin::GenerateFunctionForCpp(
     Class &cls, const FunctionDefinition &functionDefinition) {
   auto method = GenerateFunction(cls, functionDefinition, false, false);
-  method.mExposeToScript = true;
+  method.mExposeToCSharp = true;
+  method.mExposeToLua = true;
 
   CodeBlock preWork, postWork;
   auto caller = GenerateFunctionPointerCall(cls, method, preWork);
@@ -89,7 +90,8 @@ void DotNetInterfaceClassPlugin::GenerateFunctionForCpp(
 void DotNetInterfaceClassPlugin::GenerateFunctionPointerForCpp(
     Class &cls, const FunctionDefinition &functionDefinition) {
   auto method = GenerateFunction(cls, functionDefinition, true, true);
-  method.mExposeToScript = false;
+  method.mExposeToCSharp = false;
+  method.mExposeToLua = false;
   method.mName += St::CSharpInterfaceFunctionSuffix;
   method.mFunctionPointer = true;
   method.mVisibility = Visibility::Private;
@@ -253,8 +255,7 @@ void DotNetInterfaceClassPlugin::GenerateReturnStatement(ClassMethod &method,
                    sizeParameter);
   method.mBody.Indent(1);
   auto &underlyingType = method.mReturnType.mTemplateParameters.front();
-  auto converted =
-      ConvertArrayElemStatement("holgenTempValue", "holgenIterator", underlyingType);
+  auto converted = ConvertArrayElemStatement("holgenTempValue", "holgenIterator", underlyingType);
   if (method.mReturnType.mName == "std::array")
     method.mBody.Add("holgenFinalValue[holgenIterator] = {};", converted);
   else
@@ -291,8 +292,8 @@ std::string DotNetInterfaceClassPlugin::ConvertBasicStatementForReturn(const std
 }
 
 std::string DotNetInterfaceClassPlugin::ConvertArrayElemStatement(const std::string &statement,
-                                                                   const std::string &iterator,
-                                                                   const Type &type) {
+                                                                  const std::string &iterator,
+                                                                  const Type &type) {
   THROW_IF(type.mName == "void", "voids cant be returned");
   if (auto retClass = mProject.GetClass(type.mName)) {
     if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
@@ -343,7 +344,7 @@ void DotNetInterfaceClassPlugin::GenerateCSharpPointerField(CSharpClass &csCls) 
 void DotNetInterfaceClassPlugin::GenerateCSharpMethods(const Class &cls, CSharpClass &csCls) {
   for (auto &method: cls.mMethods) {
     // work with unprocessed methods to retain more info about user intent
-    if (!method.mExposeToScript)
+    if (!method.mExposeToCSharp)
       continue;
     csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
                                                 CSharpMethodType::InterfaceClassAbstractMethod)

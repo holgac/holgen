@@ -65,8 +65,10 @@ void ContainerFieldPlugin::ProcessIndex(Class &cls, const ClassField &field,
                     Type{mProject, field.mField->mDefinitionSource, underlyingType,
                          PassByType::Pointer, constness},
                     Visibility::Public, constness};
-    if (i == 0)
-      method.mExposeToScript = true;
+    if (i == 0) {
+      method.mExposeToCSharp = true;
+      method.mExposeToLua = true;
+    }
     method.mArguments.emplace_back(
         "key",
         Type{mProject, fieldIndexedOn.mField->mDefinitionSource, fieldIndexedOn.mField->mType});
@@ -132,7 +134,8 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     method.mVisibility = Visibility::Protected;
   } else if (!useMoveRef) {
     // TODO: change to useMoveRef after implementing ReadFromLua
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
+    method.mExposeToLua = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Add,
                                          Annotations::MethodOption_Custom)) {
@@ -248,7 +251,8 @@ void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) 
                                                   Annotations::MethodOption_Protected)) {
       method.mVisibility = Visibility::Protected;
     } else if (i == 0) {
-      method.mExposeToScript = true;
+      method.mExposeToCSharp = true;
+      method.mExposeToLua = true;
     }
     if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
                                            Annotations::MethodOption_Custom)) {
@@ -293,7 +297,8 @@ void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field)
                                                 Annotations::MethodOption_Protected)) {
     method.mVisibility = Visibility::Protected;
   } else {
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
+    method.mExposeToLua = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Count,
                                          Annotations::MethodOption_Custom)) {
@@ -339,7 +344,8 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
                                                 Annotations::MethodOption_Protected)) {
     method.mVisibility = Visibility::Protected;
   } else {
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
+    method.mExposeToLua = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Delete,
                                          Annotations::MethodOption_Custom)) {
@@ -425,7 +431,8 @@ void ContainerFieldPlugin::GenerateHasElem(Class &cls, const ClassField &field) 
                                                 Annotations::MethodOption_Protected)) {
     method.mVisibility = Visibility::Protected;
   } else {
-    method.mExposeToScript = true;
+    method.mExposeToCSharp = true;
+    method.mExposeToLua = true;
   }
   if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Has,
                                          Annotations::MethodOption_Custom)) {

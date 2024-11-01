@@ -23,7 +23,7 @@ bool CWrappersPlugin::ShouldProcess(const Class &cls) const {
 
 void CWrappersPlugin::ProcessClass(Class &cls) const {
   for (auto &method: cls.mMethods) {
-    if (!method.mExposeToScript)
+    if (!method.mExposeToCSharp)
       continue;
     WrapMethod(cls, method);
   }

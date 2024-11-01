@@ -183,7 +183,7 @@ bool DotNetWrapperPlugin::ShouldProcess(const Class &cls) const {
 }
 
 bool DotNetWrapperPlugin::ShouldProcess(const ClassMethod &method) const {
-  if (!method.mExposeToScript)
+  if (!method.mExposeToCSharp)
     return false;
   if (!method.mFunction)
     return true;

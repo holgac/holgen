@@ -31,6 +31,7 @@ enum class TypeDefinitionType {
   Value,
   Pointer,
   Reference,
+  Unspecified,
 };
 
 struct TypeDefinition {
@@ -38,7 +39,7 @@ struct TypeDefinition {
   std::vector<TypeDefinition> mTemplateParameters;
   // positive values indicate array; 0 means a regular value
   std::string mArraySize;
-  TypeDefinitionType mType;
+  TypeDefinitionType mType = TypeDefinitionType::Unspecified;
   bool operator==(const TypeDefinition &rhs) const;
 };
 

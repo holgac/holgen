@@ -31,7 +31,8 @@ struct TestData {
   auto method = ClassMethod{"TestFunction", Type{"void"}, Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mExposeToScript = true;
+  method.mExposeToLua = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), void(), "Calling unset TestFunction function");
 lua_getglobal(luaState, mLuaFuncHandle_TestFunction.c_str());
@@ -60,7 +61,8 @@ struct TestData {
   auto method = ClassMethod{"TestFunction", Type{"void"}, Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mExposeToScript = true;
+  method.mExposeToLua = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), void(), "Calling unset TestFunction function");
 lua_getglobal(luaState, "Table");
@@ -92,7 +94,8 @@ struct TestData {
   auto method = ClassMethod{"TestFunction", Type{"uint32_t"}, Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mExposeToScript = true;
+  method.mExposeToLua = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");
 lua_getglobal(luaState, mLuaFuncHandle_TestFunction.c_str());
@@ -125,7 +128,8 @@ struct TestData {
   auto method = ClassMethod{"TestFunction", Type{"uint32_t"}, Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mExposeToScript = true;
+  method.mExposeToLua = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");
 lua_getglobal(luaState, "Table");
@@ -174,7 +178,8 @@ struct TestData {
                                  Type{"std::string", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("a3",
                                  Type{"InnerStruct", PassByType::Reference, Constness::Const});
-  method.mExposeToScript = true;
+  method.mExposeToLua = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");
 lua_getglobal(luaState, mLuaFuncHandle_TestFunction.c_str());
@@ -215,7 +220,8 @@ struct TestData {
                             Visibility::Public, Constness::Const};
   method.mFunction = cls->mStruct->GetFunction("TestFunction");
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-  method.mExposeToScript = true;
+  method.mExposeToLua = true;
+  method.mExposeToCSharp = true;
   helpers::ExpectEqual(*cls->GetMethod("TestFunction", Constness::Const), method, R"R(
 HOLGEN_WARN_AND_RETURN_IF(mLuaFuncHandle_TestFunction.empty(), {}, "Calling unset TestFunction function");
 lua_getglobal(luaState, mLuaFuncHandle_TestFunction.c_str());
