@@ -365,8 +365,7 @@ bool CSharpMethodHelper::ShouldHaveDeleterArgument(const Type &returnType) {
   case CSharpMethodType::InterfaceClassMethodDelegate:
     return false;
   case CSharpMethodType::WrappedClassDelegate:
-    return returnType.mName == "std::array" || returnType.mName == "std::vector" ||
-        returnType.mName == "std::span";
+    return CSharpHelper::Get().NeedsDeleterArgument(returnType);
   }
   THROW("Unexpected method type!");
 }
@@ -384,8 +383,7 @@ bool CSharpMethodHelper::ShouldPassDeleterArgument(const Type &returnType) {
     break;
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
-    return returnType.mName == "std::array" || returnType.mName == "std::vector" ||
-        returnType.mName == "std::span";
+    return CSharpHelper::Get().NeedsDeleterArgument(returnType);
   }
   THROW("Unexpected method type!");
 }

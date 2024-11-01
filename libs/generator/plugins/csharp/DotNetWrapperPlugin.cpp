@@ -96,7 +96,7 @@ void DotNetWrapperPlugin::ProcessProxyFields(const Class &cls, CSharpClass &csCl
       continue;
     auto &csField = csCls.mFields.emplace_back(
         Naming().FieldNameInCSharp(field.mField->mName),
-        CSharpHelper::Get().ConvertType(field.mType, mProject, InteropType::Internal, false),
+        CSharpHelper::Get().ConvertFieldType(field.mType, mProject, InteropType::Internal, false),
         CSharpVisibility::Public);
     if (getter) {
       csField.mGetter = CSharpMethodBase{};
@@ -136,7 +136,7 @@ void DotNetWrapperPlugin::ProcessMirror(const Class &cls, CSharpClass &csCls) co
       continue;
     auto fieldName = field.mField ? St::Capitalize(field.mField->mName) : field.mName;
     auto fieldType =
-        CSharpHelper::Get().ConvertType(field.mType, mProject, InteropType::ManagedToNative, false);
+        CSharpHelper::Get().ConvertFieldType(field.mType, mProject, InteropType::ManagedToNative, false);
     innerStruct.mFields.emplace_back(fieldName, fieldType, CSharpVisibility::Public);
     auto &csField = csCls.mFields.emplace_back(fieldName, fieldType, CSharpVisibility::Public);
     csField.mDirectTo = std::format("{}.{}", St::CSharpMirroredStructFieldName, fieldName);
