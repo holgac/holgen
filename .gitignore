@@ -7,7 +7,6 @@ cmake-build-release/
 tests/blackbox/.run/
 tests/blackbox/.idea/
 tests/blackbox_csharp/.idea/
-tests/blackbox_csharp/output/
 tests/blackbox_csharp/csharp/CSharpBindings/bin
 tests/blackbox_csharp/csharp/CSharpBindings/obj
 tests/blackbox_csharp/csharp/TestModule/obj
