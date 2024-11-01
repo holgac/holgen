@@ -3,7 +3,7 @@
 namespace CSharpBindings;
 
 [Flags]
-enum BitmapTest : ulong
+public enum BitmapTest : ulong
 {
   Entry1 = 1,
   Entry2 = 2,

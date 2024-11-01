@@ -107,6 +107,7 @@ public sealed class DotNetModule : IDotNetModule
             c.Bump(_instance._bumpAmount * 2);
         }
     }
+
     public static void StringArraysManagedToNative()
     {
         var c = CounterManager.GetCounter(_instance._counterName);
@@ -134,6 +135,16 @@ public sealed class DotNetModule : IDotNetModule
     }
 
     public static void TrackedCSharpObject(uint addCount)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static EnumTest EnumArgumentAndReturnValue(EnumTest value)
+    {
+        return EnumTest.Entry1;
+    }
+
+    public static string EnumVectorArgumentAndReturnValue()
     {
         throw new NotImplementedException();
     }

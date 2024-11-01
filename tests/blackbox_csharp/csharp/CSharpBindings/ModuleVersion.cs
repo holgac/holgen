@@ -125,7 +125,24 @@ public class ModuleVersion
     DeferredDeleter.Perform(holgenDeferredDeleter);
     return holgenReturnValue;
   }
-  public static void HolgenInitialize(ModuleVersionConstructDelegate moduleVersionConstructDelegate, ModuleVersionConstructDoubleDelegate moduleVersionConstructDoubleDelegate, ModuleVersionGetSumDelegate moduleVersionGetSumDelegate, ModuleVersionBumpRevisionDelegate moduleVersionBumpRevisionDelegate, ModuleVersionSumOfSelfAndDelegate moduleVersionSumOfSelfAndDelegate, ModuleVersionGetNextRevisionsDelegate moduleVersionGetNextRevisionsDelegate, ModuleVersionGetNextThreeRevisionsDelegate moduleVersionGetNextThreeRevisionsDelegate, ModuleVersionGetDataAsVectorDelegate moduleVersionGetDataAsVectorDelegate, ModuleVersionGetDataAsArrayDelegate moduleVersionGetDataAsArrayDelegate, ModuleVersionGetDataAsSignedVectorDelegate moduleVersionGetDataAsSignedVectorDelegate)
+  public EnumTest[] GetEnums(EnumTest[] value)
+  {
+    var holgenResult = Marshal.GetDelegateForFunctionPointer<ModuleVersionGetEnumsDelegate>(_getEnumsImpl)(ref this.Data, value, (ulong)value.Length, out var holgenReturnValueHolgenSize, out var holgenDeferredDeleter);
+    var holgenReturnValueHolgenSizeInt = (int)holgenReturnValueHolgenSize;
+    var holgenReturnValue = new EnumTest[holgenReturnValueHolgenSizeInt];
+    Span<EnumTest> holgenResultSpan;
+    unsafe
+    {
+      holgenResultSpan = new Span<EnumTest>(holgenResult.ToPointer(), holgenReturnValueHolgenSizeInt);
+    }
+    for (var i = 0; i < holgenReturnValueHolgenSizeInt; ++i)
+    {
+      holgenReturnValue[i] = holgenResultSpan[i];;
+    }
+    DeferredDeleter.Perform(holgenDeferredDeleter);
+    return holgenReturnValue;
+  }
+  public static void HolgenInitialize(ModuleVersionConstructDelegate moduleVersionConstructDelegate, ModuleVersionConstructDoubleDelegate moduleVersionConstructDoubleDelegate, ModuleVersionGetSumDelegate moduleVersionGetSumDelegate, ModuleVersionBumpRevisionDelegate moduleVersionBumpRevisionDelegate, ModuleVersionSumOfSelfAndDelegate moduleVersionSumOfSelfAndDelegate, ModuleVersionGetNextRevisionsDelegate moduleVersionGetNextRevisionsDelegate, ModuleVersionGetNextThreeRevisionsDelegate moduleVersionGetNextThreeRevisionsDelegate, ModuleVersionGetDataAsVectorDelegate moduleVersionGetDataAsVectorDelegate, ModuleVersionGetDataAsArrayDelegate moduleVersionGetDataAsArrayDelegate, ModuleVersionGetDataAsSignedVectorDelegate moduleVersionGetDataAsSignedVectorDelegate, ModuleVersionGetEnumsDelegate moduleVersionGetEnumsDelegate)
   {
     _constructImpl = Marshal.GetFunctionPointerForDelegate(moduleVersionConstructDelegate);
     _constructDoubleImpl = Marshal.GetFunctionPointerForDelegate(moduleVersionConstructDoubleDelegate);
@@ -137,6 +154,7 @@ public class ModuleVersion
     _getDataAsVectorImpl = Marshal.GetFunctionPointerForDelegate(moduleVersionGetDataAsVectorDelegate);
     _getDataAsArrayImpl = Marshal.GetFunctionPointerForDelegate(moduleVersionGetDataAsArrayDelegate);
     _getDataAsSignedVectorImpl = Marshal.GetFunctionPointerForDelegate(moduleVersionGetDataAsSignedVectorDelegate);
+    _getEnumsImpl = Marshal.GetFunctionPointerForDelegate(moduleVersionGetEnumsDelegate);
   }
   
   public delegate ModuleVersion.Fields ModuleVersionConstructDelegate(ushort major, ushort minor, uint revision);
@@ -149,7 +167,8 @@ public class ModuleVersion
   public delegate IntPtr ModuleVersionGetDataAsVectorDelegate(ref ModuleVersion.Fields holgenObject, out ulong holgenReturnValueHolgenSize, out IntPtr holgenDeferredDeleter);
   public delegate IntPtr ModuleVersionGetDataAsArrayDelegate(ref ModuleVersion.Fields holgenObject, out IntPtr holgenDeferredDeleter);
   public delegate IntPtr ModuleVersionGetDataAsSignedVectorDelegate(ref ModuleVersion.Fields holgenObject, out ulong holgenReturnValueHolgenSize, out IntPtr holgenDeferredDeleter);
-  public delegate void ModuleVersionHolgenInitializeDelegate(ModuleVersionConstructDelegate moduleVersionConstructDelegate, ModuleVersionConstructDoubleDelegate moduleVersionConstructDoubleDelegate, ModuleVersionGetSumDelegate moduleVersionGetSumDelegate, ModuleVersionBumpRevisionDelegate moduleVersionBumpRevisionDelegate, ModuleVersionSumOfSelfAndDelegate moduleVersionSumOfSelfAndDelegate, ModuleVersionGetNextRevisionsDelegate moduleVersionGetNextRevisionsDelegate, ModuleVersionGetNextThreeRevisionsDelegate moduleVersionGetNextThreeRevisionsDelegate, ModuleVersionGetDataAsVectorDelegate moduleVersionGetDataAsVectorDelegate, ModuleVersionGetDataAsArrayDelegate moduleVersionGetDataAsArrayDelegate, ModuleVersionGetDataAsSignedVectorDelegate moduleVersionGetDataAsSignedVectorDelegate);
+  public delegate IntPtr ModuleVersionGetEnumsDelegate(ref ModuleVersion.Fields holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] EnumTest[] value, ulong valueHolgenSize, out ulong holgenReturnValueHolgenSize, out IntPtr holgenDeferredDeleter);
+  public delegate void ModuleVersionHolgenInitializeDelegate(ModuleVersionConstructDelegate moduleVersionConstructDelegate, ModuleVersionConstructDoubleDelegate moduleVersionConstructDoubleDelegate, ModuleVersionGetSumDelegate moduleVersionGetSumDelegate, ModuleVersionBumpRevisionDelegate moduleVersionBumpRevisionDelegate, ModuleVersionSumOfSelfAndDelegate moduleVersionSumOfSelfAndDelegate, ModuleVersionGetNextRevisionsDelegate moduleVersionGetNextRevisionsDelegate, ModuleVersionGetNextThreeRevisionsDelegate moduleVersionGetNextThreeRevisionsDelegate, ModuleVersionGetDataAsVectorDelegate moduleVersionGetDataAsVectorDelegate, ModuleVersionGetDataAsArrayDelegate moduleVersionGetDataAsArrayDelegate, ModuleVersionGetDataAsSignedVectorDelegate moduleVersionGetDataAsSignedVectorDelegate, ModuleVersionGetEnumsDelegate moduleVersionGetEnumsDelegate);
   
   private static IntPtr _constructImpl = IntPtr.Zero;
   private static IntPtr _constructDoubleImpl = IntPtr.Zero;
@@ -161,5 +180,6 @@ public class ModuleVersion
   private static IntPtr _getDataAsVectorImpl = IntPtr.Zero;
   private static IntPtr _getDataAsArrayImpl = IntPtr.Zero;
   private static IntPtr _getDataAsSignedVectorImpl = IntPtr.Zero;
+  private static IntPtr _getEnumsImpl = IntPtr.Zero;
   
 }

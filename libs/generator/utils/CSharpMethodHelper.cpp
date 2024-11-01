@@ -9,7 +9,7 @@ CSharpMethod CSharpMethodHelper::GenerateMethod(const ClassMethod &method) {
   if (ShouldAddThisArgument(method)) {
     auto &arg = csMethod.mArguments.emplace_back(St::CSharpHolgenObjectArg,
                                                  ConvertArgumentType(Type{mClass.mName}));
-    if (!mClass.IsProxyable())
+    if (!mClass.IsProxyable() && !mClass.mEnum)
       arg.mType.mType = CSharpPassByType::Ref;
   }
   PopulateArguments(csMethod.mArguments, method.mArguments);
@@ -66,6 +66,26 @@ void CSharpMethodHelper::SetMethodProperties(const ClassMethod &method, CSharpMe
 }
 
 CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
+  if (type.mName == "char" && type.mType == PassByType::Pointer &&
+      type.mConstness == Constness::Const) {
+    switch (mMethodType) {
+    case CSharpMethodType::WrappedClassDelegate:
+    case CSharpMethodType::WrappedClassCallerMethod:
+    case CSharpMethodType::WrappedClassCallerConstructor:
+    case CSharpMethodType::InterfaceClassAbstractMethod:
+      THROW("{} is not a valid type for this method type!", type.ToString(true));
+    case CSharpMethodType::ModuleInterfaceDelegate:
+    case CSharpMethodType::ModuleInterfaceAbstractMethod:
+    case CSharpMethodType::InterfaceClassMethodCaller:
+    case CSharpMethodType::InterfaceClassMethodDelegate:
+      break;
+    }
+    auto out = CSharpType{"string"};
+    out.mArrayDepth = type.mPointerDepth;
+    THROW_IF(out.mArrayDepth > 1, "{} cannot be represented in c#: pointer level too deep!",
+             type.ToString(true));
+    return out;
+  }
   auto it = CSharpHelper::Get().CppTypeToCSharpType.find(type.mName);
   if (it != CSharpHelper::Get().CppTypeToCSharpType.end()) {
     THROW_IF(type.mType == PassByType::Pointer,
@@ -85,6 +105,8 @@ CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
     case CSharpMethodType::InterfaceClassMethodDelegate:
       if (cls->IsProxyable()) {
         return CSharpType{"IntPtr"};
+      } else if (cls->mEnum) {
+        return CSharpType{cls->mName};
       } else {
         return CSharpType{std::format("{}.{}", cls->mName, St::CSharpMirroredStructStructName)};
       }
@@ -108,7 +130,7 @@ CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
       return CSharpType{"IntPtr"};
     }
   }
-  THROW("Unhandled type: {}", type.ToString(true, true));
+  THROW("Unhandled type: {}", type.ToString(true, false));
 }
 
 CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
@@ -151,9 +173,10 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
 
   auto it = CSharpHelper::Get().CppTypeToCSharpType.find(type.mName);
   if (it != CSharpHelper::Get().CppTypeToCSharpType.end()) {
-    THROW_IF(type.mType == PassByType::Pointer,
-             "Primitive pointer return types are not supported!");
-    return CSharpType{it->second};
+    auto out = CSharpType{it->second};
+    if (type.mType == PassByType::Pointer)
+      out.mType = CSharpPassByType::Out;
+    return out;
   }
   if (auto cls = mProject.GetClass(type.mName)) {
     switch (mMethodType) {
@@ -168,6 +191,8 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
     case CSharpMethodType::ModuleInterfaceAbstractMethod:
       if (cls->IsProxyable()) {
         return CSharpType{"IntPtr"};
+      } else if (cls->mEnum) {
+        return CSharpType{cls->mName};
       } else {
         return CSharpType{std::format("{}.{}", cls->mName, St::CSharpMirroredStructStructName)};
       }
@@ -275,7 +300,7 @@ void CSharpMethodHelper::AddAttributes(std::list<std::string> &attributes, const
 bool CSharpMethodHelper::ShouldUseRefArgument(const Type &type, const CSharpType &csType) {
   (void)csType;
   auto cls = mProject.GetClass(type.mName);
-  if (!cls || cls->IsProxyable())
+  if (!cls || cls->IsProxyable() || cls->mEnum)
     return false;
   switch (mMethodType) {
   case CSharpMethodType::WrappedClassDelegate:
@@ -414,7 +439,7 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
   auto it = method.mArguments.begin(), end = method.mArguments.end();
 
   if (ShouldPassThisArgument(method)) {
-    if (!mClass.IsProxyable()) {
+    if (!mClass.IsProxyable() && !mClass.mEnum) {
       ss << "ref ";
     }
 
@@ -434,8 +459,7 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
     }
     THROW_IF(csIt == csEnd || it->mName != csIt->mName, "Argument order got messed up!");
     if (auto argClass = mProject.GetClass(it->mType.mName)) {
-      // if (mMethodType != InteropType::NativeToManaged && !argClass->IsProxyable()) {
-      if (!argClass->IsProxyable() &&
+      if (!argClass->IsProxyable() && !argClass->mEnum &&
           (mMethodType == CSharpMethodType::WrappedClassCallerConstructor ||
            mMethodType == CSharpMethodType::WrappedClassCallerMethod)) {
         ss << "ref ";
@@ -489,6 +513,8 @@ std::string CSharpMethodHelper::VariableRepresentation(const Type &type,
     if (auto cls = mProject.GetClass(type.mName)) {
       if (cls->mStruct && cls->mStruct->GetAnnotation(Annotations::Interface))
         return std::format("(({})GCHandle.FromIntPtr({}).Target!)", cls->mName, variableName);
+      else if (cls->mEnum)
+        return std::format("{}({})", type.mName, variableName);
       else if (cls->IsProxyable())
         return std::format("new {}({})", type.mName, variableName);
       else
@@ -498,7 +524,9 @@ std::string CSharpMethodHelper::VariableRepresentation(const Type &type,
     return std::format("{}", variableName);
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
-    if (cls && cls->IsProxyable()) {
+    if (cls && cls->mEnum)
+      return std::format("{}({})", type.mName, variableName);
+    else if (cls && cls->IsProxyable()) {
       return std::format("{}.{}", variableName, St::CSharpProxyObjectPointerFieldName);
     } else if (cls) {
       return std::format("{}.{}", variableName, St::CSharpMirroredStructFieldName);
@@ -585,7 +613,9 @@ void CSharpMethodHelper::GenerateMethodBodyForMethodReturningClass(const ClassMe
                                                                    const Class &cls) {
   auto caller = ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod);
   if (mMethodType == CSharpMethodType::WrappedClassCallerMethod) {
-    if (cls.IsProxyable()) {
+    if (cls.mEnum) {
+      csMethod.mBody.Add("return {}({});", cls.mName, caller);
+    } else if (cls.IsProxyable()) {
       csMethod.mBody.Add("return new {}({});", cls.mName, caller);
     } else {
       csMethod.mBody.Add("return new {}", cls.mName);
@@ -596,7 +626,9 @@ void CSharpMethodHelper::GenerateMethodBodyForMethodReturningClass(const ClassMe
       csMethod.mBody.Add("}};");
     }
   } else if (mMethodType == CSharpMethodType::InterfaceClassMethodCaller) {
-    if (cls.IsProxyable()) {
+    if (cls.mEnum) {
+      csMethod.mBody.Add("return {}({});", cls.mName, caller);
+    } else if (cls.IsProxyable()) {
       csMethod.mBody.Add("return {}.{};", caller, St::CSharpProxyObjectPointerFieldName);
     } else {
       csMethod.mBody.Add("return {}.{};", caller, St::CSharpMirroredStructFieldName);
@@ -630,7 +662,9 @@ void CSharpMethodHelper::GenerateMethodBodyForMethodReturningArray(const ClassMe
   auto retClass = mProject.GetClass(method.mReturnType.mTemplateParameters.front().mName);
   std::string objectConstructor;
   if (retClass) {
-    if (retClass->IsProxyable()) {
+    if (retClass->mEnum) {
+      objectConstructor = std::format("holgenResultSpan[i];", retClass->mName, caller);
+    } else if (retClass->IsProxyable()) {
       underlyingType = "IntPtr";
       objectConstructor = std::format("new {}(holgenResultSpan[i])", retClass->mName);
     } else {
@@ -706,7 +740,32 @@ void CSharpMethodHelper::GenerateMethodBodyForInterfaceClassMethodCallerReturnin
       csMethod.mBody.Add(
           "Marshal.WriteIntPtr(holgenReturnValue, holgenIterator * IntPtr.Size, elemPtr);");
     } else if (auto underlyingClass = mProject.GetClass(retVal.mName)) {
-      if (underlyingClass->IsProxyable()) {
+      if (underlyingClass->mEnum) {
+        auto entryEnum = underlyingClass->GetNestedEnum("Entry");
+        auto underlyingCsType =
+            ConvertReturnType(Type{entryEnum->GetUnderlyingType(*underlyingClass)}).mName;
+        std::string writer;
+        std::string caster;
+        if (underlyingCsType == "byte" || underlyingCsType == "sbyte" ||
+            underlyingCsType == "char") {
+          writer = "WriteByte";
+          caster = "byte";
+        } else if (underlyingCsType == "short" || underlyingCsType == "ushort") {
+          writer = "WriteInt16";
+          caster = "short";
+        } else if (underlyingCsType == "int" || underlyingCsType == "uint") {
+          writer = "WriteInt32";
+          caster = "int";
+        } else if (underlyingCsType == "long" || underlyingCsType == "ulong") {
+          writer = "WriteInt64";
+          caster = "long";
+        } else {
+          THROW("Could not determine how to marshal enum {}", underlyingClass->mName);
+        }
+        csMethod.mBody.Add("Marshal.{0}(holgenReturnValue, holgenIterator * sizeof({1}), "
+                           "({1})holgenResult[holgenIterator]);",
+                           writer, caster);
+      } else if (underlyingClass->IsProxyable()) {
         csMethod.mBody.Add("Marshal.WriteIntPtr(holgenReturnValue, holgenIterator * IntPtr.Size, "
                            "holgenResult[holgenIterator].{});",
                            St::CSharpProxyObjectPointerFieldName);

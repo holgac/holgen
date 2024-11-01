@@ -61,6 +61,8 @@ bool Class::IsAbstract() const {
 }
 
 bool Class::IsProxyable() const {
+  if (mEnum)
+    return false;
   return !mStruct ||
       (!mStruct->GetMatchingAttribute(Annotations::Script, Annotations::Script_AlwaysMirror) &&
        !mStruct->GetAnnotation(Annotations::Singleton));
@@ -81,6 +83,12 @@ bool ClassDestructor::IsEmpty() const {
 }
 
 GEN_GETTER_BY_NAME(ClassEnum, ClassEnumEntry, GetEntry, mEntries)
+
+std::string ClassEnum::GetUnderlyingType(const Class &cls) const {
+  if (auto usingStatement = cls.GetUsing(mUnderlyingType))
+    return usingStatement->mSourceType.mName;
+  return mUnderlyingType;
+}
 
 GEN_GETTER_BY_NAME_NONCONST(Class, ClassField, GetField, mFields);
 

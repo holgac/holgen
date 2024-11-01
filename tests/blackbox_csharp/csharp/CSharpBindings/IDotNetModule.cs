@@ -27,6 +27,8 @@ public interface IDotNetModule
   public static abstract int PrimitiveReturnVector();
   public static abstract uint PrimitiveReturnArray();
   public static abstract void TrackedCSharpObject(uint addCount);
+  public static abstract EnumTest EnumArgumentAndReturnValue(EnumTest value);
+  public static abstract string EnumVectorArgumentAndReturnValue();
   
   public delegate void DotNetModuleInitializeDelegate();
   public delegate uint DotNetModuleBumpAndGetSingletonCounterDelegate();
@@ -49,5 +51,7 @@ public interface IDotNetModule
   public delegate int DotNetModulePrimitiveReturnVectorDelegate();
   public delegate uint DotNetModulePrimitiveReturnArrayDelegate();
   public delegate void DotNetModuleTrackedCSharpObjectDelegate(uint addCount);
+  public delegate EnumTest DotNetModuleEnumArgumentAndReturnValueDelegate(EnumTest value);
+  public delegate string DotNetModuleEnumVectorArgumentAndReturnValueDelegate();
   
 }

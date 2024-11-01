@@ -66,7 +66,7 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
     bool isVector = arg.mType.mName == "std::vector";
     if (isSpan || isVector) {
       func.mBody.Add("std::vector<{}> {}HolgenVector;",
-                     arg.mType.mTemplateParameters.front().ToString(true, false), arg.mName);
+                     arg.mType.mTemplateParameters.front().ToFullyQualifiedString(mProject), arg.mName);
       func.mBody.Add("{0}HolgenVector.reserve({0}{1});", arg.mName, St::CSharpAuxiliarySizeSuffix);
       func.mBody.Add("for (size_t i = 0; i < {}{}; ++i) {{", arg.mName,
                      St::CSharpAuxiliarySizeSuffix);

@@ -528,6 +528,40 @@ TEST_F(ModuleTest, TrackedCSharpObjectReturnProxyVector) {
   EXPECT_EQ(counters[2], counterManager.GetCounterPtr("Test2"));
 }
 
+TEST_F(ModuleTest, ModuleEnumArgumentAndReturnValue) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  EXPECT_EQ(module1.EnumArgumentAndReturnValue(EnumTest::Entry5), EnumTest::Entry5);
+  EXPECT_EQ(module2.EnumArgumentAndReturnValue(EnumTest::Entry5), EnumTest::Entry1);
+}
+
+TEST_F(ModuleTest, WrappedClassEnumVectorArgumentAndReturnValue) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  EXPECT_EQ(std::string(module1.EnumVectorArgumentAndReturnValue()), "Entry1Entry2Entry1");
+}
+
+// TEST_F(ModuleTest, InterfaceEnumVectorArgumentAndReturnValue) {
+//   DotNetHost mDotNetHost;
+//   mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+//   auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+//   module1.Initialize();
+//   auto &counterManager = CounterManager::GetInstance();
+//   module1.TrackedCSharpObject(1);
+//   auto res1 = std::vector<EnumTest>{EnumTest::Entry5};
+//   EXPECT_EQ(counterManager.GetCounterBumpers()[0].GetEnums({}), res1);
+//   auto res2 = std::vector<EnumTest>{EnumTest::Entry1, EnumTest::Entry5, EnumTest::Entry2};
+//   EXPECT_EQ(counterManager.GetCounterBumpers()[0].GetEnums(res2), res2);
+// }
+//
 // TEST_F(ModuleTest, TrackedCSharpObjectReturnArray) {
 //   DotNetHost mDotNetHost;
 //   mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");

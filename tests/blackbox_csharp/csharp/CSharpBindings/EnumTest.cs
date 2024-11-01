@@ -2,7 +2,7 @@
 
 namespace CSharpBindings;
 
-enum EnumTest : byte
+public enum EnumTest : byte
 {
   Entry1 = 3,
   Entry2 = 0,

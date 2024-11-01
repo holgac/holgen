@@ -101,6 +101,7 @@ public class CounterBumperImpl : ICounterBumper
             res[i] = new CounterBumperImpl();
             res[i].Name = $"{Name}{i}";
         }
+
         return res;
     }
 
@@ -111,6 +112,7 @@ public class CounterBumperImpl : ICounterBumper
         {
             res[i] = new ModuleVersion(0, 1, (uint)i);
         }
+
         return res;
     }
 
@@ -121,6 +123,7 @@ public class CounterBumperImpl : ICounterBumper
         {
             res[i] = CounterManager.GetCounter($"{Name}{i}");
         }
+
         return res;
     }
 

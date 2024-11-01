@@ -152,6 +152,7 @@ struct ClassEnum {
       mName(std::move(name)), mVisibility(visibility), mUnderlyingType(std::move(underlyingType)) {}
 
   [[nodiscard]] const ClassEnumEntry *GetEntry(const std::string &name) const;
+  [[nodiscard]] std::string GetUnderlyingType(const Class &cls) const;
 };
 
 // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)

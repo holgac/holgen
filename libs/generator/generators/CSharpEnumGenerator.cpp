@@ -29,16 +29,11 @@ void CSharpEnumGenerator::Process(GeneratedContent &out, const Class &cls,
   AddCppComments(codeBlock, cls.mComments);
   AddCppComments(codeBlock, clsEnum.mComments);
   if (!clsEnum.mUnderlyingType.empty()) {
-    std::string underlyingType = clsEnum.mUnderlyingType;
-    auto usingEntry = cls.GetUsing(clsEnum.mUnderlyingType);
-    if (usingEntry) {
-      underlyingType = usingEntry->mSourceType.mName;
-    }
-    auto csType = CSharpHelper::Get().ConvertFieldType(Type{underlyingType}, mTranslatedProject,
-                                                       InteropType::Internal, false);
-    codeBlock.Add("enum {} : {}", cls.mName, csType.mName);
+    auto csType = CSharpHelper::Get().ConvertFieldType(
+        Type{clsEnum.GetUnderlyingType(cls)}, mTranslatedProject, InteropType::Internal, false);
+    codeBlock.Add("public enum {} : {}", cls.mName, csType.mName);
   } else {
-    codeBlock.Add("enum {}", cls.mName);
+    codeBlock.Add("public enum {}", cls.mName);
   }
   codeBlock.Add("{{");
   codeBlock.Indent(1);

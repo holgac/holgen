@@ -16,6 +16,7 @@ struct ModuleVersion {
     func GetDataAsVector() -> vector<u32>;
     func GetDataAsArray() -> u32[3];
     func GetDataAsSignedVector() -> vector<s32>;
+    func GetEnums(vector<EnumTest> value) -> vector<EnumTest>;
 }
 
 @dotNetModule
@@ -41,4 +42,6 @@ struct DotNetModule {
     func PrimitiveReturnVector() -> s32;
     func PrimitiveReturnArray() -> u32;
     func TrackedCSharpObject(u32 addCount);
+    func EnumArgumentAndReturnValue(EnumTest value) -> EnumTest;
+    func EnumVectorArgumentAndReturnValue() -> string;
 }

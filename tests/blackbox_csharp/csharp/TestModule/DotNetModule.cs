@@ -174,4 +174,22 @@ public sealed class DotNetModule : IDotNetModule
             CounterManager.InsertCounterBumper(new CounterBumperImpl());
         }
     }
+
+    public static EnumTest EnumArgumentAndReturnValue(EnumTest value)
+    {
+        return value;
+    }
+
+    public static string EnumVectorArgumentAndReturnValue()
+    {
+        var v = new ModuleVersion(1, 2, 3);
+        var results = v.GetEnums([EnumTest.Entry1, EnumTest.Entry2]);
+        string finalVal = "";
+        foreach (var result in results)
+        {
+            finalVal += result.ToString();
+        }
+
+        return finalVal;
+    }
 }

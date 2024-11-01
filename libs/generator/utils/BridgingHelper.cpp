@@ -31,10 +31,11 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
     THROW_IF(isReturnType && res.mType != PassByType::Value && cls->mStruct &&
                  cls->mStruct->GetAnnotation(Annotations::Interface),
              "Interface class {} is NOT returned by value in {}", cls->mName, definitionSource);
-    if (res.mType == PassByType::Reference) {
+    if (cls->mEnum) {
+      res.mType = PassByType::Value;
+    } else if (res.mType == PassByType::Reference) {
       res.mType = PassByType::Pointer;
-    }
-    if (!isReturnType && res.mType == PassByType::Value) {
+    } else if (!isReturnType && res.mType == PassByType::Value) {
       res.mType = PassByType::Pointer;
     }
     return res;
