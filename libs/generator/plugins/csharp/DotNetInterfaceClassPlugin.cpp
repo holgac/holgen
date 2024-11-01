@@ -261,6 +261,14 @@ void DotNetInterfaceClassPlugin::GenerateReturnStatement(ClassMethod &method,
     method.mBody.Add("holgenFinalValue.emplace_back({});", converted);
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
+  if (CSharpHelper::Get().CppTypesConvertibleToCSharpArray.contains(method.mReturnType.mName)) {
+    if (method.mReturnType.mTemplateParameters.front().mName == "std::string")
+      method.mBody.Add("{}::{}(holgenTempValue, {});", St::DeferredDeleter,
+                       St::DeferredDeleterPerformManagedArray, sizeParameter);
+    else
+      method.mBody.Add("{}::{}(holgenTempValue);", St::DeferredDeleter,
+                       St::DeferredDeleterPerformManaged);
+  }
   method.mBody.Add("return holgenFinalValue;", converted);
 }
 
@@ -322,10 +330,10 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethods(const Class &cls, CSharpC
     csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
                                                 CSharpMethodType::InterfaceClassAbstractMethod)
                                  .GenerateMethod(method));
-  csCls.mDelegates.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
-                                                CSharpMethodType::InterfaceClassMethodDelegate)
-                                 .GenerateMethod(method));
-  csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+    csCls.mDelegates.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                                  CSharpMethodType::InterfaceClassMethodDelegate)
+                                   .GenerateMethod(method));
+    csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
                                                 CSharpMethodType::InterfaceClassMethodCaller)
                                  .GenerateMethod(method));
   }

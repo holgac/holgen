@@ -42,6 +42,7 @@ set(gen_csharp_plugins
     plugins/csharp/DotNetWrapperPlugin.cpp
     plugins/csharp/DotNetInterfacePlugin.cpp
     plugins/csharp/DotNetInterfaceClassPlugin.cpp
+    plugins/csharp/DotNetDeferredDeleterPlugin.cpp
 )
 
 set(gen_plugins

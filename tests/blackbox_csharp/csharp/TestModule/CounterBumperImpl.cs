@@ -87,6 +87,12 @@ public class CounterBumperImpl : ICounterBumper
 
         return result;
     }
+
+    public override string[] SplitName(sbyte delim)
+    {
+        return Name.Split((char)delim);
+    }
+
     //
     // public override uint[] SplitNameAndParse(sbyte delim)
     // {
@@ -98,11 +104,6 @@ public class CounterBumperImpl : ICounterBumper
     //     }
     //
     //     return result;
-    // }
-
-    // public override string[] SplitName(sbyte delim)
-    // {
-    //     return Name.Split((char)delim);
     // }
     //
     // public override string[] SplitNameIntoThree()

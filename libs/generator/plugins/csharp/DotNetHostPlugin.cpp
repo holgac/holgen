@@ -215,6 +215,8 @@ void DotNetHostPlugin::CreateInitializeHolgenMethod(Class &cls) {
   auto method =
       ClassMethod{"InitializeHolgen", Type{"void"}, Visibility::Private, Constness::NotConst};
   GenerateInitializeDotNetInterface(method.mBody);
+  GenerateInitializeMetaClasses(method.mBody);
+
   for (auto &csCls: mProject.mCSharpClasses) {
     if (!csCls.mClass || !ShouldInitializeClass(*csCls.mClass))
       continue;
@@ -240,6 +242,34 @@ void DotNetHostPlugin::CreateInitializeHolgenMethod(Class &cls) {
       "HOLGEN_FAIL_IF(res < 0 || !{}, \"LoadModule method not found in main module!\");",
       Naming().FieldNameInCpp("loadModule"));
   cls.mMethods.push_back(std::move(method));
+}
+
+void DotNetHostPlugin::GenerateInitializeMetaClasses(CodeBlock &codeBlock) {
+  GenerateInitializeMetaClassMethod(codeBlock, St::DeferredDeleter,
+                                    St::DeferredDeleterPerformManaged);
+  GenerateInitializeMetaClassMethod(codeBlock, St::DeferredDeleter,
+                                    St::DeferredDeleterPerformManagedArray);
+}
+
+void DotNetHostPlugin::GenerateInitializeMetaClassMethod(CodeBlock &codeBlock,
+                                                         const std::string &className,
+                                                         const std::string &methodName) {
+  auto delegateName = std::format("{0}.{1}+{2}, {0}", St::CSharpProjectName, className,
+                                  Naming().CSharpMethodDelegateName(className, methodName));
+  auto classFullName = std::format("{0}.{1}, {0}", St::CSharpProjectName, className);
+
+  codeBlock.Add("{{");
+  codeBlock.Indent(1);
+  codeBlock.Add("auto res = {0}(\"{1}\", \"{3}\", "
+                "\"{4}\", nullptr, "
+                "nullptr, (void**)(&{2}::{3}));",
+                Naming().FieldNameInCpp("hostfxrDelegate_get_function_pointer"), classFullName,
+                className, methodName, delegateName);
+  codeBlock.Add(
+      "HOLGEN_FAIL_IF(res < 0 || !{0}::{1}, \"Required meta method {1} not found in {0}\");",
+      className, methodName);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
 }
 
 void DotNetHostPlugin::CreateLoadModuleMethod(Class &cls, const Class &moduleCls) {

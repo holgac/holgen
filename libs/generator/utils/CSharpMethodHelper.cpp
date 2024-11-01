@@ -608,32 +608,17 @@ void CSharpMethodHelper::GenerateMethodBodyForMethodReturningClass(const ClassMe
 
 void CSharpMethodHelper::GenerateMethodBodyForMethodReturningArray(const ClassMethod &method,
                                                                    CSharpMethodBase &csMethod) {
+  if (mMethodType == CSharpMethodType::InterfaceClassMethodCaller) {
+    GenerateMethodBodyForInterfaceClassMethodCallerReturningArray(method, csMethod);
+    return;
+  }
+
   auto caller = ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod);
   auto sizeParameter =
       std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
   auto retVal = method.mReturnType.mTemplateParameters.front();
   auto csRetVal = ConvertReturnType(retVal);
 
-  if (mMethodType == CSharpMethodType::InterfaceClassMethodCaller) {
-    csMethod.mBody.Add("var holgenResult = {};", caller);
-    if (method.mReturnType.mName != "std::array")
-      csMethod.mBody.Add("{} = (ulong)holgenResult.Length;", sizeParameter);
-    csMethod.mBody.Add("IntPtr holgenReturnValue = Marshal.AllocHGlobal((int)(sizeof({}) * {}));",
-                       csRetVal.ToString(), sizeParameter);
-    if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
-      csMethod.mBody.Add("Marshal.Copy(holgenResult, 0, holgenReturnValue, (int){});",
-                         sizeParameter);
-    } else {
-      csMethod.mBody.Add("for (int holgenIterator = 0; holgenIterator < {}; ++holgenIterator)",
-                         sizeParameter);
-      csMethod.mBody.Add("{{");
-      csMethod.mBody.Indent(1);
-      csMethod.mBody.Indent(-1);
-      csMethod.mBody.Add("}}");
-    }
-    csMethod.mBody.Add("return holgenReturnValue;", caller);
-    return;
-  }
 
   std::string sizeString;
   if (method.mReturnType.mName == "std::array")
@@ -683,6 +668,61 @@ void CSharpMethodHelper::GenerateMethodBodyForMethodReturningArray(const ClassMe
   }
   csMethod.mBody.Add("DeferredDeleter.Perform({});", St::DeferredDeleterArgumentName);
   csMethod.mBody.Add("return holgenReturnValue;");
+}
+
+void CSharpMethodHelper::GenerateMethodBodyForInterfaceClassMethodCallerReturningArray(
+    const ClassMethod &method, CSharpMethodBase &csMethod) {
+  auto caller = ConstructWrapperCall(GetWrapperTargetInWrappedClass(method), method, csMethod);
+  auto sizeParameter =
+      std::format("{}{}", St::CSharpAuxiliaryReturnValueArgName, St::CSharpAuxiliarySizeSuffix);
+  auto retVal = method.mReturnType.mTemplateParameters.front();
+  auto csRetVal = ConvertReturnType(retVal);
+
+  bool isStringContainer = retVal.mName == "std::string";
+  csMethod.mBody.Add("var holgenResult = {};", caller);
+  if (method.mReturnType.mName != "std::array")
+    csMethod.mBody.Add("{} = (ulong)holgenResult.Length;", sizeParameter);
+  csMethod.mBody.Add("IntPtr holgenReturnValue = Marshal.AllocHGlobal({} * (int){});",
+                     isStringContainer ? "IntPtr.Size"
+                                       : std::format("sizeof({})", csRetVal.ToString()),
+                     sizeParameter);
+  if (CSharpHelper::Get().CSharpTypesSupportedByMarshalCopy.contains(csRetVal.mName)) {
+    csMethod.mBody.Add("Marshal.Copy(holgenResult, 0, holgenReturnValue, (int){});", sizeParameter);
+  } else {
+    csMethod.mBody.Add("for (int holgenIterator = 0; holgenIterator < (int){}; ++holgenIterator)",
+                       sizeParameter);
+    csMethod.mBody.Add("{{");
+    csMethod.mBody.Indent(1);
+    if (isStringContainer) {
+      csMethod.mBody.Add(
+          "IntPtr elemPtr = Marshal.StringToHGlobalAnsi(holgenResult[holgenIterator]);");
+      csMethod.mBody.Add(
+          "Marshal.WriteIntPtr(holgenReturnValue, holgenIterator * IntPtr.Size, elemPtr);");
+    } else if (auto underlyingClass = mProject.GetClass(retVal.mName)) {
+      if (underlyingClass->IsProxyable()) {
+        csMethod.mBody.Add("Marshal.WriteIntPtr(holgenReturnValue, holgenIterator * IntPtr.Size, "
+                           "holgenResult[holgenIterator].{});",
+                           St::CSharpProxyObjectPointerFieldName);
+      } else {
+        csMethod.mBody.Add(
+            "IntPtr destPtr = IntPtr.Add(holgenReturnValue, holgenIterator * IntPtr.Size);");
+        csMethod.mBody.Add("Marshal.StructureToPtr(holgenResult[holgenIterator], destPtr, false);");
+      }
+    } else if (csRetVal.mName == "ulong") {
+      csMethod.mBody.Add("Marshal.WriteInt64(holgenReturnValue, holgenIterator * sizeof({}), "
+                         "(long)holgenResult[holgenIterator]);",
+                         csRetVal.mName);
+    } else if (csRetVal.mName == "uint") {
+      csMethod.mBody.Add("Marshal.WriteInt32(holgenReturnValue, holgenIterator * sizeof({}), "
+                         "(long)holgenResult[holgenIterator]);",
+                         csRetVal.mName);
+    } else {
+      THROW("Cannot marshal {}({})", csRetVal.ToString(), method.mReturnType.ToString(false));
+    }
+    csMethod.mBody.Indent(-1);
+    csMethod.mBody.Add("}}");
+  }
+  csMethod.mBody.Add("return holgenReturnValue;", caller);
 }
 
 void CSharpMethodHelper::GenerateMethodBodyForMethodReturningValue(const ClassMethod &method,

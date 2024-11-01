@@ -13,6 +13,8 @@ private:
   Class &GenerateClass();
   void GenerateField(Class &cls);
   void GeneratePerformMethod(Class &cls);
+  void GeneratePerformManagedMethod(Class &cls);
+  void GeneratePerformManagedArrayMethod(Class &cls);
   void GenerateConstructor(Class &cls);
 };
 

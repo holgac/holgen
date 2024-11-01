@@ -12,9 +12,9 @@ struct ICounterBumper {
     func BumpMultiple(vector<string> names, vector<u32> counts);
     func SetNameConcatArray(string[3] name);
     func SplitNameAndParseSigned(s8 delim) -> vector<s32>;
+    func SplitName(s8 delim) -> vector<string>;
 //    func SplitNameAndParse(s8 delim) -> vector<u32>;
 //    func GetOtherCounters() -> vector<ICounterBumper>;
-//    func SplitName(s8 delim) -> vector<string>;
 //    func SplitNameIntoThree() -> string[3];
 //    @func(static)
 //    func StaticFunction() -> string;

@@ -37,6 +37,7 @@
 #include "generator/plugins/csharp/DotNetClassPlugin.h"
 #include "generator/plugins/csharp/DotNetInterfacePlugin.h"
 #include "generator/plugins/csharp/DotNetInterfaceClassPlugin.h"
+#include "generator/plugins/csharp/DotNetDeferredDeleterPlugin.h"
 
 namespace holgen {
 
@@ -66,6 +67,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<DotNetWrapperPlugin>();
   AddPlugin<DotNetInterfacePlugin>();
   AddPlugin<DotNetInterfaceClassPlugin>();
+  AddPlugin<DotNetDeferredDeleterPlugin>();
   // Any csharp class that needs initialization needs to be added before DotNetHostPlugin runs
   AddPlugin<DotNetHostPlugin>();
   AddPlugin<DotNetModuleInterfacePlugin>();

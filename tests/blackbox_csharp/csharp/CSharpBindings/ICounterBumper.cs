@@ -78,8 +78,21 @@ public abstract class ICounterBumper
   {
     var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SplitNameAndParseSigned(delim);
     holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
-    IntPtr holgenReturnValue = Marshal.AllocHGlobal((int)(sizeof(int) * holgenReturnValueHolgenSize));
+    IntPtr holgenReturnValue = Marshal.AllocHGlobal(sizeof(int) * (int)holgenReturnValueHolgenSize);
     Marshal.Copy(holgenResult, 0, holgenReturnValue, (int)holgenReturnValueHolgenSize);
+    return holgenReturnValue;
+  }
+  public abstract string[] SplitName(sbyte delim);
+  public static IntPtr SplitNameCaller(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize)
+  {
+    var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).SplitName(delim);
+    holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
+    IntPtr holgenReturnValue = Marshal.AllocHGlobal(IntPtr.Size * (int)holgenReturnValueHolgenSize);
+    for (int holgenIterator = 0; holgenIterator < (int)holgenReturnValueHolgenSize; ++holgenIterator)
+    {
+      IntPtr elemPtr = Marshal.StringToHGlobalAnsi(holgenResult[holgenIterator]);
+      Marshal.WriteIntPtr(holgenReturnValue, holgenIterator * IntPtr.Size, elemPtr);
+    }
     return holgenReturnValue;
   }
   
@@ -95,6 +108,7 @@ public abstract class ICounterBumper
   public delegate void ICounterBumperBumpMultipleDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)] string[] names, ulong namesHolgenSize, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=4)] uint[] counts, ulong countsHolgenSize);
   public delegate void ICounterBumperSetNameConcatArrayDelegate(IntPtr holgenObject, [MarshalAs(UnmanagedType.LPArray, SizeConst=3)] string[] name);
   public delegate IntPtr ICounterBumperSplitNameAndParseSignedDelegate(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize);
+  public delegate IntPtr ICounterBumperSplitNameDelegate(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize);
   
   private GCHandle _holgenPtr;
   

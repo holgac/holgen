@@ -60,6 +60,8 @@ private:
                                                  CSharpMethodBase &csMethod, const Class &cls);
   void GenerateMethodBodyForMethodReturningArray(const ClassMethod &method,
                                                  CSharpMethodBase &csMethod);
+  void GenerateMethodBodyForInterfaceClassMethodCallerReturningArray(const ClassMethod &method,
+                                                                     CSharpMethodBase &csMethod);
   void GenerateMethodBodyForMethodReturningValue(const ClassMethod &method,
                                                  CSharpMethodBase &csMethod);
   [[nodiscard]] std::string ConstructWrapperCall(const std::string &methodToCall,

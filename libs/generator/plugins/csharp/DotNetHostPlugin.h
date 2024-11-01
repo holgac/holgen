@@ -21,6 +21,8 @@ private:
   void CreateLoadBaseModuleMethod(Class &cls);
   void PopulateForModule(Class &cls, const Class &moduleCls);
   void CreateInitializeHolgenMethod(Class &cls);
+  void GenerateInitializeMetaClasses(CodeBlock& codeBlock);
+  void GenerateInitializeMetaClassMethod(CodeBlock& codeBlock, const std::string& className, const std::string& methodName);
   void CreateLoadModuleMethod(Class &cls, const Class &moduleCls);
   void GenerateInitializeDotNetInterface(CodeBlock &codeBlock);
   void GenerateInitializeClass(Class &cls, CodeBlock &codeBlock, const Class &projectCls);
