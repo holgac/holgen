@@ -15,5 +15,6 @@ private:
   void ProcessToStringFunction(Class &cls, ClassMethod &method);
   void ProcessMethodVisibility(MethodBase &method,
                                const FunctionDefinition &functionDefinition);
+  bool CanExposeInCSharp( const FunctionDefinition &functionDefinition);
 };
 } // namespace holgen

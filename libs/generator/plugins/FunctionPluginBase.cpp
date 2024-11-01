@@ -94,6 +94,16 @@ void FunctionPluginBase::ProcessMethodVisibility(MethodBase &method,
   }
 }
 
+bool FunctionPluginBase::CanExposeInCSharp(const FunctionDefinition &functionDefinition) {
+  if (functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_CSharp))
+    return false;
+  for (auto &arg: functionDefinition.mArguments) {
+    if (arg.mType.mName == St::Lua_CustomData)
+      return false;
+  }
+  return true;
+}
+
 ClassMethod FunctionPluginBase::NewFunction(Class &cls,
                                             const FunctionDefinition &functionDefinition) {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
@@ -109,8 +119,7 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
   bool exposeToScript =
       !functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_Script) &&
       method.mVisibility == Visibility::Public;
-  method.mExposeToCSharp = exposeToScript &&
-      !functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_CSharp);
+  method.mExposeToCSharp = exposeToScript && CanExposeInCSharp(functionDefinition);
   method.mExposeToLua = exposeToScript &&
       !functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_Lua);
   method.mFunction = &functionDefinition;
