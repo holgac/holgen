@@ -136,6 +136,22 @@ public abstract class ICounterBumper
     }
     return holgenReturnValue;
   }
+  public abstract Counter[] GetCounters(ulong count);
+  public static IntPtr GetCountersCaller(IntPtr holgenObject, ulong count, out ulong holgenReturnValueHolgenSize)
+  {
+    var holgenResult = ((ICounterBumper)GCHandle.FromIntPtr(holgenObject).Target!).GetCounters(count);
+    holgenReturnValueHolgenSize = (ulong)holgenResult.Length;
+    IntPtr holgenReturnValue;
+    unsafe
+    {
+      holgenReturnValue = Marshal.AllocHGlobal(IntPtr.Size * (int)holgenReturnValueHolgenSize);
+    }
+    for (int holgenIterator = 0; holgenIterator < (int)holgenReturnValueHolgenSize; ++holgenIterator)
+    {
+      Marshal.WriteIntPtr(holgenReturnValue, holgenIterator * IntPtr.Size, holgenResult[holgenIterator].HolgenPtr);
+    }
+    return holgenReturnValue;
+  }
   
   public delegate void ICounterBumperSetNameDelegate(IntPtr holgenObject, string name);
   public delegate string ICounterBumperGetNameDelegate(IntPtr holgenObject);
@@ -152,6 +168,7 @@ public abstract class ICounterBumper
   public delegate IntPtr ICounterBumperSplitNameDelegate(IntPtr holgenObject, sbyte delim, out ulong holgenReturnValueHolgenSize);
   public delegate IntPtr ICounterBumperCloneMultipleDelegate(IntPtr holgenObject, ulong count, out ulong holgenReturnValueHolgenSize);
   public delegate IntPtr ICounterBumperGetVersionsDelegate(IntPtr holgenObject, ulong count, out ulong holgenReturnValueHolgenSize);
+  public delegate IntPtr ICounterBumperGetCountersDelegate(IntPtr holgenObject, ulong count, out ulong holgenReturnValueHolgenSize);
   
   private GCHandle _holgenPtr;
   

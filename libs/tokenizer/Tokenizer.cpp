@@ -11,7 +11,8 @@ std::map<char, TokenType> SpecialTokens = {
     {')', TokenType::PClose},    {'{', TokenType::COpen},  {'}', TokenType::CClose},
     {'<', TokenType::AOpen},     {'>', TokenType::AClose}, {'[', TokenType::BOpen},
     {']', TokenType::BClose},    {'+', TokenType::Plus},   {'-', TokenType::Minus},
-    {'/', TokenType::Slash},     {'@', TokenType::At},
+    {'/', TokenType::Slash},     {'@', TokenType::At},     {'*', TokenType::Star},
+    {'&', TokenType::Ampersand},
 };
 
 bool IsWhitespace(char c) {
@@ -19,7 +20,8 @@ bool IsWhitespace(char c) {
 }
 } // namespace
 
-Tokenizer::Tokenizer(std::string_view sv, std::string source) : mData(sv), mSource(source) {}
+Tokenizer::Tokenizer(std::string_view sv, std::string source) :
+    mData(sv), mSource(std::move(source)) {}
 
 bool Tokenizer::GetNext(Token &tok) {
   std::string_view oldContents(mData.data() + mIndex, mEndIndex - mIndex);

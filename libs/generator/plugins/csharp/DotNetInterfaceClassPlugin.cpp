@@ -254,13 +254,7 @@ void DotNetInterfaceClassPlugin::GenerateReturnStatement(ClassMethod &method,
   method.mBody.Indent(1);
   auto &underlyingType = method.mReturnType.mTemplateParameters.front();
   auto converted =
-      ConvertBasicStatementForReturn("holgenTempValue[holgenIterator]", underlyingType);
-  if (auto underlyingClass = mProject.GetClass(underlyingType.mName)) {
-    if (underlyingClass->mStruct &&
-        underlyingClass->mStruct->GetAnnotation(Annotations::Interface)) {
-      converted = "static_cast<void **>(holgenTempValue)[holgenIterator]";
-    }
-  }
+      ConvertArrayElemStatement("holgenTempValue", "holgenIterator", underlyingType);
   if (method.mReturnType.mName == "std::array")
     method.mBody.Add("holgenFinalValue[holgenIterator] = {};", converted);
   else
@@ -292,6 +286,24 @@ std::string DotNetInterfaceClassPlugin::ConvertBasicStatementForReturn(const std
     }
   } else if (TypeInfo::Get().CppPrimitives.contains(type.mName) || type.mName == "std::string") {
     return statement;
+  }
+  THROW("Cannot convert {} for return!", type.ToString(false, false));
+}
+
+std::string DotNetInterfaceClassPlugin::ConvertArrayElemStatement(const std::string &statement,
+                                                                   const std::string &iterator,
+                                                                   const Type &type) {
+  THROW_IF(type.mName == "void", "voids cant be returned");
+  if (auto retClass = mProject.GetClass(type.mName)) {
+    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+      return std::format("static_cast<void **>({})[{}]", statement, iterator);
+    } else if (retClass->IsProxyable()) {
+      return std::format("{}[{}]", statement, iterator);
+    } else {
+      return std::format("{}[{}]", statement, iterator);
+    }
+  } else if (TypeInfo::Get().CppPrimitives.contains(type.mName) || type.mName == "std::string") {
+    return std::format("{}[{}]", statement, iterator);
   }
   THROW("Cannot convert {} for return!", type.ToString(false, false));
 }

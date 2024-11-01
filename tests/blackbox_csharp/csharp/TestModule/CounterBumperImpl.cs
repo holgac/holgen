@@ -114,6 +114,16 @@ public class CounterBumperImpl : ICounterBumper
         return res;
     }
 
+    public override Counter[] GetCounters(ulong count)
+    {
+        var res = new Counter[count];
+        for (int i = 0; i < res.Length; i++)
+        {
+            res[i] = CounterManager.GetCounter($"{Name}{i}");
+        }
+        return res;
+    }
+
     //
     // public override uint[] SplitNameAndParse(sbyte delim)
     // {

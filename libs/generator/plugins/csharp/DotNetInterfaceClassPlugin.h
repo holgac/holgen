@@ -23,6 +23,9 @@ private:
   void GenerateReturnStatement(ClassMethod &method, const std::string &assignedValue);
   [[nodiscard]] std::string ConvertBasicStatementForReturn(const std::string &statement,
                                                            const Type &type);
+  [[nodiscard]] std::string ConvertArrayElemStatement(const std::string &statement,
+                                                       const std::string &iterator,
+                                                       const Type &type);
   void ProcessForCSharp(Class &cls);
   CSharpClass &GenerateCSharpClass(Class &cls);
   void GenerateCSharpPointerField(CSharpClass &csCls);

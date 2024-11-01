@@ -15,7 +15,7 @@ struct ICounterBumper {
     func SplitName(s8 delim) -> vector<string>;
     func CloneMultiple(u64 count) -> vector<ICounterBumper>;
     func GetVersions(u64 count) -> vector<ModuleVersion>;
-//    func GetCounters(u64 count) -> vector<Counter>;
+    func GetCounters(u64 count) -> vector<Counter *>;
 //    func SplitNameAndParse(s8 delim) -> vector<u32>;
 //    func GetOtherCounters() -> vector<ICounterBumper>;
 //    func SplitNameIntoThree() -> string[3];

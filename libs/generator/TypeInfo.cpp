@@ -197,8 +197,7 @@ Type::Type(const TranslatedProject &project, const DefinitionSource &definitionS
     auto underlyingClass = project.GetClass(typeDefinition.mTemplateParameters[0].mName);
     THROW_IF(!underlyingClass, "Class {} referenced in {} does not exist!",
              typeDefinition.mTemplateParameters[0].mName, definitionSource);
-    auto idField = underlyingClass->GetIdField();
-    if (idField) {
+    if (auto idField = underlyingClass->GetIdField()) {
       *this = idField->mType;
     } else {
       *this = Type{underlyingClass->mStruct->mName, PassByType::Pointer};
@@ -210,6 +209,19 @@ Type::Type(const TranslatedProject &project, const DefinitionSource &definitionS
     } else {
       mName = typeDefinition.mName;
     }
+
+    switch (typeDefinition.mType) {
+    case TypeDefinitionType::Pointer:
+      mType = PassByType::Pointer;
+      break;
+    case TypeDefinitionType::Reference:
+      mType = PassByType::Reference;
+      break;
+    case TypeDefinitionType::Value:
+      mType = PassByType::Value;
+      break;
+    }
+
     for (const auto &templateParameter: typeDefinition.mTemplateParameters) {
       mTemplateParameters.emplace_back(project, definitionSource, templateParameter);
     }

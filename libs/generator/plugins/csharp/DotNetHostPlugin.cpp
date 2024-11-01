@@ -333,7 +333,7 @@ void DotNetHostPlugin::GenerateInitializeDotNetInterface(CodeBlock &codeBlock) {
                 St::CSharpInterfaceFreePtr);
   codeBlock.Indent(-1);
   codeBlock.Add("HOLGEN_FAIL_IF(res < 0 || !{0}::{1}, \"Could not get {1} of {0}, was the project "
-                "built after the cs files were generated?!\");",
+                "built after the cs files were generated?\");",
                 St::CSharpInterfaceName, St::CSharpInterfaceFreePtr);
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
@@ -395,7 +395,7 @@ void DotNetHostPlugin::GenerateInitializeNonInterface(CodeBlock &codeBlock,
   codeBlock.Add("nullptr, nullptr, (void**)(&initFunc));");
   codeBlock.Indent(-1);
   codeBlock.Add("HOLGEN_FAIL_IF(res < 0 || !initFunc, \"Could not initialize {}, was the project "
-                "built after the cs files were generated?!\");",
+                "built after the cs files were generated?\");",
                 projectCls.mName);
   codeBlock.Add("initFunc({});", initFuncCallArgs.str());
 }
@@ -419,7 +419,7 @@ void DotNetHostPlugin::GenerateInitializeInterface(CodeBlock &codeBlock, const C
     codeBlock.Indent(-1);
     codeBlock.Add(
         "HOLGEN_FAIL_IF(res < 0 || !{0}::{1}{2}, \"Could not get {1} of {0}, was the project "
-        "built after the cs files were generated?!\");",
+        "built after the cs files were generated?\");",
         projectCls.mName, method.mName, St::CSharpInterfaceFunctionSuffix);
   }
 }

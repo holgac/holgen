@@ -193,20 +193,28 @@ void Parser::ParseType(Token &curToken, TypeDefinition &typeDefinition) {
                     "Templated type definition should be terminated with a '>', found \"{}\"",
                     curToken.mContents)
 
-    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete field definition!")
+    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
   }
   if (curToken.mType == TokenType::BOpen) {
-    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete field definition!")
+    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
     PARSER_THROW_IF(curToken.mType != TokenType::String,
                     "Invalid array size specifier, expected an integer or enum name, found \"{}\"",
                     curToken.mContents)
 
     typeDefinition.mArraySize = curToken.mContents;
-    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete field definition!")
+    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
     PARSER_THROW_IF(curToken.mType != TokenType::BClose,
                     "Array type definition should be terminated with a ']', found \"{}\"",
                     curToken.mContents)
-    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete field definition!")
+    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
+  }
+
+  if (curToken.mType == TokenType::Star) {
+    typeDefinition.mType = TypeDefinitionType::Pointer;
+    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
+  } else if (curToken.mType == TokenType::Ampersand) {
+    typeDefinition.mType = TypeDefinitionType::Reference;
+    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
   }
 }
 

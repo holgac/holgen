@@ -25,6 +25,8 @@ enum class TokenType {
   BClose, // ]
   Slash, // /
   At, // @
+  Star, // *
+  Ampersand, // &
 };
 
 struct Token {

@@ -27,11 +27,18 @@ struct DefinitionSource {
   size_t mColumn = -1;
 };
 
+enum class TypeDefinitionType {
+  Value,
+  Pointer,
+  Reference,
+};
+
 struct TypeDefinition {
   std::string mName;
   std::vector<TypeDefinition> mTemplateParameters;
   // positive values indicate array; 0 means a regular value
   std::string mArraySize;
+  TypeDefinitionType mType;
   bool operator==(const TypeDefinition &rhs) const;
 };
 

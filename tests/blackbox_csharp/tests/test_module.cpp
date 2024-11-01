@@ -511,6 +511,23 @@ TEST_F(ModuleTest, TrackedCSharpObjectReturnMirrorVector) {
   EXPECT_EQ(versions[4], ModuleVersion(0, 1, 4));
 }
 
+TEST_F(ModuleTest, TrackedCSharpObjectReturnProxyVector) {
+  DotNetHost mDotNetHost;
+  mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
+  auto &module1 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule");
+  auto &module2 = mDotNetHost.LoadCustomDotNetModule(mPathToBinFolder / "TestModule2");
+  module1.Initialize();
+  module2.Initialize();
+  auto &counterManager = CounterManager::GetInstance();
+  module1.TrackedCSharpObject(1);
+  counterManager.GetCounterBumpers()[0].SetName("Test");
+  auto counters = counterManager.GetCounterBumpers()[0].GetCounters(3);
+  EXPECT_EQ(counters.size(), 3);
+  EXPECT_EQ(counters[0], counterManager.GetCounterPtr("Test0"));
+  EXPECT_EQ(counters[1], counterManager.GetCounterPtr("Test1"));
+  EXPECT_EQ(counters[2], counterManager.GetCounterPtr("Test2"));
+}
+
 // TEST_F(ModuleTest, TrackedCSharpObjectReturnArray) {
 //   DotNetHost mDotNetHost;
 //   mDotNetHost.Initialize(mPathToBinFolder / "CSharpBindings");
