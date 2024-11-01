@@ -69,10 +69,9 @@ void DotNetWrapperPlugin::ProcessMethods(const Class &cls, CSharpClass &csCls) c
             .GenerateMethod(method);
     csCls.mDelegates.push_back(std::move(csDelegate));
 
-    auto csMethod = CSharpMethodHelper(mProject, cls, csCls, Naming(),
-                                       CSharpMethodType::WrappedClassCallerMethod)
-                        .GenerateMethod(method);
-    csCls.mMethods.push_back(std::move(csMethod));
+    csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                                CSharpMethodType::WrappedClassCallerMethod)
+                                 .GenerateMethod(method));
   }
 }
 

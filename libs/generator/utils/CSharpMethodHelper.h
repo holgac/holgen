@@ -10,6 +10,7 @@ enum class CSharpMethodType {
   WrappedClassDelegate,
   WrappedClassCallerMethod,
   WrappedClassCallerConstructor,
+  InterfaceClassAbstractMethod,
   ModuleInterfaceDelegate,
   ModuleInterfaceAbstractMethod,
 };
@@ -38,6 +39,7 @@ private:
   void AddAuxiliaryArguments(std::list<CSharpMethodArgument> &arguments, const Type &type,
                              const std::string &argPrefix, bool isReturnValue);
   bool ShouldHaveSizeArgument(const Type &returnType);
+  bool ShouldPassSizeArgument(const Type &returnType);
   bool ShouldHaveDeleterArgument(const Type &returnType);
   bool ShouldPassDeleterArgument(const Type &returnType);
   bool ShouldPassThisArgument(const ClassMethod &method);

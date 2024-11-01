@@ -2,6 +2,7 @@
 #include "core/St.h"
 #include "generator/utils/BridgingHelper.h"
 #include "generator/utils/CSharpHelper.h"
+#include "generator/utils/CSharpMethodHelper.h"
 
 namespace holgen {
 
@@ -326,13 +327,9 @@ void DotNetInterfaceClassPlugin::GenerateCSharpMethods(const Class &cls, CSharpC
 CSharpMethod &DotNetInterfaceClassPlugin::GenerateCSharpAbstractMethod(const Class &cls,
                                                                        CSharpClass &csCls,
                                                                        const ClassMethod &method) {
-  auto csMethod = CSharpHelper::Get().CreateMethod(mProject, cls, method, InteropType::Internal,
-                                                   InteropType::Internal, false, true, true);
-  csMethod.mVirtuality = Virtuality::PureVirtual;
-  for (auto &arg: csMethod.mArguments) {
-    arg.mAttributes.clear();
-  }
-  csCls.mMethods.push_back(std::move(csMethod));
+  csCls.mMethods.push_back(CSharpMethodHelper(mProject, cls, csCls, Naming(),
+                                              CSharpMethodType::InterfaceClassAbstractMethod)
+                               .GenerateMethod(method));
   return csCls.mMethods.back();
 }
 

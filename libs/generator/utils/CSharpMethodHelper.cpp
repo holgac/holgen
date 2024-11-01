@@ -49,6 +49,10 @@ void CSharpMethodHelper::SetMethodProperties(const ClassMethod &method, CSharpMe
   case CSharpMethodType::WrappedClassCallerConstructor:
     csMethod.mStaticness = method.IsStatic(mClass) ? Staticness::Static : Staticness::NotStatic;
     break;
+  case CSharpMethodType::InterfaceClassAbstractMethod:
+    csMethod.mStaticness = method.IsStatic(mClass) ? Staticness::Static : Staticness::NotStatic;
+    csMethod.mVirtuality = Virtuality::PureVirtual;
+    break;
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
     csMethod.mVirtuality = Virtuality::PureVirtual;
     csMethod.mStaticness = Staticness::Static;
@@ -67,6 +71,7 @@ CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassCallerMethod:
     case CSharpMethodType::WrappedClassCallerConstructor:
+    case CSharpMethodType::InterfaceClassAbstractMethod:
       return CSharpType{cls->mName};
     case CSharpMethodType::WrappedClassDelegate:
     case CSharpMethodType::ModuleInterfaceDelegate:
@@ -82,6 +87,7 @@ CSharpType CSharpMethodHelper::ConvertReturnType(const Type &type) {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassCallerMethod:
     case CSharpMethodType::WrappedClassCallerConstructor:
+    case CSharpMethodType::InterfaceClassAbstractMethod:
       {
         auto out = ConvertReturnType(type.mTemplateParameters.front());
         ++out.mArrayDepth;
@@ -103,6 +109,7 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
     case CSharpMethodType::WrappedClassDelegate:
     case CSharpMethodType::WrappedClassCallerMethod:
     case CSharpMethodType::WrappedClassCallerConstructor:
+    case CSharpMethodType::InterfaceClassAbstractMethod:
       THROW("{} is not a valid type for this method type!", type.ToString(true));
     case CSharpMethodType::ModuleInterfaceDelegate:
     case CSharpMethodType::ModuleInterfaceAbstractMethod:
@@ -123,6 +130,7 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
       break;
     case CSharpMethodType::ModuleInterfaceDelegate:
     case CSharpMethodType::ModuleInterfaceAbstractMethod:
+    case CSharpMethodType::InterfaceClassAbstractMethod:
       THROW("{} is not a valid type for this method type!", type.ToString(true));
     }
     return CSharpType{"IntPtr"};
@@ -138,6 +146,7 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassCallerMethod:
     case CSharpMethodType::WrappedClassCallerConstructor:
+    case CSharpMethodType::InterfaceClassAbstractMethod:
       return CSharpType{cls->mName};
     case CSharpMethodType::WrappedClassDelegate:
     case CSharpMethodType::ModuleInterfaceDelegate:
@@ -153,11 +162,7 @@ CSharpType CSharpMethodHelper::ConvertArgumentType(const Type &type) {
     switch (mMethodType) {
     case CSharpMethodType::WrappedClassCallerMethod:
     case CSharpMethodType::WrappedClassCallerConstructor:
-      {
-        auto out = ConvertArgumentType(type.mTemplateParameters.front());
-        ++out.mArrayDepth;
-        return out;
-      }
+    case CSharpMethodType::InterfaceClassAbstractMethod:
     case CSharpMethodType::WrappedClassDelegate:
     case CSharpMethodType::ModuleInterfaceDelegate:
     case CSharpMethodType::ModuleInterfaceAbstractMethod:
@@ -180,6 +185,7 @@ std::string CSharpMethodHelper::GetMethodName(const std::string &rawName) {
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     return rawName;
   }
   THROW("Unexpected method type!");
@@ -191,6 +197,7 @@ bool CSharpMethodHelper::ShouldAddThisArgument(const ClassMethod &method) {
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     return false;
   case CSharpMethodType::WrappedClassDelegate:
     return !method.IsStatic(mClass);
@@ -217,6 +224,7 @@ void CSharpMethodHelper::AddAttributes(std::list<std::string> &attributes, const
   case CSharpMethodType::WrappedClassDelegate:
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
     break;
+  case CSharpMethodType::InterfaceClassAbstractMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
   case CSharpMethodType::WrappedClassCallerMethod:
     return;
@@ -252,6 +260,7 @@ bool CSharpMethodHelper::ShouldUseRefArgument(const Type &type, const CSharpType
     return true;
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     return false;
   }
   THROW("Unexpected method type!");
@@ -263,13 +272,14 @@ void CSharpMethodHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &
   switch (mMethodType) {
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     return;
   case CSharpMethodType::ModuleInterfaceDelegate:
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
   case CSharpMethodType::WrappedClassDelegate:
     break;
   }
-  if (CSharpHelper::Get().NeedsSizeArgument(type)) {
+  if (ShouldHaveSizeArgument(type)) {
     auto &arg = arguments.emplace_back(
         std::format("{}{}", argPrefix, St::CSharpAuxiliarySizeSuffix), CSharpType{"ulong"});
     if (isReturnValue) {
@@ -284,8 +294,31 @@ void CSharpMethodHelper::AddAuxiliaryArguments(std::list<CSharpMethodArgument> &
 }
 
 bool CSharpMethodHelper::ShouldHaveSizeArgument(const Type &returnType) {
-  // TODO: implement properly
-  return CSharpHelper::Get().NeedsSizeArgument(returnType);
+  switch (mMethodType) {
+  case CSharpMethodType::InterfaceClassAbstractMethod:
+  case CSharpMethodType::WrappedClassCallerMethod:
+  case CSharpMethodType::WrappedClassCallerConstructor:
+    return false;
+  case CSharpMethodType::ModuleInterfaceDelegate:
+  case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::ModuleInterfaceAbstractMethod:
+    return CSharpHelper::Get().NeedsSizeArgument(returnType);
+  }
+  THROW("Unexpected method type!");
+}
+
+bool CSharpMethodHelper::ShouldPassSizeArgument(const Type &returnType) {
+  switch (mMethodType) {
+  case CSharpMethodType::WrappedClassCallerMethod:
+  case CSharpMethodType::WrappedClassCallerConstructor:
+    return CSharpHelper::Get().NeedsSizeArgument(returnType);
+  case CSharpMethodType::InterfaceClassAbstractMethod:
+  case CSharpMethodType::ModuleInterfaceDelegate:
+  case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::ModuleInterfaceAbstractMethod:
+    break;
+  }
+  THROW("Unexpected method type!");
 }
 
 bool CSharpMethodHelper::ShouldHaveDeleterArgument(const Type &returnType) {
@@ -294,6 +327,7 @@ bool CSharpMethodHelper::ShouldHaveDeleterArgument(const Type &returnType) {
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     return false;
   case CSharpMethodType::WrappedClassDelegate:
     return returnType.mName == "std::array" || returnType.mName == "std::vector" ||
@@ -308,6 +342,7 @@ bool CSharpMethodHelper::ShouldPassDeleterArgument(const Type &returnType) {
   case CSharpMethodType::ModuleInterfaceDelegate:
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
   case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     break;
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
@@ -318,9 +353,17 @@ bool CSharpMethodHelper::ShouldPassDeleterArgument(const Type &returnType) {
 }
 
 bool CSharpMethodHelper::ShouldPassThisArgument(const ClassMethod &method) {
-  if (method.IsStatic(mClass) || mCsClass.mStaticness == Staticness::Static)
-    return false;
-  return true;
+  switch (mMethodType) {
+  case CSharpMethodType::WrappedClassCallerMethod:
+  case CSharpMethodType::WrappedClassCallerConstructor:
+    return !method.IsStatic(mClass) && mCsClass.mStaticness != Staticness::Static;
+  case CSharpMethodType::ModuleInterfaceDelegate:
+  case CSharpMethodType::ModuleInterfaceAbstractMethod:
+  case CSharpMethodType::WrappedClassDelegate:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
+    break;
+  }
+  THROW("Unexpected method type!");
 }
 
 std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &method,
@@ -359,7 +402,7 @@ std::string CSharpMethodHelper::ConstructMethodArguments(const ClassMethod &meth
     // }
   }
   // if (mMethodType == CSharpMethodType::InterfaceCallerMethod) {
-  if (ShouldHaveSizeArgument(method.mReturnType)) {
+  if (ShouldPassSizeArgument(method.mReturnType)) {
     if (!isFirst)
       ss << ", ";
     if (mMethodType == CSharpMethodType::WrappedClassCallerMethod)
@@ -386,6 +429,7 @@ std::string CSharpMethodHelper::VariableRepresentation(const CSharpType &type,
   case CSharpMethodType::ModuleInterfaceDelegate:
   case CSharpMethodType::WrappedClassDelegate:
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     break;
   case CSharpMethodType::WrappedClassCallerMethod:
   case CSharpMethodType::WrappedClassCallerConstructor:
@@ -413,6 +457,7 @@ void CSharpMethodHelper::GenerateMethodBody(const ClassMethod &method, CSharpMet
   case CSharpMethodType::ModuleInterfaceDelegate:
   case CSharpMethodType::WrappedClassDelegate:
   case CSharpMethodType::ModuleInterfaceAbstractMethod:
+  case CSharpMethodType::InterfaceClassAbstractMethod:
     return;
   case CSharpMethodType::WrappedClassCallerMethod:
     return GenerateMethodBodyForWrapperMethod(method, csMethod);
@@ -531,7 +576,7 @@ void CSharpMethodHelper::GenerateMethodBodyForWrapperMethodReturningArray(
     objectConstructor = "holgenResultSpan[i]";
   }
   csMethod.mBody.Add("var holgenResult = {};", caller);
-  if (ShouldHaveSizeArgument(method.mReturnType)) {
+  if (ShouldPassSizeArgument(method.mReturnType)) {
     csMethod.mBody.Add("var {0}Int = (int){0};", sizeParameter);
   }
   csMethod.mBody.Add("var holgenReturnValue = new {}[{}];", csRetVal.ToString(), sizeString);
