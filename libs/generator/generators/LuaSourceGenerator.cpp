@@ -38,6 +38,13 @@ void LuaSourceGenerator::Generate(GeneratedContent &out, const Class &cls) const
       codeBlock.Add("---@type {}", ToLuaType(Type{cls.mName}));
       codeBlock.Add("{} = nil", globalAttribute->mValue.mName);
     }
+    auto funcTableAttribute = cls.mStruct->GetMatchingAttribute(
+        Annotations::LuaFuncTable, Annotations::LuaFuncTable_SourceTable);
+    if (funcTableAttribute) {
+      codeBlock.Add("");
+      codeBlock.Add("---@type table<string, {}>", ToLuaType(Type{cls.mName}));
+      codeBlock.Add("{} = nil", funcTableAttribute->mValue.mName);
+    }
   }
   out.mBody = std::move(codeBlock);
 }
@@ -93,6 +100,8 @@ void LuaSourceGenerator::GenerateField(CodeBlock &codeBlock, const ClassField &f
     codeBlock.Add("---@field {}Id {}", field.mField->mName, ToLuaType(field.mType));
     codeBlock.Add("---@field {} {}", field.mField->mName,
                   ToLuaType(Type{field.mField->mType.mTemplateParameters.front().mName}));
+  } else if (field.mField && field.mField->mType.mName == "luadata") {
+    codeBlock.Add("---@field {} any", field.mField->mName);
   } else {
     codeBlock.Add("---@field {} {}", field.mField->mName, ToLuaType(field.mType));
   }
@@ -121,8 +130,11 @@ void LuaSourceGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cls,
   }
   if (method.mReturnType != Type{"void"})
     codeBlock.Add("---@return {}", ToLuaType(method.mReturnType));
-  codeBlock.Add("function {}{}:{}({}) end", cls.mName, St::LuaMetatableSuffix, method.mName,
-                argsStr.str());
+  std::string accessor = ":";
+  if (method.IsStatic(cls))
+    accessor = ".";
+  codeBlock.Add("function {}{}{}{}({}) end", cls.mName, St::LuaMetatableSuffix, accessor,
+                method.mName, argsStr.str());
 }
 
 bool LuaSourceGenerator::ShouldProcess(const Class &cls) const {
