@@ -10,7 +10,7 @@ void LuaFunctionPlugin::Run() {
     return;
   }
   for (auto &cls: mProject.mClasses) {
-    if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::NoLua))
+    if (cls.mStruct == nullptr || cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
       continue;
     bool isFuncTable = false;
     if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {

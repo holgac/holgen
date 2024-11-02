@@ -32,6 +32,7 @@ TEST(GeneratorTest, Helpers) {
       .mConfigHeader = "",
       .mCSharpRoot = "",
   };
+  generatorSettings.EnableFeature(GeneratorFeatureFlag::Lua);
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
   ExpectGeneratedContent(files["CMakeLists.txt"], FileType::CMakeFile, "CMakeLists.txt",
@@ -82,7 +83,6 @@ TEST(GeneratorTest, ClassWithGetters) {
       .mNamespace = "generator_test_namespace",
   };
   translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
-  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
@@ -181,13 +181,13 @@ TEST(GeneratorTest, ClassWithContainers) {
       .mNamespace = "generator_test_namespace",
   };
   translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
-  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
       .mCSharpRoot = "",
   };
+  generatorSettings.EnableFeature(GeneratorFeatureFlag::Lua);
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
   ExpectGeneratedContent(files["gen/Market.h"], FileType::CppHeader, "gen/Market.h",
@@ -330,13 +330,13 @@ TEST(GeneratorTest, NestedClasses) {
       .mNamespace = "generator_test_namespace",
   };
   translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
-  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
       .mCSharpRoot = "",
   };
+  generatorSettings.EnableFeature(GeneratorFeatureFlag::Lua);
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
   ExpectGeneratedContent(files["gen/Sound.h"], FileType::CppHeader, "gen/Sound.h",
@@ -573,13 +573,13 @@ TEST(GeneratorTest, Converters) {
       .mNamespace = "generator_test_namespace",
   };
   translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
-  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
       .mCSharpRoot = "",
   };
+  generatorSettings.EnableFeature(GeneratorFeatureFlag::Lua);
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
   ExpectGeneratedContent(files["gen/Person.h"], FileType::CppHeader, "gen/Person.h",
@@ -878,13 +878,13 @@ TEST(GeneratorTest, DataManager) {
       .mNamespace = "generator_test_namespace",
   };
   translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
-  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
       .mCSharpRoot = "",
   };
+  generatorSettings.EnableFeature(GeneratorFeatureFlag::Lua);
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
 
@@ -1002,13 +1002,13 @@ TEST(GeneratorTest, NonCopyableStruct) {
       .mNamespace = "generator_test_namespace",
   };
   translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
-  translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   auto translatedProject = Translator(translatorSettings).Translate(projectDefinition);
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",
       .mCSharpRoot = "",
   };
+  generatorSettings.EnableFeature(GeneratorFeatureFlag::Lua);
   CodeGenerator generator(generatorSettings);
   auto files = MapByName(generator.Generate(translatedProject));
 

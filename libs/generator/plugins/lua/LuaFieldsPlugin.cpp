@@ -56,7 +56,7 @@ void LuaFieldsPlugin::ProcessRegistryDataField(Class &cls, const FieldDefinition
 }
 
 void LuaFieldsPlugin::ProcessStruct(Class &cls, const StructDefinition &structDefinition) {
-  if (structDefinition.GetAnnotation(Annotations::NoLua)) {
+  if (structDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_Lua)) {
     return;
   }
 

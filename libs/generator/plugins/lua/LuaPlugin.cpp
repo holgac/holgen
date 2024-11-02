@@ -35,8 +35,8 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
   const std::set<std::string> NoNewIndexTypes = {St::UserData, St::Variant, St::Lua_CustomData};
   for (auto &field: cls.mFields) {
     // TODO: parse variant
-    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
-      NoNewIndexTypes.contains(field.mField->mType.mName))
+    if (!field.mField || field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
+        NoNewIndexTypes.contains(field.mField->mType.mName))
       continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
@@ -140,8 +140,8 @@ void LuaPlugin::GenerateReadMirrorStructFromLuaBody(Class &cls, ClassMethod &met
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
   for (auto &field: cls.mFields) {
     // TODO: handle variant type (should call setter instead of direct assignment)
-    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
-      field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
+    if (!field.mField || field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
+        field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant)
       continue;
     // TODO: handle refs?
     auto fieldClass = mProject.GetClass(field.mType.mName);
@@ -272,8 +272,8 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
 
   method.mBody.Add("lua_newtable(luaState);");
   for (auto &field: cls.mFields) {
-    if (!field.mField || field.mField->GetAnnotation(Annotations::NoLua) ||
-      field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant) {
+    if (!field.mField || field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
+        field.mField->mType.mName == St::UserData || field.mField->mType.mName == St::Variant) {
       continue;
     }
     method.mBody.Add("lua_pushstring(luaState, \"{}\");", Naming().FieldNameInLua(*field.mField));
@@ -294,7 +294,7 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
 }
 
 void LuaPlugin::ProcessStruct(Class &cls) {
-  if (cls.mStruct->GetAnnotation(Annotations::NoLua))
+  if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
     return;
   cls.mSourceIncludes.AddStandardHeader("cstring");
   // TODO: just include in header
@@ -378,7 +378,7 @@ void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
 }
 
 void LuaPlugin::ProcessEnum(Class &cls) {
-  if (cls.mEnum->GetAnnotation(Annotations::NoLua))
+  if (cls.mEnum->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
     return;
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
   cls.mSourceIncludes.AddLibHeader("lua.hpp");

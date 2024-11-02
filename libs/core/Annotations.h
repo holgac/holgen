@@ -33,21 +33,6 @@ public:
   inline static const std::string JsonConvert_Elem = "elem";
 
   /*
-   * Disables lua integration for the specified data type.
-   *
-   * Example:
-   * @noLua
-   * struct Something { ... }
-   *
-   * struct Something {
-   *  @noLua()
-   *  i8 field;
-   * }
-   * TODO: use @no(lua)
-   */
-  inline static const std::string NoLua = "noLua";
-
-  /*
    * Disables certain features for the object (field, class, method) below.
    * @no(script) applies to any scripting and managed language.
    */
@@ -84,7 +69,7 @@ public:
    *
    * Example:
    * @noJson
-   * struct Something { ... }
+   * struct Something { ... main.cpp}
    *
    * struct Something {
    *  @noJson()
@@ -411,7 +396,7 @@ public:
    * Struct related annotations
    *
    * A struct can be defined nonCopyable which removes operator= and copy constructor
-   * @struct(nonCopyable)
+   * @struct(nonCopyablemain.cpp)
    * struct YouCanOnlyMoveThis {
    *    BigData field;
    * }
