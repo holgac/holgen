@@ -44,7 +44,7 @@ public:
   /**
    * An annotation that describes the runtime-loaded dotnet modules of this type. The runtime is
    * expected to have a class named Module that matches the annotated struct. The functions should
-   * be static and marked with [UnmanagedCallersOnly].
+   * be static.
    * Does not support fields.
    *
    * @dotNetModule
@@ -106,6 +106,18 @@ public:
   inline static const std::string Container_Count = "count";
   inline static const std::string Container_Delete = "delete";
   inline static const std::string Container_Has = "has";
+
+
+ /*
+  * Lua related annotations
+  *
+  * global: Creates an annotation in stubs file
+  * @lua(global=Game)
+  * struct GameContext {
+  * }
+  */
+ inline static const std::string Lua = "lua";
+ inline static const std::string Lua_Global = "global";
 
   /**
    * Indicates that the struct is managed by the given DataManager.

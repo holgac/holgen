@@ -29,6 +29,16 @@ void LuaSourceGenerator::Generate(GeneratedContent &out, const Class &cls) const
     GenerateEnum(codeBlock, cls);
 
   GenerateMethods(codeBlock, cls);
+
+  if (cls.mStruct) {
+    auto globalAttribute =
+        cls.mStruct->GetMatchingAttribute(Annotations::Lua, Annotations::Lua_Global);
+    if (globalAttribute) {
+      codeBlock.Add("");
+      codeBlock.Add("---@type {}", ToLuaType(Type{cls.mName}));
+      codeBlock.Add("{} = nil", globalAttribute->mValue.mName);
+    }
+  }
   out.mBody = std::move(codeBlock);
 }
 
@@ -50,7 +60,8 @@ void LuaSourceGenerator::GenerateEnum(CodeBlock &codeBlock, const Class &cls) co
   codeBlock.Add("local {} = {{", cls.mName);
   codeBlock.Indent(1);
   codeBlock.Add(std::move(entriesCodeBlock));
-  codeBlock.Add("Invalid = {},", cls.mEnum->mInvalidValue);
+  if (cls.mEnum->mType == EnumDefinitionType::Enum)
+    codeBlock.Add("Invalid = {},", cls.mEnum->mInvalidValue);
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
 }
@@ -133,12 +144,7 @@ bool LuaSourceGenerator::ShouldProcess(const ClassField &field) const {
 }
 
 bool LuaSourceGenerator::ShouldProcess(const ClassMethod &method) const {
-  if (!method.mFunction ||
-      method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
-      method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Lua)) {
-    return false;
-  }
-  return true;
+  return method.mExposeToLua;
 }
 
 std::string LuaSourceGenerator::ToLuaType(const Type &type) const {
