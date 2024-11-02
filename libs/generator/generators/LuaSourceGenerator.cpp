@@ -56,8 +56,15 @@ void LuaSourceGenerator::GenerateEnum(CodeBlock &codeBlock, const Class &cls) co
     entriesCodeBlock.Add("{} = {},", entry.mName, entry.mValue);
   }
 
+  auto indexEnum = cls.GetNestedEnum("EntryIndex");
+  if (indexEnum) {
+    for (auto &entry: indexEnum->mEntries) {
+      entriesCodeBlock.Add("{} = {},", entry.mName, entry.mValue);
+    }
+  }
+
   codeBlock.Add("---@alias {} {}", cls.mName, aliasStatement.str());
-  codeBlock.Add("local {} = {{", cls.mName);
+  codeBlock.Add("{} = {{", cls.mName);
   codeBlock.Indent(1);
   codeBlock.Add(std::move(entriesCodeBlock));
   if (cls.mEnum->mType == EnumDefinitionType::Enum)
@@ -70,7 +77,7 @@ void LuaSourceGenerator::GenerateClassDefinition(CodeBlock &codeBlock, const Cla
   auto luaClassName = cls.mName + St::LuaMetatableSuffix;
   codeBlock.Add("---@class {}", luaClassName);
   GenerateFields(codeBlock, cls);
-  codeBlock.Add("local {} = {{}}", luaClassName);
+  codeBlock.Add("{} = {{}}", luaClassName);
 }
 
 void LuaSourceGenerator::GenerateFields(CodeBlock &codeBlock, const Class &cls) const {
