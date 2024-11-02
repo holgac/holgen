@@ -28,7 +28,9 @@ void LuaSourceGenerator::Generate(GeneratedContent &out, const Class &cls) const
   } else if (cls.mEnum)
     GenerateEnum(codeBlock, cls);
 
-  GenerateMethods(codeBlock, cls);
+  if (!cls.mStruct || !cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    GenerateMethods(codeBlock, cls);
+  }
 
   if (cls.mStruct) {
     auto globalAttribute =
@@ -93,6 +95,13 @@ void LuaSourceGenerator::GenerateFields(CodeBlock &codeBlock, const Class &cls) 
       continue;
     GenerateField(codeBlock, field);
   }
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    for (auto &method: cls.mMethods) {
+      if (!ShouldProcess(method))
+        continue;
+      GenerateMethodAsField(codeBlock, method);
+    }
+  }
 }
 
 void LuaSourceGenerator::GenerateField(CodeBlock &codeBlock, const ClassField &field) const {
@@ -107,6 +116,11 @@ void LuaSourceGenerator::GenerateField(CodeBlock &codeBlock, const ClassField &f
   }
 }
 
+void LuaSourceGenerator::GenerateMethodAsField(CodeBlock &codeBlock,
+                                               const ClassMethod &method) const {
+  codeBlock.Add("---@field {} {}", method.mName, ToFunctionSignature(method));
+}
+
 void LuaSourceGenerator::GenerateMethods(CodeBlock &codeBlock, const Class &cls) const {
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
@@ -119,7 +133,6 @@ void LuaSourceGenerator::GenerateMethods(CodeBlock &codeBlock, const Class &cls)
 void LuaSourceGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cls,
                                         const ClassMethod &method) const {
   std::stringstream argsStr;
-  std::stringstream argTypesStr;
   bool isFirst = true;
   for (auto &arg: method.mArguments) {
     if (arg.mType.mName == "lua_State")
@@ -127,17 +140,14 @@ void LuaSourceGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cls,
     codeBlock.Add("---@param {} {}", arg.mName, ToLuaType(arg.mType));
     if (isFirst)
       isFirst = false;
-    else {
+    else
       argsStr << ", ";
-      argTypesStr << ", ";
-    }
     argsStr << arg.mName;
-    argTypesStr << arg.mName << ": " << ToLuaType(arg.mType);
   }
   if (method.mReturnType != Type{"void"})
     codeBlock.Add("---@return {}", ToLuaType(method.mReturnType));
   std::string accessor = ":";
-  if (method.IsStatic(cls))
+  if (method.IsStatic(cls) || cls.mStruct->GetAnnotation(Annotations::LuaFuncTable))
     accessor = ".";
   codeBlock.Add("function {}{}{}{}({}) end", cls.mName, St::LuaMetatableSuffix, accessor,
                 method.mName, argsStr.str());
@@ -146,10 +156,7 @@ void LuaSourceGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cls,
     auto funcTableAnnotation = method.mFunction->GetMatchingAttribute(
         Annotations::LuaFunc, Annotations::LuaFunc_SourceTable);
     if (funcTableAnnotation) {
-      std::string returnAnnotation;
-      if (method.mReturnType.mName != "void")
-        returnAnnotation = std::format(": {}", ToLuaType(method.mReturnType));
-      codeBlock.Add("---@type table<string, fun({}){}>", argTypesStr.str(), returnAnnotation);
+      codeBlock.Add("---@type table<string, {}>", ToFunctionSignature(method));
       codeBlock.Add("{} = nil", funcTableAnnotation->mValue.mName);
     }
   }
@@ -189,7 +196,7 @@ std::string LuaSourceGenerator::ToLuaType(const Type &type) const {
   if (type.mName == "void" && type.mType == PassByType::Pointer)
     return "userdata";
   if (type.mName == "bool")
-    return "bool";
+    return "boolean";
   if (ti.IntegralTypes.contains(type.mName) || ti.FloatingPointTypes.contains(type.mName))
     return "number";
   if (type.mName == "std::string")
@@ -226,5 +233,28 @@ std::string LuaSourceGenerator::ToLuaType(const Type &type) const {
     return std::format("{}[]", ToLuaType(type.mTemplateParameters.front()));
   }
   return "any";
+}
+
+std::string LuaSourceGenerator::ToTypedFunctionArguments(const ClassMethod &method) const {
+  std::stringstream ss;
+  bool isFirst = true;
+  for (auto &arg: method.mArguments) {
+    if (arg.mType.mName == "lua_State")
+      continue;
+    if (isFirst)
+      isFirst = false;
+    else {
+      ss << ", ";
+    }
+    ss << arg.mName << ": " << ToLuaType(arg.mType);
+  }
+  return ss.str();
+}
+
+std::string LuaSourceGenerator::ToFunctionSignature(const ClassMethod &method) const {
+  std::string returnAnnotation;
+  if (method.mReturnType.mName != "void")
+    returnAnnotation = std::format(": {}", ToLuaType(method.mReturnType));
+  return std::format("fun({}){}", ToTypedFunctionArguments(method), returnAnnotation);
 }
 } // namespace holgen
