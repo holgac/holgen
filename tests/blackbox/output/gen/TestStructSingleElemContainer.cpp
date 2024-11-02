@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructSingleElemContainer::operator==(const TestStructSingleElemContainer &rhs) const {
-  return !(
-      mSingleElemStructs != rhs.mSingleElemStructs ||
-      mSingleElemStructsWithId != rhs.mSingleElemStructsWithId
-  );
-}
-
 const std::vector<TestStructSingleElem> &TestStructSingleElemContainer::GetSingleElemStructs() const {
   return mSingleElemStructs;
 }
@@ -97,6 +90,13 @@ TestStructSingleElemWithId *TestStructSingleElemContainer::GetSingleElemStructWi
 
 size_t TestStructSingleElemContainer::GetSingleElemStructWithIdCount() const {
   return mSingleElemStructsWithId.size();
+}
+
+bool TestStructSingleElemContainer::operator==(const TestStructSingleElemContainer &rhs) const {
+  return !(
+      mSingleElemStructs != rhs.mSingleElemStructs ||
+      mSingleElemStructsWithId != rhs.mSingleElemStructsWithId
+  );
 }
 
 bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {

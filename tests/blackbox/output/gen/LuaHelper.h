@@ -181,11 +181,11 @@ public:
   template <typename T>
   static bool Read(T &data, lua_State *luaState, int32_t luaIndex) {
     if constexpr(std::is_pointer_v<T>) {
-      return Read(*data, luaState, luaIndex);
+      data = std::remove_pointer_t<T>::ReadProxyFromLua(luaState, luaIndex);
     } else {
       data = T::ReadMirrorFromLua(luaState, luaIndex);
-      return true;
     }
+    return true;
   }
   static bool Read(bool &data, lua_State *luaState, int32_t luaIndex);
   static bool Read(double &data, lua_State *luaState, int32_t luaIndex);

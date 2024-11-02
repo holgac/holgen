@@ -19,7 +19,6 @@ public:
   TestLuaCalculator(const TestLuaCalculator &rhs) = default;
   TestLuaCalculator(TestLuaCalculator &&rhs) noexcept = default;
   ~TestLuaCalculator() = default;
-  bool operator==(const TestLuaCalculator &rhs) const;
   const TestLuaNumber &GetLastValue() const;
   TestLuaNumber &GetLastValue();
   void SetLastValue(const TestLuaNumber &val);
@@ -41,6 +40,7 @@ public:
   TestLuaNumber ReturnNew(lua_State *luaState, const int32_t num) const;
   void SetReturnNewLuaFunc(std::string val);
   bool HasReturnNewLuaFunc() const;
+  bool operator==(const TestLuaCalculator &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

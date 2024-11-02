@@ -17,12 +17,12 @@ public:
   TestStructHashable(const TestStructHashable &rhs) = default;
   TestStructHashable(TestStructHashable &&rhs) noexcept = default;
   ~TestStructHashable() = default;
-  bool operator==(const TestStructHashable &rhs) const;
   uint32_t GetField1() const;
   uint32_t GetField2() const;
   void SetField1(uint32_t val);
   void SetField2(uint32_t val);
   uint64_t Hash() const;
+  bool operator==(const TestStructHashable &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

@@ -18,7 +18,6 @@ public:
   Human(const Human &rhs) = default;
   Human(Human &&rhs) noexcept = default;
   ~Human() = default;
-  bool operator==(const Human &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -26,6 +25,7 @@ public:
   void SetName(const std::string &val);
   static Human *Get(uint32_t id);
   static Human *GetFromName(const std::string &key);
+  bool operator==(const Human &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

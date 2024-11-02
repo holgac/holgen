@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestEnumStruct::operator==(const TestEnumStruct &rhs) const {
-  return !(
-      mEnumField != rhs.mEnumField ||
-      mEnumDefaultValueField != rhs.mEnumDefaultValueField
-  );
-}
-
 const TestEnum &TestEnumStruct::GetEnumField() const {
   return mEnumField;
 }
@@ -38,6 +31,13 @@ void TestEnumStruct::SetEnumField(const TestEnum &val) {
 
 void TestEnumStruct::SetEnumDefaultValueField(const TestEnumDefaultValue &val) {
   mEnumDefaultValueField = val;
+}
+
+bool TestEnumStruct::operator==(const TestEnumStruct &rhs) const {
+  return !(
+      mEnumField != rhs.mEnumField ||
+      mEnumDefaultValueField != rhs.mEnumDefaultValueField
+  );
 }
 
 bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {

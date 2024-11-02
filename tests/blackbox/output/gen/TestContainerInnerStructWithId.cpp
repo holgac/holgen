@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestContainerInnerStructWithId::operator==(const TestContainerInnerStructWithId &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName
-  );
-}
-
 uint32_t TestContainerInnerStructWithId::GetId() const {
   return mId;
 }
@@ -34,6 +27,13 @@ void TestContainerInnerStructWithId::SetId(uint32_t val) {
 
 void TestContainerInnerStructWithId::SetName(const std::string &val) {
   mName = val;
+}
+
+bool TestContainerInnerStructWithId::operator==(const TestContainerInnerStructWithId &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName
+  );
 }
 
 bool TestContainerInnerStructWithId::ParseJson(const rapidjson::Value &json, const Converter &converter) {

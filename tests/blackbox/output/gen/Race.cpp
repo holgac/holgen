@@ -9,15 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Race::operator==(const Race &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName ||
-      mHairColors != rhs.mHairColors ||
-      mNames != rhs.mNames
-  );
-}
-
 uint32_t Race::GetId() const {
   return mId;
 }
@@ -60,6 +51,15 @@ void Race::SetHairColors(const std::vector<std::string> &val) {
 
 void Race::SetNames(const std::map<std::string, std::vector<std::string>> &val) {
   mNames = val;
+}
+
+bool Race::operator==(const Race &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mHairColors != rhs.mHairColors ||
+      mNames != rhs.mNames
+  );
 }
 
 bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {

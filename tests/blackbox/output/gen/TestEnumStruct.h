@@ -19,13 +19,13 @@ public:
   TestEnumStruct(const TestEnumStruct &rhs) = default;
   TestEnumStruct(TestEnumStruct &&rhs) noexcept = default;
   ~TestEnumStruct() = default;
-  bool operator==(const TestEnumStruct &rhs) const;
   const TestEnum &GetEnumField() const;
   TestEnum &GetEnumField();
   const TestEnumDefaultValue &GetEnumDefaultValueField() const;
   TestEnumDefaultValue &GetEnumDefaultValueField();
   void SetEnumField(const TestEnum &val);
   void SetEnumDefaultValueField(const TestEnumDefaultValue &val);
+  bool operator==(const TestEnumStruct &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

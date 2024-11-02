@@ -18,10 +18,10 @@ public:
   TestStructSingleElem(const TestStructSingleElem &rhs) = default;
   TestStructSingleElem(TestStructSingleElem &&rhs) noexcept = default;
   ~TestStructSingleElem() = default;
-  bool operator==(const TestStructSingleElem &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
   void SetName(const std::string &val);
+  bool operator==(const TestStructSingleElem &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

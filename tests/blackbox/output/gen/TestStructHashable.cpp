@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructHashable::operator==(const TestStructHashable &rhs) const {
-  return !(
-      mField1 != rhs.mField1 ||
-      mField2 != rhs.mField2
-  );
-}
-
 uint32_t TestStructHashable::GetField1() const {
   return mField1;
 }
@@ -30,6 +23,13 @@ void TestStructHashable::SetField1(uint32_t val) {
 
 void TestStructHashable::SetField2(uint32_t val) {
   mField2 = val;
+}
+
+bool TestStructHashable::operator==(const TestStructHashable &rhs) const {
+  return !(
+      mField1 != rhs.mField1 ||
+      mField2 != rhs.mField2
+  );
 }
 
 bool TestStructHashable::ParseJson(const rapidjson::Value &json, const Converter &converter) {

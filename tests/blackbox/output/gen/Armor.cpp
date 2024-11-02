@@ -11,15 +11,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Armor::operator==(const Armor &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName ||
-      mAlternativeName != rhs.mAlternativeName ||
-      mArmorClass != rhs.mArmorClass
-  );
-}
-
 uint32_t Armor::GetId() const {
   return mId;
 }
@@ -70,6 +61,15 @@ Armor *Armor::GetFromName(const std::string &key) {
 
 Armor *Armor::GetFromAlternativeName(const std::string &key) {
   return GlobalPointer<GameData>::GetInstance()->GetArmorFromAlternativeName(key);
+}
+
+bool Armor::operator==(const Armor &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mAlternativeName != rhs.mAlternativeName ||
+      mArmorClass != rhs.mArmorClass
+  );
 }
 
 bool Armor::ParseJson(const rapidjson::Value &json, const Converter &converter) {

@@ -9,15 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestContainerVector::operator==(const TestContainerVector &rhs) const {
-  return !(
-      mInnerStructsWithId != rhs.mInnerStructsWithId ||
-      mInnerStructsNoId != rhs.mInnerStructsNoId ||
-      mStringContainer != rhs.mStringContainer ||
-      mUnsignedContainer != rhs.mUnsignedContainer
-  );
-}
-
 const std::vector<TestContainerInnerStructWithId> &TestContainerVector::GetInnerStructsWithId() const {
   return mInnerStructsWithId;
 }
@@ -234,6 +225,17 @@ void TestContainerVector::DeleteUnsignedElem(size_t idx) {
 
 size_t TestContainerVector::GetUnsignedElemCount() const {
   return mUnsignedContainer.size();
+}
+
+bool TestContainerVector::operator==(const TestContainerVector &rhs) const {
+  return !(
+      mInnerStructsWithId != rhs.mInnerStructsWithId ||
+      mInnerStructsNoId != rhs.mInnerStructsNoId ||
+      mStringContainer != rhs.mStringContainer ||
+      mUnsignedContainer != rhs.mUnsignedContainer ||
+      mInnerStructsWithIdNameIndex != rhs.mInnerStructsWithIdNameIndex ||
+      mInnerStructsNoIdNameIndex != rhs.mInnerStructsNoIdNameIndex
+  );
 }
 
 bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converter &converter) {

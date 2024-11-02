@@ -20,7 +20,6 @@ public:
   TestStructSingleElemContainer(const TestStructSingleElemContainer &rhs) = default;
   TestStructSingleElemContainer(TestStructSingleElemContainer &&rhs) noexcept = default;
   ~TestStructSingleElemContainer() = default;
-  bool operator==(const TestStructSingleElemContainer &rhs) const;
   const std::vector<TestStructSingleElem> &GetSingleElemStructs() const;
   std::vector<TestStructSingleElem> &GetSingleElemStructs();
   const std::vector<TestStructSingleElemWithId> &GetSingleElemStructsWithId() const;
@@ -38,6 +37,7 @@ public:
   const TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx) const;
   TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx);
   size_t GetSingleElemStructWithIdCount() const;
+  bool operator==(const TestStructSingleElemContainer &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

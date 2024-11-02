@@ -9,14 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestJsonStructMapWithConverters::operator==(const TestJsonStructMapWithConverters &rhs) const {
-  return !(
-      mTestMapConvertElem != rhs.mTestMapConvertElem ||
-      mTestMapConvertKey != rhs.mTestMapConvertKey ||
-      mTestMapConvertKeyElem != rhs.mTestMapConvertKeyElem
-  );
-}
-
 const std::map<std::string, uint32_t> &TestJsonStructMapWithConverters::GetTestMapConvertElem() const {
   return mTestMapConvertElem;
 }
@@ -51,6 +43,14 @@ void TestJsonStructMapWithConverters::SetTestMapConvertKey(const std::map<uint32
 
 void TestJsonStructMapWithConverters::SetTestMapConvertKeyElem(const std::map<uint32_t, uint32_t> &val) {
   mTestMapConvertKeyElem = val;
+}
+
+bool TestJsonStructMapWithConverters::operator==(const TestJsonStructMapWithConverters &rhs) const {
+  return !(
+      mTestMapConvertElem != rhs.mTestMapConvertElem ||
+      mTestMapConvertKey != rhs.mTestMapConvertKey ||
+      mTestMapConvertKeyElem != rhs.mTestMapConvertKeyElem
+  );
 }
 
 bool TestJsonStructMapWithConverters::ParseJson(const rapidjson::Value &json, const Converter &converter) {

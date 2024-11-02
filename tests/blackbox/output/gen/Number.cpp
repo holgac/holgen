@@ -9,18 +9,18 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Number::operator==(const Number &rhs) const {
-  return !(
-      mValue != rhs.mValue
-  );
-}
-
 int64_t Number::GetValue() const {
   return mValue;
 }
 
 void Number::SetValue(int64_t val) {
   mValue = val;
+}
+
+bool Number::operator==(const Number &rhs) const {
+  return !(
+      mValue != rhs.mValue
+  );
 }
 
 bool Number::ParseJson(const rapidjson::Value &json, const Converter &converter) {

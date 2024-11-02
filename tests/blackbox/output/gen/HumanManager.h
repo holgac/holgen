@@ -21,7 +21,6 @@ public:
   HumanManager(const HumanManager &rhs) = default;
   HumanManager(HumanManager &&rhs) noexcept = default;
   ~HumanManager() = default;
-  bool operator==(const HumanManager &rhs) const;
   const std::unordered_map<uint32_t, Human> &GetHumans() const;
   std::unordered_map<uint32_t, Human> &GetHumans();
   void SetHumans(const std::unordered_map<uint32_t, Human> &val);
@@ -34,6 +33,7 @@ public:
   bool HasHuman(uint32_t key) const;
   void DeleteHuman(uint32_t key);
   size_t GetHumanCount() const;
+  bool operator==(const HumanManager &rhs) const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

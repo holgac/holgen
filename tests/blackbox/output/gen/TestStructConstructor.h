@@ -19,7 +19,6 @@ public:
   TestStructConstructor(const TestStructConstructor &rhs) = default;
   TestStructConstructor(TestStructConstructor &&rhs) noexcept = default;
   ~TestStructConstructor() = default;
-  bool operator==(const TestStructConstructor &rhs) const;
   float GetX() const;
   float GetY() const;
   float GetZ() const;
@@ -28,6 +27,7 @@ public:
   void SetZ(float val);
   static TestStructConstructor Construct1(const float val);
   static TestStructConstructor Construct3(const float x, const float y, const float z);
+  bool operator==(const TestStructConstructor &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

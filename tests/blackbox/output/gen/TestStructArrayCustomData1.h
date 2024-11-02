@@ -17,13 +17,13 @@ public:
   TestStructArrayCustomData1(const TestStructArrayCustomData1 &rhs) = default;
   TestStructArrayCustomData1(TestStructArrayCustomData1 &&rhs) noexcept = default;
   ~TestStructArrayCustomData1() = default;
-  bool operator==(const TestStructArrayCustomData1 &rhs) const;
   uint32_t GetF1() const;
   float GetF2() const;
   uint64_t GetF3() const;
   void SetF1(uint32_t val);
   void SetF2(float val);
   void SetF3(uint64_t val);
+  bool operator==(const TestStructArrayCustomData1 &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

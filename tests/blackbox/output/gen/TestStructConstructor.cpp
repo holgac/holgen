@@ -10,14 +10,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructConstructor::operator==(const TestStructConstructor &rhs) const {
-  return !(
-      std::fabs(mX - rhs.mX) >= 0.00001 ||
-      std::fabs(mY - rhs.mY) >= 0.00001 ||
-      std::fabs(mZ - rhs.mZ) >= 0.00001
-  );
-}
-
 float TestStructConstructor::GetX() const {
   return mX;
 }
@@ -48,6 +40,14 @@ TestStructConstructor TestStructConstructor::Construct1(const float val) {
 
 TestStructConstructor TestStructConstructor::Construct3(const float x, const float y, const float z) {
   return TestStructConstructor(x, y, z);
+}
+
+bool TestStructConstructor::operator==(const TestStructConstructor &rhs) const {
+  return !(
+      std::fabs(mX - rhs.mX) >= 0.00001 ||
+      std::fabs(mY - rhs.mY) >= 0.00001 ||
+      std::fabs(mZ - rhs.mZ) >= 0.00001
+  );
 }
 
 bool TestStructConstructor::ParseJson(const rapidjson::Value &json, const Converter &converter) {

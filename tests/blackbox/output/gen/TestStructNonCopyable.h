@@ -18,10 +18,10 @@ public:
   TestStructNonCopyable(const TestStructNonCopyable &rhs) = delete;
   TestStructNonCopyable(TestStructNonCopyable &&rhs) noexcept;
   ~TestStructNonCopyable() = default;
-  bool operator==(const TestStructNonCopyable &rhs) const;
   const std::vector<int> &GetBigVector() const;
   std::vector<int> &GetBigVector();
   void SetBigVector(const std::vector<int> &val);
+  bool operator==(const TestStructNonCopyable &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

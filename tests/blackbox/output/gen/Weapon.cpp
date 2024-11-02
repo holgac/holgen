@@ -9,15 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Weapon::operator==(const Weapon &rhs) const {
-  return !(
-      mDamageMin != rhs.mDamageMin ||
-      mDamageMax != rhs.mDamageMax ||
-      mDamageMultipliers != rhs.mDamageMultipliers ||
-      mModifiers != rhs.mModifiers
-  );
-}
-
 uint32_t Weapon::GetDamageMin() const {
   return mDamageMin;
 }
@@ -56,6 +47,15 @@ void Weapon::SetDamageMultipliers(const std::vector<DamageMultiplier> &val) {
 
 void Weapon::SetModifiers(const std::vector<std::string> &val) {
   mModifiers = val;
+}
+
+bool Weapon::operator==(const Weapon &rhs) const {
+  return !(
+      mDamageMin != rhs.mDamageMin ||
+      mDamageMax != rhs.mDamageMax ||
+      mDamageMultipliers != rhs.mDamageMultipliers ||
+      mModifiers != rhs.mModifiers
+  );
 }
 
 bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter) {

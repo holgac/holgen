@@ -19,7 +19,6 @@ public:
   TestStructToString(const TestStructToString &rhs) = default;
   TestStructToString(TestStructToString &&rhs) noexcept = default;
   ~TestStructToString() = default;
-  bool operator==(const TestStructToString &rhs) const;
   const std::string &GetField1() const;
   std::string &GetField1();
   const std::string &GetField2() const;
@@ -27,6 +26,7 @@ public:
   void SetField1(const std::string &val);
   void SetField2(const std::string &val);
   std::string Stringify() const;
+  bool operator==(const TestStructToString &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

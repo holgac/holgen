@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestLuaCalculator::operator==(const TestLuaCalculator &rhs) const {
-  return !(
-      mLastValue != rhs.mLastValue
-  );
-}
-
 const TestLuaNumber &TestLuaCalculator::GetLastValue() const {
   return mLastValue;
 }
@@ -178,6 +172,18 @@ void TestLuaCalculator::SetReturnNewLuaFunc(std::string val) {
 
 bool TestLuaCalculator::HasReturnNewLuaFunc() const {
   return !mLuaFuncHandle_ReturnNew.empty();
+}
+
+bool TestLuaCalculator::operator==(const TestLuaCalculator &rhs) const {
+  return !(
+      mLastValue != rhs.mLastValue ||
+      mLuaFuncHandle_AddPrimitive != rhs.mLuaFuncHandle_AddPrimitive ||
+      mLuaFuncHandle_AddRef != rhs.mLuaFuncHandle_AddRef ||
+      mLuaFuncHandle_AddNullable != rhs.mLuaFuncHandle_AddNullable ||
+      mLuaFuncHandle_ReturnNullable != rhs.mLuaFuncHandle_ReturnNullable ||
+      mLuaFuncHandle_ReturnRef != rhs.mLuaFuncHandle_ReturnRef ||
+      mLuaFuncHandle_ReturnNew != rhs.mLuaFuncHandle_ReturnNew
+  );
 }
 
 bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter &converter) {

@@ -24,7 +24,6 @@ public:
   GameData(const GameData &rhs) = default;
   GameData(GameData &&rhs) noexcept = default;
   ~GameData() = default;
-  bool operator==(const GameData &rhs) const;
   const std::vector<Boot> &GetBoots() const;
   std::vector<Boot> &GetBoots();
   const std::vector<Armor> &GetArmors() const;
@@ -57,6 +56,7 @@ public:
   const Character *GetCharacter(uint32_t idx) const;
   Character *GetCharacter(uint32_t idx);
   size_t GetCharacterCount() const;
+  bool operator==(const GameData &rhs) const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

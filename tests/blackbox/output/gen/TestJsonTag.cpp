@@ -11,13 +11,6 @@
 #include "TestJsonTagManager.h"
 
 namespace holgen_blackbox_test {
-bool TestJsonTag::operator==(const TestJsonTag &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName
-  );
-}
-
 uint64_t TestJsonTag::GetId() const {
   return mId;
 }
@@ -44,6 +37,13 @@ TestJsonTag *TestJsonTag::Get(uint64_t id) {
 
 TestJsonTag *TestJsonTag::GetFromName(const std::string &key) {
   return GlobalPointer<TestJsonTagManager>::GetInstance()->GetTagFromName(key);
+}
+
+bool TestJsonTag::operator==(const TestJsonTag &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName
+  );
 }
 
 bool TestJsonTag::ParseJson(const rapidjson::Value &json, const Converter &converter) {

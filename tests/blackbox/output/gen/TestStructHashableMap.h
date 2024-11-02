@@ -20,10 +20,10 @@ public:
   TestStructHashableMap(const TestStructHashableMap &rhs) = default;
   TestStructHashableMap(TestStructHashableMap &&rhs) noexcept = default;
   ~TestStructHashableMap() = default;
-  bool operator==(const TestStructHashableMap &rhs) const;
   const std::unordered_map<TestStructHashable, std::string> &GetData() const;
   std::unordered_map<TestStructHashable, std::string> &GetData();
   void SetData(const std::unordered_map<TestStructHashable, std::string> &val);
+  bool operator==(const TestStructHashableMap &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

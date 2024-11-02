@@ -22,7 +22,6 @@ public:
   TestContainerVector(const TestContainerVector &rhs) = default;
   TestContainerVector(TestContainerVector &&rhs) noexcept = default;
   ~TestContainerVector() = default;
-  bool operator==(const TestContainerVector &rhs) const;
   const std::vector<TestContainerInnerStructWithId> &GetInnerStructsWithId() const;
   std::vector<TestContainerInnerStructWithId> &GetInnerStructsWithId();
   const std::vector<TestContainerInnerStructNoId> &GetInnerStructsNoId() const;
@@ -61,6 +60,7 @@ public:
   uint32_t *GetUnsignedElem(size_t idx);
   void DeleteUnsignedElem(size_t idx);
   size_t GetUnsignedElemCount() const;
+  bool operator==(const TestContainerVector &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

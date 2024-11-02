@@ -28,12 +28,6 @@ void TestLuaRegistryData::UninitializeLua(lua_State *luaState) {
   mData = LUA_NOREF;
 }
 
-bool TestLuaRegistryData::operator==(const TestLuaRegistryData &rhs) const {
-  return !(
-      mData != rhs.mData
-  );
-}
-
 int TestLuaRegistryData::GetData() const {
   return mData;
 }
@@ -113,6 +107,13 @@ void TestLuaRegistryData::Add(lua_State *luaState, const int32_t val) const {
   LuaHelper::Push<false>(val, luaState);
   lua_call(luaState, 2, 0);
   lua_pop(luaState, 1);
+}
+
+bool TestLuaRegistryData::operator==(const TestLuaRegistryData &rhs) const {
+  return !(
+      mData != rhs.mData ||
+      mTable != rhs.mTable
+  );
 }
 
 bool TestLuaRegistryData::ParseJson(const rapidjson::Value &json, const Converter &converter) {

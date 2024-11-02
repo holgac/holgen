@@ -13,15 +13,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Character::operator==(const Character &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName ||
-      mBootId != rhs.mBootId ||
-      mArmorId != rhs.mArmorId
-  );
-}
-
 uint32_t Character::GetId() const {
   return mId;
 }
@@ -80,6 +71,15 @@ Character *Character::Get(uint32_t id) {
 
 Character *Character::GetFromName(const std::string &key) {
   return GlobalPointer<GameData>::GetInstance()->GetCharacterFromName(key);
+}
+
+bool Character::operator==(const Character &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mBootId != rhs.mBootId ||
+      mArmorId != rhs.mArmorId
+  );
 }
 
 bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter) {

@@ -16,15 +16,6 @@ TestStruct::TestStruct(TestStruct &&rhs) noexcept {
   std::swap(mTestFieldUserdata, rhs.mTestFieldUserdata);
 }
 
-bool TestStruct::operator==(const TestStruct &rhs) const {
-  return !(
-      mTestFieldBool != rhs.mTestFieldBool ||
-      mTestFieldUnsigned != rhs.mTestFieldUnsigned ||
-      mTestFieldString != rhs.mTestFieldString ||
-      mTestFieldUserdata != rhs.mTestFieldUserdata
-  );
-}
-
 bool TestStruct::GetTestFieldBool() const {
   return mTestFieldBool;
 }
@@ -51,6 +42,15 @@ void TestStruct::SetTestFieldUnsigned(uint32_t val) {
 
 void TestStruct::SetTestFieldString(const std::string &val) {
   mTestFieldString = val;
+}
+
+bool TestStruct::operator==(const TestStruct &rhs) const {
+  return !(
+      mTestFieldBool != rhs.mTestFieldBool ||
+      mTestFieldUnsigned != rhs.mTestFieldUnsigned ||
+      mTestFieldString != rhs.mTestFieldString ||
+      mTestFieldUserdata != rhs.mTestFieldUserdata
+  );
 }
 
 bool TestStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {

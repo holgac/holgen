@@ -19,7 +19,6 @@ public:
   Calculator(const Calculator &rhs) = default;
   Calculator(Calculator &&rhs) noexcept = default;
   ~Calculator() = default;
-  bool operator==(const Calculator &rhs) const;
   const Number &GetCurVal() const;
   Number &GetCurVal();
   void SetCurVal(const Number &val);
@@ -30,6 +29,7 @@ public:
   void SetSubtractLuaFunc(std::string val);
   bool HasSubtractLuaFunc() const;
   int64_t SubtractThenMultiply(const int64_t lhs, const int64_t rhs);
+  bool operator==(const Calculator &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

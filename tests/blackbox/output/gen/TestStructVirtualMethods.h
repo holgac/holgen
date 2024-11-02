@@ -17,9 +17,9 @@ public:
   TestStructVirtualMethods(const TestStructVirtualMethods &rhs) = default;
   TestStructVirtualMethods(TestStructVirtualMethods &&rhs) noexcept = default;
   virtual ~TestStructVirtualMethods() = default;
-  bool operator==(const TestStructVirtualMethods &rhs) const;
   virtual uint32_t VirtualFunc();
   virtual uint32_t PureVirtualFunc() = 0;
+  bool operator==(const TestStructVirtualMethods &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

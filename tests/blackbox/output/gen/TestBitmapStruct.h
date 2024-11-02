@@ -18,7 +18,6 @@ public:
   TestBitmapStruct(const TestBitmapStruct &rhs) = default;
   TestBitmapStruct(TestBitmapStruct &&rhs) noexcept = default;
   ~TestBitmapStruct() = default;
-  bool operator==(const TestBitmapStruct &rhs) const;
   const TestBitmap &GetBitmapField() const;
   TestBitmap &GetBitmapField();
   void SetBitmapField(const TestBitmap &val);
@@ -26,6 +25,7 @@ public:
   void AddBitmapField(uint64_t val);
   void RemoveBitmapField(uint64_t val);
   void ToggleBitmapField(uint64_t val);
+  bool operator==(const TestBitmapStruct &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

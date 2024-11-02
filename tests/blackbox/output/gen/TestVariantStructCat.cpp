@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestVariantStructCat::operator==(const TestVariantStructCat &rhs) const {
-  return !(
-      mName != rhs.mName ||
-      mColor != rhs.mColor
-  );
-}
-
 const std::string &TestVariantStructCat::GetName() const {
   return mName;
 }
@@ -38,6 +31,13 @@ void TestVariantStructCat::SetName(const std::string &val) {
 
 void TestVariantStructCat::SetColor(const std::string &val) {
   mColor = val;
+}
+
+bool TestVariantStructCat::operator==(const TestVariantStructCat &rhs) const {
+  return !(
+      mName != rhs.mName ||
+      mColor != rhs.mColor
+  );
 }
 
 bool TestVariantStructCat::ParseJson(const rapidjson::Value &json, const Converter &converter) {

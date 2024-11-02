@@ -19,7 +19,6 @@ public:
   TestContainerEnum(const TestContainerEnum &rhs) = default;
   TestContainerEnum(TestContainerEnum &&rhs) noexcept = default;
   ~TestContainerEnum() = default;
-  bool operator==(const TestContainerEnum &rhs) const;
   const std::array<uint8_t, 4> &GetSkills() const;
   std::array<uint8_t, 4> &GetSkills();
   void SetSkills(const std::array<uint8_t, 4> &val);
@@ -27,6 +26,7 @@ public:
   uint8_t &GetSkill(TestContainerSkill idx);
   void SetSkill(const TestContainerSkill &idx, uint8_t val);
   size_t GetSkillCount() const;
+  bool operator==(const TestContainerEnum &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

@@ -22,7 +22,6 @@ public:
   ~TestLuaRegistryData();
   void InitializeLua(lua_State *luaState);
   void UninitializeLua(lua_State *luaState);
-  bool operator==(const TestLuaRegistryData &rhs) const;
   int GetData() const;
   void SetData(int val);
   void SetTable(std::string val);
@@ -30,6 +29,7 @@ public:
   void Init(lua_State *luaState, const std::function<void(lua_State *)> &initData) const;
   int32_t Get(lua_State *luaState) const;
   void Add(lua_State *luaState, const int32_t val) const;
+  bool operator==(const TestLuaRegistryData &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

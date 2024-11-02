@@ -18,12 +18,12 @@ public:
   DamageMultiplier(const DamageMultiplier &rhs) = default;
   DamageMultiplier(DamageMultiplier &&rhs) noexcept = default;
   ~DamageMultiplier() = default;
-  bool operator==(const DamageMultiplier &rhs) const;
   const std::string &GetWhen() const;
   std::string &GetWhen();
   float GetValue() const;
   void SetWhen(const std::string &val);
   void SetValue(float val);
+  bool operator==(const DamageMultiplier &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

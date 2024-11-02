@@ -18,7 +18,6 @@ public:
   TestStruct(const TestStruct &rhs) = delete;
   TestStruct(TestStruct &&rhs) noexcept;
   ~TestStruct() = default;
-  bool operator==(const TestStruct &rhs) const;
   bool GetTestFieldBool() const;
   uint32_t GetTestFieldUnsigned() const;
   const std::string &GetTestFieldString() const;
@@ -38,6 +37,7 @@ public:
   void SetTestFieldUserdata(T *val) {
     mTestFieldUserdata = reinterpret_cast<void*>(val);
   }
+  bool operator==(const TestStruct &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

@@ -11,13 +11,6 @@
 #include "TestStructArrayCustomData2.h"
 
 namespace holgen_blackbox_test {
-bool TestStructArray::operator==(const TestStructArray &rhs) const {
-  return !(
-      mType != rhs.mType ||
-      mCustomData != rhs.mCustomData
-  );
-}
-
 const TestStructArrayType &TestStructArray::GetType() const {
   return mType;
 }
@@ -40,6 +33,13 @@ void TestStructArray::SetType(const TestStructArrayType &val) {
 
 void TestStructArray::SetCustomData(const std::array<uint8_t, 16> &val) {
   mCustomData = val;
+}
+
+bool TestStructArray::operator==(const TestStructArray &rhs) const {
+  return !(
+      mType != rhs.mType ||
+      mCustomData != rhs.mCustomData
+  );
 }
 
 bool TestStructArray::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -86,6 +86,9 @@ void TestStructArray::PushMirrorToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "type");
   LuaHelper::Push<true>(mType, luaState);
   lua_settable(luaState, -3);
+  lua_pushstring(luaState, "customData");
+  LuaHelper::Push<true>(mCustomData, luaState);
+  lua_settable(luaState, -3);
 }
 
 void TestStructArray::PushGlobalToLua(lua_State *luaState, const char *name) const {
@@ -119,6 +122,9 @@ TestStructArray TestStructArray::ReadMirrorFromLua(lua_State *luaState, int32_t 
     if (0 == strcmp("type", key)) {
       LuaHelper::Read(result.mType, luaState, -1);
       lua_pop(luaState, 1);
+    } else if (0 == strcmp("customData", key)) {
+      LuaHelper::Read(result.mCustomData, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestStructArray.{}", key);
       lua_pop(luaState, 1);
@@ -134,6 +140,9 @@ int TestStructArray::NewIndexMetaMethod(lua_State *luaState) {
   if (0 == strcmp("type", key)) {
     auto res = LuaHelper::Read(instance->mType, luaState, -1);
     HOLGEN_WARN_IF(!res, "Assigning TestStructArray.type from lua failed!");
+  } else if (0 == strcmp("customData", key)) {
+    auto res = LuaHelper::Read(instance->mCustomData, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestStructArray.customData from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructArray.{}", key);
   }
@@ -149,6 +158,14 @@ void TestStructArray::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestStructArray::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructArrayMeta");
+}
+
+int TestStructArray::InitializeCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructArray.Initialize method with an invalid lua proxy object!");
+  auto arg0 = TestStructArrayType::ReadMirrorFromLua(luaState, -1);
+  instance->Initialize(arg0);
+  return 0;
 }
 
 int TestStructArray::GetData1CallerFromLua(lua_State *luaState) {
@@ -173,6 +190,12 @@ int TestStructArray::IndexMetaMethod(lua_State *luaState) {
     auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArray.type with an invalid lua proxy object!");
     LuaHelper::Push<false>(instance->mType, luaState);
+  } else if (0 == strcmp("customData", key)) {
+    auto instance = TestStructArray::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructArray.customData with an invalid lua proxy object!");
+    LuaHelper::Push<false>(instance->mCustomData, luaState);
+  } else if (0 == strcmp("Initialize", key)) {
+    lua_pushcfunction(luaState, TestStructArray::InitializeCallerFromLua);
   } else if (0 == strcmp("GetData1", key)) {
     lua_pushcfunction(luaState, TestStructArray::GetData1CallerFromLua);
   } else if (0 == strcmp("GetData2", key)) {

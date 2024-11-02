@@ -17,10 +17,10 @@ public:
   TestLuaStaticCppFunction(const TestLuaStaticCppFunction &rhs) = default;
   TestLuaStaticCppFunction(TestLuaStaticCppFunction &&rhs) noexcept = default;
   ~TestLuaStaticCppFunction() = default;
-  bool operator==(const TestLuaStaticCppFunction &rhs) const;
   uint32_t GetData() const;
   void SetData(uint32_t val);
   static TestLuaStaticCppFunction Factory(const uint32_t data);
+  bool operator==(const TestLuaStaticCppFunction &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

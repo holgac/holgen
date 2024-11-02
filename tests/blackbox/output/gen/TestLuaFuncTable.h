@@ -19,11 +19,11 @@ public:
   TestLuaFuncTable(const TestLuaFuncTable &rhs) = default;
   TestLuaFuncTable(TestLuaFuncTable &&rhs) noexcept = default;
   ~TestLuaFuncTable() = default;
-  bool operator==(const TestLuaFuncTable &rhs) const;
   void SetTable(std::string val);
   const std::string &GetTable() const;
   void SetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const;
   int32_t GetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const;
+  bool operator==(const TestLuaFuncTable &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

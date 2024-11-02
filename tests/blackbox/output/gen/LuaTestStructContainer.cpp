@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool LuaTestStructContainer::operator==(const LuaTestStructContainer &rhs) const {
-  return !(
-      mTestVector != rhs.mTestVector ||
-      mTestMap != rhs.mTestMap
-  );
-}
-
 const std::vector<uint32_t> &LuaTestStructContainer::GetTestVector() const {
   return mTestVector;
 }
@@ -65,6 +58,13 @@ void LuaTestStructContainer::DeleteTestVectorElem(size_t idx) {
 
 size_t LuaTestStructContainer::GetTestVectorElemCount() const {
   return mTestVector.size();
+}
+
+bool LuaTestStructContainer::operator==(const LuaTestStructContainer &rhs) const {
+  return !(
+      mTestVector != rhs.mTestVector ||
+      mTestMap != rhs.mTestMap
+  );
 }
 
 bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {

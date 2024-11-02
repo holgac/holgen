@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructToString::operator==(const TestStructToString &rhs) const {
-  return !(
-      mField1 != rhs.mField1 ||
-      mField2 != rhs.mField2
-  );
-}
-
 const std::string &TestStructToString::GetField1() const {
   return mField1;
 }
@@ -38,6 +31,13 @@ void TestStructToString::SetField1(const std::string &val) {
 
 void TestStructToString::SetField2(const std::string &val) {
   mField2 = val;
+}
+
+bool TestStructToString::operator==(const TestStructToString &rhs) const {
+  return !(
+      mField1 != rhs.mField1 ||
+      mField2 != rhs.mField2
+  );
 }
 
 bool TestStructToString::ParseJson(const rapidjson::Value &json, const Converter &converter) {

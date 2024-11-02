@@ -19,7 +19,6 @@ public:
   TestContainerSet(const TestContainerSet &rhs) = default;
   TestContainerSet(TestContainerSet &&rhs) noexcept = default;
   ~TestContainerSet() = default;
-  bool operator==(const TestContainerSet &rhs) const;
   const std::set<std::string> &GetStringContainer() const;
   std::set<std::string> &GetStringContainer();
   const std::set<uint32_t> &GetUnsignedContainer() const;
@@ -35,6 +34,7 @@ public:
   bool HasUnsignedElem(uint32_t elem) const;
   void DeleteUnsignedElem(uint32_t elem);
   size_t GetUnsignedElemCount() const;
+  bool operator==(const TestContainerSet &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

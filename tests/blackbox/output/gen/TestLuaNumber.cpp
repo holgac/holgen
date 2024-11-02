@@ -9,18 +9,18 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestLuaNumber::operator==(const TestLuaNumber &rhs) const {
-  return !(
-      mValue != rhs.mValue
-  );
-}
-
 int32_t TestLuaNumber::GetValue() const {
   return mValue;
 }
 
 void TestLuaNumber::SetValue(int32_t val) {
   mValue = val;
+}
+
+bool TestLuaNumber::operator==(const TestLuaNumber &rhs) const {
+  return !(
+      mValue != rhs.mValue
+  );
 }
 
 bool TestLuaNumber::ParseJson(const rapidjson::Value &json, const Converter &converter) {

@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructHashableMap::operator==(const TestStructHashableMap &rhs) const {
-  return !(
-      mData != rhs.mData
-  );
-}
-
 const std::unordered_map<TestStructHashable, std::string> &TestStructHashableMap::GetData() const {
   return mData;
 }
@@ -25,6 +19,12 @@ std::unordered_map<TestStructHashable, std::string> &TestStructHashableMap::GetD
 
 void TestStructHashableMap::SetData(const std::unordered_map<TestStructHashable, std::string> &val) {
   mData = val;
+}
+
+bool TestStructHashableMap::operator==(const TestStructHashableMap &rhs) const {
+  return !(
+      mData != rhs.mData
+  );
 }
 
 bool TestStructHashableMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {

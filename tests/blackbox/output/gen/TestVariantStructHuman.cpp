@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestVariantStructHuman::operator==(const TestVariantStructHuman &rhs) const {
-  return !(
-      mName != rhs.mName ||
-      mNationality != rhs.mNationality
-  );
-}
-
 const std::string &TestVariantStructHuman::GetName() const {
   return mName;
 }
@@ -38,6 +31,13 @@ void TestVariantStructHuman::SetName(const std::string &val) {
 
 void TestVariantStructHuman::SetNationality(const std::string &val) {
   mNationality = val;
+}
+
+bool TestVariantStructHuman::operator==(const TestVariantStructHuman &rhs) const {
+  return !(
+      mName != rhs.mName ||
+      mNationality != rhs.mNationality
+  );
 }
 
 bool TestVariantStructHuman::ParseJson(const rapidjson::Value &json, const Converter &converter) {

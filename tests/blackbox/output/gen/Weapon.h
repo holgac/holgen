@@ -20,7 +20,6 @@ public:
   Weapon(const Weapon &rhs) = default;
   Weapon(Weapon &&rhs) noexcept = default;
   ~Weapon() = default;
-  bool operator==(const Weapon &rhs) const;
   uint32_t GetDamageMin() const;
   uint32_t GetDamageMax() const;
   const std::vector<DamageMultiplier> &GetDamageMultipliers() const;
@@ -32,6 +31,7 @@ public:
   void SetDamageMultipliers(const std::vector<DamageMultiplier> &val);
   void SetModifiers(const std::vector<std::string> &val);
   uint32_t GetAverageDamage();
+  bool operator==(const Weapon &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

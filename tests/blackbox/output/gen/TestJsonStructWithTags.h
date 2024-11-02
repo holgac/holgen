@@ -18,10 +18,10 @@ public:
   TestJsonStructWithTags(const TestJsonStructWithTags &rhs) = default;
   TestJsonStructWithTags(TestJsonStructWithTags &&rhs) noexcept = default;
   ~TestJsonStructWithTags() = default;
-  bool operator==(const TestJsonStructWithTags &rhs) const;
   const std::vector<uint64_t> &GetTags() const;
   std::vector<uint64_t> &GetTags();
   void SetTags(const std::vector<uint64_t> &val);
+  bool operator==(const TestJsonStructWithTags &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

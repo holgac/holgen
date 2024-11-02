@@ -12,12 +12,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestJsonTagManager::operator==(const TestJsonTagManager &rhs) const {
-  return !(
-      mTags != rhs.mTags
-  );
-}
-
 const std::vector<TestJsonTag> &TestJsonTagManager::GetTags() const {
   return mTags;
 }
@@ -80,6 +74,13 @@ TestJsonTag *TestJsonTagManager::GetTag(uint64_t idx) {
 
 size_t TestJsonTagManager::GetTagCount() const {
   return mTags.size();
+}
+
+bool TestJsonTagManager::operator==(const TestJsonTagManager &rhs) const {
+  return !(
+      mTags != rhs.mTags ||
+      mTagsNameIndex != rhs.mTagsNameIndex
+  );
 }
 
 bool TestJsonTagManager::ParseFiles(const std::string &rootPath, const Converter &converterArg) {

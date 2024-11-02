@@ -10,13 +10,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool DamageMultiplier::operator==(const DamageMultiplier &rhs) const {
-  return !(
-      mWhen != rhs.mWhen ||
-      std::fabs(mValue - rhs.mValue) >= 0.00001
-  );
-}
-
 const std::string &DamageMultiplier::GetWhen() const {
   return mWhen;
 }
@@ -35,6 +28,13 @@ void DamageMultiplier::SetWhen(const std::string &val) {
 
 void DamageMultiplier::SetValue(float val) {
   mValue = val;
+}
+
+bool DamageMultiplier::operator==(const DamageMultiplier &rhs) const {
+  return !(
+      mWhen != rhs.mWhen ||
+      std::fabs(mValue - rhs.mValue) >= 0.00001
+  );
 }
 
 bool DamageMultiplier::ParseJson(const rapidjson::Value &json, const Converter &converter) {

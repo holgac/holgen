@@ -20,7 +20,6 @@ public:
   LuaTestStructContainer(const LuaTestStructContainer &rhs) = default;
   LuaTestStructContainer(LuaTestStructContainer &&rhs) noexcept = default;
   ~LuaTestStructContainer() = default;
-  bool operator==(const LuaTestStructContainer &rhs) const;
   const std::vector<uint32_t> &GetTestVector() const;
   std::vector<uint32_t> &GetTestVector();
   const std::map<std::string, uint32_t> &GetTestMap() const;
@@ -32,6 +31,7 @@ public:
   uint32_t *GetTestVectorElem(size_t idx);
   void DeleteTestVectorElem(size_t idx);
   size_t GetTestVectorElemCount() const;
+  bool operator==(const LuaTestStructContainer &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

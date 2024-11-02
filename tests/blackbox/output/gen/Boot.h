@@ -18,7 +18,6 @@ public:
   Boot(const Boot &rhs) = default;
   Boot(Boot &&rhs) noexcept = default;
   ~Boot() = default;
-  bool operator==(const Boot &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -29,6 +28,7 @@ public:
   void SetColor(const std::string &val);
   static Boot *Get(uint32_t id);
   static Boot *GetFromName(const std::string &key);
+  bool operator==(const Boot &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

@@ -20,10 +20,10 @@ public:
   TestStructComparableMap(const TestStructComparableMap &rhs) = default;
   TestStructComparableMap(TestStructComparableMap &&rhs) noexcept = default;
   ~TestStructComparableMap() = default;
-  bool operator==(const TestStructComparableMap &rhs) const;
   const std::map<TestStructComparable, std::string> &GetData() const;
   std::map<TestStructComparable, std::string> &GetData();
   void SetData(const std::map<TestStructComparable, std::string> &val);
+  bool operator==(const TestStructComparableMap &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

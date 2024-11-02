@@ -13,12 +13,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool HumanManager::operator==(const HumanManager &rhs) const {
-  return !(
-      mHumans != rhs.mHumans
-  );
-}
-
 const std::unordered_map<uint32_t, Human> &HumanManager::GetHumans() const {
   return mHumans;
 }
@@ -99,6 +93,14 @@ void HumanManager::DeleteHuman(uint32_t key) {
 
 size_t HumanManager::GetHumanCount() const {
   return mHumans.size();
+}
+
+bool HumanManager::operator==(const HumanManager &rhs) const {
+  return !(
+      mHumans != rhs.mHumans ||
+      mHumansNameIndex != rhs.mHumansNameIndex ||
+      mHumansNextId != rhs.mHumansNextId
+  );
 }
 
 bool HumanManager::ParseFiles(const std::string &rootPath, const Converter &converterArg) {

@@ -18,12 +18,12 @@ public:
   TestContainerInnerStructNoId(const TestContainerInnerStructNoId &rhs) = default;
   TestContainerInnerStructNoId(TestContainerInnerStructNoId &&rhs) noexcept = default;
   ~TestContainerInnerStructNoId() = default;
-  bool operator==(const TestContainerInnerStructNoId &rhs) const;
   uint32_t GetField() const;
   const std::string &GetName() const;
   std::string &GetName();
   void SetField(uint32_t val);
   void SetName(const std::string &val);
+  bool operator==(const TestContainerInnerStructNoId &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

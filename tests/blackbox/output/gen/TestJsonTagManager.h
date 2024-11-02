@@ -21,7 +21,6 @@ public:
   TestJsonTagManager(const TestJsonTagManager &rhs) = default;
   TestJsonTagManager(TestJsonTagManager &&rhs) noexcept = default;
   ~TestJsonTagManager() = default;
-  bool operator==(const TestJsonTagManager &rhs) const;
   const std::vector<TestJsonTag> &GetTags() const;
   std::vector<TestJsonTag> &GetTags();
   void SetTags(const std::vector<TestJsonTag> &val);
@@ -33,6 +32,7 @@ public:
   const TestJsonTag *GetTag(uint64_t idx) const;
   TestJsonTag *GetTag(uint64_t idx);
   size_t GetTagCount() const;
+  bool operator==(const TestJsonTagManager &rhs) const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

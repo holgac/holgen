@@ -16,15 +16,6 @@ TestStructSmartPointers::TestStructSmartPointers(TestStructSmartPointers &&rhs) 
   mUniquePtrs = std::move(rhs.mUniquePtrs);
 }
 
-bool TestStructSmartPointers::operator==(const TestStructSmartPointers &rhs) const {
-  return !(
-      mSharedPtr != rhs.mSharedPtr ||
-      mSharedPtrs != rhs.mSharedPtrs ||
-      mUniquePtr != rhs.mUniquePtr ||
-      mUniquePtrs != rhs.mUniquePtrs
-  );
-}
-
 const std::shared_ptr<TestStructVirtualMethods> &TestStructSmartPointers::GetSharedPtr() const {
   return mSharedPtr;
 }
@@ -71,6 +62,15 @@ void TestStructSmartPointers::SetUniquePtr(std::unique_ptr<TestStructVirtualMeth
 
 void TestStructSmartPointers::SetUniquePtrs(std::vector<std::unique_ptr<TestStructVirtualMethods>> &&val) {
   mUniquePtrs = std::move(val);
+}
+
+bool TestStructSmartPointers::operator==(const TestStructSmartPointers &rhs) const {
+  return !(
+      mSharedPtr != rhs.mSharedPtr ||
+      mSharedPtrs != rhs.mSharedPtrs ||
+      mUniquePtr != rhs.mUniquePtr ||
+      mUniquePtrs != rhs.mUniquePtrs
+  );
 }
 
 bool TestStructSmartPointers::ParseJson(const rapidjson::Value &json, const Converter &converter) {

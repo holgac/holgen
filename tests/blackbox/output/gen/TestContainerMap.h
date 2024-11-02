@@ -20,7 +20,6 @@ public:
   TestContainerMap(const TestContainerMap &rhs) = default;
   TestContainerMap(TestContainerMap &&rhs) noexcept = default;
   ~TestContainerMap() = default;
-  bool operator==(const TestContainerMap &rhs) const;
   const std::map<uint32_t, TestContainerInnerStructWithId> &GetInnerStructsWithId() const;
   std::map<uint32_t, TestContainerInnerStructWithId> &GetInnerStructsWithId();
   void SetInnerStructsWithId(const std::map<uint32_t, TestContainerInnerStructWithId> &val);
@@ -33,6 +32,7 @@ public:
   bool HasInnerStructWithId(uint32_t key) const;
   void DeleteInnerStructWithId(uint32_t key);
   size_t GetInnerStructWithIdCount() const;
+  bool operator==(const TestContainerMap &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

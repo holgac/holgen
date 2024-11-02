@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestContainerSet::operator==(const TestContainerSet &rhs) const {
-  return !(
-      mStringContainer != rhs.mStringContainer ||
-      mUnsignedContainer != rhs.mUnsignedContainer
-  );
-}
-
 const std::set<std::string> &TestContainerSet::GetStringContainer() const {
   return mStringContainer;
 }
@@ -80,6 +73,13 @@ void TestContainerSet::DeleteUnsignedElem(uint32_t elem) {
 
 size_t TestContainerSet::GetUnsignedElemCount() const {
   return mUnsignedContainer.size();
+}
+
+bool TestContainerSet::operator==(const TestContainerSet &rhs) const {
+  return !(
+      mStringContainer != rhs.mStringContainer ||
+      mUnsignedContainer != rhs.mUnsignedContainer
+  );
 }
 
 bool TestContainerSet::ParseJson(const rapidjson::Value &json, const Converter &converter) {

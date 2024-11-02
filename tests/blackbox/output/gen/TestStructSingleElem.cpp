@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructSingleElem::operator==(const TestStructSingleElem &rhs) const {
-  return !(
-      mName != rhs.mName
-  );
-}
-
 const std::string &TestStructSingleElem::GetName() const {
   return mName;
 }
@@ -25,6 +19,12 @@ std::string &TestStructSingleElem::GetName() {
 
 void TestStructSingleElem::SetName(const std::string &val) {
   mName = val;
+}
+
+bool TestStructSingleElem::operator==(const TestStructSingleElem &rhs) const {
+  return !(
+      mName != rhs.mName
+  );
 }
 
 bool TestStructSingleElem::ParseJson(const rapidjson::Value &json, const Converter &converter) {

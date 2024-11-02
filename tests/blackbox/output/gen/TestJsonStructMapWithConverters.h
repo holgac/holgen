@@ -19,7 +19,6 @@ public:
   TestJsonStructMapWithConverters(const TestJsonStructMapWithConverters &rhs) = default;
   TestJsonStructMapWithConverters(TestJsonStructMapWithConverters &&rhs) noexcept = default;
   ~TestJsonStructMapWithConverters() = default;
-  bool operator==(const TestJsonStructMapWithConverters &rhs) const;
   const std::map<std::string, uint32_t> &GetTestMapConvertElem() const;
   std::map<std::string, uint32_t> &GetTestMapConvertElem();
   const std::map<uint32_t, std::string> &GetTestMapConvertKey() const;
@@ -29,6 +28,7 @@ public:
   void SetTestMapConvertElem(const std::map<std::string, uint32_t> &val);
   void SetTestMapConvertKey(const std::map<uint32_t, std::string> &val);
   void SetTestMapConvertKeyElem(const std::map<uint32_t, uint32_t> &val);
+  bool operator==(const TestJsonStructMapWithConverters &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

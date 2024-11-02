@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructPairFields::operator==(const TestStructPairFields &rhs) const {
-  return !(
-      mIntStringPair != rhs.mIntStringPair ||
-      mPairVector != rhs.mPairVector
-  );
-}
-
 const std::pair<int32_t, std::string> &TestStructPairFields::GetIntStringPair() const {
   return mIntStringPair;
 }
@@ -38,6 +31,13 @@ void TestStructPairFields::SetIntStringPair(const std::pair<int32_t, std::string
 
 void TestStructPairFields::SetPairVector(const std::vector<std::pair<std::string, int32_t>> &val) {
   mPairVector = val;
+}
+
+bool TestStructPairFields::operator==(const TestStructPairFields &rhs) const {
+  return !(
+      mIntStringPair != rhs.mIntStringPair ||
+      mPairVector != rhs.mPairVector
+  );
 }
 
 bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Converter &converter) {

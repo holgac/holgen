@@ -9,18 +9,18 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool RaceId::operator==(const RaceId &rhs) const {
-  return !(
-      mId != rhs.mId
-  );
-}
-
 uint32_t RaceId::GetId() const {
   return mId;
 }
 
 void RaceId::SetId(uint32_t val) {
   mId = val;
+}
+
+bool RaceId::operator==(const RaceId &rhs) const {
+  return !(
+      mId != rhs.mId
+  );
 }
 
 bool RaceId::ParseJson(const rapidjson::Value &json, const Converter &converter) {

@@ -9,14 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Country::operator==(const Country &rhs) const {
-  return !(
-      mLeader != rhs.mLeader ||
-      mCitizens != rhs.mCitizens ||
-      mPopulation != rhs.mPopulation
-  );
-}
-
 const Person &Country::GetLeader() const {
   return mLeader;
 }
@@ -51,6 +43,14 @@ void Country::SetCitizens(const std::vector<Person> &val) {
 
 void Country::SetPopulation(const std::map<uint32_t, uint32_t> &val) {
   mPopulation = val;
+}
+
+bool Country::operator==(const Country &rhs) const {
+  return !(
+      mLeader != rhs.mLeader ||
+      mCitizens != rhs.mCitizens ||
+      mPopulation != rhs.mPopulation
+  );
 }
 
 bool Country::ParseJson(const rapidjson::Value &json, const Converter &converter) {

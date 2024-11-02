@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestJsonStructWithTags::operator==(const TestJsonStructWithTags &rhs) const {
-  return !(
-      mTags != rhs.mTags
-  );
-}
-
 const std::vector<uint64_t> &TestJsonStructWithTags::GetTags() const {
   return mTags;
 }
@@ -25,6 +19,12 @@ std::vector<uint64_t> &TestJsonStructWithTags::GetTags() {
 
 void TestJsonStructWithTags::SetTags(const std::vector<uint64_t> &val) {
   mTags = val;
+}
+
+bool TestJsonStructWithTags::operator==(const TestJsonStructWithTags &rhs) const {
+  return !(
+      mTags != rhs.mTags
+  );
 }
 
 bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Converter &converter) {

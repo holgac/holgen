@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructComparableMap::operator==(const TestStructComparableMap &rhs) const {
-  return !(
-      mData != rhs.mData
-  );
-}
-
 const std::map<TestStructComparable, std::string> &TestStructComparableMap::GetData() const {
   return mData;
 }
@@ -25,6 +19,12 @@ std::map<TestStructComparable, std::string> &TestStructComparableMap::GetData() 
 
 void TestStructComparableMap::SetData(const std::map<TestStructComparable, std::string> &val) {
   mData = val;
+}
+
+bool TestStructComparableMap::operator==(const TestStructComparableMap &rhs) const {
+  return !(
+      mData != rhs.mData
+  );
 }
 
 bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {

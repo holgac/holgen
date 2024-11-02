@@ -13,12 +13,6 @@ TestStructNonCopyable::TestStructNonCopyable(TestStructNonCopyable &&rhs) noexce
   mBigVector = std::move(rhs.mBigVector);
 }
 
-bool TestStructNonCopyable::operator==(const TestStructNonCopyable &rhs) const {
-  return !(
-      mBigVector != rhs.mBigVector
-  );
-}
-
 const std::vector<int> &TestStructNonCopyable::GetBigVector() const {
   return mBigVector;
 }
@@ -29,6 +23,12 @@ std::vector<int> &TestStructNonCopyable::GetBigVector() {
 
 void TestStructNonCopyable::SetBigVector(const std::vector<int> &val) {
   mBigVector = val;
+}
+
+bool TestStructNonCopyable::operator==(const TestStructNonCopyable &rhs) const {
+  return !(
+      mBigVector != rhs.mBigVector
+  );
 }
 
 bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Converter &converter) {

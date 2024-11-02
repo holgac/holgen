@@ -17,9 +17,9 @@ public:
   RaceId(const RaceId &rhs) = default;
   RaceId(RaceId &&rhs) noexcept = default;
   ~RaceId() = default;
-  bool operator==(const RaceId &rhs) const;
   uint32_t GetId() const;
   void SetId(uint32_t val);
+  bool operator==(const RaceId &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

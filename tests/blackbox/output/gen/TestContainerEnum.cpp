@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestContainerEnum::operator==(const TestContainerEnum &rhs) const {
-  return !(
-      mSkills != rhs.mSkills
-  );
-}
-
 const std::array<uint8_t, 4> &TestContainerEnum::GetSkills() const {
   return mSkills;
 }
@@ -41,6 +35,12 @@ void TestContainerEnum::SetSkill(const TestContainerSkill &idx, uint8_t val) {
 
 size_t TestContainerEnum::GetSkillCount() const {
   return mSkills.size();
+}
+
+bool TestContainerEnum::operator==(const TestContainerEnum &rhs) const {
+  return !(
+      mSkills != rhs.mSkills
+  );
 }
 
 bool TestContainerEnum::ParseJson(const rapidjson::Value &json, const Converter &converter) {

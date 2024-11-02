@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Calculator::operator==(const Calculator &rhs) const {
-  return !(
-      mCurVal != rhs.mCurVal
-  );
-}
-
 const Number &Calculator::GetCurVal() const {
   return mCurVal;
 }
@@ -76,6 +70,14 @@ void Calculator::SetSubtractLuaFunc(std::string val) {
 
 bool Calculator::HasSubtractLuaFunc() const {
   return !mLuaFuncHandle_Subtract.empty();
+}
+
+bool Calculator::operator==(const Calculator &rhs) const {
+  return !(
+      mCurVal != rhs.mCurVal ||
+      mLuaFuncHandle_Add != rhs.mLuaFuncHandle_Add ||
+      mLuaFuncHandle_Subtract != rhs.mLuaFuncHandle_Subtract
+  );
 }
 
 bool Calculator::ParseJson(const rapidjson::Value &json, const Converter &converter) {

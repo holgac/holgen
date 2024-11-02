@@ -9,16 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool Person::operator==(const Person &rhs) const {
-  return !(
-      mRace != rhs.mRace ||
-      mCurrentCountry != rhs.mCurrentCountry ||
-      mCurrentCity != rhs.mCurrentCity ||
-      mHomeCountry != rhs.mHomeCountry ||
-      mPlaceOfBirth != rhs.mPlaceOfBirth
-  );
-}
-
 uint32_t Person::GetRace() const {
   return mRace;
 }
@@ -57,6 +47,16 @@ void Person::SetHomeCountry(uint32_t val) {
 
 void Person::SetPlaceOfBirth(uint32_t val) {
   mPlaceOfBirth = val;
+}
+
+bool Person::operator==(const Person &rhs) const {
+  return !(
+      mRace != rhs.mRace ||
+      mCurrentCountry != rhs.mCurrentCountry ||
+      mCurrentCity != rhs.mCurrentCity ||
+      mHomeCountry != rhs.mHomeCountry ||
+      mPlaceOfBirth != rhs.mPlaceOfBirth
+  );
 }
 
 bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter) {

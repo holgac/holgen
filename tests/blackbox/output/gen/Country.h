@@ -20,7 +20,6 @@ public:
   Country(const Country &rhs) = default;
   Country(Country &&rhs) noexcept = default;
   ~Country() = default;
-  bool operator==(const Country &rhs) const;
   const Person &GetLeader() const;
   Person &GetLeader();
   const std::vector<Person> &GetCitizens() const;
@@ -30,6 +29,7 @@ public:
   void SetLeader(const Person &val);
   void SetCitizens(const std::vector<Person> &val);
   void SetPopulation(const std::map<uint32_t, uint32_t> &val);
+  bool operator==(const Country &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

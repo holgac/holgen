@@ -20,7 +20,6 @@ public:
   TestLuaFuncTableContainer(const TestLuaFuncTableContainer &rhs) = default;
   TestLuaFuncTableContainer(TestLuaFuncTableContainer &&rhs) noexcept = default;
   ~TestLuaFuncTableContainer() = default;
-  bool operator==(const TestLuaFuncTableContainer &rhs) const;
   int32_t GetField() const;
   const TestLuaFuncTable &GetScript1() const;
   TestLuaFuncTable &GetScript1();
@@ -41,6 +40,7 @@ public:
   void SetScriptWithSourceTable2(const TestLuaFuncTableWithSourceTable &val);
   void SetStaticScript1(const TestLuaFuncTableStatic &val);
   void SetStaticScript2(const TestLuaFuncTableStatic &val);
+  bool operator==(const TestLuaFuncTableContainer &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

@@ -19,13 +19,13 @@ public:
   TestStructPairFields(const TestStructPairFields &rhs) = default;
   TestStructPairFields(TestStructPairFields &&rhs) noexcept = default;
   ~TestStructPairFields() = default;
-  bool operator==(const TestStructPairFields &rhs) const;
   const std::pair<int32_t, std::string> &GetIntStringPair() const;
   std::pair<int32_t, std::string> &GetIntStringPair();
   const std::vector<std::pair<std::string, int32_t>> &GetPairVector() const;
   std::vector<std::pair<std::string, int32_t>> &GetPairVector();
   void SetIntStringPair(const std::pair<int32_t, std::string> &val);
   void SetPairVector(const std::vector<std::pair<std::string, int32_t>> &val);
+  bool operator==(const TestStructPairFields &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

@@ -20,7 +20,6 @@ public:
   TestStructSmartPointers(const TestStructSmartPointers &rhs) = delete;
   TestStructSmartPointers(TestStructSmartPointers &&rhs) noexcept;
   ~TestStructSmartPointers() = default;
-  bool operator==(const TestStructSmartPointers &rhs) const;
   const std::shared_ptr<TestStructVirtualMethods> &GetSharedPtr() const;
   std::shared_ptr<TestStructVirtualMethods> &GetSharedPtr();
   const std::vector<std::shared_ptr<TestStructVirtualMethods>> &GetSharedPtrs() const;
@@ -33,6 +32,7 @@ public:
   void SetSharedPtrs(std::vector<std::shared_ptr<TestStructVirtualMethods>> &&val);
   void SetUniquePtr(std::unique_ptr<TestStructVirtualMethods> &&val);
   void SetUniquePtrs(std::vector<std::unique_ptr<TestStructVirtualMethods>> &&val);
+  bool operator==(const TestStructSmartPointers &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

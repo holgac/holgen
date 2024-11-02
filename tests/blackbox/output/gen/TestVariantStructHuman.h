@@ -18,13 +18,13 @@ public:
   TestVariantStructHuman(const TestVariantStructHuman &rhs) = default;
   TestVariantStructHuman(TestVariantStructHuman &&rhs) noexcept = default;
   ~TestVariantStructHuman() = default;
-  bool operator==(const TestVariantStructHuman &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
   const std::string &GetNationality() const;
   std::string &GetNationality();
   void SetName(const std::string &val);
   void SetNationality(const std::string &val);
+  bool operator==(const TestVariantStructHuman &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

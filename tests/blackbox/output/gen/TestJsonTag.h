@@ -18,7 +18,6 @@ public:
   TestJsonTag(const TestJsonTag &rhs) = default;
   TestJsonTag(TestJsonTag &&rhs) noexcept = default;
   ~TestJsonTag() = default;
-  bool operator==(const TestJsonTag &rhs) const;
   uint64_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -26,6 +25,7 @@ public:
   void SetName(const std::string &val);
   static TestJsonTag *Get(uint64_t id);
   static TestJsonTag *GetFromName(const std::string &key);
+  bool operator==(const TestJsonTag &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

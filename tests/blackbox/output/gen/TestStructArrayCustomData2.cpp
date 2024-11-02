@@ -10,14 +10,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructArrayCustomData2::operator==(const TestStructArrayCustomData2 &rhs) const {
-  return !(
-      mF1 != rhs.mF1 ||
-      std::fabs(mF2 - rhs.mF2) >= 0.00001 ||
-      mF3 != rhs.mF3
-  );
-}
-
 uint64_t TestStructArrayCustomData2::GetF1() const {
   return mF1;
 }
@@ -40,6 +32,14 @@ void TestStructArrayCustomData2::SetF2(float val) {
 
 void TestStructArrayCustomData2::SetF3(uint32_t val) {
   mF3 = val;
+}
+
+bool TestStructArrayCustomData2::operator==(const TestStructArrayCustomData2 &rhs) const {
+  return !(
+      mF1 != rhs.mF1 ||
+      std::fabs(mF2 - rhs.mF2) >= 0.00001 ||
+      mF3 != rhs.mF3
+  );
 }
 
 bool TestStructArrayCustomData2::ParseJson(const rapidjson::Value &json, const Converter &converter) {

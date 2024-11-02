@@ -17,7 +17,6 @@ public:
   Person(const Person &rhs) = default;
   Person(Person &&rhs) noexcept = default;
   ~Person() = default;
-  bool operator==(const Person &rhs) const;
   uint32_t GetRace() const;
   uint32_t GetCurrentCountry() const;
   uint32_t GetCurrentCity() const;
@@ -28,6 +27,7 @@ public:
   void SetCurrentCity(uint32_t val);
   void SetHomeCountry(uint32_t val);
   void SetPlaceOfBirth(uint32_t val);
+  bool operator==(const Person &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

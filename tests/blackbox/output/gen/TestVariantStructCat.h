@@ -18,13 +18,13 @@ public:
   TestVariantStructCat(const TestVariantStructCat &rhs) = default;
   TestVariantStructCat(TestVariantStructCat &&rhs) noexcept = default;
   ~TestVariantStructCat() = default;
-  bool operator==(const TestVariantStructCat &rhs) const;
   const std::string &GetName() const;
   std::string &GetName();
   const std::string &GetColor() const;
   std::string &GetColor();
   void SetName(const std::string &val);
   void SetColor(const std::string &val);
+  bool operator==(const TestVariantStructCat &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

@@ -21,7 +21,6 @@ public:
   TestStructArray(const TestStructArray &rhs) = default;
   TestStructArray(TestStructArray &&rhs) noexcept = default;
   ~TestStructArray() = default;
-  bool operator==(const TestStructArray &rhs) const;
   const TestStructArrayType &GetType() const;
   TestStructArrayType &GetType();
   const std::array<uint8_t, 16> &GetCustomData() const;
@@ -31,6 +30,7 @@ public:
   void Initialize(const TestStructArrayType &type);
   TestStructArrayCustomData1 *GetData1();
   TestStructArrayCustomData2 *GetData2();
+  bool operator==(const TestStructArray &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
@@ -51,6 +51,7 @@ public:
   inline static const char *CLASS_NAME = "TestStructArray";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int InitializeCallerFromLua(lua_State *luaState);
   static int GetData1CallerFromLua(lua_State *luaState);
   static int GetData2CallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

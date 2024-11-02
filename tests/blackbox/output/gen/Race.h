@@ -20,7 +20,6 @@ public:
   Race(const Race &rhs) = default;
   Race(Race &&rhs) noexcept = default;
   ~Race() = default;
-  bool operator==(const Race &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -32,6 +31,7 @@ public:
   void SetName(const std::string &val);
   void SetHairColors(const std::vector<std::string> &val);
   void SetNames(const std::map<std::string, std::vector<std::string>> &val);
+  bool operator==(const Race &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

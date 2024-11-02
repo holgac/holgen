@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestStructComparable::operator==(const TestStructComparable &rhs) const {
-  return !(
-      mField1 != rhs.mField1 ||
-      mField2 != rhs.mField2
-  );
-}
-
 uint32_t TestStructComparable::GetField1() const {
   return mField1;
 }
@@ -30,6 +23,13 @@ void TestStructComparable::SetField1(uint32_t val) {
 
 void TestStructComparable::SetField2(uint32_t val) {
   mField2 = val;
+}
+
+bool TestStructComparable::operator==(const TestStructComparable &rhs) const {
+  return !(
+      mField1 != rhs.mField1 ||
+      mField2 != rhs.mField2
+  );
 }
 
 bool TestStructComparable::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -159,6 +159,23 @@ void TestStructComparable::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestStructComparableMeta");
 }
 
+int TestStructComparable::operator<CallerFromLua(lua_State *luaState) {
+  auto instance = TestStructComparable::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructComparable.operator< method with an invalid lua proxy object!");
+  TestStructComparable arg0Mirror;
+  TestStructComparable *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestStructComparable::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestStructComparable::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator<(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 int TestStructComparable::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("field1", key)) {
@@ -169,6 +186,8 @@ int TestStructComparable::IndexMetaMethod(lua_State *luaState) {
     auto instance = TestStructComparable::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestStructComparable.field2 with an invalid lua proxy object!");
     LuaHelper::Push<false>(instance->mField2, luaState);
+  } else if (0 == strcmp("operator<", key)) {
+    lua_pushcfunction(luaState, TestStructComparable::operator<CallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestStructComparable.{}", key);
     return 0;

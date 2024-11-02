@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestContainerMap::operator==(const TestContainerMap &rhs) const {
-  return !(
-      mInnerStructsWithId != rhs.mInnerStructsWithId
-  );
-}
-
 const std::map<uint32_t, TestContainerInnerStructWithId> &TestContainerMap::GetInnerStructsWithId() const {
   return mInnerStructsWithId;
 }
@@ -95,6 +89,14 @@ void TestContainerMap::DeleteInnerStructWithId(uint32_t key) {
 
 size_t TestContainerMap::GetInnerStructWithIdCount() const {
   return mInnerStructsWithId.size();
+}
+
+bool TestContainerMap::operator==(const TestContainerMap &rhs) const {
+  return !(
+      mInnerStructsWithId != rhs.mInnerStructsWithId ||
+      mInnerStructsWithIdNameIndex != rhs.mInnerStructsWithIdNameIndex ||
+      mInnerStructsWithIdNextId != rhs.mInnerStructsWithIdNextId
+  );
 }
 
 bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {

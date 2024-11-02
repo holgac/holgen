@@ -10,10 +10,6 @@
 #include "TestLuaFuncTableContainer.h"
 
 namespace holgen_blackbox_test {
-bool TestLuaFuncTableWithSourceTable::operator==(const TestLuaFuncTableWithSourceTable &rhs) const {
-  return true;
-}
-
 void TestLuaFuncTableWithSourceTable::SetTable(std::string val) {
   mTable = std::move(val);
 }
@@ -69,6 +65,12 @@ int32_t TestLuaFuncTableWithSourceTable::GetField(lua_State *luaState, const Tes
   LuaHelper::Read(result, luaState, -1);
   lua_pop(luaState, 3);
   return result;
+}
+
+bool TestLuaFuncTableWithSourceTable::operator==(const TestLuaFuncTableWithSourceTable &rhs) const {
+  return !(
+      mTable != rhs.mTable
+  );
 }
 
 bool TestLuaFuncTableWithSourceTable::ParseJson(const rapidjson::Value &json, const Converter &converter) {

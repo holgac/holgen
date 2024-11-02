@@ -9,12 +9,6 @@
 #include "LuaHelper.h"
 
 namespace holgen_blackbox_test {
-bool TestBitmapStruct::operator==(const TestBitmapStruct &rhs) const {
-  return !(
-      mBitmapField != rhs.mBitmapField
-  );
-}
-
 const TestBitmap &TestBitmapStruct::GetBitmapField() const {
   return mBitmapField;
 }
@@ -41,6 +35,12 @@ void TestBitmapStruct::RemoveBitmapField(uint64_t val) {
 
 void TestBitmapStruct::ToggleBitmapField(uint64_t val) {
   mBitmapField.Toggle(TestBitmap(val));
+}
+
+bool TestBitmapStruct::operator==(const TestBitmapStruct &rhs) const {
+  return !(
+      mBitmapField != rhs.mBitmapField
+  );
 }
 
 bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {
