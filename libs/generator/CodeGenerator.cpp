@@ -9,6 +9,7 @@
 #include "generators/CSharpHolgenMainGenerator.h"
 #include "generators/CSharpSourceGenerator.h"
 #include "generators/CSharpEnumGenerator.h"
+#include "generators/LuaSourceGenerator.h"
 
 namespace holgen {
 
@@ -27,6 +28,7 @@ std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &t
   CSharpHolgenMainGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
   CSharpSourceGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
   CSharpEnumGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  LuaSourceGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
 
   mTranslatedProject = nullptr;
   return contents;

@@ -79,6 +79,7 @@ set(gen_generators
     generators/CSharpHolgenMainGenerator.cpp
     generators/CSharpSourceGenerator.cpp
     generators/CSharpEnumGenerator.cpp
+    generators/LuaSourceGenerator.cpp
 )
 
 set(gen_utils

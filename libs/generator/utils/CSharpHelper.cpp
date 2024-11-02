@@ -61,11 +61,10 @@ CSharpHelper &CSharpHelper::Get() {
 
 CSharpHelper::CSharpHelper() {
   CppTypeToCSharpType = {
-      {"int8_t", "sbyte"},       {"int16_t", "short"},       {"int32_t", "int"},
-      {"int64_t", "long"},       {"std::ptrdiff_t", "long"}, {"uint8_t", "byte"},
-      {"uint16_t", "ushort"},    {"uint32_t", "uint"},       {"uint64_t", "ulong"},
-      {"size_t", "ulong"},       {"float", "float"},         {"double", "double"},
-      {"std::string", "string"}, {"void", "void"},           {"bool", "bool"}};
+      {"int8_t", "sbyte"},  {"int16_t", "short"},       {"int32_t", "int"},  {"int", "int"},
+      {"int64_t", "long"},  {"std::ptrdiff_t", "long"}, {"uint8_t", "byte"}, {"uint16_t", "ushort"},
+      {"uint32_t", "uint"}, {"uint64_t", "ulong"},      {"size_t", "ulong"}, {"float", "float"},
+      {"double", "double"}, {"std::string", "string"},  {"void", "void"},    {"bool", "bool"}};
   CppTypesConvertibleToCSharpArray = {"std::vector", "std::array", "std::span"};
   CSharpTypesSupportedByMarshalCopy = {"byte", "short", "int", "long", "float", "double"};
 }

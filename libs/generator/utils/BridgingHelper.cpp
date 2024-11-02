@@ -13,7 +13,8 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
   if (type.mName == "std::string") {
     return Type{"char", PassByType::Pointer, Constness::Const};
   }
-  if (type.mName == "std::vector" || type.mName == "std::span" || type.mName == "std::array") {
+  if (type.mName == "std::vector" || type.mName == "std::span" || type.mName == "std::array" ||
+      type.mName == "std::set" || type.mName == "std::deque") {
     auto underlying =
         ConvertType(project, type.mTemplateParameters.front(), isReturnType, definitionSource);
     if (underlying.mType == PassByType::Pointer) {

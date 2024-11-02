@@ -140,7 +140,7 @@ std::string NamingConvention::LuaFunctionHandleNameInCpp(
 }
 
 std::string NamingConvention::LuaMetatableName(const Class &cls) const {
-  return cls.mName + "Meta";
+  return cls.mName + St::LuaMetatableSuffix;
 }
 
 std::string NamingConvention::LuaMethodCaller(const ClassMethod &method) const {

@@ -30,9 +30,9 @@ struct CliOptions {
   std::string mNamespace;
   std::string mProjectName;
   std::string mConfigHeader;
-  bool mLuaEnabled = false;
   bool mJsonEnabled = false;
   std::string mCSharpRoot;
+  std::string mLuaRoot;
 };
 
 bool ParseArgs(CliOptions &out, int argc, char **argv) {
@@ -64,9 +64,9 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
        .description = "Config header to include in all generated headers"},
       {.identifier = 'l',
        .access_letters = nullptr,
-       .access_name = "lua",
-       .value_name = nullptr,
-       .description = "Enable lua bindings (optional, requires lua)"},
+       .access_name = "lua_root",
+       .value_name = "VALUE",
+       .description = "Directory to put the Lua stubs (enables lua, optional, requires lua)"},
       {.identifier = 'c',
        .access_letters = nullptr,
        .access_name = "csharp_root",
@@ -100,7 +100,7 @@ bool ParseArgs(CliOptions &out, int argc, char **argv) {
       out.mConfigHeader = cag_option_get_value(&context);
       break;
     case 'l':
-      out.mLuaEnabled = true;
+      out.mLuaRoot = cag_option_get_value(&context);
       break;
     case 'c':
       out.mCSharpRoot = cag_option_get_value(&context);
@@ -157,7 +157,7 @@ ProjectDefinition ParseProjectDefinition(const CliOptions &cliOptions) {
 
 TranslatorSettings GetTranslatorSettings(const CliOptions &cliOptions) {
   TranslatorSettings translatorSettings{cliOptions.mNamespace};
-  if (cliOptions.mLuaEnabled)
+  if (!cliOptions.mLuaRoot.empty())
     translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
   if (cliOptions.mJsonEnabled)
     translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
@@ -169,6 +169,8 @@ TranslatorSettings GetTranslatorSettings(const CliOptions &cliOptions) {
 GeneratorSettings GetGeneratorSettings(const CliOptions &cliOptions) {
   GeneratorSettings generatorSettings{cliOptions.mProjectName, cliOptions.mConfigHeader,
                                       cliOptions.mCSharpRoot};
+  if (!cliOptions.mLuaRoot.empty())
+    generatorSettings.EnableFeature(GeneratorFeatureFlag::Lua);
   if (!cliOptions.mCSharpRoot.empty())
     generatorSettings.EnableFeature(GeneratorFeatureFlag::CSharp);
   return generatorSettings;
@@ -186,6 +188,9 @@ void WriteToFiles(const std::vector<GeneratedContent> &results, const CliOptions
     case FileType::CSharpProject:
     case FileType::CSharpSource:
       target = std::filesystem::path(cliOptions.mCSharpRoot) / result.mName;
+      break;
+    case FileType::LuaSource:
+      target = std::filesystem::path(cliOptions.mLuaRoot) / result.mName;
       break;
     }
     THROW_IF(target.empty(), "Could not figure out where to put {}", result.mName);

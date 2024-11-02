@@ -7,5 +7,6 @@ enum class FileType {
   CMakeFile,
   CSharpSource,
   CSharpProject,
+  LuaSource,
 };
 } // namespace holgen

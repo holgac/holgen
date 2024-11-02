@@ -13,7 +13,8 @@ struct GeneratedContent {
 
 namespace GeneratorFeatureFlag {
 enum Entry : uint64_t {
-  CSharp = 1
+  CSharp = 1,
+  Lua = 2,
 };
 }; // namespace GeneratorFeatureFlag
 

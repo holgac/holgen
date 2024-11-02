@@ -16,14 +16,16 @@ void CWrappersPlugin::Run() {
 }
 
 bool CWrappersPlugin::ShouldProcess(const Class &cls) const {
-  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::DotNetModule))
+  if (cls.mStruct &&
+      (cls.mStruct->GetAnnotation(Annotations::DotNetModule) ||
+       cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)))
     return false;
   return true;
 }
 
 void CWrappersPlugin::ProcessClass(Class &cls) const {
   for (auto &method: cls.mMethods) {
-    if (!method.mExposeToCSharp)
+    if (!ShouldProcess(method))
       continue;
     WrapMethod(cls, method);
   }
@@ -162,5 +164,29 @@ Type CWrappersPlugin::SanitizeType(const Type &type) const {
     res.mType = PassByType::Value;
   res.mConstness = Constness::NotConst;
   return res;
+}
+
+bool CWrappersPlugin::ShouldProcess(const ClassMethod &method) const {
+  if (!method.mExposeToCSharp)
+    return false;
+  if (!ShouldProcess(method.mReturnType))
+    return false;
+  for (auto &arg: method.mArguments) {
+    if (!ShouldProcess(arg.mType))
+      return false;
+  }
+  return true;
+}
+
+bool CWrappersPlugin::ShouldProcess(const Type &type) const {
+  if (type.mName == "std::map" || type.mName == "std::unordered_map" || type.mName == "std::set" ||
+      type.mName == "std::unordered_set" || type.mName == "lua_State" || type.mName == "std::pair")
+    return false;
+  if (type.mName == "std::vector" || type.mName == "std::deque" || type.mName == "std::span" ||
+      type.mName == "std::array") {
+    if (!ShouldProcess(type.mTemplateParameters.front()))
+      return false;
+  }
+  return true;
 }
 } // namespace holgen
