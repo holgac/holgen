@@ -43,10 +43,10 @@ enum TestStructArrayType {
 struct TestStructArray {
   // TODO: const
   TestStructArrayType type;
-  @noLua
+  @no(lua)
   @noJson
   u8[16] customData;
-  @noLua
+  @no(lua)
   func Initialize(TestStructArrayType type);
   func GetData1() -> TestStructArrayCustomData1 nullable;
   func GetData2() -> TestStructArrayCustomData2 nullable;
@@ -72,7 +72,7 @@ struct TestStructComparable {
     u32 field1;
     u32 field2;
     @func(const)
-    @noLua
+    @no(lua)
     func operator<(TestStructComparable rhs) -> bool;
 }
 

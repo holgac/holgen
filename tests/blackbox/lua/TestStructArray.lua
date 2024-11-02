@@ -2,11 +2,7 @@
 ---@diagnostic disable: missing-return
 ---@class TestStructArrayMeta
 ---@field type TestStructArrayType
----@field customData number[]
 TestStructArrayMeta = {}
-
----@param type TestStructArrayType
-function TestStructArrayMeta:Initialize(type) end
 
 ---@return TestStructArrayCustomData1Meta
 function TestStructArrayMeta:GetData1() end

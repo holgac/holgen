@@ -27,8 +27,10 @@ CLI options:
 -i, --input=DIR           Directory containing holgen schema files
 -o, --cpp_output=DIR      Directory to put the C++ output files
 -n, --namespace=VALUE     C++ namespace to use for all data structures
--c, --cmake=VALUE         CMake target name to use for the generated static lib
+-p, --project=VALUE       Project name to use in cmake static lib
 -h, --header=VALUE        Config header to include in all generated headers
+--lua_root=VALUE          Directory to put the Lua stubs (enables lua, optional, requires lua)
+--json                    Enable json parsing (optional, requires rapidjson)
 ```
 
 # Usage

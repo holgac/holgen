@@ -4,7 +4,3 @@
 ---@field field1 number
 ---@field field2 number
 TestStructComparableMeta = {}
-
----@param rhs TestStructComparableMeta
----@return bool
-function TestStructComparableMeta:operator<(rhs) end
