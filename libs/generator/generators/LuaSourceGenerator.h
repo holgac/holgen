@@ -13,14 +13,14 @@ private:
   void GenerateClassDefinition(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateFields(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateField(CodeBlock &codeBlock, const ClassField &field) const;
-  void GenerateMethodAsField(CodeBlock &codeBlock, const ClassMethod &method) const;
+  void GenerateMethodAsField(CodeBlock &codeBlock, const Class& cls,const ClassMethod &method) const;
   void GenerateMethods(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
   bool ShouldProcess(const Class &cls) const;
   bool ShouldProcess(const ClassField &field) const;
   bool ShouldProcess(const ClassMethod &method) const;
   [[nodiscard]] std::string ToLuaType(const Type &type) const;
-  [[nodiscard]] std::string ToTypedFunctionArguments(const ClassMethod& method) const;
-  [[nodiscard]] std::string ToFunctionSignature(const ClassMethod& method) const;
+  [[nodiscard]] std::string ToTypedFunctionArguments(const Class& cls,const ClassMethod& method) const;
+  [[nodiscard]] std::string ToFunctionSignature(const Class& cls, const ClassMethod& method) const;
 };
 } // namespace holgen
