@@ -20,7 +20,7 @@ bool DotNetClassPlugin::ShouldProcess(const Class &cls) const {
       cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
       cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_CSharp) ||
        cls.mStruct->GetAnnotation(Annotations::DotNetModule) ||
-       cls.mStruct->GetAnnotation(Annotations::Interface))
+       cls.mStruct->GetAnnotation(Annotations::DotNetInterface))
     return false;
   return true;
 }

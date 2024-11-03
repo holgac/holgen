@@ -10,7 +10,7 @@ void ClassCopyMoveDestroyPlugin::Run() {
     if (!cls.mStruct)
       continue;
     if (cls.mStruct->GetAnnotation(Annotations::DotNetModule) ||
-        cls.mStruct->GetAnnotation(Annotations::Interface))
+        cls.mStruct->GetAnnotation(Annotations::DotNetInterface))
       continue;
 
     ProcessClass(cls);

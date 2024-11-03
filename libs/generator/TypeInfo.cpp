@@ -306,7 +306,7 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
     seenClasses.insert(cls->mName);
     if (cls->mStruct &&
         (cls->mStruct->GetAnnotation(Annotations::DotNetModule) ||
-         cls->mStruct->GetAnnotation(Annotations::Interface))) {
+         cls->mStruct->GetAnnotation(Annotations::DotNetInterface))) {
       return false;
     }
     if (forCopy && cls->mStruct &&

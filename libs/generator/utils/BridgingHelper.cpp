@@ -27,7 +27,7 @@ Type BridgingHelper::ConvertType(const TranslatedProject &project, const Type &t
   if (auto cls = project.GetClass(type.mName)) {
     auto res = type;
     THROW_IF(isReturnType && res.mType != PassByType::Value && cls->mStruct &&
-                 cls->mStruct->GetAnnotation(Annotations::Interface),
+                 cls->mStruct->GetAnnotation(Annotations::DotNetInterface),
              "Interface class {} is NOT returned by value in {}", cls->mName, definitionSource);
     if (cls->mEnum) {
       res.mType = PassByType::Value;

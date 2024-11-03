@@ -217,9 +217,9 @@ public:
   inline static const std::string DataManager = "dataManager";
 
   /**
-   * Interfaces are classes fully implemented in C# that can be called from C++.
+   * DotNetInterfaces are classes fully implemented in C# that can be called from C++.
    */
-  inline static const std::string Interface = "interface";
+  inline static const std::string DotNetInterface = "dotNetInterface";
 
   /**
    * Singleton classes derive from Singleton<T>.

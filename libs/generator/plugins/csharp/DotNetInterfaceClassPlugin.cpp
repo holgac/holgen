@@ -15,7 +15,7 @@ void DotNetInterfaceClassPlugin::Run() {
 }
 
 bool DotNetInterfaceClassPlugin::ShouldProcess(const Class &cls) {
-  if (!cls.mStruct || !cls.mStruct->GetAnnotation(Annotations::Interface))
+  if (!cls.mStruct || !cls.mStruct->GetAnnotation(Annotations::DotNetInterface))
     return false;
   return true;
 }
@@ -97,13 +97,13 @@ void DotNetInterfaceClassPlugin::GenerateFunctionPointerForCpp(
   method.mVisibility = Visibility::Private;
   method.mStaticness = Staticness::Static;
   if (auto retClass = mProject.GetClass(method.mReturnType.mName)) {
-    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::DotNetInterface)) {
       method.mReturnType = Type{"void", PassByType::Pointer};
     }
   }
   for (auto &arg: method.mArguments) {
     auto argClass = mProject.GetClass(arg.mType.mName);
-    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::Interface)) {
+    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::DotNetInterface)) {
       arg.mType = Type{"void", PassByType::Pointer};
     }
   }
@@ -161,7 +161,7 @@ std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class 
     std::string toPointer = arg.mType.mType != PassByType::Pointer ? "&" : "";
     if (argClass) {
       if (argClass && argClass->mStruct &&
-          argClass->mStruct->GetAnnotation(Annotations::Interface)) {
+          argClass->mStruct->GetAnnotation(Annotations::DotNetInterface)) {
         ss << arg.mName << "." << Naming().FieldGetterNameInCpp(St::CSharpInterfaceInstanceName)
            << "()";
       } else {
@@ -173,7 +173,7 @@ std::string DotNetInterfaceClassPlugin::GenerateFunctionPointerCall(const Class 
       auto underlyingCls = mProject.GetClass(underlying.mName);
       if (underlying.mName == "std::string" || underlyingCls) {
         bool isInterface = underlyingCls && underlyingCls->mStruct &&
-            underlyingCls->mStruct->GetAnnotation(Annotations::Interface);
+            underlyingCls->mStruct->GetAnnotation(Annotations::DotNetInterface);
         finalArgName = std::format("{}HolgenTemp", arg.mName);
         std::string convertedElemName = "elem";
         if (isInterface)
@@ -278,7 +278,7 @@ std::string DotNetInterfaceClassPlugin::ConvertBasicStatementForReturn(const std
 
   THROW_IF(type.mName == "void", "voids cant be returned");
   if (auto retClass = mProject.GetClass(type.mName)) {
-    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::DotNetInterface)) {
       return std::format("{}({})", retClass->mName, statement);
     } else if (retClass->IsProxyable()) {
       return std::format("*{}", statement);
@@ -296,7 +296,7 @@ std::string DotNetInterfaceClassPlugin::ConvertArrayElemStatement(const std::str
                                                                   const Type &type) {
   THROW_IF(type.mName == "void", "voids cant be returned");
   if (auto retClass = mProject.GetClass(type.mName)) {
-    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::Interface)) {
+    if (retClass->mStruct && retClass->mStruct->GetAnnotation(Annotations::DotNetInterface)) {
       return std::format("static_cast<void **>({})[{}]", statement, iterator);
     } else if (retClass->IsProxyable()) {
       return std::format("{}[{}]", statement, iterator);

@@ -214,7 +214,7 @@ bool DotNetWrapperPlugin::ShouldProcess(const ClassField &field) const {
 }
 
 bool DotNetWrapperPlugin::IsStaticClass(const Class &cls) const {
-  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::Interface))
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::DotNetInterface))
     return false;
   for (auto &method: cls.mMethods) {
     if (ShouldProcess(method) && method.mStaticness != Staticness::Static)

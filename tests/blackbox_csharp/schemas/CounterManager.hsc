@@ -1,4 +1,4 @@
-@interface
+@dotNetInterface
 struct ICounterBumper {
     func SetName(string name);
     func GetName() -> string;

@@ -85,7 +85,7 @@ void CWrappersPlugin::WrapMethod(Class &cls, const ClassMethod &method) const {
       continue;
     }
     auto argClass = mProject.GetClass(addedArg.mType.mName);
-    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::Interface)) {
+    if (argClass && argClass->mStruct && argClass->mStruct->GetAnnotation(Annotations::DotNetInterface)) {
       addedArg.mType = Type{"void", PassByType::Pointer};
       args << std::format("{}::{}({})", argClass->mNamespace, argClass->mName, arg.mName);
     } else {

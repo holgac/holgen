@@ -511,7 +511,7 @@ std::string CSharpMethodHelper::VariableRepresentation(const Type &type,
     break;
   case CSharpMethodType::InterfaceClassMethodCaller:
     if (auto cls = mProject.GetClass(type.mName)) {
-      if (cls->mStruct && cls->mStruct->GetAnnotation(Annotations::Interface))
+      if (cls->mStruct && cls->mStruct->GetAnnotation(Annotations::DotNetInterface))
         return std::format("(({})GCHandle.FromIntPtr({}).Target!)", cls->mName, variableName);
       else if (cls->mEnum)
         return std::format("{}({})", type.mName, variableName);

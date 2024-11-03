@@ -345,7 +345,7 @@ void DotNetHostPlugin::GenerateInitializeClass(Class &cls, CodeBlock &codeBlock,
   codeBlock.Add("{{");
   codeBlock.Indent(1);
 
-  if (projectCls.mStruct && projectCls.mStruct->GetAnnotation(Annotations::Interface))
+  if (projectCls.mStruct && projectCls.mStruct->GetAnnotation(Annotations::DotNetInterface))
     GenerateInitializeInterface(codeBlock, projectCls);
   else
     GenerateInitializeNonInterface(codeBlock, projectCls);
