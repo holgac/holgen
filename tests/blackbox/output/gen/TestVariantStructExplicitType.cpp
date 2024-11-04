@@ -226,7 +226,7 @@ void TestVariantStructExplicitType::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestVariantStructExplicitTypeMeta");
+  lua_getglobal(luaState, "TestVariantStructExplicitType");
   lua_setmetatable(luaState, -2);
 }
 
@@ -297,7 +297,7 @@ void TestVariantStructExplicitType::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestVariantStructExplicitType::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestVariantStructExplicitTypeMeta");
+  lua_setglobal(luaState, "TestVariantStructExplicitType");
 }
 
 int TestVariantStructExplicitType::IndexMetaMethod(lua_State *luaState) {

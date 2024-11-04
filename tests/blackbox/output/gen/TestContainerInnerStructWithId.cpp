@@ -80,7 +80,7 @@ void TestContainerInnerStructWithId::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestContainerInnerStructWithIdMeta");
+  lua_getglobal(luaState, "TestContainerInnerStructWithId");
   lua_setmetatable(luaState, -2);
 }
 
@@ -160,7 +160,7 @@ void TestContainerInnerStructWithId::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestContainerInnerStructWithId::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestContainerInnerStructWithIdMeta");
+  lua_setglobal(luaState, "TestContainerInnerStructWithId");
 }
 
 int TestContainerInnerStructWithId::IndexMetaMethod(lua_State *luaState) {

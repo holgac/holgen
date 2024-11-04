@@ -38,3 +38,10 @@ HOLGEN_WARN(msg, ## __VA_ARGS__); \
 continue; \
 }
 #endif // ifndef HOLGEN_WARN_AND_CONTINUE_IF
+#if WINDOWS
+#define HOLGEN_EXPORT __declspec(dllexport)
+#elif __GNUC__ >= 4
+#define HOLGEN_EXPORT __attribute__ ((visibility ("default")))
+#else
+#define HOLGEN_EXPORT
+#endif

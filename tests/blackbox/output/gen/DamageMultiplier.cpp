@@ -81,7 +81,7 @@ void DamageMultiplier::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "DamageMultiplierMeta");
+  lua_getglobal(luaState, "DamageMultiplier");
   lua_setmetatable(luaState, -2);
 }
 
@@ -161,7 +161,7 @@ void DamageMultiplier::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, DamageMultiplier::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "DamageMultiplierMeta");
+  lua_setglobal(luaState, "DamageMultiplier");
 }
 
 int DamageMultiplier::IndexMetaMethod(lua_State *luaState) {

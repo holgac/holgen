@@ -8,6 +8,7 @@ set(gen_sources
     gen/LuaHelper.cpp
     gen/GlobalPointer.cpp
     gen/FilesystemHelper.cpp
+    gen/Singleton.cpp
 )
 set(src_sources
 )

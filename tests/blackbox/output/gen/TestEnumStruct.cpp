@@ -84,7 +84,7 @@ void TestEnumStruct::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestEnumStructMeta");
+  lua_getglobal(luaState, "TestEnumStruct");
   lua_setmetatable(luaState, -2);
 }
 
@@ -164,7 +164,7 @@ void TestEnumStruct::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestEnumStruct::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestEnumStructMeta");
+  lua_setglobal(luaState, "TestEnumStruct");
 }
 
 int TestEnumStruct::IndexMetaMethod(lua_State *luaState) {

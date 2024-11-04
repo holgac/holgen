@@ -78,7 +78,7 @@ void TestContainerEnum::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestContainerEnumMeta");
+  lua_getglobal(luaState, "TestContainerEnum");
   lua_setmetatable(luaState, -2);
 }
 
@@ -149,7 +149,7 @@ void TestContainerEnum::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestContainerEnum::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestContainerEnumMeta");
+  lua_setglobal(luaState, "TestContainerEnum");
 }
 
 int TestContainerEnum::GetSkillCallerFromLua(lua_State *luaState) {

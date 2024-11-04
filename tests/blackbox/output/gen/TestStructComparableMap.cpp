@@ -62,7 +62,7 @@ void TestStructComparableMap::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructComparableMapMeta");
+  lua_getglobal(luaState, "TestStructComparableMap");
   lua_setmetatable(luaState, -2);
 }
 
@@ -133,7 +133,7 @@ void TestStructComparableMap::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructComparableMap::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructComparableMapMeta");
+  lua_setglobal(luaState, "TestStructComparableMap");
 }
 
 int TestStructComparableMap::IndexMetaMethod(lua_State *luaState) {

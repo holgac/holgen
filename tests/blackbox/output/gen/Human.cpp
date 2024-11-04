@@ -90,7 +90,7 @@ void Human::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "HumanMeta");
+  lua_getglobal(luaState, "Human");
   lua_setmetatable(luaState, -2);
 }
 
@@ -170,7 +170,7 @@ void Human::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Human::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "HumanMeta");
+  lua_setglobal(luaState, "Human");
 }
 
 int Human::IndexMetaMethod(lua_State *luaState) {

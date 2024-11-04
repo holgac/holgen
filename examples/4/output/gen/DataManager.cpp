@@ -22,14 +22,6 @@ DataManager::DataManager(DataManager &&rhs) noexcept {
   mWeaponsNameIndex = std::move(rhs.mWeaponsNameIndex);
 }
 
-bool DataManager::operator==(const DataManager &rhs) const {
-  return !(
-      mCharacters != rhs.mCharacters ||
-      mArmors != rhs.mArmors ||
-      mWeapons != rhs.mWeapons
-  );
-}
-
 const std::deque<Character> &DataManager::GetCharacters() const {
   return mCharacters;
 }
@@ -252,6 +244,17 @@ size_t DataManager::GetWeaponCount() const {
   return mWeapons.size();
 }
 
+bool DataManager::operator==(const DataManager &rhs) const {
+  return !(
+      mCharacters != rhs.mCharacters ||
+      mArmors != rhs.mArmors ||
+      mWeapons != rhs.mWeapons ||
+      mCharactersNameIndex != rhs.mCharactersNameIndex ||
+      mArmorsNameIndex != rhs.mArmorsNameIndex ||
+      mWeaponsNameIndex != rhs.mWeaponsNameIndex
+  );
+}
+
 bool DataManager::ParseFiles(const std::string &rootPath, const Converter &converterArg) {
   auto converter = converterArg;
   if (converter.armorNameToId == nullptr) {
@@ -345,7 +348,7 @@ void DataManager::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "DataManagerMeta");
+  lua_getglobal(luaState, "DataManager");
   lua_setmetatable(luaState, -2);
 }
 
@@ -434,7 +437,7 @@ void DataManager::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, DataManager::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "DataManagerMeta");
+  lua_setglobal(luaState, "DataManager");
 }
 
 int DataManager::GetCharacterFromNameCallerFromLua(lua_State *luaState) {

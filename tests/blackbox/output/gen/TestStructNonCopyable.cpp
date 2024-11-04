@@ -66,7 +66,7 @@ void TestStructNonCopyable::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructNonCopyableMeta");
+  lua_getglobal(luaState, "TestStructNonCopyable");
   lua_setmetatable(luaState, -2);
 }
 
@@ -137,7 +137,7 @@ void TestStructNonCopyable::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructNonCopyable::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructNonCopyableMeta");
+  lua_setglobal(luaState, "TestStructNonCopyable");
 }
 
 int TestStructNonCopyable::IndexMetaMethod(lua_State *luaState) {

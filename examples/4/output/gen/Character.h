@@ -20,7 +20,6 @@ public:
   Character(const Character &rhs) = default;
   Character(Character &&rhs) noexcept = default;
   ~Character() = default;
-  bool operator==(const Character &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -39,6 +38,7 @@ public:
   void SetArmor(const CharacterArmor &val);
   static Character *Get(uint32_t id);
   static Character *GetFromName(const std::string &key);
+  bool operator==(const Character &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

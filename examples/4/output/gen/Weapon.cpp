@@ -11,15 +11,6 @@
 #include "LuaHelper.h"
 
 namespace ex4_schemas {
-bool Weapon::operator==(const Weapon &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName ||
-      mDamageMin != rhs.mDamageMin ||
-      mDamageMax != rhs.mDamageMax
-  );
-}
-
 uint32_t Weapon::GetId() const {
   return mId;
 }
@@ -62,6 +53,15 @@ Weapon *Weapon::Get(uint32_t id) {
 
 Weapon *Weapon::GetFromName(const std::string &key) {
   return GlobalPointer<DataManager>::GetInstance()->GetWeaponFromName(key);
+}
+
+bool Weapon::operator==(const Weapon &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mDamageMin != rhs.mDamageMin ||
+      mDamageMax != rhs.mDamageMax
+  );
 }
 
 bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -117,7 +117,7 @@ void Weapon::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "WeaponMeta");
+  lua_getglobal(luaState, "Weapon");
   lua_setmetatable(luaState, -2);
 }
 
@@ -215,7 +215,7 @@ void Weapon::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Weapon::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "WeaponMeta");
+  lua_setglobal(luaState, "Weapon");
 }
 
 int Weapon::IndexMetaMethod(lua_State *luaState) {

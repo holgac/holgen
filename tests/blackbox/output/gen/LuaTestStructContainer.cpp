@@ -111,7 +111,7 @@ void LuaTestStructContainer::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "LuaTestStructContainerMeta");
+  lua_getglobal(luaState, "LuaTestStructContainer");
   lua_setmetatable(luaState, -2);
 }
 
@@ -191,7 +191,7 @@ void LuaTestStructContainer::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, LuaTestStructContainer::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "LuaTestStructContainerMeta");
+  lua_setglobal(luaState, "LuaTestStructContainer");
 }
 
 int LuaTestStructContainer::AddTestVectorElemCallerFromLua(lua_State *luaState) {

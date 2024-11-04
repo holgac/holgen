@@ -78,7 +78,7 @@ void TestBitmapStruct::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestBitmapStructMeta");
+  lua_getglobal(luaState, "TestBitmapStruct");
   lua_setmetatable(luaState, -2);
 }
 
@@ -149,7 +149,7 @@ void TestBitmapStruct::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestBitmapStruct::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestBitmapStructMeta");
+  lua_setglobal(luaState, "TestBitmapStruct");
 }
 
 int TestBitmapStruct::HasBitmapFieldCallerFromLua(lua_State *luaState) {

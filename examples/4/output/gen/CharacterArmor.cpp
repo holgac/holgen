@@ -11,13 +11,6 @@
 #include "LuaHelper.h"
 
 namespace ex4_schemas {
-bool CharacterArmor::operator==(const CharacterArmor &rhs) const {
-  return !(
-      std::fabs(mDirtAmount - rhs.mDirtAmount) >= 0.00001 ||
-      mArmorId != rhs.mArmorId
-  );
-}
-
 float CharacterArmor::GetDirtAmount() const {
   return mDirtAmount;
 }
@@ -40,6 +33,13 @@ void CharacterArmor::SetDirtAmount(float val) {
 
 void CharacterArmor::SetArmorId(uint32_t val) {
   mArmorId = val;
+}
+
+bool CharacterArmor::operator==(const CharacterArmor &rhs) const {
+  return !(
+      std::fabs(mDirtAmount - rhs.mDirtAmount) >= 0.00001 ||
+      mArmorId != rhs.mArmorId
+  );
 }
 
 bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -90,7 +90,7 @@ void CharacterArmor::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "CharacterArmorMeta");
+  lua_getglobal(luaState, "CharacterArmor");
   lua_setmetatable(luaState, -2);
 }
 
@@ -170,7 +170,7 @@ void CharacterArmor::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, CharacterArmor::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "CharacterArmorMeta");
+  lua_setglobal(luaState, "CharacterArmor");
 }
 
 int CharacterArmor::IndexMetaMethod(lua_State *luaState) {

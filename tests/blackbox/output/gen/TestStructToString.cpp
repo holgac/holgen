@@ -84,7 +84,7 @@ void TestStructToString::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructToStringMeta");
+  lua_getglobal(luaState, "TestStructToString");
   lua_setmetatable(luaState, -2);
 }
 
@@ -164,7 +164,7 @@ void TestStructToString::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructToString::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructToStringMeta");
+  lua_setglobal(luaState, "TestStructToString");
 }
 
 int TestStructToString::StringifyCallerFromLua(lua_State *luaState) {

@@ -269,7 +269,7 @@ void TestLuaCalculator::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestLuaCalculatorMeta");
+  lua_getglobal(luaState, "TestLuaCalculator");
   lua_setmetatable(luaState, -2);
 }
 
@@ -345,7 +345,7 @@ void TestLuaCalculator::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestLuaCalculator::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestLuaCalculatorMeta");
+  lua_setglobal(luaState, "TestLuaCalculator");
 }
 
 int TestLuaCalculator::AddPrimitiveCallerFromLua(lua_State *luaState) {

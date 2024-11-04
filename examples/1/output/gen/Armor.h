@@ -17,11 +17,11 @@ public:
   Armor(const Armor &rhs) = default;
   Armor(Armor &&rhs) noexcept = default;
   ~Armor() = default;
-  bool operator==(const Armor &rhs) const;
   uint32_t GetId() const;
   int8_t GetArmorClass() const;
   void SetId(uint32_t val);
   void SetArmorClass(int8_t val);
+  bool operator==(const Armor &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

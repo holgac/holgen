@@ -135,7 +135,7 @@ void Armor::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "ArmorMeta");
+  lua_getglobal(luaState, "Armor");
   lua_setmetatable(luaState, -2);
 }
 
@@ -234,7 +234,7 @@ void Armor::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Armor::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "ArmorMeta");
+  lua_setglobal(luaState, "Armor");
 }
 
 int Armor::IndexMetaMethod(lua_State *luaState) {

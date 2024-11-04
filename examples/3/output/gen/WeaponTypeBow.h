@@ -18,12 +18,12 @@ public:
   WeaponTypeBow(const WeaponTypeBow &rhs) = default;
   WeaponTypeBow(WeaponTypeBow &&rhs) noexcept = default;
   ~WeaponTypeBow() = default;
-  bool operator==(const WeaponTypeBow &rhs) const;
   uint32_t GetRange() const;
   const std::string &GetMaterial() const;
   std::string &GetMaterial();
   void SetRange(uint32_t val);
   void SetMaterial(const std::string &val);
+  bool operator==(const WeaponTypeBow &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

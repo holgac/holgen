@@ -120,7 +120,7 @@ void Weapon::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "WeaponMeta");
+  lua_getglobal(luaState, "Weapon");
   lua_setmetatable(luaState, -2);
 }
 
@@ -218,7 +218,7 @@ void Weapon::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Weapon::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "WeaponMeta");
+  lua_setglobal(luaState, "Weapon");
 }
 
 int Weapon::GetAverageDamageCallerFromLua(lua_State *luaState) {

@@ -95,7 +95,7 @@ void TestStructArrayCustomData2::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructArrayCustomData2Meta");
+  lua_getglobal(luaState, "TestStructArrayCustomData2");
   lua_setmetatable(luaState, -2);
 }
 
@@ -184,7 +184,7 @@ void TestStructArrayCustomData2::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructArrayCustomData2::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructArrayCustomData2Meta");
+  lua_setglobal(luaState, "TestStructArrayCustomData2");
 }
 
 int TestStructArrayCustomData2::IndexMetaMethod(lua_State *luaState) {

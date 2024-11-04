@@ -134,7 +134,7 @@ void TestContainerMap::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestContainerMapMeta");
+  lua_getglobal(luaState, "TestContainerMap");
   lua_setmetatable(luaState, -2);
 }
 
@@ -205,7 +205,7 @@ void TestContainerMap::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestContainerMap::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestContainerMapMeta");
+  lua_setglobal(luaState, "TestContainerMap");
 }
 
 int TestContainerMap::GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState) {

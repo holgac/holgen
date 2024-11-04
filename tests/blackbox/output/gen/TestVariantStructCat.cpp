@@ -84,7 +84,7 @@ void TestVariantStructCat::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestVariantStructCatMeta");
+  lua_getglobal(luaState, "TestVariantStructCat");
   lua_setmetatable(luaState, -2);
 }
 
@@ -164,7 +164,7 @@ void TestVariantStructCat::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestVariantStructCat::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestVariantStructCatMeta");
+  lua_setglobal(luaState, "TestVariantStructCat");
 }
 
 int TestVariantStructCat::IndexMetaMethod(lua_State *luaState) {

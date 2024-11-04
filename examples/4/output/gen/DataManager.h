@@ -23,7 +23,6 @@ public:
   DataManager(const DataManager &rhs) = delete;
   DataManager(DataManager &&rhs) noexcept;
   ~DataManager() = default;
-  bool operator==(const DataManager &rhs) const;
   const std::deque<Character> &GetCharacters() const;
   std::deque<Character> &GetCharacters();
   const std::deque<Armor> &GetArmors() const;
@@ -57,6 +56,7 @@ public:
   Weapon *GetWeapon(uint32_t idx);
   void DeleteWeapon(uint32_t idx);
   size_t GetWeaponCount() const;
+  bool operator==(const DataManager &rhs) const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

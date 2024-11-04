@@ -17,11 +17,11 @@ public:
   WeaponTypeSword(const WeaponTypeSword &rhs) = default;
   WeaponTypeSword(WeaponTypeSword &&rhs) noexcept = default;
   ~WeaponTypeSword() = default;
-  bool operator==(const WeaponTypeSword &rhs) const;
   float GetSharpness() const;
   bool GetIsShortSword() const;
   void SetSharpness(float val);
   void SetIsShortSword(bool val);
+  bool operator==(const WeaponTypeSword &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

@@ -58,7 +58,7 @@ void Number::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "NumberMeta");
+  lua_getglobal(luaState, "Number");
   lua_setmetatable(luaState, -2);
 }
 
@@ -129,7 +129,7 @@ void Number::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Number::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "NumberMeta");
+  lua_setglobal(luaState, "Number");
 }
 
 int Number::IndexMetaMethod(lua_State *luaState) {

@@ -85,7 +85,7 @@ void TestLuaFuncTableWithSourceTable::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestLuaFuncTableWithSourceTableMeta");
+  lua_getglobal(luaState, "TestLuaFuncTableWithSourceTable");
   lua_setmetatable(luaState, -2);
 }
 
@@ -131,7 +131,7 @@ void TestLuaFuncTableWithSourceTable::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestLuaFuncTableWithSourceTable::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestLuaFuncTableWithSourceTableMeta");
+  lua_setglobal(luaState, "TestLuaFuncTableWithSourceTable");
 }
 
 int TestLuaFuncTableWithSourceTable::SetFieldCallerFromLua(lua_State *luaState) {

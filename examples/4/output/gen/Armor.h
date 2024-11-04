@@ -18,7 +18,6 @@ public:
   Armor(const Armor &rhs) = default;
   Armor(Armor &&rhs) noexcept = default;
   ~Armor() = default;
-  bool operator==(const Armor &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -28,6 +27,7 @@ public:
   void SetArmorClass(int8_t val);
   static Armor *Get(uint32_t id);
   static Armor *GetFromName(const std::string &key);
+  bool operator==(const Armor &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

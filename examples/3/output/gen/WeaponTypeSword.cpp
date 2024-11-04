@@ -10,13 +10,6 @@
 #include "LuaHelper.h"
 
 namespace ex3_schemas {
-bool WeaponTypeSword::operator==(const WeaponTypeSword &rhs) const {
-  return !(
-      std::fabs(mSharpness - rhs.mSharpness) >= 0.00001 ||
-      mIsShortSword != rhs.mIsShortSword
-  );
-}
-
 float WeaponTypeSword::GetSharpness() const {
   return mSharpness;
 }
@@ -31,6 +24,13 @@ void WeaponTypeSword::SetSharpness(float val) {
 
 void WeaponTypeSword::SetIsShortSword(bool val) {
   mIsShortSword = val;
+}
+
+bool WeaponTypeSword::operator==(const WeaponTypeSword &rhs) const {
+  return !(
+      std::fabs(mSharpness - rhs.mSharpness) >= 0.00001 ||
+      mIsShortSword != rhs.mIsShortSword
+  );
 }
 
 bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -77,7 +77,7 @@ void WeaponTypeSword::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "WeaponTypeSwordMeta");
+  lua_getglobal(luaState, "WeaponTypeSword");
   lua_setmetatable(luaState, -2);
 }
 
@@ -157,7 +157,7 @@ void WeaponTypeSword::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, WeaponTypeSword::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "WeaponTypeSwordMeta");
+  lua_setglobal(luaState, "WeaponTypeSword");
 }
 
 int WeaponTypeSword::IndexMetaMethod(lua_State *luaState) {

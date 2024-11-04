@@ -84,7 +84,7 @@ void TestStructPairFields::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructPairFieldsMeta");
+  lua_getglobal(luaState, "TestStructPairFields");
   lua_setmetatable(luaState, -2);
 }
 
@@ -164,7 +164,7 @@ void TestStructPairFields::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructPairFields::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructPairFieldsMeta");
+  lua_setglobal(luaState, "TestStructPairFields");
 }
 
 int TestStructPairFields::IndexMetaMethod(lua_State *luaState) {

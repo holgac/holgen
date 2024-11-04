@@ -9,15 +9,6 @@
 #include "LuaHelper.h"
 
 namespace ex1_schemas {
-bool Character::operator==(const Character &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mName != rhs.mName ||
-      mRace != rhs.mRace ||
-      mArmor != rhs.mArmor
-  );
-}
-
 uint32_t Character::GetId() const {
   return mId;
 }
@@ -60,6 +51,15 @@ void Character::SetRace(const Race &val) {
 
 void Character::SetArmor(const Armor &val) {
   mArmor = val;
+}
+
+bool Character::operator==(const Character &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mName != rhs.mName ||
+      mRace != rhs.mRace ||
+      mArmor != rhs.mArmor
+  );
 }
 
 bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -124,7 +124,7 @@ void Character::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "CharacterMeta");
+  lua_getglobal(luaState, "Character");
   lua_setmetatable(luaState, -2);
 }
 
@@ -227,7 +227,7 @@ void Character::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Character::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "CharacterMeta");
+  lua_setglobal(luaState, "Character");
 }
 
 int Character::IndexMetaMethod(lua_State *luaState) {

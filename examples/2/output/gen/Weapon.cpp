@@ -9,14 +9,6 @@
 #include "LuaHelper.h"
 
 namespace ex2_schemas {
-bool Weapon::operator==(const Weapon &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mDamageMin != rhs.mDamageMin ||
-      mDamageMax != rhs.mDamageMax
-  );
-}
-
 uint32_t Weapon::GetId() const {
   return mId;
 }
@@ -55,6 +47,15 @@ void Weapon::SetGetAverageDamageLuaFunc(std::string val) {
 
 bool Weapon::HasGetAverageDamageLuaFunc() const {
   return !mLuaFuncHandle_GetAverageDamage.empty();
+}
+
+bool Weapon::operator==(const Weapon &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mDamageMin != rhs.mDamageMin ||
+      mDamageMax != rhs.mDamageMax ||
+      mLuaFuncHandle_GetAverageDamage != rhs.mLuaFuncHandle_GetAverageDamage
+  );
 }
 
 bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -109,7 +110,7 @@ void Weapon::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "WeaponMeta");
+  lua_getglobal(luaState, "Weapon");
   lua_setmetatable(luaState, -2);
 }
 
@@ -198,7 +199,7 @@ void Weapon::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Weapon::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "WeaponMeta");
+  lua_setglobal(luaState, "Weapon");
 }
 
 int Weapon::GetAverageDamageCallerFromLua(lua_State *luaState) {
@@ -213,6 +214,17 @@ int Weapon::InitializeCallerFromLua(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Weapon.Initialize method with an invalid lua proxy object!");
   instance->Initialize();
+  return 0;
+}
+
+int Weapon::SetDamageCallerFromLua(lua_State *luaState) {
+  auto instance = Weapon::ReadProxyFromLua(luaState, -3);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Weapon.SetDamage method with an invalid lua proxy object!");
+  uint8_t arg0;
+  LuaHelper::Read(arg0, luaState, -2);
+  uint8_t arg1;
+  LuaHelper::Read(arg1, luaState, -1);
+  instance->SetDamage(arg0, arg1);
   return 0;
 }
 
@@ -242,6 +254,8 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, Weapon::GetAverageDamageCallerFromLua);
   } else if (0 == strcmp("Initialize", key)) {
     lua_pushcfunction(luaState, Weapon::InitializeCallerFromLua);
+  } else if (0 == strcmp("SetDamage", key)) {
+    lua_pushcfunction(luaState, Weapon::SetDamageCallerFromLua);
   } else if (0 == strcmp("GetDamage", key)) {
     lua_pushcfunction(luaState, Weapon::GetDamageCallerFromLua);
   } else {

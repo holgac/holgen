@@ -113,7 +113,7 @@ void Boot::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "BootMeta");
+  lua_getglobal(luaState, "Boot");
   lua_setmetatable(luaState, -2);
 }
 
@@ -203,7 +203,7 @@ void Boot::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Boot::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "BootMeta");
+  lua_setglobal(luaState, "Boot");
 }
 
 int Boot::IndexMetaMethod(lua_State *luaState) {

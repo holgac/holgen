@@ -62,7 +62,7 @@ void RaceId::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "RaceIdMeta");
+  lua_getglobal(luaState, "RaceId");
   lua_setmetatable(luaState, -2);
 }
 
@@ -133,7 +133,7 @@ void RaceId::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, RaceId::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "RaceIdMeta");
+  lua_setglobal(luaState, "RaceId");
 }
 
 int RaceId::IndexMetaMethod(lua_State *luaState) {

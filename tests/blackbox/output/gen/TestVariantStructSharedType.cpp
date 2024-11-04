@@ -228,7 +228,7 @@ void TestVariantStructSharedType::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestVariantStructSharedTypeMeta");
+  lua_getglobal(luaState, "TestVariantStructSharedType");
   lua_setmetatable(luaState, -2);
 }
 
@@ -274,7 +274,7 @@ void TestVariantStructSharedType::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestVariantStructSharedType::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestVariantStructSharedTypeMeta");
+  lua_setglobal(luaState, "TestVariantStructSharedType");
 }
 
 int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {

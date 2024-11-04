@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace ex3_schemas {
-bool WeaponTypeBow::operator==(const WeaponTypeBow &rhs) const {
-  return !(
-      mRange != rhs.mRange ||
-      mMaterial != rhs.mMaterial
-  );
-}
-
 uint32_t WeaponTypeBow::GetRange() const {
   return mRange;
 }
@@ -34,6 +27,13 @@ void WeaponTypeBow::SetRange(uint32_t val) {
 
 void WeaponTypeBow::SetMaterial(const std::string &val) {
   mMaterial = val;
+}
+
+bool WeaponTypeBow::operator==(const WeaponTypeBow &rhs) const {
+  return !(
+      mRange != rhs.mRange ||
+      mMaterial != rhs.mMaterial
+  );
 }
 
 bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -80,7 +80,7 @@ void WeaponTypeBow::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "WeaponTypeBowMeta");
+  lua_getglobal(luaState, "WeaponTypeBow");
   lua_setmetatable(luaState, -2);
 }
 
@@ -160,7 +160,7 @@ void WeaponTypeBow::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, WeaponTypeBow::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "WeaponTypeBowMeta");
+  lua_setglobal(luaState, "WeaponTypeBow");
 }
 
 int WeaponTypeBow::IndexMetaMethod(lua_State *luaState) {

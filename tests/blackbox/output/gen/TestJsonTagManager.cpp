@@ -130,7 +130,7 @@ void TestJsonTagManager::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestJsonTagManagerMeta");
+  lua_getglobal(luaState, "TestJsonTagManager");
   lua_setmetatable(luaState, -2);
 }
 
@@ -201,7 +201,7 @@ void TestJsonTagManager::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestJsonTagManager::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestJsonTagManagerMeta");
+  lua_setglobal(luaState, "TestJsonTagManager");
 }
 
 int TestJsonTagManager::GetOrInsertCallerFromLua(lua_State *luaState) {

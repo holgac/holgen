@@ -62,7 +62,7 @@ void TestStructHashableMap::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructHashableMapMeta");
+  lua_getglobal(luaState, "TestStructHashableMap");
   lua_setmetatable(luaState, -2);
 }
 
@@ -133,7 +133,7 @@ void TestStructHashableMap::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructHashableMap::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructHashableMapMeta");
+  lua_setglobal(luaState, "TestStructHashableMap");
 }
 
 int TestStructHashableMap::IndexMetaMethod(lua_State *luaState) {

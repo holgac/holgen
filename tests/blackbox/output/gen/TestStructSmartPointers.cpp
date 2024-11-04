@@ -85,7 +85,7 @@ void TestStructSmartPointers::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructSmartPointersMeta");
+  lua_getglobal(luaState, "TestStructSmartPointers");
   lua_setmetatable(luaState, -2);
 }
 
@@ -123,7 +123,7 @@ void TestStructSmartPointers::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructSmartPointers::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructSmartPointersMeta");
+  lua_setglobal(luaState, "TestStructSmartPointers");
 }
 
 int TestStructSmartPointers::IndexMetaMethod(lua_State *luaState) {

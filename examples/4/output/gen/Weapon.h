@@ -18,7 +18,6 @@ public:
   Weapon(const Weapon &rhs) = default;
   Weapon(Weapon &&rhs) noexcept = default;
   ~Weapon() = default;
-  bool operator==(const Weapon &rhs) const;
   uint32_t GetId() const;
   const std::string &GetName() const;
   std::string &GetName();
@@ -30,6 +29,7 @@ public:
   void SetDamageMax(uint8_t val);
   static Weapon *Get(uint32_t id);
   static Weapon *GetFromName(const std::string &key);
+  bool operator==(const Weapon &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

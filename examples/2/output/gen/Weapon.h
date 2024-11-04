@@ -18,7 +18,6 @@ public:
   Weapon(const Weapon &rhs) = default;
   Weapon(Weapon &&rhs) noexcept = default;
   ~Weapon() = default;
-  bool operator==(const Weapon &rhs) const;
   uint32_t GetId() const;
   uint8_t GetDamageMin() const;
   uint8_t GetDamageMax() const;
@@ -29,6 +28,7 @@ public:
   void Initialize();
   void SetDamage(const uint8_t min, const uint8_t max);
   uint8_t GetDamage();
+  bool operator==(const Weapon &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
@@ -51,6 +51,7 @@ private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetAverageDamageCallerFromLua(lua_State *luaState);
   static int InitializeCallerFromLua(lua_State *luaState);
+  static int SetDamageCallerFromLua(lua_State *luaState);
   static int GetDamageCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId = -1;

@@ -548,7 +548,7 @@ Tester = {
 TEST_F(LuaTest, StaticFunction) {
   LuaHelper::CreateMetatables(mState);
   EXPECT_EQ(TestLuaStaticCppFunction::Factory(15).GetData(), 15);
-  luaL_dostring(mState, "return TestLuaStaticCppFunctionMeta.Factory(32).data");
+  luaL_dostring(mState, "return TestLuaStaticCppFunction.Factory(32).data");
   LuaTestHelper::ExpectStack(mState, {"32"});
   lua_pop(mState, 1);
 }
@@ -573,7 +573,7 @@ TEST_F(LuaTest, ParsingPairFields) {
 
 TEST_F(LuaTest, Constructor) {
   LuaHelper::CreateMetatables(mState);
-  luaL_dostring(mState, "return TestStructConstructorMeta.Construct3(1,2,3).y");
+  luaL_dostring(mState, "return TestStructConstructor.Construct3(1,2,3).y");
   LuaTestHelper::ExpectStack(mState, {"2"});
   lua_pop(mState, 1);
 }

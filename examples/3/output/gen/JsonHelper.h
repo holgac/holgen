@@ -7,6 +7,7 @@
 #include <deque>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -39,6 +40,16 @@ public:
     ++it;
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing std::pair!");
     return true;
+  }
+  template <typename T>
+  static bool Parse(std::shared_ptr<T> &out, const rapidjson::Value &json, const Converter &converter) {
+    out = std::make_shared<T>();
+    return Parse(*out.get(), json, converter);
+  }
+  template <typename T>
+  static bool Parse(std::unique_ptr<T> &out, const rapidjson::Value &json, const Converter &converter) {
+    out = std::make_unique<T>();
+    return Parse(*out.get(), json, converter);
   }
   template <typename SourceType, typename T, size_t C, typename ElemConverter>
   static bool ParseConvertElem(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {

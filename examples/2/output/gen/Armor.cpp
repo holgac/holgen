@@ -9,13 +9,6 @@
 #include "LuaHelper.h"
 
 namespace ex2_schemas {
-bool Armor::operator==(const Armor &rhs) const {
-  return !(
-      mId != rhs.mId ||
-      mArmorClass != rhs.mArmorClass
-  );
-}
-
 uint32_t Armor::GetId() const {
   return mId;
 }
@@ -26,6 +19,13 @@ int8_t Armor::GetArmorClass() const {
 
 void Armor::SetId(uint32_t val) {
   mId = val;
+}
+
+bool Armor::operator==(const Armor &rhs) const {
+  return !(
+      mId != rhs.mId ||
+      mArmorClass != rhs.mArmorClass
+  );
 }
 
 bool Armor::ParseJson(const rapidjson::Value &json, const Converter &converter) {
@@ -63,7 +63,7 @@ void Armor::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "ArmorMeta");
+  lua_getglobal(luaState, "Armor");
   lua_setmetatable(luaState, -2);
 }
 
@@ -143,7 +143,7 @@ void Armor::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Armor::NewIndexMetaMethod);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "ArmorMeta");
+  lua_setglobal(luaState, "Armor");
 }
 
 int Armor::InitializeCallerFromLua(lua_State *luaState) {

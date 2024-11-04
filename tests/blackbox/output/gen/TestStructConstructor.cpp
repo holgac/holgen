@@ -103,7 +103,7 @@ void TestStructConstructor::PushToLua(lua_State *luaState) const {
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
   lua_settable(luaState, -3);
-  lua_getglobal(luaState, "TestStructConstructorMeta");
+  lua_getglobal(luaState, "TestStructConstructor");
   lua_setmetatable(luaState, -2);
 }
 
@@ -198,7 +198,7 @@ void TestStructConstructor::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "Construct3");
   lua_pushcfunction(luaState, TestStructConstructor::Construct3CallerFromLua);
   lua_settable(luaState, -3);
-  lua_setglobal(luaState, "TestStructConstructorMeta");
+  lua_setglobal(luaState, "TestStructConstructor");
 }
 
 int TestStructConstructor::Construct1CallerFromLua(lua_State *luaState) {
