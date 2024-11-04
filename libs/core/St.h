@@ -36,7 +36,6 @@ public:
   inline static const std::string Lua_ReadProxyObject = "ReadProxyFromLua";
   inline static const std::string Lua_ReadMirrorObject = "ReadMirrorFromLua";
   inline static const std::string Lua_PushMirrorObject = "PushMirrorToLua";
-  inline static const std::string LuaMetatableSuffix = "Meta";
   inline static const std::string LuaTable_TableField = "table";
   inline static const std::string Lua_CustomData = "luadata";
   inline static const std::string Lua_Initialize = "InitializeLua";

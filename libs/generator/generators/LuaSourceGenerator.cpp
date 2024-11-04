@@ -83,7 +83,7 @@ void LuaSourceGenerator::GenerateEnum(CodeBlock &codeBlock, const Class &cls) co
 }
 
 void LuaSourceGenerator::GenerateClassDefinition(CodeBlock &codeBlock, const Class &cls) const {
-  auto luaClassName = cls.mName + St::LuaMetatableSuffix;
+  auto luaClassName = mNamingConvention.LuaMetatableName(cls.mName);
   codeBlock.Add("---@class {}", luaClassName);
   GenerateFields(codeBlock, cls);
   codeBlock.Add("{} = {{}}", luaClassName);
@@ -150,7 +150,7 @@ void LuaSourceGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cls,
   std::string accessor = ":";
   if (method.IsStatic(cls) || cls.mStruct->GetAnnotation(Annotations::LuaFuncTable))
     accessor = ".";
-  codeBlock.Add("function {}{}{}{}({}) end", cls.mName, St::LuaMetatableSuffix, accessor,
+  codeBlock.Add("function {}{}{}({}) end", mNamingConvention.LuaMetatableName(cls), accessor,
                 method.mName, argsStr.str());
 
   if (method.mFunction) {
@@ -224,7 +224,7 @@ std::string LuaSourceGenerator::ToLuaType(const Type &type) const {
     if (cls->mEnum)
       return cls->mName;
     else
-      return cls->mName + St::LuaMetatableSuffix;
+      return mNamingConvention.LuaMetatableName(*cls);
   }
   if (ti.CppKeyedContainers.contains(type.mName)) {
     return std::format("table<{}, {}>", ToLuaType(type.mTemplateParameters.front()),

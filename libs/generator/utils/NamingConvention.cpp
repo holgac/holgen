@@ -139,8 +139,12 @@ std::string NamingConvention::LuaFunctionHandleNameInCpp(
   return "mLuaFuncHandle_" + functionDefinition.mName;
 }
 
+std::string NamingConvention::LuaMetatableName(const std::string &name) const {
+  return name;
+}
+
 std::string NamingConvention::LuaMetatableName(const Class &cls) const {
-  return cls.mName + St::LuaMetatableSuffix;
+  return LuaMetatableName(cls.mName);
 }
 
 std::string NamingConvention::LuaMethodCaller(const ClassMethod &method) const {

@@ -46,6 +46,7 @@ public:
       LuaFunctionCheckerNameInCpp(const FunctionDefinition &functionDefinition) const;
   virtual std::string
       LuaFunctionHandleNameInCpp(const FunctionDefinition &functionDefinition) const;
+  virtual std::string LuaMetatableName(const std::string &name) const;
   virtual std::string LuaMetatableName(const Class &cls) const;
   virtual std::string LuaMethodCaller(const ClassMethod &method) const;
   virtual std::string CSharpMethodName(const ClassMethod &method) const;
