@@ -19,65 +19,80 @@ void ClassCopyMoveDestroyPlugin::Run() {
 
 void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
   auto variantData = cls.GetVariantData();
+  bool noCtor = cls.mStruct &&
+      cls.mStruct->GetMatchingAnnotation(Annotations::Struct,
+                                         Annotations::Struct_NoDefaultConstructor);
+  bool noAssignment = cls.mStruct &&
+      cls.mStruct->GetMatchingAnnotation(Annotations::Struct,
+                                         Annotations::Struct_NoDefaultAssignment);
   bool isCopyable = Type{cls.mName}.SupportsCopy(mProject);
   bool needsCustomCopy = NeedsCustomCopyOperator(cls);
 
-  auto defaultConstructor = ClassConstructor{};
-  defaultConstructor.mDefaultDelete = DefaultDelete::Default;
-  cls.mConstructors.push_back(std::move(defaultConstructor));
-
-  auto copyAssignment = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
-                                    Visibility::Public, Constness::NotConst};
-  copyAssignment.mArguments.emplace_back("rhs",
-                                         Type{cls.mName, PassByType::Reference, Constness::Const});
-
-  if (!isCopyable) {
-    copyAssignment.mDefaultDelete = DefaultDelete::Delete;
-  } else if (needsCustomCopy) {
-    PopulateMethod(cls, copyAssignment, variantData, false, true);
-  } else {
-    copyAssignment.mDefaultDelete = DefaultDelete::Default;
+  if (!noCtor) {
+    auto defaultConstructor = ClassConstructor{};
+    defaultConstructor.mDefaultDelete = DefaultDelete::Default;
+    cls.mConstructors.push_back(std::move(defaultConstructor));
   }
 
-  Validate().NewMethod(cls, copyAssignment);
-  cls.mMethods.push_back(std::move(copyAssignment));
+  if (!noAssignment) {
+    auto copyAssignment = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
+                                      Visibility::Public, Constness::NotConst};
+    copyAssignment.mArguments.emplace_back(
+        "rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
 
-  auto copyConstructor = ClassConstructor{};
-  copyConstructor.mArguments.emplace_back("rhs",
-                                          Type{cls.mName, PassByType::Reference, Constness::Const});
-  if (!isCopyable) {
-    copyConstructor.mDefaultDelete = DefaultDelete::Delete;
-  } else if (needsCustomCopy) {
-    PopulateMethod(cls, copyConstructor, variantData, false, false);
-  } else {
-    copyConstructor.mDefaultDelete = DefaultDelete::Default;
+    if (!isCopyable) {
+      copyAssignment.mDefaultDelete = DefaultDelete::Delete;
+    } else if (needsCustomCopy) {
+      PopulateMethod(cls, copyAssignment, variantData, false, true);
+    } else {
+      copyAssignment.mDefaultDelete = DefaultDelete::Default;
+    }
+
+    Validate().NewMethod(cls, copyAssignment);
+    cls.mMethods.push_back(std::move(copyAssignment));
   }
 
-  cls.mConstructors.push_back(std::move(copyConstructor));
+  if (!noCtor) {
 
-  auto moveAssignment = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
-                                    Visibility::Public, Constness::NotConst};
-  moveAssignment.mNoexceptness = Noexceptness::Noexcept;
-  moveAssignment.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
-  if (!isCopyable || needsCustomCopy) {
-    PopulateMethod(cls, moveAssignment, variantData, true, true);
-  } else {
-    moveAssignment.mDefaultDelete = DefaultDelete::Default;
-  }
-  Validate().NewMethod(cls, moveAssignment);
-  cls.mMethods.push_back(std::move(moveAssignment));
+    auto copyConstructor = ClassConstructor{};
+    copyConstructor.mArguments.emplace_back(
+        "rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
+    if (!isCopyable) {
+      copyConstructor.mDefaultDelete = DefaultDelete::Delete;
+    } else if (needsCustomCopy) {
+      PopulateMethod(cls, copyConstructor, variantData, false, false);
+    } else {
+      copyConstructor.mDefaultDelete = DefaultDelete::Default;
+    }
 
-  auto moveConstructor = ClassConstructor{};
-  moveConstructor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
-  if (!isCopyable || needsCustomCopy) {
-    PopulateMethod(cls, moveConstructor, variantData, true, false);
-  } else {
-    moveConstructor.mDefaultDelete = DefaultDelete::Default;
+    cls.mConstructors.push_back(std::move(copyConstructor));
   }
-  moveConstructor.mNoexceptness = Noexceptness::Noexcept;
-  cls.mConstructors.push_back(std::move(moveConstructor));
-  if (cls.mDestructor.IsEmpty()) {
-    cls.mDestructor.mDefaultDelete = DefaultDelete::Default;
+
+  if (!noAssignment) {
+    auto moveAssignment = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
+                                      Visibility::Public, Constness::NotConst};
+    moveAssignment.mNoexceptness = Noexceptness::Noexcept;
+    moveAssignment.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
+    if (!isCopyable || needsCustomCopy) {
+      PopulateMethod(cls, moveAssignment, variantData, true, true);
+    } else {
+      moveAssignment.mDefaultDelete = DefaultDelete::Default;
+    }
+    Validate().NewMethod(cls, moveAssignment);
+    cls.mMethods.push_back(std::move(moveAssignment));
+
+    auto moveConstructor = ClassConstructor{};
+    moveConstructor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
+    if (!isCopyable || needsCustomCopy) {
+      PopulateMethod(cls, moveConstructor, variantData, true, false);
+    } else {
+      moveConstructor.mDefaultDelete = DefaultDelete::Default;
+    }
+    moveConstructor.mNoexceptness = Noexceptness::Noexcept;
+    cls.mConstructors.push_back(std::move(moveConstructor));
+    if (cls.mDestructor.IsEmpty()) {
+      cls.mDestructor.mDefaultDelete = DefaultDelete::Default;
+    }
   }
 }
 

@@ -408,13 +408,15 @@ public:
    * Struct related annotations
    *
    * A struct can be defined nonCopyable which removes operator= and copy constructor
-   * @struct(nonCopyablemain.cpp)
+   * @struct(nonCopyable)
    * struct YouCanOnlyMoveThis {
    *    BigData field;
    * }
    */
   inline static const std::string Struct = "struct";
   inline static const std::string Struct_NonCopyable = "nonCopyable";
+  inline static const std::string Struct_NoDefaultConstructor = "noDefaultConstructor";
+  inline static const std::string Struct_NoDefaultAssignment = "noDefaultAssignment";
 
 
   /**

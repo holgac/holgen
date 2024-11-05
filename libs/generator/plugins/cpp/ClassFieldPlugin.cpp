@@ -45,6 +45,8 @@ void ClassFieldPlugin::ProcessStructDefinition(Class &cls,
         field.mDefaultValue = "nullptr";
       else
         field.mDefaultValue = "-1";
+    } else if (field.mType.mType == PassByType::Pointer) {
+      field.mDefaultValue = "nullptr";
     }
     FillComments(fieldDefinition, field.mComments);
     Validate().NewField(cls, field);
