@@ -38,6 +38,11 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
     if (!field.mField || field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
         NoNewIndexTypes.contains(field.mField->mType.mName))
       continue;
+    auto fieldClass = mProject.GetClass(field.mType.mName);
+    if (fieldClass && fieldClass->mStruct &&
+        (fieldClass->mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+         fieldClass->mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua)))
+      continue;
     if (field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_Const))
       continue;
     if (!field.mType.SupportsCopy(mProject)) {
@@ -294,7 +299,8 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
 }
 
 void LuaPlugin::ProcessStruct(Class &cls) {
-  if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
+  if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+      cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
     return;
   cls.mSourceIncludes.AddStandardHeader("cstring");
   // TODO: just include in header
@@ -378,7 +384,8 @@ void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
 }
 
 void LuaPlugin::ProcessEnum(Class &cls) {
-  if (cls.mEnum->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
+  if (cls.mEnum->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+      cls.mEnum->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
     return;
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});
   cls.mSourceIncludes.AddLibHeader("lua.hpp");

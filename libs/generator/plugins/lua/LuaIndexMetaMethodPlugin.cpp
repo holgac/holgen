@@ -9,7 +9,9 @@ void LuaIndexMetaMethodPlugin::Run() {
     return;
   }
   for (auto &cls: mProject.mClasses) {
-    if (!cls.mStruct || cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
+    if (!cls.mStruct ||
+        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
       continue;
     Process(cls);
   }
@@ -57,6 +59,11 @@ void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFields(Class &cls,
     // TODO: handle variant type (should call setter instead of direct assignment)
     if (!field.mField || field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
         field.mField->mType.mName == St::UserData)
+      continue;
+    auto fieldClass = mProject.GetClass(field.mType.mName);
+    if (fieldClass && fieldClass->mStruct &&
+        (fieldClass->mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
+         fieldClass->mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua)))
       continue;
     bool isRef = field.mField->mType.mName == "Ref";
     switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
