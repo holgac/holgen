@@ -28,13 +28,13 @@ void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
   bool isCopyable = Type{cls.mName}.SupportsCopy(mProject);
   bool needsCustomCopy = NeedsCustomCopyOperator(cls);
 
-  if (!noCtor) {
+  if (!noCtor && !cls.GetDefaultConstructor()) {
     auto defaultConstructor = ClassConstructor{};
     defaultConstructor.mDefaultDelete = DefaultDelete::Default;
     cls.mConstructors.push_back(std::move(defaultConstructor));
   }
 
-  if (!noAssignment) {
+  if (!noAssignment && !cls.GetCopyAssignment()) {
     auto copyAssignment = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
                                       Visibility::Public, Constness::NotConst};
     copyAssignment.mArguments.emplace_back(
@@ -52,8 +52,7 @@ void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
     cls.mMethods.push_back(std::move(copyAssignment));
   }
 
-  if (!noCtor) {
-
+  if (!noCtor && !cls.GetCopyConstructor()) {
     auto copyConstructor = ClassConstructor{};
     copyConstructor.mArguments.emplace_back(
         "rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
@@ -68,7 +67,7 @@ void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
     cls.mConstructors.push_back(std::move(copyConstructor));
   }
 
-  if (!noAssignment) {
+  if (!noAssignment && !cls.GetMoveAssignment()) {
     auto moveAssignment = ClassMethod{"operator=", Type{cls.mName, PassByType::Reference},
                                       Visibility::Public, Constness::NotConst};
     moveAssignment.mNoexceptness = Noexceptness::Noexcept;
@@ -80,7 +79,9 @@ void ClassCopyMoveDestroyPlugin::ProcessClass(Class &cls) {
     }
     Validate().NewMethod(cls, moveAssignment);
     cls.mMethods.push_back(std::move(moveAssignment));
+  }
 
+  if (!noCtor && !cls.GetMoveConstructor()) {
     auto moveConstructor = ClassConstructor{};
     moveConstructor.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::MoveReference});
     if (!isCopyable || needsCustomCopy) {
