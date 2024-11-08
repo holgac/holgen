@@ -1,6 +1,8 @@
 #include "CppModifiableSourceGenerator.h"
 #include "core/St.h"
 
+#include "core/Annotations.h"
+
 namespace holgen {
 void CppModifiableSourceGenerator::Run(std::vector<GeneratedContent> &contents) const {
   for (auto &cls: mTranslatedProject.mClasses) {
@@ -24,7 +26,15 @@ void CppModifiableSourceGenerator::Generate(GeneratedContent &out, const Class &
     if (!method.mUserDefined || method.mVirtuality == Virtuality::PureVirtual)
       continue;
     codeBlock.Add("{} {{", GenerateFunctionSignature(cls, method, false, false));
-    codeBlock.UserDefined("{}_{}{}", cls.mName, method.mName,
+    std::string sectionSuffix;
+    if (method.mFunction &&
+        method.mFunction->GetMatchingAttribute(Annotations::Func,
+                                               Annotations::Func_OverloadSuffix)) {
+      sectionSuffix =
+          method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OverloadSuffix)
+              ->mValue.mName;
+    }
+    codeBlock.UserDefined("{}_{}{}{}", cls.mName, method.mName, sectionSuffix,
                           method.mConstness == Constness::Const ? "_Const" : "");
     codeBlock.Add("}}");
     codeBlock.AddLine();

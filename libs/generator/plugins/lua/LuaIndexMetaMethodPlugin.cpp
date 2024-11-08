@@ -163,7 +163,15 @@ void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForExposedMethods(Class &c
     if (!exposedMethod.mExposeToLua)
       continue;
     GenerateMethodCaller(cls, exposedMethod);
-    switcher.AddCase(exposedMethod.mName, [&](CodeBlock &switchBlock) {
+    std::string methodSuffix;
+    if (exposedMethod.mFunction &&
+        exposedMethod.mFunction->GetMatchingAttribute(Annotations::Func,
+                                                      Annotations::Func_OverloadSuffix)) {
+      methodSuffix = exposedMethod.mFunction
+                         ->GetMatchingAttribute(Annotations::Func, Annotations::Func_OverloadSuffix)
+                         ->mValue.mName;
+    }
+    switcher.AddCase(exposedMethod.mName + methodSuffix, [&](CodeBlock &switchBlock) {
       // TODO: LuaHelper::Push should work with functions
       switchBlock.Add("lua_pushcfunction(luaState, {}::{});", cls.mName,
                       Naming().LuaMethodCaller(exposedMethod));

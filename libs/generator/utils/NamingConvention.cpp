@@ -148,7 +148,14 @@ std::string NamingConvention::LuaMetatableName(const Class &cls) const {
 }
 
 std::string NamingConvention::LuaMethodCaller(const ClassMethod &method) const {
-  return method.mName + "CallerFromLua";
+  std::string methodSuffix;
+  if (method.mFunction &&
+      method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OverloadSuffix)) {
+    methodSuffix =
+        method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OverloadSuffix)
+            ->mValue.mName;
+  }
+  return method.mName + methodSuffix + "CallerFromLua";
 }
 
 std::string NamingConvention::CSharpMethodName(const ClassMethod &method) const {

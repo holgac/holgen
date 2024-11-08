@@ -295,6 +295,10 @@ public:
    * virtual: A user defined function that's marked as virtual.
    *
    * pureVirtual: A function with no definition that's marked as pure virtual.
+   *
+   * overloadSuffix: When defining multiple functions with the same name, use this to differentiate
+   *                 the sections in the partially-generated file.
+   *                 The lua exports will use this as a suffix as well.
    */
   inline static const std::string Func = "func";
   inline static const std::string Func_OnDestroy = "onDestroy";
@@ -309,6 +313,7 @@ public:
   inline static const std::string Func_Noexcept = "noexcept";
   inline static const std::string Func_Virtual = "virtual";
   inline static const std::string Func_PureVirtual = "pureVirtual";
+  inline static const std::string Func_OverloadSuffix = "overloadSuffix";
 
   /**
    * Adds a comment to a struct, field or function.
