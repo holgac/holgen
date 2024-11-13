@@ -179,6 +179,10 @@ std::string Parser::ParseDefaultValue(Token &curToken) {
 }
 
 void Parser::ParseType(Token &curToken, TypeDefinition &typeDefinition) {
+  if (curToken.mContents == "const") {
+    typeDefinition.mConstness = Constness::Const;
+    PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
+  }
   typeDefinition.mName = curToken.mContents;
   PARSER_THROW_IF(!mTokenizer.GetNextNonWhitespace(curToken), "Incomplete type definition!")
   if (curToken.mType == TokenType::AOpen) {

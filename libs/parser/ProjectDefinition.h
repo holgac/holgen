@@ -40,6 +40,7 @@ struct TypeDefinition {
   // positive values indicate array; 0 means a regular value
   std::string mArraySize;
   TypeDefinitionType mType = TypeDefinitionType::Unspecified;
+  Constness mConstness = Constness::NotConst;
   bool operator==(const TypeDefinition &rhs) const;
 };
 

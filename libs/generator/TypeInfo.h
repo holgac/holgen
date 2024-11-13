@@ -38,8 +38,9 @@ struct Type : TypeBase<Type> {
       TypeBase(std::move(name)), mConstness(constness), mType(passByType) {}
 
   Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
-       const TypeDefinition &typeDefinition, PassByType passByType = PassByType::Value,
-       Constness constness = Constness::NotConst);
+       const TypeDefinition &typeDefinition, PassByType passByType = PassByType::Value);
+  Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
+       const TypeDefinition &typeDefinition, PassByType passByType, Constness constness);
 
   static Type ReturnType(const TranslatedProject &project, const FunctionDefinition &func);
 

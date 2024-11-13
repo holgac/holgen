@@ -191,6 +191,10 @@ std::string Type::ToFullyQualifiedString(const TranslatedProject &project) const
 }
 
 Type::Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
+           const TypeDefinition &typeDefinition, PassByType passByType) :
+    Type(project, definitionSource, typeDefinition, passByType, typeDefinition.mConstness) {}
+
+Type::Type(const TranslatedProject &project, const DefinitionSource &definitionSource,
            const TypeDefinition &typeDefinition, PassByType passByType, Constness constness) :
     mConstness(constness), mType(passByType) {
   if (typeDefinition.mName == "Ref") {
