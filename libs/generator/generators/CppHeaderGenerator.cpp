@@ -40,6 +40,7 @@ void CppHeaderGenerator::Generate(GeneratedContent &out, const Class &cls) const
     GenerateClassDefinition(specialization, codeBlock);
   }
   GenerateCFunctionsForHeader(codeBlock, cls);
+  GenerateMacros(codeBlock, cls);
   out.mBody = std::move(codeBlock);
 }
 
@@ -276,6 +277,33 @@ void CppHeaderGenerator::GenerateCFunctionsForHeader(CodeBlock &codeBlock, const
   }
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
+}
+
+void CppHeaderGenerator::GenerateMacros(CodeBlock &codeBlock, const Class &cls) const {
+  for (auto &macro: cls.mHeaderMacros) {
+    if (macro.mArguments.empty()) {
+      codeBlock.Add("#define {} \\", macro.mName);
+    } else {
+      std::stringstream ss;
+      bool isFirst = true;
+      for (auto &argument: macro.mArguments) {
+        if (isFirst) {
+          isFirst = false;
+        } else {
+          ss << ", ";
+        }
+        ss << argument;
+      }
+      codeBlock.Add("#define {}({}) \\", macro.mName, ss.str());
+    }
+    codeBlock.Indent(2);
+    auto curLineCount = codeBlock.mLines.size();
+    codeBlock.Add(macro.mBody);
+    for (size_t i = curLineCount; i < codeBlock.mLines.size() - 1; ++i) {
+      codeBlock.mLines[i] += " \\";
+    }
+    codeBlock.Indent(-2);
+  }
 }
 
 } // namespace holgen

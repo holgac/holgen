@@ -15,6 +15,7 @@ private:
   void GenerateIntegralConstructor(Class &cls);
   void GenerateProperties(Class &cls);
   void GenerateProperty(Class &cls, const AnnotationDefinition &annotation);
+  void GenerateXMacros(Class& cls);
   std::string DetermineUnderlyingType(Class &cls);
 };
 } // namespace holgen

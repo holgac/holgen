@@ -31,7 +31,8 @@ struct ClassField {
   std::list<std::string> mDefaultConstructorArguments;
   std::list<std::string> mComments;
   const FieldDefinition *mField = nullptr;
-  [[nodiscard]] bool IsVariantTypeField(const Class& cls, const std::string **rawName, const NamingConvention& naming) const;
+  [[nodiscard]] bool IsVariantTypeField(const Class &cls, const std::string **rawName,
+                                        const NamingConvention &naming) const;
 };
 
 struct MethodArgument {
@@ -158,6 +159,14 @@ struct ClassEnum {
   [[nodiscard]] std::string GetUnderlyingType(const Class &cls) const;
 };
 
+struct Macro {
+  std::string mName;
+  std::list<std::string> mArguments;
+  // backslashes are added automatically
+  CodeBlock mBody;
+  explicit Macro(std::string name) : mName(std::move(name)) {}
+};
+
 // This is the unit that will be generated into multiple destinations (cpp header/src, maybe lua)
 struct Class {
   explicit Class(std::string name, std::string _namespace, const StructDefinition *_struct) :
@@ -191,6 +200,7 @@ struct Class {
   std::list<BaseClass> mBaseClasses;
   std::list<Type> mFriendClasses;
   std::list<std::string> mComments;
+  std::list<Macro> mHeaderMacros;
   [[nodiscard]] ClassField *GetField(const std::string &name);
   [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);
   [[nodiscard]] const ClassField *GetField(const std::string &name) const;

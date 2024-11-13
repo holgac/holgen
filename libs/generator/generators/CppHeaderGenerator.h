@@ -23,5 +23,6 @@ private:
   void GenerateFieldDeclarations(CodeBlock &codeBlock, const Class &cls,
                                  Visibility visibility) const;
   void GenerateCFunctionsForHeader(CodeBlock &codeBlock, const Class &cls) const;
+  void GenerateMacros(CodeBlock &codeBlock, const Class &cls) const;
 };
 } // namespace holgen

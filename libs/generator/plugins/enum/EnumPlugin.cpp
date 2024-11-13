@@ -25,6 +25,7 @@ void EnumPlugin::Run() {
     GenerateProperties(cls);
     GenerateFormatter(cls, true);
     GenerateFormatter(cls, false);
+    GenerateXMacros(cls);
     Validate().Enum(cls);
   }
 }
@@ -131,6 +132,32 @@ void EnumPlugin::GenerateProperty(Class &cls, const AnnotationDefinition &annota
   }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
+}
+
+void EnumPlugin::GenerateXMacros(Class &cls) {
+  {
+    auto macro = Macro{Naming().EnumClassForEachMacro(cls)};
+    for (auto &entry: cls.mEnum->mEntries) {
+      macro.mBody.Add("{}({})", Naming().EnumClassForEachDoerMacro(cls), entry.mName);
+    }
+    cls.mHeaderMacros.push_back(std::move(macro));
+  }
+  {
+    auto macro = Macro{Naming().EnumClassSwitchMacro(cls)};
+    macro.mArguments.emplace_back("VALUE");
+    macro.mBody.Add("switch ((VALUE)) {{");
+    std::string namespaceSuffix;
+    if (!cls.mNamespace.empty())
+      namespaceSuffix = cls.mNamespace + "::";
+    for (auto &entry: cls.mEnum->mEntries) {
+      macro.mBody.Add("case {}{}::{}:", namespaceSuffix, cls.mName, entry.mName);
+      macro.mBody.Indent(1);
+      macro.mBody.Add("{}({})", Naming().EnumClassForEachDoerMacro(cls), entry.mName);
+      macro.mBody.Indent(-1);
+    }
+    macro.mBody.Add("}}");
+    cls.mHeaderMacros.push_back(std::move(macro));
+  }
 }
 
 std::string EnumPlugin::DetermineUnderlyingType(Class &cls) {

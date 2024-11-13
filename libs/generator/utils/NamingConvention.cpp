@@ -49,6 +49,24 @@ std::string NamingConvention::FieldGetterNameInCpp(const FieldDefinition &fieldD
   return FieldGetterNameInCpp(fieldDefinition.mName);
 }
 
+std::string NamingConvention::EnumClassForEachMacro(const Class &cls) const {
+  std::string prefix;
+  if (!cls.mNamespace.empty())
+    prefix = St::Replace(cls.mNamespace, "::", "_") + "_";
+  return std::format("{}FOR_EACH_{}", prefix, cls.mName);
+}
+
+std::string NamingConvention::EnumClassSwitchMacro(const Class &cls) const {
+  std::string prefix;
+  if (!cls.mNamespace.empty())
+    prefix = St::Replace(cls.mNamespace, "::", "_") + "_";
+  return std::format("{}SWITCH_{}", prefix, cls.mName);
+}
+
+std::string NamingConvention::EnumClassForEachDoerMacro(const Class &cls) const {
+  return EnumClassForEachMacro(cls) + "_DOER";
+}
+
 std::string NamingConvention::FieldGetterNameInCpp(const std::string &fieldName) const {
   return std::format("Get{}", St::Capitalize(fieldName));
 }

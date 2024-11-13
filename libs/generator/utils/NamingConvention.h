@@ -22,6 +22,9 @@ public:
                                           const AnnotationDefinition &indexAnnotation) const;
   virtual std::string FieldGetterNameInCpp(const FieldDefinition &fieldDefinition,
                                            bool dereferenceRef = false) const;
+  virtual std::string EnumClassForEachMacro(const Class& cls) const;
+  virtual std::string EnumClassSwitchMacro(const Class& cls) const;
+  virtual std::string EnumClassForEachDoerMacro(const Class& cls) const;
   virtual std::string FieldGetterNameInCpp(const std::string &fieldName) const;
   virtual std::string VariantGetterNameInCpp(const FieldDefinition &fieldDefinition,
                                              const StructDefinition &getAs) const;
