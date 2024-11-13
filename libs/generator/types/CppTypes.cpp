@@ -2,6 +2,8 @@
 #include "holgen.h"
 #include "core/Annotations.h"
 
+#include "generator/utils/NamingConvention.h"
+
 namespace holgen {
 
 const ClassMethod *Class::GetMethod(const std::string &name, Constness constness) const {
@@ -184,6 +186,23 @@ const ClassField *Class::GetIdField() const {
       return &field;
   }
   return nullptr;
+}
+
+bool ClassField::IsVariantTypeField(const Class &cls, const std::string **rawName,
+                                    const NamingConvention &naming) const {
+  for (auto &classField: cls.mFields) {
+    if (!classField.mField || !classField.mField->GetAnnotation(Annotations::Variant))
+      continue;
+    auto variantAnnotation = classField.mField->GetAnnotation(Annotations::Variant);
+    auto variantFieldAttribute = variantAnnotation->GetAttribute(Annotations::Variant_TypeField);
+    if (naming.FieldNameInCpp(variantFieldAttribute->mValue.mName) == mName) {
+      if (rawName) {
+        *rawName = &variantFieldAttribute->mValue.mName;
+      }
+      return true;
+    }
+  }
+  return false;
 }
 
 TemplateParameter::TemplateParameter(std::string type, std::string name) :

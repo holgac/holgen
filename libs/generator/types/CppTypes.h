@@ -7,6 +7,7 @@
 #include "generator/utils/HeaderContainer.h"
 
 namespace holgen {
+class NamingConvention;
 struct Class;
 struct ClassMethod;
 
@@ -30,6 +31,7 @@ struct ClassField {
   std::list<std::string> mDefaultConstructorArguments;
   std::list<std::string> mComments;
   const FieldDefinition *mField = nullptr;
+  [[nodiscard]] bool IsVariantTypeField(const Class& cls, const std::string **rawName, const NamingConvention& naming) const;
 };
 
 struct MethodArgument {

@@ -32,9 +32,8 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
   stringSwitcherElseCase.Add(R"R(HOLGEN_WARN("Unexpected lua field: {}.{{}}", key);)R",
                              cls.mStruct->mName);
   StringSwitcher switcher("key", std::move(stringSwitcherElseCase));
-  const std::set<std::string> NoNewIndexTypes = {St::UserData, St::Variant, St::Lua_CustomData};
+  const std::set<std::string> NoNewIndexTypes = {St::UserData, St::Lua_CustomData};
   for (auto &field: cls.mFields) {
-    // TODO: parse variant
     if (!field.mField || field.mField->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
         NoNewIndexTypes.contains(field.mField->mType.mName))
       continue;
@@ -50,12 +49,24 @@ void LuaPlugin::GenerateNewIndexMetaMethod(Class &cls) {
     }
     // TODO: Make this work with nested structs
     // TODO: This appends to containers, so a=[1] a=[2] results in a=[1,2].
-    switcher.AddCase(Naming().FieldNameInLua(*field.mField), [&](CodeBlock &switchBlock) {
-      switchBlock.Add("auto res = {}::{}(instance->{}, luaState, -1);", St::LuaHelper,
-                      St::LuaHelper_Read, field.mName);
-      switchBlock.Add("HOLGEN_WARN_IF(!res, \"Assigning {}.{} from lua failed!\");", cls.mName,
-                      field.mField->mName);
-    });
+    bool isVariantType = field.IsVariantTypeField(cls, nullptr, Naming());
+    switcher.AddCase(
+        Naming().FieldNameInLua(*field.mField), [&, isVariantType](CodeBlock &switchBlock) {
+          if (isVariantType) {
+            switchBlock.Add("{}temp;", field.mType.ToString(false));
+            switchBlock.Add("auto res = {}::{}(temp, luaState, -1);", St::LuaHelper,
+                            St::LuaHelper_Read, field.mName);
+          } else {
+            switchBlock.Add("auto res = {}::{}(instance->{}, luaState, -1);", St::LuaHelper,
+                            St::LuaHelper_Read, field.mName);
+          }
+          switchBlock.Add("HOLGEN_WARN_IF(!res, \"Assigning {}.{} from lua failed!\");", cls.mName,
+                          field.mField->mName);
+          if (isVariantType) {
+            switchBlock.Add("instance->{}(temp);",
+                            Naming().FieldSetterNameInCpp(field.mField->mName));
+          }
+        });
   }
   if (!switcher.IsEmpty()) {
     method.mBody.Add("auto instance = {}::{}(luaState, -3);", cls.mName, St::Lua_ReadProxyObject);

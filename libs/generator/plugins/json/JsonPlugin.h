@@ -23,9 +23,6 @@ private:
                                  const std::string &varName);
   void GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
                                     const ClassMethod &luaFunction, const std::string &varName);
-  bool IsVariantTypeField(const Class &cls, const ClassField &field,
-                          const std::string **rawName = nullptr);
-
   const AnnotationDefinition *GetConvertElemAnnotation(const FieldDefinition *field);
   const AnnotationDefinition *GetConvertKeyAnnotation(const FieldDefinition *field);
   void GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock, const ClassField &field,

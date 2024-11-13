@@ -96,7 +96,7 @@ void JsonPlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBody) {
   methodBody.Add("auto it = json.Begin();");
   for (auto &field: cls.mFields) {
     const std::string *variantRawName = nullptr;
-    bool isVariantTypeField = IsVariantTypeField(cls, field, &variantRawName);
+    bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
     if (!ShouldParseField(field, isVariantTypeField))
       continue;
 
@@ -136,7 +136,7 @@ void JsonPlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) 
   StringSwitcher switcher("name", std::move(stringSwitcherElseCase));
   for (const auto &field: cls.mFields) {
     const std::string *variantRawName = nullptr;
-    bool isVariantTypeField = IsVariantTypeField(cls, field, &variantRawName);
+    bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
     if (!ShouldParseField(field, isVariantTypeField))
       continue;
     if (isVariantTypeField) {
@@ -176,7 +176,7 @@ void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock,
   const std::string *variantRawName = nullptr;
   if (field.mField && field.mField->GetAnnotation(Annotations::JsonConvert)) {
     GenerateParseJsonJsonConvert(cls, codeBlock, field, varName);
-  } else if (IsVariantTypeField(cls, field, &variantRawName)) {
+  } else if (field.IsVariantTypeField(cls, &variantRawName, Naming())) {
     GenerateParseJsonVariantType(cls, codeBlock, field, varName, *variantRawName);
   } else if (field.mField && field.mField->mType.mName == St::Variant) {
     GenerateParseJsonVariant(cls, codeBlock, field, varName);
@@ -402,23 +402,6 @@ void JsonPlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
                 Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction), varName);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{}");)R",
                 cls.mStruct->mName, luaFunction.mFunction->mName);
-}
-
-bool JsonPlugin::IsVariantTypeField(const Class &cls, const ClassField &field,
-                                    const std::string **rawName) {
-  for (auto &classField: cls.mFields) {
-    if (!classField.mField || !classField.mField->GetAnnotation(Annotations::Variant))
-      continue;
-    auto variantAnnotation = classField.mField->GetAnnotation(Annotations::Variant);
-    auto variantFieldAttribute = variantAnnotation->GetAttribute(Annotations::Variant_TypeField);
-    if (Naming().FieldNameInCpp(variantFieldAttribute->mValue.mName) == field.mName) {
-      if (rawName) {
-        *rawName = &variantFieldAttribute->mValue.mName;
-      }
-      return true;
-    }
-  }
-  return false;
 }
 
 const AnnotationDefinition *JsonPlugin::GetConvertElemAnnotation(const FieldDefinition *field) {

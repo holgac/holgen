@@ -125,6 +125,7 @@ void ClassFieldVariantPlugin::ProcessVariantType(Class &cls, const std::string &
     auto method = ClassMethod{Naming().VariantResetterNameInCpp(typeFieldName), Type{"void"},
                               Visibility::Public, Constness::NotConst};
     ProcessVariantTypeCommon(cls, typeFieldName, method, VariantTypeProcessType::Resetter);
+    method.mExposeToLua = true;
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
