@@ -32,6 +32,7 @@ TypeInfo::TypeInfo() {
       {"pair", "std::pair"},
       {"shared_ptr", "std::shared_ptr"},
       {"unique_ptr", "std::unique_ptr"},
+      {"json", "rapidjson::Value"},
   };
 
   SignedIntegralTypes = {"int8_t",    "int16_t", "int32_t", "int64_t",

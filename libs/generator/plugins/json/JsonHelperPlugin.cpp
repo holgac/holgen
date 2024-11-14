@@ -98,12 +98,35 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,
   if (fixedSize)
     method.mBody.Add("size_t writtenItemCount = 0;");
 
+  CodeBlock modificationBlock;
+  std::string elemString = withConverter ? "elemConverter(elem)" : "elem";
+  if (TypeInfo::Get().CppSets.contains(container)) {
+    modificationBlock.Add("out.insert(std::move({}));", elemString);
+  } else if (fixedSize) {
+    if (withConverter) {
+      modificationBlock.Add("out[writtenItemCount] = std::move(elem);");
+    }
+    modificationBlock.Add("++writtenItemCount;");
+  } else {
+    modificationBlock.Add("out.push_back(std::move({}));", elemString);
+  }
+
   method.mBody.Line() << "for (const auto& data: json.GetArray()) {";
+  method.mBody.Indent(1);
   if (fixedSize)
     method.mBody.Add(
         R"R(HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in {}");)R",
         container);
-  method.mBody.Indent(1);
+  if (withConverter) {
+    method.mBody.Add("if constexpr (std::same_as<SourceType, rapidjson::Value>) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("auto& elem = data;");
+    method.mBody.Add(modificationBlock);
+
+    method.mBody.Indent(-1);
+    method.mBody.Add("}} else {{");
+    method.mBody.Indent(1);
+  }
   if (withConverter)
     method.mBody.Add("SourceType elem;", St::JsonHelper_Parse);
   else if (!fixedSize)
@@ -116,16 +139,11 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,
 
   method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of {}");)R",
                    container);
-  std::string elemString = withConverter ? "elemConverter(elem)" : "elem";
-  if (TypeInfo::Get().CppSets.contains(container)) {
-    method.mBody.Add("out.insert(std::move({}));", elemString);
-  } else if (fixedSize) {
-    if (withConverter) {
-      method.mBody.Add("out[writtenItemCount] = std::move(elem);");
-    }
-    method.mBody.Add("++writtenItemCount;");
-  } else {
-    method.mBody.Add("out.push_back(std::move({}));", elemString);
+  method.mBody.Add(modificationBlock);
+
+  if (withConverter) {
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}");
   }
   method.mBody.Indent(-1);
   method.mBody.Line() << "}"; // range based for on json.GetArray()
