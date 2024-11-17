@@ -319,6 +319,10 @@ bool Type::SupportsCopyOrMirroring(TranslatedProject &project, std::set<std::str
       return false;
     }
     for (auto &field: cls->mFields) {
+      if (!forCopy && field.mField &&
+          field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_AlwaysProxy))
+        continue;
+
       if (!field.mType.SupportsCopyOrMirroring(project, seenClasses, forCopy)) {
         return false;
       }

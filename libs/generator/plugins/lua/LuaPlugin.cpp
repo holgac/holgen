@@ -249,7 +249,7 @@ void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) {
 }
 
 void LuaPlugin::GeneratePushToLua(Class &cls) {
-  auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
+  auto method = ClassMethod{St::Lua_PushProxyObject, Type{"void"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   method.mBody.Add("lua_newtable(luaState);");
@@ -296,7 +296,11 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
     auto fieldClass = mProject.GetClass(field.mType.mName);
     if (fieldClass && !fieldClass->mEnum) {
       std::string accessOperator = field.mType.mType == PassByType::Pointer ? "->" : ".";
+      if (field.mField && field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_AlwaysProxy)) {
+      method.mBody.Add("{}{}{}(luaState);", field.mName, accessOperator, St::Lua_PushProxyObject);
+      } else {
       method.mBody.Add("{}{}{}(luaState);", field.mName, accessOperator, St::Lua_PushMirrorObject);
+      }
     } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, {});", field.mName);
     } else {
@@ -402,7 +406,7 @@ void LuaPlugin::ProcessEnum(Class &cls) {
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   // For consistency, all holgen classes have both PushToLua and PushMirrorToLua
-  for (auto &methodName: std::vector<std::string>{"PushToLua", St::Lua_PushMirrorObject}) {
+  for (auto &methodName: std::vector<std::string>{St::Lua_PushProxyObject, St::Lua_PushMirrorObject}) {
     auto method = ClassMethod{methodName, Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     std::string valueToPush;
@@ -423,7 +427,7 @@ void LuaPlugin::GeneratePushGlobalToLua(Class &cls) {
   auto method = ClassMethod{"PushGlobalToLua", Type{"void"}};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mArguments.emplace_back("name", Type{"char", PassByType::Pointer, Constness::Const});
-  method.mBody.Add("PushToLua(luaState);");
+  method.mBody.Add("{}(luaState);", St::Lua_PushProxyObject);
   method.mBody.Add("lua_setglobal(luaState, name);");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

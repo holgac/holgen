@@ -166,7 +166,7 @@ void LuaHelperPlugin::GenerateBasePush(Class &cls) {
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
-  method.mBody.Line() << "data.PushToLua(luaState);";
+  method.mBody.Add("data.{}(luaState);", St::Lua_PushProxyObject);
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
   method.mBody.Indent(-1);

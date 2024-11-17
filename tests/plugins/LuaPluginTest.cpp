@@ -31,11 +31,12 @@ enum TestData {}
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushToLua", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod(St::Lua_PushProxyObject, Constness::Const), nullptr);
   {
-    auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
+    auto method =
+        ClassMethod{St::Lua_PushProxyObject, Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method,
+    helpers::ExpectEqual(*cls->GetMethod(St::Lua_PushProxyObject, Constness::Const), method,
                          "LuaHelper::Push<true>(TestData::UnderlyingType(mValue), luaState);");
   }
 }
@@ -48,11 +49,12 @@ struct TestData {}
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushToLua", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod(St::Lua_PushProxyObject, Constness::Const), nullptr);
   {
-    auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
+    auto method =
+        ClassMethod{St::Lua_PushProxyObject, Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method, R"R(
+    helpers::ExpectEqual(*cls->GetMethod(St::Lua_PushProxyObject, Constness::Const), method, R"R(
 lua_newtable(luaState);
 lua_pushstring(luaState, "p");
 lua_pushlightuserdata(luaState, (void *) this);
@@ -104,11 +106,12 @@ struct DM {
   auto cls = project.GetClass("TestData");
   ASSERT_NE(cls, nullptr);
 
-  ASSERT_NE(cls->GetMethod("PushToLua", Constness::Const), nullptr);
+  ASSERT_NE(cls->GetMethod(St::Lua_PushProxyObject, Constness::Const), nullptr);
   {
-    auto method = ClassMethod{"PushToLua", Type{"void"}, Visibility::Public, Constness::Const};
+    auto method =
+        ClassMethod{St::Lua_PushProxyObject, Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
-    helpers::ExpectEqual(*cls->GetMethod("PushToLua", Constness::Const), method, R"R(
+    helpers::ExpectEqual(*cls->GetMethod(St::Lua_PushProxyObject, Constness::Const), method, R"R(
 lua_newtable(luaState);
 uint64_t id = mId;
 lua_pushstring(luaState, "i");

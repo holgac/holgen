@@ -438,6 +438,10 @@ public:
    * u32 customPrivateSetter;
    * @field(set=none)
    * u32 noSetter;
+   *
+   * If the field needs to be passed as a proxy even in mirrored objects, use always proxy.
+   * @field(alwaysProxy)
+   * UncopyableType* ptr;
    */
   inline static const std::string Field = "field";
   inline static const std::string Field_Const = "const";
@@ -447,5 +451,6 @@ public:
   inline static const std::string Field_OnCopy = "onCopy";
   inline static const std::string Field_OnCopy_Copy = "copy";
   inline static const std::string Field_OnCopy_Swap = "swap";
+  inline static const std::string Field_AlwaysProxy = "alwaysProxy";
 };
 } // namespace holgen
