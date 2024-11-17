@@ -6,7 +6,7 @@
 #include "../TranslatorPlugin.h"
 
 namespace holgen {
-class JsonPlugin : public TranslatorPlugin {
+class JsonParsePlugin : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
   void Run() override;

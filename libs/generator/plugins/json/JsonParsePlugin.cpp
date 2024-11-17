@@ -1,4 +1,4 @@
-#include "JsonPlugin.h"
+#include "JsonParsePlugin.h"
 #include <vector>
 #include "core/Annotations.h"
 #include "core/St.h"
@@ -27,7 +27,7 @@ bool ShouldParseMethod(const ClassMethod &method) {
 }
 } // namespace
 
-void JsonPlugin::Run() {
+void JsonParsePlugin::Run() {
   if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Json)) {
     return;
   }
@@ -39,7 +39,7 @@ void JsonPlugin::Run() {
   }
 }
 
-void JsonPlugin::GenerateSwitcherLoop(CodeBlock &methodBody, CodeBlock &&codeBlock) {
+void JsonParsePlugin::GenerateSwitcherLoop(CodeBlock &methodBody, CodeBlock &&codeBlock) {
   methodBody.Add("for (const auto &data: json.GetObject()) {{");
   methodBody.Indent(1);
   methodBody.Add("const auto &name = data.name.GetString();");
@@ -48,7 +48,7 @@ void JsonPlugin::GenerateSwitcherLoop(CodeBlock &methodBody, CodeBlock &&codeBlo
   methodBody.Line() << "}"; // range based for on json.GetObject()
 }
 
-void JsonPlugin::GenerateParseJsonForLuaFuncTable(Class &cls) {
+void JsonParsePlugin::GenerateParseJsonForLuaFuncTable(Class &cls) {
   auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("json",
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
@@ -60,7 +60,7 @@ void JsonPlugin::GenerateParseJsonForLuaFuncTable(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void JsonPlugin::GenerateParseJson(Class &cls) {
+void JsonParsePlugin::GenerateParseJson(Class &cls) {
   auto method = ClassMethod{St::ParseJson, Type{"bool"}, Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("json",
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
@@ -92,7 +92,7 @@ void JsonPlugin::GenerateParseJson(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void JsonPlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBody) {
+void JsonParsePlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBody) {
   methodBody.Add("auto it = json.Begin();");
   for (auto &field: cls.mFields) {
     const std::string *variantRawName = nullptr;
@@ -127,7 +127,7 @@ void JsonPlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBody) {
       cls.mName);
 }
 
-void JsonPlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) {
+void JsonParsePlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) {
   StringSwitcher variantSwitcher("name", {});
 
   CodeBlock stringSwitcherElseCase;
@@ -171,7 +171,7 @@ void JsonPlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodBody) 
   }
 }
 
-void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock,
+void JsonParsePlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock,
                                            const ClassField &field, const std::string &varName) {
   const std::string *variantRawName = nullptr;
   if (field.mField && field.mField->GetAnnotation(Annotations::JsonConvert)) {
@@ -189,7 +189,7 @@ void JsonPlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock,
   }
 }
 
-void JsonPlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, const ClassField &field,
+void JsonParsePlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                           const std::string &varName) {
   auto variantTypeField =
       cls.GetField(Naming().FieldNameInCpp(field.mField->GetAnnotation(Annotations::Variant)
@@ -234,7 +234,7 @@ void JsonPlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, cons
       cls.mStruct->mName, field.mField->mName, variantTypeField->mName);
 }
 
-void JsonPlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock,
+void JsonParsePlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock,
                                               const ClassField &field, const std::string &varName,
                                               const std::string &rawFieldName) {
   codeBlock.Add("{}temp;", field.mType.ToString(false));
@@ -245,7 +245,7 @@ void JsonPlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock,
   codeBlock.Add("{}(temp);", Naming().FieldSetterNameInCpp(rawFieldName));
 }
 
-void JsonPlugin::GenerateParseJsonJsonConvertKeyElem(
+void JsonParsePlugin::GenerateParseJsonJsonConvertKeyElem(
     Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
     const AnnotationDefinition *convertElemAnnotation,
     const AnnotationDefinition *convertKeyAnnotation) {
@@ -264,7 +264,7 @@ void JsonPlugin::GenerateParseJsonJsonConvertKeyElem(
                 cls.mStruct->mName, field.mField->mName);
 }
 
-void JsonPlugin::GenerateParseJsonJsonConvertKey(Class &cls, CodeBlock &codeBlock,
+void JsonParsePlugin::GenerateParseJsonJsonConvertKey(Class &cls, CodeBlock &codeBlock,
                                                  const ClassField &field,
                                                  const std::string &varName,
                                                  const AnnotationDefinition *convertKeyAnnotation) {
@@ -279,7 +279,7 @@ void JsonPlugin::GenerateParseJsonJsonConvertKey(Class &cls, CodeBlock &codeBloc
                 cls.mStruct->mName, field.mField->mName);
 }
 
-void JsonPlugin::GenerateParseJsonJsonConvertElem(
+void JsonParsePlugin::GenerateParseJsonJsonConvertElem(
     Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
     const AnnotationDefinition *convertElemAnnotation) {
   codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
@@ -293,7 +293,7 @@ void JsonPlugin::GenerateParseJsonJsonConvertElem(
                 cls.mStruct->mName, field.mField->mName);
 }
 
-void JsonPlugin::GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &codeBlock,
+void JsonParsePlugin::GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &codeBlock,
                                                    const ClassField &field,
                                                    const std::string &varName) {
   auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
@@ -313,7 +313,7 @@ void JsonPlugin::GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &codeBl
                   jsonConvertUsing->mValue.mName);
 }
 
-void JsonPlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock,
+void JsonParsePlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock,
                                               const ClassField &field, const std::string &varName) {
   auto convertElemAnnotation = GetConvertElemAnnotation(field.mField);
   auto convertKeyAnnotation = GetConvertKeyAnnotation(field.mField);
@@ -329,7 +329,7 @@ void JsonPlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock,
   }
 }
 
-void JsonPlugin::ProcessStruct(Class &cls) {
+void JsonParsePlugin::ProcessStruct(Class &cls) {
   if (cls.mStruct->GetAnnotation(Annotations::NoJson))
     return;
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
@@ -347,7 +347,7 @@ void JsonPlugin::ProcessStruct(Class &cls) {
   }
 }
 
-void JsonPlugin::ProcessEnum(Class &cls) {
+void JsonParsePlugin::ProcessEnum(Class &cls) {
   if (cls.mEnum->GetAnnotation(Annotations::NoJson))
     return;
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
@@ -395,7 +395,7 @@ void JsonPlugin::ProcessEnum(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void JsonPlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
+void JsonParsePlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
                                               const ClassMethod &luaFunction,
                                               const std::string &varName) {
   codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
@@ -404,7 +404,7 @@ void JsonPlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
                 cls.mStruct->mName, luaFunction.mFunction->mName);
 }
 
-const AnnotationDefinition *JsonPlugin::GetConvertElemAnnotation(const FieldDefinition *field) {
+const AnnotationDefinition *JsonParsePlugin::GetConvertElemAnnotation(const FieldDefinition *field) {
   for (auto &annotation: field->GetAnnotations(Annotations::JsonConvert)) {
     if (annotation.GetAttribute(Annotations::JsonConvert_Elem)) {
       return &annotation;
@@ -413,7 +413,7 @@ const AnnotationDefinition *JsonPlugin::GetConvertElemAnnotation(const FieldDefi
   return nullptr;
 }
 
-const AnnotationDefinition *JsonPlugin::GetConvertKeyAnnotation(const FieldDefinition *field) {
+const AnnotationDefinition *JsonParsePlugin::GetConvertKeyAnnotation(const FieldDefinition *field) {
   for (auto &annotation: field->GetAnnotations(Annotations::JsonConvert)) {
     if (annotation.GetAttribute(Annotations::JsonConvert_Key)) {
       return &annotation;

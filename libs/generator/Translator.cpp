@@ -23,7 +23,7 @@
 #include "generator/plugins/json/JsonConverterPlugin.h"
 #include "generator/plugins/json/JsonHelperPlugin.h"
 #include "generator/plugins/json/JsonParseFilesPlugin.h"
-#include "generator/plugins/json/JsonPlugin.h"
+#include "generator/plugins/json/JsonParsePlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
 #include "generator/plugins/lua/LuaHelperPlugin.h"
 #include "generator/plugins/lua/LuaFieldsPlugin.h"
@@ -73,7 +73,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<DotNetModuleInterfacePlugin>();
   AddPlugin<ClassEqualsOperatorPlugin>();
   AddPlugin<JsonConverterPlugin>();
-  AddPlugin<JsonPlugin>();
+  AddPlugin<JsonParsePlugin>();
   AddPlugin<JsonParseFilesPlugin>();
   AddPlugin<JsonHelperPlugin>();
   // TODO: lua plugins should run before json so that LuaRegistryData can be initialized via json

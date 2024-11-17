@@ -3,10 +3,10 @@
 #include "generator/plugins/cpp/ClassIdFieldPlugin.h"
 #include "generator/plugins/cpp/ClassPlugin.h"
 #include "generator/plugins/json/JsonConverterPlugin.h"
-#include "generator/plugins/json/JsonPlugin.h"
+#include "generator/plugins/json/JsonParsePlugin.h"
 #include "generator/plugins/lua/LuaFunctionPlugin.h"
 
-class JsonPluginTest : public TranslatorPluginTest {
+class JsonParsePluginTest : public TranslatorPluginTest {
 protected:
   static void Run(TranslatedProject &project) {
     TranslatorSettings translatorSettings;
@@ -18,11 +18,11 @@ protected:
     JsonConverterPlugin(project, translatorSettings).Run();
     // Not a direct dependency, but needed to parse lua function names
     LuaFunctionPlugin(project, translatorSettings).Run();
-    JsonPlugin(project, translatorSettings).Run();
+    JsonParsePlugin(project, translatorSettings).Run();
   }
 };
 
-TEST_F(JsonPluginTest, StructParseJsonEmpty) {
+TEST_F(JsonParsePluginTest, StructParseJsonEmpty) {
   auto project = Parse("struct TestData {}");
   Run(project);
   auto cls = project.GetClass("TestData");
@@ -41,7 +41,7 @@ return true;
   }
 }
 
-TEST_F(JsonPluginTest, StructParseJson) {
+TEST_F(JsonParsePluginTest, StructParseJson) {
   auto project = Parse(R"R(
 struct TestData {
   u32 testFieldUnsigned;
@@ -118,7 +118,7 @@ return true;
   }
 }
 
-TEST_F(JsonPluginTest, StructParseJsonConverter) {
+TEST_F(JsonParsePluginTest, StructParseJsonConverter) {
   auto project = Parse(R"R(
 struct TestData {
   @jsonConvert(from=string, using=testU32Converter)
@@ -184,7 +184,7 @@ return true;
   }
 }
 
-TEST_F(JsonPluginTest, EnumParseJson) {
+TEST_F(JsonParsePluginTest, EnumParseJson) {
   auto project = Parse("enum TestData {}");
   Run(project);
   auto cls = project.GetClass("TestData");
