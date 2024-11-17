@@ -46,4 +46,5 @@ struct TestJsonStructWithSingleTag {
 struct TestJsonStructContainer {
   vector<TestJsonTag> tags;
   vector<TestJsonEnum> enums;
+  map<string, TestJsonTag> tagMap;
 }

@@ -194,3 +194,12 @@ TEST_F(JsonTest, DumpVector) {
   obj2.ParseJson(obj.DumpJson(doc), {});
   EXPECT_EQ(obj, obj2);
 }
+
+TEST_F(JsonTest, DumpMap) {
+  TestJsonStructContainer obj, obj2;
+  obj.GetTagMap().emplace("asdf", TestJsonTag{123, "qwer"});
+  obj.GetTagMap().emplace("zxcv", TestJsonTag{456, "rewq"});
+  rapidjson::Document doc;
+  obj2.ParseJson(obj.DumpJson(doc), {});
+  EXPECT_EQ(obj, obj2);
+}

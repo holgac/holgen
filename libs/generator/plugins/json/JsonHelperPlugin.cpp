@@ -234,6 +234,9 @@ void JsonHelperPlugin::GenerateDumpFunctions(Class &cls) {
   for (auto &container: TypeInfo::Get().CppSingleElemContainers) {
     GenerateDumpForSingleElemContainer(cls, container);
   }
+  for (auto &container: TypeInfo::Get().CppKeyedContainers) {
+    GenerateDumpForKeyedContainer(cls, container);
+  }
   GenerateDumpTuple(cls, 2, "std::pair");
 }
 
@@ -286,6 +289,24 @@ void JsonHelperPlugin::GenerateDumpForSingleElemContainer(Class &cls,
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
 
+  method.mBody.Add("return val;");
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void JsonHelperPlugin::GenerateDumpForKeyedContainer(Class &cls, const std::string &container) {
+
+  auto method = GenerateDumpMethod(container);
+  method.mTemplateParameters.emplace_back("typename", "K");
+  method.mTemplateParameters.emplace_back("typename", "V");
+  method.mArguments.front().mType.mTemplateParameters.emplace_back("K");
+  method.mArguments.front().mType.mTemplateParameters.emplace_back("V");
+  method.mBody.Add("auto val = rapidjson::Value(rapidjson::kObjectType);");
+  method.mBody.Add("for (auto &[k, v]: data) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("val.AddMember({0}(k, doc), {0}(v, doc), doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
   method.mBody.Add("return val;");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

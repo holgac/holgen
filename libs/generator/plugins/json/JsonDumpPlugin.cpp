@@ -26,7 +26,7 @@ void JsonDumpPlugin::ProcessStruct(Class &cls) {
   for (auto &field: cls.mFields) {
     if (!field.mField || !ShouldProcess(field, false))
       continue;
-    GenerateForField(cls, method.mBody, field, field.mField->mName);
+    GenerateForField(method.mBody, field, field.mField->mName);
   }
   method.mBody.Add("return val;");
   Validate().NewMethod(cls, method);
@@ -42,17 +42,8 @@ void JsonDumpPlugin::ProcessEnum(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void JsonDumpPlugin::GenerateForField(Class &cls, CodeBlock &codeBlock, const ClassField &field,
+void JsonDumpPlugin::GenerateForField(CodeBlock &codeBlock, const ClassField &field,
                                       const std::string &fieldName) {
-  (void)cls;
-  // TODO: remove this code completely - currently it's used to gate the implemented types
-  if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName)) {
-  } else if (field.mType.mName == "std::string") {
-  } else if (mProject.GetClass(field.mType.mName)) {
-  } else if (TypeInfo::Get().CppSingleElemContainers.contains(field.mType.mName)) {
-  } else {
-    return;
-  }
   codeBlock.Add("val.AddMember(\"{}\", {}::{}({}, doc), doc.GetAllocator());", fieldName,
                 St::JsonHelper, St::JsonHelper_Dump, field.mName);
 }
