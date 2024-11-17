@@ -9,6 +9,7 @@
 #include "TestJsonStructMapWithConverters.h"
 #include "TestJsonEnum.h"
 #include "TestJsonStructWithSingleTag.h"
+#include "TestJsonStructContainer.h"
 
 using namespace holgen_blackbox_test;
 
@@ -182,5 +183,14 @@ TEST_F(JsonTest, DumpStructField) {
   obj.GetTag().SetName("tagName");
   auto json = obj.DumpJson(doc);
   obj2.ParseJson(json, {});
+  EXPECT_EQ(obj, obj2);
+}
+
+TEST_F(JsonTest, DumpVector) {
+  TestJsonStructContainer obj, obj2;
+  obj.GetTags().emplace_back(123, "asdf");
+  obj.GetTags().emplace_back(456, "qwer");
+  rapidjson::Document doc;
+  obj2.ParseJson(obj.DumpJson(doc), {});
   EXPECT_EQ(obj, obj2);
 }

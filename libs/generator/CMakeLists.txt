@@ -18,6 +18,7 @@ set(gen_enum_plugins
 )
 
 set(gen_json_plugins
+    plugins/json/JsonPluginBase.cpp
     plugins/json/JsonParsePlugin.cpp
     plugins/json/JsonDumpPlugin.cpp
     plugins/json/JsonParseFilesPlugin.cpp

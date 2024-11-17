@@ -113,6 +113,7 @@ public:
   std::set<std::string> CppFixedSizeContainers;
   // Map-like containers
   std::set<std::string> CppKeyedContainers;
+  std::set<std::string> CppSingleElemContainers;
   std::set<std::string> CppHashContainers;
   std::set<std::string> CppTreeContainers;
   // All containers

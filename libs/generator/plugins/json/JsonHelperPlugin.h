@@ -29,5 +29,7 @@ private:
   void GenerateDumpSingleElem(Class &cls);
   void GenerateBaseDump(Class &cls);
   ClassMethod GenerateDumpMethod(const std::string& type);
+  void GenerateDumpForSingleElemContainer(Class &cls, const std::string &container);
+  void GenerateDumpTuple(Class &cls, size_t size, const std::string &container);
 };
 } // namespace holgen

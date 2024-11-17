@@ -10,7 +10,7 @@ struct TestStructSingleElem {
 
 struct TestStructSingleElemWithId {
   @id
-  @noJson
+  @no(json)
   u32 id;
   string name;
 }
@@ -44,7 +44,7 @@ struct TestStructArray {
   // TODO: const
   TestStructArrayType type;
   @no(lua)
-  @noJson
+  @no(json)
   u8[16] customData;
   @no(lua)
   func Initialize(TestStructArrayType type);
@@ -110,12 +110,12 @@ struct TestStructVirtualMethods {
 }
 
 struct TestStructSmartPointers {
-    @noJson
+    @no(json)
     shared_ptr<TestStructVirtualMethods> sharedPtr;
-    @noJson
+    @no(json)
     vector<shared_ptr<TestStructVirtualMethods>> sharedPtrs;
-    @noJson
+    @no(json)
     unique_ptr<TestStructVirtualMethods> uniquePtr;
-    @noJson
+    @no(json)
     vector<unique_ptr<TestStructVirtualMethods>> uniquePtrs;
 }

@@ -3,6 +3,8 @@ struct TestJsonTag {
   @id
   u64 id;
   string name;
+  @func(constructor)
+  func Construct(u64 id, string name);
 }
 
 @dataManager
@@ -39,4 +41,9 @@ enum TestJsonEnum {
 
 struct TestJsonStructWithSingleTag {
   TestJsonTag tag;
+}
+
+struct TestJsonStructContainer {
+  vector<TestJsonTag> tags;
+  vector<TestJsonEnum> enums;
 }

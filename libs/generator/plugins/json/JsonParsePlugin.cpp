@@ -7,26 +7,6 @@
 
 namespace holgen {
 
-namespace {
-bool ShouldParseField(const ClassField &field, bool isVariantTypeField) {
-  if ((field.mField &&
-       (field.mField->GetAnnotation(Annotations::NoJson) ||
-        field.mField->mType.mName == St::UserData)) ||
-      field.mType.mType == PassByType::Pointer)
-    return false;
-  if (!field.mField && !isVariantTypeField)
-    return false;
-  return true;
-}
-
-bool ShouldParseMethod(const ClassMethod &method) {
-  if (!method.mFunction || method.mFunction->GetAnnotation(Annotations::NoJson) ||
-      !method.mFunction->GetAnnotation(Annotations::LuaFunc))
-    return false;
-  return true;
-}
-} // namespace
-
 void JsonParsePlugin::Run() {
   if (!mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Json)) {
     return;
@@ -97,7 +77,7 @@ void JsonParsePlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBo
   for (auto &field: cls.mFields) {
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
-    if (!ShouldParseField(field, isVariantTypeField))
+    if (!ShouldProcess(field, isVariantTypeField))
       continue;
 
     methodBody.Add("{{");
@@ -112,7 +92,7 @@ void JsonParsePlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBo
   }
 
   for (const auto &method: cls.mMethods) {
-    if (!ShouldParseMethod(method))
+    if (!ShouldProcess(method))
       continue;
     methodBody.Add("{{");
     methodBody.Indent(1);
@@ -137,7 +117,7 @@ void JsonParsePlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodB
   for (const auto &field: cls.mFields) {
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
-    if (!ShouldParseField(field, isVariantTypeField))
+    if (!ShouldProcess(field, isVariantTypeField))
       continue;
     if (isVariantTypeField) {
       variantSwitcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
@@ -155,7 +135,7 @@ void JsonParsePlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodB
   }
 
   for (const auto &method: cls.mMethods) {
-    if (!ShouldParseMethod(method))
+    if (!ShouldProcess(method))
       continue;
     switcher.AddCase(method.mFunction->mName, [&](CodeBlock &switchBlock) {
       GenerateParseJsonForFunction(cls, switchBlock, method, "data.value");

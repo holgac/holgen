@@ -3,12 +3,12 @@
 #include <map>
 #include <set>
 #include <string>
-#include "../TranslatorPlugin.h"
+#include "JsonPluginBase.h"
 
 namespace holgen {
-class JsonParsePlugin : public TranslatorPlugin {
+class JsonParsePlugin : public JsonPluginBase {
 public:
-  using TranslatorPlugin::TranslatorPlugin;
+  using JsonPluginBase::JsonPluginBase;
   void Run() override;
 
 private:

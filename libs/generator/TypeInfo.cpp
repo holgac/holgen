@@ -78,10 +78,11 @@ TypeInfo::TypeInfo() {
   CppLists = {
       "std::list",
   };
-  CppContainers = CppIndexedContainers;
+  CppSingleElemContainers = CppIndexedContainers;
+  CppSingleElemContainers.insert(CppSets.begin(), CppSets.end());
+  CppSingleElemContainers.insert(CppLists.begin(), CppLists.end());
+  CppContainers = CppSingleElemContainers;
   CppContainers.insert(CppKeyedContainers.begin(), CppKeyedContainers.end());
-  CppContainers.insert(CppSets.begin(), CppSets.end());
-  CppContainers.insert(CppLists.begin(), CppLists.end());
 
   CppStableContainers = {"std::deque"};
   CppStableContainers.insert(CppSets.begin(), CppSets.end());

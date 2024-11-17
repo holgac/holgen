@@ -231,6 +231,10 @@ void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
 void JsonHelperPlugin::GenerateDumpFunctions(Class &cls) {
   GenerateBaseDump(cls);
   GenerateDumpSingleElem(cls);
+  for (auto &container: TypeInfo::Get().CppSingleElemContainers) {
+    GenerateDumpForSingleElemContainer(cls, container);
+  }
+  GenerateDumpTuple(cls, 2, "std::pair");
 }
 
 void JsonHelperPlugin::GenerateDumpSingleElem(Class &cls) {
@@ -263,6 +267,48 @@ ClassMethod JsonHelperPlugin::GenerateDumpMethod(const std::string &type) {
   method.mArguments.emplace_back("data", Type{type, PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("doc", Type{"rapidjson::Document", PassByType::Reference});
   return method;
+}
+
+void JsonHelperPlugin::GenerateDumpForSingleElemContainer(Class &cls,
+                                                          const std::string &container) {
+  auto method = GenerateDumpMethod(container);
+  method.mTemplateParameters.emplace_back("typename", "T");
+  method.mArguments.front().mType.mTemplateParameters.emplace_back("T");
+  if (container == "std::array") {
+    method.mTemplateParameters.emplace_back("size_t", "Size");
+    method.mArguments.front().mType.mTemplateParameters.emplace_back("Size");
+  }
+  method.mBody.Add("auto val = rapidjson::Value(rapidjson::kArrayType);");
+  method.mBody.Add("val.Reserve(data.size(), doc.GetAllocator());");
+  method.mBody.Add("for (auto& elem: data) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("val.PushBack({}(elem, doc), doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+
+  method.mBody.Add("return val;");
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void JsonHelperPlugin::GenerateDumpTuple(Class &cls, size_t size, const std::string &container) {
+  auto method = GenerateDumpMethod(container);
+  for (size_t i = 0; i < size; ++i) {
+    auto tName = std::format("T{}", i);
+    method.mTemplateParameters.emplace_back("typename", tName);
+    method.mArguments.front().mType.mTemplateParameters.emplace_back(tName);
+  }
+  method.mBody.Add("auto val = rapidjson::Value(rapidjson::kArrayType);");
+  method.mBody.Add("val.Reserve({}, doc.GetAllocator());", size);
+
+  for (size_t i = 0; i < size; ++i) {
+    method.mBody.Add("val.PushBack({}(std::get<{}>(data), doc), doc.GetAllocator());",
+                     St::JsonHelper_Dump, i);
+  }
+
+  method.mBody.Add("return val;");
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {
