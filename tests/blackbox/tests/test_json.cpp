@@ -7,6 +7,7 @@
 #include "Converter.h"
 #include "TestStructPairFields.h"
 #include "TestJsonStructMapWithConverters.h"
+#include "TestJsonEnum.h"
 
 using namespace holgen_blackbox_test;
 
@@ -130,4 +131,25 @@ TEST_F(JsonTest, ParsingPairFields) {
   EXPECT_EQ(data.GetPairVector()[0].second, 5);
   EXPECT_EQ(data.GetPairVector()[1].first, "howareyou");
   EXPECT_EQ(data.GetPairVector()[1].second, 9);
+}
+
+TEST_F(JsonTest, DumpAndParseEnum) {
+  rapidjson::Document doc;
+  TestJsonEnum e = TestJsonEnum::Entry5;
+  auto json = e.DumpJson(doc);
+  EXPECT_EQ(json.GetType(), rapidjson::kNumberType);
+  TestJsonEnum e2;
+  e2.ParseJson(json, {});
+  EXPECT_EQ(e2, e);
+}
+
+TEST_F(JsonTest, DumpAndParseInvalidEnum) {
+  rapidjson::Document doc;
+  TestJsonEnum e;
+  auto json = e.DumpJson(doc);
+  EXPECT_EQ(json.GetType(), rapidjson::kNumberType);
+  TestJsonEnum e2;
+  e2.ParseJson(json, {});
+  EXPECT_EQ(e2, e);
+  EXPECT_EQ(e2, TestJsonEnum::Invalid);
 }

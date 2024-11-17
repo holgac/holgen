@@ -31,3 +31,9 @@ struct TestJsonStructMapWithConverters {
   map<u32, u32> testMapConvertKeyElem;
 }
 
+enum TestJsonEnum {
+    Entry1 = 1;
+    Entry2 = 2;
+    Entry5 = 5;
+}
+

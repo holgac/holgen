@@ -91,6 +91,7 @@ TypeInfo::TypeInfo() {
   KeyableTypes.insert("std::string");
   AllowlistedTypes = {
       "rapidjson::Value",
+      "rapidjson::Document",
       "lua_State",
       // TODO: properly validate functions and remove this hack
       "std::function",
