@@ -27,6 +27,7 @@ private:
   void GenerateParseTuple(Class &cls, size_t size, const std::string &tupleClassName);
   void GenerateDumpFunctions(Class& cls);
   void GenerateDumpSingleElem(Class &cls);
+  void GenerateBaseDump(Class &cls);
   ClassMethod GenerateDumpMethod(const std::string& type);
 };
 } // namespace holgen

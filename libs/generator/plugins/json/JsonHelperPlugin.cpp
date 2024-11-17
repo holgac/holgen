@@ -229,6 +229,7 @@ void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
 }
 
 void JsonHelperPlugin::GenerateDumpFunctions(Class &cls) {
+  GenerateBaseDump(cls);
   GenerateDumpSingleElem(cls);
 }
 
@@ -246,6 +247,14 @@ void JsonHelperPlugin::GenerateDumpSingleElem(Class &cls) {
     Validate().NewMethod(cls, method);
     cls.mMethods.push_back(std::move(method));
   }
+}
+
+void JsonHelperPlugin::GenerateBaseDump(Class &cls) {
+  auto method = GenerateDumpMethod("T");
+  method.mTemplateParameters.emplace_back("typename", "T");
+  method.mBody.Add("return data.{}(doc);", St::DumpJson);
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 ClassMethod JsonHelperPlugin::GenerateDumpMethod(const std::string &type) {

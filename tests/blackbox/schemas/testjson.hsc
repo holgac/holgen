@@ -32,8 +32,11 @@ struct TestJsonStructMapWithConverters {
 }
 
 enum TestJsonEnum {
-    Entry1 = 1;
-    Entry2 = 2;
-    Entry5 = 5;
+  Entry1 = 1;
+  Entry2 = 2;
+  Entry5 = 5;
 }
 
+struct TestJsonStructWithSingleTag {
+  TestJsonTag tag;
+}
