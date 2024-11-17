@@ -13,6 +13,7 @@ public:
   void Run() override;
 
 private:
+  void GenerateParseFunctions(Class& cls);
   void GenerateParseJsonForSmartPointer(Class &cls, const std::string &pointerType,
                                         const std::string &pointerGenerator);
   void GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container,
@@ -24,5 +25,8 @@ private:
   void GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,
                                const std::string &getter);
   void GenerateParseTuple(Class &cls, size_t size, const std::string &tupleClassName);
+  void GenerateDumpFunctions(Class& cls);
+  void GenerateDumpSingleElem(Class &cls);
+  ClassMethod GenerateDumpMethod(const std::string& type);
 };
 } // namespace holgen

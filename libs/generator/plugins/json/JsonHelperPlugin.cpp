@@ -9,6 +9,13 @@ void JsonHelperPlugin::Run() {
   }
   auto cls = Class{St::JsonHelper, mSettings.mNamespace};
   cls.mHeaderIncludes.AddLibHeader("rapidjson/document.h");
+  GenerateParseFunctions(cls);
+  GenerateDumpFunctions(cls);
+  Validate().NewClass(cls);
+  mProject.mClasses.push_back(std::move(cls));
+}
+
+void JsonHelperPlugin::GenerateParseFunctions(Class &cls) {
   GenerateBaseParse(cls);
   GenerateParseSingleElem(cls);
   GenerateParseTuple(cls, 2, "std::pair");
@@ -33,8 +40,6 @@ void JsonHelperPlugin::Run() {
       }
     }
   }
-  Validate().NewClass(cls);
-  mProject.mClasses.push_back(std::move(cls));
 }
 
 void JsonHelperPlugin::GenerateParseJsonForSmartPointer(Class &cls, const std::string &pointerType,
@@ -221,6 +226,34 @@ void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
   method.mBody.Add("return true;");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
+}
+
+void JsonHelperPlugin::GenerateDumpFunctions(Class &cls) {
+  GenerateDumpSingleElem(cls);
+}
+
+void JsonHelperPlugin::GenerateDumpSingleElem(Class &cls) {
+  for (auto &type: {"int8_t", "int16_t", "int32_t", "int64_t", "uint8_t", "uint16_t", "uint32_t",
+                    "uint64_t", "float", "double", "bool"}) {
+    auto method = GenerateDumpMethod(type);
+    method.mBody.Add("return rapidjson::Value(data);");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+  }
+  {
+    auto method = GenerateDumpMethod("std::string");
+    method.mBody.Add("return rapidjson::Value(data.c_str(), data.size(), doc.GetAllocator());");
+    Validate().NewMethod(cls, method);
+    cls.mMethods.push_back(std::move(method));
+  }
+}
+
+ClassMethod JsonHelperPlugin::GenerateDumpMethod(const std::string &type) {
+  auto method = ClassMethod{St::JsonHelper_Dump, Type{"rapidjson::Value"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back("data", Type{type, PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("doc", Type{"rapidjson::Document", PassByType::Reference});
+  return method;
 }
 
 void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {

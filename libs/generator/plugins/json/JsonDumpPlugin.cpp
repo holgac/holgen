@@ -45,17 +45,14 @@ void JsonDumpPlugin::ProcessEnum(Class &cls) {
 void JsonDumpPlugin::GenerateForField(Class &cls, CodeBlock &codeBlock, const ClassField &field,
                                       const std::string &fieldName) {
   std::string constructor;
+  // TODO: remove this code completely - currently it's used to gate the implemented types
   if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName)) {
-    constructor = std::format("rapidjson::Value({})", field.mName);
   } else if (field.mType.mName == "std::string") {
-    constructor = std::format(
-        "rapidjson::Value({0}.c_str(), {0}.size(), doc.GetAllocator())",
-        field.mName);
   } else {
-    // TODO: throw
     return;
   }
-  codeBlock.Add("val.AddMember(\"{}\", {}, doc.GetAllocator());", fieldName, constructor);
+  codeBlock.Add("val.AddMember(\"{}\", {}::{}({}, doc), doc.GetAllocator());", fieldName,
+                St::JsonHelper, St::JsonHelper_Dump, field.mName);
   (void)cls;
 }
 
