@@ -153,3 +153,23 @@ TEST_F(JsonTest, DumpAndParseInvalidEnum) {
   EXPECT_EQ(e2, e);
   EXPECT_EQ(e2, TestJsonEnum::Invalid);
 }
+
+TEST_F(JsonTest, DumpAndParsePrimitiveStruct) {
+  rapidjson::Document doc;
+  TestJsonTag tag;
+  tag.SetId(123);
+  tag.SetName("tagName");
+  auto json = tag.DumpJson(doc);
+  EXPECT_EQ(json.GetType(), rapidjson::kObjectType);
+  ASSERT_NE(json.FindMember("id"), json.MemberEnd());
+  ASSERT_EQ(json.FindMember("id")->value.GetType(), rapidjson::kNumberType);
+  EXPECT_EQ(json.FindMember("id")->value.GetInt64(), 123);
+
+  ASSERT_NE(json.FindMember("name"), json.MemberEnd());
+  ASSERT_EQ(json.FindMember("name")->value.GetType(), rapidjson::kStringType);
+  EXPECT_EQ(std::string(json.FindMember("name")->value.GetString()), "tagName");
+
+  TestJsonTag tag2;
+  tag2.ParseJson(json, {});
+  EXPECT_EQ(tag, tag2);
+}
