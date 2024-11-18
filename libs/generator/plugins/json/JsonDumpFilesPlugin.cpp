@@ -29,7 +29,7 @@ void JsonDumpFilesPlugin::GenerateDumpFiles(Class &cls) {
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
   cls.mSourceIncludes.AddLibHeader("rapidjson/stringbuffer.h");
-  cls.mSourceIncludes.AddLibHeader("rapidjson/prettywriter.h");
+  cls.mSourceIncludes.AddLibHeader("rapidjson/writer.h");
   cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
 
   cls.mHeaderIncludes.AddStandardHeader("filesystem");
@@ -63,31 +63,14 @@ void JsonDumpFilesPlugin::GenerateDumpFiles(Class &cls) {
 }
 
 void JsonDumpFilesPlugin::GenerateDumpSelf(CodeBlock &codeBlock) {
-  codeBlock.Add("{{");
-  codeBlock.Indent(1);
-  codeBlock.Add("auto json = {}(doc);", St::DumpJson);
-  GenerateDumpToFile(codeBlock, "(selfName + \".json\")");
-  codeBlock.Indent(-1);
-  codeBlock.Add("}}");
-}
-
-void JsonDumpFilesPlugin::GenerateDumpToFile(CodeBlock &codeBlock, const std::string &fileName) {
-  codeBlock.Add("rapidjson::StringBuffer sb;");
-  codeBlock.Add("rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);");
-  codeBlock.Add("json.Accept(writer);");
-  codeBlock.Add("std::ofstream out(rootPath / {}, std::ios_base::binary);", fileName);
-  codeBlock.Add("out.write(sb.GetString(), sb.GetSize());");
+  codeBlock.Add("{}::{}(rootPath / (selfName + \".json\"), {}(doc));", St::JsonHelper,
+                St::JsonHelper_DumpToFile, St::DumpJson);
 }
 
 void JsonDumpFilesPlugin::GenerateDumpContainerField(const ClassField &field,
                                                      CodeBlock &codeBlock) {
-
-  codeBlock.Add("{{");
-  codeBlock.Indent(1);
-  codeBlock.Add("auto json = {}::{}({}, doc);", St::JsonHelper, St::JsonHelper_Dump, field.mName);
-  GenerateDumpToFile(codeBlock, std::format("\"{}.json\"", field.mField->mName));
-  codeBlock.Indent(-1);
-  codeBlock.Add("}}");
+  codeBlock.Add("{0}::{1}(rootPath / \"{2}\", {0}::{3}({4}, doc));", St::JsonHelper,
+                St::JsonHelper_DumpToFile, field.mField->mName + ".json", St::JsonHelper_Dump, field.mName);
 }
 
 } // namespace holgen

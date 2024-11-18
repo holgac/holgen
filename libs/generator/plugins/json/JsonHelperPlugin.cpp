@@ -228,7 +228,28 @@ void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
   cls.mMethods.push_back(std::move(method));
 }
 
+void JsonHelperPlugin::GenerateDumpToFile(Class &cls) {
+  cls.mHeaderIncludes.AddStandardHeader("filesystem");
+  cls.mSourceIncludes.AddLibHeader("rapidjson/stringbuffer.h");
+  cls.mSourceIncludes.AddLibHeader("rapidjson/writer.h");
+  cls.mSourceIncludes.AddStandardHeader("fstream");
+  auto method = ClassMethod{St::JsonHelper_DumpToFile, Type{"void"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back(
+      "path", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mBody.Add("rapidjson::StringBuffer sb;");
+  method.mBody.Add("rapidjson::Writer<rapidjson::StringBuffer> writer(sb);");
+  method.mBody.Add("json.Accept(writer);");
+  method.mBody.Add("std::ofstream out(path, std::ios_base::binary);");
+  method.mBody.Add("out.write(sb.GetString(), sb.GetSize());");
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
 void JsonHelperPlugin::GenerateDumpFunctions(Class &cls) {
+  GenerateDumpToFile(cls);
   GenerateBaseDump(cls);
   GenerateDumpSingleElem(cls);
   for (auto &container: TypeInfo::Get().CppSingleElemContainers) {
