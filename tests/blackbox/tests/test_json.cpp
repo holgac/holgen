@@ -10,6 +10,7 @@
 #include "TestJsonEnum.h"
 #include "TestJsonStructWithSingleTag.h"
 #include "TestJsonStructContainer.h"
+#include "TestVariantStructExplicitType.h"
 
 using namespace holgen_blackbox_test;
 
@@ -200,6 +201,20 @@ TEST_F(JsonTest, DumpMap) {
   obj.GetTagMap().emplace("asdf", TestJsonTag{123, "qwer"});
   obj.GetTagMap().emplace("zxcv", TestJsonTag{456, "rewq"});
   rapidjson::Document doc;
+  obj2.ParseJson(obj.DumpJson(doc), {});
+  EXPECT_EQ(obj, obj2);
+}
+
+TEST_F(JsonTest, Variants) {
+  TestVariantStructExplicitType obj, obj2;
+  rapidjson::Document doc;
+  obj2.ParseJson(obj.DumpJson(doc), {});
+  EXPECT_EQ(obj, obj2);
+  obj.SetType(TestVariantStructType::Human);
+  obj.GetBeing1AsTestVariantStructHuman()->SetName("Urist");
+  obj.GetBeing1AsTestVariantStructHuman()->SetNationality("Dorf");
+  obj.GetBeing2AsTestVariantStructHuman()->SetName("McMiner");
+  obj.GetBeing2AsTestVariantStructHuman()->SetNationality("Dorf");
   obj2.ParseJson(obj.DumpJson(doc), {});
   EXPECT_EQ(obj, obj2);
 }

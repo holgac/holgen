@@ -13,5 +13,7 @@ private:
   void ProcessEnum(Class &cls);
   void GenerateForField(CodeBlock &codeBlock, const ClassField &field,
                         const std::string &fieldName);
+  void ProcessStructFields(Class &cls, CodeBlock& codeBlock);
+  void ProcessStructVariantFields(Class &cls, CodeBlock& codeBlock);
 };
 } // namespace holgen
