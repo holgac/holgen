@@ -10,6 +10,8 @@ void JsonConverterPlugin::Run() {
   }
   Validate().JsonConverters();
   auto cls = Class{St::Converter, mSettings.mNamespace};
+  cls.mFields.emplace_back(Naming().FieldNameInCpp(St::Converter_BypassField), Type{"bool"},
+                           Visibility::Public, Staticness::NotStatic, "false");
   std::set<std::string> processedConverters;
   std::map<std::string, ClassField> converterFields;
   for (const auto &targetCls: mProject.mClasses) {

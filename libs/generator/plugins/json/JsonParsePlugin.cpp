@@ -163,8 +163,14 @@ void JsonParsePlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock
                                                 const std::string &varName) {
   const std::string *variantRawName = nullptr;
   if (field.mField && field.mField->GetAnnotation(Annotations::JsonConvert)) {
+    codeBlock.Add("if (!converter.{}) {{", Naming().FieldNameInCpp(St::Converter_BypassField));
+    codeBlock.Indent(1);
     GenerateParseJsonJsonConvert(cls, codeBlock, field, varName);
-  } else if (field.IsVariantTypeField(cls, &variantRawName, Naming())) {
+    codeBlock.Indent(-1);
+    codeBlock.Add("}} else {{", Naming().FieldNameInCpp(St::Converter_BypassField));
+    codeBlock.Indent(1);
+  }
+  if (field.IsVariantTypeField(cls, &variantRawName, Naming())) {
     GenerateParseJsonVariantType(cls, codeBlock, field, varName, *variantRawName);
   } else if (field.mField && field.mField->mType.mName == St::Variant) {
     GenerateParseJsonVariant(cls, codeBlock, field, varName);
@@ -174,6 +180,10 @@ void JsonParsePlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock
     codeBlock.Add(
         R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
         cls.mStruct->mName, field.mField->mName);
+  }
+  if (field.mField && field.mField->GetAnnotation(Annotations::JsonConvert)) {
+    codeBlock.Indent(-1);
+    codeBlock.Add("}}");
   }
 }
 
