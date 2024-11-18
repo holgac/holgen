@@ -22,6 +22,10 @@ void JsonDumpPlugin::ProcessStruct(Class &cls) {
   auto method =
       ClassMethod{St::DumpJson, Type{"rapidjson::Value"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("doc", Type{"rapidjson::Document", PassByType::Reference});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    cls.mHeaderIncludes.AddLibHeader("lua.hpp");
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  }
   method.mBody.Add("rapidjson::Value val(rapidjson::kObjectType);");
   ProcessStructFields(cls, method.mBody);
   ProcessStructVariantFields(cls, method.mBody);
@@ -35,6 +39,10 @@ void JsonDumpPlugin::ProcessEnum(Class &cls) {
   auto method =
       ClassMethod{St::DumpJson, Type{"rapidjson::Value"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("doc", Type{"rapidjson::Document", PassByType::Reference});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    cls.mHeaderIncludes.AddLibHeader("lua.hpp");
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  }
   method.mBody.Add("return rapidjson::Value(GetValue());");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
@@ -42,11 +50,21 @@ void JsonDumpPlugin::ProcessEnum(Class &cls) {
 
 void JsonDumpPlugin::GenerateForField(CodeBlock &codeBlock, const ClassField &field,
                                       const std::string &fieldName) {
-  codeBlock.Add("val.AddMember(\"{}\", {}::{}({}, doc), doc.GetAllocator());", fieldName,
-                St::JsonHelper, St::JsonHelper_Dump, field.mName);
+  std::string constructor;
+  if (field.mField && field.mField->mType.mName == St::Lua_CustomData &&
+      mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    constructor = std::format("{}::{}({}, doc, luaState)", St::JsonHelper,
+                              St::JsonHelper_DumpLuaRegistryObject, field.mName);
+  else
+    constructor = std::format("{}::{}({}, doc{})", St::JsonHelper, St::JsonHelper_Dump, field.mName,
+                              mLuaStateArgument);
+  codeBlock.Add("val.AddMember(\"{}\", {}, doc.GetAllocator());", fieldName, constructor);
 }
 
 void JsonDumpPlugin::ProcessStructFields(Class &cls, CodeBlock &codeBlock) {
+  if (cls.mStruct && cls.mStruct->GetAnnotation(Annotations::LuaFuncTable))
+    GenerateForField(codeBlock, *cls.GetField(Naming().FieldNameInCpp(St::LuaTable_TableField)),
+                     St::LuaTable_TableField);
   for (auto &field: cls.mFields) {
     if (IsContainerOfDataManager(cls, field))
       continue;
@@ -72,10 +90,10 @@ void JsonDumpPlugin::ProcessStructVariantFields(Class &cls, CodeBlock &codeBlock
       codeBlock.Indent(1);
       for (auto &variantField: variantFields) {
         codeBlock.Add(
-            "val.AddMember(\"{}\", {}()->{}(doc), doc.GetAllocator());",
+            "val.AddMember(\"{}\", {}()->{}(doc{}), doc.GetAllocator());",
             variantField->mField->mName,
             Naming().VariantGetterNameInCpp(*variantField->mField, *variantClass->mStruct),
-            St::DumpJson);
+            St::DumpJson, mLuaStateArgument);
       }
       codeBlock.Add("break;");
       codeBlock.Indent(-1);

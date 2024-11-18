@@ -4,12 +4,12 @@
 #include <map>
 #include <set>
 #include <string>
-#include "generator/plugins/TranslatorPlugin.h"
+#include "JsonPluginBase.h"
 
 namespace holgen {
-class JsonHelperPlugin : public TranslatorPlugin {
+class JsonHelperPlugin : public JsonPluginBase {
 public:
-  using TranslatorPlugin::TranslatorPlugin;
+  using JsonPluginBase::JsonPluginBase;
   void Run() override;
 
 private:
@@ -29,6 +29,8 @@ private:
   void GenerateParseTuple(Class &cls, size_t size, const std::string &tupleClassName);
   void GenerateDumpToFile(Class &cls);
   void GenerateDumpFunctions(Class &cls);
+  void GenerateDumpLuaObject(Class &cls);
+  void GenerateDumpLuaRegistryObject(Class &cls);
   void GenerateDumpSingleElem(Class &cls);
   void GenerateBaseDump(Class &cls);
   ClassMethod GenerateDumpMethod(const std::string &type);

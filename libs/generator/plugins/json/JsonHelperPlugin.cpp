@@ -279,6 +279,108 @@ void JsonHelperPlugin::GenerateDumpFunctions(Class &cls) {
     GenerateDumpForKeyedContainer(cls, container);
   }
   GenerateDumpTuple(cls, 2, "std::pair");
+
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    cls.mHeaderIncludes.AddLibHeader("lua.hpp");
+    cls.mSourceIncludes.AddStandardHeader("cstring");
+    GenerateDumpLuaObject(cls);
+    GenerateDumpLuaRegistryObject(cls);
+  }
+}
+
+void JsonHelperPlugin::GenerateDumpLuaObject(Class &cls) {
+  auto method = ClassMethod{St::JsonHelper_DumpLuaObject, Type{"rapidjson::Value"},
+                            Visibility::Public, Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back("idx", Type{"int"});
+  method.mArguments.emplace_back("doc", Type{"rapidjson::Document", PassByType::Reference});
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mArguments.emplace_back("stringify", Type{"bool"});
+
+  method.mBody.Add("auto luaType = lua_type(luaState, idx);");
+  method.mBody.Add("switch (luaType) {{");
+
+  method.mBody.Add("case LUA_TNIL:");
+  method.mBody.Indent(1);
+  method.mBody.Add("return rapidjson::Value(rapidjson::kNullType);");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case LUA_TBOOLEAN:");
+  method.mBody.Indent(1);
+  method.mBody.Add("return rapidjson::Value(lua_toboolean(luaState, idx));");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case LUA_TNUMBER:");
+  method.mBody.Indent(1);
+  method.mBody.Add("if (stringify) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("auto val = std::to_string(lua_tonumber(luaState, idx));");
+  method.mBody.Add("return rapidjson::Value(val.c_str(), val.size(), doc.GetAllocator());");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}} else {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("return rapidjson::Value(lua_tonumber(luaState, idx));");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case LUA_TSTRING:");
+  method.mBody.Indent(1);
+  method.mBody.Add("{{");
+  method.mBody.Indent(1);
+  method.mBody.Add("auto val = lua_tostring(luaState, idx);");
+  method.mBody.Add("return rapidjson::Value(val, std::strlen(val), doc.GetAllocator());");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case LUA_TTABLE:");
+  method.mBody.Indent(1);
+  method.mBody.Add("{{");
+  method.mBody.Indent(1);
+  method.mBody.Add("auto val = rapidjson::Value(rapidjson::kObjectType);");
+  method.mBody.Add("lua_pushvalue(luaState, idx);");
+  method.mBody.Add("lua_pushnil(luaState);");
+
+  method.mBody.Add("while (lua_next(luaState, -2)) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("auto value = {}(-1, doc, luaState, false);", St::JsonHelper_DumpLuaObject);
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("auto key = {}(-1, doc, luaState, true);", St::JsonHelper_DumpLuaObject);
+  method.mBody.Add("val.AddMember(key, value, doc.GetAllocator());");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("return val;");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("default:");
+  method.mBody.Indent(1);
+  method.mBody.Add("HOLGEN_FAIL(\"Unexpected type when serializing lua data: {{}}\", luaType);");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("}}");
+
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void JsonHelperPlugin::GenerateDumpLuaRegistryObject(Class &cls) {
+  auto method = ClassMethod{St::JsonHelper_DumpLuaRegistryObject, Type{"rapidjson::Value"},
+                            Visibility::Public, Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back("data", Type{"int"});
+  method.mArguments.emplace_back("doc", Type{"rapidjson::Document", PassByType::Reference});
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+
+  method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, data);");
+  method.mBody.Add("auto res = {}(-1, doc, luaState, false);", St::JsonHelper_DumpLuaObject);
+  method.mBody.Add("lua_pop(luaState, 1);");
+  method.mBody.Add("return res;");
+
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 void JsonHelperPlugin::GenerateDumpSingleElem(Class &cls) {
@@ -300,7 +402,7 @@ void JsonHelperPlugin::GenerateDumpSingleElem(Class &cls) {
 void JsonHelperPlugin::GenerateBaseDump(Class &cls) {
   auto method = GenerateDumpMethod("T");
   method.mTemplateParameters.emplace_back("typename", "T");
-  method.mBody.Add("return data.{}(doc);", St::DumpJson);
+  method.mBody.Add("return data.{}(doc{});", St::DumpJson, mLuaStateArgument);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -310,6 +412,8 @@ ClassMethod JsonHelperPlugin::GenerateDumpMethod(const std::string &type) {
                             Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("data", Type{type, PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("doc", Type{"rapidjson::Document", PassByType::Reference});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   return method;
 }
 
@@ -326,7 +430,8 @@ void JsonHelperPlugin::GenerateDumpForSingleElemContainer(Class &cls,
   method.mBody.Add("val.Reserve(data.size(), doc.GetAllocator());");
   method.mBody.Add("for (auto& elem: data) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("val.PushBack({}(elem, doc), doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Add("val.PushBack({}(elem, doc{}), doc.GetAllocator());", St::JsonHelper_Dump,
+                   mLuaStateArgument);
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
 
@@ -358,15 +463,17 @@ void JsonHelperPlugin::GenerateDumpForKeyedContainer(Class &cls, const std::stri
   method.mBody.Indent(1);
   method.mBody.Add("if constexpr ({} || {}<K>) {{", GetIsStringTypeCondition("K"), St::EnumConcept);
   method.mBody.Indent(1);
-  method.mBody.Add("val.AddMember({0}(k, doc), {0}(v, doc), doc.GetAllocator());",
-                   St::JsonHelper_Dump);
+  method.mBody.Add("val.AddMember({0}(k, doc{1}), {0}(v, doc{1}), doc.GetAllocator());",
+                   St::JsonHelper_Dump, mLuaStateArgument);
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{", St::JsonHelper_Dump);
   method.mBody.Indent(1);
   method.mBody.Add("auto elem = rapidjson::Value(rapidjson::kArrayType);");
   method.mBody.Add("elem.Reserve(2, doc.GetAllocator());");
-  method.mBody.Add("elem.PushBack({}(k, doc), doc.GetAllocator());", St::JsonHelper_Dump);
-  method.mBody.Add("elem.PushBack({}(v, doc), doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Add("elem.PushBack({}(k, doc{}), doc.GetAllocator());", St::JsonHelper_Dump,
+                   mLuaStateArgument);
+  method.mBody.Add("elem.PushBack({}(v, doc{}), doc.GetAllocator());", St::JsonHelper_Dump,
+                   mLuaStateArgument);
   method.mBody.Add("val.PushBack(elem, doc.GetAllocator());", St::JsonHelper_Dump);
   method.mBody.Indent(-1);
   method.mBody.Add("}}", St::JsonHelper_Dump);
@@ -388,8 +495,8 @@ void JsonHelperPlugin::GenerateDumpTuple(Class &cls, size_t size, const std::str
   method.mBody.Add("val.Reserve({}, doc.GetAllocator());", size);
 
   for (size_t i = 0; i < size; ++i) {
-    method.mBody.Add("val.PushBack({}(std::get<{}>(data), doc), doc.GetAllocator());",
-                     St::JsonHelper_Dump, i);
+    method.mBody.Add("val.PushBack({}(std::get<{}>(data), doc{}), doc.GetAllocator());",
+                     St::JsonHelper_Dump, i, mLuaStateArgument);
   }
 
   method.mBody.Add("return val;");

@@ -42,6 +42,9 @@ void JsonDumpFilesPlugin::GenerateDumpFiles(Class &cls) {
       "rootPath", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("selfName",
                                  Type{"std::string", PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  }
 
   method.mBody.Add("if (std::filesystem::exists(rootPath)) {{");
   method.mBody.Indent(1);
@@ -63,14 +66,15 @@ void JsonDumpFilesPlugin::GenerateDumpFiles(Class &cls) {
 }
 
 void JsonDumpFilesPlugin::GenerateDumpSelf(CodeBlock &codeBlock) {
-  codeBlock.Add("{}::{}(rootPath / (selfName + \".json\"), {}(doc));", St::JsonHelper,
-                St::JsonHelper_DumpToFile, St::DumpJson);
+  codeBlock.Add("{}::{}(rootPath / (selfName + \".json\"), {}(doc{}));", St::JsonHelper,
+                St::JsonHelper_DumpToFile, St::DumpJson, mLuaStateArgument);
 }
 
 void JsonDumpFilesPlugin::GenerateDumpContainerField(const ClassField &field,
                                                      CodeBlock &codeBlock) {
-  codeBlock.Add("{0}::{1}(rootPath / \"{2}\", {0}::{3}({4}, doc));", St::JsonHelper,
-                St::JsonHelper_DumpToFile, field.mField->mName + ".json", St::JsonHelper_Dump, field.mName);
+  codeBlock.Add("{0}::{1}(rootPath / \"{2}\", {0}::{3}({4}, doc{5}));", St::JsonHelper,
+                St::JsonHelper_DumpToFile, field.mField->mName + ".json", St::JsonHelper_Dump,
+                field.mName, mLuaStateArgument);
 }
 
 } // namespace holgen

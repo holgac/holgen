@@ -3,6 +3,14 @@
 #include "core/St.h"
 
 namespace holgen {
+JsonPluginBase::JsonPluginBase(TranslatedProject &translatedProject,
+                               const TranslatorSettings &translatorSettings) :
+    TranslatorPlugin(translatedProject, translatorSettings) {
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    mLuaStateArgument = ", luaState";
+  }
+}
+
 bool JsonPluginBase::ShouldProcess(const ClassField &field, bool isVariantType) const {
   if (isVariantType)
     return true;
