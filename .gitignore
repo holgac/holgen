@@ -4,6 +4,7 @@ cmake-build-release/
 *.swo
 .idea/misc.xml
 .idea/editor.xml
+examples/.idea/
 tests/blackbox/.run/
 tests/blackbox/.idea/
 tests/blackbox_csharp/.idea/

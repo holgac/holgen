@@ -74,6 +74,18 @@ void JsonParsePlugin::GenerateParseJson(Class &cls) {
 
 void JsonParsePlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBody) {
   methodBody.Add("auto it = json.Begin();");
+  if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    methodBody.Add("{{");
+    methodBody.Indent(1);
+    methodBody.Add(
+        R"R(HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing {}!");)R",
+        cls.mName);
+    GenerateParseJsonForField(
+        cls, methodBody, *cls.GetField(Naming().FieldNameInCpp(St::LuaTable_TableField)), "(*it)");
+    methodBody.Add("++it;");
+    methodBody.Indent(-1);
+    methodBody.Add("}}");
+  }
   for (auto &field: cls.mFields) {
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
@@ -95,15 +107,17 @@ void JsonParsePlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBo
     methodBody.Add("}}");
   }
 
-  for (const auto &method: cls.mMethods) {
-    if (!ShouldProcess(method))
-      continue;
-    methodBody.Add("{{");
-    methodBody.Indent(1);
-    GenerateParseJsonForFunction(cls, methodBody, method, "(*it)");
-    methodBody.Add("++it;");
-    methodBody.Indent(-1);
-    methodBody.Add("}}");
+  if (!cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    for (const auto &method: cls.mMethods) {
+      if (!ShouldProcess(method))
+        continue;
+      methodBody.Add("{{");
+      methodBody.Indent(1);
+      GenerateParseJsonForFunction(cls, methodBody, method, "(*it)");
+      methodBody.Add("++it;");
+      methodBody.Indent(-1);
+      methodBody.Add("}}");
+    }
   }
 
   methodBody.Add(
@@ -118,6 +132,13 @@ void JsonParsePlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodB
   stringSwitcherElseCase.Add(
       R"R(HOLGEN_WARN("Unexpected entry in json when parsing {}: {{}}", name);)R", cls.mName);
   StringSwitcher switcher("name", std::move(stringSwitcherElseCase));
+  if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    switcher.AddCase(St::LuaTable_TableField, [&](CodeBlock &switchBlock) {
+      GenerateParseJsonForField(cls, switchBlock,
+                                *cls.GetField(Naming().FieldNameInCpp(St::LuaTable_TableField)),
+                                "data.value");
+    });
+  }
   for (const auto &field: cls.mFields) {
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
@@ -141,12 +162,14 @@ void JsonParsePlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodB
     }
   }
 
-  for (const auto &method: cls.mMethods) {
-    if (!ShouldProcess(method))
-      continue;
-    switcher.AddCase(method.mFunction->mName, [&](CodeBlock &switchBlock) {
-      GenerateParseJsonForFunction(cls, switchBlock, method, "data.value");
-    });
+  if (!cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    for (const auto &method: cls.mMethods) {
+      if (!ShouldProcess(method))
+        continue;
+      switcher.AddCase(method.mFunction->mName, [&](CodeBlock &switchBlock) {
+        GenerateParseJsonForFunction(cls, switchBlock, method, "data.value");
+      });
+    }
   }
 
   if (!variantSwitcher.IsEmpty()) {
@@ -179,7 +202,7 @@ void JsonParsePlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock
                   field.mName, varName);
     codeBlock.Add(
         R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
-        cls.mStruct->mName, field.mField->mName);
+        cls.mStruct->mName, field.mField ? field.mField->mName : field.mName);
   }
   if (field.mField && field.mField->GetAnnotation(Annotations::JsonConvert)) {
     codeBlock.Indent(-1);
@@ -335,11 +358,7 @@ void JsonParsePlugin::ProcessStruct(Class &cls) {
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
   cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-  if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
-    GenerateParseJsonForLuaFuncTable(cls);
-  } else {
-    GenerateParseJson(cls);
-  }
+  GenerateParseJson(cls);
 }
 
 void JsonParsePlugin::ProcessEnum(Class &cls) {

@@ -25,6 +25,8 @@ void ClassIdFieldPlugin::ProcessStructDefinition(Class &cls,
                    Visibility::Private, Staticness::NotStatic, fieldDefinition.mDefaultValue};
     field.mField = &fieldDefinition;
     field.mDefaultValue = "-1";
+
+    cls.mUsings.emplace_back(field.mType, "IdType");
     Validate().IdField(cls, field);
     cls.mFields.push_back(std::move(field));
   }

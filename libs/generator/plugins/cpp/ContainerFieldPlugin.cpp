@@ -168,6 +168,11 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     method.mBody.Add(std::move(inserters));
 
     if (underlyingIdField) {
+      method.mBody.Add("auto idInElem = elem.{}();",
+                       Naming().FieldGetterNameInCpp(*underlyingIdField->mField));
+      method.mBody.Add("HOLGEN_FAIL_IF(idInElem != {0}::IdType(-1) && idInElem != {0}::IdType(newId), \"Objects "
+                       "not loaded in the right order!\");",
+                       underlyingType.mName);
       method.mBody.Add("elem.{}(newId);",
                        Naming().FieldSetterNameInCpp(*underlyingIdField->mField));
     }
