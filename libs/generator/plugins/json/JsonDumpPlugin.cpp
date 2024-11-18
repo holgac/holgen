@@ -48,6 +48,8 @@ void JsonDumpPlugin::GenerateForField(CodeBlock &codeBlock, const ClassField &fi
 
 void JsonDumpPlugin::ProcessStructFields(Class &cls, CodeBlock &codeBlock) {
   for (auto &field: cls.mFields) {
+    if (IsContainerOfDataManager(cls, field))
+      continue;
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
     if (!ShouldProcess(field, isVariantTypeField))

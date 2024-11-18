@@ -19,7 +19,8 @@ bool JsonPluginBase::ShouldProcess(const ClassField &field, bool isVariantType) 
 }
 
 bool JsonPluginBase::ShouldProcess(const ClassMethod &method) const {
-  if (!method.mFunction || method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Json) ||
+  if (!method.mFunction ||
+      method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Json) ||
       !method.mFunction->GetAnnotation(Annotations::LuaFunc))
     return false;
   return true;
@@ -31,5 +32,10 @@ bool JsonPluginBase::ShouldProcess(const Class &cls) const {
   if (cls.mEnum && cls.mEnum->GetMatchingAttribute(Annotations::No, Annotations::No_Json))
     return false;
   return true;
+}
+
+bool JsonPluginBase::IsContainerOfDataManager(const Class &cls, const ClassField &field) const {
+  return cls.mStruct && cls.mStruct->GetAnnotation(Annotations::DataManager) && field.mField &&
+      field.mField->GetAnnotation(Annotations::Container);
 }
 } // namespace holgen

@@ -80,6 +80,10 @@ void JsonParsePlugin::GenerateParseJsonFromArray(Class &cls, CodeBlock &methodBo
     if (!ShouldProcess(field, isVariantTypeField))
       continue;
 
+    // data manager's container fields are stored in separate files
+    if (IsContainerOfDataManager(cls, field))
+      continue;
+
     methodBody.Add("{{");
     methodBody.Indent(1);
     methodBody.Add(
@@ -118,6 +122,9 @@ void JsonParsePlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodB
     const std::string *variantRawName = nullptr;
     bool isVariantTypeField = field.IsVariantTypeField(cls, &variantRawName, Naming());
     if (!ShouldProcess(field, isVariantTypeField))
+      continue;
+    // data manager's container fields are stored in separate files
+    if (IsContainerOfDataManager(cls, field))
       continue;
     if (isVariantTypeField) {
       variantSwitcher.AddCase(field.mField ? field.mField->mName : *variantRawName,
@@ -318,15 +325,10 @@ void JsonParsePlugin::ProcessStruct(Class &cls) {
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
   cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
-  if (cls.mStruct->GetAnnotation(Annotations::DataManager) == nullptr) {
-    // TODO: currently we iterate over the json obj when deserializing, but this won't work with
-    // dependencies. For DataManager we should have something custom so that a single file can
-    // define everything too. But for now ParseFiles is good enough.
-    if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
-      GenerateParseJsonForLuaFuncTable(cls);
-    } else {
-      GenerateParseJson(cls);
-    }
+  if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    GenerateParseJsonForLuaFuncTable(cls);
+  } else {
+    GenerateParseJson(cls);
   }
 }
 
