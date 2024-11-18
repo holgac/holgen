@@ -343,7 +343,7 @@ void JsonHelperPlugin::GenerateDumpForKeyedContainer(Class &cls, const std::stri
   method.mArguments.front().mType.mTemplateParameters.emplace_back("K");
   method.mArguments.front().mType.mTemplateParameters.emplace_back("V");
   method.mBody.Add("rapidjson::Type valueType;");
-  method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("K"));
+  method.mBody.Add("if constexpr ({} || {}<K>) {{", GetIsStringTypeCondition("K"), St::EnumConcept);
   method.mBody.Indent(1);
   method.mBody.Add("valueType = rapidjson::kObjectType;");
   method.mBody.Indent(-1);
@@ -356,7 +356,7 @@ void JsonHelperPlugin::GenerateDumpForKeyedContainer(Class &cls, const std::stri
 
   method.mBody.Add("for (auto &[k, v]: data) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("K"));
+  method.mBody.Add("if constexpr ({} || {}<K>) {{", GetIsStringTypeCondition("K"), St::EnumConcept);
   method.mBody.Indent(1);
   method.mBody.Add("val.AddMember({0}(k, doc), {0}(v, doc), doc.GetAllocator());",
                    St::JsonHelper_Dump);
@@ -427,7 +427,9 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainerElem(
   }
 
   codeBlock.Line() << "auto[it, insertRes] = out.try_emplace(key, V());";
-  codeBlock.Add("if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {{");
+  codeBlock.Add(
+      "if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || {}<K>) {{",
+      St::EnumConcept);
   codeBlock.Indent(1);
   codeBlock.Add(
       R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
@@ -499,9 +501,11 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std:
 
 
   if (withKeyConverter)
-    method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("KeySourceType"));
+    method.mBody.Add("if constexpr ({} || {}<KeySourceType>) {{",
+                     GetIsStringTypeCondition("KeySourceType"), St::EnumConcept);
   else
-    method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("K"));
+    method.mBody.Add("if constexpr ({} || {}<K>) {{", GetIsStringTypeCondition("K"),
+                     St::EnumConcept);
   method.mBody.Indent(1);
 
   method.mBody.Add(

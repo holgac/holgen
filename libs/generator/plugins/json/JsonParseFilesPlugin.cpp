@@ -180,7 +180,7 @@ void JsonParseFilesPlugin::GenerateFilesByName(ClassMethod &method) {
 void JsonParseFilesPlugin::GenerateReadSelf(CodeBlock &codeBlock) {
   codeBlock.Add("if (!selfName.empty()) {{");
   codeBlock.Indent(1);
-  codeBlock.Add("auto contents = {}::{}(selfName + \".json\");", St::FilesystemHelper,
+  codeBlock.Add("auto contents = {}::{}(rootPath / (selfName + \".json\"));", St::FilesystemHelper,
                 St::FilesystemHelper_ReadFile);
   codeBlock.Add("rapidjson::Document doc;");
   codeBlock.Add("doc.Parse(contents.c_str());");

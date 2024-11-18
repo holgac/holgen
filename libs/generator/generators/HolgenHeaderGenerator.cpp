@@ -18,6 +18,15 @@ void HolgenHeaderGenerator::Run(std::vector<GeneratedContent> &contents) const {
   }
 
   codeBlock.Line();
+  GenerateErrorCheckMacros(codeBlock);
+  GenerateExportMacro(codeBlock);
+  GenerateEnumConcept(codeBlock);
+
+  header.mBody = std::move(codeBlock);
+}
+
+void HolgenHeaderGenerator::GenerateErrorCheckMacros(CodeBlock &codeBlock) const {
+
   codeBlock.Add("#ifndef HOLGEN_FAIL");
   codeBlock.Add(
       R"(#define HOLGEN_FAIL(msg, ...) throw std::runtime_error(std::format("{{}}:{{}} " msg, __FILE__, __LINE__, ## __VA_ARGS__)))");
@@ -58,6 +67,9 @@ void HolgenHeaderGenerator::Run(std::vector<GeneratedContent> &contents) const {
   codeBlock.Add("continue; \\");
   codeBlock.Add("}}");
   codeBlock.Add("#endif // ifndef HOLGEN_WARN_AND_CONTINUE_IF");
+}
+
+void HolgenHeaderGenerator::GenerateExportMacro(CodeBlock &codeBlock) const {
   codeBlock.Add("#if WINDOWS");
   codeBlock.Add("#define HOLGEN_EXPORT __declspec(dllexport)");
   codeBlock.Add("#elif __GNUC__ >= 4");
@@ -65,7 +77,30 @@ void HolgenHeaderGenerator::Run(std::vector<GeneratedContent> &contents) const {
   codeBlock.Add("#else");
   codeBlock.Add("#define HOLGEN_EXPORT");
   codeBlock.Add("#endif");
+}
 
-  header.mBody = std::move(codeBlock);
+void HolgenHeaderGenerator::GenerateEnumConcept(CodeBlock &codeBlock) const {
+  // Using a random util class here to get the namespace we used for them.
+  auto randomUtilClass = mTranslatedProject.GetClass(St::Singleton);
+  THROW_IF(!randomUtilClass, "Singleton class was removed!");
+  codeBlock.Add("namespace {} {{", randomUtilClass->mNamespace);
+  codeBlock.Add("template <typename T>");
+  codeBlock.Add("concept {} = requires(T t) {{", St::EnumConcept);
+  codeBlock.Indent(1);
+  codeBlock.Add("typename T::UnderlyingType;");
+  codeBlock.Add("std::is_convertible_v<typename T::UnderlyingType, int64_t>;");
+  codeBlock.Add("{{");
+  codeBlock.Indent(1);
+  codeBlock.Add("T::Invalid");
+  codeBlock.Indent(-1);
+  codeBlock.Add("}} -> std::convertible_to<int64_t>;");
+  codeBlock.Add("{{");
+  codeBlock.Indent(1);
+  codeBlock.Add("t.GetValue()");
+  codeBlock.Indent(-1);
+  codeBlock.Add("}} -> std::same_as<typename T::Entry>;");
+  codeBlock.Indent(-1);
+  codeBlock.Add("}};");
+  codeBlock.Add("}}");
 }
 } // namespace holgen

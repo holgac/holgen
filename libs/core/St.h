@@ -20,6 +20,8 @@ public:
   static std::string Replace(const std::string &source, const std::string &from,
                              const std::string &to);
   static std::string StripNamespace(const std::string &str);
+  inline static const std::string EnumConcept = "EnumConcept";
+  inline static const std::string Singleton = "Singleton";
   inline static const std::string GlobalPointer = "GlobalPointer";
   inline static const std::string GlobalPointer_GetInstance = "GetInstance";
   inline static const std::string GlobalPointer_SetInstance = "SetInstance";

@@ -18,7 +18,7 @@ void ClassPlugin::AddClass(const StructDefinition &structDefinition) {
   auto cls = Class{structDefinition.mName, mSettings.mNamespace, &structDefinition};
   FillComments(structDefinition, cls.mComments);
   if (structDefinition.GetAnnotation(Annotations::Singleton)) {
-    auto &base = cls.mBaseClasses.emplace_back(Visibility::Public, Type{"Singleton"});
+    auto &base = cls.mBaseClasses.emplace_back(Visibility::Public, Type{St::Singleton});
     base.mType.mTemplateParameters.emplace_back(cls.mName);
   }
   Validate().NewClass(cls);

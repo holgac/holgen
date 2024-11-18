@@ -1,4 +1,5 @@
 #include "SingletonPlugin.h"
+#include "core/St.h"
 
 namespace holgen {
 
@@ -12,7 +13,7 @@ void SingletonPlugin::Run() {
 }
 
 Class &SingletonPlugin::GenerateClass() {
-  auto cls = Class{"Singleton", mSettings.mNamespace};
+  auto cls = Class{St::Singleton, mSettings.mNamespace};
   cls.mTemplateParameters.emplace_back("typename", "T");
   Validate().NewClass(cls);
   mProject.mClasses.push_back(std::move(cls));
