@@ -30,17 +30,21 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
   cls.mSourceIncludes.AddLocalHeader(St::JsonHelper + ".h");
 
-  cls.mSourceIncludes.AddStandardHeader("filesystem");
+  cls.mHeaderIncludes.AddStandardHeader("filesystem");
   cls.mSourceIncludes.AddStandardHeader("queue");
   cls.mSourceIncludes.AddStandardHeader("vector");
   cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
   auto method = ClassMethod{ParseFiles, Type{"bool"}, Visibility::Public, Constness::NotConst};
-  method.mArguments.emplace_back("rootPath",
+  method.mArguments.emplace_back(
+      "rootPath", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("selfName",
                                  Type{"std::string", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converterArg",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
 
   GenerateConverterPopulators(cls, method);
+
+  GenerateReadSelf(method.mBody);
   GenerateFilesByName(method);
 
   bool isFirst = true;
@@ -177,5 +181,17 @@ void JsonParseFilesPlugin::GenerateFilesByName(ClassMethod &method) {
   method.mBody.Add("pathsQueue.pop();");
   method.mBody.Indent(-1);
   method.mBody.Add("}}"); // while(!paths.empty())
+}
+
+void JsonParseFilesPlugin::GenerateReadSelf(CodeBlock &codeBlock) {
+  codeBlock.Add("if (!selfName.empty()) {{");
+  codeBlock.Indent(1);
+  codeBlock.Add("auto contents = {}::{}(selfName);", St::FilesystemHelper,
+                St::FilesystemHelper_ReadFile);
+  codeBlock.Add("rapidjson::Document doc;");
+  codeBlock.Add("doc.Parse(contents.c_str());");
+  codeBlock.Add("{}(doc, converter);", St::ParseJson);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
 }
 } // namespace holgen

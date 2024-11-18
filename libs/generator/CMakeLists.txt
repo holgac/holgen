@@ -22,6 +22,7 @@ set(gen_json_plugins
     plugins/json/JsonParsePlugin.cpp
     plugins/json/JsonDumpPlugin.cpp
     plugins/json/JsonParseFilesPlugin.cpp
+    plugins/json/JsonDumpFilesPlugin.cpp
     plugins/json/JsonHelperPlugin.cpp
     plugins/json/JsonConverterPlugin.cpp
 )

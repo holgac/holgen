@@ -1,20 +1,16 @@
 #pragma once
-
-
-#include <map>
-#include <set>
-#include <string>
-#include "../TranslatorPlugin.h"
+#include "JsonPluginBase.h"
 
 namespace holgen {
-class JsonParseFilesPlugin : public TranslatorPlugin {
+class JsonParseFilesPlugin : public JsonPluginBase {
 public:
-  using TranslatorPlugin::TranslatorPlugin;
+  using JsonPluginBase::JsonPluginBase;
   void Run() override;
 
 private:
   void GenerateConverterPopulators(Class &cls, ClassMethod &method);
   void GenerateParseFiles(Class &cls);
   void GenerateFilesByName(ClassMethod &method);
+  void GenerateReadSelf(CodeBlock& codeBlock);
 };
 } // namespace holgen
