@@ -76,6 +76,13 @@ bool TestVariantStructCat::ParseJson(const rapidjson::Value &json, const Convert
   return true;
 }
 
+rapidjson::Value TestVariantStructCat::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("color", JsonHelper::Dump(mColor, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestVariantStructCat::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

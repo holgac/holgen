@@ -4,3 +4,5 @@
 ---@field being1 number[]
 ---@field being2 number[]
 TestVariantStructSharedType = {}
+
+function TestVariantStructSharedType:ResetBeingType() end

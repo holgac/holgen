@@ -36,6 +36,7 @@ public:
     return std::array<WeaponType::Entry, 2>{Sword, Bow};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -78,3 +79,13 @@ public:
   }
 };
 }
+#define ex3_schemas_FOR_EACH_WeaponType \
+    ex3_schemas_FOR_EACH_WeaponType_DOER(Sword) \
+    ex3_schemas_FOR_EACH_WeaponType_DOER(Bow)
+#define ex3_schemas_SWITCH_WeaponType(VALUE) \
+    switch ((VALUE)) { \
+    case ex3_schemas::WeaponType::Sword: \
+      ex3_schemas_FOR_EACH_WeaponType_DOER(Sword) \
+    case ex3_schemas::WeaponType::Bow: \
+      ex3_schemas_FOR_EACH_WeaponType_DOER(Bow) \
+    }

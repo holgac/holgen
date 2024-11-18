@@ -54,6 +54,12 @@ bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Conv
   return true;
 }
 
+rapidjson::Value TestStructComparableMap::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("data", JsonHelper::Dump(mData, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStructComparableMap::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

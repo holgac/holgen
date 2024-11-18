@@ -37,6 +37,7 @@ public:
     return std::array<TestEnumDefaultValue::Entry, 3>{SomeEntry, DefaultEntry, AnotherEntry};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -79,3 +80,16 @@ public:
   }
 };
 }
+#define holgen_blackbox_test_FOR_EACH_TestEnumDefaultValue \
+    holgen_blackbox_test_FOR_EACH_TestEnumDefaultValue_DOER(SomeEntry) \
+    holgen_blackbox_test_FOR_EACH_TestEnumDefaultValue_DOER(DefaultEntry) \
+    holgen_blackbox_test_FOR_EACH_TestEnumDefaultValue_DOER(AnotherEntry)
+#define holgen_blackbox_test_SWITCH_TestEnumDefaultValue(VALUE) \
+    switch ((VALUE)) { \
+    case holgen_blackbox_test::TestEnumDefaultValue::SomeEntry: \
+      holgen_blackbox_test_FOR_EACH_TestEnumDefaultValue_DOER(SomeEntry) \
+    case holgen_blackbox_test::TestEnumDefaultValue::DefaultEntry: \
+      holgen_blackbox_test_FOR_EACH_TestEnumDefaultValue_DOER(DefaultEntry) \
+    case holgen_blackbox_test::TestEnumDefaultValue::AnotherEntry: \
+      holgen_blackbox_test_FOR_EACH_TestEnumDefaultValue_DOER(AnotherEntry) \
+    }

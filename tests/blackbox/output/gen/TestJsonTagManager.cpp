@@ -83,6 +83,12 @@ bool TestJsonTagManager::operator==(const TestJsonTagManager &rhs) const {
   );
 }
 
+rapidjson::Value TestJsonTagManager::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("tags", JsonHelper::Dump(mTags, doc), doc.GetAllocator());
+  return val;
+}
+
 bool TestJsonTagManager::ParseFiles(const std::string &rootPath, const Converter &converterArg) {
   auto &converter = converterArg;
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;

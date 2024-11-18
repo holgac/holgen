@@ -72,6 +72,13 @@ bool TestContainerInnerStructWithId::ParseJson(const rapidjson::Value &json, con
   return true;
 }
 
+rapidjson::Value TestContainerInnerStructWithId::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestContainerInnerStructWithId::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

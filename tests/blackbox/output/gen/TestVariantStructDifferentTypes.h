@@ -38,6 +38,7 @@ public:
   TestVariantStructType GetBeing2Type() const;
   bool operator==(const TestVariantStructDifferentTypes &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
@@ -57,6 +58,8 @@ public:
   inline static const char *CLASS_NAME = "TestVariantStructDifferentTypes";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int ResetBeing1TypeCallerFromLua(lua_State *luaState);
+  static int ResetBeing2TypeCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   TestVariantStructType mBeing1Type;
   std::array<uint8_t, std::max({sizeof(TestVariantStructCat), sizeof(TestVariantStructHuman)})> mBeing1;

@@ -54,6 +54,12 @@ bool RaceId::ParseJson(const rapidjson::Value &json, const Converter &converter)
   return true;
 }
 
+rapidjson::Value RaceId::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
+  return val;
+}
+
 void RaceId::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

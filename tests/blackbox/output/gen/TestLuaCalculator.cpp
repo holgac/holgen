@@ -261,6 +261,12 @@ bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter 
   return true;
 }
 
+rapidjson::Value TestLuaCalculator::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("lastValue", JsonHelper::Dump(mLastValue, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestLuaCalculator::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

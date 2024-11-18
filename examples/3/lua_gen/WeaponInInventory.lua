@@ -4,3 +4,5 @@
 ---@field type WeaponType
 ---@field weapon number[]
 WeaponInInventory = {}
+
+function WeaponInInventory:ResetType() end

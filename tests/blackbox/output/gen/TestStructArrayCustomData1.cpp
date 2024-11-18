@@ -87,6 +87,14 @@ bool TestStructArrayCustomData1::ParseJson(const rapidjson::Value &json, const C
   return true;
 }
 
+rapidjson::Value TestStructArrayCustomData1::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("f1", JsonHelper::Dump(mF1, doc), doc.GetAllocator());
+  val.AddMember("f2", JsonHelper::Dump(mF2, doc), doc.GetAllocator());
+  val.AddMember("f3", JsonHelper::Dump(mF3, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStructArrayCustomData1::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

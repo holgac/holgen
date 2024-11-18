@@ -37,6 +37,7 @@ public:
     return std::array<TestEnum::Entry, 3>{Entry5, Entry1, Entry2};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -79,3 +80,16 @@ public:
   }
 };
 }
+#define holgen_blackbox_test_FOR_EACH_TestEnum \
+    holgen_blackbox_test_FOR_EACH_TestEnum_DOER(Entry5) \
+    holgen_blackbox_test_FOR_EACH_TestEnum_DOER(Entry1) \
+    holgen_blackbox_test_FOR_EACH_TestEnum_DOER(Entry2)
+#define holgen_blackbox_test_SWITCH_TestEnum(VALUE) \
+    switch ((VALUE)) { \
+    case holgen_blackbox_test::TestEnum::Entry5: \
+      holgen_blackbox_test_FOR_EACH_TestEnum_DOER(Entry5) \
+    case holgen_blackbox_test::TestEnum::Entry1: \
+      holgen_blackbox_test_FOR_EACH_TestEnum_DOER(Entry1) \
+    case holgen_blackbox_test::TestEnum::Entry2: \
+      holgen_blackbox_test_FOR_EACH_TestEnum_DOER(Entry2) \
+    }

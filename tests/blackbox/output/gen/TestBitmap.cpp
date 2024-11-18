@@ -228,6 +228,10 @@ bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &conver
   return true;
 }
 
+rapidjson::Value TestBitmap::DumpJson(rapidjson::Document &doc) const {
+  return rapidjson::Value(GetValue());
+}
+
 void TestBitmap::PushToLua(lua_State *luaState) const {
   LuaHelper::Push<true>(mValue, luaState);
 }

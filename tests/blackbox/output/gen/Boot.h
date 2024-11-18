@@ -30,6 +30,7 @@ public:
   static Boot *GetFromName(const std::string &key);
   bool operator==(const Boot &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

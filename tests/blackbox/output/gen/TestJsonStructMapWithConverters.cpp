@@ -98,6 +98,14 @@ bool TestJsonStructMapWithConverters::ParseJson(const rapidjson::Value &json, co
   return true;
 }
 
+rapidjson::Value TestJsonStructMapWithConverters::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("testMapConvertElem", JsonHelper::Dump(mTestMapConvertElem, doc), doc.GetAllocator());
+  val.AddMember("testMapConvertKey", JsonHelper::Dump(mTestMapConvertKey, doc), doc.GetAllocator());
+  val.AddMember("testMapConvertKeyElem", JsonHelper::Dump(mTestMapConvertKeyElem, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestJsonStructMapWithConverters::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

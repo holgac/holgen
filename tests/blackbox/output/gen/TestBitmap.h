@@ -72,6 +72,7 @@ public:
     return std::array<TestBitmap::EntryIndex, 5>{Entry1Index, Entry2Index, Entry3Index, Entry4Index, Entry5Index};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*

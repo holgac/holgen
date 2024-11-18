@@ -88,6 +88,10 @@ bool TestEnum::ParseJson(const rapidjson::Value &json, const Converter &converte
   return true;
 }
 
+rapidjson::Value TestEnum::DumpJson(rapidjson::Document &doc) const {
+  return rapidjson::Value(GetValue());
+}
+
 void TestEnum::PushToLua(lua_State *luaState) const {
   LuaHelper::Push<true>(TestEnum::UnderlyingType(mValue), luaState);
 }

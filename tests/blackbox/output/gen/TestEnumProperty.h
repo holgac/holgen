@@ -39,6 +39,7 @@ public:
   const char *GetPlural() const;
   uint16_t GetMaxAge() const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -81,3 +82,16 @@ public:
   }
 };
 }
+#define holgen_blackbox_test_FOR_EACH_TestEnumProperty \
+    holgen_blackbox_test_FOR_EACH_TestEnumProperty_DOER(Human) \
+    holgen_blackbox_test_FOR_EACH_TestEnumProperty_DOER(Elf) \
+    holgen_blackbox_test_FOR_EACH_TestEnumProperty_DOER(Goblin)
+#define holgen_blackbox_test_SWITCH_TestEnumProperty(VALUE) \
+    switch ((VALUE)) { \
+    case holgen_blackbox_test::TestEnumProperty::Human: \
+      holgen_blackbox_test_FOR_EACH_TestEnumProperty_DOER(Human) \
+    case holgen_blackbox_test::TestEnumProperty::Elf: \
+      holgen_blackbox_test_FOR_EACH_TestEnumProperty_DOER(Elf) \
+    case holgen_blackbox_test::TestEnumProperty::Goblin: \
+      holgen_blackbox_test_FOR_EACH_TestEnumProperty_DOER(Goblin) \
+    }

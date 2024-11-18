@@ -112,6 +112,10 @@ bool TestEnumProperty::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
+rapidjson::Value TestEnumProperty::DumpJson(rapidjson::Document &doc) const {
+  return rapidjson::Value(GetValue());
+}
+
 void TestEnumProperty::PushToLua(lua_State *luaState) const {
   LuaHelper::Push<true>(TestEnumProperty::UnderlyingType(mValue), luaState);
 }

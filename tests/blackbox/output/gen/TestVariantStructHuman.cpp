@@ -76,6 +76,13 @@ bool TestVariantStructHuman::ParseJson(const rapidjson::Value &json, const Conve
   return true;
 }
 
+rapidjson::Value TestVariantStructHuman::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("nationality", JsonHelper::Dump(mNationality, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestVariantStructHuman::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

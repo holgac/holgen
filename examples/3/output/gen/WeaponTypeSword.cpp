@@ -69,6 +69,13 @@ bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &c
   return true;
 }
 
+rapidjson::Value WeaponTypeSword::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("sharpness", JsonHelper::Dump(mSharpness, doc), doc.GetAllocator());
+  val.AddMember("isShortSword", JsonHelper::Dump(mIsShortSword, doc), doc.GetAllocator());
+  return val;
+}
+
 void WeaponTypeSword::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

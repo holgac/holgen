@@ -68,6 +68,13 @@ bool TestStructComparable::ParseJson(const rapidjson::Value &json, const Convert
   return true;
 }
 
+rapidjson::Value TestStructComparable::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("field1", JsonHelper::Dump(mField1, doc), doc.GetAllocator());
+  val.AddMember("field2", JsonHelper::Dump(mField2, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStructComparable::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

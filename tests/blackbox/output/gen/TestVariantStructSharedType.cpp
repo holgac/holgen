@@ -220,6 +220,22 @@ bool TestVariantStructSharedType::ParseJson(const rapidjson::Value &json, const 
   return true;
 }
 
+rapidjson::Value TestVariantStructSharedType::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("beingType", JsonHelper::Dump(mBeingType, doc), doc.GetAllocator());
+  switch (mBeingType.GetValue()) {
+  case TestVariantStructType::Cat:
+    val.AddMember("being1", GetBeing1AsTestVariantStructCat()->DumpJson(doc), doc.GetAllocator());
+    val.AddMember("being2", GetBeing2AsTestVariantStructCat()->DumpJson(doc), doc.GetAllocator());
+    break;
+  case TestVariantStructType::Human:
+    val.AddMember("being1", GetBeing1AsTestVariantStructHuman()->DumpJson(doc), doc.GetAllocator());
+    val.AddMember("being2", GetBeing2AsTestVariantStructHuman()->DumpJson(doc), doc.GetAllocator());
+    break;
+  }
+  return val;
+}
+
 void TestVariantStructSharedType::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -263,6 +279,17 @@ TestVariantStructSharedType TestVariantStructSharedType::ReadMirrorFromLua(lua_S
 }
 
 int TestVariantStructSharedType::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = TestVariantStructSharedType::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("being1", key)) {
+    auto res = LuaHelper::Read(instance->mBeing1, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructSharedType.being1 from lua failed!");
+  } else if (0 == strcmp("being2", key)) {
+    auto res = LuaHelper::Read(instance->mBeing2, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructSharedType.being2 from lua failed!");
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestVariantStructSharedType.{}", key);
+  }
   return 0;
 }
 
@@ -275,6 +302,13 @@ void TestVariantStructSharedType::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestVariantStructSharedType::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestVariantStructSharedType");
+}
+
+int TestVariantStructSharedType::ResetBeingTypeCallerFromLua(lua_State *luaState) {
+  auto instance = TestVariantStructSharedType::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestVariantStructSharedType.ResetBeingType method with an invalid lua proxy object!");
+  instance->ResetBeingType();
+  return 0;
 }
 
 int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
@@ -305,6 +339,8 @@ int TestVariantStructSharedType::IndexMetaMethod(lua_State *luaState) {
     default:
       lua_pushnil(luaState);
     }
+  } else if (0 == strcmp("ResetBeingType", key)) {
+    lua_pushcfunction(luaState, TestVariantStructSharedType::ResetBeingTypeCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructSharedType.{}", key);
     return 0;

@@ -70,6 +70,12 @@ bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
+rapidjson::Value TestBitmapStruct::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("bitmapField", JsonHelper::Dump(mBitmapField, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestBitmapStruct::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

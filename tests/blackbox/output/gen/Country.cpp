@@ -102,6 +102,14 @@ bool Country::ParseJson(const rapidjson::Value &json, const Converter &converter
   return true;
 }
 
+rapidjson::Value Country::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("leader", JsonHelper::Dump(mLeader, doc), doc.GetAllocator());
+  val.AddMember("citizens", JsonHelper::Dump(mCitizens, doc), doc.GetAllocator());
+  val.AddMember("population", JsonHelper::Dump(mPopulation, doc), doc.GetAllocator());
+  return val;
+}
+
 void Country::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

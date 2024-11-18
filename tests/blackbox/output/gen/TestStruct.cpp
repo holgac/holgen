@@ -98,6 +98,14 @@ bool TestStruct::ParseJson(const rapidjson::Value &json, const Converter &conver
   return true;
 }
 
+rapidjson::Value TestStruct::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("testFieldBool", JsonHelper::Dump(mTestFieldBool, doc), doc.GetAllocator());
+  val.AddMember("testFieldUnsigned", JsonHelper::Dump(mTestFieldUnsigned, doc), doc.GetAllocator());
+  val.AddMember("testFieldString", JsonHelper::Dump(mTestFieldString, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStruct::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

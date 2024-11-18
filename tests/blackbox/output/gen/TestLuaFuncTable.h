@@ -25,6 +25,7 @@ public:
   int32_t GetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const;
   bool operator==(const TestLuaFuncTable &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

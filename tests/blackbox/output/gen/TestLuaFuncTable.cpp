@@ -73,6 +73,11 @@ bool TestLuaFuncTable::ParseJson(const rapidjson::Value &json, const Converter &
   return JsonHelper::Parse(mTable, json, converter);
 }
 
+rapidjson::Value TestLuaFuncTable::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  return val;
+}
+
 void TestLuaFuncTable::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

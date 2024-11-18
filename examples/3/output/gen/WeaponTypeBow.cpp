@@ -72,6 +72,13 @@ bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &con
   return true;
 }
 
+rapidjson::Value WeaponTypeBow::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("range", JsonHelper::Dump(mRange, doc), doc.GetAllocator());
+  val.AddMember("material", JsonHelper::Dump(mMaterial, doc), doc.GetAllocator());
+  return val;
+}
+
 void WeaponTypeBow::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

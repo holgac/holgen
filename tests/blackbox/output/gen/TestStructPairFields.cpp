@@ -76,6 +76,13 @@ bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Convert
   return true;
 }
 
+rapidjson::Value TestStructPairFields::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("intStringPair", JsonHelper::Dump(mIntStringPair, doc), doc.GetAllocator());
+  val.AddMember("pairVector", JsonHelper::Dump(mPairVector, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStructPairFields::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

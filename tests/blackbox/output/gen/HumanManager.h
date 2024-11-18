@@ -34,6 +34,7 @@ public:
   void DeleteHuman(uint32_t key);
   size_t GetHumanCount() const;
   bool operator==(const HumanManager &rhs) const;
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

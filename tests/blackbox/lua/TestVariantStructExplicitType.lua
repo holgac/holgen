@@ -5,3 +5,5 @@
 ---@field being1 number[]
 ---@field being2 number[]
 TestVariantStructExplicitType = {}
+
+function TestVariantStructExplicitType:ResetType() end

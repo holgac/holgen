@@ -4,3 +4,7 @@
 ---@field being1 number[]
 ---@field being2 number[]
 TestVariantStructDifferentTypes = {}
+
+function TestVariantStructDifferentTypes:ResetBeing1Type() end
+
+function TestVariantStructDifferentTypes:ResetBeing2Type() end

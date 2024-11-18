@@ -87,4 +87,52 @@ bool JsonHelper::Parse(std::string &out, const rapidjson::Value &json, const Con
   out = json.GetString();
   return true;
 }
+
+rapidjson::Value JsonHelper::Dump(const int8_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const int16_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const int32_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const int64_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const uint8_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const uint16_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const uint32_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const uint64_t &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const float &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const double &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const bool &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data);
+}
+
+rapidjson::Value JsonHelper::Dump(const std::string &data, rapidjson::Document &doc) {
+  return rapidjson::Value(data.c_str(), data.size(), doc.GetAllocator());
+}
 }

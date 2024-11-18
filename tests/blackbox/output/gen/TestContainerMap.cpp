@@ -126,6 +126,12 @@ bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
+rapidjson::Value TestContainerMap::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("innerStructsWithId", JsonHelper::Dump(mInnerStructsWithId, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestContainerMap::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

@@ -92,6 +92,10 @@ bool TestContainerSkill::ParseJson(const rapidjson::Value &json, const Converter
   return true;
 }
 
+rapidjson::Value TestContainerSkill::DumpJson(rapidjson::Document &doc) const {
+  return rapidjson::Value(GetValue());
+}
+
 void TestContainerSkill::PushToLua(lua_State *luaState) const {
   LuaHelper::Push<true>(TestContainerSkill::UnderlyingType(mValue), luaState);
 }

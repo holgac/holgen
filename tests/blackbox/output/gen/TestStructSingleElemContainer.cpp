@@ -135,6 +135,13 @@ bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, cons
   return true;
 }
 
+rapidjson::Value TestStructSingleElemContainer::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("singleElemStructs", JsonHelper::Dump(mSingleElemStructs, doc), doc.GetAllocator());
+  val.AddMember("singleElemStructsWithId", JsonHelper::Dump(mSingleElemStructsWithId, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStructSingleElemContainer::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

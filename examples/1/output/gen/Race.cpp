@@ -92,6 +92,10 @@ bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   return true;
 }
 
+rapidjson::Value Race::DumpJson(rapidjson::Document &doc) const {
+  return rapidjson::Value(GetValue());
+}
+
 void Race::PushToLua(lua_State *luaState) const {
   LuaHelper::Push<true>(Race::UnderlyingType(mValue), luaState);
 }

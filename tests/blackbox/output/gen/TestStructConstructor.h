@@ -29,6 +29,7 @@ public:
   static TestStructConstructor Construct3(const float x, const float y, const float z);
   bool operator==(const TestStructConstructor &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

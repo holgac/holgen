@@ -73,6 +73,13 @@ bool DamageMultiplier::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
+rapidjson::Value DamageMultiplier::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("when", JsonHelper::Dump(mWhen, doc), doc.GetAllocator());
+  val.AddMember("value", JsonHelper::Dump(mValue, doc), doc.GetAllocator());
+  return val;
+}
+
 void DamageMultiplier::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

@@ -159,6 +159,20 @@ bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter 
   return true;
 }
 
+rapidjson::Value WeaponInInventory::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("type", JsonHelper::Dump(mType, doc), doc.GetAllocator());
+  switch (mType.GetValue()) {
+  case WeaponType::Bow:
+    val.AddMember("weapon", GetWeaponAsWeaponTypeBow()->DumpJson(doc), doc.GetAllocator());
+    break;
+  case WeaponType::Sword:
+    val.AddMember("weapon", GetWeaponAsWeaponTypeSword()->DumpJson(doc), doc.GetAllocator());
+    break;
+  }
+  return val;
+}
+
 void WeaponInInventory::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -222,8 +236,13 @@ int WeaponInInventory::NewIndexMetaMethod(lua_State *luaState) {
   auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -3);
   const char *key = lua_tostring(luaState, -2);
   if (0 == strcmp("type", key)) {
-    auto res = LuaHelper::Read(instance->mType, luaState, -1);
+    WeaponType temp;
+    auto res = LuaHelper::Read(temp, luaState, -1);
     HOLGEN_WARN_IF(!res, "Assigning WeaponInInventory.type from lua failed!");
+    instance->SetType(temp);
+  } else if (0 == strcmp("weapon", key)) {
+    auto res = LuaHelper::Read(instance->mWeapon, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning WeaponInInventory.weapon from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponInInventory.{}", key);
   }
@@ -239,6 +258,13 @@ void WeaponInInventory::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, WeaponInInventory::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "WeaponInInventory");
+}
+
+int WeaponInInventory::ResetTypeCallerFromLua(lua_State *luaState) {
+  auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling WeaponInInventory.ResetType method with an invalid lua proxy object!");
+  instance->ResetType();
+  return 0;
 }
 
 int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
@@ -260,6 +286,8 @@ int WeaponInInventory::IndexMetaMethod(lua_State *luaState) {
     default:
       lua_pushnil(luaState);
     }
+  } else if (0 == strcmp("ResetType", key)) {
+    lua_pushcfunction(luaState, WeaponInInventory::ResetTypeCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: WeaponInInventory.{}", key);
     return 0;

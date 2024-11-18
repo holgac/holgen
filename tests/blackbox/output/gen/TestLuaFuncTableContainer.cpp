@@ -182,6 +182,18 @@ bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Co
   return true;
 }
 
+rapidjson::Value TestLuaFuncTableContainer::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("field", JsonHelper::Dump(mField, doc), doc.GetAllocator());
+  val.AddMember("script1", JsonHelper::Dump(mScript1, doc), doc.GetAllocator());
+  val.AddMember("script2", JsonHelper::Dump(mScript2, doc), doc.GetAllocator());
+  val.AddMember("scriptWithSourceTable1", JsonHelper::Dump(mScriptWithSourceTable1, doc), doc.GetAllocator());
+  val.AddMember("scriptWithSourceTable2", JsonHelper::Dump(mScriptWithSourceTable2, doc), doc.GetAllocator());
+  val.AddMember("staticScript1", JsonHelper::Dump(mStaticScript1, doc), doc.GetAllocator());
+  val.AddMember("staticScript2", JsonHelper::Dump(mStaticScript2, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestLuaFuncTableContainer::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

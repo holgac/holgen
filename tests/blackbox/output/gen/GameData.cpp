@@ -240,6 +240,14 @@ bool GameData::operator==(const GameData &rhs) const {
   );
 }
 
+rapidjson::Value GameData::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("boots", JsonHelper::Dump(mBoots, doc), doc.GetAllocator());
+  val.AddMember("armors", JsonHelper::Dump(mArmors, doc), doc.GetAllocator());
+  val.AddMember("characters", JsonHelper::Dump(mCharacters, doc), doc.GetAllocator());
+  return val;
+}
+
 bool GameData::ParseFiles(const std::string &rootPath, const Converter &converterArg) {
   auto converter = converterArg;
   if (converter.bootNameToId == nullptr) {

@@ -4,3 +4,8 @@
 ---@field id number
 ---@field name string
 TestJsonTag = {}
+
+---@param id number
+---@param name string
+---@return TestJsonTag
+function TestJsonTag.Construct(id, name) end

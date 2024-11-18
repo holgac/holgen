@@ -31,6 +31,10 @@ void TestJsonTag::SetName(const std::string &val) {
   mName = val;
 }
 
+TestJsonTag TestJsonTag::Construct(const uint64_t id, const std::string &name) {
+  return TestJsonTag(id, name);
+}
+
 TestJsonTag *TestJsonTag::Get(uint64_t id) {
   return GlobalPointer<TestJsonTagManager>::GetInstance()->GetTag(id);
 }
@@ -80,6 +84,13 @@ bool TestJsonTag::ParseJson(const rapidjson::Value &json, const Converter &conve
     return false;
   }
   return true;
+}
+
+rapidjson::Value TestJsonTag::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  return val;
 }
 
 void TestJsonTag::PushToLua(lua_State *luaState) const {
@@ -172,7 +183,20 @@ void TestJsonTag::CreateLuaMetatable(lua_State *luaState) {
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestJsonTag::NewIndexMetaMethod);
   lua_settable(luaState, -3);
+  lua_pushstring(luaState, "Construct");
+  lua_pushcfunction(luaState, TestJsonTag::ConstructCallerFromLua);
+  lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestJsonTag");
+}
+
+int TestJsonTag::ConstructCallerFromLua(lua_State *luaState) {
+  uint64_t arg0;
+  LuaHelper::Read(arg0, luaState, -2);
+  std::string arg1;
+  LuaHelper::Read(arg1, luaState, -1);
+  auto result = TestJsonTag::Construct(arg0, arg1);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
 }
 
 int TestJsonTag::IndexMetaMethod(lua_State *luaState) {
@@ -185,6 +209,8 @@ int TestJsonTag::IndexMetaMethod(lua_State *luaState) {
     auto instance = TestJsonTag::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestJsonTag.name with an invalid lua proxy object!");
     LuaHelper::Push<false>(instance->mName, luaState);
+  } else if (0 == strcmp("Construct", key)) {
+    lua_pushcfunction(luaState, TestJsonTag::ConstructCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestJsonTag.{}", key);
     return 0;

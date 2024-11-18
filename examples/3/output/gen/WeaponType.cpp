@@ -84,6 +84,10 @@ bool WeaponType::ParseJson(const rapidjson::Value &json, const Converter &conver
   return true;
 }
 
+rapidjson::Value WeaponType::DumpJson(rapidjson::Document &doc) const {
+  return rapidjson::Value(GetValue());
+}
+
 void WeaponType::PushToLua(lua_State *luaState) const {
   LuaHelper::Push<true>(WeaponType::UnderlyingType(mValue), luaState);
 }

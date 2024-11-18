@@ -50,6 +50,12 @@ bool TestLuaStaticCppFunction::ParseJson(const rapidjson::Value &json, const Con
   return true;
 }
 
+rapidjson::Value TestLuaStaticCppFunction::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("data", JsonHelper::Dump(mData, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestLuaStaticCppFunction::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

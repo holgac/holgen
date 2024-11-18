@@ -102,6 +102,13 @@ bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter)
   return true;
 }
 
+rapidjson::Value Weapon::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("damageMin", JsonHelper::Dump(mDamageMin, doc), doc.GetAllocator());
+  val.AddMember("damageMax", JsonHelper::Dump(mDamageMax, doc), doc.GetAllocator());
+  return val;
+}
+
 void Weapon::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -217,17 +224,6 @@ int Weapon::InitializeCallerFromLua(lua_State *luaState) {
   return 0;
 }
 
-int Weapon::SetDamageCallerFromLua(lua_State *luaState) {
-  auto instance = Weapon::ReadProxyFromLua(luaState, -3);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Weapon.SetDamage method with an invalid lua proxy object!");
-  uint8_t arg0;
-  LuaHelper::Read(arg0, luaState, -2);
-  uint8_t arg1;
-  LuaHelper::Read(arg1, luaState, -1);
-  instance->SetDamage(arg0, arg1);
-  return 0;
-}
-
 int Weapon::GetDamageCallerFromLua(lua_State *luaState) {
   auto instance = Weapon::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Weapon.GetDamage method with an invalid lua proxy object!");
@@ -254,8 +250,6 @@ int Weapon::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, Weapon::GetAverageDamageCallerFromLua);
   } else if (0 == strcmp("Initialize", key)) {
     lua_pushcfunction(luaState, Weapon::InitializeCallerFromLua);
-  } else if (0 == strcmp("SetDamage", key)) {
-    lua_pushcfunction(luaState, Weapon::SetDamageCallerFromLua);
   } else if (0 == strcmp("GetDamage", key)) {
     lua_pushcfunction(luaState, Weapon::GetDamageCallerFromLua);
   } else {

@@ -22,7 +22,9 @@ set(gen_sources
     gen/TestContainerSet.cpp
     gen/TestContainerVector.cpp
     gen/TestEnumStruct.cpp
+    gen/TestJsonStructContainer.cpp
     gen/TestJsonStructMapWithConverters.cpp
+    gen/TestJsonStructWithSingleTag.cpp
     gen/TestJsonStructWithTags.cpp
     gen/TestJsonTag.cpp
     gen/TestJsonTagManager.cpp
@@ -62,6 +64,7 @@ set(gen_sources
     gen/TestEnum.cpp
     gen/TestEnumDefaultValue.cpp
     gen/TestEnumProperty.cpp
+    gen/TestJsonEnum.cpp
     gen/TestStructArrayType.cpp
     gen/TestVariantStructType.cpp
     gen/Converter.cpp
@@ -73,6 +76,7 @@ set(gen_sources
 )
 set(src_sources
     src/Calculator.cpp
+    src/TestJsonTag.cpp
     src/TestJsonTagManager.cpp
     src/TestLuaStaticCppFunction.cpp
     src/TestStructArray.cpp

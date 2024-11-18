@@ -84,6 +84,10 @@ bool TestVariantStructType::ParseJson(const rapidjson::Value &json, const Conver
   return true;
 }
 
+rapidjson::Value TestVariantStructType::DumpJson(rapidjson::Document &doc) const {
+  return rapidjson::Value(GetValue());
+}
+
 void TestVariantStructType::PushToLua(lua_State *luaState) const {
   LuaHelper::Push<true>(TestVariantStructType::UnderlyingType(mValue), luaState);
 }

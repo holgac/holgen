@@ -11,9 +11,5 @@ function Weapon:GetAverageDamage() end
 
 function Weapon:Initialize() end
 
----@param min number
----@param max number
-function Weapon:SetDamage(min, max) end
-
 ---@return number
 function Weapon:GetDamage() end

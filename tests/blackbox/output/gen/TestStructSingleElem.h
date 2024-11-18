@@ -23,6 +23,7 @@ public:
   void SetName(const std::string &val);
   bool operator==(const TestStructSingleElem &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

@@ -70,6 +70,12 @@ bool TestContainerEnum::ParseJson(const rapidjson::Value &json, const Converter 
   return true;
 }
 
+rapidjson::Value TestContainerEnum::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("skills", JsonHelper::Dump(mSkills, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestContainerEnum::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

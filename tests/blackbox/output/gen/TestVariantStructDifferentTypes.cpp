@@ -275,6 +275,29 @@ bool TestVariantStructDifferentTypes::ParseJson(const rapidjson::Value &json, co
   return true;
 }
 
+rapidjson::Value TestVariantStructDifferentTypes::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("being1Type", JsonHelper::Dump(mBeing1Type, doc), doc.GetAllocator());
+  val.AddMember("being2Type", JsonHelper::Dump(mBeing2Type, doc), doc.GetAllocator());
+  switch (mBeing1Type.GetValue()) {
+  case TestVariantStructType::Cat:
+    val.AddMember("being1", GetBeing1AsTestVariantStructCat()->DumpJson(doc), doc.GetAllocator());
+    break;
+  case TestVariantStructType::Human:
+    val.AddMember("being1", GetBeing1AsTestVariantStructHuman()->DumpJson(doc), doc.GetAllocator());
+    break;
+  }
+  switch (mBeing2Type.GetValue()) {
+  case TestVariantStructType::Cat:
+    val.AddMember("being2", GetBeing2AsTestVariantStructCat()->DumpJson(doc), doc.GetAllocator());
+    break;
+  case TestVariantStructType::Human:
+    val.AddMember("being2", GetBeing2AsTestVariantStructHuman()->DumpJson(doc), doc.GetAllocator());
+    break;
+  }
+  return val;
+}
+
 void TestVariantStructDifferentTypes::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
@@ -318,6 +341,17 @@ TestVariantStructDifferentTypes TestVariantStructDifferentTypes::ReadMirrorFromL
 }
 
 int TestVariantStructDifferentTypes::NewIndexMetaMethod(lua_State *luaState) {
+  auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -3);
+  const char *key = lua_tostring(luaState, -2);
+  if (0 == strcmp("being1", key)) {
+    auto res = LuaHelper::Read(instance->mBeing1, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructDifferentTypes.being1 from lua failed!");
+  } else if (0 == strcmp("being2", key)) {
+    auto res = LuaHelper::Read(instance->mBeing2, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestVariantStructDifferentTypes.being2 from lua failed!");
+  } else {
+    HOLGEN_WARN("Unexpected lua field: TestVariantStructDifferentTypes.{}", key);
+  }
   return 0;
 }
 
@@ -330,6 +364,20 @@ void TestVariantStructDifferentTypes::CreateLuaMetatable(lua_State *luaState) {
   lua_pushcfunction(luaState, TestVariantStructDifferentTypes::NewIndexMetaMethod);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestVariantStructDifferentTypes");
+}
+
+int TestVariantStructDifferentTypes::ResetBeing1TypeCallerFromLua(lua_State *luaState) {
+  auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestVariantStructDifferentTypes.ResetBeing1Type method with an invalid lua proxy object!");
+  instance->ResetBeing1Type();
+  return 0;
+}
+
+int TestVariantStructDifferentTypes::ResetBeing2TypeCallerFromLua(lua_State *luaState) {
+  auto instance = TestVariantStructDifferentTypes::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestVariantStructDifferentTypes.ResetBeing2Type method with an invalid lua proxy object!");
+  instance->ResetBeing2Type();
+  return 0;
 }
 
 int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
@@ -360,6 +408,10 @@ int TestVariantStructDifferentTypes::IndexMetaMethod(lua_State *luaState) {
     default:
       lua_pushnil(luaState);
     }
+  } else if (0 == strcmp("ResetBeing1Type", key)) {
+    lua_pushcfunction(luaState, TestVariantStructDifferentTypes::ResetBeing1TypeCallerFromLua);
+  } else if (0 == strcmp("ResetBeing2Type", key)) {
+    lua_pushcfunction(luaState, TestVariantStructDifferentTypes::ResetBeing2TypeCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestVariantStructDifferentTypes.{}", key);
     return 0;

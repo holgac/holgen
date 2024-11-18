@@ -76,6 +76,13 @@ bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &co
   return true;
 }
 
+rapidjson::Value TestEnumStruct::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("enumField", JsonHelper::Dump(mEnumField, doc), doc.GetAllocator());
+  val.AddMember("enumDefaultValueField", JsonHelper::Dump(mEnumDefaultValueField, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestEnumStruct::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

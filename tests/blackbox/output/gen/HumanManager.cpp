@@ -103,6 +103,12 @@ bool HumanManager::operator==(const HumanManager &rhs) const {
   );
 }
 
+rapidjson::Value HumanManager::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("humans", JsonHelper::Dump(mHumans, doc), doc.GetAllocator());
+  return val;
+}
+
 bool HumanManager::ParseFiles(const std::string &rootPath, const Converter &converterArg) {
   auto &converter = converterArg;
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;

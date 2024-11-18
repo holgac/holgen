@@ -120,6 +120,12 @@ bool TestLuaRegistryData::ParseJson(const rapidjson::Value &json, const Converte
   return JsonHelper::Parse(mTable, json, converter);
 }
 
+rapidjson::Value TestLuaRegistryData::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("data", JsonHelper::Dump(mData, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestLuaRegistryData::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

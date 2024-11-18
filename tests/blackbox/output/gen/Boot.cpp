@@ -104,6 +104,14 @@ bool Boot::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   return true;
 }
 
+rapidjson::Value Boot::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("color", JsonHelper::Dump(mColor, doc), doc.GetAllocator());
+  return val;
+}
+
 void Boot::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   uint64_t id = mId;

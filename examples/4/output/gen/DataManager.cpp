@@ -255,6 +255,14 @@ bool DataManager::operator==(const DataManager &rhs) const {
   );
 }
 
+rapidjson::Value DataManager::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("characters", JsonHelper::Dump(mCharacters, doc), doc.GetAllocator());
+  val.AddMember("armors", JsonHelper::Dump(mArmors, doc), doc.GetAllocator());
+  val.AddMember("weapons", JsonHelper::Dump(mWeapons, doc), doc.GetAllocator());
+  return val;
+}
+
 bool DataManager::ParseFiles(const std::string &rootPath, const Converter &converterArg) {
   auto converter = converterArg;
   if (converter.armorNameToId == nullptr) {

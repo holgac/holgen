@@ -30,6 +30,7 @@ public:
   uint8_t GetDamage();
   bool operator==(const Weapon &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
@@ -51,7 +52,6 @@ private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetAverageDamageCallerFromLua(lua_State *luaState);
   static int InitializeCallerFromLua(lua_State *luaState);
-  static int SetDamageCallerFromLua(lua_State *luaState);
   static int GetDamageCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId = -1;

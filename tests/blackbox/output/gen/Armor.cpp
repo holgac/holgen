@@ -126,6 +126,15 @@ bool Armor::ParseJson(const rapidjson::Value &json, const Converter &converter) 
   return true;
 }
 
+rapidjson::Value Armor::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("alternativeName", JsonHelper::Dump(mAlternativeName, doc), doc.GetAllocator());
+  val.AddMember("armorClass", JsonHelper::Dump(mArmorClass, doc), doc.GetAllocator());
+  return val;
+}
+
 void Armor::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   uint64_t id = mId;

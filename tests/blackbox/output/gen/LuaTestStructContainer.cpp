@@ -103,6 +103,13 @@ bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Conve
   return true;
 }
 
+rapidjson::Value LuaTestStructContainer::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("testVector", JsonHelper::Dump(mTestVector, doc), doc.GetAllocator());
+  val.AddMember("testMap", JsonHelper::Dump(mTestMap, doc), doc.GetAllocator());
+  return val;
+}
+
 void LuaTestStructContainer::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

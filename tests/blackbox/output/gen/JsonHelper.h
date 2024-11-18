@@ -56,12 +56,18 @@ public:
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
-    HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
-      SourceType elem;
-      auto res = Parse(elem, data, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::array");
-      out[writtenItemCount] = std::move(elem);
-      ++writtenItemCount;
+      HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
+      if constexpr (std::same_as<SourceType, rapidjson::Value>) {
+        auto& elem = data;
+        out[writtenItemCount] = std::move(elem);
+        ++writtenItemCount;
+      } else {
+        SourceType elem;
+        auto res = Parse(elem, data, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::array");
+        out[writtenItemCount] = std::move(elem);
+        ++writtenItemCount;
+      }
     }
     return true;
   }
@@ -70,7 +76,7 @@ public:
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
-    HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
+      HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
       auto res = Parse(out[writtenItemCount], data, converter);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::array");
       ++writtenItemCount;
@@ -81,10 +87,15 @@ public:
   static bool ParseConvertElem(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::deque");
     for (const auto& data: json.GetArray()) {
-      SourceType elem;
-      auto res = Parse(elem, data, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::deque");
-      out.push_back(std::move(elemConverter(elem)));
+      if constexpr (std::same_as<SourceType, rapidjson::Value>) {
+        auto& elem = data;
+        out.push_back(std::move(elemConverter(elem)));
+      } else {
+        SourceType elem;
+        auto res = Parse(elem, data, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::deque");
+        out.push_back(std::move(elemConverter(elem)));
+      }
     }
     return true;
   }
@@ -103,10 +114,15 @@ public:
   static bool ParseConvertElem(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::vector");
     for (const auto& data: json.GetArray()) {
-      SourceType elem;
-      auto res = Parse(elem, data, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::vector");
-      out.push_back(std::move(elemConverter(elem)));
+      if constexpr (std::same_as<SourceType, rapidjson::Value>) {
+        auto& elem = data;
+        out.push_back(std::move(elemConverter(elem)));
+      } else {
+        SourceType elem;
+        auto res = Parse(elem, data, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::vector");
+        out.push_back(std::move(elemConverter(elem)));
+      }
     }
     return true;
   }
@@ -125,10 +141,15 @@ public:
   static bool ParseConvertElem(std::list<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::list");
     for (const auto& data: json.GetArray()) {
-      SourceType elem;
-      auto res = Parse(elem, data, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::list");
-      out.push_back(std::move(elemConverter(elem)));
+      if constexpr (std::same_as<SourceType, rapidjson::Value>) {
+        auto& elem = data;
+        out.push_back(std::move(elemConverter(elem)));
+      } else {
+        SourceType elem;
+        auto res = Parse(elem, data, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::list");
+        out.push_back(std::move(elemConverter(elem)));
+      }
     }
     return true;
   }
@@ -147,10 +168,15 @@ public:
   static bool ParseConvertElem(std::set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::set");
     for (const auto& data: json.GetArray()) {
-      SourceType elem;
-      auto res = Parse(elem, data, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::set");
-      out.insert(std::move(elemConverter(elem)));
+      if constexpr (std::same_as<SourceType, rapidjson::Value>) {
+        auto& elem = data;
+        out.insert(std::move(elemConverter(elem)));
+      } else {
+        SourceType elem;
+        auto res = Parse(elem, data, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::set");
+        out.insert(std::move(elemConverter(elem)));
+      }
     }
     return true;
   }
@@ -169,10 +195,15 @@ public:
   static bool ParseConvertElem(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_set");
     for (const auto& data: json.GetArray()) {
-      SourceType elem;
-      auto res = Parse(elem, data, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::unordered_set");
-      out.insert(std::move(elemConverter(elem)));
+      if constexpr (std::same_as<SourceType, rapidjson::Value>) {
+        auto& elem = data;
+        out.insert(std::move(elemConverter(elem)));
+      } else {
+        SourceType elem;
+        auto res = Parse(elem, data, converter);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::unordered_set");
+        out.insert(std::move(elemConverter(elem)));
+      }
     }
     return true;
   }
@@ -342,6 +373,100 @@ public:
       it->second = std::move(elemConverter(valueRaw));
     }
     return true;
+  }
+  template <typename T>
+  static rapidjson::Value Dump(const T &data, rapidjson::Document &doc) {
+    return data.DumpJson(doc);
+  }
+  static rapidjson::Value Dump(const int8_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const int16_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const int32_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const int64_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const uint8_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const uint16_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const uint32_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const uint64_t &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const float &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const double &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const bool &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const std::string &data, rapidjson::Document &doc);
+  template <typename T, size_t Size>
+  static rapidjson::Value Dump(const std::array<T, Size> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kArrayType);
+    val.Reserve(data.size(), doc.GetAllocator());
+    for (auto& elem: data) {
+      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename T>
+  static rapidjson::Value Dump(const std::deque<T> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kArrayType);
+    val.Reserve(data.size(), doc.GetAllocator());
+    for (auto& elem: data) {
+      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename T>
+  static rapidjson::Value Dump(const std::list<T> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kArrayType);
+    val.Reserve(data.size(), doc.GetAllocator());
+    for (auto& elem: data) {
+      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename T>
+  static rapidjson::Value Dump(const std::set<T> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kArrayType);
+    val.Reserve(data.size(), doc.GetAllocator());
+    for (auto& elem: data) {
+      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename T>
+  static rapidjson::Value Dump(const std::unordered_set<T> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kArrayType);
+    val.Reserve(data.size(), doc.GetAllocator());
+    for (auto& elem: data) {
+      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename T>
+  static rapidjson::Value Dump(const std::vector<T> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kArrayType);
+    val.Reserve(data.size(), doc.GetAllocator());
+    for (auto& elem: data) {
+      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename K, typename V>
+  static rapidjson::Value Dump(const std::map<K, V> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kObjectType);
+    for (auto &[k, v]: data) {
+      val.AddMember(Dump(k, doc), Dump(v, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename K, typename V>
+  static rapidjson::Value Dump(const std::unordered_map<K, V> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kObjectType);
+    for (auto &[k, v]: data) {
+      val.AddMember(Dump(k, doc), Dump(v, doc), doc.GetAllocator());
+    }
+    return val;
+  }
+  template <typename T0, typename T1>
+  static rapidjson::Value Dump(const std::pair<T0, T1> &data, rapidjson::Document &doc) {
+    auto val = rapidjson::Value(rapidjson::kArrayType);
+    val.Reserve(2, doc.GetAllocator());
+    val.PushBack(Dump(std::get<0>(data), doc), doc.GetAllocator());
+    val.PushBack(Dump(std::get<1>(data), doc), doc.GetAllocator());
+    return val;
   }
 };
 template <>

@@ -50,6 +50,12 @@ bool Number::ParseJson(const rapidjson::Value &json, const Converter &converter)
   return true;
 }
 
+rapidjson::Value Number::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("value", JsonHelper::Dump(mValue, doc), doc.GetAllocator());
+  return val;
+}
+
 void Number::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

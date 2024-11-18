@@ -116,6 +116,15 @@ bool Character::ParseJson(const rapidjson::Value &json, const Converter &convert
   return true;
 }
 
+rapidjson::Value Character::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("race", JsonHelper::Dump(mRace, doc), doc.GetAllocator());
+  val.AddMember("weapons", JsonHelper::Dump(mWeapons, doc), doc.GetAllocator());
+  return val;
+}
+
 void Character::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

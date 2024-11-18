@@ -38,6 +38,7 @@ public:
     return std::array<TestContainerSkill::Entry, 4>{Strength, Perception, Endurance, Charisma};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -80,3 +81,19 @@ public:
   }
 };
 }
+#define holgen_blackbox_test_FOR_EACH_TestContainerSkill \
+    holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Strength) \
+    holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Perception) \
+    holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Endurance) \
+    holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Charisma)
+#define holgen_blackbox_test_SWITCH_TestContainerSkill(VALUE) \
+    switch ((VALUE)) { \
+    case holgen_blackbox_test::TestContainerSkill::Strength: \
+      holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Strength) \
+    case holgen_blackbox_test::TestContainerSkill::Perception: \
+      holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Perception) \
+    case holgen_blackbox_test::TestContainerSkill::Endurance: \
+      holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Endurance) \
+    case holgen_blackbox_test::TestContainerSkill::Charisma: \
+      holgen_blackbox_test_FOR_EACH_TestContainerSkill_DOER(Charisma) \
+    }

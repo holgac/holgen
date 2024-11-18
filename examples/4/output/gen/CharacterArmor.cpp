@@ -82,6 +82,13 @@ bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &co
   return true;
 }
 
+rapidjson::Value CharacterArmor::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("dirtAmount", JsonHelper::Dump(mDirtAmount, doc), doc.GetAllocator());
+  val.AddMember("armor", JsonHelper::Dump(mArmorId, doc), doc.GetAllocator());
+  return val;
+}
+
 void CharacterArmor::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

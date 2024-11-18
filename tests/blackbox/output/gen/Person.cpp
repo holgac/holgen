@@ -142,6 +142,16 @@ bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter)
   return true;
 }
 
+rapidjson::Value Person::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("race", JsonHelper::Dump(mRace, doc), doc.GetAllocator());
+  val.AddMember("currentCountry", JsonHelper::Dump(mCurrentCountry, doc), doc.GetAllocator());
+  val.AddMember("currentCity", JsonHelper::Dump(mCurrentCity, doc), doc.GetAllocator());
+  val.AddMember("homeCountry", JsonHelper::Dump(mHomeCountry, doc), doc.GetAllocator());
+  val.AddMember("placeOfBirth", JsonHelper::Dump(mPlaceOfBirth, doc), doc.GetAllocator());
+  return val;
+}
+
 void Person::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

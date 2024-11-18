@@ -14,6 +14,7 @@ namespace holgen_blackbox_test {
 // Defined in tests/blackbox/schemas/testjson.hsc
 class TestJsonTag {
 public:
+  TestJsonTag(const uint64_t id, const std::string &name);
   TestJsonTag() = default;
   TestJsonTag(const TestJsonTag &rhs) = default;
   TestJsonTag(TestJsonTag &&rhs) noexcept = default;
@@ -23,10 +24,12 @@ public:
   std::string &GetName();
   void SetId(uint64_t val);
   void SetName(const std::string &val);
+  static TestJsonTag Construct(const uint64_t id, const std::string &name);
   static TestJsonTag *Get(uint64_t id);
   static TestJsonTag *GetFromName(const std::string &key);
   bool operator==(const TestJsonTag &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
@@ -46,6 +49,7 @@ public:
   inline static const char *CLASS_NAME = "TestJsonTag";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int ConstructCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint64_t mId = -1;
   std::string mName;

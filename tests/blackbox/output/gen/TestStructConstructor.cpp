@@ -95,6 +95,14 @@ bool TestStructConstructor::ParseJson(const rapidjson::Value &json, const Conver
   return true;
 }
 
+rapidjson::Value TestStructConstructor::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("x", JsonHelper::Dump(mX, doc), doc.GetAllocator());
+  val.AddMember("y", JsonHelper::Dump(mY, doc), doc.GetAllocator());
+  val.AddMember("z", JsonHelper::Dump(mZ, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStructConstructor::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

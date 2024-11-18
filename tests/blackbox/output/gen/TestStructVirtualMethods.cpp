@@ -17,6 +17,11 @@ bool TestStructVirtualMethods::ParseJson(const rapidjson::Value &json, const Con
   return true;
 }
 
+rapidjson::Value TestStructVirtualMethods::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  return val;
+}
+
 void TestStructVirtualMethods::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

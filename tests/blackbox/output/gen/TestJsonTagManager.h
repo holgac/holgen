@@ -33,6 +33,7 @@ public:
   TestJsonTag *GetTag(uint64_t idx);
   size_t GetTagCount() const;
   bool operator==(const TestJsonTagManager &rhs) const;
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;

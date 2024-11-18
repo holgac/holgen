@@ -54,6 +54,12 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Conve
   return true;
 }
 
+rapidjson::Value TestJsonStructWithTags::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("tags", JsonHelper::Dump(mTags, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestJsonStructWithTags::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

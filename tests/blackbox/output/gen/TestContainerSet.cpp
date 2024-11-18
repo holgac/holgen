@@ -118,6 +118,13 @@ bool TestContainerSet::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
+rapidjson::Value TestContainerSet::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("stringContainer", JsonHelper::Dump(mStringContainer, doc), doc.GetAllocator());
+  val.AddMember("unsignedContainer", JsonHelper::Dump(mUnsignedContainer, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestContainerSet::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

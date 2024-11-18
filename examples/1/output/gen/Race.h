@@ -38,6 +38,7 @@ public:
     return std::array<Race::Entry, 4>{Human, Elf, Dwarf, Hobbit};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -80,3 +81,19 @@ public:
   }
 };
 }
+#define ex1_schemas_FOR_EACH_Race \
+    ex1_schemas_FOR_EACH_Race_DOER(Human) \
+    ex1_schemas_FOR_EACH_Race_DOER(Elf) \
+    ex1_schemas_FOR_EACH_Race_DOER(Dwarf) \
+    ex1_schemas_FOR_EACH_Race_DOER(Hobbit)
+#define ex1_schemas_SWITCH_Race(VALUE) \
+    switch ((VALUE)) { \
+    case ex1_schemas::Race::Human: \
+      ex1_schemas_FOR_EACH_Race_DOER(Human) \
+    case ex1_schemas::Race::Elf: \
+      ex1_schemas_FOR_EACH_Race_DOER(Elf) \
+    case ex1_schemas::Race::Dwarf: \
+      ex1_schemas_FOR_EACH_Race_DOER(Dwarf) \
+    case ex1_schemas::Race::Hobbit: \
+      ex1_schemas_FOR_EACH_Race_DOER(Hobbit) \
+    }

@@ -31,6 +31,7 @@ public:
   WeaponType GetType() const;
   bool operator==(const WeaponInInventory &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
@@ -50,6 +51,7 @@ public:
   inline static const char *CLASS_NAME = "WeaponInInventory";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int ResetTypeCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   WeaponType mType;
   std::array<uint8_t, std::max({sizeof(WeaponTypeBow), sizeof(WeaponTypeSword)})> mWeapon;

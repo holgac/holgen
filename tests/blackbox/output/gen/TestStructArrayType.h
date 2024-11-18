@@ -36,6 +36,7 @@ public:
     return std::array<TestStructArrayType::Entry, 2>{Type1, Type2};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -78,3 +79,13 @@ public:
   }
 };
 }
+#define holgen_blackbox_test_FOR_EACH_TestStructArrayType \
+    holgen_blackbox_test_FOR_EACH_TestStructArrayType_DOER(Type1) \
+    holgen_blackbox_test_FOR_EACH_TestStructArrayType_DOER(Type2)
+#define holgen_blackbox_test_SWITCH_TestStructArrayType(VALUE) \
+    switch ((VALUE)) { \
+    case holgen_blackbox_test::TestStructArrayType::Type1: \
+      holgen_blackbox_test_FOR_EACH_TestStructArrayType_DOER(Type1) \
+    case holgen_blackbox_test::TestStructArrayType::Type2: \
+      holgen_blackbox_test_FOR_EACH_TestStructArrayType_DOER(Type2) \
+    }

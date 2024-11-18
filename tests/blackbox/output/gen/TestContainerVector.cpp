@@ -292,6 +292,15 @@ bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converte
   return true;
 }
 
+rapidjson::Value TestContainerVector::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("innerStructsWithId", JsonHelper::Dump(mInnerStructsWithId, doc), doc.GetAllocator());
+  val.AddMember("innerStructsNoId", JsonHelper::Dump(mInnerStructsNoId, doc), doc.GetAllocator());
+  val.AddMember("stringContainer", JsonHelper::Dump(mStringContainer, doc), doc.GetAllocator());
+  val.AddMember("unsignedContainer", JsonHelper::Dump(mUnsignedContainer, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestContainerVector::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

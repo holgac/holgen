@@ -123,6 +123,12 @@ bool Calculator::ParseJson(const rapidjson::Value &json, const Converter &conver
   return true;
 }
 
+rapidjson::Value Calculator::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("curVal", JsonHelper::Dump(mCurVal, doc), doc.GetAllocator());
+  return val;
+}
+
 void Calculator::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

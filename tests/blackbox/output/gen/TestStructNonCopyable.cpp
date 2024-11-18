@@ -58,6 +58,12 @@ bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Conver
   return true;
 }
 
+rapidjson::Value TestStructNonCopyable::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("bigVector", JsonHelper::Dump(mBigVector, doc), doc.GetAllocator());
+  return val;
+}
+
 void TestStructNonCopyable::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

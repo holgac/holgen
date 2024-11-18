@@ -36,6 +36,7 @@ public:
     return std::array<TestVariantStructType::Entry, 2>{Human, Cat};
   }
   bool ParseJson(const rapidjson::Value &json, const Converter &converter);
+  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*
@@ -78,3 +79,13 @@ public:
   }
 };
 }
+#define holgen_blackbox_test_FOR_EACH_TestVariantStructType \
+    holgen_blackbox_test_FOR_EACH_TestVariantStructType_DOER(Human) \
+    holgen_blackbox_test_FOR_EACH_TestVariantStructType_DOER(Cat)
+#define holgen_blackbox_test_SWITCH_TestVariantStructType(VALUE) \
+    switch ((VALUE)) { \
+    case holgen_blackbox_test::TestVariantStructType::Human: \
+      holgen_blackbox_test_FOR_EACH_TestVariantStructType_DOER(Human) \
+    case holgen_blackbox_test::TestVariantStructType::Cat: \
+      holgen_blackbox_test_FOR_EACH_TestVariantStructType_DOER(Cat) \
+    }

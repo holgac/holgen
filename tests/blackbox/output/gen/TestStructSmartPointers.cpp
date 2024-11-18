@@ -77,6 +77,11 @@ bool TestStructSmartPointers::ParseJson(const rapidjson::Value &json, const Conv
   return true;
 }
 
+rapidjson::Value TestStructSmartPointers::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  return val;
+}
+
 void TestStructSmartPointers::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

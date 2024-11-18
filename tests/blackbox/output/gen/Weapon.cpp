@@ -112,6 +112,15 @@ bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter)
   return true;
 }
 
+rapidjson::Value Weapon::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("damageMin", JsonHelper::Dump(mDamageMin, doc), doc.GetAllocator());
+  val.AddMember("damageMax", JsonHelper::Dump(mDamageMax, doc), doc.GetAllocator());
+  val.AddMember("damageMultipliers", JsonHelper::Dump(mDamageMultipliers, doc), doc.GetAllocator());
+  val.AddMember("modifiers", JsonHelper::Dump(mModifiers, doc), doc.GetAllocator());
+  return val;
+}
+
 void Weapon::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");

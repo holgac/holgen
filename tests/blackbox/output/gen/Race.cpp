@@ -116,6 +116,15 @@ bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   return true;
 }
 
+rapidjson::Value Race::DumpJson(rapidjson::Document &doc) const {
+  rapidjson::Value val(rapidjson::kObjectType);
+  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("hairColors", JsonHelper::Dump(mHairColors, doc), doc.GetAllocator());
+  val.AddMember("names", JsonHelper::Dump(mNames, doc), doc.GetAllocator());
+  return val;
+}
+
 void Race::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
