@@ -1,6 +1,6 @@
 mixin Object {
     // We don't want to read ids from json, so let's annotate as such.
-    @noJson
+    @no(json)
     u32 id = -1;
     // You can define custom functions for your data structures. By default they're implemented in c++.
     // If you have c++ functions, a separate directory will be generated that will have partially generated code.
@@ -38,8 +38,8 @@ struct Weapon : Object {
     u8 damageMax;
     // If we want to set multiple values together to ensure they're consistent, we can disable their setters and write
     // a custom function.
-    // In this example we don't want this called from lua for some reason, so we annotate it with noLua
-    @noLua
+    // In this example we don't want this called from lua for some reason, so we annotate it with no(lua)
+    @no(lua)
     func SetDamage(u8 min, u8 max);
 
     // here's a function returning a uint8_t:

@@ -18,7 +18,7 @@ void JsonParseFilesPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (cls.mStruct == nullptr)
       continue;
-    if (cls.mStruct->GetAnnotation(Annotations::NoJson) ||
+    if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Json) ||
         cls.mStruct->GetAnnotation(Annotations::DataManager) == nullptr)
       continue;
     GenerateParseFiles(cls);

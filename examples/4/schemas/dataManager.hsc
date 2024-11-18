@@ -1,5 +1,5 @@
 mixin NamedObject {
-    @noJson
+    @no(json)
     // Annotate this field as id. DataManager will use it to uniquely identify instances.
     @id
     u32 id = -1;

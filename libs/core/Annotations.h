@@ -66,21 +66,6 @@ public:
   inline static const std::string Script_AlwaysMirror = "alwaysMirror";
 
   /*
-   * Disables json integration for the specified data type.
-   *
-   * Example:
-   * @noJson
-   * struct Something { ... main.cpp}
-   *
-   * struct Something {
-   *  @noJson()
-   *  i8 field;
-   * }
-   * TODO: use @no(json)
-   */
-  inline static const std::string NoJson = "noJson";
-
-  /*
    * Indicates that the field is a container that should be exposed.
    * Methods like AddElem, GetElem, GetElemCount, DeleteElem are added and exposed to lua.
    * Be careful using this with a vector if the underlying data type is not managed; the

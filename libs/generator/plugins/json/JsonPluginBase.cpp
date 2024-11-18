@@ -19,7 +19,7 @@ bool JsonPluginBase::ShouldProcess(const ClassField &field, bool isVariantType) 
 }
 
 bool JsonPluginBase::ShouldProcess(const ClassMethod &method) const {
-  if (!method.mFunction || method.mFunction->GetAnnotation(Annotations::NoJson) ||
+  if (!method.mFunction || method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Json) ||
       !method.mFunction->GetAnnotation(Annotations::LuaFunc))
     return false;
   return true;

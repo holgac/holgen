@@ -152,7 +152,8 @@ void JsonParsePlugin::GenerateParseJsonFromObject(Class &cls, CodeBlock &methodB
 }
 
 void JsonParsePlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock,
-                                           const ClassField &field, const std::string &varName) {
+                                                const ClassField &field,
+                                                const std::string &varName) {
   const std::string *variantRawName = nullptr;
   if (field.mField && field.mField->GetAnnotation(Annotations::JsonConvert)) {
     GenerateParseJsonJsonConvert(cls, codeBlock, field, varName);
@@ -169,8 +170,9 @@ void JsonParsePlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock
   }
 }
 
-void JsonParsePlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock, const ClassField &field,
-                                          const std::string &varName) {
+void JsonParsePlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock,
+                                               const ClassField &field,
+                                               const std::string &varName) {
   auto variantTypeField =
       cls.GetField(Naming().FieldNameInCpp(field.mField->GetAnnotation(Annotations::Variant)
                                                ->GetAttribute(Annotations::Variant_TypeField)
@@ -215,8 +217,9 @@ void JsonParsePlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock,
 }
 
 void JsonParsePlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBlock,
-                                              const ClassField &field, const std::string &varName,
-                                              const std::string &rawFieldName) {
+                                                   const ClassField &field,
+                                                   const std::string &varName,
+                                                   const std::string &rawFieldName) {
   codeBlock.Add("{}temp;", field.mType.ToString(false));
   codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
                 varName);
@@ -244,10 +247,9 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertKeyElem(
                 cls.mStruct->mName, field.mField->mName);
 }
 
-void JsonParsePlugin::GenerateParseJsonJsonConvertKey(Class &cls, CodeBlock &codeBlock,
-                                                 const ClassField &field,
-                                                 const std::string &varName,
-                                                 const AnnotationDefinition *convertKeyAnnotation) {
+void JsonParsePlugin::GenerateParseJsonJsonConvertKey(
+    Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
+    const AnnotationDefinition *convertKeyAnnotation) {
   codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
                 St::JsonHelper_ParseConvertKey,
                 Type{mProject, convertKeyAnnotation->mDefinitionSource,
@@ -274,8 +276,8 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertElem(
 }
 
 void JsonParsePlugin::GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &codeBlock,
-                                                   const ClassField &field,
-                                                   const std::string &varName) {
+                                                        const ClassField &field,
+                                                        const std::string &varName) {
   auto jsonConvert = field.mField->GetAnnotation(Annotations::JsonConvert);
   auto jsonConvertUsing = jsonConvert->GetAttribute(Annotations::JsonConvert_Using);
   Type type(mProject, jsonConvert->mDefinitionSource,
@@ -294,7 +296,8 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &c
 }
 
 void JsonParsePlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBlock,
-                                              const ClassField &field, const std::string &varName) {
+                                                   const ClassField &field,
+                                                   const std::string &varName) {
   auto convertElemAnnotation = GetConvertElemAnnotation(field.mField);
   auto convertKeyAnnotation = GetConvertKeyAnnotation(field.mField);
   if (convertElemAnnotation && convertKeyAnnotation) {
@@ -310,7 +313,7 @@ void JsonParsePlugin::GenerateParseJsonJsonConvert(Class &cls, CodeBlock &codeBl
 }
 
 void JsonParsePlugin::ProcessStruct(Class &cls) {
-  if (cls.mStruct->GetAnnotation(Annotations::NoJson))
+  if (cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Json))
     return;
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
@@ -328,7 +331,7 @@ void JsonParsePlugin::ProcessStruct(Class &cls) {
 }
 
 void JsonParsePlugin::ProcessEnum(Class &cls) {
-  if (cls.mEnum->GetAnnotation(Annotations::NoJson))
+  if (cls.mEnum->GetMatchingAttribute(Annotations::No, Annotations::No_Json))
     return;
   cls.mHeaderIncludes.AddLibHeader("rapidjson/fwd.h");
   cls.mSourceIncludes.AddLibHeader("rapidjson/document.h");
@@ -376,15 +379,16 @@ void JsonParsePlugin::ProcessEnum(Class &cls) {
 }
 
 void JsonParsePlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
-                                              const ClassMethod &luaFunction,
-                                              const std::string &varName) {
+                                                   const ClassMethod &luaFunction,
+                                                   const std::string &varName) {
   codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
                 Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction), varName);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{}");)R",
                 cls.mStruct->mName, luaFunction.mFunction->mName);
 }
 
-const AnnotationDefinition *JsonParsePlugin::GetConvertElemAnnotation(const FieldDefinition *field) {
+const AnnotationDefinition *
+    JsonParsePlugin::GetConvertElemAnnotation(const FieldDefinition *field) {
   for (auto &annotation: field->GetAnnotations(Annotations::JsonConvert)) {
     if (annotation.GetAttribute(Annotations::JsonConvert_Elem)) {
       return &annotation;
