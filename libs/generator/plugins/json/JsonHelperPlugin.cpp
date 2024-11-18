@@ -16,6 +16,7 @@ void JsonHelperPlugin::Run() {
 }
 
 void JsonHelperPlugin::GenerateParseFunctions(Class &cls) {
+  GenerateParseFromFile(cls);
   GenerateBaseParse(cls);
   GenerateParseSingleElem(cls);
   GenerateParseTuple(cls, 2, "std::pair");
@@ -40,6 +41,25 @@ void JsonHelperPlugin::GenerateParseFunctions(Class &cls) {
       }
     }
   }
+}
+
+void JsonHelperPlugin::GenerateParseFromFile(Class &cls) {
+  cls.mHeaderIncludes.AddLocalHeader("FilesystemHelper.h");
+  auto method = ClassMethod{St::JsonHelper_ParseFromFile, Type{"bool"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  method.mTemplateParameters.emplace_back("typename", "T");
+  method.mArguments.emplace_back("out", Type{"T", PassByType::Reference});
+  method.mArguments.emplace_back(
+      "path", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("converter",
+                                 Type{St::Converter, PassByType::Reference, Constness::Const});
+  method.mBody.Add("auto contents = {}::{}(path);", St::FilesystemHelper,
+                   St::FilesystemHelper_ReadFile);
+  method.mBody.Add("rapidjson::Document doc;");
+  method.mBody.Add("doc.Parse(contents.c_str());");
+  method.mBody.Add("return {}(out, doc, converter);", St::JsonHelper_Parse);
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
 }
 
 void JsonHelperPlugin::GenerateParseJsonForSmartPointer(Class &cls, const std::string &pointerType,

@@ -42,6 +42,21 @@ public:
   inline static const std::string No_Lua = "lua";
   inline static const std::string No_Json = "json";
 
+
+  /**
+   * Can be used to control the load order of container fields of dataManagers when loading
+   * from a data source such as json.
+   *
+   * @dataManager
+   * struct Manager {
+   *   @loadBefore(field2, field3)
+   *   @loadAfter(field4)
+   *   vector<Object> field1;
+   * }
+   */
+  inline static const std::string LoadBefore = "loadBefore";
+  inline static const std::string LoadAfter = "loadAfter";
+
   /**
    * An annotation that describes the runtime-loaded dotnet modules of this type. The runtime is
    * expected to have a class named Module that matches the annotated struct. The functions should
@@ -94,16 +109,16 @@ public:
   inline static const std::string Container_Has = "has";
 
 
- /*
-  * Lua related annotations
-  *
-  * global: Creates an annotation in stubs file
-  * @lua(global=Game)
-  * struct GameContext {
-  * }
-  */
- inline static const std::string Lua = "lua";
- inline static const std::string Lua_Global = "global";
+  /*
+   * Lua related annotations
+   *
+   * global: Creates an annotation in stubs file
+   * @lua(global=Game)
+   * struct GameContext {
+   * }
+   */
+  inline static const std::string Lua = "lua";
+  inline static const std::string Lua_Global = "global";
 
   /**
    * Indicates that the struct is managed by the given DataManager.

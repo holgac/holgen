@@ -1,4 +1,5 @@
 #include "JsonParseFilesPlugin.h"
+
 #include <vector>
 #include "generator/utils/NamingConvention.h"
 #include "core/Annotations.h"
@@ -48,58 +49,53 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
   GenerateFilesByName(method);
 
   bool isFirst = true;
-  for (const auto &structToProcess: mProject.mDependencyGraph.GetProcessOrder()) {
-    for (const auto &field: cls.mFields) {
-      if (!field.mField || !field.mField->GetAnnotation(Annotations::Container))
-        continue;
-      auto &fieldDefinition = *field.mField;
-      auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
-      if (templateParameter.mName != structToProcess)
-        continue;
+  auto processOrder = GetProcessOrder(cls);
+  for (auto &fieldPtr: processOrder) {
+    auto &field = *fieldPtr;
+    auto &fieldDefinition = *field.mField;
+    auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
 
-      {
-        auto line = method.mBody.Line();
-        if (isFirst) {
-          line << "auto it";
-          isFirst = false;
-        } else {
-          line << "it";
-        }
-        line << " = filesByName.find(\"" << fieldDefinition.mName << "\");";
+    {
+      auto line = method.mBody.Line();
+      if (isFirst) {
+        line << "auto it";
+        isFirst = false;
+      } else {
+        line << "it";
       }
-      method.mBody.Add("if (it != filesByName.end()) {{");
-      method.mBody.Indent(1);
-
-      method.mBody.Add("for (const auto& filePath: it->second) {{");
-      method.mBody.Indent(1);
-      method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
-                       St::FilesystemHelper_ReadFile);
-      method.mBody.Add("rapidjson::Document doc;");
-      method.mBody.Add("doc.Parse(contents.c_str());");
-      method.mBody.Add(
-          R"(HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {{}}: It is supposed to contain a list of {} entries", filePath.string());)",
-          structToProcess);
-      method.mBody.Add("for (auto& jsonElem: doc.GetArray()) {{"); // if (!doc.IsArray())
-      method.mBody.Indent(1);
-      method.mBody.Add(
-          R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
-      Type type(mProject, fieldDefinition.mDefinitionSource, templateParameter);
-      method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
-      method.mBody.Add("auto res = elem.{}(jsonElem, converter);",
-                       ParseJson); // if (!doc.IsArray())
-      method.mBody.Add(
-          R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
-      method.mBody.Add("{}(std::move(elem));",
-                       Naming().ContainerElemAdderNameInCpp(fieldDefinition));
-      method.mBody.Indent(-1);
-      method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
-
-      method.mBody.Indent(-1);
-      method.mBody.Add("}}"); // for(path: filesByName[field])
-
-      method.mBody.Indent(-1);
-      method.mBody.Add("}}"); // if (it != filesByName.end())
+      line << " = filesByName.find(\"" << fieldDefinition.mName << "\");";
     }
+    method.mBody.Add("if (it != filesByName.end()) {{");
+    method.mBody.Indent(1);
+
+    method.mBody.Add("for (const auto& filePath: it->second) {{");
+    method.mBody.Indent(1);
+    method.mBody.Add("auto contents = {}::{}(filePath);", St::FilesystemHelper,
+                     St::FilesystemHelper_ReadFile);
+    method.mBody.Add("rapidjson::Document doc;");
+    method.mBody.Add("doc.Parse(contents.c_str());");
+    method.mBody.Add(
+        R"(HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {{}}: It is supposed to contain a list of {} entries", filePath.string());)",
+        field.mType.mTemplateParameters.front().mName);
+    method.mBody.Add("for (auto& jsonElem: doc.GetArray()) {{"); // if (!doc.IsArray())
+    method.mBody.Indent(1);
+    method.mBody.Add(
+        R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
+    Type type(mProject, fieldDefinition.mDefinitionSource, templateParameter);
+    method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
+    method.mBody.Add("auto res = elem.{}(jsonElem, converter);",
+                     ParseJson); // if (!doc.IsArray())
+    method.mBody.Add(
+        R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
+    method.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
+
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}"); // for(path: filesByName[field])
+
+    method.mBody.Indent(-1);
+    method.mBody.Add("}}"); // if (it != filesByName.end())
   }
   method.mBody.Add("return true;");
   Validate().NewMethod(cls, method);
@@ -166,12 +162,10 @@ void JsonParseFilesPlugin::GenerateFilesByName(ClassMethod &method) {
   method.mBody.Indent(-1);
   method.mBody.Add("}} else if (std::filesystem::is_regular_file(entry)) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("std::string filename = entry.path().filename().string();");
-  method.mBody.Add("auto dotPosition = filename.rfind('.');");
-  method.mBody.Add(
-      "if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == \"json\") {{");
+  method.mBody.Add("if (entry.path().extension() == \".json\") {{");
   method.mBody.Indent(1);
-  method.mBody.Add("filesByName[filename.substr(0, dotPosition)].push_back(entry.path());");
+  method.mBody.Add("auto filename = entry.path().filename().string();");
+  method.mBody.Add("filesByName[filename.substr(0, filename.size() - 5)].push_back(entry.path());");
   method.mBody.Indent(-1);
   method.mBody.Add("}}"); // if (json)
   method.mBody.Indent(-1);
@@ -186,12 +180,72 @@ void JsonParseFilesPlugin::GenerateFilesByName(ClassMethod &method) {
 void JsonParseFilesPlugin::GenerateReadSelf(CodeBlock &codeBlock) {
   codeBlock.Add("if (!selfName.empty()) {{");
   codeBlock.Indent(1);
-  codeBlock.Add("auto contents = {}::{}(selfName);", St::FilesystemHelper,
+  codeBlock.Add("auto contents = {}::{}(selfName + \".json\");", St::FilesystemHelper,
                 St::FilesystemHelper_ReadFile);
   codeBlock.Add("rapidjson::Document doc;");
   codeBlock.Add("doc.Parse(contents.c_str());");
   codeBlock.Add("{}(doc, converter);", St::ParseJson);
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
+}
+
+namespace {
+struct FieldDependencyInfo {
+  std::set<std::string> mDependedBy = {};
+  size_t mNumDependencies = 0;
+  const ClassField *mField;
+
+  explicit FieldDependencyInfo(const ClassField &field) : mField(&field) {}
+};
+} // namespace
+
+std::vector<const ClassField *> JsonParseFilesPlugin::GetProcessOrder(const Class &cls) {
+  std::vector<const ClassField *> result;
+  std::map<std::string, FieldDependencyInfo> depInfo;
+  for (auto &field: cls.mFields) {
+    if (!ShouldProcess(field, false))
+      continue;
+    if (!IsContainerOfDataManager(cls, field))
+      continue;
+    depInfo.emplace(field.mField->mName, FieldDependencyInfo{field});
+  }
+  result.reserve(depInfo.size());
+  for (auto &[name, info]: depInfo) {
+    auto loadBefore = info.mField->mField->GetAnnotation(Annotations::LoadBefore);
+    if (loadBefore) {
+      for (auto &attrib: loadBefore->mAttributes) {
+        auto res = info.mDependedBy.emplace(attrib.mName).second;
+        if (res)
+          depInfo.at(attrib.mName).mNumDependencies++;
+      }
+    }
+    auto loadAfter = info.mField->mField->GetAnnotation(Annotations::LoadAfter);
+    if (loadAfter) {
+      for (auto &attrib: loadAfter->mAttributes) {
+        auto res = depInfo.at(attrib.mName).mDependedBy.emplace(name).second;
+        if (res)
+          info.mNumDependencies++;
+      }
+    }
+  }
+  while (!depInfo.empty()) {
+    bool processed = false;
+    auto it = depInfo.begin();
+    while (it != depInfo.end()) {
+      if (it->second.mNumDependencies == 0) {
+        processed = true;
+        result.push_back(it->second.mField);
+        for (auto &dep: it->second.mDependedBy) {
+          depInfo.at(dep).mNumDependencies--;
+        }
+        it = depInfo.erase(it);
+      } else {
+        ++it;
+      }
+    }
+    THROW_IF(!processed, "DataManager {} has a circular dependency in load order that includes {}",
+             cls.mName, depInfo.begin()->first);
+  }
+  return result;
 }
 } // namespace holgen

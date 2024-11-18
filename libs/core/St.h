@@ -28,6 +28,7 @@ public:
   inline static const std::string FilesystemHelper_DumpFile = "DumpFile";
   inline static const std::string JsonHelper = "JsonHelper";
   inline static const std::string JsonHelper_Parse = "Parse";
+  inline static const std::string JsonHelper_ParseFromFile = "ParseFromFile";
   inline static const std::string JsonHelper_Dump = "Dump";
   inline static const std::string JsonHelper_DumpToFile = "DumpToFile";
   inline static const std::string JsonHelper_ParseConvertElem = "ParseConvertElem";

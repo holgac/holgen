@@ -14,6 +14,7 @@ public:
 
 private:
   void GenerateParseFunctions(Class &cls);
+  void GenerateParseFromFile(Class &cls);
   void GenerateParseJsonForSmartPointer(Class &cls, const std::string &pointerType,
                                         const std::string &pointerGenerator);
   void GenerateParseJsonForSingleElemContainer(Class &cls, const std::string &container,

@@ -12,5 +12,6 @@ private:
   void GenerateParseFiles(Class &cls);
   void GenerateFilesByName(ClassMethod &method);
   void GenerateReadSelf(CodeBlock& codeBlock);
+  std::vector<const ClassField*> GetProcessOrder(const Class& cls);
 };
 } // namespace holgen
