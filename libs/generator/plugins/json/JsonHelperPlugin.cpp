@@ -301,10 +301,34 @@ void JsonHelperPlugin::GenerateDumpForKeyedContainer(Class &cls, const std::stri
   method.mTemplateParameters.emplace_back("typename", "V");
   method.mArguments.front().mType.mTemplateParameters.emplace_back("K");
   method.mArguments.front().mType.mTemplateParameters.emplace_back("V");
-  method.mBody.Add("auto val = rapidjson::Value(rapidjson::kObjectType);");
+  method.mBody.Add("rapidjson::Type valueType;");
+  method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("K"));
+  method.mBody.Indent(1);
+  method.mBody.Add("valueType = rapidjson::kObjectType;");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}} else {{", St::JsonHelper_Dump);
+  method.mBody.Indent(1);
+  method.mBody.Add("valueType = rapidjson::kArrayType;");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}", St::JsonHelper_Dump);
+  method.mBody.Add("auto val = rapidjson::Value(valueType);");
+
   method.mBody.Add("for (auto &[k, v]: data) {{");
   method.mBody.Indent(1);
-  method.mBody.Add("val.AddMember({0}(k, doc), {0}(v, doc), doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("K"));
+  method.mBody.Indent(1);
+  method.mBody.Add("val.AddMember({0}(k, doc), {0}(v, doc), doc.GetAllocator());",
+                   St::JsonHelper_Dump);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}} else {{", St::JsonHelper_Dump);
+  method.mBody.Indent(1);
+  method.mBody.Add("auto elem = rapidjson::Value(rapidjson::kArrayType);");
+  method.mBody.Add("elem.Reserve(2, doc.GetAllocator());");
+  method.mBody.Add("elem.PushBack({}(k, doc), doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Add("elem.PushBack({}(v, doc), doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Add("val.PushBack(elem, doc.GetAllocator());", St::JsonHelper_Dump);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}", St::JsonHelper_Dump);
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
   method.mBody.Add("return val;");
@@ -345,6 +369,47 @@ void JsonHelperPlugin::GenerateParseSingleElem(Class &cls) {
   GenerateParseSingleElem(cls, "double", "IsNumber", "GetDouble");
   GenerateParseSingleElem(cls, "bool", "IsBool", "GetBool");
   GenerateParseSingleElem(cls, "std::string", "IsString", "GetString");
+}
+
+void JsonHelperPlugin::GenerateParseJsonForKeyedContainerElem(
+    CodeBlock &codeBlock, const std::string &container, bool withKeyConverter,
+    bool withElemConverter, const std::string &keyVariable, const std::string &valueVariable) {
+  if (withKeyConverter) {
+    codeBlock.Line() << "KeySourceType keyInJson;";
+    codeBlock.Add("auto res = {}(keyInJson, {}, converter);", St::JsonHelper_Parse, keyVariable);
+    codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R", container);
+    codeBlock.Line() << "K key = std::move(keyConverter(keyInJson));";
+  } else {
+    codeBlock.Line() << "K key;";
+    codeBlock.Add("auto res = {}(key, {}, converter);", St::JsonHelper_Parse, keyVariable);
+    codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R", container);
+  }
+
+  codeBlock.Line() << "auto[it, insertRes] = out.try_emplace(key, V());";
+  codeBlock.Add("if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {{");
+  codeBlock.Indent(1);
+  codeBlock.Add(
+      R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
+      container);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}} else {{");
+  codeBlock.Indent(1);
+  codeBlock.Add(
+      R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing {}");)R",
+      container);
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
+  if (withElemConverter) {
+    codeBlock.Add("ElemSourceType valueRaw;");
+    codeBlock.Add("res = {}(valueRaw, {}, converter);", St::JsonHelper_Parse, valueVariable);
+    codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R",
+                  container);
+    codeBlock.Add("it->second = std::move(elemConverter(valueRaw));");
+  } else {
+    codeBlock.Add("res = {}(it->second, {}, converter);", St::JsonHelper_Parse, valueVariable);
+    codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R",
+                  container);
+  }
 }
 
 void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std::string &container,
@@ -391,6 +456,13 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std:
     method.mName = St::JsonHelper_ParseConvertKeyElem;
   }
 
+
+  if (withKeyConverter)
+    method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("KeySourceType"));
+  else
+    method.mBody.Add("if constexpr ({}) {{", GetIsStringTypeCondition("K"));
+  method.mBody.Indent(1);
+
   method.mBody.Add(
       R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing {}");)R",
       container);
@@ -398,46 +470,29 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std:
   method.mBody.Line() << "for (const auto& data: json.GetObject()) {";
   method.mBody.Indent(1);
 
-  if (withKeyConverter) {
-    method.mBody.Line() << "KeySourceType keyInJson;";
-    method.mBody.Add("auto res = {}(keyInJson, data.name, converter);", St::JsonHelper_Parse);
-    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R",
-                     container);
-    method.mBody.Line() << "K key = std::move(keyConverter(keyInJson));";
-  } else {
-    method.mBody.Line() << "K key;";
-    method.mBody.Add("auto res = {}(key, data.name, converter);", St::JsonHelper_Parse);
-    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R",
-                     container);
-  }
+  GenerateParseJsonForKeyedContainerElem(method.mBody, container, withKeyConverter,
+                                         withElemConverter, "data.name", "data.value");
 
-  method.mBody.Line() << "auto[it, insertRes] = out.try_emplace(key, V());";
-  method.mBody.Add("if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {{");
-  method.mBody.Indent(1);
-  method.mBody.Add(
-      R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {{}} when parsing {}", key);)R",
-      container);
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+
   method.mBody.Indent(-1);
   method.mBody.Add("}} else {{");
   method.mBody.Indent(1);
   method.mBody.Add(
-      R"R(HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing {}");)R",
+      R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing {}");)R",
       container);
+  method.mBody.Add("for (const auto& data: json.GetArray()) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("auto& elemKey = data[0];");
+  method.mBody.Add("auto& elemValue = data[1];");
+  GenerateParseJsonForKeyedContainerElem(method.mBody, container, withKeyConverter,
+                                         withElemConverter, "elemKey", "elemValue");
   method.mBody.Indent(-1);
   method.mBody.Add("}}");
-  if (withElemConverter) {
-    method.mBody.Add("ElemSourceType valueRaw;");
-    method.mBody.Add("res = {}(valueRaw, data.value, converter);", St::JsonHelper_Parse);
-    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R",
-                     container);
-    method.mBody.Add("it->second = std::move(elemConverter(valueRaw));");
-  } else {
-    method.mBody.Add("res = {}(it->second, data.value, converter);", St::JsonHelper_Parse);
-    method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R",
-                     container);
-  }
+
   method.mBody.Indent(-1);
-  method.mBody.Line() << "}"; // range based for on json.GetArray()
+  method.mBody.Add("}}");
   method.mBody.Line() << "return true;";
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

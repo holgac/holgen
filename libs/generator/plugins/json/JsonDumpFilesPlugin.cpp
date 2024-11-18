@@ -43,6 +43,12 @@ void JsonDumpFilesPlugin::GenerateDumpFiles(Class &cls) {
   method.mArguments.emplace_back("selfName",
                                  Type{"std::string", PassByType::Reference, Constness::Const});
 
+  method.mBody.Add("if (std::filesystem::exists(rootPath)) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("std::filesystem::remove_all(rootPath);");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+  method.mBody.Add("std::filesystem::create_directories(rootPath);");
   method.mBody.Add("rapidjson::Document doc;");
   GenerateDumpSelf(method.mBody);
 
