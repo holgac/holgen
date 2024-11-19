@@ -159,7 +159,7 @@ ClassMethod *Class::GetCopyAssignment() {
 
 bool Class::HasUserDefinedMethods() const {
   for (const auto &method: mMethods) {
-    if (method.mUserDefined) {
+    if (method.mUserDefined && method.mVirtuality != Virtuality::PureVirtual) {
       return true;
     }
   }

@@ -53,11 +53,13 @@ void JsonPluginBase::GenerateOnDataLoadCalls(const Class &cls, CodeBlock &codeBl
         !method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_OnDataLoad))
       continue;
     DefinitionSource dummySource{"Invalid"};
-    THROW_IF(
-        !method.mArguments.empty(),
-        "{} ({}) has an onDataLoad function {} ({}) that takes a parameter which is not supported!",
-        cls.mName, cls.mStruct ? cls.mStruct->mDefinitionSource : dummySource, method.mName,
-        method.mFunction->mDefinitionSource);
+    for (auto &arg: method.mArguments) {
+      THROW_IF(!arg.mDefaultValue.has_value(),
+               "{} ({}) has an onDataLoad function {} ({}) that takes a parameter without a "
+               "default value!",
+               cls.mName, cls.mStruct ? cls.mStruct->mDefinitionSource : dummySource, method.mName,
+               method.mFunction->mDefinitionSource);
+    }
     codeBlock.Add("{}();", method.mName);
   }
 }
