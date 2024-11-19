@@ -97,6 +97,7 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
     method.mBody.Indent(-1);
     method.mBody.Add("}}"); // if (it != filesByName.end())
   }
+  GenerateOnDataLoadCalls(cls, method.mBody);
   method.mBody.Add("return true;");
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

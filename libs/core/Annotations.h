@@ -280,6 +280,10 @@ public:
    * onDestroy: Called when the object is destroyed, use it to free unmanaged resources
    *            By default, onDestroy functions are protected, use "public" attribute if needed.
    *
+   * onDataLoad: Called when the object is successfully parsed from a data source, use it to
+   *             sanitize the object or create dependent objects. Normally called after ParseJson,
+   *             but for DataManagers it is ParseFiles.
+   *
    * const: Specifies whether the function is const
    *
    * static: Creates a static method that can be called without an instance.
@@ -303,6 +307,7 @@ public:
    */
   inline static const std::string Func = "func";
   inline static const std::string Func_OnDestroy = "onDestroy";
+  inline static const std::string Func_OnDataLoad = "onDataLoad";
   inline static const std::string Func_Const = "const";
   inline static const std::string Func_Private = "private";
   inline static const std::string Func_Protected = "protected";

@@ -10,7 +10,8 @@ void LuaFunctionPlugin::Run() {
     return;
   }
   for (auto &cls: mProject.mClasses) {
-    if (cls.mStruct == nullptr || cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
+    if (cls.mStruct == nullptr ||
+        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
       continue;
     bool isFuncTable = false;
     if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
@@ -58,6 +59,8 @@ void LuaFunctionPlugin::ProcessStructDefinition(Class &cls,
 
 void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition,
                                            bool isFuncTable) {
+  if (functionDefinition.GetMatchingAnnotation(Annotations::Func, Annotations::Func_OnDataLoad))
+    return;
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   cls.mHeaderIncludes.AddForwardDeclaration({"", "struct", "lua_State"});

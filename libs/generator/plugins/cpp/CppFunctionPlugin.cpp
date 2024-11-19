@@ -4,8 +4,7 @@
 namespace holgen {
 void CppFunctionPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
-    if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::LuaFuncTable) ||
-        cls.mStruct->GetAnnotation(Annotations::DotNetInterface) ||
+    if (cls.mStruct == nullptr || cls.mStruct->GetAnnotation(Annotations::DotNetInterface) ||
         cls.mStruct->GetAnnotation(Annotations::DotNetModule))
       continue;
     ProcessStructDefinition(cls, *cls.mStruct);
@@ -18,9 +17,21 @@ void CppFunctionPlugin::ProcessStructDefinition(Class &cls,
     ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin));
   }
   for (auto &func: structDefinition.mFunctions) {
-    if (!func.GetAnnotation(Annotations::LuaFunc))
-      AddCppFunction(cls, func);
+    if (!ShouldProcess(cls, func))
+      continue;
+    AddCppFunction(cls, func);
   }
+}
+
+bool CppFunctionPlugin::ShouldProcess(const Class &cls,
+                                      const FunctionDefinition &functionDefinition) {
+  if (functionDefinition.GetAnnotation(Annotations::LuaFunc))
+    return false;
+
+  if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
+    return functionDefinition.GetMatchingAttribute(Annotations::Func, Annotations::Func_OnDataLoad);
+  }
+  return true;
 }
 
 void CppFunctionPlugin::AddCppFunction(Class &cls, const FunctionDefinition &functionDefinition) {

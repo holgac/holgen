@@ -67,6 +67,8 @@ void JsonParsePlugin::GenerateParseJson(Class &cls) {
     method.mBody.Add("}}");
   }
 
+  if (!cls.mStruct || !cls.mStruct->GetAnnotation(Annotations::DataManager))
+    GenerateOnDataLoadCalls(cls, method.mBody);
   method.mBody.Line() << "return true;";
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));

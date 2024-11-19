@@ -46,4 +46,19 @@ bool JsonPluginBase::IsContainerOfDataManager(const Class &cls, const ClassField
   return cls.mStruct && cls.mStruct->GetAnnotation(Annotations::DataManager) && field.mField &&
       field.mField->GetAnnotation(Annotations::Container);
 }
+
+void JsonPluginBase::GenerateOnDataLoadCalls(const Class &cls, CodeBlock &codeBlock) {
+  for (auto &method: cls.mMethods) {
+    if (!method.mFunction ||
+        !method.mFunction->GetMatchingAnnotation(Annotations::Func, Annotations::Func_OnDataLoad))
+      continue;
+    DefinitionSource dummySource{"Invalid"};
+    THROW_IF(
+        !method.mArguments.empty(),
+        "{} ({}) has an onDataLoad function {} ({}) that takes a parameter which is not supported!",
+        cls.mName, cls.mStruct ? cls.mStruct->mDefinitionSource : dummySource, method.mName,
+        method.mFunction->mDefinitionSource);
+    codeBlock.Add("{}();", method.mName);
+  }
+}
 } // namespace holgen

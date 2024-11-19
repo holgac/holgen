@@ -46,13 +46,7 @@ void JsonDumpFilesPlugin::GenerateDumpFiles(Class &cls) {
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   }
 
-  method.mBody.Add("if (std::filesystem::exists(rootPath)) {{");
-  method.mBody.Indent(1);
-  method.mBody.Add("std::filesystem::remove_all(rootPath);");
-  method.mBody.Indent(-1);
-  method.mBody.Add("}}");
-  method.mBody.Add("std::filesystem::create_directories(rootPath);");
-  method.mBody.Add("rapidjson::Document doc;");
+  GenerateRecreateDirectory(method.mBody);
   GenerateDumpSelf(method.mBody);
 
   for (auto &field: cls.mFields) {
@@ -63,6 +57,16 @@ void JsonDumpFilesPlugin::GenerateDumpFiles(Class &cls) {
 
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
+}
+
+void JsonDumpFilesPlugin::GenerateRecreateDirectory(CodeBlock &codeBlock) {
+  codeBlock.Add("if (std::filesystem::exists(rootPath)) {{");
+  codeBlock.Indent(1);
+  codeBlock.Add("std::filesystem::remove_all(rootPath);");
+  codeBlock.Indent(-1);
+  codeBlock.Add("}}");
+  codeBlock.Add("std::filesystem::create_directories(rootPath);");
+  codeBlock.Add("rapidjson::Document doc;");
 }
 
 void JsonDumpFilesPlugin::GenerateDumpSelf(CodeBlock &codeBlock) {

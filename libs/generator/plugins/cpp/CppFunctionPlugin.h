@@ -13,5 +13,6 @@ private:
   void ProcessConstructorAttribute(Class &cls, ClassMethod &method);
   void AddCppConstructor(Class &cls, const FunctionDefinition &functionDefinition);
   void ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition);
+  [[nodiscard]] bool ShouldProcess(const Class &cls, const FunctionDefinition &functionDefinition);
 };
 } // namespace holgen
