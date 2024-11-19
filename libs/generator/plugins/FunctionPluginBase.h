@@ -6,6 +6,8 @@ namespace holgen {
 class FunctionPluginBase : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
+
+protected:
   ClassMethod NewFunction(Class &cls, const FunctionDefinition &functionDefinition);
   ClassConstructor NewConstructor(Class &cls, const FunctionDefinition &functionDefinition);
 

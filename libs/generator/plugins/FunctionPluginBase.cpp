@@ -83,10 +83,14 @@ void FunctionPluginBase::ProcessMethodVisibility(MethodBase &method,
   if (!funcAnnotation) {
     return;
   }
+
+  if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy) ||
+      funcAnnotation->GetAttribute(Annotations::Func_OnDataLoad)) {
+    method.mVisibility = Visibility::Private;
+  }
+
   if (funcAnnotation->GetAttribute(Annotations::Func_Public)) {
     method.mVisibility = Visibility::Public;
-  } else if (funcAnnotation->GetAttribute(Annotations::Func_OnDestroy)) {
-    method.mVisibility = Visibility::Protected;
   } else if (funcAnnotation->GetAttribute(Annotations::Func_Protected)) {
     method.mVisibility = Visibility::Protected;
   } else if (funcAnnotation->GetAttribute(Annotations::Func_Private)) {
