@@ -22,6 +22,7 @@ private:
   void GenerateIndexForRegistryData(ClassField &field, CodeBlock &switchBlock);
   void GenerateInstanceGetter(Class &cls, CodeBlock &codeBlock, int index,
                               const std::string &outVarName);
+  bool ShouldGenerateWrapper(const ClassMethod& method) const;
 };
 
 } // namespace holgen

@@ -41,6 +41,10 @@ void JsonHelperPlugin::GenerateParseFunctions(Class &cls) {
       }
     }
   }
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua)) {
+    GenerateParseLuaObject(cls);
+    GenerateParseLuaRegistryObject(cls);
+  }
 }
 
 void JsonHelperPlugin::GenerateParseFromFile(Class &cls) {
@@ -53,11 +57,13 @@ void JsonHelperPlugin::GenerateParseFromFile(Class &cls) {
       "path", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add("auto contents = {}::{}(path);", St::FilesystemHelper,
                    St::FilesystemHelper_ReadFile);
   method.mBody.Add("rapidjson::Document doc;");
   method.mBody.Add("doc.Parse(contents.c_str());");
-  method.mBody.Add("return {}(out, doc, converter);", St::JsonHelper_Parse);
+  method.mBody.Add("return {}(out, doc, converter{});", St::JsonHelper_Parse, mLuaStateArgument);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -77,9 +83,11 @@ void JsonHelperPlugin::GenerateParseJsonForSmartPointer(Class &cls, const std::s
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   method.mBody.Add("out = {}<T>();", pointerGenerator);
-  method.mBody.Add("return Parse(*out.get(), json, converter);");
+  method.mBody.Add("return Parse(*out.get(), json, converter{});", mLuaStateArgument);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -116,6 +124,8 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,
                                    Type{"ElemConverter", PassByType::Reference, Constness::Const});
     method.mTemplateParameters.emplace_back("typename", "ElemConverter");
   }
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   method.mBody.Add(
       R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing {}");)R",
@@ -129,7 +139,8 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,
     modificationBlock.Add("out.insert(std::move({}));", elemString);
   } else if (fixedSize) {
     if (withConverter) {
-      modificationBlock.Add("out[writtenItemCount] = std::move(elem);");
+      modificationBlock.Add("out[writtenItemCount] = std::move({});", elemString);
+      // otherwise the element will be parsed in-place
     }
     modificationBlock.Add("++writtenItemCount;");
   } else {
@@ -153,14 +164,15 @@ void JsonHelperPlugin::GenerateParseJsonForSingleElemContainer(Class &cls,
     method.mBody.Indent(1);
   }
   if (withConverter)
-    method.mBody.Add("SourceType elem;", St::JsonHelper_Parse);
+    method.mBody.Add("SourceType elem;");
   else if (!fixedSize)
-    method.mBody.Add("T elem;", St::JsonHelper_Parse);
+    method.mBody.Add("T elem;");
   if (withConverter || !fixedSize)
-    method.mBody.Add("auto res = {}(elem, data, converter);", St::JsonHelper_Parse);
+    method.mBody.Add("auto res = {}(elem, data, converter{});", St::JsonHelper_Parse,
+                     mLuaStateArgument);
   else
-    method.mBody.Add("auto res = {}(out[writtenItemCount], data, converter);",
-                     St::JsonHelper_Parse);
+    method.mBody.Add("auto res = {}(out[writtenItemCount], data, converter{});",
+                     St::JsonHelper_Parse, mLuaStateArgument);
 
   method.mBody.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of {}");)R",
                    container);
@@ -186,7 +198,9 @@ void JsonHelperPlugin::GenerateBaseParse(Class &cls) {
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
-  method.mBody.Add("return out.{}(json, converter);", St::ParseJson);
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mBody.Add("return out.{}(json, converter{});", St::ParseJson, mLuaStateArgument);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -202,6 +216,8 @@ void JsonHelperPlugin::GenerateParseSingleElem(Class &cls, const std::string &ty
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add(
       R"R(HOLGEN_WARN_AND_RETURN_IF(!json.{}(), false, "Found type mismatch in json when parsing {}");)R",
       validator, type);
@@ -226,6 +242,8 @@ void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add(
       R"R(HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing {}");)R",
       tupleClassName);
@@ -235,7 +253,8 @@ void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
     method.mBody.Add(
         R"R(HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing {}!");)R",
         tupleClassName);
-    method.mBody.Add("res = {}(std::get<{}>(out), *it, converter);", St::JsonHelper_Parse, i);
+    method.mBody.Add("res = {}(std::get<{}>(out), *it, converter{});", St::JsonHelper_Parse, i,
+                     mLuaStateArgument);
     method.mBody.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Parsing {} failed!");)R",
                      tupleClassName);
     method.mBody.Add("++it;");
@@ -244,6 +263,103 @@ void JsonHelperPlugin::GenerateParseTuple(Class &cls, size_t size,
       R"R(HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing {}!");)R",
       tupleClassName);
   method.mBody.Add("return true;");
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void JsonHelperPlugin::GenerateParseLuaObject(Class &cls) {
+  auto method = ClassMethod{St::JsonHelper_ParseLuaObject, Type{"void"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+
+  method.mBody.Add("switch (json.GetType()) {{");
+
+  method.mBody.Add("case rapidjson::kNullType:");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_pushnil(luaState);");
+  method.mBody.Add("break;");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case rapidjson::kFalseType:");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_pushboolean(luaState, false);");
+  method.mBody.Add("break;");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case rapidjson::kTrueType:");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_pushboolean(luaState, true);");
+  method.mBody.Add("break;");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case rapidjson::kObjectType:");
+  method.mBody.Indent(1);
+  method.mBody.Add("{{");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_newtable(luaState);");
+
+  method.mBody.Add("for (const auto& data: json.GetObject()) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("{}(data.name, luaState);", St::JsonHelper_ParseLuaObject);
+  method.mBody.Add("{}(data.value, luaState);", St::JsonHelper_ParseLuaObject);
+  method.mBody.Add("lua_settable(luaState, -3);");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+
+  method.mBody.Indent(-1);
+  method.mBody.Add("break;");
+  method.mBody.Add("}}");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case rapidjson::kArrayType:");
+  method.mBody.Indent(1);
+  method.mBody.Add("{{");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_newtable(luaState);");
+  method.mBody.Add("size_t i = 0;");
+
+  method.mBody.Add("for (const auto& data: json.GetArray()) {{");
+  method.mBody.Indent(1);
+  method.mBody.Add("{}(data, luaState);", St::JsonHelper_ParseLuaObject);
+  method.mBody.Add("lua_rawseti(luaState, -2, i);");
+  method.mBody.Add("++i;");
+  method.mBody.Indent(-1);
+  method.mBody.Add("}}");
+
+  method.mBody.Indent(-1);
+  method.mBody.Add("break;");
+  method.mBody.Add("}}");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case rapidjson::kStringType:");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_pushstring(luaState, json.GetString());");
+  method.mBody.Add("break;");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("case rapidjson::kNumberType:");
+  method.mBody.Indent(1);
+  method.mBody.Add("lua_pushnumber(luaState, json.GetDouble());");
+  method.mBody.Add("break;");
+  method.mBody.Indent(-1);
+
+  method.mBody.Add("}}");
+
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void JsonHelperPlugin::GenerateParseLuaRegistryObject(Class &cls) {
+  auto method = ClassMethod{St::JsonHelper_ParseLuaRegistryObject, Type{"int"}, Visibility::Public,
+                            Constness::NotConst, Staticness::Static};
+  method.mArguments.emplace_back("json",
+                                 Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
+  method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mBody.Add("{}(json, luaState);", St::JsonHelper_ParseLuaObject);
+  method.mBody.Add("return luaL_ref(luaState, LUA_REGISTRYINDEX);");
+
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -524,12 +640,14 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainerElem(
     bool withElemConverter, const std::string &keyVariable, const std::string &valueVariable) {
   if (withKeyConverter) {
     codeBlock.Line() << "KeySourceType keyInJson;";
-    codeBlock.Add("auto res = {}(keyInJson, {}, converter);", St::JsonHelper_Parse, keyVariable);
+    codeBlock.Add("auto res = {}(keyInJson, {}, converter{});", St::JsonHelper_Parse, keyVariable,
+                  mLuaStateArgument);
     codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R", container);
     codeBlock.Line() << "K key = std::move(keyConverter(keyInJson));";
   } else {
     codeBlock.Line() << "K key;";
-    codeBlock.Add("auto res = {}(key, {}, converter);", St::JsonHelper_Parse, keyVariable);
+    codeBlock.Add("auto res = {}(key, {}, converter{});", St::JsonHelper_Parse, keyVariable,
+                  mLuaStateArgument);
     codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of {}");)R", container);
   }
 
@@ -551,12 +669,14 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainerElem(
   codeBlock.Add("}}");
   if (withElemConverter) {
     codeBlock.Add("ElemSourceType valueRaw;");
-    codeBlock.Add("res = {}(valueRaw, {}, converter);", St::JsonHelper_Parse, valueVariable);
+    codeBlock.Add("res = {}(valueRaw, {}, converter{});", St::JsonHelper_Parse, valueVariable,
+                  mLuaStateArgument);
     codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R",
                   container);
     codeBlock.Add("it->second = std::move(elemConverter(valueRaw));");
   } else {
-    codeBlock.Add("res = {}(it->second, {}, converter);", St::JsonHelper_Parse, valueVariable);
+    codeBlock.Add("res = {}(it->second, {}, converter{});", St::JsonHelper_Parse, valueVariable,
+                  mLuaStateArgument);
     codeBlock.Add(R"R(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of {}");)R",
                   container);
   }
@@ -601,11 +721,12 @@ void JsonHelperPlugin::GenerateParseJsonForKeyedContainer(Class &cls, const std:
     method.mArguments.emplace_back("elemConverter",
                                    Type{"ElemConverter", PassByType::Reference, Constness::Const});
   }
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   if (withKeyConverter && withElemConverter) {
     method.mName = St::JsonHelper_ParseConvertKeyElem;
   }
-
 
   if (withKeyConverter)
     method.mBody.Add("if constexpr ({} || {}<KeySourceType>) {{",

@@ -42,6 +42,8 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
                                  Type{"std::string", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converterArg",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   GenerateConverterPopulators(cls, method);
 
@@ -83,8 +85,8 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
         R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
     Type type(mProject, fieldDefinition.mDefinitionSource, templateParameter);
     method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
-    method.mBody.Add("auto res = elem.{}(jsonElem, converter);",
-                     ParseJson); // if (!doc.IsArray())
+    method.mBody.Add("auto res = elem.{}(jsonElem, converter{});",
+                     ParseJson, mLuaStateArgument); // if (!doc.IsArray())
     method.mBody.Add(
         R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
     method.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
@@ -185,7 +187,7 @@ void JsonParseFilesPlugin::GenerateReadSelf(CodeBlock &codeBlock) {
                 St::FilesystemHelper_ReadFile);
   codeBlock.Add("rapidjson::Document doc;");
   codeBlock.Add("doc.Parse(contents.c_str());");
-  codeBlock.Add("{}(doc, converter);", St::ParseJson);
+  codeBlock.Add("{}(doc, converter{});", St::ParseJson, mLuaStateArgument);
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
 }

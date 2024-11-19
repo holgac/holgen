@@ -27,6 +27,8 @@ private:
   void GenerateParseSingleElem(Class &cls, const std::string &type, const std::string &validator,
                                const std::string &getter);
   void GenerateParseTuple(Class &cls, size_t size, const std::string &tupleClassName);
+  void GenerateParseLuaObject(Class &cls);
+  void GenerateParseLuaRegistryObject(Class &cls);
   void GenerateDumpToFile(Class &cls);
   void GenerateDumpFunctions(Class &cls);
   void GenerateDumpLuaObject(Class &cls);

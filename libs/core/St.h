@@ -31,6 +31,8 @@ public:
   inline static const std::string JsonHelper = "JsonHelper";
   inline static const std::string JsonHelper_Parse = "Parse";
   inline static const std::string JsonHelper_ParseFromFile = "ParseFromFile";
+  inline static const std::string JsonHelper_ParseLuaObject = "ParseLuaObject";
+  inline static const std::string JsonHelper_ParseLuaRegistryObject = "ParseLuaRegistryObject";
   inline static const std::string JsonHelper_Dump = "Dump";
   inline static const std::string JsonHelper_DumpLuaObject = "DumpLuaObject";
   inline static const std::string JsonHelper_DumpLuaRegistryObject = "DumpLuaRegistryObject";

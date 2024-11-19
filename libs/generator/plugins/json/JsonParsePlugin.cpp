@@ -34,8 +34,8 @@ void JsonParsePlugin::GenerateParseJsonForLuaFuncTable(Class &cls) {
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
-  method.mBody.Add("return {}::{}({}, json, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                   Naming().FieldNameInCpp(St::LuaTable_TableField));
+  method.mBody.Add("return {}::{}({}, json, converter{});", St::JsonHelper, St::JsonHelper_Parse,
+                   Naming().FieldNameInCpp(St::LuaTable_TableField), mLuaStateArgument);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }
@@ -46,6 +46,8 @@ void JsonParsePlugin::GenerateParseJson(Class &cls) {
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   CodeBlock parseJsonFromObjectBlock;
   GenerateParseJsonFromObject(cls, parseJsonFromObjectBlock);
@@ -199,9 +201,12 @@ void JsonParsePlugin::GenerateParseJsonForField(Class &cls, CodeBlock &codeBlock
     GenerateParseJsonVariantType(cls, codeBlock, field, varName, *variantRawName);
   } else if (field.mField && field.mField->mType.mName == St::Variant) {
     GenerateParseJsonVariant(cls, codeBlock, field, varName);
+  } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
+    codeBlock.Add("{} = {}::{}({}{});", field.mName, St::JsonHelper,
+                  St::JsonHelper_ParseLuaRegistryObject, varName, mLuaStateArgument);
   } else {
-    codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                  field.mName, varName);
+    codeBlock.Add("auto res = {}::{}({}, {}, converter{});", St::JsonHelper, St::JsonHelper_Parse,
+                  field.mName, varName, mLuaStateArgument);
     codeBlock.Add(
         R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
         cls.mStruct->mName, field.mField ? field.mField->mName : field.mName);
@@ -241,8 +246,9 @@ void JsonParsePlugin::GenerateParseJsonVariant(Class &cls, CodeBlock &codeBlock,
       codeBlock.Add("}} else if ({} == {}) {{", variantTypeField->mName, entryStr);
     }
     codeBlock.Indent(1);
-    codeBlock.Add("res = {}::{}(*{}(), {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                  Naming().VariantGetterNameInCpp(*field.mField, projectStruct), varName);
+    codeBlock.Add("res = {}::{}(*{}(), {}, converter{});", St::JsonHelper, St::JsonHelper_Parse,
+                  Naming().VariantGetterNameInCpp(*field.mField, projectStruct), varName,
+                  mLuaStateArgument);
     codeBlock.Indent(-1);
   }
   codeBlock.Add("}} else {{");
@@ -263,8 +269,8 @@ void JsonParsePlugin::GenerateParseJsonVariantType(Class &cls, CodeBlock &codeBl
                                                    const std::string &varName,
                                                    const std::string &rawFieldName) {
   codeBlock.Add("{}temp;", field.mType.ToString(false));
-  codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                varName);
+  codeBlock.Add("auto res = {}::{}(temp, {}, converter{});", St::JsonHelper, St::JsonHelper_Parse,
+                varName, mLuaStateArgument);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                 cls.mStruct->mName, rawFieldName);
   codeBlock.Add("{}(temp);", Naming().FieldSetterNameInCpp(rawFieldName));
@@ -274,7 +280,7 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertKeyElem(
     Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
     const AnnotationDefinition *convertElemAnnotation,
     const AnnotationDefinition *convertKeyAnnotation) {
-  codeBlock.Add("auto res = {}::{}<{}, {}>({}, {}, converter, converter.{}, converter.{});",
+  codeBlock.Add("auto res = {}::{}<{}, {}>({}, {}, converter, converter.{}, converter.{}{});",
                 St::JsonHelper, St::JsonHelper_ParseConvertKeyElem,
                 Type{mProject, convertKeyAnnotation->mDefinitionSource,
                      convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
@@ -284,7 +290,8 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertKeyElem(
                     .ToString(true),
                 field.mName, varName,
                 convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName,
-                convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+                convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName,
+                mLuaStateArgument);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                 cls.mStruct->mName, field.mField->mName);
 }
@@ -292,13 +299,14 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertKeyElem(
 void JsonParsePlugin::GenerateParseJsonJsonConvertKey(
     Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
     const AnnotationDefinition *convertKeyAnnotation) {
-  codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
+  codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{}{});", St::JsonHelper,
                 St::JsonHelper_ParseConvertKey,
                 Type{mProject, convertKeyAnnotation->mDefinitionSource,
                      convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
                     .ToString(true),
                 field.mName, varName,
-                convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+                convertKeyAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName,
+                mLuaStateArgument);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                 cls.mStruct->mName, field.mField->mName);
 }
@@ -306,13 +314,14 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertKey(
 void JsonParsePlugin::GenerateParseJsonJsonConvertElem(
     Class &cls, CodeBlock &codeBlock, const ClassField &field, const std::string &varName,
     const AnnotationDefinition *convertElemAnnotation) {
-  codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{});", St::JsonHelper,
+  codeBlock.Add("auto res = {}::{}<{}>({}, {}, converter, converter.{}{});", St::JsonHelper,
                 St::JsonHelper_ParseConvertElem,
                 Type{mProject, convertElemAnnotation->mDefinitionSource,
                      convertElemAnnotation->GetAttribute(Annotations::JsonConvert_From)->mValue}
                     .ToString(true),
                 field.mName, varName,
-                convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName);
+                convertElemAnnotation->GetAttribute(Annotations::JsonConvert_Using)->mValue.mName,
+                mLuaStateArgument);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                 cls.mStruct->mName, field.mField->mName);
 }
@@ -325,8 +334,8 @@ void JsonParsePlugin::GenerateParseJsonJsonConvertField(Class &cls, CodeBlock &c
   Type type(mProject, jsonConvert->mDefinitionSource,
             jsonConvert->GetAttribute(Annotations::JsonConvert_From)->mValue);
   codeBlock.Line() << type.ToString(false) << "temp;";
-  codeBlock.Add("auto res = {}::{}(temp, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                varName);
+  codeBlock.Add("auto res = {}::{}(temp, {}, converter{});", St::JsonHelper, St::JsonHelper_Parse,
+                varName, mLuaStateArgument);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{} field");)R",
                 cls.mStruct->mName, field.mField->mName);
   if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName) ||
@@ -374,6 +383,8 @@ void JsonParsePlugin::ProcessEnum(Class &cls) {
                                  Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
   method.mArguments.emplace_back("converter",
                                  Type{St::Converter, PassByType::Reference, Constness::Const});
+  if (mSettings.IsFeatureEnabled(TranslatorFeatureFlag::Lua))
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
   method.mBody.Add("if (json.IsString()) {{");
   method.mBody.Indent(1);
   method.mBody.Add(
@@ -391,7 +402,7 @@ void JsonParsePlugin::ProcessEnum(Class &cls) {
     method.mBody.Add("for (auto &data: json.GetArray()) {{");
     method.mBody.Indent(1);
     method.mBody.Add("{} parsedData;", cls.mName);
-    method.mBody.Add("parsedData.{}(data, converter);", St::ParseJson);
+    method.mBody.Add("parsedData.{}(data, converter{});", St::ParseJson, mLuaStateArgument);
     method.mBody.Add("Add(parsedData);");
     method.mBody.Indent(-1);
     method.mBody.Add("}}");
@@ -414,8 +425,9 @@ void JsonParsePlugin::ProcessEnum(Class &cls) {
 void JsonParsePlugin::GenerateParseJsonForFunction(Class &cls, CodeBlock &codeBlock,
                                                    const ClassMethod &luaFunction,
                                                    const std::string &varName) {
-  codeBlock.Add("auto res = {}::{}({}, {}, converter);", St::JsonHelper, St::JsonHelper_Parse,
-                Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction), varName);
+  codeBlock.Add("auto res = {}::{}({}, {}, converter{});", St::JsonHelper, St::JsonHelper_Parse,
+                Naming().LuaFunctionHandleNameInCpp(*luaFunction.mFunction), varName,
+                mLuaStateArgument);
   codeBlock.Add(R"R(HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse {}.{}");)R",
                 cls.mStruct->mName, luaFunction.mFunction->mName);
 }

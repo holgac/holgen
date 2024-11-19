@@ -160,7 +160,7 @@ void LuaIndexMetaMethodPlugin::GenerateMethodCaller(Class &cls, const ClassMetho
 void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForExposedMethods(Class &cls,
                                                                         StringSwitcher &switcher) {
   for (auto &exposedMethod: cls.mMethods) {
-    if (!exposedMethod.mExposeToLua)
+    if (!ShouldGenerateWrapper(exposedMethod))
       continue;
     GenerateMethodCaller(cls, exposedMethod);
     std::string methodSuffix;
@@ -315,6 +315,15 @@ void LuaIndexMetaMethodPlugin::GenerateInstanceGetter(Class &cls, CodeBlock &cod
                                                       const std::string &outVarName = "instance") {
   codeBlock.Add("auto {} = {}::{}(luaState, {});", outVarName, cls.mName, St::Lua_ReadProxyObject,
                 index);
+}
+
+bool LuaIndexMetaMethodPlugin::ShouldGenerateWrapper(const ClassMethod &method) const {
+  if (!method.mExposeToLua)
+    return false;
+  if (method.mFunction &&
+      method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OnDataLoad))
+    return false;
+  return true;
 }
 
 } // namespace holgen
