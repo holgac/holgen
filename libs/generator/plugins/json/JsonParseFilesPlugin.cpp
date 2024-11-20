@@ -55,7 +55,12 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
   for (auto &fieldPtr: processOrder) {
     auto &field = *fieldPtr;
     auto &fieldDefinition = *field.mField;
-    auto &templateParameter = fieldDefinition.mType.mTemplateParameters[0];
+    const TypeDefinition *templateParameter;
+    if (TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName)) {
+      templateParameter = &fieldDefinition.mType.mTemplateParameters.back();
+    } else {
+      templateParameter = &fieldDefinition.mType.mTemplateParameters.front();
+    }
 
     {
       auto line = method.mBody.Line();
@@ -83,13 +88,18 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
     method.mBody.Indent(1);
     method.mBody.Add(
         R"(HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {{}}", filePath.string());)");
-    Type type(mProject, fieldDefinition.mDefinitionSource, templateParameter);
+    Type type(mProject, fieldDefinition.mDefinitionSource, *templateParameter);
     method.mBody.Add("{}elem;", type.ToString(false)); // if (!doc.IsArray())
-    method.mBody.Add("auto res = elem.{}(jsonElem, converter{});",
-                     ParseJson, mLuaStateArgument); // if (!doc.IsArray())
+    method.mBody.Add("auto res = {}::{}(elem, jsonElem, converter{});", St::JsonHelper,
+                     St::JsonHelper_Parse,
+                     mLuaStateArgument); // if (!doc.IsArray())
     method.mBody.Add(
         R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
-    method.mBody.Add("{}(std::move(elem));", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
+    if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName))
+      method.mBody.Add("{}(elem);", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
+    else
+      method.mBody.Add("{}(std::move(elem));",
+                       Naming().ContainerElemAdderNameInCpp(fieldDefinition));
     method.mBody.Indent(-1);
     method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
 
