@@ -9,5 +9,6 @@ namespace holgen_blackbox_test {
 class FilesystemHelper {
 public:
   static std::string ReadFile(const std::filesystem::path &filePath);
+  static void DumpFile(const std::filesystem::path &filePath, const std::string &contents);
 };
 }

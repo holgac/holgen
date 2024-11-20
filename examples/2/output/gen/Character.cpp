@@ -2,7 +2,6 @@
 #include "Character.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -75,21 +74,21 @@ bool Character::operator==(const Character &rhs) const {
   );
 }
 
-bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("name", name)) {
-        auto res = JsonHelper::Parse(mName, data.value, converter);
+        auto res = JsonHelper::Parse(mName, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
       } else if (0 == strcmp("race", name)) {
-        auto res = JsonHelper::Parse(mRace, data.value, converter);
+        auto res = JsonHelper::Parse(mRace, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.race field");
       } else if (0 == strcmp("armor", name)) {
-        auto res = JsonHelper::Parse(mArmor, data.value, converter);
+        auto res = JsonHelper::Parse(mArmor, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
       } else if (0 == strcmp("weapon", name)) {
-        auto res = JsonHelper::Parse(mWeapon, data.value, converter);
+        auto res = JsonHelper::Parse(mWeapon, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.weapon field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
@@ -99,25 +98,25 @@ bool Character::ParseJson(const rapidjson::Value &json, const Converter &convert
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      auto res = JsonHelper::Parse(mName, (*it), converter);
+      auto res = JsonHelper::Parse(mName, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      auto res = JsonHelper::Parse(mRace, (*it), converter);
+      auto res = JsonHelper::Parse(mRace, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.race field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      auto res = JsonHelper::Parse(mArmor, (*it), converter);
+      auto res = JsonHelper::Parse(mArmor, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      auto res = JsonHelper::Parse(mWeapon, (*it), converter);
+      auto res = JsonHelper::Parse(mWeapon, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.weapon field");
       ++it;
     }
@@ -129,12 +128,12 @@ bool Character::ParseJson(const rapidjson::Value &json, const Converter &convert
   return true;
 }
 
-rapidjson::Value Character::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value Character::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
-  val.AddMember("race", JsonHelper::Dump(mRace, doc), doc.GetAllocator());
-  val.AddMember("armor", JsonHelper::Dump(mArmor, doc), doc.GetAllocator());
-  val.AddMember("weapon", JsonHelper::Dump(mWeapon, doc), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc, luaState), doc.GetAllocator());
+  val.AddMember("race", JsonHelper::Dump(mRace, doc, luaState), doc.GetAllocator());
+  val.AddMember("armor", JsonHelper::Dump(mArmor, doc, luaState), doc.GetAllocator());
+  val.AddMember("weapon", JsonHelper::Dump(mWeapon, doc, luaState), doc.GetAllocator());
   return val;
 }
 

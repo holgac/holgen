@@ -2,7 +2,6 @@
 #include "Race.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -62,21 +61,21 @@ bool Race::operator==(const Race &rhs) const {
   );
 }
 
-bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("id", name)) {
-        auto res = JsonHelper::Parse(mId, data.value, converter);
+        auto res = JsonHelper::Parse(mId, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.id field");
       } else if (0 == strcmp("name", name)) {
-        auto res = JsonHelper::Parse(mName, data.value, converter);
+        auto res = JsonHelper::Parse(mName, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.name field");
       } else if (0 == strcmp("hairColors", name)) {
-        auto res = JsonHelper::Parse(mHairColors, data.value, converter);
+        auto res = JsonHelper::Parse(mHairColors, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.hairColors field");
       } else if (0 == strcmp("names", name)) {
-        auto res = JsonHelper::Parse(mNames, data.value, converter);
+        auto res = JsonHelper::Parse(mNames, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.names field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing Race: {}", name);
@@ -86,25 +85,25 @@ bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Race!");
-      auto res = JsonHelper::Parse(mId, (*it), converter);
+      auto res = JsonHelper::Parse(mId, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.id field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Race!");
-      auto res = JsonHelper::Parse(mName, (*it), converter);
+      auto res = JsonHelper::Parse(mName, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.name field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Race!");
-      auto res = JsonHelper::Parse(mHairColors, (*it), converter);
+      auto res = JsonHelper::Parse(mHairColors, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.hairColors field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Race!");
-      auto res = JsonHelper::Parse(mNames, (*it), converter);
+      auto res = JsonHelper::Parse(mNames, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Race.names field");
       ++it;
     }
@@ -116,12 +115,12 @@ bool Race::ParseJson(const rapidjson::Value &json, const Converter &converter) {
   return true;
 }
 
-rapidjson::Value Race::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value Race::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
-  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
-  val.AddMember("hairColors", JsonHelper::Dump(mHairColors, doc), doc.GetAllocator());
-  val.AddMember("names", JsonHelper::Dump(mNames, doc), doc.GetAllocator());
+  val.AddMember("id", JsonHelper::Dump(mId, doc, luaState), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc, luaState), doc.GetAllocator());
+  val.AddMember("hairColors", JsonHelper::Dump(mHairColors, doc, luaState), doc.GetAllocator());
+  val.AddMember("names", JsonHelper::Dump(mNames, doc, luaState), doc.GetAllocator());
   return val;
 }
 

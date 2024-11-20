@@ -2,7 +2,6 @@
 #include "TestStructArray.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -42,12 +41,12 @@ bool TestStructArray::operator==(const TestStructArray &rhs) const {
   );
 }
 
-bool TestStructArray::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructArray::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("type", name)) {
-        auto res = JsonHelper::Parse(mType, data.value, converter);
+        auto res = JsonHelper::Parse(mType, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArray.type field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructArray: {}", name);
@@ -57,7 +56,7 @@ bool TestStructArray::ParseJson(const rapidjson::Value &json, const Converter &c
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructArray!");
-      auto res = JsonHelper::Parse(mType, (*it), converter);
+      auto res = JsonHelper::Parse(mType, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructArray.type field");
       ++it;
     }
@@ -69,9 +68,9 @@ bool TestStructArray::ParseJson(const rapidjson::Value &json, const Converter &c
   return true;
 }
 
-rapidjson::Value TestStructArray::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructArray::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("type", JsonHelper::Dump(mType, doc), doc.GetAllocator());
+  val.AddMember("type", JsonHelper::Dump(mType, doc, luaState), doc.GetAllocator());
   return val;
 }
 

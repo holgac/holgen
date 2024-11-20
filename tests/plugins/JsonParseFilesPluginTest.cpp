@@ -91,7 +91,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct elem;
-      auto res = elem.ParseJson(jsonElem, converter, luaState);
+      auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct(std::move(elem));
     }
@@ -107,7 +107,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct2 elem;
-      auto res = elem.ParseJson(jsonElem, converter, luaState);
+      auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct2(std::move(elem));
     }
@@ -197,7 +197,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct2 elem;
-      auto res = elem.ParseJson(jsonElem, converter, luaState);
+      auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct2(std::move(elem));
     }
@@ -213,7 +213,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct elem;
-      auto res = elem.ParseJson(jsonElem, converter, luaState);
+      auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct(std::move(elem));
     }

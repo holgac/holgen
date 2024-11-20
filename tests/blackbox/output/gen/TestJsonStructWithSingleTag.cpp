@@ -2,7 +2,6 @@
 #include "TestJsonStructWithSingleTag.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -27,12 +26,12 @@ bool TestJsonStructWithSingleTag::operator==(const TestJsonStructWithSingleTag &
   );
 }
 
-bool TestJsonStructWithSingleTag::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestJsonStructWithSingleTag::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("tag", name)) {
-        auto res = JsonHelper::Parse(mTag, data.value, converter);
+        auto res = JsonHelper::Parse(mTag, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithSingleTag.tag field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructWithSingleTag: {}", name);
@@ -42,7 +41,7 @@ bool TestJsonStructWithSingleTag::ParseJson(const rapidjson::Value &json, const 
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructWithSingleTag!");
-      auto res = JsonHelper::Parse(mTag, (*it), converter);
+      auto res = JsonHelper::Parse(mTag, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithSingleTag.tag field");
       ++it;
     }
@@ -54,9 +53,9 @@ bool TestJsonStructWithSingleTag::ParseJson(const rapidjson::Value &json, const 
   return true;
 }
 
-rapidjson::Value TestJsonStructWithSingleTag::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestJsonStructWithSingleTag::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("tag", JsonHelper::Dump(mTag, doc), doc.GetAllocator());
+  val.AddMember("tag", JsonHelper::Dump(mTag, doc, luaState), doc.GetAllocator());
   return val;
 }
 

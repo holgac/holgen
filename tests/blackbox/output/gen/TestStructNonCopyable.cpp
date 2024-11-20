@@ -2,7 +2,6 @@
 #include "TestStructNonCopyable.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -31,12 +30,12 @@ bool TestStructNonCopyable::operator==(const TestStructNonCopyable &rhs) const {
   );
 }
 
-bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("bigVector", name)) {
-        auto res = JsonHelper::Parse(mBigVector, data.value, converter);
+        auto res = JsonHelper::Parse(mBigVector, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructNonCopyable.bigVector field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructNonCopyable: {}", name);
@@ -46,7 +45,7 @@ bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Conver
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructNonCopyable!");
-      auto res = JsonHelper::Parse(mBigVector, (*it), converter);
+      auto res = JsonHelper::Parse(mBigVector, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructNonCopyable.bigVector field");
       ++it;
     }
@@ -58,9 +57,9 @@ bool TestStructNonCopyable::ParseJson(const rapidjson::Value &json, const Conver
   return true;
 }
 
-rapidjson::Value TestStructNonCopyable::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructNonCopyable::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("bigVector", JsonHelper::Dump(mBigVector, doc), doc.GetAllocator());
+  val.AddMember("bigVector", JsonHelper::Dump(mBigVector, doc, luaState), doc.GetAllocator());
   return val;
 }
 

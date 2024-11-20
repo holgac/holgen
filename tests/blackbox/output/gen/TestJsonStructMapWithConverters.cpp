@@ -2,7 +2,6 @@
 #include "TestJsonStructMapWithConverters.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -53,19 +52,34 @@ bool TestJsonStructMapWithConverters::operator==(const TestJsonStructMapWithConv
   );
 }
 
-bool TestJsonStructMapWithConverters::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestJsonStructMapWithConverters::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("testMapConvertElem", name)) {
-        auto res = JsonHelper::ParseConvertElem<std::string>(mTestMapConvertElem, data.value, converter, converter.testJsonConvertStringToU32);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
+        if (!converter.mBypassConverters) {
+          auto res = JsonHelper::ParseConvertElem<std::string>(mTestMapConvertElem, data.value, converter, converter.testJsonConvertStringToU32, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
+        } else {
+          auto res = JsonHelper::Parse(mTestMapConvertElem, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
+        }
       } else if (0 == strcmp("testMapConvertKey", name)) {
-        auto res = JsonHelper::ParseConvertKey<std::string>(mTestMapConvertKey, data.value, converter, converter.testJsonConvertStringToU32);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
+        if (!converter.mBypassConverters) {
+          auto res = JsonHelper::ParseConvertKey<std::string>(mTestMapConvertKey, data.value, converter, converter.testJsonConvertStringToU32, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
+        } else {
+          auto res = JsonHelper::Parse(mTestMapConvertKey, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
+        }
       } else if (0 == strcmp("testMapConvertKeyElem", name)) {
-        auto res = JsonHelper::ParseConvertKeyElem<std::string, std::string>(mTestMapConvertKeyElem, data.value, converter, converter.testJsonConvertStringToU32, converter.testJsonConvertStringToU32);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
+        if (!converter.mBypassConverters) {
+          auto res = JsonHelper::ParseConvertKeyElem<std::string, std::string>(mTestMapConvertKeyElem, data.value, converter, converter.testJsonConvertStringToU32, converter.testJsonConvertStringToU32, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
+        } else {
+          auto res = JsonHelper::Parse(mTestMapConvertKeyElem, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
+        }
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructMapWithConverters: {}", name);
       }
@@ -74,20 +88,35 @@ bool TestJsonStructMapWithConverters::ParseJson(const rapidjson::Value &json, co
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructMapWithConverters!");
-      auto res = JsonHelper::ParseConvertElem<std::string>(mTestMapConvertElem, (*it), converter, converter.testJsonConvertStringToU32);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
+      if (!converter.mBypassConverters) {
+        auto res = JsonHelper::ParseConvertElem<std::string>(mTestMapConvertElem, (*it), converter, converter.testJsonConvertStringToU32, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
+      } else {
+        auto res = JsonHelper::Parse(mTestMapConvertElem, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertElem field");
+      }
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructMapWithConverters!");
-      auto res = JsonHelper::ParseConvertKey<std::string>(mTestMapConvertKey, (*it), converter, converter.testJsonConvertStringToU32);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
+      if (!converter.mBypassConverters) {
+        auto res = JsonHelper::ParseConvertKey<std::string>(mTestMapConvertKey, (*it), converter, converter.testJsonConvertStringToU32, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
+      } else {
+        auto res = JsonHelper::Parse(mTestMapConvertKey, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKey field");
+      }
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructMapWithConverters!");
-      auto res = JsonHelper::ParseConvertKeyElem<std::string, std::string>(mTestMapConvertKeyElem, (*it), converter, converter.testJsonConvertStringToU32, converter.testJsonConvertStringToU32);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
+      if (!converter.mBypassConverters) {
+        auto res = JsonHelper::ParseConvertKeyElem<std::string, std::string>(mTestMapConvertKeyElem, (*it), converter, converter.testJsonConvertStringToU32, converter.testJsonConvertStringToU32, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
+      } else {
+        auto res = JsonHelper::Parse(mTestMapConvertKeyElem, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructMapWithConverters.testMapConvertKeyElem field");
+      }
       ++it;
     }
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestJsonStructMapWithConverters!");
@@ -98,11 +127,11 @@ bool TestJsonStructMapWithConverters::ParseJson(const rapidjson::Value &json, co
   return true;
 }
 
-rapidjson::Value TestJsonStructMapWithConverters::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestJsonStructMapWithConverters::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("testMapConvertElem", JsonHelper::Dump(mTestMapConvertElem, doc), doc.GetAllocator());
-  val.AddMember("testMapConvertKey", JsonHelper::Dump(mTestMapConvertKey, doc), doc.GetAllocator());
-  val.AddMember("testMapConvertKeyElem", JsonHelper::Dump(mTestMapConvertKeyElem, doc), doc.GetAllocator());
+  val.AddMember("testMapConvertElem", JsonHelper::Dump(mTestMapConvertElem, doc, luaState), doc.GetAllocator());
+  val.AddMember("testMapConvertKey", JsonHelper::Dump(mTestMapConvertKey, doc, luaState), doc.GetAllocator());
+  val.AddMember("testMapConvertKeyElem", JsonHelper::Dump(mTestMapConvertKeyElem, doc, luaState), doc.GetAllocator());
   return val;
 }
 

@@ -4,6 +4,7 @@
 #include "../holgen.h"
 #include <cstdint>
 #include <string>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
@@ -24,8 +25,8 @@ public:
   void SetWhen(const std::string &val);
   void SetValue(float val);
   bool operator==(const DamageMultiplier &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

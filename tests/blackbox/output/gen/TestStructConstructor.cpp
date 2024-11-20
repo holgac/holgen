@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -50,18 +49,18 @@ bool TestStructConstructor::operator==(const TestStructConstructor &rhs) const {
   );
 }
 
-bool TestStructConstructor::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructConstructor::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("x", name)) {
-        auto res = JsonHelper::Parse(mX, data.value, converter);
+        auto res = JsonHelper::Parse(mX, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructConstructor.x field");
       } else if (0 == strcmp("y", name)) {
-        auto res = JsonHelper::Parse(mY, data.value, converter);
+        auto res = JsonHelper::Parse(mY, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructConstructor.y field");
       } else if (0 == strcmp("z", name)) {
-        auto res = JsonHelper::Parse(mZ, data.value, converter);
+        auto res = JsonHelper::Parse(mZ, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructConstructor.z field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructConstructor: {}", name);
@@ -71,19 +70,19 @@ bool TestStructConstructor::ParseJson(const rapidjson::Value &json, const Conver
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructConstructor!");
-      auto res = JsonHelper::Parse(mX, (*it), converter);
+      auto res = JsonHelper::Parse(mX, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructConstructor.x field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructConstructor!");
-      auto res = JsonHelper::Parse(mY, (*it), converter);
+      auto res = JsonHelper::Parse(mY, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructConstructor.y field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructConstructor!");
-      auto res = JsonHelper::Parse(mZ, (*it), converter);
+      auto res = JsonHelper::Parse(mZ, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructConstructor.z field");
       ++it;
     }
@@ -95,11 +94,11 @@ bool TestStructConstructor::ParseJson(const rapidjson::Value &json, const Conver
   return true;
 }
 
-rapidjson::Value TestStructConstructor::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructConstructor::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("x", JsonHelper::Dump(mX, doc), doc.GetAllocator());
-  val.AddMember("y", JsonHelper::Dump(mY, doc), doc.GetAllocator());
-  val.AddMember("z", JsonHelper::Dump(mZ, doc), doc.GetAllocator());
+  val.AddMember("x", JsonHelper::Dump(mX, doc, luaState), doc.GetAllocator());
+  val.AddMember("y", JsonHelper::Dump(mY, doc, luaState), doc.GetAllocator());
+  val.AddMember("z", JsonHelper::Dump(mZ, doc, luaState), doc.GetAllocator());
   return val;
 }
 

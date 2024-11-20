@@ -62,7 +62,7 @@ TEST_F(StructTest, SingleElem) {
 }
 )R");
   TestStructSingleElemContainer container;
-  container.ParseJson(doc, {});
+  container.ParseJson(doc, {}, nullptr);
   ASSERT_EQ(container.GetSingleElemStructCount(), 2);
   EXPECT_EQ(container.GetSingleElemStruct(0)->GetName(), "elem1");
   EXPECT_EQ(container.GetSingleElemStruct(1)->GetName(), "elem2");
@@ -79,7 +79,7 @@ TEST_F(StructTest, SingleElemWithId) {
 }
   )R");
   TestStructSingleElemContainer container;
-  container.ParseJson(doc, {});
+  container.ParseJson(doc, {}, nullptr);
   ASSERT_EQ(container.GetSingleElemStructWithIdCount(), 2);
   EXPECT_EQ(container.GetSingleElemStructWithId(0)->GetName(), "elem1");
   EXPECT_EQ(container.GetSingleElemStructWithId(1)->GetName(), "elem2");

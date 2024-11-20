@@ -2,7 +2,6 @@
 #include "TestJsonStructWithTags.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -27,13 +26,18 @@ bool TestJsonStructWithTags::operator==(const TestJsonStructWithTags &rhs) const
   );
 }
 
-bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("tags", name)) {
-        auto res = JsonHelper::ParseConvertElem<std::string>(mTags, data.value, converter, converter.testJsonConvertTag);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+        if (!converter.mBypassConverters) {
+          auto res = JsonHelper::ParseConvertElem<std::string>(mTags, data.value, converter, converter.testJsonConvertTag, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+        } else {
+          auto res = JsonHelper::Parse(mTags, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+        }
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructWithTags: {}", name);
       }
@@ -42,8 +46,13 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Conve
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructWithTags!");
-      auto res = JsonHelper::ParseConvertElem<std::string>(mTags, (*it), converter, converter.testJsonConvertTag);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+      if (!converter.mBypassConverters) {
+        auto res = JsonHelper::ParseConvertElem<std::string>(mTags, (*it), converter, converter.testJsonConvertTag, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+      } else {
+        auto res = JsonHelper::Parse(mTags, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructWithTags.tags field");
+      }
       ++it;
     }
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestJsonStructWithTags!");
@@ -54,9 +63,9 @@ bool TestJsonStructWithTags::ParseJson(const rapidjson::Value &json, const Conve
   return true;
 }
 
-rapidjson::Value TestJsonStructWithTags::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestJsonStructWithTags::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("tags", JsonHelper::Dump(mTags, doc), doc.GetAllocator());
+  val.AddMember("tags", JsonHelper::Dump(mTags, doc, luaState), doc.GetAllocator());
   return val;
 }
 

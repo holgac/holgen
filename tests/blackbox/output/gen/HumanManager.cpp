@@ -2,11 +2,12 @@
 #include "HumanManager.h"
 
 #include <cstring>
-#include <filesystem>
+#include <fstream>
 #include <queue>
 #include <vector>
-#include <lua.hpp>
 #include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include "Converter.h"
 #include "FilesystemHelper.h"
 #include "JsonHelper.h"
@@ -46,8 +47,10 @@ Human *HumanManager::AddHuman(Human &&elem) {
   }
   auto newId = mHumansNextId;
   ++mHumansNextId;
-  mHumansNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Human::IdType(-1) && idInElem != Human::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mHumansNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mHumans.emplace(newId, std::forward<Human>(elem));
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
   return &(it->second);
@@ -60,8 +63,10 @@ Human *HumanManager::AddHuman(Human &elem) {
   }
   auto newId = mHumansNextId;
   ++mHumansNextId;
-  mHumansNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Human::IdType(-1) && idInElem != Human::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mHumansNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mHumans.emplace(newId, elem);
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
   return &(it->second);
@@ -103,14 +108,23 @@ bool HumanManager::operator==(const HumanManager &rhs) const {
   );
 }
 
-rapidjson::Value HumanManager::DumpJson(rapidjson::Document &doc) const {
+bool HumanManager::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
+  return true;
+}
+
+rapidjson::Value HumanManager::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("humans", JsonHelper::Dump(mHumans, doc), doc.GetAllocator());
   return val;
 }
 
-bool HumanManager::ParseFiles(const std::string &rootPath, const Converter &converterArg) {
+bool HumanManager::ParseFiles(const std::filesystem::path &rootPath, const std::string &selfName, const Converter &converterArg, lua_State *luaState) {
   auto &converter = converterArg;
+  if (!selfName.empty()) {
+    auto contents = FilesystemHelper::ReadFile(rootPath / (selfName + ".json"));
+    rapidjson::Document doc;
+    doc.Parse(contents.c_str());
+    ParseJson(doc, converter, luaState);
+  }
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;
   std::queue<std::filesystem::path> pathsQueue;
   pathsQueue.push(std::filesystem::path(rootPath));
@@ -120,16 +134,41 @@ bool HumanManager::ParseFiles(const std::string &rootPath, const Converter &conv
       if (std::filesystem::is_directory(entry)) {
         pathsQueue.push(entry.path());
       } else if (std::filesystem::is_regular_file(entry)) {
-        std::string filename = entry.path().filename().string();
-        auto dotPosition = filename.rfind('.');
-        if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == "json") {
-          filesByName[filename.substr(0, dotPosition)].push_back(entry.path());
+        if (entry.path().extension() == ".json") {
+          auto filename = entry.path().filename().string();
+          filesByName[filename.substr(0, filename.size() - 5)].push_back(entry.path());
         }
       }
     }
     pathsQueue.pop();
   }
+  auto it = filesByName.find("humans");
+  if (it != filesByName.end()) {
+    for (const auto& filePath: it->second) {
+      auto contents = FilesystemHelper::ReadFile(filePath);
+      rapidjson::Document doc;
+      doc.Parse(contents.c_str());
+      HOLGEN_WARN_AND_RETURN_IF(!doc.IsArray(), false, "Invalid json file {}: It is supposed to contain a list of uint32_t entries", filePath.string());
+      for (auto& jsonElem: doc.GetArray()) {
+        HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
+        Human elem;
+        auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
+        AddHuman(std::move(elem));
+      }
+    }
+  }
   return true;
+}
+
+void HumanManager::DumpFiles(const std::filesystem::path &rootPath, const std::string &selfName, lua_State *luaState) const {
+  if (std::filesystem::exists(rootPath)) {
+    std::filesystem::remove_all(rootPath);
+  }
+  std::filesystem::create_directories(rootPath);
+  rapidjson::Document doc;
+  JsonHelper::DumpToFile(rootPath / (selfName + ".json"), DumpJson(doc, luaState));
+  JsonHelper::DumpToFile(rootPath / "humans.json", JsonHelper::Dump(mHumans, doc, luaState));
 }
 
 void HumanManager::PushToLua(lua_State *luaState) const {

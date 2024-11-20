@@ -2,7 +2,6 @@
 #include "Human.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "GlobalPointer.h"
@@ -46,15 +45,15 @@ bool Human::operator==(const Human &rhs) const {
   );
 }
 
-bool Human::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool Human::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("id", name)) {
-        auto res = JsonHelper::Parse(mId, data.value, converter);
+        auto res = JsonHelper::Parse(mId, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.id field");
       } else if (0 == strcmp("name", name)) {
-        auto res = JsonHelper::Parse(mName, data.value, converter);
+        auto res = JsonHelper::Parse(mName, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.name field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing Human: {}", name);
@@ -64,13 +63,13 @@ bool Human::ParseJson(const rapidjson::Value &json, const Converter &converter) 
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Human!");
-      auto res = JsonHelper::Parse(mId, (*it), converter);
+      auto res = JsonHelper::Parse(mId, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.id field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Human!");
-      auto res = JsonHelper::Parse(mName, (*it), converter);
+      auto res = JsonHelper::Parse(mName, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Human.name field");
       ++it;
     }
@@ -82,10 +81,10 @@ bool Human::ParseJson(const rapidjson::Value &json, const Converter &converter) 
   return true;
 }
 
-rapidjson::Value Human::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value Human::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
-  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("id", JsonHelper::Dump(mId, doc, luaState), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc, luaState), doc.GetAllocator());
   return val;
 }
 

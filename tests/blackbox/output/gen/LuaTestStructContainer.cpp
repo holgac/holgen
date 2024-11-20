@@ -2,7 +2,6 @@
 #include "LuaTestStructContainer.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -67,15 +66,15 @@ bool LuaTestStructContainer::operator==(const LuaTestStructContainer &rhs) const
   );
 }
 
-bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("testVector", name)) {
-        auto res = JsonHelper::Parse(mTestVector, data.value, converter);
+        auto res = JsonHelper::Parse(mTestVector, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testVector field");
       } else if (0 == strcmp("testMap", name)) {
-        auto res = JsonHelper::Parse(mTestMap, data.value, converter);
+        auto res = JsonHelper::Parse(mTestMap, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testMap field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing LuaTestStructContainer: {}", name);
@@ -85,13 +84,13 @@ bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Conve
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing LuaTestStructContainer!");
-      auto res = JsonHelper::Parse(mTestVector, (*it), converter);
+      auto res = JsonHelper::Parse(mTestVector, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testVector field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing LuaTestStructContainer!");
-      auto res = JsonHelper::Parse(mTestMap, (*it), converter);
+      auto res = JsonHelper::Parse(mTestMap, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse LuaTestStructContainer.testMap field");
       ++it;
     }
@@ -103,10 +102,10 @@ bool LuaTestStructContainer::ParseJson(const rapidjson::Value &json, const Conve
   return true;
 }
 
-rapidjson::Value LuaTestStructContainer::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value LuaTestStructContainer::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("testVector", JsonHelper::Dump(mTestVector, doc), doc.GetAllocator());
-  val.AddMember("testMap", JsonHelper::Dump(mTestMap, doc), doc.GetAllocator());
+  val.AddMember("testVector", JsonHelper::Dump(mTestVector, doc, luaState), doc.GetAllocator());
+  val.AddMember("testMap", JsonHelper::Dump(mTestMap, doc, luaState), doc.GetAllocator());
   return val;
 }
 

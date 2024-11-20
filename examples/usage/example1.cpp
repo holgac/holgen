@@ -39,7 +39,8 @@ void example1() {
   Character c2;
   // The second parameter is a converter. It's not useful for this example, but it allows programmatically converting values from json
   // into more c++ friendly values before storing in the class. The second example will expand on this.
-  c2.ParseJson(doc, {});
+  // The third parameter is the lua context. We don't need lua when parsing json in this example, so we pass null.
+  c2.ParseJson(doc, {}, nullptr);
 
   // And let's test things from lua! I'll use a basic context class I created
   LuaContext ctx(LuaContext::Create);

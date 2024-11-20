@@ -28,7 +28,7 @@ TEST(WeaponTest, ParseJson) {
 }
     )DELIM");
   Weapon weapon;
-  JsonHelper::Parse(weapon, doc, {});
+  JsonHelper::Parse(weapon, doc, {}, nullptr);
   EXPECT_EQ(weapon.GetDamageMin(), 25);
   EXPECT_EQ(weapon.GetDamageMax(), 35);
   EXPECT_EQ(weapon.GetModifiers().size(), 2);
@@ -57,7 +57,7 @@ TEST(WeaponTest, CppFunc) {
 }
     )DELIM");
   Weapon weapon;
-  JsonHelper::Parse(weapon, doc, {});
+  JsonHelper::Parse(weapon, doc, {}, nullptr);
   EXPECT_EQ(weapon.GetAverageDamage(), 30);
 }
 

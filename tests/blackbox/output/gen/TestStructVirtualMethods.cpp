@@ -2,7 +2,6 @@
 #include "TestStructVirtualMethods.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -13,11 +12,11 @@ bool TestStructVirtualMethods::operator==(const TestStructVirtualMethods &rhs) c
   return true;
 }
 
-bool TestStructVirtualMethods::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructVirtualMethods::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   return true;
 }
 
-rapidjson::Value TestStructVirtualMethods::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructVirtualMethods::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
   return val;
 }

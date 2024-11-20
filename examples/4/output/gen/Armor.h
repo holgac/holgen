@@ -4,6 +4,7 @@
 #include "../holgen.h"
 #include <cstdint>
 #include <string>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
@@ -14,6 +15,7 @@ namespace ex4_schemas {
 // Defined in 4/schemas/dataManager.hsc
 class Armor {
 public:
+  using IdType=uint32_t;
   Armor() = default;
   Armor(const Armor &rhs) = default;
   Armor(Armor &&rhs) noexcept = default;
@@ -28,8 +30,8 @@ public:
   static Armor *Get(uint32_t id);
   static Armor *GetFromName(const std::string &key);
   bool operator==(const Armor &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

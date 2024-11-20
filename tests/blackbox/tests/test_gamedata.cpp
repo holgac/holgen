@@ -58,7 +58,7 @@ TEST_F(GameDataTest, ElementGettersAndAdders) {
 
 TEST_F(GameDataTest, ParseFiles) {
   GameData gd;
-  gd.ParseFiles("gamedata", {});
+  gd.ParseFiles("gamedata", "", {}, nullptr);
   auto plateMail = gd.GetArmorFromName("Plate Mail");
   ASSERT_NE(plateMail, nullptr);
   EXPECT_EQ(plateMail->GetArmorClass(), 3);
@@ -72,7 +72,7 @@ TEST_F(GameDataTest, ParseFiles) {
 TEST_F(GameDataTest, GlobalPointer) {
   GameData gd;
   GlobalPointer<GameData>::SetInstance(&gd);
-  gd.ParseFiles("gamedata", {});
+  gd.ParseFiles("gamedata", "", {}, nullptr);
   auto plateMail = gd.GetArmorFromName("Plate Mail");
   ASSERT_NE(plateMail, nullptr);
   auto plateMailFromGlobalPointer = Armor::Get(plateMail->GetId());
@@ -83,7 +83,7 @@ TEST_F(GameDataTest, Ref) {
   // TODO: move to fixture
   GameData gd;
   GlobalPointer<GameData>::SetInstance(&gd);
-  gd.ParseFiles("gamedata", {});
+  gd.ParseFiles("gamedata", "", {}, nullptr);
   auto gorion = gd.GetCharacterFromName("Gorion");
   auto robe = gd.GetArmorFromName("Wizard Robe");
   ASSERT_NE(gorion, nullptr);

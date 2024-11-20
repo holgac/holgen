@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 #include <unordered_map>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 #include "TestStructHashable.h"
 
@@ -24,8 +25,8 @@ public:
   std::unordered_map<TestStructHashable, std::string> &GetData();
   void SetData(const std::unordered_map<TestStructHashable, std::string> &val);
   bool operator==(const TestStructHashableMap &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

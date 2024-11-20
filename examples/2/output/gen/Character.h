@@ -4,6 +4,7 @@
 #include "../holgen.h"
 #include <cstdint>
 #include <string>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 #include "Armor.h"
 #include "Race.h"
@@ -37,8 +38,8 @@ public:
   void SetWeapon(const Weapon &val);
   void Initialize();
   bool operator==(const Character &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

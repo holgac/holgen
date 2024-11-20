@@ -2,7 +2,6 @@
 #include "TestContainerInnerStructNoId.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -36,15 +35,15 @@ bool TestContainerInnerStructNoId::operator==(const TestContainerInnerStructNoId
   );
 }
 
-bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("field", name)) {
-        auto res = JsonHelper::Parse(mField, data.value, converter);
+        auto res = JsonHelper::Parse(mField, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.field field");
       } else if (0 == strcmp("name", name)) {
-        auto res = JsonHelper::Parse(mName, data.value, converter);
+        auto res = JsonHelper::Parse(mName, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.name field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerInnerStructNoId: {}", name);
@@ -54,13 +53,13 @@ bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value &json, const
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerInnerStructNoId!");
-      auto res = JsonHelper::Parse(mField, (*it), converter);
+      auto res = JsonHelper::Parse(mField, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.field field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerInnerStructNoId!");
-      auto res = JsonHelper::Parse(mName, (*it), converter);
+      auto res = JsonHelper::Parse(mName, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerInnerStructNoId.name field");
       ++it;
     }
@@ -72,10 +71,10 @@ bool TestContainerInnerStructNoId::ParseJson(const rapidjson::Value &json, const
   return true;
 }
 
-rapidjson::Value TestContainerInnerStructNoId::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestContainerInnerStructNoId::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("field", JsonHelper::Dump(mField, doc), doc.GetAllocator());
-  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
+  val.AddMember("field", JsonHelper::Dump(mField, doc, luaState), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc, luaState), doc.GetAllocator());
   return val;
 }
 

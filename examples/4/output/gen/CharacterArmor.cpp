@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Armor.h"
 #include "Converter.h"
@@ -42,18 +41,23 @@ bool CharacterArmor::operator==(const CharacterArmor &rhs) const {
   );
 }
 
-bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("dirtAmount", name)) {
-        auto res = JsonHelper::Parse(mDirtAmount, data.value, converter);
+        auto res = JsonHelper::Parse(mDirtAmount, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.dirtAmount field");
       } else if (0 == strcmp("armor", name)) {
-        std::string temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
-        mArmorId = converter.armorNameToId(temp);
+        if (!converter.mBypassConverters) {
+          std::string temp;
+          auto res = JsonHelper::Parse(temp, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
+          mArmorId = converter.armorNameToId(temp);
+        } else {
+          auto res = JsonHelper::Parse(mArmorId, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
+        }
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing CharacterArmor: {}", name);
       }
@@ -62,16 +66,21 @@ bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &co
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing CharacterArmor!");
-      auto res = JsonHelper::Parse(mDirtAmount, (*it), converter);
+      auto res = JsonHelper::Parse(mDirtAmount, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.dirtAmount field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing CharacterArmor!");
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
-      mArmorId = converter.armorNameToId(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
+        mArmorId = converter.armorNameToId(temp);
+      } else {
+        auto res = JsonHelper::Parse(mArmorId, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse CharacterArmor.armor field");
+      }
       ++it;
     }
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing CharacterArmor!");
@@ -82,10 +91,10 @@ bool CharacterArmor::ParseJson(const rapidjson::Value &json, const Converter &co
   return true;
 }
 
-rapidjson::Value CharacterArmor::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value CharacterArmor::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("dirtAmount", JsonHelper::Dump(mDirtAmount, doc), doc.GetAllocator());
-  val.AddMember("armor", JsonHelper::Dump(mArmorId, doc), doc.GetAllocator());
+  val.AddMember("dirtAmount", JsonHelper::Dump(mDirtAmount, doc, luaState), doc.GetAllocator());
+  val.AddMember("armor", JsonHelper::Dump(mArmorId, doc, luaState), doc.GetAllocator());
   return val;
 }
 

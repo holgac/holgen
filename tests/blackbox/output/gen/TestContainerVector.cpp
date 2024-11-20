@@ -2,7 +2,6 @@
 #include "TestContainerVector.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -77,8 +76,10 @@ TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestCo
     return nullptr;
   }
   auto newId = mInnerStructsWithId.size();
-  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   return &(mInnerStructsWithId.emplace_back(std::forward<TestContainerInnerStructWithId>(elem)));
 }
 
@@ -88,8 +89,10 @@ TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestCo
     return nullptr;
   }
   auto newId = mInnerStructsWithId.size();
-  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   return &(mInnerStructsWithId.emplace_back(elem));
 }
 
@@ -238,21 +241,21 @@ bool TestContainerVector::operator==(const TestContainerVector &rhs) const {
   );
 }
 
-bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("innerStructsWithId", name)) {
-        auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
+        auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsWithId field");
       } else if (0 == strcmp("innerStructsNoId", name)) {
-        auto res = JsonHelper::Parse(mInnerStructsNoId, data.value, converter);
+        auto res = JsonHelper::Parse(mInnerStructsNoId, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsNoId field");
       } else if (0 == strcmp("stringContainer", name)) {
-        auto res = JsonHelper::Parse(mStringContainer, data.value, converter);
+        auto res = JsonHelper::Parse(mStringContainer, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.stringContainer field");
       } else if (0 == strcmp("unsignedContainer", name)) {
-        auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter);
+        auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.unsignedContainer field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerVector: {}", name);
@@ -262,25 +265,25 @@ bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converte
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
-      auto res = JsonHelper::Parse(mInnerStructsWithId, (*it), converter);
+      auto res = JsonHelper::Parse(mInnerStructsWithId, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsWithId field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
-      auto res = JsonHelper::Parse(mInnerStructsNoId, (*it), converter);
+      auto res = JsonHelper::Parse(mInnerStructsNoId, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.innerStructsNoId field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
-      auto res = JsonHelper::Parse(mStringContainer, (*it), converter);
+      auto res = JsonHelper::Parse(mStringContainer, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.stringContainer field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerVector!");
-      auto res = JsonHelper::Parse(mUnsignedContainer, (*it), converter);
+      auto res = JsonHelper::Parse(mUnsignedContainer, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerVector.unsignedContainer field");
       ++it;
     }
@@ -292,12 +295,12 @@ bool TestContainerVector::ParseJson(const rapidjson::Value &json, const Converte
   return true;
 }
 
-rapidjson::Value TestContainerVector::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestContainerVector::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("innerStructsWithId", JsonHelper::Dump(mInnerStructsWithId, doc), doc.GetAllocator());
-  val.AddMember("innerStructsNoId", JsonHelper::Dump(mInnerStructsNoId, doc), doc.GetAllocator());
-  val.AddMember("stringContainer", JsonHelper::Dump(mStringContainer, doc), doc.GetAllocator());
-  val.AddMember("unsignedContainer", JsonHelper::Dump(mUnsignedContainer, doc), doc.GetAllocator());
+  val.AddMember("innerStructsWithId", JsonHelper::Dump(mInnerStructsWithId, doc, luaState), doc.GetAllocator());
+  val.AddMember("innerStructsNoId", JsonHelper::Dump(mInnerStructsNoId, doc, luaState), doc.GetAllocator());
+  val.AddMember("stringContainer", JsonHelper::Dump(mStringContainer, doc, luaState), doc.GetAllocator());
+  val.AddMember("unsignedContainer", JsonHelper::Dump(mUnsignedContainer, doc, luaState), doc.GetAllocator());
   return val;
 }
 

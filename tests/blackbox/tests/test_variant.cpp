@@ -102,7 +102,7 @@ TEST_F(VariantTest, JsonSharedType) {
   "being1": {"name": "john", "nationality": "none"},
   "being2": {"name": "john2", "nationality": "non2e"}
 })R");
-  tvs.ParseJson(doc, {});
+  tvs.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(tvs.GetBeingType(), TestVariantStructType::Human);
 
   EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructCat(); }, std::runtime_error);
@@ -127,7 +127,7 @@ TEST_F(VariantTest, JsonExplicitType) {
   "being1": {"name": "catty", "color": "orange"},
   "being2": {"name": "kitty", "color": "white"}
   })R");
-  tvs.ParseJson(doc, {});
+  tvs.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(tvs.GetType(), TestVariantStructType::Cat);
 
   EXPECT_THROW({ tvs.GetBeing1AsTestVariantStructHuman(); }, std::runtime_error);

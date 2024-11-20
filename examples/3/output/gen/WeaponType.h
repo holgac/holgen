@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <format>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
@@ -35,8 +36,8 @@ public:
   constexpr static std::array<WeaponType::Entry, 2> GetEntries() {
     return std::array<WeaponType::Entry, 2>{Sword, Bow};
   }
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*

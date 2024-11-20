@@ -4,5 +4,7 @@
 #include "../holgen.h"
 namespace ex1_schemas {
 class Converter {
+public:
+  bool mBypassConverters = false;
 };
 }

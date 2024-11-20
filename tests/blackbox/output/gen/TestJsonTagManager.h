@@ -3,9 +3,11 @@
 
 #include "../holgen.h"
 #include <cstdint>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 #include "TestJsonTag.h"
 
@@ -33,8 +35,10 @@ public:
   TestJsonTag *GetTag(uint64_t idx);
   size_t GetTagCount() const;
   bool operator==(const TestJsonTagManager &rhs) const;
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
-  bool ParseFiles(const std::string &rootPath, const Converter &converterArg);
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
+  bool ParseFiles(const std::filesystem::path &rootPath, const std::string &selfName, const Converter &converterArg, lua_State *luaState);
+  void DumpFiles(const std::filesystem::path &rootPath, const std::string &selfName, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

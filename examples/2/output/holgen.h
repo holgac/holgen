@@ -45,3 +45,16 @@ continue; \
 #else
 #define HOLGEN_EXPORT
 #endif
+namespace ex2_schemas {
+template <typename T>
+concept EnumConcept = requires(T t) {
+  typename T::UnderlyingType;
+  std::is_convertible_v<typename T::UnderlyingType, int64_t>;
+  {
+    T::Invalid
+  } -> std::convertible_to<int64_t>;
+  {
+    t.GetValue()
+  } -> std::same_as<typename T::Entry>;
+};
+}

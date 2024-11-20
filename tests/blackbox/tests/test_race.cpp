@@ -15,7 +15,7 @@ TEST(RaceTest, ParseNestedContainers) {
 }
     )DELIM");
   Race race;
-  JsonHelper::Parse(race, doc, {});
+  JsonHelper::Parse(race, doc, {}, nullptr);
   EXPECT_EQ(race.GetName(), "elf");
   EXPECT_EQ(race.GetHairColors().size(), 3);
   EXPECT_EQ(race.GetHairColors()[0], "black");

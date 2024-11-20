@@ -2,7 +2,6 @@
 #include "TestStruct.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -53,18 +52,18 @@ bool TestStruct::operator==(const TestStruct &rhs) const {
   );
 }
 
-bool TestStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStruct::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("testFieldBool", name)) {
-        auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter);
+        auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldBool field");
       } else if (0 == strcmp("testFieldUnsigned", name)) {
-        auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
+        auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldUnsigned field");
       } else if (0 == strcmp("testFieldString", name)) {
-        auto res = JsonHelper::Parse(mTestFieldString, data.value, converter);
+        auto res = JsonHelper::Parse(mTestFieldString, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldString field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStruct: {}", name);
@@ -74,19 +73,19 @@ bool TestStruct::ParseJson(const rapidjson::Value &json, const Converter &conver
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStruct!");
-      auto res = JsonHelper::Parse(mTestFieldBool, (*it), converter);
+      auto res = JsonHelper::Parse(mTestFieldBool, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldBool field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStruct!");
-      auto res = JsonHelper::Parse(mTestFieldUnsigned, (*it), converter);
+      auto res = JsonHelper::Parse(mTestFieldUnsigned, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldUnsigned field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStruct!");
-      auto res = JsonHelper::Parse(mTestFieldString, (*it), converter);
+      auto res = JsonHelper::Parse(mTestFieldString, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStruct.testFieldString field");
       ++it;
     }
@@ -98,11 +97,11 @@ bool TestStruct::ParseJson(const rapidjson::Value &json, const Converter &conver
   return true;
 }
 
-rapidjson::Value TestStruct::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStruct::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("testFieldBool", JsonHelper::Dump(mTestFieldBool, doc), doc.GetAllocator());
-  val.AddMember("testFieldUnsigned", JsonHelper::Dump(mTestFieldUnsigned, doc), doc.GetAllocator());
-  val.AddMember("testFieldString", JsonHelper::Dump(mTestFieldString, doc), doc.GetAllocator());
+  val.AddMember("testFieldBool", JsonHelper::Dump(mTestFieldBool, doc, luaState), doc.GetAllocator());
+  val.AddMember("testFieldUnsigned", JsonHelper::Dump(mTestFieldUnsigned, doc, luaState), doc.GetAllocator());
+  val.AddMember("testFieldString", JsonHelper::Dump(mTestFieldString, doc, luaState), doc.GetAllocator());
   return val;
 }
 

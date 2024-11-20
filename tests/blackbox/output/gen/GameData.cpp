@@ -2,10 +2,11 @@
 #include "GameData.h"
 
 #include <cstring>
-#include <filesystem>
+#include <fstream>
 #include <queue>
-#include <lua.hpp>
 #include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 #include "Converter.h"
 #include "FilesystemHelper.h"
 #include "JsonHelper.h"
@@ -68,8 +69,10 @@ Boot *GameData::AddBoot(Boot &&elem) {
     return nullptr;
   }
   auto newId = mBoots.size();
-  mBootsNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Boot::IdType(-1) && idInElem != Boot::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mBootsNameIndex.emplace(elem.GetName(), newId);
   return &(mBoots.emplace_back(std::forward<Boot>(elem)));
 }
 
@@ -79,8 +82,10 @@ Boot *GameData::AddBoot(Boot &elem) {
     return nullptr;
   }
   auto newId = mBoots.size();
-  mBootsNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Boot::IdType(-1) && idInElem != Boot::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mBootsNameIndex.emplace(elem.GetName(), newId);
   return &(mBoots.emplace_back(elem));
 }
 
@@ -138,9 +143,11 @@ Armor *GameData::AddArmor(Armor &&elem) {
     return nullptr;
   }
   auto newId = mArmors.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
+  elem.SetId(newId);
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
-  elem.SetId(newId);
   return &(mArmors.emplace_back(std::forward<Armor>(elem)));
 }
 
@@ -154,9 +161,11 @@ Armor *GameData::AddArmor(Armor &elem) {
     return nullptr;
   }
   auto newId = mArmors.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
+  elem.SetId(newId);
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
-  elem.SetId(newId);
   return &(mArmors.emplace_back(elem));
 }
 
@@ -196,8 +205,10 @@ Character *GameData::AddCharacter(Character &&elem) {
     return nullptr;
   }
   auto newId = mCharacters.size();
-  mCharactersNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mCharactersNameIndex.emplace(elem.GetName(), newId);
   return &(mCharacters.emplace_back(std::forward<Character>(elem)));
 }
 
@@ -207,8 +218,10 @@ Character *GameData::AddCharacter(Character &elem) {
     return nullptr;
   }
   auto newId = mCharacters.size();
-  mCharactersNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mCharactersNameIndex.emplace(elem.GetName(), newId);
   return &(mCharacters.emplace_back(elem));
 }
 
@@ -240,15 +253,16 @@ bool GameData::operator==(const GameData &rhs) const {
   );
 }
 
-rapidjson::Value GameData::DumpJson(rapidjson::Document &doc) const {
+bool GameData::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
+  return true;
+}
+
+rapidjson::Value GameData::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("boots", JsonHelper::Dump(mBoots, doc), doc.GetAllocator());
-  val.AddMember("armors", JsonHelper::Dump(mArmors, doc), doc.GetAllocator());
-  val.AddMember("characters", JsonHelper::Dump(mCharacters, doc), doc.GetAllocator());
   return val;
 }
 
-bool GameData::ParseFiles(const std::string &rootPath, const Converter &converterArg) {
+bool GameData::ParseFiles(const std::filesystem::path &rootPath, const std::string &selfName, const Converter &converterArg, lua_State *luaState) {
   auto converter = converterArg;
   if (converter.bootNameToId == nullptr) {
     converter.bootNameToId = [this](const std::string &key) -> uint32_t {
@@ -264,6 +278,12 @@ bool GameData::ParseFiles(const std::string &rootPath, const Converter &converte
       return elem->GetId();
     };
   }
+  if (!selfName.empty()) {
+    auto contents = FilesystemHelper::ReadFile(rootPath / (selfName + ".json"));
+    rapidjson::Document doc;
+    doc.Parse(contents.c_str());
+    ParseJson(doc, converter, luaState);
+  }
   std::map<std::string, std::vector<std::filesystem::path>> filesByName;
   std::queue<std::filesystem::path> pathsQueue;
   pathsQueue.push(std::filesystem::path(rootPath));
@@ -273,10 +293,9 @@ bool GameData::ParseFiles(const std::string &rootPath, const Converter &converte
       if (std::filesystem::is_directory(entry)) {
         pathsQueue.push(entry.path());
       } else if (std::filesystem::is_regular_file(entry)) {
-        std::string filename = entry.path().filename().string();
-        auto dotPosition = filename.rfind('.');
-        if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == "json") {
-          filesByName[filename.substr(0, dotPosition)].push_back(entry.path());
+        if (entry.path().extension() == ".json") {
+          auto filename = entry.path().filename().string();
+          filesByName[filename.substr(0, filename.size() - 5)].push_back(entry.path());
         }
       }
     }
@@ -292,7 +311,7 @@ bool GameData::ParseFiles(const std::string &rootPath, const Converter &converte
       for (auto& jsonElem: doc.GetArray()) {
         HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
         Armor elem;
-        auto res = elem.ParseJson(jsonElem, converter);
+        auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
         AddArmor(std::move(elem));
       }
@@ -308,7 +327,7 @@ bool GameData::ParseFiles(const std::string &rootPath, const Converter &converte
       for (auto& jsonElem: doc.GetArray()) {
         HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
         Boot elem;
-        auto res = elem.ParseJson(jsonElem, converter);
+        auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
         AddBoot(std::move(elem));
       }
@@ -324,13 +343,25 @@ bool GameData::ParseFiles(const std::string &rootPath, const Converter &converte
       for (auto& jsonElem: doc.GetArray()) {
         HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
         Character elem;
-        auto res = elem.ParseJson(jsonElem, converter);
+        auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
         AddCharacter(std::move(elem));
       }
     }
   }
   return true;
+}
+
+void GameData::DumpFiles(const std::filesystem::path &rootPath, const std::string &selfName, lua_State *luaState) const {
+  if (std::filesystem::exists(rootPath)) {
+    std::filesystem::remove_all(rootPath);
+  }
+  std::filesystem::create_directories(rootPath);
+  rapidjson::Document doc;
+  JsonHelper::DumpToFile(rootPath / (selfName + ".json"), DumpJson(doc, luaState));
+  JsonHelper::DumpToFile(rootPath / "boots.json", JsonHelper::Dump(mBoots, doc, luaState));
+  JsonHelper::DumpToFile(rootPath / "armors.json", JsonHelper::Dump(mArmors, doc, luaState));
+  JsonHelper::DumpToFile(rootPath / "characters.json", JsonHelper::Dump(mCharacters, doc, luaState));
 }
 
 void GameData::PushToLua(lua_State *luaState) const {

@@ -9,5 +9,6 @@ namespace ex1_schemas {
 class FilesystemHelper {
 public:
   static std::string ReadFile(const std::filesystem::path &filePath);
+  static void DumpFile(const std::filesystem::path &filePath, const std::string &contents);
 };
 }

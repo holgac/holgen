@@ -2,7 +2,6 @@
 #include "TestStructPairFields.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -40,15 +39,15 @@ bool TestStructPairFields::operator==(const TestStructPairFields &rhs) const {
   );
 }
 
-bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("intStringPair", name)) {
-        auto res = JsonHelper::Parse(mIntStringPair, data.value, converter);
+        auto res = JsonHelper::Parse(mIntStringPair, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.intStringPair field");
       } else if (0 == strcmp("pairVector", name)) {
-        auto res = JsonHelper::Parse(mPairVector, data.value, converter);
+        auto res = JsonHelper::Parse(mPairVector, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.pairVector field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructPairFields: {}", name);
@@ -58,13 +57,13 @@ bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Convert
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructPairFields!");
-      auto res = JsonHelper::Parse(mIntStringPair, (*it), converter);
+      auto res = JsonHelper::Parse(mIntStringPair, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.intStringPair field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructPairFields!");
-      auto res = JsonHelper::Parse(mPairVector, (*it), converter);
+      auto res = JsonHelper::Parse(mPairVector, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructPairFields.pairVector field");
       ++it;
     }
@@ -76,10 +75,10 @@ bool TestStructPairFields::ParseJson(const rapidjson::Value &json, const Convert
   return true;
 }
 
-rapidjson::Value TestStructPairFields::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructPairFields::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("intStringPair", JsonHelper::Dump(mIntStringPair, doc), doc.GetAllocator());
-  val.AddMember("pairVector", JsonHelper::Dump(mPairVector, doc), doc.GetAllocator());
+  val.AddMember("intStringPair", JsonHelper::Dump(mIntStringPair, doc, luaState), doc.GetAllocator());
+  val.AddMember("pairVector", JsonHelper::Dump(mPairVector, doc, luaState), doc.GetAllocator());
   return val;
 }
 

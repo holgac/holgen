@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -37,15 +36,15 @@ bool DamageMultiplier::operator==(const DamageMultiplier &rhs) const {
   );
 }
 
-bool DamageMultiplier::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool DamageMultiplier::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("when", name)) {
-        auto res = JsonHelper::Parse(mWhen, data.value, converter);
+        auto res = JsonHelper::Parse(mWhen, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.when field");
       } else if (0 == strcmp("value", name)) {
-        auto res = JsonHelper::Parse(mValue, data.value, converter);
+        auto res = JsonHelper::Parse(mValue, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.value field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing DamageMultiplier: {}", name);
@@ -55,13 +54,13 @@ bool DamageMultiplier::ParseJson(const rapidjson::Value &json, const Converter &
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing DamageMultiplier!");
-      auto res = JsonHelper::Parse(mWhen, (*it), converter);
+      auto res = JsonHelper::Parse(mWhen, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.when field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing DamageMultiplier!");
-      auto res = JsonHelper::Parse(mValue, (*it), converter);
+      auto res = JsonHelper::Parse(mValue, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse DamageMultiplier.value field");
       ++it;
     }
@@ -73,10 +72,10 @@ bool DamageMultiplier::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
-rapidjson::Value DamageMultiplier::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value DamageMultiplier::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("when", JsonHelper::Dump(mWhen, doc), doc.GetAllocator());
-  val.AddMember("value", JsonHelper::Dump(mValue, doc), doc.GetAllocator());
+  val.AddMember("when", JsonHelper::Dump(mWhen, doc, luaState), doc.GetAllocator());
+  val.AddMember("value", JsonHelper::Dump(mValue, doc, luaState), doc.GetAllocator());
   return val;
 }
 

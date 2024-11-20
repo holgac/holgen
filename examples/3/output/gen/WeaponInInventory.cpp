@@ -2,7 +2,6 @@
 #include "WeaponInInventory.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -98,13 +97,13 @@ bool WeaponInInventory::operator==(const WeaponInInventory &rhs) const {
   return true;
 }
 
-bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("type", name)) {
         WeaponType temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
+        auto res = JsonHelper::Parse(temp, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.type field");
         SetType(temp);
       }
@@ -115,9 +114,9 @@ bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter 
       } else if (0 == strcmp("weapon", name)) {
         bool res;
         if (mType == WeaponType::Bow) {
-          res = JsonHelper::Parse(*GetWeaponAsWeaponTypeBow(), data.value, converter);
+          res = JsonHelper::Parse(*GetWeaponAsWeaponTypeBow(), data.value, converter, luaState);
         } else if (mType == WeaponType::Sword) {
-          res = JsonHelper::Parse(*GetWeaponAsWeaponTypeSword(), data.value, converter);
+          res = JsonHelper::Parse(*GetWeaponAsWeaponTypeSword(), data.value, converter, luaState);
         } else {
           HOLGEN_WARN("Could not json-parse WeaponInInventory.weapon variant field, its type {} is unexpected", mType);
           return false;
@@ -132,7 +131,7 @@ bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter 
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponInInventory!");
       WeaponType temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
+      auto res = JsonHelper::Parse(temp, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponInInventory.type field");
       SetType(temp);
       ++it;
@@ -141,9 +140,9 @@ bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter 
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponInInventory!");
       bool res;
       if (mType == WeaponType::Bow) {
-        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeBow(), (*it), converter);
+        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeBow(), (*it), converter, luaState);
       } else if (mType == WeaponType::Sword) {
-        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeSword(), (*it), converter);
+        res = JsonHelper::Parse(*GetWeaponAsWeaponTypeSword(), (*it), converter, luaState);
       } else {
         HOLGEN_WARN("Could not json-parse WeaponInInventory.weapon variant field, its type {} is unexpected", mType);
         return false;
@@ -159,15 +158,15 @@ bool WeaponInInventory::ParseJson(const rapidjson::Value &json, const Converter 
   return true;
 }
 
-rapidjson::Value WeaponInInventory::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value WeaponInInventory::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("type", JsonHelper::Dump(mType, doc), doc.GetAllocator());
+  val.AddMember("type", JsonHelper::Dump(mType, doc, luaState), doc.GetAllocator());
   switch (mType.GetValue()) {
   case WeaponType::Bow:
-    val.AddMember("weapon", GetWeaponAsWeaponTypeBow()->DumpJson(doc), doc.GetAllocator());
+    val.AddMember("weapon", GetWeaponAsWeaponTypeBow()->DumpJson(doc, luaState), doc.GetAllocator());
     break;
   case WeaponType::Sword:
-    val.AddMember("weapon", GetWeaponAsWeaponTypeSword()->DumpJson(doc), doc.GetAllocator());
+    val.AddMember("weapon", GetWeaponAsWeaponTypeSword()->DumpJson(doc, luaState), doc.GetAllocator());
     break;
   }
   return val;

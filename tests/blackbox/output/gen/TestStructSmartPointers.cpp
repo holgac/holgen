@@ -2,7 +2,6 @@
 #include "TestStructSmartPointers.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -73,11 +72,11 @@ bool TestStructSmartPointers::operator==(const TestStructSmartPointers &rhs) con
   );
 }
 
-bool TestStructSmartPointers::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructSmartPointers::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   return true;
 }
 
-rapidjson::Value TestStructSmartPointers::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructSmartPointers::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
   return val;
 }

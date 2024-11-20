@@ -2,7 +2,6 @@
 #include "TestJsonStructContainer.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -53,18 +52,18 @@ bool TestJsonStructContainer::operator==(const TestJsonStructContainer &rhs) con
   );
 }
 
-bool TestJsonStructContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestJsonStructContainer::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("tags", name)) {
-        auto res = JsonHelper::Parse(mTags, data.value, converter);
+        auto res = JsonHelper::Parse(mTags, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructContainer.tags field");
       } else if (0 == strcmp("enums", name)) {
-        auto res = JsonHelper::Parse(mEnums, data.value, converter);
+        auto res = JsonHelper::Parse(mEnums, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructContainer.enums field");
       } else if (0 == strcmp("tagMap", name)) {
-        auto res = JsonHelper::Parse(mTagMap, data.value, converter);
+        auto res = JsonHelper::Parse(mTagMap, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructContainer.tagMap field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestJsonStructContainer: {}", name);
@@ -74,19 +73,19 @@ bool TestJsonStructContainer::ParseJson(const rapidjson::Value &json, const Conv
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructContainer!");
-      auto res = JsonHelper::Parse(mTags, (*it), converter);
+      auto res = JsonHelper::Parse(mTags, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructContainer.tags field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructContainer!");
-      auto res = JsonHelper::Parse(mEnums, (*it), converter);
+      auto res = JsonHelper::Parse(mEnums, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructContainer.enums field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestJsonStructContainer!");
-      auto res = JsonHelper::Parse(mTagMap, (*it), converter);
+      auto res = JsonHelper::Parse(mTagMap, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestJsonStructContainer.tagMap field");
       ++it;
     }
@@ -98,11 +97,11 @@ bool TestJsonStructContainer::ParseJson(const rapidjson::Value &json, const Conv
   return true;
 }
 
-rapidjson::Value TestJsonStructContainer::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestJsonStructContainer::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("tags", JsonHelper::Dump(mTags, doc), doc.GetAllocator());
-  val.AddMember("enums", JsonHelper::Dump(mEnums, doc), doc.GetAllocator());
-  val.AddMember("tagMap", JsonHelper::Dump(mTagMap, doc), doc.GetAllocator());
+  val.AddMember("tags", JsonHelper::Dump(mTags, doc, luaState), doc.GetAllocator());
+  val.AddMember("enums", JsonHelper::Dump(mEnums, doc, luaState), doc.GetAllocator());
+  val.AddMember("tagMap", JsonHelper::Dump(mTagMap, doc, luaState), doc.GetAllocator());
   return val;
 }
 

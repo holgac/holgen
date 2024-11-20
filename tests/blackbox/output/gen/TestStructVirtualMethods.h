@@ -3,6 +3,7 @@
 
 #include "../holgen.h"
 #include <cstdint>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
@@ -20,8 +21,8 @@ public:
   virtual uint32_t VirtualFunc();
   virtual uint32_t PureVirtualFunc() = 0;
   bool operator==(const TestStructVirtualMethods &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
   /*

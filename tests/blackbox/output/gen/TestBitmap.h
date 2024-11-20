@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <format>
 #include <string>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
@@ -71,8 +72,8 @@ public:
   constexpr static std::array<TestBitmap::EntryIndex, 5> GetEntryIndices() {
     return std::array<TestBitmap::EntryIndex, 5>{Entry1Index, Entry2Index, Entry3Index, Entry4Index, Entry5Index};
   }
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   /*

@@ -2,7 +2,6 @@
 #include "TestBitmapStruct.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -43,12 +42,12 @@ bool TestBitmapStruct::operator==(const TestBitmapStruct &rhs) const {
   );
 }
 
-bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("bitmapField", name)) {
-        auto res = JsonHelper::Parse(mBitmapField, data.value, converter);
+        auto res = JsonHelper::Parse(mBitmapField, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestBitmapStruct.bitmapField field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestBitmapStruct: {}", name);
@@ -58,7 +57,7 @@ bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestBitmapStruct!");
-      auto res = JsonHelper::Parse(mBitmapField, (*it), converter);
+      auto res = JsonHelper::Parse(mBitmapField, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestBitmapStruct.bitmapField field");
       ++it;
     }
@@ -70,9 +69,9 @@ bool TestBitmapStruct::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
-rapidjson::Value TestBitmapStruct::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestBitmapStruct::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("bitmapField", JsonHelper::Dump(mBitmapField, doc), doc.GetAllocator());
+  val.AddMember("bitmapField", JsonHelper::Dump(mBitmapField, doc, luaState), doc.GetAllocator());
   return val;
 }
 

@@ -2,7 +2,6 @@
 #include "Weapon.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -58,18 +57,18 @@ bool Weapon::operator==(const Weapon &rhs) const {
   );
 }
 
-bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("damageMin", name)) {
-        auto res = JsonHelper::Parse(mDamageMin, data.value, converter);
+        auto res = JsonHelper::Parse(mDamageMin, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMin field");
       } else if (0 == strcmp("damageMax", name)) {
-        auto res = JsonHelper::Parse(mDamageMax, data.value, converter);
+        auto res = JsonHelper::Parse(mDamageMax, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMax field");
       } else if (0 == strcmp("GetAverageDamage", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_GetAverageDamage, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_GetAverageDamage, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.GetAverageDamage");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing Weapon: {}", name);
@@ -79,18 +78,18 @@ bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter)
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Weapon!");
-      auto res = JsonHelper::Parse(mDamageMin, (*it), converter);
+      auto res = JsonHelper::Parse(mDamageMin, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMin field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Weapon!");
-      auto res = JsonHelper::Parse(mDamageMax, (*it), converter);
+      auto res = JsonHelper::Parse(mDamageMax, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.damageMax field");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_GetAverageDamage, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_GetAverageDamage, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Weapon.GetAverageDamage");
       ++it;
     }
@@ -102,10 +101,10 @@ bool Weapon::ParseJson(const rapidjson::Value &json, const Converter &converter)
   return true;
 }
 
-rapidjson::Value Weapon::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value Weapon::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("damageMin", JsonHelper::Dump(mDamageMin, doc), doc.GetAllocator());
-  val.AddMember("damageMax", JsonHelper::Dump(mDamageMax, doc), doc.GetAllocator());
+  val.AddMember("damageMin", JsonHelper::Dump(mDamageMin, doc, luaState), doc.GetAllocator());
+  val.AddMember("damageMax", JsonHelper::Dump(mDamageMax, doc, luaState), doc.GetAllocator());
   return val;
 }
 

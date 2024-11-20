@@ -2,7 +2,6 @@
 #include "TestLuaCalculator.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -186,30 +185,30 @@ bool TestLuaCalculator::operator==(const TestLuaCalculator &rhs) const {
   );
 }
 
-bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("lastValue", name)) {
-        auto res = JsonHelper::Parse(mLastValue, data.value, converter);
+        auto res = JsonHelper::Parse(mLastValue, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.lastValue field");
       } else if (0 == strcmp("AddPrimitive", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_AddPrimitive, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_AddPrimitive, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddPrimitive");
       } else if (0 == strcmp("AddRef", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_AddRef, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_AddRef, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddRef");
       } else if (0 == strcmp("AddNullable", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_AddNullable, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_AddNullable, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddNullable");
       } else if (0 == strcmp("ReturnNullable", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNullable, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNullable, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNullable");
       } else if (0 == strcmp("ReturnRef", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnRef, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnRef, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnRef");
       } else if (0 == strcmp("ReturnNew", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNew, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNew, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNew");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestLuaCalculator: {}", name);
@@ -219,37 +218,37 @@ bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter 
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaCalculator!");
-      auto res = JsonHelper::Parse(mLastValue, (*it), converter);
+      auto res = JsonHelper::Parse(mLastValue, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.lastValue field");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_AddPrimitive, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_AddPrimitive, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddPrimitive");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_AddRef, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_AddRef, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddRef");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_AddNullable, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_AddNullable, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.AddNullable");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNullable, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNullable, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNullable");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnRef, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnRef, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnRef");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNew, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_ReturnNew, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaCalculator.ReturnNew");
       ++it;
     }
@@ -261,9 +260,9 @@ bool TestLuaCalculator::ParseJson(const rapidjson::Value &json, const Converter 
   return true;
 }
 
-rapidjson::Value TestLuaCalculator::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestLuaCalculator::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("lastValue", JsonHelper::Dump(mLastValue, doc), doc.GetAllocator());
+  val.AddMember("lastValue", JsonHelper::Dump(mLastValue, doc, luaState), doc.GetAllocator());
   return val;
 }
 

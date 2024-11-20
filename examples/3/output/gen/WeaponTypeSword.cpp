@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -33,15 +32,15 @@ bool WeaponTypeSword::operator==(const WeaponTypeSword &rhs) const {
   );
 }
 
-bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("sharpness", name)) {
-        auto res = JsonHelper::Parse(mSharpness, data.value, converter);
+        auto res = JsonHelper::Parse(mSharpness, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.sharpness field");
       } else if (0 == strcmp("isShortSword", name)) {
-        auto res = JsonHelper::Parse(mIsShortSword, data.value, converter);
+        auto res = JsonHelper::Parse(mIsShortSword, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.isShortSword field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeSword: {}", name);
@@ -51,13 +50,13 @@ bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &c
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeSword!");
-      auto res = JsonHelper::Parse(mSharpness, (*it), converter);
+      auto res = JsonHelper::Parse(mSharpness, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.sharpness field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeSword!");
-      auto res = JsonHelper::Parse(mIsShortSword, (*it), converter);
+      auto res = JsonHelper::Parse(mIsShortSword, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeSword.isShortSword field");
       ++it;
     }
@@ -69,10 +68,10 @@ bool WeaponTypeSword::ParseJson(const rapidjson::Value &json, const Converter &c
   return true;
 }
 
-rapidjson::Value WeaponTypeSword::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value WeaponTypeSword::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("sharpness", JsonHelper::Dump(mSharpness, doc), doc.GetAllocator());
-  val.AddMember("isShortSword", JsonHelper::Dump(mIsShortSword, doc), doc.GetAllocator());
+  val.AddMember("sharpness", JsonHelper::Dump(mSharpness, doc, luaState), doc.GetAllocator());
+  val.AddMember("isShortSword", JsonHelper::Dump(mIsShortSword, doc, luaState), doc.GetAllocator());
   return val;
 }
 

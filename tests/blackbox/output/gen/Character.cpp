@@ -2,7 +2,6 @@
 #include "Character.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Armor.h"
 #include "Boot.h"
@@ -82,26 +81,36 @@ bool Character::operator==(const Character &rhs) const {
   );
 }
 
-bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool Character::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("id", name)) {
-        auto res = JsonHelper::Parse(mId, data.value, converter);
+        auto res = JsonHelper::Parse(mId, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.id field");
       } else if (0 == strcmp("name", name)) {
-        auto res = JsonHelper::Parse(mName, data.value, converter);
+        auto res = JsonHelper::Parse(mName, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
       } else if (0 == strcmp("boot", name)) {
-        std::string temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.boot field");
-        mBootId = converter.bootNameToId(temp);
+        if (!converter.mBypassConverters) {
+          std::string temp;
+          auto res = JsonHelper::Parse(temp, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.boot field");
+          mBootId = converter.bootNameToId(temp);
+        } else {
+          auto res = JsonHelper::Parse(mBootId, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.boot field");
+        }
       } else if (0 == strcmp("armor", name)) {
-        std::string temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
-        mArmorId = converter.armorNameToId(temp);
+        if (!converter.mBypassConverters) {
+          std::string temp;
+          auto res = JsonHelper::Parse(temp, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
+          mArmorId = converter.armorNameToId(temp);
+        } else {
+          auto res = JsonHelper::Parse(mArmorId, data.value, converter, luaState);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
+        }
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing Character: {}", name);
       }
@@ -110,30 +119,40 @@ bool Character::ParseJson(const rapidjson::Value &json, const Converter &convert
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      auto res = JsonHelper::Parse(mId, (*it), converter);
+      auto res = JsonHelper::Parse(mId, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.id field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      auto res = JsonHelper::Parse(mName, (*it), converter);
+      auto res = JsonHelper::Parse(mName, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.name field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.boot field");
-      mBootId = converter.bootNameToId(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.boot field");
+        mBootId = converter.bootNameToId(temp);
+      } else {
+        auto res = JsonHelper::Parse(mBootId, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.boot field");
+      }
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Character!");
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
-      mArmorId = converter.armorNameToId(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
+        mArmorId = converter.armorNameToId(temp);
+      } else {
+        auto res = JsonHelper::Parse(mArmorId, (*it), converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Character.armor field");
+      }
       ++it;
     }
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Character!");
@@ -144,12 +163,12 @@ bool Character::ParseJson(const rapidjson::Value &json, const Converter &convert
   return true;
 }
 
-rapidjson::Value Character::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value Character::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("id", JsonHelper::Dump(mId, doc), doc.GetAllocator());
-  val.AddMember("name", JsonHelper::Dump(mName, doc), doc.GetAllocator());
-  val.AddMember("boot", JsonHelper::Dump(mBootId, doc), doc.GetAllocator());
-  val.AddMember("armor", JsonHelper::Dump(mArmorId, doc), doc.GetAllocator());
+  val.AddMember("id", JsonHelper::Dump(mId, doc, luaState), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc, luaState), doc.GetAllocator());
+  val.AddMember("boot", JsonHelper::Dump(mBootId, doc, luaState), doc.GetAllocator());
+  val.AddMember("armor", JsonHelper::Dump(mArmorId, doc, luaState), doc.GetAllocator());
   return val;
 }
 

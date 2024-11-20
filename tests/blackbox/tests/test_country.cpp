@@ -62,7 +62,7 @@ TEST(CountryTest, Converters) {
     return result;
   };
 
-  JsonHelper::Parse(country, doc, converter);
+  JsonHelper::Parse(country, doc, converter, nullptr);
   EXPECT_EQ(country.GetLeader().GetRace(), raceMap.at("dwarf"));
   EXPECT_EQ(country.GetLeader().GetCurrentCountry(), countryMap.at("Country1"));
   EXPECT_EQ(country.GetLeader().GetCurrentCity(), cityMap.at("City1"));

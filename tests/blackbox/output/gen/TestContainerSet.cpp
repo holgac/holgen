@@ -2,7 +2,6 @@
 #include "TestContainerSet.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -82,15 +81,15 @@ bool TestContainerSet::operator==(const TestContainerSet &rhs) const {
   );
 }
 
-bool TestContainerSet::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestContainerSet::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("stringContainer", name)) {
-        auto res = JsonHelper::Parse(mStringContainer, data.value, converter);
+        auto res = JsonHelper::Parse(mStringContainer, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.stringContainer field");
       } else if (0 == strcmp("unsignedContainer", name)) {
-        auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter);
+        auto res = JsonHelper::Parse(mUnsignedContainer, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.unsignedContainer field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerSet: {}", name);
@@ -100,13 +99,13 @@ bool TestContainerSet::ParseJson(const rapidjson::Value &json, const Converter &
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerSet!");
-      auto res = JsonHelper::Parse(mStringContainer, (*it), converter);
+      auto res = JsonHelper::Parse(mStringContainer, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.stringContainer field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerSet!");
-      auto res = JsonHelper::Parse(mUnsignedContainer, (*it), converter);
+      auto res = JsonHelper::Parse(mUnsignedContainer, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerSet.unsignedContainer field");
       ++it;
     }
@@ -118,10 +117,10 @@ bool TestContainerSet::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
-rapidjson::Value TestContainerSet::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestContainerSet::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("stringContainer", JsonHelper::Dump(mStringContainer, doc), doc.GetAllocator());
-  val.AddMember("unsignedContainer", JsonHelper::Dump(mUnsignedContainer, doc), doc.GetAllocator());
+  val.AddMember("stringContainer", JsonHelper::Dump(mStringContainer, doc, luaState), doc.GetAllocator());
+  val.AddMember("unsignedContainer", JsonHelper::Dump(mUnsignedContainer, doc, luaState), doc.GetAllocator());
   return val;
 }
 

@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdint>
 #include <deque>
+#include <filesystem>
 #include <list>
 #include <map>
 #include <memory>
@@ -13,7 +14,9 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <lua.hpp>
 #include <rapidjson/document.h>
+#include "FilesystemHelper.h"
 
 namespace ex1_schemas {
   class Converter;
@@ -22,69 +25,76 @@ namespace ex1_schemas {
 class JsonHelper {
 public:
   template <typename T>
-  static bool Parse(T &out, const rapidjson::Value &json, const Converter &converter) {
-    return out.ParseJson(json, converter);
+  static bool ParseFromFile(T &out, const std::filesystem::path &path, const Converter &converter, lua_State *luaState) {
+    auto contents = FilesystemHelper::ReadFile(path);
+    rapidjson::Document doc;
+    doc.Parse(contents.c_str());
+    return Parse(out, doc, converter, luaState);
+  }
+  template <typename T>
+  static bool Parse(T &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
+    return out.ParseJson(json, converter, luaState);
   }
   template <typename T0, typename T1>
-  static bool Parse(std::pair<T0, T1> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::pair<T0, T1> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::pair");
     bool res;
     auto it = json.Begin();
     HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing std::pair!");
-    res = Parse(std::get<0>(out), *it, converter);
+    res = Parse(std::get<0>(out), *it, converter, luaState);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Parsing std::pair failed!");
     ++it;
     HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing std::pair!");
-    res = Parse(std::get<1>(out), *it, converter);
+    res = Parse(std::get<1>(out), *it, converter, luaState);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Parsing std::pair failed!");
     ++it;
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing std::pair!");
     return true;
   }
   template <typename T>
-  static bool Parse(std::shared_ptr<T> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::shared_ptr<T> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     out = std::make_shared<T>();
-    return Parse(*out.get(), json, converter);
+    return Parse(*out.get(), json, converter, luaState);
   }
   template <typename T>
-  static bool Parse(std::unique_ptr<T> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::unique_ptr<T> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     out = std::make_unique<T>();
-    return Parse(*out.get(), json, converter);
+    return Parse(*out.get(), json, converter, luaState);
   }
   template <typename SourceType, typename T, size_t C, typename ElemConverter>
-  static bool ParseConvertElem(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  static bool ParseConvertElem(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
       HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
       if constexpr (std::same_as<SourceType, rapidjson::Value>) {
         auto& elem = data;
-        out[writtenItemCount] = std::move(elem);
+        out[writtenItemCount] = std::move(elemConverter(elem));
         ++writtenItemCount;
       } else {
         SourceType elem;
-        auto res = Parse(elem, data, converter);
+        auto res = Parse(elem, data, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::array");
-        out[writtenItemCount] = std::move(elem);
+        out[writtenItemCount] = std::move(elemConverter(elem));
         ++writtenItemCount;
       }
     }
     return true;
   }
   template <typename T, size_t C>
-  static bool Parse(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::array<T, C> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::array");
     size_t writtenItemCount = 0;
     for (const auto& data: json.GetArray()) {
       HOLGEN_WARN_AND_RETURN_IF(writtenItemCount >= C, false, "Received more data than what the container can handle in std::array");
-      auto res = Parse(out[writtenItemCount], data, converter);
+      auto res = Parse(out[writtenItemCount], data, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::array");
       ++writtenItemCount;
     }
     return true;
   }
   template <typename SourceType, typename T, typename ElemConverter>
-  static bool ParseConvertElem(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  static bool ParseConvertElem(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::deque");
     for (const auto& data: json.GetArray()) {
       if constexpr (std::same_as<SourceType, rapidjson::Value>) {
@@ -92,7 +102,7 @@ public:
         out.push_back(std::move(elemConverter(elem)));
       } else {
         SourceType elem;
-        auto res = Parse(elem, data, converter);
+        auto res = Parse(elem, data, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::deque");
         out.push_back(std::move(elemConverter(elem)));
       }
@@ -100,18 +110,18 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::deque<T> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::deque");
     for (const auto& data: json.GetArray()) {
       T elem;
-      auto res = Parse(elem, data, converter);
+      auto res = Parse(elem, data, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::deque");
       out.push_back(std::move(elem));
     }
     return true;
   }
   template <typename SourceType, typename T, typename ElemConverter>
-  static bool ParseConvertElem(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  static bool ParseConvertElem(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::vector");
     for (const auto& data: json.GetArray()) {
       if constexpr (std::same_as<SourceType, rapidjson::Value>) {
@@ -119,7 +129,7 @@ public:
         out.push_back(std::move(elemConverter(elem)));
       } else {
         SourceType elem;
-        auto res = Parse(elem, data, converter);
+        auto res = Parse(elem, data, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::vector");
         out.push_back(std::move(elemConverter(elem)));
       }
@@ -127,18 +137,18 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::vector<T> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::vector");
     for (const auto& data: json.GetArray()) {
       T elem;
-      auto res = Parse(elem, data, converter);
+      auto res = Parse(elem, data, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::vector");
       out.push_back(std::move(elem));
     }
     return true;
   }
   template <typename SourceType, typename T, typename ElemConverter>
-  static bool ParseConvertElem(std::list<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  static bool ParseConvertElem(std::list<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::list");
     for (const auto& data: json.GetArray()) {
       if constexpr (std::same_as<SourceType, rapidjson::Value>) {
@@ -146,7 +156,7 @@ public:
         out.push_back(std::move(elemConverter(elem)));
       } else {
         SourceType elem;
-        auto res = Parse(elem, data, converter);
+        auto res = Parse(elem, data, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::list");
         out.push_back(std::move(elemConverter(elem)));
       }
@@ -154,18 +164,18 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::list<T> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::list<T> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::list");
     for (const auto& data: json.GetArray()) {
       T elem;
-      auto res = Parse(elem, data, converter);
+      auto res = Parse(elem, data, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::list");
       out.push_back(std::move(elem));
     }
     return true;
   }
   template <typename SourceType, typename T, typename ElemConverter>
-  static bool ParseConvertElem(std::set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  static bool ParseConvertElem(std::set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::set");
     for (const auto& data: json.GetArray()) {
       if constexpr (std::same_as<SourceType, rapidjson::Value>) {
@@ -173,7 +183,7 @@ public:
         out.insert(std::move(elemConverter(elem)));
       } else {
         SourceType elem;
-        auto res = Parse(elem, data, converter);
+        auto res = Parse(elem, data, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::set");
         out.insert(std::move(elemConverter(elem)));
       }
@@ -181,18 +191,18 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::set<T> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::set<T> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::set");
     for (const auto& data: json.GetArray()) {
       T elem;
-      auto res = Parse(elem, data, converter);
+      auto res = Parse(elem, data, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::set");
       out.insert(std::move(elem));
     }
     return true;
   }
   template <typename SourceType, typename T, typename ElemConverter>
-  static bool ParseConvertElem(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
+  static bool ParseConvertElem(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_set");
     for (const auto& data: json.GetArray()) {
       if constexpr (std::same_as<SourceType, rapidjson::Value>) {
@@ -200,7 +210,7 @@ public:
         out.insert(std::move(elemConverter(elem)));
       } else {
         SourceType elem;
-        auto res = Parse(elem, data, converter);
+        auto res = Parse(elem, data, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::unordered_set");
         out.insert(std::move(elemConverter(elem)));
       }
@@ -208,289 +218,486 @@ public:
     return true;
   }
   template <typename T>
-  static bool Parse(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter) {
+  static bool Parse(std::unordered_set<T> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
     HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_set");
     for (const auto& data: json.GetArray()) {
       T elem;
-      auto res = Parse(elem, data, converter);
+      auto res = Parse(elem, data, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing an elem of std::unordered_set");
       out.insert(std::move(elem));
     }
     return true;
   }
   template <typename K, typename V>
-  static bool Parse(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
-    for (const auto& data: json.GetObject()) {
-      K key;
-      auto res = Parse(key, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+  static bool Parse(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
+    if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
+      for (const auto& data: json.GetObject()) {
+        K key;
+        auto res = Parse(key, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        res = Parse(it->second, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
       }
-      res = Parse(it->second, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        K key;
+        auto res = Parse(key, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        res = Parse(it->second, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+      }
     }
     return true;
   }
   template <typename ElemSourceType, typename K, typename V, typename ElemConverter>
-  static bool ParseConvertElem(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
-    for (const auto& data: json.GetObject()) {
-      K key;
-      auto res = Parse(key, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+  static bool ParseConvertElem(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
+    if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
+      for (const auto& data: json.GetObject()) {
+        K key;
+        auto res = Parse(key, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+        it->second = std::move(elemConverter(valueRaw));
       }
-      ElemSourceType valueRaw;
-      res = Parse(valueRaw, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
-      it->second = std::move(elemConverter(valueRaw));
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        K key;
+        auto res = Parse(key, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+        it->second = std::move(elemConverter(valueRaw));
+      }
     }
     return true;
   }
   template <typename KeySourceType, typename K, typename V, typename KeyConverter>
-  static bool ParseConvertKey(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
-    for (const auto& data: json.GetObject()) {
-      KeySourceType keyInJson;
-      auto res = Parse(keyInJson, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
-      K key = std::move(keyConverter(keyInJson));
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+  static bool ParseConvertKey(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, lua_State *luaState) {
+    if constexpr (std::same_as<KeySourceType, std::string> || EnumConcept<KeySourceType>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
+      for (const auto& data: json.GetObject()) {
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        res = Parse(it->second, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
       }
-      res = Parse(it->second, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        res = Parse(it->second, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+      }
     }
     return true;
   }
   template <typename KeySourceType, typename ElemSourceType, typename K, typename V, typename KeyConverter, typename ElemConverter>
-  static bool ParseConvertKeyElem(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, const ElemConverter &elemConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
-    for (const auto& data: json.GetObject()) {
-      KeySourceType keyInJson;
-      auto res = Parse(keyInJson, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
-      K key = std::move(keyConverter(keyInJson));
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+  static bool ParseConvertKeyElem(std::map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, const ElemConverter &elemConverter, lua_State *luaState) {
+    if constexpr (std::same_as<KeySourceType, std::string> || EnumConcept<KeySourceType>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::map");
+      for (const auto& data: json.GetObject()) {
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+        it->second = std::move(elemConverter(valueRaw));
       }
-      ElemSourceType valueRaw;
-      res = Parse(valueRaw, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
-      it->second = std::move(elemConverter(valueRaw));
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::map");
+        it->second = std::move(elemConverter(valueRaw));
+      }
     }
     return true;
   }
   template <typename K, typename V>
-  static bool Parse(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
-    for (const auto& data: json.GetObject()) {
-      K key;
-      auto res = Parse(key, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+  static bool Parse(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
+    if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+      for (const auto& data: json.GetObject()) {
+        K key;
+        auto res = Parse(key, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        res = Parse(it->second, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
       }
-      res = Parse(it->second, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        K key;
+        auto res = Parse(key, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        res = Parse(it->second, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+      }
     }
     return true;
   }
   template <typename ElemSourceType, typename K, typename V, typename ElemConverter>
-  static bool ParseConvertElem(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
-    for (const auto& data: json.GetObject()) {
-      K key;
-      auto res = Parse(key, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+  static bool ParseConvertElem(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const ElemConverter &elemConverter, lua_State *luaState) {
+    if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+      for (const auto& data: json.GetObject()) {
+        K key;
+        auto res = Parse(key, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+        it->second = std::move(elemConverter(valueRaw));
       }
-      ElemSourceType valueRaw;
-      res = Parse(valueRaw, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
-      it->second = std::move(elemConverter(valueRaw));
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        K key;
+        auto res = Parse(key, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+        it->second = std::move(elemConverter(valueRaw));
+      }
     }
     return true;
   }
   template <typename KeySourceType, typename K, typename V, typename KeyConverter>
-  static bool ParseConvertKey(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
-    for (const auto& data: json.GetObject()) {
-      KeySourceType keyInJson;
-      auto res = Parse(keyInJson, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
-      K key = std::move(keyConverter(keyInJson));
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+  static bool ParseConvertKey(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, lua_State *luaState) {
+    if constexpr (std::same_as<KeySourceType, std::string> || EnumConcept<KeySourceType>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+      for (const auto& data: json.GetObject()) {
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        res = Parse(it->second, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
       }
-      res = Parse(it->second, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        res = Parse(it->second, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+      }
     }
     return true;
   }
   template <typename KeySourceType, typename ElemSourceType, typename K, typename V, typename KeyConverter, typename ElemConverter>
-  static bool ParseConvertKeyElem(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, const ElemConverter &elemConverter) {
-    HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
-    for (const auto& data: json.GetObject()) {
-      KeySourceType keyInJson;
-      auto res = Parse(keyInJson, data.name, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
-      K key = std::move(keyConverter(keyInJson));
-      auto[it, insertRes] = out.try_emplace(key, V());
-      if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string>) {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
-      } else {
-        HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+  static bool ParseConvertKeyElem(std::unordered_map<K, V> &out, const rapidjson::Value &json, const Converter &converter, const KeyConverter &keyConverter, const ElemConverter &elemConverter, lua_State *luaState) {
+    if constexpr (std::same_as<KeySourceType, std::string> || EnumConcept<KeySourceType>) {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsObject(), false, "Found non-object json element when parsing std::unordered_map");
+      for (const auto& data: json.GetObject()) {
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, data.name, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, data.value, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+        it->second = std::move(elemConverter(valueRaw));
       }
-      ElemSourceType valueRaw;
-      res = Parse(valueRaw, data.value, converter);
-      HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
-      it->second = std::move(elemConverter(valueRaw));
+    } else {
+      HOLGEN_WARN_AND_RETURN_IF(!json.IsArray(), false, "Found non-array json element when parsing std::unordered_map");
+      for (const auto& data: json.GetArray()) {
+        auto& elemKey = data[0];
+        auto& elemValue = data[1];
+        KeySourceType keyInJson;
+        auto res = Parse(keyInJson, elemKey, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing key of std::unordered_map");
+        K key = std::move(keyConverter(keyInJson));
+        auto[it, insertRes] = out.try_emplace(key, V());
+        if constexpr (std::is_integral_v<K> || std::is_same_v<K, std::string> || EnumConcept<K>) {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key: {} when parsing std::unordered_map", key);
+        } else {
+          HOLGEN_WARN_AND_CONTINUE_IF(!insertRes, "Detected duplicate key when parsing std::unordered_map");
+        }
+        ElemSourceType valueRaw;
+        res = Parse(valueRaw, elemValue, converter, luaState);
+        HOLGEN_WARN_AND_CONTINUE_IF(!res, "Failed parsing value of std::unordered_map");
+        it->second = std::move(elemConverter(valueRaw));
+      }
     }
     return true;
   }
+  static void ParseLuaObject(const rapidjson::Value &json, lua_State *luaState);
+  static int ParseLuaRegistryObject(const rapidjson::Value &json, lua_State *luaState);
+  static void DumpToFile(const std::filesystem::path &path, const rapidjson::Value &json);
   template <typename T>
-  static rapidjson::Value Dump(const T &data, rapidjson::Document &doc) {
-    return data.DumpJson(doc);
+  static rapidjson::Value Dump(const T &data, rapidjson::Document &doc, lua_State *luaState) {
+    return data.DumpJson(doc, luaState);
   }
-  static rapidjson::Value Dump(const int8_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const int16_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const int32_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const int64_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const uint8_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const uint16_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const uint32_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const uint64_t &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const float &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const double &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const bool &data, rapidjson::Document &doc);
-  static rapidjson::Value Dump(const std::string &data, rapidjson::Document &doc);
+  static rapidjson::Value Dump(const int8_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const int16_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const int32_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const int64_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const uint8_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const uint16_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const uint32_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const uint64_t &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const float &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const double &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const bool &data, rapidjson::Document &doc, lua_State *luaState);
+  static rapidjson::Value Dump(const std::string &data, rapidjson::Document &doc, lua_State *luaState);
   template <typename T, size_t Size>
-  static rapidjson::Value Dump(const std::array<T, Size> &data, rapidjson::Document &doc) {
+  static rapidjson::Value Dump(const std::array<T, Size> &data, rapidjson::Document &doc, lua_State *luaState) {
     auto val = rapidjson::Value(rapidjson::kArrayType);
     val.Reserve(data.size(), doc.GetAllocator());
     for (auto& elem: data) {
-      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+      val.PushBack(Dump(elem, doc, luaState), doc.GetAllocator());
     }
     return val;
   }
   template <typename T>
-  static rapidjson::Value Dump(const std::deque<T> &data, rapidjson::Document &doc) {
+  static rapidjson::Value Dump(const std::deque<T> &data, rapidjson::Document &doc, lua_State *luaState) {
     auto val = rapidjson::Value(rapidjson::kArrayType);
     val.Reserve(data.size(), doc.GetAllocator());
     for (auto& elem: data) {
-      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+      val.PushBack(Dump(elem, doc, luaState), doc.GetAllocator());
     }
     return val;
   }
   template <typename T>
-  static rapidjson::Value Dump(const std::list<T> &data, rapidjson::Document &doc) {
+  static rapidjson::Value Dump(const std::list<T> &data, rapidjson::Document &doc, lua_State *luaState) {
     auto val = rapidjson::Value(rapidjson::kArrayType);
     val.Reserve(data.size(), doc.GetAllocator());
     for (auto& elem: data) {
-      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+      val.PushBack(Dump(elem, doc, luaState), doc.GetAllocator());
     }
     return val;
   }
   template <typename T>
-  static rapidjson::Value Dump(const std::set<T> &data, rapidjson::Document &doc) {
+  static rapidjson::Value Dump(const std::set<T> &data, rapidjson::Document &doc, lua_State *luaState) {
     auto val = rapidjson::Value(rapidjson::kArrayType);
     val.Reserve(data.size(), doc.GetAllocator());
     for (auto& elem: data) {
-      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+      val.PushBack(Dump(elem, doc, luaState), doc.GetAllocator());
     }
     return val;
   }
   template <typename T>
-  static rapidjson::Value Dump(const std::unordered_set<T> &data, rapidjson::Document &doc) {
+  static rapidjson::Value Dump(const std::unordered_set<T> &data, rapidjson::Document &doc, lua_State *luaState) {
     auto val = rapidjson::Value(rapidjson::kArrayType);
     val.Reserve(data.size(), doc.GetAllocator());
     for (auto& elem: data) {
-      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+      val.PushBack(Dump(elem, doc, luaState), doc.GetAllocator());
     }
     return val;
   }
   template <typename T>
-  static rapidjson::Value Dump(const std::vector<T> &data, rapidjson::Document &doc) {
+  static rapidjson::Value Dump(const std::vector<T> &data, rapidjson::Document &doc, lua_State *luaState) {
     auto val = rapidjson::Value(rapidjson::kArrayType);
     val.Reserve(data.size(), doc.GetAllocator());
     for (auto& elem: data) {
-      val.PushBack(Dump(elem, doc), doc.GetAllocator());
+      val.PushBack(Dump(elem, doc, luaState), doc.GetAllocator());
     }
     return val;
   }
   template <typename K, typename V>
-  static rapidjson::Value Dump(const std::map<K, V> &data, rapidjson::Document &doc) {
-    auto val = rapidjson::Value(rapidjson::kObjectType);
+  static rapidjson::Value Dump(const std::map<K, V> &data, rapidjson::Document &doc, lua_State *luaState) {
+    rapidjson::Type valueType;
+    if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+      valueType = rapidjson::kObjectType;
+    } else {
+      valueType = rapidjson::kArrayType;
+    }
+    auto val = rapidjson::Value(valueType);
     for (auto &[k, v]: data) {
-      val.AddMember(Dump(k, doc), Dump(v, doc), doc.GetAllocator());
+      if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+        val.AddMember(Dump(k, doc, luaState), Dump(v, doc, luaState), doc.GetAllocator());
+      } else {
+        auto elem = rapidjson::Value(rapidjson::kArrayType);
+        elem.Reserve(2, doc.GetAllocator());
+        elem.PushBack(Dump(k, doc, luaState), doc.GetAllocator());
+        elem.PushBack(Dump(v, doc, luaState), doc.GetAllocator());
+        val.PushBack(elem, doc.GetAllocator());
+      }
     }
     return val;
   }
   template <typename K, typename V>
-  static rapidjson::Value Dump(const std::unordered_map<K, V> &data, rapidjson::Document &doc) {
-    auto val = rapidjson::Value(rapidjson::kObjectType);
+  static rapidjson::Value Dump(const std::unordered_map<K, V> &data, rapidjson::Document &doc, lua_State *luaState) {
+    rapidjson::Type valueType;
+    if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+      valueType = rapidjson::kObjectType;
+    } else {
+      valueType = rapidjson::kArrayType;
+    }
+    auto val = rapidjson::Value(valueType);
     for (auto &[k, v]: data) {
-      val.AddMember(Dump(k, doc), Dump(v, doc), doc.GetAllocator());
+      if constexpr (std::same_as<K, std::string> || EnumConcept<K>) {
+        val.AddMember(Dump(k, doc, luaState), Dump(v, doc, luaState), doc.GetAllocator());
+      } else {
+        auto elem = rapidjson::Value(rapidjson::kArrayType);
+        elem.Reserve(2, doc.GetAllocator());
+        elem.PushBack(Dump(k, doc, luaState), doc.GetAllocator());
+        elem.PushBack(Dump(v, doc, luaState), doc.GetAllocator());
+        val.PushBack(elem, doc.GetAllocator());
+      }
     }
     return val;
   }
   template <typename T0, typename T1>
-  static rapidjson::Value Dump(const std::pair<T0, T1> &data, rapidjson::Document &doc) {
+  static rapidjson::Value Dump(const std::pair<T0, T1> &data, rapidjson::Document &doc, lua_State *luaState) {
     auto val = rapidjson::Value(rapidjson::kArrayType);
     val.Reserve(2, doc.GetAllocator());
-    val.PushBack(Dump(std::get<0>(data), doc), doc.GetAllocator());
-    val.PushBack(Dump(std::get<1>(data), doc), doc.GetAllocator());
+    val.PushBack(Dump(std::get<0>(data), doc, luaState), doc.GetAllocator());
+    val.PushBack(Dump(std::get<1>(data), doc, luaState), doc.GetAllocator());
     return val;
   }
+  static rapidjson::Value DumpLuaObject(int idx, rapidjson::Document &doc, lua_State *luaState, bool stringify);
+  static rapidjson::Value DumpLuaRegistryObject(int data, rapidjson::Document &doc, lua_State *luaState);
 };
 template <>
-bool JsonHelper::Parse(int8_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(int8_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(int16_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(int16_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(int32_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(int32_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(int64_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(int64_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(uint8_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(uint8_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(uint16_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(uint16_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(uint32_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(uint32_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(uint64_t &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(uint64_t &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(float &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(float &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(double &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(double &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(bool &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(bool &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 template <>
-bool JsonHelper::Parse(std::string &out, const rapidjson::Value &json, const Converter &converter);
+bool JsonHelper::Parse(std::string &out, const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
 }

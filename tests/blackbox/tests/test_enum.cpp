@@ -36,7 +36,7 @@ TEST_F(EnumTest, JsonString) {
   TestEnumStruct testEnumStruct;
   rapidjson::Document doc;
   doc.Parse(R"R({"enumField": "Entry5"})R");
-  testEnumStruct.ParseJson(doc, {});
+  testEnumStruct.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(testEnumStruct.GetEnumField(), TestEnum::Entry5);
 }
 
@@ -44,7 +44,7 @@ TEST_F(EnumTest, JsonIntegral) {
   TestEnumStruct testEnumStruct;
   rapidjson::Document doc;
   doc.Parse(R"R({"enumField": 5})R");
-  testEnumStruct.ParseJson(doc, {});
+  testEnumStruct.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(testEnumStruct.GetEnumField(), TestEnum::Entry5);
 }
 
@@ -96,11 +96,11 @@ TEST_F(EnumTest, DefaultValueJson) {
   TestEnumStruct testEnumStruct;
   rapidjson::Document doc;
   doc.Parse(R"R({})R");
-  testEnumStruct.ParseJson(doc, {});
+  testEnumStruct.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(testEnumStruct.GetEnumDefaultValueField(), TestEnumDefaultValue::DefaultEntry);
 
   doc.Parse(R"R({"enumDefaultValueField": "some invalid data"})R");
-  testEnumStruct.ParseJson(doc, {});
+  testEnumStruct.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(testEnumStruct.GetEnumDefaultValueField(), TestEnumDefaultValue::Invalid);
 }
 

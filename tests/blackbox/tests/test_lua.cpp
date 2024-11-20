@@ -102,7 +102,7 @@ TEST_F(LuaTest, DataManager) {
   GameData::CreateLuaMetatable(mState);
   GameData gd;
   GlobalPointer<GameData>::SetInstance(&gd);
-  gd.ParseFiles("gamedata", {});
+  gd.ParseFiles("gamedata", "", {}, nullptr);
   gd.GetArmorFromName("Plate Mail")->PushToLua(mState);
   lua_setglobal(mState, "pm");
   luaL_dostring(mState, "return pm.alternativeName");
@@ -116,7 +116,7 @@ TEST_F(LuaTest, Ref) {
   GameData::CreateLuaMetatable(mState);
   GameData gd;
   GlobalPointer<GameData>::SetInstance(&gd);
-  gd.ParseFiles("gamedata", {});
+  gd.ParseFiles("gamedata", "", {}, nullptr);
   auto gorion = Character::GetFromName("Gorion");
   ASSERT_NE(gorion, nullptr);
   auto boot = gorion->GetBoot();
@@ -377,10 +377,10 @@ Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return con
   luaL_dostring(mState, script);
   TestLuaFuncTableContainer c;
   const char *json =
-      R"R({"scriptWithSourceTable1":"SetTo30AndGetDouble", "scriptWithSourceTable2":"SetTo40AndGetTriple"})R";
+      R"R({"scriptWithSourceTable1":{"table":"SetTo30AndGetDouble"}, "scriptWithSourceTable2":{"table":"SetTo40AndGetTriple"}})R";
   rapidjson::Document doc;
   doc.Parse(json);
-  c.ParseJson(doc, {});
+  c.ParseJson(doc, {}, nullptr);
   c.GetScriptWithSourceTable1().SetField(mState, c);
   EXPECT_EQ(c.GetField(), 30);
   EXPECT_EQ(c.GetScriptWithSourceTable1().GetField(mState, c), 60);

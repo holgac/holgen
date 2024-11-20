@@ -2,7 +2,6 @@
 #include "Calculator.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -80,18 +79,18 @@ bool Calculator::operator==(const Calculator &rhs) const {
   );
 }
 
-bool Calculator::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool Calculator::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("curVal", name)) {
-        auto res = JsonHelper::Parse(mCurVal, data.value, converter);
+        auto res = JsonHelper::Parse(mCurVal, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.curVal field");
       } else if (0 == strcmp("Add", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_Add, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_Add, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Add");
       } else if (0 == strcmp("Subtract", name)) {
-        auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, data.value, converter);
+        auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Subtract");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing Calculator: {}", name);
@@ -101,17 +100,17 @@ bool Calculator::ParseJson(const rapidjson::Value &json, const Converter &conver
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Calculator!");
-      auto res = JsonHelper::Parse(mCurVal, (*it), converter);
+      auto res = JsonHelper::Parse(mCurVal, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.curVal field");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_Add, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_Add, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Add");
       ++it;
     }
     {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, (*it), converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_Subtract, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Calculator.Subtract");
       ++it;
     }
@@ -123,9 +122,9 @@ bool Calculator::ParseJson(const rapidjson::Value &json, const Converter &conver
   return true;
 }
 
-rapidjson::Value Calculator::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value Calculator::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("curVal", JsonHelper::Dump(mCurVal, doc), doc.GetAllocator());
+  val.AddMember("curVal", JsonHelper::Dump(mCurVal, doc, luaState), doc.GetAllocator());
   return val;
 }
 

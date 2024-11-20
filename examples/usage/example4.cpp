@@ -15,8 +15,10 @@ void example4() {
     return;
   }
   DataManager manager;
+  LuaContext ctx(LuaContext::Create);
+  LuaHelper::CreateMetatables(ctx);
   // load everything recursively
-  manager.ParseFiles("data/4", {});
+  manager.ParseFiles("data/4", "", {}, ctx);
   // set the singleton
   GlobalPointer<DataManager>::SetInstance(&manager);
   std::cout << std::format("character #{}: {}. They're wearing {} and wielding {}\n",
@@ -36,8 +38,6 @@ void example4() {
   std::cout << std::format("New armor {} has id {}\n",
                            Armor::GetFromName("leather jacket")->GetName(),
                            Armor::GetFromName("leather jacket")->GetId());
-  LuaContext ctx(LuaContext::Create);
-  LuaHelper::CreateMetatables(ctx);
   manager.PushToLua(ctx);
   manager.PushGlobalToLua(ctx, "manager");
   // Do the same from lua:

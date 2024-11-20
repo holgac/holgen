@@ -2,7 +2,6 @@
 #include "WeaponTypeBow.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -36,15 +35,15 @@ bool WeaponTypeBow::operator==(const WeaponTypeBow &rhs) const {
   );
 }
 
-bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("range", name)) {
-        auto res = JsonHelper::Parse(mRange, data.value, converter);
+        auto res = JsonHelper::Parse(mRange, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.range field");
       } else if (0 == strcmp("material", name)) {
-        auto res = JsonHelper::Parse(mMaterial, data.value, converter);
+        auto res = JsonHelper::Parse(mMaterial, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.material field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing WeaponTypeBow: {}", name);
@@ -54,13 +53,13 @@ bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &con
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeBow!");
-      auto res = JsonHelper::Parse(mRange, (*it), converter);
+      auto res = JsonHelper::Parse(mRange, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.range field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing WeaponTypeBow!");
-      auto res = JsonHelper::Parse(mMaterial, (*it), converter);
+      auto res = JsonHelper::Parse(mMaterial, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse WeaponTypeBow.material field");
       ++it;
     }
@@ -72,10 +71,10 @@ bool WeaponTypeBow::ParseJson(const rapidjson::Value &json, const Converter &con
   return true;
 }
 
-rapidjson::Value WeaponTypeBow::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value WeaponTypeBow::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("range", JsonHelper::Dump(mRange, doc), doc.GetAllocator());
-  val.AddMember("material", JsonHelper::Dump(mMaterial, doc), doc.GetAllocator());
+  val.AddMember("range", JsonHelper::Dump(mRange, doc, luaState), doc.GetAllocator());
+  val.AddMember("material", JsonHelper::Dump(mMaterial, doc, luaState), doc.GetAllocator());
   return val;
 }
 

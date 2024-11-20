@@ -116,13 +116,44 @@ bool TestLuaRegistryData::operator==(const TestLuaRegistryData &rhs) const {
   );
 }
 
-bool TestLuaRegistryData::ParseJson(const rapidjson::Value &json, const Converter &converter) {
-  return JsonHelper::Parse(mTable, json, converter);
+bool TestLuaRegistryData::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
+  if (json.IsObject()) {
+    for (const auto &data: json.GetObject()) {
+      const auto &name = data.name.GetString();
+      if (0 == strcmp("table", name)) {
+        auto res = JsonHelper::Parse(mTable, data.value, converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaRegistryData.mTable field");
+      } else if (0 == strcmp("data", name)) {
+        mData = JsonHelper::ParseLuaRegistryObject(data.value, luaState);
+      } else {
+        HOLGEN_WARN("Unexpected entry in json when parsing TestLuaRegistryData: {}", name);
+      }
+    }
+  } else if (json.IsArray()) {
+    auto it = json.Begin();
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaRegistryData!");
+      auto res = JsonHelper::Parse(mTable, (*it), converter, luaState);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaRegistryData.mTable field");
+      ++it;
+    }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaRegistryData!");
+      mData = JsonHelper::ParseLuaRegistryObject((*it), luaState);
+      ++it;
+    }
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestLuaRegistryData!");
+  } else {
+    HOLGEN_WARN("Unexpected json type when parsing TestLuaRegistryData.");
+    return false;
+  }
+  return true;
 }
 
-rapidjson::Value TestLuaRegistryData::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestLuaRegistryData::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("data", JsonHelper::Dump(mData, doc), doc.GetAllocator());
+  val.AddMember("table", JsonHelper::Dump(mTable, doc, luaState), doc.GetAllocator());
+  val.AddMember("data", JsonHelper::DumpLuaRegistryObject(mData, doc, luaState), doc.GetAllocator());
   return val;
 }
 

@@ -4,6 +4,7 @@
 #include "../holgen.h"
 #include <cstdint>
 #include <string>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 #include "CharacterArmor.h"
 
@@ -16,6 +17,7 @@ namespace ex4_schemas {
 // Defined in 4/schemas/dataManager.hsc
 class Character {
 public:
+  using IdType=uint32_t;
   Character() = default;
   Character(const Character &rhs) = default;
   Character(Character &&rhs) noexcept = default;
@@ -39,8 +41,8 @@ public:
   static Character *Get(uint32_t id);
   static Character *GetFromName(const std::string &key);
   bool operator==(const Character &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

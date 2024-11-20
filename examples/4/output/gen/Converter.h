@@ -9,6 +9,7 @@
 namespace ex4_schemas {
 class Converter {
 public:
+  bool mBypassConverters = false;
   std::function<uint32_t(const std::string &)> armorNameToId;
   std::function<uint32_t(const std::string &)> weaponNameToId;
 };

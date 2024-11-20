@@ -2,7 +2,6 @@
 #include "TestLuaFuncTableContainer.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -101,30 +100,30 @@ bool TestLuaFuncTableContainer::operator==(const TestLuaFuncTableContainer &rhs)
   );
 }
 
-bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("field", name)) {
-        auto res = JsonHelper::Parse(mField, data.value, converter);
+        auto res = JsonHelper::Parse(mField, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.field field");
       } else if (0 == strcmp("script1", name)) {
-        auto res = JsonHelper::Parse(mScript1, data.value, converter);
+        auto res = JsonHelper::Parse(mScript1, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script1 field");
       } else if (0 == strcmp("script2", name)) {
-        auto res = JsonHelper::Parse(mScript2, data.value, converter);
+        auto res = JsonHelper::Parse(mScript2, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script2 field");
       } else if (0 == strcmp("scriptWithSourceTable1", name)) {
-        auto res = JsonHelper::Parse(mScriptWithSourceTable1, data.value, converter);
+        auto res = JsonHelper::Parse(mScriptWithSourceTable1, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable1 field");
       } else if (0 == strcmp("scriptWithSourceTable2", name)) {
-        auto res = JsonHelper::Parse(mScriptWithSourceTable2, data.value, converter);
+        auto res = JsonHelper::Parse(mScriptWithSourceTable2, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable2 field");
       } else if (0 == strcmp("staticScript1", name)) {
-        auto res = JsonHelper::Parse(mStaticScript1, data.value, converter);
+        auto res = JsonHelper::Parse(mStaticScript1, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript1 field");
       } else if (0 == strcmp("staticScript2", name)) {
-        auto res = JsonHelper::Parse(mStaticScript2, data.value, converter);
+        auto res = JsonHelper::Parse(mStaticScript2, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript2 field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestLuaFuncTableContainer: {}", name);
@@ -134,43 +133,43 @@ bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Co
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
-      auto res = JsonHelper::Parse(mField, (*it), converter);
+      auto res = JsonHelper::Parse(mField, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.field field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
-      auto res = JsonHelper::Parse(mScript1, (*it), converter);
+      auto res = JsonHelper::Parse(mScript1, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script1 field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
-      auto res = JsonHelper::Parse(mScript2, (*it), converter);
+      auto res = JsonHelper::Parse(mScript2, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.script2 field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
-      auto res = JsonHelper::Parse(mScriptWithSourceTable1, (*it), converter);
+      auto res = JsonHelper::Parse(mScriptWithSourceTable1, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable1 field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
-      auto res = JsonHelper::Parse(mScriptWithSourceTable2, (*it), converter);
+      auto res = JsonHelper::Parse(mScriptWithSourceTable2, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.scriptWithSourceTable2 field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
-      auto res = JsonHelper::Parse(mStaticScript1, (*it), converter);
+      auto res = JsonHelper::Parse(mStaticScript1, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript1 field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableContainer!");
-      auto res = JsonHelper::Parse(mStaticScript2, (*it), converter);
+      auto res = JsonHelper::Parse(mStaticScript2, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableContainer.staticScript2 field");
       ++it;
     }
@@ -182,15 +181,15 @@ bool TestLuaFuncTableContainer::ParseJson(const rapidjson::Value &json, const Co
   return true;
 }
 
-rapidjson::Value TestLuaFuncTableContainer::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestLuaFuncTableContainer::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("field", JsonHelper::Dump(mField, doc), doc.GetAllocator());
-  val.AddMember("script1", JsonHelper::Dump(mScript1, doc), doc.GetAllocator());
-  val.AddMember("script2", JsonHelper::Dump(mScript2, doc), doc.GetAllocator());
-  val.AddMember("scriptWithSourceTable1", JsonHelper::Dump(mScriptWithSourceTable1, doc), doc.GetAllocator());
-  val.AddMember("scriptWithSourceTable2", JsonHelper::Dump(mScriptWithSourceTable2, doc), doc.GetAllocator());
-  val.AddMember("staticScript1", JsonHelper::Dump(mStaticScript1, doc), doc.GetAllocator());
-  val.AddMember("staticScript2", JsonHelper::Dump(mStaticScript2, doc), doc.GetAllocator());
+  val.AddMember("field", JsonHelper::Dump(mField, doc, luaState), doc.GetAllocator());
+  val.AddMember("script1", JsonHelper::Dump(mScript1, doc, luaState), doc.GetAllocator());
+  val.AddMember("script2", JsonHelper::Dump(mScript2, doc, luaState), doc.GetAllocator());
+  val.AddMember("scriptWithSourceTable1", JsonHelper::Dump(mScriptWithSourceTable1, doc, luaState), doc.GetAllocator());
+  val.AddMember("scriptWithSourceTable2", JsonHelper::Dump(mScriptWithSourceTable2, doc, luaState), doc.GetAllocator());
+  val.AddMember("staticScript1", JsonHelper::Dump(mStaticScript1, doc, luaState), doc.GetAllocator());
+  val.AddMember("staticScript2", JsonHelper::Dump(mStaticScript2, doc, luaState), doc.GetAllocator());
   return val;
 }
 

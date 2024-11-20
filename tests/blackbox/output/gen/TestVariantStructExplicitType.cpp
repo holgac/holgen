@@ -2,7 +2,6 @@
 #include "TestVariantStructExplicitType.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -132,13 +131,13 @@ bool TestVariantStructExplicitType::operator==(const TestVariantStructExplicitTy
   return true;
 }
 
-bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("type", name)) {
         TestVariantStructType temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
+        auto res = JsonHelper::Parse(temp, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.type field");
         SetType(temp);
       }
@@ -149,9 +148,9 @@ bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, cons
       } else if (0 == strcmp("being1", name)) {
         bool res;
         if (mType == TestVariantStructType::Cat) {
-          res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), data.value, converter);
+          res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), data.value, converter, luaState);
         } else if (mType == TestVariantStructType::Human) {
-          res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), data.value, converter);
+          res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), data.value, converter, luaState);
         } else {
           HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being1 variant field, its type {} is unexpected", mType);
           return false;
@@ -160,9 +159,9 @@ bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, cons
       } else if (0 == strcmp("being2", name)) {
         bool res;
         if (mType == TestVariantStructType::Cat) {
-          res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), data.value, converter);
+          res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), data.value, converter, luaState);
         } else if (mType == TestVariantStructType::Human) {
-          res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), data.value, converter);
+          res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), data.value, converter, luaState);
         } else {
           HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being2 variant field, its type {} is unexpected", mType);
           return false;
@@ -177,7 +176,7 @@ bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, cons
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructExplicitType!");
       TestVariantStructType temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
+      auto res = JsonHelper::Parse(temp, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestVariantStructExplicitType.type field");
       SetType(temp);
       ++it;
@@ -186,9 +185,9 @@ bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, cons
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructExplicitType!");
       bool res;
       if (mType == TestVariantStructType::Cat) {
-        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), (*it), converter);
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructCat(), (*it), converter, luaState);
       } else if (mType == TestVariantStructType::Human) {
-        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), (*it), converter);
+        res = JsonHelper::Parse(*GetBeing1AsTestVariantStructHuman(), (*it), converter, luaState);
       } else {
         HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being1 variant field, its type {} is unexpected", mType);
         return false;
@@ -200,9 +199,9 @@ bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, cons
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestVariantStructExplicitType!");
       bool res;
       if (mType == TestVariantStructType::Cat) {
-        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), (*it), converter);
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructCat(), (*it), converter, luaState);
       } else if (mType == TestVariantStructType::Human) {
-        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), (*it), converter);
+        res = JsonHelper::Parse(*GetBeing2AsTestVariantStructHuman(), (*it), converter, luaState);
       } else {
         HOLGEN_WARN("Could not json-parse TestVariantStructExplicitType.being2 variant field, its type {} is unexpected", mType);
         return false;
@@ -218,17 +217,17 @@ bool TestVariantStructExplicitType::ParseJson(const rapidjson::Value &json, cons
   return true;
 }
 
-rapidjson::Value TestVariantStructExplicitType::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestVariantStructExplicitType::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("type", JsonHelper::Dump(mType, doc), doc.GetAllocator());
+  val.AddMember("type", JsonHelper::Dump(mType, doc, luaState), doc.GetAllocator());
   switch (mType.GetValue()) {
   case TestVariantStructType::Cat:
-    val.AddMember("being1", GetBeing1AsTestVariantStructCat()->DumpJson(doc), doc.GetAllocator());
-    val.AddMember("being2", GetBeing2AsTestVariantStructCat()->DumpJson(doc), doc.GetAllocator());
+    val.AddMember("being1", GetBeing1AsTestVariantStructCat()->DumpJson(doc, luaState), doc.GetAllocator());
+    val.AddMember("being2", GetBeing2AsTestVariantStructCat()->DumpJson(doc, luaState), doc.GetAllocator());
     break;
   case TestVariantStructType::Human:
-    val.AddMember("being1", GetBeing1AsTestVariantStructHuman()->DumpJson(doc), doc.GetAllocator());
-    val.AddMember("being2", GetBeing2AsTestVariantStructHuman()->DumpJson(doc), doc.GetAllocator());
+    val.AddMember("being1", GetBeing1AsTestVariantStructHuman()->DumpJson(doc, luaState), doc.GetAllocator());
+    val.AddMember("being2", GetBeing2AsTestVariantStructHuman()->DumpJson(doc, luaState), doc.GetAllocator());
     break;
   }
   return val;

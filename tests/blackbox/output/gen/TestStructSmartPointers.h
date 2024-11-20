@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 #include "TestStructVirtualMethods.h"
 
@@ -33,8 +34,8 @@ public:
   void SetUniquePtr(std::unique_ptr<TestStructVirtualMethods> &&val);
   void SetUniquePtrs(std::vector<std::unique_ptr<TestStructVirtualMethods>> &&val);
   bool operator==(const TestStructSmartPointers &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;
   /*

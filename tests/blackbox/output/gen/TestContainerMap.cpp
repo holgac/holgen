@@ -2,7 +2,6 @@
 #include "TestContainerMap.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -42,8 +41,10 @@ TestContainerInnerStructWithId *TestContainerMap::AddInnerStructWithId(TestConta
   }
   auto newId = mInnerStructsWithIdNextId;
   ++mInnerStructsWithIdNextId;
-  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mInnerStructsWithId.emplace(newId, std::forward<TestContainerInnerStructWithId>(elem));
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
   return &(it->second);
@@ -56,8 +57,10 @@ TestContainerInnerStructWithId *TestContainerMap::AddInnerStructWithId(TestConta
   }
   auto newId = mInnerStructsWithIdNextId;
   ++mInnerStructsWithIdNextId;
-  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
+  mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mInnerStructsWithId.emplace(newId, elem);
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
   return &(it->second);
@@ -99,12 +102,12 @@ bool TestContainerMap::operator==(const TestContainerMap &rhs) const {
   );
 }
 
-bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("innerStructsWithId", name)) {
-        auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter);
+        auto res = JsonHelper::Parse(mInnerStructsWithId, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerMap.innerStructsWithId field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestContainerMap: {}", name);
@@ -114,7 +117,7 @@ bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestContainerMap!");
-      auto res = JsonHelper::Parse(mInnerStructsWithId, (*it), converter);
+      auto res = JsonHelper::Parse(mInnerStructsWithId, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestContainerMap.innerStructsWithId field");
       ++it;
     }
@@ -126,9 +129,9 @@ bool TestContainerMap::ParseJson(const rapidjson::Value &json, const Converter &
   return true;
 }
 
-rapidjson::Value TestContainerMap::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestContainerMap::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("innerStructsWithId", JsonHelper::Dump(mInnerStructsWithId, doc), doc.GetAllocator());
+  val.AddMember("innerStructsWithId", JsonHelper::Dump(mInnerStructsWithId, doc, luaState), doc.GetAllocator());
   return val;
 }
 

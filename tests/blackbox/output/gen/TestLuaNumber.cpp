@@ -2,7 +2,6 @@
 #include "TestLuaNumber.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -23,12 +22,12 @@ bool TestLuaNumber::operator==(const TestLuaNumber &rhs) const {
   );
 }
 
-bool TestLuaNumber::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestLuaNumber::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("value", name)) {
-        auto res = JsonHelper::Parse(mValue, data.value, converter);
+        auto res = JsonHelper::Parse(mValue, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaNumber.value field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestLuaNumber: {}", name);
@@ -38,7 +37,7 @@ bool TestLuaNumber::ParseJson(const rapidjson::Value &json, const Converter &con
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaNumber!");
-      auto res = JsonHelper::Parse(mValue, (*it), converter);
+      auto res = JsonHelper::Parse(mValue, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaNumber.value field");
       ++it;
     }
@@ -50,9 +49,9 @@ bool TestLuaNumber::ParseJson(const rapidjson::Value &json, const Converter &con
   return true;
 }
 
-rapidjson::Value TestLuaNumber::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestLuaNumber::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("value", JsonHelper::Dump(mValue, doc), doc.GetAllocator());
+  val.AddMember("value", JsonHelper::Dump(mValue, doc, luaState), doc.GetAllocator());
   return val;
 }
 

@@ -4,6 +4,7 @@
 #include "../holgen.h"
 #include <cstdint>
 #include <string>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
@@ -14,6 +15,7 @@ namespace holgen_blackbox_test {
 // Defined in tests/blackbox/schemas/testjson.hsc
 class TestJsonTag {
 public:
+  using IdType=uint64_t;
   TestJsonTag(const uint64_t id, const std::string &name);
   TestJsonTag() = default;
   TestJsonTag(const TestJsonTag &rhs) = default;
@@ -28,8 +30,8 @@ public:
   static TestJsonTag *Get(uint64_t id);
   static TestJsonTag *GetFromName(const std::string &key);
   bool operator==(const TestJsonTag &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

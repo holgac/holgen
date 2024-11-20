@@ -2,7 +2,6 @@
 #include "TestEnumStruct.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -40,15 +39,15 @@ bool TestEnumStruct::operator==(const TestEnumStruct &rhs) const {
   );
 }
 
-bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("enumField", name)) {
-        auto res = JsonHelper::Parse(mEnumField, data.value, converter);
+        auto res = JsonHelper::Parse(mEnumField, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumField field");
       } else if (0 == strcmp("enumDefaultValueField", name)) {
-        auto res = JsonHelper::Parse(mEnumDefaultValueField, data.value, converter);
+        auto res = JsonHelper::Parse(mEnumDefaultValueField, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumDefaultValueField field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestEnumStruct: {}", name);
@@ -58,13 +57,13 @@ bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &co
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestEnumStruct!");
-      auto res = JsonHelper::Parse(mEnumField, (*it), converter);
+      auto res = JsonHelper::Parse(mEnumField, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumField field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestEnumStruct!");
-      auto res = JsonHelper::Parse(mEnumDefaultValueField, (*it), converter);
+      auto res = JsonHelper::Parse(mEnumDefaultValueField, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestEnumStruct.enumDefaultValueField field");
       ++it;
     }
@@ -76,10 +75,10 @@ bool TestEnumStruct::ParseJson(const rapidjson::Value &json, const Converter &co
   return true;
 }
 
-rapidjson::Value TestEnumStruct::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestEnumStruct::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("enumField", JsonHelper::Dump(mEnumField, doc), doc.GetAllocator());
-  val.AddMember("enumDefaultValueField", JsonHelper::Dump(mEnumDefaultValueField, doc), doc.GetAllocator());
+  val.AddMember("enumField", JsonHelper::Dump(mEnumField, doc, luaState), doc.GetAllocator());
+  val.AddMember("enumDefaultValueField", JsonHelper::Dump(mEnumDefaultValueField, doc, luaState), doc.GetAllocator());
   return val;
 }
 

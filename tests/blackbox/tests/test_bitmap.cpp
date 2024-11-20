@@ -45,7 +45,7 @@ TEST_F(BitmapTest, JsonString) {
   TestBitmapStruct testBitmapStruct;
   rapidjson::Document doc;
   doc.Parse(R"R({"bitmapField": "Entry5"})R");
-  testBitmapStruct.ParseJson(doc, {});
+  testBitmapStruct.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(testBitmapStruct.GetBitmapField(), TestBitmap::Entry5);
 }
 
@@ -53,7 +53,7 @@ TEST_F(BitmapTest, JsonStringMultiple) {
   TestBitmapStruct testBitmapStruct;
   rapidjson::Document doc;
   doc.Parse(R"R({"bitmapField": "Entry5,Entry1,Entry1,Entry1"})R");
-  testBitmapStruct.ParseJson(doc, {});
+  testBitmapStruct.ParseJson(doc, {}, nullptr);
   EXPECT_TRUE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry5));
   EXPECT_TRUE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry1));
   EXPECT_FALSE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry2));
@@ -63,7 +63,7 @@ TEST_F(BitmapTest, JsonIntegral) {
   TestBitmapStruct testBitmapStruct;
   rapidjson::Document doc;
   doc.Parse(R"R({"bitmapField": 17})R");
-  testBitmapStruct.ParseJson(doc, {});
+  testBitmapStruct.ParseJson(doc, {}, nullptr);
   EXPECT_TRUE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry5));
   EXPECT_TRUE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry1));
   EXPECT_FALSE(testBitmapStruct.GetBitmapField().Has(TestBitmap::Entry2));

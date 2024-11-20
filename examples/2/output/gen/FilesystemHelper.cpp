@@ -14,4 +14,9 @@ std::string FilesystemHelper::ReadFile(const std::filesystem::path &filePath) {
   fin.read(contents.data(), contents.size());
   return contents;
 }
+
+void FilesystemHelper::DumpFile(const std::filesystem::path &filePath, const std::string &contents) {
+  std::ofstream out(filePath, std::ios_base::binary);
+  out.write(contents.c_str(), contents.size());
+}
 }

@@ -36,7 +36,7 @@ TEST_F(JsonTest, ElemConverter) {
     doc.Parse(R"R(
 {"tags": ["tag1", "tag2"]}
     )R");
-    testStruct1.ParseJson(doc, cv);
+    testStruct1.ParseJson(doc, cv, nullptr);
   }
   ASSERT_NE(tagManager.GetTagFromName("tag1"), nullptr);
   EXPECT_EQ(tagManager.GetTagFromName("tag1")->GetId(), 0);
@@ -50,7 +50,7 @@ TEST_F(JsonTest, ElemConverter) {
     doc.Parse(R"R(
 {"tags": ["tag3", "tag2"]}
     )R");
-    testStruct2.ParseJson(doc, cv);
+    testStruct2.ParseJson(doc, cv, nullptr);
   }
   ASSERT_NE(tagManager.GetTagFromName("tag3"), nullptr);
   EXPECT_EQ(tagManager.GetTagFromName("tag3")->GetId(), 2);
@@ -69,7 +69,7 @@ TEST_F(JsonTest, MapConvertElem) {
     doc.Parse(R"R(
 {"testMapConvertElem": {"1": "1", "2": "2"}}
     )R");
-    obj.ParseJson(doc, cv);
+    obj.ParseJson(doc, cv, nullptr);
   }
   ASSERT_EQ(obj.GetTestMapConvertElem().size(), 2);
   EXPECT_EQ(obj.GetTestMapConvertElem().at("1"), 1);
@@ -88,7 +88,7 @@ TEST_F(JsonTest, MapConvertKey) {
     doc.Parse(R"R(
 {"testMapConvertKey": {"1": "1", "2": "2"}}
     )R");
-    obj.ParseJson(doc, cv);
+    obj.ParseJson(doc, cv, nullptr);
   }
   ASSERT_EQ(obj.GetTestMapConvertKey().size(), 2);
   EXPECT_EQ(obj.GetTestMapConvertKey().at(1), "1");
@@ -107,7 +107,7 @@ TEST_F(JsonTest, MapConvertKeyElem) {
     doc.Parse(R"R(
 {"testMapConvertKeyElem": {"1": "1", "2": "2"}}
     )R");
-    obj.ParseJson(doc, cv);
+    obj.ParseJson(doc, cv, nullptr);
   }
   ASSERT_EQ(obj.GetTestMapConvertKeyElem().size(), 2);
   EXPECT_EQ(obj.GetTestMapConvertKeyElem().at(1), 1);
@@ -126,7 +126,7 @@ TEST_F(JsonTest, ParsingPairFields) {
   ]
 }
 )R");
-  data.ParseJson(doc, {});
+  data.ParseJson(doc, {}, nullptr);
   EXPECT_EQ(data.GetIntStringPair().first, 5);
   EXPECT_EQ(data.GetIntStringPair().second, "hello");
   ASSERT_EQ(data.GetPairVector().size(), 2);
@@ -139,20 +139,20 @@ TEST_F(JsonTest, ParsingPairFields) {
 TEST_F(JsonTest, DumpAndParseEnum) {
   rapidjson::Document doc;
   TestJsonEnum e = TestJsonEnum::Entry5;
-  auto json = e.DumpJson(doc);
+  auto json = e.DumpJson(doc, nullptr);
   EXPECT_EQ(json.GetType(), rapidjson::kNumberType);
   TestJsonEnum e2;
-  e2.ParseJson(json, {});
+  e2.ParseJson(json, {}, nullptr);
   EXPECT_EQ(e2, e);
 }
 
 TEST_F(JsonTest, DumpAndParseInvalidEnum) {
   rapidjson::Document doc;
   TestJsonEnum e;
-  auto json = e.DumpJson(doc);
+  auto json = e.DumpJson(doc, nullptr);
   EXPECT_EQ(json.GetType(), rapidjson::kNumberType);
   TestJsonEnum e2;
-  e2.ParseJson(json, {});
+  e2.ParseJson(json, {}, nullptr);
   EXPECT_EQ(e2, e);
   EXPECT_EQ(e2, TestJsonEnum::Invalid);
 }
@@ -162,7 +162,7 @@ TEST_F(JsonTest, DumpAndParsePrimitiveStruct) {
   TestJsonTag tag;
   tag.SetId(123);
   tag.SetName("tagName");
-  auto json = tag.DumpJson(doc);
+  auto json = tag.DumpJson(doc, nullptr);
   EXPECT_EQ(json.GetType(), rapidjson::kObjectType);
   ASSERT_NE(json.FindMember("id"), json.MemberEnd());
   ASSERT_EQ(json.FindMember("id")->value.GetType(), rapidjson::kNumberType);
@@ -173,7 +173,7 @@ TEST_F(JsonTest, DumpAndParsePrimitiveStruct) {
   EXPECT_EQ(std::string(json.FindMember("name")->value.GetString()), "tagName");
 
   TestJsonTag tag2;
-  tag2.ParseJson(json, {});
+  tag2.ParseJson(json, {}, nullptr);
   EXPECT_EQ(tag, tag2);
 }
 
@@ -182,8 +182,8 @@ TEST_F(JsonTest, DumpStructField) {
   TestJsonStructWithSingleTag obj, obj2;
   obj.GetTag().SetId(123);
   obj.GetTag().SetName("tagName");
-  auto json = obj.DumpJson(doc);
-  obj2.ParseJson(json, {});
+  auto json = obj.DumpJson(doc, nullptr);
+  obj2.ParseJson(json, {}, nullptr);
   EXPECT_EQ(obj, obj2);
 }
 
@@ -192,7 +192,7 @@ TEST_F(JsonTest, DumpVector) {
   obj.GetTags().emplace_back(123, "asdf");
   obj.GetTags().emplace_back(456, "qwer");
   rapidjson::Document doc;
-  obj2.ParseJson(obj.DumpJson(doc), {});
+  obj2.ParseJson(obj.DumpJson(doc, nullptr), {}, nullptr);
   EXPECT_EQ(obj, obj2);
 }
 
@@ -201,20 +201,20 @@ TEST_F(JsonTest, DumpMap) {
   obj.GetTagMap().emplace("asdf", TestJsonTag{123, "qwer"});
   obj.GetTagMap().emplace("zxcv", TestJsonTag{456, "rewq"});
   rapidjson::Document doc;
-  obj2.ParseJson(obj.DumpJson(doc), {});
+  obj2.ParseJson(obj.DumpJson(doc, nullptr), {}, nullptr);
   EXPECT_EQ(obj, obj2);
 }
 
 TEST_F(JsonTest, Variants) {
   TestVariantStructExplicitType obj, obj2;
   rapidjson::Document doc;
-  obj2.ParseJson(obj.DumpJson(doc), {});
+  obj2.ParseJson(obj.DumpJson(doc, nullptr), {}, nullptr);
   EXPECT_EQ(obj, obj2);
   obj.SetType(TestVariantStructType::Human);
   obj.GetBeing1AsTestVariantStructHuman()->SetName("Urist");
   obj.GetBeing1AsTestVariantStructHuman()->SetNationality("Dorf");
   obj.GetBeing2AsTestVariantStructHuman()->SetName("McMiner");
   obj.GetBeing2AsTestVariantStructHuman()->SetNationality("Dorf");
-  obj2.ParseJson(obj.DumpJson(doc), {});
+  obj2.ParseJson(obj.DumpJson(doc, nullptr), {}, nullptr);
   EXPECT_EQ(obj, obj2);
 }

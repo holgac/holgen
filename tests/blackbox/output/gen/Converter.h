@@ -10,6 +10,7 @@
 namespace holgen_blackbox_test {
 class Converter {
 public:
+  bool mBypassConverters = false;
   std::function<uint32_t(const std::string &)> armorNameToId;
   std::function<uint32_t(const std::string &)> bootNameToId;
   std::function<uint32_t(const std::string &)> cityNameToId;

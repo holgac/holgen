@@ -4,6 +4,7 @@
 #include "../holgen.h"
 #include <cstdint>
 #include <string>
+#include <lua.hpp>
 #include <rapidjson/fwd.h>
 
 struct lua_State;
@@ -14,6 +15,7 @@ namespace ex4_schemas {
 // Defined in 4/schemas/dataManager.hsc
 class Weapon {
 public:
+  using IdType=uint32_t;
   Weapon() = default;
   Weapon(const Weapon &rhs) = default;
   Weapon(Weapon &&rhs) noexcept = default;
@@ -30,8 +32,8 @@ public:
   static Weapon *Get(uint32_t id);
   static Weapon *GetFromName(const std::string &key);
   bool operator==(const Weapon &rhs) const;
-  bool ParseJson(const rapidjson::Value &json, const Converter &converter);
-  rapidjson::Value DumpJson(rapidjson::Document &doc) const;
+  bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
+  rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
   void PushMirrorToLua(lua_State *luaState) const;
   void PushGlobalToLua(lua_State *luaState, const char *name) const;

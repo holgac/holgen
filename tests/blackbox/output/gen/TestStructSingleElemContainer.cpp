@@ -2,7 +2,6 @@
 #include "TestStructSingleElemContainer.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -66,12 +65,16 @@ size_t TestStructSingleElemContainer::GetSingleElemStructCount() const {
 
 TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &&elem) {
   auto newId = mSingleElemStructsWithId.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   return &(mSingleElemStructsWithId.emplace_back(std::forward<TestStructSingleElemWithId>(elem)));
 }
 
 TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &elem) {
   auto newId = mSingleElemStructsWithId.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   return &(mSingleElemStructsWithId.emplace_back(elem));
 }
@@ -99,15 +102,15 @@ bool TestStructSingleElemContainer::operator==(const TestStructSingleElemContain
   );
 }
 
-bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("singleElemStructs", name)) {
-        auto res = JsonHelper::Parse(mSingleElemStructs, data.value, converter);
+        auto res = JsonHelper::Parse(mSingleElemStructs, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructs field");
       } else if (0 == strcmp("singleElemStructsWithId", name)) {
-        auto res = JsonHelper::Parse(mSingleElemStructsWithId, data.value, converter);
+        auto res = JsonHelper::Parse(mSingleElemStructsWithId, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructsWithId field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructSingleElemContainer: {}", name);
@@ -117,13 +120,13 @@ bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, cons
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructSingleElemContainer!");
-      auto res = JsonHelper::Parse(mSingleElemStructs, (*it), converter);
+      auto res = JsonHelper::Parse(mSingleElemStructs, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructs field");
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructSingleElemContainer!");
-      auto res = JsonHelper::Parse(mSingleElemStructsWithId, (*it), converter);
+      auto res = JsonHelper::Parse(mSingleElemStructsWithId, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructSingleElemContainer.singleElemStructsWithId field");
       ++it;
     }
@@ -135,10 +138,10 @@ bool TestStructSingleElemContainer::ParseJson(const rapidjson::Value &json, cons
   return true;
 }
 
-rapidjson::Value TestStructSingleElemContainer::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructSingleElemContainer::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("singleElemStructs", JsonHelper::Dump(mSingleElemStructs, doc), doc.GetAllocator());
-  val.AddMember("singleElemStructsWithId", JsonHelper::Dump(mSingleElemStructsWithId, doc), doc.GetAllocator());
+  val.AddMember("singleElemStructs", JsonHelper::Dump(mSingleElemStructs, doc, luaState), doc.GetAllocator());
+  val.AddMember("singleElemStructsWithId", JsonHelper::Dump(mSingleElemStructsWithId, doc, luaState), doc.GetAllocator());
   return val;
 }
 

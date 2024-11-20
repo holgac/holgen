@@ -77,7 +77,7 @@ void example3() {
   // Let's create the damage getter function that we referenced in json
   ctx.Execute(
       "AverageDamageGetter = function(weapon) return (weapon.damageMin + weapon.damageMax) / 2 end");
-  c1.ParseJson(doc, {});
+  c1.ParseJson(doc, {}, ctx);
   c1.PushGlobalToLua(ctx, "frodo");
 
   std::cout << c1.GetName() << " has " << c1.GetWeapons().size() << " weapons:" << std::endl;

@@ -2,7 +2,6 @@
 #include "TestStructComparableMap.h"
 
 #include <cstring>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -27,12 +26,12 @@ bool TestStructComparableMap::operator==(const TestStructComparableMap &rhs) con
   );
 }
 
-bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("data", name)) {
-        auto res = JsonHelper::Parse(mData, data.value, converter);
+        auto res = JsonHelper::Parse(mData, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructComparableMap.data field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestStructComparableMap: {}", name);
@@ -42,7 +41,7 @@ bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Conv
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestStructComparableMap!");
-      auto res = JsonHelper::Parse(mData, (*it), converter);
+      auto res = JsonHelper::Parse(mData, (*it), converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestStructComparableMap.data field");
       ++it;
     }
@@ -54,9 +53,9 @@ bool TestStructComparableMap::ParseJson(const rapidjson::Value &json, const Conv
   return true;
 }
 
-rapidjson::Value TestStructComparableMap::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestStructComparableMap::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
-  val.AddMember("data", JsonHelper::Dump(mData, doc), doc.GetAllocator());
+  val.AddMember("data", JsonHelper::Dump(mData, doc, luaState), doc.GetAllocator());
   return val;
 }
 

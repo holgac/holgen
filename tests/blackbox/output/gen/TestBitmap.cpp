@@ -2,7 +2,6 @@
 #include "TestBitmap.h"
 
 #include <sstream>
-#include <lua.hpp>
 #include <rapidjson/document.h>
 #include "Converter.h"
 #include "JsonHelper.h"
@@ -209,7 +208,7 @@ void TestBitmap::Toggle(const TestBitmap::Entry &val) {
   mValue ^= val;
 }
 
-bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &converter) {
+bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsString()) {
     *this = TestBitmap::FromString(std::string_view(json.GetString(), json.GetStringLength()));
   } else if (json.IsInt64()) {
@@ -217,7 +216,7 @@ bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &conver
   } else if (json.IsArray()) {
     for (auto &data: json.GetArray()) {
       TestBitmap parsedData;
-      parsedData.ParseJson(data, converter);
+      parsedData.ParseJson(data, converter, luaState);
       Add(parsedData);
     }
   } else {
@@ -228,7 +227,7 @@ bool TestBitmap::ParseJson(const rapidjson::Value &json, const Converter &conver
   return true;
 }
 
-rapidjson::Value TestBitmap::DumpJson(rapidjson::Document &doc) const {
+rapidjson::Value TestBitmap::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   return rapidjson::Value(GetValue());
 }
 
