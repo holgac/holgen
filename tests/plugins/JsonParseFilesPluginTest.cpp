@@ -10,6 +10,7 @@ protected:
   static void Run(TranslatedProject &project) {
     TranslatorSettings translatorSettings;
     translatorSettings.EnableFeature(TranslatorFeatureFlag::Json);
+    translatorSettings.EnableFeature(TranslatorFeatureFlag::Lua);
     ClassPlugin(project, translatorSettings).Run();
     ClassIdFieldPlugin(project, translatorSettings).Run();
     ClassFieldPlugin(project, translatorSettings).Run();
@@ -37,6 +38,7 @@ struct TestData {
   @container(elemName=innerStruct)
   vector<InnerStruct> innerStructs;
   @container(elemName=innerStruct2)
+  @loadAfter(innerStructs)
   vector<InnerStruct2> innerStruct2s;
 }
   )R");
@@ -47,12 +49,21 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("ParseFiles", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseFiles", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("rootPath",
+    method.mArguments.emplace_back(
+        "rootPath", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("selfName",
                                    Type{"std::string", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converterArg",
                                    Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("ParseFiles", Constness::NotConst), method, R"R(
 auto &converter = converterArg;
+if (!selfName.empty()) {
+  auto contents = FilesystemHelper::ReadFile(rootPath / (selfName + ".json"));
+  rapidjson::Document doc;
+  doc.Parse(contents.c_str());
+  ParseJson(doc, converter, luaState);
+}
 std::map<std::string, std::vector<std::filesystem::path>> filesByName;
 std::queue<std::filesystem::path> pathsQueue;
 pathsQueue.push(std::filesystem::path(rootPath));
@@ -62,10 +73,9 @@ while(!pathsQueue.empty()) {
     if (std::filesystem::is_directory(entry)) {
       pathsQueue.push(entry.path());
     } else if (std::filesystem::is_regular_file(entry)) {
-      std::string filename = entry.path().filename().string();
-      auto dotPosition = filename.rfind('.');
-      if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == "json") {
-        filesByName[filename.substr(0, dotPosition)].push_back(entry.path());
+      if (entry.path().extension() == ".json") {
+        auto filename = entry.path().filename().string();
+        filesByName[filename.substr(0, filename.size() - 5)].push_back(entry.path());
       }
     }
   }
@@ -81,7 +91,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct elem;
-      auto res = elem.ParseJson(jsonElem, converter);
+      auto res = elem.ParseJson(jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct(std::move(elem));
     }
@@ -97,7 +107,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct2 elem;
-      auto res = elem.ParseJson(jsonElem, converter);
+      auto res = elem.ParseJson(jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct2(std::move(elem));
     }
@@ -138,10 +148,13 @@ struct TestData {
   ASSERT_NE(cls->GetMethod("ParseFiles", Constness::NotConst), nullptr);
   {
     auto method = ClassMethod{"ParseFiles", Type{"bool"}, Visibility::Public, Constness::NotConst};
-    method.mArguments.emplace_back("rootPath",
+    method.mArguments.emplace_back(
+        "rootPath", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("selfName",
                                    Type{"std::string", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converterArg",
                                    Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("ParseFiles", Constness::NotConst), method, R"R(
 auto converter = converterArg;
 if (converter.innerStruct2NameToId == nullptr) {
@@ -150,6 +163,12 @@ if (converter.innerStruct2NameToId == nullptr) {
     HOLGEN_WARN_AND_RETURN_IF(!elem, uint32_t(-1), "{} InnerStruct2 not found!", key);
     return elem->GetId();
   };
+}
+if (!selfName.empty()) {
+  auto contents = FilesystemHelper::ReadFile(rootPath / (selfName + ".json"));
+  rapidjson::Document doc;
+  doc.Parse(contents.c_str());
+  ParseJson(doc, converter, luaState);
 }
 std::map<std::string, std::vector<std::filesystem::path>> filesByName;
 std::queue<std::filesystem::path> pathsQueue;
@@ -160,10 +179,9 @@ while(!pathsQueue.empty()) {
     if (std::filesystem::is_directory(entry)) {
       pathsQueue.push(entry.path());
     } else if (std::filesystem::is_regular_file(entry)) {
-      std::string filename = entry.path().filename().string();
-      auto dotPosition = filename.rfind('.');
-      if (dotPosition != std::string::npos && filename.substr(dotPosition + 1) == "json") {
-        filesByName[filename.substr(0, dotPosition)].push_back(entry.path());
+      if (entry.path().extension() == ".json") {
+        auto filename = entry.path().filename().string();
+        filesByName[filename.substr(0, filename.size() - 5)].push_back(entry.path());
       }
     }
   }
@@ -179,7 +197,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct2 elem;
-      auto res = elem.ParseJson(jsonElem, converter);
+      auto res = elem.ParseJson(jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct2(std::move(elem));
     }
@@ -195,7 +213,7 @@ if (it != filesByName.end()) {
     for (auto& jsonElem: doc.GetArray()) {
       HOLGEN_WARN_AND_CONTINUE_IF(!jsonElem.IsObject(), "Invalid entry in json file {}", filePath.string());
       InnerStruct elem;
-      auto res = elem.ParseJson(jsonElem, converter);
+      auto res = elem.ParseJson(jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
       AddInnerStruct(std::move(elem));
     }

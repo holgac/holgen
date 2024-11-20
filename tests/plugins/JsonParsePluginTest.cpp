@@ -35,6 +35,8 @@ TEST_F(JsonParsePluginTest, StructParseJsonEmpty) {
         "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter",
                                    Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("luaState",
+                                   Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 return true;
     )R");
@@ -63,21 +65,23 @@ struct TestData {
         "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter",
                                    Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("luaState",
+                                   Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 if (json.IsObject()) {
   for (const auto &data: json.GetObject()) {
     const auto &name = data.name.GetString();
     if (0 == strcmp("testFieldUnsigned", name)) {
-      auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter);
+      auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
     } else if (0 == strcmp("testFieldDouble", name)) {
-      auto res = JsonHelper::Parse(mTestFieldDouble, data.value, converter);
+      auto res = JsonHelper::Parse(mTestFieldDouble, data.value, converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldDouble field");
     } else if (0 == strcmp("testFieldBool", name)) {
-      auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter);
+      auto res = JsonHelper::Parse(mTestFieldBool, data.value, converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldBool field");
     } else if (0 == strcmp("testFieldFunc", name)) {
-      auto res = JsonHelper::Parse(mLuaFuncHandle_testFieldFunc, data.value, converter);
+      auto res = JsonHelper::Parse(mLuaFuncHandle_testFieldFunc, data.value, converter, luaState);
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldFunc");
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestData: {}", name);
@@ -87,24 +91,24 @@ if (json.IsObject()) {
   auto it = json.Begin();
   {
     HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestData!");
-    auto res = JsonHelper::Parse(mTestFieldUnsigned, (*it), converter);
+    auto res = JsonHelper::Parse(mTestFieldUnsigned, (*it), converter, luaState);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
     ++it;
   }
   {
     HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestData!");
-    auto res = JsonHelper::Parse(mTestFieldDouble, (*it), converter);
+    auto res = JsonHelper::Parse(mTestFieldDouble, (*it), converter, luaState);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldDouble field");
     ++it;
   }
   {
     HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestData!");
-    auto res = JsonHelper::Parse(mTestFieldBool, (*it), converter);
+    auto res = JsonHelper::Parse(mTestFieldBool, (*it), converter, luaState);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldBool field");
     ++it;
   }
   {
-    auto res = JsonHelper::Parse(mLuaFuncHandle_testFieldFunc, (*it), converter);
+    auto res = JsonHelper::Parse(mLuaFuncHandle_testFieldFunc, (*it), converter, luaState);
     HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldFunc");
     ++it;
   }
@@ -138,20 +142,32 @@ struct TestData {
         "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter",
                                    Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("luaState",
+                                   Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 if (json.IsObject()) {
   for (const auto &data: json.GetObject()) {
     const auto &name = data.name.GetString();
     if (0 == strcmp("testFieldUnsigned", name)) {
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
-      mTestFieldUnsigned = converter.testU32Converter(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, data.value, converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
+        mTestFieldUnsigned = converter.testU32Converter(temp);
+      } else {
+        auto res = JsonHelper::Parse(mTestFieldUnsigned, data.value, converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
+      }
     } else if (0 == strcmp("testFieldString", name)) {
-      bool temp;
-      auto res = JsonHelper::Parse(temp, data.value, converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldString field");
-      mTestFieldString = std::move(converter.testStringConverter(temp));
+      if (!converter.mBypassConverters) {
+        bool temp;
+        auto res = JsonHelper::Parse(temp, data.value, converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldString field");
+        mTestFieldString = std::move(converter.testStringConverter(temp));
+      } else {
+        auto res = JsonHelper::Parse(mTestFieldString, data.value, converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldString field");
+      }
     } else {
       HOLGEN_WARN("Unexpected entry in json when parsing TestData: {}", name);
     }
@@ -160,18 +176,28 @@ if (json.IsObject()) {
   auto it = json.Begin();
   {
     HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestData!");
-    std::string temp;
-    auto res = JsonHelper::Parse(temp, (*it), converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
-    mTestFieldUnsigned = converter.testU32Converter(temp);
+    if (!converter.mBypassConverters) {
+      std::string temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter, luaState);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
+      mTestFieldUnsigned = converter.testU32Converter(temp);
+    } else {
+      auto res = JsonHelper::Parse(mTestFieldUnsigned, (*it), converter, luaState);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldUnsigned field");
+    }
     ++it;
   }
   {
     HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestData!");
-    bool temp;
-    auto res = JsonHelper::Parse(temp, (*it), converter);
-    HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldString field");
-    mTestFieldString = std::move(converter.testStringConverter(temp));
+    if (!converter.mBypassConverters) {
+      bool temp;
+      auto res = JsonHelper::Parse(temp, (*it), converter, luaState);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldString field");
+      mTestFieldString = std::move(converter.testStringConverter(temp));
+    } else {
+      auto res = JsonHelper::Parse(mTestFieldString, (*it), converter, luaState);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestData.testFieldString field");
+    }
     ++it;
   }
   HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestData!");
@@ -197,6 +223,8 @@ TEST_F(JsonParsePluginTest, EnumParseJson) {
         "json", Type{"rapidjson::Value", PassByType::Reference, Constness::Const});
     method.mArguments.emplace_back("converter",
                                    Type{"Converter", PassByType::Reference, Constness::Const});
+    method.mArguments.emplace_back("luaState",
+                                   Type{"lua_State", PassByType::Pointer});
     helpers::ExpectEqual(*cls->GetMethod("ParseJson", Constness::NotConst), method, R"R(
 if (json.IsString()) {
   *this = TestData::FromString(std::string_view(json.GetString(), json.GetStringLength()));

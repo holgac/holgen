@@ -142,7 +142,7 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
     method.mUserDefined = true;
   } else {
     CodeBlock validators;
-    CodeBlock inserters;
+    CodeBlock indexInserters;
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
       auto &fieldIndexedOn = *underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
@@ -155,27 +155,29 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
       validators.Add("return nullptr;");
       validators.Indent(-1);
       validators.Add("}}");
-      inserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
+      indexInserters.Add("{}.emplace(elem.{}(), newId);", indexFieldName, getterMethodName);
     }
     method.mBody.Add(std::move(validators));
 
     if (isKeyedContainer) {
       method.mBody.Add("auto newId = {}NextId;", field.mName);
       method.mBody.Add("++{}NextId;", field.mName);
-    } else if (!inserters.mContents.empty() || underlyingIdField) {
+    } else if (!indexInserters.mContents.empty() || underlyingIdField) {
       method.mBody.Add("auto newId = {}.size();", field.mName);
     }
-    method.mBody.Add(std::move(inserters));
 
     if (underlyingIdField) {
       method.mBody.Add("auto idInElem = elem.{}();",
                        Naming().FieldGetterNameInCpp(*underlyingIdField->mField));
-      method.mBody.Add("HOLGEN_FAIL_IF(idInElem != {0}::IdType(-1) && idInElem != {0}::IdType(newId), \"Objects "
-                       "not loaded in the right order!\");",
-                       underlyingType.mName);
+      method.mBody.Add(
+          "HOLGEN_FAIL_IF(idInElem != {0}::IdType(-1) && idInElem != {0}::IdType(newId), \"Objects "
+          "not loaded in the right order!\");",
+          underlyingType.mName);
       method.mBody.Add("elem.{}(newId);",
                        Naming().FieldSetterNameInCpp(*underlyingIdField->mField));
     }
+
+    method.mBody.Add(std::move(indexInserters));
 
     std::string elemToInsert = "elem";
     if (useMoveRef)

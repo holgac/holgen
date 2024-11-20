@@ -2,6 +2,7 @@
 #include "Helpers.h"
 #include "generator/CodeGenerator.h"
 #include "generator/plugins/helpers/GlobalPointerPlugin.h"
+#include "generator/plugins/helpers/SingletonPlugin.h"
 
 using namespace holgen;
 
@@ -13,8 +14,8 @@ TEST(GeneratorGlobalPointerTest, HeaderAndSource) {
   TranslatorSettings translatorSettings{
       .mNamespace = "generator_test_namespace",
   };
-  GlobalPointerPlugin ggp(tp, translatorSettings);
-  ggp.Run();
+  SingletonPlugin(tp, translatorSettings).Run();
+  GlobalPointerPlugin(tp, translatorSettings).Run();
   GeneratorSettings generatorSettings{
       .mProjectName = "generator_test_cmake",
       .mConfigHeader = "",

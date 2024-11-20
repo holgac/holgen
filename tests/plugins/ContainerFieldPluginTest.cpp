@@ -272,6 +272,8 @@ struct TestData {
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
 auto newId = mInnerStructs.size();
+auto idInElem = elem.GetId();
+HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
 elem.SetId(newId);
 return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
     )R");
@@ -313,9 +315,11 @@ if (mInnerStructsGuidIndex.contains(elem.GetGuid())) {
   return nullptr;
 }
 auto newId = mInnerStructs.size();
+auto idInElem = elem.GetId();
+HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
+elem.SetId(newId);
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 mInnerStructsGuidIndex.emplace(elem.GetGuid(), newId);
-elem.SetId(newId);
 return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
     )R");
   }
@@ -373,8 +377,10 @@ if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
 }
 auto newId = mInnerStructsNextId;
 ++mInnerStructsNextId;
-mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
+auto idInElem = elem.GetId();
+HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
 elem.SetId(newId);
+mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 auto[it, res] = mInnerStructs.emplace(newId, std::forward<InnerStruct>(elem));
 HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestData.innerStructs modified externally?");
 return &(it->second);

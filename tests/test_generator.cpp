@@ -554,25 +554,45 @@ bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter)
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("currentCountry", name)) {
-        std::string temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
-        mCurrentCountry = converter.countryToId(temp);
+        if (!converter.mBypassConverters) {
+          std::string temp;
+          auto res = JsonHelper::Parse(temp, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
+          mCurrentCountry = converter.countryToId(temp);
+        } else {
+          auto res = JsonHelper::Parse(mCurrentCountry, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
+        }
       } else if (0 == strcmp("currentCity", name)) {
-        std::string temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
-        mCurrentCity = converter.cityToId(temp);
+        if (!converter.mBypassConverters) {
+          std::string temp;
+          auto res = JsonHelper::Parse(temp, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
+          mCurrentCity = converter.cityToId(temp);
+        } else {
+          auto res = JsonHelper::Parse(mCurrentCity, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
+        }
       } else if (0 == strcmp("homeCountry", name)) {
-        std::string temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
-        mHomeCountry = converter.countryToId(temp);
+        if (!converter.mBypassConverters) {
+          std::string temp;
+          auto res = JsonHelper::Parse(temp, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
+          mHomeCountry = converter.countryToId(temp);
+        } else {
+          auto res = JsonHelper::Parse(mHomeCountry, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
+        }
       } else if (0 == strcmp("placeOfBirth", name)) {
-        std::string temp;
-        auto res = JsonHelper::Parse(temp, data.value, converter);
-        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
-        mPlaceOfBirth = converter.cityToId(temp);
+        if (!converter.mBypassConverters) {
+          std::string temp;
+          auto res = JsonHelper::Parse(temp, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
+          mPlaceOfBirth = converter.cityToId(temp);
+        } else {
+          auto res = JsonHelper::Parse(mPlaceOfBirth, data.value, converter);
+          HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
+        }
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing Person: {}", name);
       }
@@ -581,34 +601,54 @@ bool Person::ParseJson(const rapidjson::Value &json, const Converter &converter)
     auto it = json.Begin();
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
-      mCurrentCountry = converter.countryToId(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
+        mCurrentCountry = converter.countryToId(temp);
+      } else {
+        auto res = JsonHelper::Parse(mCurrentCountry, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCountry field");
+      }
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
-      mCurrentCity = converter.cityToId(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
+        mCurrentCity = converter.cityToId(temp);
+      } else {
+        auto res = JsonHelper::Parse(mCurrentCity, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.currentCity field");
+      }
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
-      mHomeCountry = converter.countryToId(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
+        mHomeCountry = converter.countryToId(temp);
+      } else {
+        auto res = JsonHelper::Parse(mHomeCountry, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.homeCountry field");
+      }
       ++it;
     }
     {
       HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing Person!");
-      std::string temp;
-      auto res = JsonHelper::Parse(temp, (*it), converter);
-      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
-      mPlaceOfBirth = converter.cityToId(temp);
+      if (!converter.mBypassConverters) {
+        std::string temp;
+        auto res = JsonHelper::Parse(temp, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
+        mPlaceOfBirth = converter.cityToId(temp);
+      } else {
+        auto res = JsonHelper::Parse(mPlaceOfBirth, (*it), converter);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse Person.placeOfBirth field");
+      }
       ++it;
     }
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing Person!");
@@ -792,6 +832,7 @@ namespace generator_test_namespace {
 // Defined in GeneratorTest
 class Person {
 public:
+  using IdType=uint32_t;
   Person() = default;
   Person(const Person &rhs) = default;
   Person(Person &&rhs) noexcept = default;

@@ -95,8 +95,6 @@ struct TestData2 {
   Run(project);
   auto cls = project.GetClass("Converter");
   ASSERT_NE(cls, nullptr);
-  ASSERT_EQ(cls->mFields.size(), 1);
-
   EXPECT_NE(cls->GetField("u32ToString"), nullptr);
   {
     auto field = ClassField{"u32ToString", Type{"std::function"}, Visibility::Public};
@@ -127,8 +125,6 @@ struct DM {
   Run(project);
   auto cls = project.GetClass("Converter");
   ASSERT_NE(cls, nullptr);
-  EXPECT_EQ(cls->mFields.size(), 1);
-
   ASSERT_NE(cls->GetField("testDataConverter"), nullptr);
   {
     auto field = ClassField{"testDataConverter", Type{"std::function"}, Visibility::Public};
