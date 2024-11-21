@@ -321,7 +321,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
         THROW("Dont know how to get the return value of {} from lua!", method.mName);
       }
     } else {
-      method.mBody.Add("{} result;", method.mReturnType.mName);
+      method.mBody.Add("{}result;", method.mReturnType.ToString(false));
       method.mBody.Add("{}::{}(result, luaState, -1);", St::LuaHelper, St::LuaHelper_Read);
     }
     if (popCount > 0) {
