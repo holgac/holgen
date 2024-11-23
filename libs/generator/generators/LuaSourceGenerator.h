@@ -1,10 +1,10 @@
 #pragma once
-#include "Generator.h"
+#include "LuaGeneratorBase.h"
 
 namespace holgen {
-class LuaSourceGenerator : public Generator {
+class LuaSourceGenerator : public LuaGeneratorBase {
 public:
-  using Generator::Generator;
+  using LuaGeneratorBase::LuaGeneratorBase;
   void Run(std::vector<GeneratedContent> &contents) const override;
 
 private:
@@ -13,14 +13,14 @@ private:
   void GenerateClassDefinition(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateFields(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateField(CodeBlock &codeBlock, const ClassField &field) const;
-  void GenerateMethodAsField(CodeBlock &codeBlock, const Class& cls,const ClassMethod &method) const;
+  void GenerateMethodAsField(CodeBlock &codeBlock, const Class &cls,
+                             const ClassMethod &method) const;
   void GenerateMethods(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
-  bool ShouldProcess(const Class &cls) const;
-  bool ShouldProcess(const ClassField &field) const;
-  bool ShouldProcess(const ClassMethod &method) const;
-  [[nodiscard]] std::string ToLuaType(const Type &type) const;
-  [[nodiscard]] std::string ToTypedFunctionArguments(const Class& cls,const ClassMethod& method) const;
-  [[nodiscard]] std::string ToFunctionSignature(const Class& cls, const ClassMethod& method) const;
+  [[nodiscard]] bool ShouldProcess(const Class &cls) const override;
+  [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
+  [[nodiscard]] std::string ToTypedFunctionArguments(const Class &cls,
+                                                     const ClassMethod &method) const;
+  [[nodiscard]] std::string ToFunctionSignature(const Class &cls, const ClassMethod &method) const;
 };
 } // namespace holgen

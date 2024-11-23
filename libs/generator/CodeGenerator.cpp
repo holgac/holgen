@@ -10,6 +10,7 @@
 #include "generators/CSharpSourceGenerator.h"
 #include "generators/CSharpEnumGenerator.h"
 #include "generators/LuaSourceGenerator.h"
+#include "generators/LuaPublisherGenerator.h"
 
 namespace holgen {
 
@@ -29,6 +30,7 @@ std::vector<GeneratedContent> CodeGenerator::Generate(const TranslatedProject &t
   CSharpSourceGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
   CSharpEnumGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
   LuaSourceGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
+  LuaPublisherGenerator(mGeneratorSettings, translatedProject, namingConvention).Run(contents);
 
   mTranslatedProject = nullptr;
   return contents;

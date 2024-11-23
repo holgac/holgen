@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 namespace holgen {
 // This kinda serves as documentation
@@ -243,10 +244,15 @@ public:
    *  func Think(Actor actor);
    * }
    * The struct above expects something like <table>.Think = function(Actor)
+   *
+   * Publisher attribute can be used to generate boilerplate code for subscribers (listeners) to
+   * register themselves for specific events (corresponding to function calls). The struct should
+   * inherit from the listener struct.
    */
   inline static const std::string LuaFuncTable = "luaFuncTable";
   inline static const std::string LuaFuncTable_SourceTable = "sourceTable";
   inline static const std::string LuaFuncTable_Static = "static";
+  inline static const std::string LuaFuncTable_Publisher = "publisher";
 
   /**
    * Marks the function below as a custom function implemented in lua

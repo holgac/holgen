@@ -23,9 +23,10 @@ private:
                                                   const std::string &functionHandle,
                                                   bool isFuncTable, ClassMethod &method,
                                                   const std::string &retVal);
-  void GenerateFunctionGetGlobalFunction(const FunctionDefinition &functionDefinition,
+  void GenerateFunctionGetGlobalFunction(const Class& cls, const FunctionDefinition &functionDefinition,
                                          const std::string &functionHandle, bool isFuncTable,
-                                         ClassMethod &method, const std::string &retVal);
+                                          ClassMethod &method,
+                                         const std::string &retVal);
   void GenerateFunctionChecker(Class &cls, const FunctionDefinition &functionDefinition,
                                ClassField &functionHandle);
   void GenerateFunctionPushArgs(ClassMethod &method, const FunctionDefinition &functionDefinition);

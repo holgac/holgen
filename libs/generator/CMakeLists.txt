@@ -82,7 +82,9 @@ set(gen_generators
     generators/CSharpHolgenMainGenerator.cpp
     generators/CSharpSourceGenerator.cpp
     generators/CSharpEnumGenerator.cpp
+    generators/LuaGeneratorBase.cpp
     generators/LuaSourceGenerator.cpp
+    generators/LuaPublisherGenerator.cpp
 )
 
 set(gen_utils

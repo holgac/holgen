@@ -46,11 +46,22 @@ void LuaIndexMetaMethodPlugin::Process(Class &cls) {
 
 void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFuncTable(Class &cls,
                                                                    StringSwitcher &switcher) {
-  switcher.AddCase(St::LuaTable_TableFieldInIndexMethod, [&](CodeBlock &switchBlock) {
-    GenerateInstanceGetter(cls, switchBlock, -2, "instance");
-    switchBlock.Add("{}::{}<false>(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
-                    Naming().FieldNameInCpp(St::LuaTable_TableField));
-  });
+  if (cls.mStruct &&
+      cls.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
+                                         Annotations::LuaFuncTable_Publisher)) {
+    switcher.AddCase(St::LuaTable_TableFieldInIndexMethod, [&](CodeBlock &switchBlock) {
+      GenerateInstanceGetter(cls, switchBlock, -2, "instance");
+      switchBlock.Add("{}::{}<false>(\"{}\", luaState);", St::LuaHelper, St::LuaHelper_Push,
+                      cls.mName);
+    });
+
+  } else {
+    switcher.AddCase(St::LuaTable_TableFieldInIndexMethod, [&](CodeBlock &switchBlock) {
+      GenerateInstanceGetter(cls, switchBlock, -2, "instance");
+      switchBlock.Add("{}::{}<false>(instance->{}, luaState);", St::LuaHelper, St::LuaHelper_Push,
+                      Naming().FieldNameInCpp(St::LuaTable_TableField));
+    });
+  }
 }
 
 void LuaIndexMetaMethodPlugin::GenerateIndexMetaMethodForFields(Class &cls,

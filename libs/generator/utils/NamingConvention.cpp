@@ -176,6 +176,11 @@ std::string NamingConvention::LuaMethodCaller(const ClassMethod &method) const {
   return method.mName + methodSuffix + "CallerFromLua";
 }
 
+std::string
+    NamingConvention::LuaPublisherCallbacksTableName(const std::string &functionName) const {
+  return functionName + "_Callbacks";
+}
+
 std::string NamingConvention::CSharpMethodName(const ClassMethod &method) const {
   return St::Capitalize(method.mName);
 }
