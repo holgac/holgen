@@ -11,12 +11,15 @@ public:
 
 private:
   void Generate(GeneratedContent &out, const Class &cls) const;
+  void GenerateModulesMap(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateMethodCallbacks(CodeBlock &codeBlock, const Class &cls,
                                const ClassMethod &method) const;
   void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
   void GenerateRegisterSubscriberMethod(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateUnregisterSubscriberMethod(CodeBlock &codeBlock, const Class &cls) const;
+  void GenerateUnregisterSubscriberByNameMethod(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateReloadSubscriber(CodeBlock &codeBlock, const Class &cls) const;
-  bool ShouldProcess(const Class &cls) const override;
+  [[nodiscard]] bool ShouldProcess(const Class &cls) const override;
+  [[nodiscard]] bool ShouldProcess(const ClassMethod &method) const override;
 };
 } // namespace holgen

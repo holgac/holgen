@@ -4,7 +4,7 @@
 
 namespace holgen {
 void FunctionPluginBase::ProcessFunctionArgument(MethodBase &method,
-                                                 const FunctionArgumentDefinition &funcArg) {
+                                                 const FunctionArgumentDefinition &funcArg) const {
   auto &arg = method.mArguments.emplace_back(
       funcArg.mName, Type{mProject, funcArg.mDefinitionSource, funcArg.mType});
   if (funcArg.mType.mName == St::Lua_CustomData) {
@@ -24,7 +24,7 @@ void FunctionPluginBase::ProcessFunctionArgument(MethodBase &method,
   }
 }
 
-void FunctionPluginBase::ProcessHashFunction(Class &cls, ClassMethod &method) {
+void FunctionPluginBase::ProcessHashFunction(Class &cls, ClassMethod &method) const {
   method.mConstness = Constness::Const;
   auto expectedHashFunction = cls.mStruct->GetHashFunction(mProject.mProject);
   THROW_IF(expectedHashFunction != method.mFunction,
@@ -51,7 +51,7 @@ void FunctionPluginBase::ProcessHashFunction(Class &cls, ClassMethod &method) {
   cls.mSpecializations.push_back(std::move(hash));
 }
 
-void FunctionPluginBase::ProcessToStringFunction(Class &cls, ClassMethod &method) {
+void FunctionPluginBase::ProcessToStringFunction(Class &cls, ClassMethod &method) const {
   method.mConstness = Constness::Const;
   auto expectedToStringFunction = cls.mStruct->GetToStringFunction(mProject.mProject);
   THROW_IF(expectedToStringFunction != method.mFunction,
@@ -77,8 +77,8 @@ void FunctionPluginBase::ProcessToStringFunction(Class &cls, ClassMethod &method
   cls.mSpecializations.push_back(std::move(formatter));
 }
 
-void FunctionPluginBase::ProcessMethodVisibility(MethodBase &method,
-                                                 const FunctionDefinition &functionDefinition) {
+void FunctionPluginBase::ProcessMethodVisibility(
+    MethodBase &method, const FunctionDefinition &functionDefinition) const {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   if (!funcAnnotation) {
     return;
@@ -98,7 +98,7 @@ void FunctionPluginBase::ProcessMethodVisibility(MethodBase &method,
   }
 }
 
-bool FunctionPluginBase::CanExposeInCSharp(const FunctionDefinition &functionDefinition) {
+bool FunctionPluginBase::CanExposeInCSharp(const FunctionDefinition &functionDefinition) const {
   if (functionDefinition.GetMatchingAttribute(Annotations::No, Annotations::No_CSharp))
     return false;
   for (auto &arg: functionDefinition.mArguments) {
@@ -109,7 +109,7 @@ bool FunctionPluginBase::CanExposeInCSharp(const FunctionDefinition &functionDef
 }
 
 ClassMethod FunctionPluginBase::NewFunction(Class &cls,
-                                            const FunctionDefinition &functionDefinition) {
+                                            const FunctionDefinition &functionDefinition) const {
   auto funcAnnotation = functionDefinition.GetAnnotation(Annotations::Func);
   auto method = ClassMethod{
       functionDefinition.mName, Type::ReturnType(mProject, functionDefinition), Visibility::Public,
@@ -150,8 +150,9 @@ ClassMethod FunctionPluginBase::NewFunction(Class &cls,
   return method;
 }
 
-ClassConstructor FunctionPluginBase::NewConstructor(Class &cls,
-                                                    const FunctionDefinition &functionDefinition) {
+ClassConstructor
+    FunctionPluginBase::NewConstructor(Class &cls,
+                                       const FunctionDefinition &functionDefinition) const {
   (void)cls;
   auto ctor = ClassConstructor{};
   ProcessMethodVisibility(ctor, functionDefinition);

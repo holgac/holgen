@@ -28,10 +28,12 @@ void LuaPublisherGenerator::Generate(GeneratedContent &out, const Class &cls) co
   codeBlock.Add("---@class {}", luaClassName);
   codeBlock.Add("{} = {{", luaClassName);
   codeBlock.Indent(1);
+  GenerateModulesMap(codeBlock, cls);
+
   CodeBlock callbacks;
   CodeBlock methods;
   for (auto &method: cls.mMethods) {
-    if (!LuaGeneratorBase::ShouldProcess(method))
+    if (!ShouldProcess(method))
       continue;
     GenerateMethodCallbacks(callbacks, cls, method);
     GenerateMethod(methods, cls, method);
@@ -40,6 +42,7 @@ void LuaPublisherGenerator::Generate(GeneratedContent &out, const Class &cls) co
   codeBlock.Add("");
   codeBlock.Add(std::move(methods));
   codeBlock.Add("");
+
   GenerateRegisterSubscriberMethod(codeBlock, cls);
   codeBlock.Add("");
   GenerateUnregisterSubscriberMethod(codeBlock, cls);
@@ -49,6 +52,11 @@ void LuaPublisherGenerator::Generate(GeneratedContent &out, const Class &cls) co
   codeBlock.Add("}}");
 
   out.mBody = std::move(codeBlock);
+}
+
+void LuaPublisherGenerator::GenerateModulesMap(CodeBlock &codeBlock, const Class &cls) const {
+  codeBlock.Add("---@type table[string, {}]", cls.mStruct->mMixins[0]);
+  codeBlock.Add("{} = {{}},", St::LuaPublisher_ModulesField);
 }
 
 void LuaPublisherGenerator::GenerateMethodCallbacks(CodeBlock &codeBlock, const Class &cls,
@@ -63,9 +71,6 @@ void LuaPublisherGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cl
   codeBlock.Add(std::move(annotations));
   codeBlock.Add("{} = function({})", method.mName, args);
   codeBlock.Indent(1);
-  codeBlock.Add("for _, module in pairs({}.{}) do", cls.mName,
-                mNamingConvention.LuaPublisherCallbacksTableName(method.mName));
-  codeBlock.Indent(1);
 
   auto listenerClass = mTranslatedProject.GetClass(cls.mStruct->mMixins.front());
   auto calledMethod = listenerClass->GetMethod(method.mName, method.mConstness);
@@ -73,14 +78,35 @@ void LuaPublisherGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cl
            "Publisher {} ({}) could not find the {} method in the listener class {} ({})",
            cls.mName, cls.mStruct->mDefinitionSource, method.mName, listenerClass->mName,
            listenerClass->mStruct->mDefinitionSource);
+
+  bool hasRetVal = method.mReturnType.mName != "void" ||
+      method.mFunction->mReturnType.mType.mName == St::Lua_CustomData;
+  if (hasRetVal) {
+    codeBlock.Add("---@type table[string, {}]",
+                  calledMethod->mReturnType.mName != "void" ? calledMethod->mReturnType.mName
+                                                            : "table[any]");
+    codeBlock.Add("local retVal = {{}}");
+  }
+  codeBlock.Add("for _, module in pairs({}.{}) do", cls.mName,
+                mNamingConvention.LuaPublisherCallbacksTableName(method.mName));
+  codeBlock.Indent(1);
+
   std::string accessor = ":";
   if (calledMethod->IsStatic(*listenerClass))
     accessor = ".";
 
-  codeBlock.Add("module{}{}({})", accessor, method.mName, args);
+  auto caller = std::format("module{}{}({})", accessor, method.mName, args);
+  if (hasRetVal) {
+    codeBlock.Add("retVal[module.name] = {}", caller);
+  } else {
+    codeBlock.Add("{}", caller);
+  }
 
   codeBlock.Indent(-1);
   codeBlock.Add("end");
+  if (hasRetVal) {
+    codeBlock.Add("return retVal");
+  }
   codeBlock.Indent(-1);
   codeBlock.Add("end,");
 }
@@ -90,8 +116,9 @@ void LuaPublisherGenerator::GenerateRegisterSubscriberMethod(CodeBlock &codeBloc
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("RegisterSubscriber = function(subscriber)");
   codeBlock.Indent(1);
+  codeBlock.Add("{}[subscriber.name] = subscriber", St::LuaPublisher_ModulesField);
   for (auto &method: cls.mMethods) {
-    if (!LuaGeneratorBase::ShouldProcess(method))
+    if (!ShouldProcess(method))
       continue;
     auto tableName =
         cls.mName + "." + mNamingConvention.LuaPublisherCallbacksTableName(method.mName);
@@ -110,8 +137,9 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBl
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("UnregisterSubscriber = function(subscriber)");
   codeBlock.Indent(1);
+  codeBlock.Add("{}[subscriber.name] = nil", St::LuaPublisher_ModulesField);
   for (auto &method: cls.mMethods) {
-    if (!LuaGeneratorBase::ShouldProcess(method))
+    if (!ShouldProcess(method))
       continue;
     auto tableName =
         cls.mName + "." + mNamingConvention.LuaPublisherCallbacksTableName(method.mName);
@@ -134,23 +162,37 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBl
   codeBlock.Add("end,");
 }
 
-void LuaPublisherGenerator::GenerateReloadSubscriber(CodeBlock &codeBlock, const Class &cls) const {
-
-  codeBlock.Add("---@param oldSubscriber {}", cls.mStruct->mMixins.front());
-  codeBlock.Add("---@param newSubscriber {}", cls.mStruct->mMixins.front());
-  codeBlock.Add("---@return {}", cls.mStruct->mMixins.front());
-  codeBlock.Add("ReloadSubscriber = function(oldSubscriber, newSubscriber)");
+void LuaPublisherGenerator::GenerateUnregisterSubscriberByNameMethod(CodeBlock &codeBlock,
+                                                                     const Class &cls) const {
+  codeBlock.Add("---@param subscriberName string");
+  codeBlock.Add("{} = function(subscriber)", St::LuaPublisher_UnregisterSubscriberByName);
   codeBlock.Indent(1);
 
-  codeBlock.Add("if oldSubscriber then");
+  codeBlock.Add("if {}[subscriber.name] then", St::LuaPublisher_ModulesField);
   codeBlock.Indent(1);
-  codeBlock.Add("{}.UnregisterSubscriber(oldSubscriber)", cls.mName);
+  codeBlock.Add("{}.UnregisterSubscriber({}[subscriber.name])", cls.mName,
+                St::LuaPublisher_ModulesField);
   codeBlock.Indent(-1);
   codeBlock.Add("end");
 
-  codeBlock.Add("{}.RegisterSubscriber(newSubscriber)", cls.mName);
-  codeBlock.Add("return newSubscriber", cls.mName);
+  codeBlock.Indent(-1);
+  codeBlock.Add("end,");
+}
 
+void LuaPublisherGenerator::GenerateReloadSubscriber(CodeBlock &codeBlock, const Class &cls) const {
+
+  codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
+  codeBlock.Add("ReloadSubscriber = function(subscriber)");
+  codeBlock.Indent(1);
+
+  codeBlock.Add("if {}[subscriber.name] then", St::LuaPublisher_ModulesField);
+  codeBlock.Indent(1);
+  codeBlock.Add("{}.UnregisterSubscriber({}[subscriber.name])", cls.mName,
+                St::LuaPublisher_ModulesField);
+  codeBlock.Indent(-1);
+  codeBlock.Add("end");
+
+  codeBlock.Add("{}.RegisterSubscriber(subscriber)", cls.mName);
   codeBlock.Indent(-1);
   codeBlock.Add("end,");
 }
@@ -164,5 +206,11 @@ bool LuaPublisherGenerator::ShouldProcess(const Class &cls) const {
     return false;
   }
   return true;
+}
+
+bool LuaPublisherGenerator::ShouldProcess(const ClassMethod &method) const {
+  if (!LuaGeneratorBase::ShouldProcess(method))
+    return false;
+  return method.mFunction;
 }
 } // namespace holgen

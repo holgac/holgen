@@ -27,10 +27,31 @@ void LuaFunctionPlugin::Run() {
       }
     }
     ProcessStructDefinition(cls, *cls.mStruct, isFuncTable);
+    if (IsLuaPublisher(cls))
+      ProcessLuaPublisher(cls);
   }
 }
 
-void LuaFunctionPlugin::GenerateTableSetter(Class &cls) {
+bool LuaFunctionPlugin::IsLuaPublisher(const Class &cls) const {
+  return cls.mStruct &&
+      cls.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
+                                         Annotations::LuaFuncTable_Publisher);
+}
+
+void LuaFunctionPlugin::ProcessLuaPublisher(Class &cls) const {
+  FunctionDefinition func;
+  func.mName = St::LuaPublisher_UnregisterSubscriberByName;
+  func.mReturnType.mType.mName = "void";
+  {
+    auto &arg = func.mArguments.emplace_back();
+    arg.mName = "subscriber";
+    arg.mType.mName = "string";
+  }
+  ProcessLuaFunction(cls, func, true);
+  cls.GetMethod(St::LuaPublisher_UnregisterSubscriberByName, Constness::Const)->mFunction = nullptr;
+}
+
+void LuaFunctionPlugin::GenerateTableSetter(Class &cls) const {
   auto method = ClassMethod{Naming().FieldSetterNameInCpp(St::LuaTable_TableField), Type{"void"},
                             Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("val", Type{"std::string"});
@@ -39,7 +60,7 @@ void LuaFunctionPlugin::GenerateTableSetter(Class &cls) {
   cls.mMethods.push_back(std::move(method));
 }
 
-void LuaFunctionPlugin::GenerateTableGetter(Class &cls) {
+void LuaFunctionPlugin::GenerateTableGetter(Class &cls) const {
   auto method = ClassMethod{Naming().FieldGetterNameInCpp(St::LuaTable_TableField),
                             Type{"std::string"}, Visibility::Public, Constness::Const};
   method.mReturnType.PreventCopying();
@@ -50,7 +71,7 @@ void LuaFunctionPlugin::GenerateTableGetter(Class &cls) {
 
 void LuaFunctionPlugin::ProcessStructDefinition(Class &cls,
                                                 const StructDefinition &structDefinition,
-                                                bool isFuncTable) {
+                                                bool isFuncTable) const {
   for (auto &mixin: structDefinition.mMixins) {
     ProcessStructDefinition(cls, *mProject.mProject.GetStruct(mixin), isFuncTable);
   }
@@ -61,7 +82,7 @@ void LuaFunctionPlugin::ProcessStructDefinition(Class &cls,
 }
 
 void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition,
-                                           bool isFuncTable) {
+                                           bool isFuncTable) const {
   if (functionDefinition.GetMatchingAnnotation(Annotations::Func, Annotations::Func_OnDataLoad))
     return;
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
@@ -100,8 +121,8 @@ void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition 
   }
 }
 
-void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
-                                                 const FunctionDefinition &functionDefinition) {
+void LuaFunctionPlugin::GenerateFunctionPushArgs(
+    ClassMethod &method, const FunctionDefinition &functionDefinition) const {
   for (auto &funcArg: functionDefinition.mArguments) {
     if (funcArg.mType.mName == St::Lua_CustomData) {
       method.mBody.Add("{}(luaState);", funcArg.mName);
@@ -115,7 +136,7 @@ void LuaFunctionPlugin::GenerateFunctionPushArgs(ClassMethod &method,
 
 void LuaFunctionPlugin::GenerateFunctionChecker(Class &cls,
                                                 const FunctionDefinition &functionDefinition,
-                                                ClassField &functionHandle) {
+                                                ClassField &functionHandle) const {
   auto method = ClassMethod{Naming().LuaFunctionCheckerNameInCpp(functionDefinition), Type{"bool"},
                             Visibility::Public, Constness::Const};
   method.mBody.Add("return !{}.empty();", functionHandle.mName);
@@ -125,7 +146,7 @@ void LuaFunctionPlugin::GenerateFunctionChecker(Class &cls,
 
 void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls,
                                                const FunctionDefinition &functionDefinition,
-                                               ClassField &functionHandle) {
+                                               ClassField &functionHandle) const {
   auto method = ClassMethod{Naming().LuaFunctionSetterNameInCpp(functionDefinition), Type{"void"},
                             Visibility::Public, Constness::NotConst};
   method.mArguments.emplace_back("val", Type{"std::string"});
@@ -135,9 +156,9 @@ void LuaFunctionPlugin::GenerateFunctionSetter(Class &cls,
 }
 
 void LuaFunctionPlugin::GenerateFunctionGetFunctionFromSourceTable(
-    const FunctionDefinition &functionDefinition, const std::string *sourceTable,
+    const std::string &functionName, bool throwOnFailure, const std::string *sourceTable,
     const std::string &functionHandle, bool isFuncTable, ClassMethod &method,
-    const std::string &retVal) {
+    const std::string &retVal) const {
   method.mBody.Add("lua_getglobal(luaState, \"{}\");", *sourceTable);
   if (isFuncTable) {
     method.mBody.Add("lua_pushstring(luaState, {}.c_str());",
@@ -146,8 +167,7 @@ void LuaFunctionPlugin::GenerateFunctionGetFunctionFromSourceTable(
     method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
     method.mBody.Indent(1);
     method.mBody.Add("HOLGEN_WARN(\"Function table {}.{{}} not found when calling {}\", {});",
-                     *sourceTable, functionDefinition.mName,
-                     Naming().FieldNameInCpp(St::LuaTable_TableField));
+                     *sourceTable, functionName, Naming().FieldNameInCpp(St::LuaTable_TableField));
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return {};", retVal);
     method.mBody.Indent(-1);
@@ -160,16 +180,13 @@ void LuaFunctionPlugin::GenerateFunctionGetFunctionFromSourceTable(
   }
   method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
   method.mBody.Indent(1);
-  bool throwOnFailure =
-      functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Reference;
   std::string warnThrowMacro = throwOnFailure ? "HOLGEN_FAIL" : "HOLGEN_WARN";
   if (isFuncTable) {
     method.mBody.Add("{}(\"Calling undefined {} function in {}.{{}}\", {});", warnThrowMacro,
-                     functionDefinition.mName, *sourceTable,
-                     Naming().FieldNameInCpp(St::LuaTable_TableField));
+                     functionName, *sourceTable, Naming().FieldNameInCpp(St::LuaTable_TableField));
   } else {
     method.mBody.Add("{}(\"Calling undefined {} function {}.{{}}\", {});", warnThrowMacro,
-                     functionDefinition.mName, *sourceTable, functionHandle);
+                     functionName, *sourceTable, functionHandle);
   }
   if (!throwOnFailure) {
     method.mBody.Add("lua_pop(luaState, 1);");
@@ -179,24 +196,33 @@ void LuaFunctionPlugin::GenerateFunctionGetFunctionFromSourceTable(
   method.mBody.Add("}}");
 }
 
-void LuaFunctionPlugin::GenerateFunctionGetGlobalFunction(
-    const Class &cls, const FunctionDefinition &functionDefinition,
-    const std::string &functionHandle, bool isFuncTable, ClassMethod &method,
-    const std::string &retVal) {
+void LuaFunctionPlugin::GenerateFunctionGetGlobalFunction(const Class &cls,
+                                                          const std::string &functionName,
+                                                          bool throwOnFailure,
+                                                          const std::string &functionHandle,
+                                                          bool isFuncTable, ClassMethod &method,
+                                                          const std::string &retVal) const {
   std::string tableExpression = Naming().FieldNameInCpp(St::LuaTable_TableField);
   std::string tableExpressionRaw = tableExpression + ".c_str()";
+  bool isPublisher = false;
   if (cls.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
                                          Annotations::LuaFuncTable_Publisher)) {
+    isPublisher = true;
     tableExpression = std::format("\"{}\"", cls.mName);
     tableExpressionRaw = tableExpression;
   }
   if (isFuncTable) {
-      method.mBody.Add("lua_getglobal(luaState, {});", tableExpressionRaw);
+    method.mBody.Add("lua_getglobal(luaState, {});", tableExpressionRaw);
 
     method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
     method.mBody.Indent(1);
-    method.mBody.Add("HOLGEN_WARN(\"Function table {{}} not found when calling {}\", {});",
-                     functionDefinition.mName, tableExpression);
+    if (isPublisher) {
+      method.mBody.Add("HOLGEN_WARN(\"Function table {} not found when calling {}\");", cls.mName,
+                       functionName);
+    } else {
+      method.mBody.Add("HOLGEN_WARN(\"Function table {{}} not found when calling {}\", {});",
+                       functionName, tableExpression);
+    }
     method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return {};", retVal);
     method.mBody.Indent(-1);
@@ -209,15 +235,13 @@ void LuaFunctionPlugin::GenerateFunctionGetGlobalFunction(
   }
   method.mBody.Add("if (lua_isnil(luaState, -1)) {{");
   method.mBody.Indent(1);
-  bool throwOnFailure =
-      functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Reference;
   std::string warnThrowMacro = throwOnFailure ? "HOLGEN_FAIL" : "HOLGEN_WARN";
   if (isFuncTable) {
     method.mBody.Add("{}(\"Calling undefined {} function in {{}}\", {});", warnThrowMacro,
-                     functionDefinition.mName, tableExpression);
+                     functionName, tableExpression);
   } else {
     method.mBody.Add("{}(\"Calling undefined {} function {{}}\", {});", warnThrowMacro,
-                     functionDefinition.mName, functionHandle);
+                     functionName, functionHandle);
   }
   if (!throwOnFailure) {
     method.mBody.Add("lua_pop(luaState, 1);");
@@ -230,8 +254,17 @@ void LuaFunctionPlugin::GenerateFunctionGetGlobalFunction(
 void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &functionDefinition,
                                          const std::string *sourceTable,
                                          const std::string &functionHandle, bool isFuncTable,
-                                         bool isStatic) {
+                                         bool isStatic) const {
   auto method = NewFunction(cls, functionDefinition);
+  bool isPublisher = cls.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
+                                                        Annotations::LuaFuncTable_Publisher);
+
+  if (isPublisher && method.mReturnType.mName != "void") {
+    auto newReturnType = Type{"std::map"};
+    newReturnType.mTemplateParameters.emplace_back("std::string");
+    newReturnType.mTemplateParameters.emplace_back(method.mReturnType);
+    method.mReturnType = newReturnType;
+  }
   method.mConstness = Constness::Const;
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_front("luaState", Type{"lua_State", PassByType::Pointer});
@@ -253,9 +286,6 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   bool throwOnFailure =
       functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Reference;
 
-  bool isPublisher = cls.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
-                                                        Annotations::LuaFuncTable_Publisher);
-
   if (isFuncTable && !isPublisher) {
     if (throwOnFailure) {
       method.mBody.Add(R"(HOLGEN_FAIL_IF({}.empty(), "Calling unset {} function from table");)",
@@ -276,11 +306,12 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   }
 
   if (sourceTable) {
-    GenerateFunctionGetFunctionFromSourceTable(functionDefinition, sourceTable, functionHandle,
-                                               isFuncTable, method, retVal);
+    GenerateFunctionGetFunctionFromSourceTable(functionDefinition.mName, throwOnFailure,
+                                               sourceTable, functionHandle, isFuncTable, method,
+                                               retVal);
   } else {
-    GenerateFunctionGetGlobalFunction(cls, functionDefinition, functionHandle, isFuncTable, method,
-                                      retVal);
+    GenerateFunctionGetGlobalFunction(cls, functionDefinition.mName, throwOnFailure, functionHandle,
+                                      isFuncTable, method, retVal);
   }
 
   int copyOffset = isFuncTable + !!sourceTable;

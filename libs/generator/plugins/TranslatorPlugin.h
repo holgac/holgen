@@ -21,7 +21,7 @@ protected:
   const TranslatorSettings &mSettings;
 
   template <typename T, typename C>
-  void FillComments(const T &definition, C &container) {
+  void FillComments(const T &definition, C &container) const {
     for (auto &annotation: definition.GetAnnotations(Annotations::Comment)) {
       for (auto &attribute: annotation.mAttributes) {
         container.push_back(attribute.mName);
