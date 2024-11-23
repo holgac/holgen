@@ -55,8 +55,6 @@ struct Type : TypeBase<Type> {
   // It's converted to string as [0]([1],[2], ...)
   // TODO: Instead of a separate field, Type should natively support function types
   std::vector<Type> mFunctionalTemplateParameters;
-  // Use this to specify a different type when generating the files.
-  std::shared_ptr<Type> mFinalType;
   [[nodiscard]] std::string ToString(bool noTrailingSpace,
                                      bool ignoreConstForPrimitives = false) const;
   [[nodiscard]] std::string ToFullyQualifiedString(const TranslatedProject &project) const;

@@ -262,6 +262,8 @@ Type Type::ReturnType(const TranslatedProject &project, const FunctionDefinition
     t.mType = PassByType::Value;
     break;
   }
+  if (t.mName == St::Lua_CustomData)
+    t.mName = "void";
   return t;
 }
 

@@ -228,7 +228,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   std::string retVal = "{}";
   if (functionDefinition.mReturnType.mCategory == FunctionReturnTypeCategory::Pointer) {
     retVal = "nullptr";
-  } else if (functionDefinition.mReturnType.mType.mName == "void") {
+  } else if (method.mReturnType.mName == "void") {
     retVal = "void()";
   } else if (auto returnedCls = mProject.GetClass(method.mReturnType.mName)) {
     if (returnedCls->mEnum) {
@@ -270,6 +270,12 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
                                       retVal);
   }
 
+  int copyOffset = isFuncTable + !!sourceTable;
+  if (copyOffset != 0) {
+    method.mBody.Add("lua_copy(luaState, -1, {});", -(copyOffset + 1));
+    method.mBody.Add("lua_pop(luaState, {});", copyOffset);
+  }
+
   if (!isStatic) {
     method.mBody.Add("{}::{}<false>(*this, luaState);", St::LuaHelper, St::LuaHelper_Push);
   }
@@ -278,7 +284,7 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   bool returnsVal = method.mReturnType.mName != "void";
   method.mBody.Add("lua_call(luaState, {}, {});", functionDefinition.mArguments.size() + !isStatic,
                    returnsVal ? 1 : 0);
-  int popCount = returnsVal + isFuncTable + !!sourceTable;
+
   if (returnsVal) {
     std::string returnValue = "result";
     if (auto returnClass = mProject.GetClass(method.mReturnType.mName)) {
@@ -324,14 +330,9 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
       method.mBody.Add("{}result;", method.mReturnType.ToString(false));
       method.mBody.Add("{}::{}(result, luaState, -1);", St::LuaHelper, St::LuaHelper_Read);
     }
-    if (popCount > 0) {
-      method.mBody.Add("lua_pop(luaState, {});", popCount);
-    }
+    if (method.mFunction->mReturnType.mType.mName != St::Lua_CustomData)
+      method.mBody.Add("lua_pop(luaState, 1);");
     method.mBody.Add("return {};", returnValue);
-  } else {
-    if (popCount > 0) {
-      method.mBody.Add("lua_pop(luaState, {});", popCount);
-    }
   }
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
