@@ -269,8 +269,14 @@ std::string LuaSourceGenerator::ToTypedFunctionArguments(const Class &cls,
 std::string LuaSourceGenerator::ToFunctionSignature(const Class &cls,
                                                     const ClassMethod &method) const {
   std::string returnAnnotation;
+  std::string extraTypes;
   if (method.mReturnType.mName != "void")
     returnAnnotation = std::format(": {}", ToLuaType(method.mReturnType));
-  return std::format("fun({}){}", ToTypedFunctionArguments(cls, method), returnAnnotation);
+  if (method.mFunction &&
+      method.mFunction->GetMatchingAnnotation(Annotations::LuaFunc, Annotations::LuaFunc_Nullable))
+    extraTypes = "nil|";
+
+  return std::format("{}fun({}){}", extraTypes, ToTypedFunctionArguments(cls, method),
+                     returnAnnotation);
 }
 } // namespace holgen

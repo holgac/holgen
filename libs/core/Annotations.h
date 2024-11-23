@@ -256,6 +256,7 @@ public:
   inline static const std::string LuaFunc = "luaFunc";
   inline static const std::string LuaFunc_SourceTable = "sourceTable";
   inline static const std::string LuaFunc_Static = "static";
+  inline static const std::string LuaFunc_Nullable = "nullable";
 
   /**
    * luadata related annotations.
