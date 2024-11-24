@@ -249,7 +249,8 @@ void LuaPlugin::GenerateReadEnumFromLuaBody(Class &cls, ClassMethod &method) {
 }
 
 void LuaPlugin::GeneratePushToLua(Class &cls) {
-  auto method = ClassMethod{St::Lua_PushProxyObject, Type{"void"}, Visibility::Public, Constness::Const};
+  auto method =
+      ClassMethod{St::Lua_PushProxyObject, Type{"void"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
 
   method.mBody.Add("lua_newtable(luaState);");
@@ -296,10 +297,12 @@ void LuaPlugin::GeneratePushMirrorStructToLua(Class &cls) {
     auto fieldClass = mProject.GetClass(field.mType.mName);
     if (fieldClass && !fieldClass->mEnum) {
       std::string accessOperator = field.mType.mType == PassByType::Pointer ? "->" : ".";
-      if (field.mField && field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_AlwaysProxy)) {
-      method.mBody.Add("{}{}{}(luaState);", field.mName, accessOperator, St::Lua_PushProxyObject);
+      if (field.mField &&
+          field.mField->GetMatchingAttribute(Annotations::Field, Annotations::Field_AlwaysProxy)) {
+        method.mBody.Add("{}{}{}(luaState);", field.mName, accessOperator, St::Lua_PushProxyObject);
       } else {
-      method.mBody.Add("{}{}{}(luaState);", field.mName, accessOperator, St::Lua_PushMirrorObject);
+        method.mBody.Add("{}{}{}(luaState);", field.mName, accessOperator,
+                         St::Lua_PushMirrorObject);
       }
     } else if (field.mField && field.mField->mType.mName == St::Lua_CustomData) {
       method.mBody.Add("lua_rawgeti(luaState, LUA_REGISTRYINDEX, {});", field.mName);
@@ -332,8 +335,13 @@ void LuaPlugin::ProcessStruct(Class &cls) {
   if (!cls.IsAbstract() && Type{cls.mName}.SupportsMirroring(mProject)) {
     GenerateReadMirrorObjectFromLua(cls);
   }
-  GenerateNewIndexMetaMethod(cls);
-  GenerateCreateLuaMetatable(cls);
+
+  if (!cls.mStruct ||
+      !cls.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable,
+                                         Annotations::LuaFuncTable_Publisher)) {
+    GenerateNewIndexMetaMethod(cls);
+    GenerateCreateLuaMetatable(cls);
+  }
 }
 
 void LuaPlugin::GeneratePushEnumToLua(Class &cls) {
@@ -406,7 +414,8 @@ void LuaPlugin::ProcessEnum(Class &cls) {
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
   // For consistency, all holgen classes have both PushToLua and PushMirrorToLua
-  for (auto &methodName: std::vector<std::string>{St::Lua_PushProxyObject, St::Lua_PushMirrorObject}) {
+  for (auto &methodName:
+       std::vector<std::string>{St::Lua_PushProxyObject, St::Lua_PushMirrorObject}) {
     auto method = ClassMethod{methodName, Type{"void"}, Visibility::Public, Constness::Const};
     method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
     std::string valueToPush;

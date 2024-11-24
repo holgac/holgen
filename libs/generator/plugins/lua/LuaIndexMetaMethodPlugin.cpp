@@ -11,7 +11,8 @@ void LuaIndexMetaMethodPlugin::Run() {
   for (auto &cls: mProject.mClasses) {
     if (!cls.mStruct ||
         cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
-        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua))
+        cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
+        cls.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable, Annotations::LuaFuncTable_Publisher))
       continue;
     Process(cls);
   }

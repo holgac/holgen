@@ -121,7 +121,7 @@ void LuaPublisherGenerator::GenerateRegisterSubscriberMethod(CodeBlock &codeBloc
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("RegisterSubscriber = function(subscriber)");
   codeBlock.Indent(1);
-  codeBlock.Add("{}[subscriber.name] = subscriber", St::LuaPublisher_ModulesField);
+  codeBlock.Add("{}.{}[subscriber.name] = subscriber", cls.mName, St::LuaPublisher_ModulesField);
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
       continue;
@@ -142,7 +142,7 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBl
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("UnregisterSubscriber = function(subscriber)");
   codeBlock.Indent(1);
-  codeBlock.Add("{}[subscriber.name] = nil", St::LuaPublisher_ModulesField);
+  codeBlock.Add("{}.{}[subscriber.name] = nil", cls.mName, St::LuaPublisher_ModulesField);
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
       continue;
@@ -183,9 +183,9 @@ void LuaPublisherGenerator::GenerateReloadSubscriber(CodeBlock &codeBlock, const
   codeBlock.Add("ReloadSubscriber = function(subscriber)");
   codeBlock.Indent(1);
 
-  codeBlock.Add("if {}[subscriber.name] then", St::LuaPublisher_ModulesField);
+  codeBlock.Add("if {}.{}[subscriber.name] then", cls.mName, St::LuaPublisher_ModulesField);
   codeBlock.Indent(1);
-  codeBlock.Add("{}.UnregisterSubscriber({}[subscriber.name])", cls.mName,
+  codeBlock.Add("{0}.UnregisterSubscriber({0}.{1}[subscriber.name])", cls.mName,
                 St::LuaPublisher_ModulesField);
   codeBlock.Indent(-1);
   codeBlock.Add("end");

@@ -28,6 +28,7 @@ private:
   void GenerateInitializeLua(Class &cls);
   void GeneratePushForKeyedContainer(Class &cls, const std::string &container) const;
   void GenerateInitializeClasses(Class &cls, ClassMethod &method);
+  void GenerateInitializePublishers(ClassMethod &method) const;
   void GenerateInitializeFunctionTables(ClassMethod &method);
 };
 

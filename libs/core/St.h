@@ -43,6 +43,7 @@ public:
   inline static const std::string LuaHelper = "LuaHelper";
   inline static const std::string LuaHelper_Push = "Push";
   inline static const std::string LuaHelper_Read = "Read";
+  inline static const std::string LuaHelper_Setup = "Setup";
   inline static const std::string Lua_ReadProxyObject = "ReadProxyFromLua";
   inline static const std::string Lua_ReadMirrorObject = "ReadMirrorFromLua";
   inline static const std::string Lua_PushMirrorObject = "PushMirrorToLua";

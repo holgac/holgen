@@ -351,6 +351,10 @@ void LuaHelperPlugin::GenerateReadForPrimitives(Class &cls) {
 void LuaHelperPlugin::GenerateInitializeClasses(Class &cls, ClassMethod &method) {
   std::array<std::set<std::string>, 2> createStatements;
   for (auto &other: mProject.mClasses) {
+    if (other.mStruct &&
+        other.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
+                                             Annotations::LuaFuncTable_Publisher))
+      continue;
     // TODO: use consts for function names
     if (other.GetMethod("CreateLuaMetatable", Constness::NotConst)) {
       cls.mSourceIncludes.AddLocalHeader(other.mName + ".h");
@@ -365,6 +369,16 @@ void LuaHelperPlugin::GenerateInitializeClasses(Class &cls, ClassMethod &method)
     for (auto &statement: statements) {
       method.mBody.AddLine(statement);
     }
+  }
+}
+
+void LuaHelperPlugin::GenerateInitializePublishers(ClassMethod &method) const {
+  for (auto &other: mProject.mClasses) {
+    if (!other.mStruct ||
+        !other.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
+                                              Annotations::LuaFuncTable_Publisher))
+      continue;
+    method.mBody.Add("luaL_dofile(luaState, (genDir / \"{}.lua\").string().c_str());", other.mName);
   }
 }
 
@@ -397,10 +411,15 @@ void LuaHelperPlugin::GenerateInitializeFunctionTables(ClassMethod &method) {
 
 void LuaHelperPlugin::GenerateInitializeLua(Class &cls) {
   // TODO: rename to InitializeLua or something, and put to St
-  auto method = ClassMethod{"CreateMetatables", Type{"void"}, Visibility::Public,
+  cls.mHeaderIncludes.AddStandardHeader("filesystem");
+  cls.mSourceIncludes.AddLocalHeader(St::FilesystemHelper + ".h");
+  auto method = ClassMethod{St::LuaHelper_Setup, Type{"void"}, Visibility::Public,
                             Constness::NotConst, Staticness::Static};
   method.mArguments.emplace_back("luaState", Type{"lua_State", PassByType::Pointer});
+  method.mArguments.emplace_back(
+      "genDir", Type{"std::filesystem::path", PassByType::Reference, Constness::Const});
   GenerateInitializeClasses(cls, method);
+  GenerateInitializePublishers(method);
   GenerateInitializeFunctionTables(method);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
