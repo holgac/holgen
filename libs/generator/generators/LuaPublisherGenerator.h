@@ -19,6 +19,8 @@ private:
   void GenerateUnregisterSubscriberMethod(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateUnregisterSubscriberByNameMethod(CodeBlock &codeBlock, const Class &cls) const;
   void GenerateReloadSubscriber(CodeBlock &codeBlock, const Class &cls) const;
+  void GenerateSubscribeToEvent(CodeBlock &codeBlock, const Class &cls) const;
+  void GenerateUnsubscribeFromEvent(CodeBlock &codeBlock, const Class &cls) const;
   [[nodiscard]] bool ShouldProcess(const Class &cls) const override;
   [[nodiscard]] bool ShouldProcess(const ClassMethod &method) const override;
 };

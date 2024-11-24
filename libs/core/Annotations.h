@@ -247,7 +247,7 @@ public:
    *
    * Publisher attribute can be used to generate boilerplate code for subscribers (listeners) to
    * register themselves for specific events (corresponding to function calls). The struct should
-   * inherit from the listener struct.
+   * inherit from the subscriber struct and the subscriber struct should have a string "name" field.
    */
   inline static const std::string LuaFuncTable = "luaFuncTable";
   inline static const std::string LuaFuncTable_SourceTable = "sourceTable";

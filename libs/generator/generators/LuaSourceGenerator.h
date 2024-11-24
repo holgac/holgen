@@ -19,6 +19,7 @@ private:
   void GenerateMethod(CodeBlock &codeBlock, const Class &cls, const ClassMethod &method) const;
   [[nodiscard]] bool ShouldProcess(const Class &cls) const override;
   [[nodiscard]] bool ShouldProcess(const ClassField &field) const;
+  using LuaGeneratorBase::ShouldProcess;
   [[nodiscard]] std::string ToTypedFunctionArguments(const Class &cls,
                                                      const ClassMethod &method) const;
   [[nodiscard]] std::string ToFunctionSignature(const Class &cls, const ClassMethod &method) const;

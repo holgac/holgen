@@ -48,6 +48,11 @@ void LuaPublisherGenerator::Generate(GeneratedContent &out, const Class &cls) co
   GenerateUnregisterSubscriberMethod(codeBlock, cls);
   codeBlock.Add("");
   GenerateReloadSubscriber(codeBlock, cls);
+  codeBlock.Add("");
+  GenerateSubscribeToEvent(codeBlock, cls);
+  codeBlock.Add("");
+  GenerateUnsubscribeFromEvent(codeBlock, cls);
+  codeBlock.Add("");
   codeBlock.Indent(-1);
   codeBlock.Add("}}");
 
@@ -145,16 +150,10 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBl
         cls.mName + "." + mNamingConvention.LuaPublisherCallbacksTableName(method.mName);
     codeBlock.Add("if subscriber.{} then", method.mName);
     codeBlock.Indent(1);
-    codeBlock.Add("for i = 1, #{} do", tableName);
-    codeBlock.Indent(1);
-    codeBlock.Add("if {}[i] == subscriber then", tableName);
-    codeBlock.Indent(1);
-    codeBlock.Add("table.remove({}, i)", tableName);
-    codeBlock.Add("break", tableName);
-    codeBlock.Indent(-1);
-    codeBlock.Add("end");
-    codeBlock.Indent(-1);
-    codeBlock.Add("end");
+
+    codeBlock.Add("{0}.UnsubscribeFromEvent({0}.{1}, subscriber)", cls.mName,
+                  mNamingConvention.LuaPublisherCallbacksTableName(method.mName));
+
     codeBlock.Indent(-1);
     codeBlock.Add("end");
   }
@@ -180,7 +179,6 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberByNameMethod(CodeBlock &
 }
 
 void LuaPublisherGenerator::GenerateReloadSubscriber(CodeBlock &codeBlock, const Class &cls) const {
-
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("ReloadSubscriber = function(subscriber)");
   codeBlock.Indent(1);
@@ -195,6 +193,45 @@ void LuaPublisherGenerator::GenerateReloadSubscriber(CodeBlock &codeBlock, const
   codeBlock.Add("{}.RegisterSubscriber(subscriber)", cls.mName);
   codeBlock.Indent(-1);
   codeBlock.Add("end,");
+}
+
+void LuaPublisherGenerator::GenerateSubscribeToEvent(CodeBlock &codeBlock, const Class &cls) const {
+  codeBlock.Add("---@param eventTable table[{}]", cls.mStruct->mMixins.front());
+  codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
+  codeBlock.Add("SubscribeToEvent = function(eventTable, subscriber)");
+  codeBlock.Indent(1);
+
+  codeBlock.Add("{}.UnsubscribeFromEvent(eventTable, subscriber)", cls.mName);
+  codeBlock.Add("table.insert(eventTable, subscriber)");
+
+  codeBlock.Indent(-1);
+  codeBlock.Add("end,");
+}
+
+void LuaPublisherGenerator::GenerateUnsubscribeFromEvent(CodeBlock &codeBlock,
+                                                         const Class &cls) const {
+  codeBlock.Add("---@param eventTable table[{}]", cls.mStruct->mMixins.front());
+  codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
+  codeBlock.Add("---@return boolean", cls.mStruct->mMixins.front());
+  codeBlock.Add("UnsubscribeFromEvent = function(eventTable, subscriber)");
+  codeBlock.Indent(1);
+
+  codeBlock.Add("for i = 1, #eventTable do");
+  codeBlock.Indent(1);
+  codeBlock.Add("if eventTable[i] == subscriber then");
+  codeBlock.Indent(1);
+  // more optimal to assign last element to it, then pop?
+  codeBlock.Add("table.remove(eventTable, i)");
+  codeBlock.Add("return true");
+  codeBlock.Indent(-1);
+  codeBlock.Add("end");
+  codeBlock.Indent(-1);
+  codeBlock.Add("end");
+
+  codeBlock.Add("return false");
+
+  codeBlock.Indent(-1);
+  codeBlock.Add("end");
 }
 
 bool LuaPublisherGenerator::ShouldProcess(const Class &cls) const {
