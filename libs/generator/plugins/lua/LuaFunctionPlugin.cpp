@@ -48,7 +48,7 @@ void LuaFunctionPlugin::ProcessLuaPublisher(Class &cls) const {
     arg.mType.mName = "string";
   }
   ProcessLuaFunction(cls, func, true);
-  cls.GetMethod(St::LuaPublisher_UnregisterSubscriberByName, Constness::Const)->mFunction = nullptr;
+  cls.GetMethod(St::LuaPublisher_UnregisterSubscriberByName, Constness::NotConst)->mFunction = nullptr;
 }
 
 void LuaFunctionPlugin::GenerateTableSetter(Class &cls) const {
@@ -259,13 +259,19 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   bool isPublisher = cls.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
                                                         Annotations::LuaFuncTable_Publisher);
 
-  if (isPublisher && method.mReturnType.mName != "void") {
-    auto newReturnType = Type{"std::map"};
-    newReturnType.mTemplateParameters.emplace_back("std::string");
-    newReturnType.mTemplateParameters.emplace_back(method.mReturnType);
-    method.mReturnType = newReturnType;
+  if (isPublisher) {
+    method.mStaticness = Staticness::Static;
+    method.mConstness = Constness::NotConst;
+    if (method.mReturnType.mName != "void") {
+      auto newReturnType = Type{"std::map"};
+      newReturnType.mTemplateParameters.emplace_back("std::string");
+      newReturnType.mTemplateParameters.emplace_back(method.mReturnType);
+      method.mReturnType = newReturnType;
+    }
+  } else {
+    method.mConstness = Constness::Const;
   }
-  method.mConstness = Constness::Const;
+
   method.mFunction = &functionDefinition;
   method.mArguments.emplace_front("luaState", Type{"lua_State", PassByType::Pointer});
   std::string retVal = "{}";

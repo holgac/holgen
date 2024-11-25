@@ -78,7 +78,7 @@ void LuaPublisherGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cl
   codeBlock.Indent(1);
 
   auto listenerClass = mTranslatedProject.GetClass(cls.mStruct->mMixins.front());
-  auto calledMethod = listenerClass->GetMethod(method.mName, method.mConstness);
+  auto calledMethod = listenerClass->GetMethod(method.mName, Constness::Const);
   THROW_IF(!calledMethod,
            "Publisher {} ({}) could not find the {} method in the listener class {} ({})",
            cls.mName, cls.mStruct->mDefinitionSource, method.mName, listenerClass->mName,
