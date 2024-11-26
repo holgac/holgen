@@ -158,7 +158,11 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBl
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("UnregisterSubscriber = function(subscriber)");
   codeBlock.Indent(1);
+  codeBlock.Add("if subscriber.name and subscriber.name ~= '' then");
+  codeBlock.Indent(1);
   codeBlock.Add("{}.{}[subscriber.name] = nil", cls.mName, St::LuaPublisher_ModulesField);
+  codeBlock.Indent(-1);
+  codeBlock.Add("end");
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
       continue;

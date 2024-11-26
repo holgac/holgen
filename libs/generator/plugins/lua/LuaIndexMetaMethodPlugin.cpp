@@ -12,7 +12,8 @@ void LuaIndexMetaMethodPlugin::Run() {
     if (!cls.mStruct ||
         cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Script) ||
         cls.mStruct->GetMatchingAttribute(Annotations::No, Annotations::No_Lua) ||
-        cls.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable, Annotations::LuaFuncTable_Publisher))
+        cls.mStruct->GetMatchingAttribute(Annotations::LuaFuncTable,
+                                          Annotations::LuaFuncTable_Publisher))
       continue;
     Process(cls);
   }
@@ -333,7 +334,8 @@ bool LuaIndexMetaMethodPlugin::ShouldGenerateWrapper(const ClassMethod &method) 
   if (!method.mExposeToLua)
     return false;
   if (method.mFunction &&
-      method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OnDataLoad))
+      (method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OnDataLoad) ||
+       method.mFunction->GetMatchingAttribute(Annotations::No, Annotations::No_Cpp)))
     return false;
   return true;
 }

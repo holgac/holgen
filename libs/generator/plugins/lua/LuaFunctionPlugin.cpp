@@ -84,7 +84,8 @@ void LuaFunctionPlugin::ProcessStructDefinition(Class &cls,
 
 void LuaFunctionPlugin::ProcessLuaFunction(Class &cls, const FunctionDefinition &functionDefinition,
                                            bool isFuncTable) const {
-  if (functionDefinition.GetMatchingAnnotation(Annotations::Func, Annotations::Func_OnDataLoad))
+  if (functionDefinition.GetMatchingAnnotation(Annotations::Func, Annotations::Func_OnDataLoad) ||
+      functionDefinition.GetMatchingAnnotation(Annotations::No, Annotations::No_Cpp))
     return;
   cls.mSourceIncludes.AddLibHeader("lua.hpp");
   cls.mSourceIncludes.AddLocalHeader(St::LuaHelper + ".h");
