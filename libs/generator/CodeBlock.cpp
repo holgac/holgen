@@ -40,7 +40,10 @@ std::string CodeBlock::ToString(FileType fileType,
       ++indentIt;
       break;
     case CodeUnitType::Code:
-      out << indentation << *lineIt << St::Newline;
+      if (lineIt->empty())
+        out << St::Newline;
+      else
+        out << indentation << *lineIt << St::Newline;
       ++lineIt;
       break;
     case CodeUnitType::UserDefined:
