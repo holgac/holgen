@@ -86,6 +86,8 @@ void LuaPublisherGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cl
 
   bool hasRetVal = method.mReturnType.mName != "void" ||
       method.mFunction->mReturnType.mType.mName == St::Lua_CustomData;
+  bool trimFalsy =
+      method.mFunction->GetMatchingAnnotation(Annotations::LuaFunc, Annotations::LuaFunc_TrimFalsy);
   if (hasRetVal) {
     codeBlock.Add("---@type table[string, {}]",
                   calledMethod->mReturnType.mName != "void" ? calledMethod->mReturnType.mName
@@ -102,7 +104,17 @@ void LuaPublisherGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cl
 
   auto caller = std::format("module{}{}({})", accessor, method.mName, args);
   if (hasRetVal) {
-    codeBlock.Add("retVal[module.name] = {}", caller);
+    if (trimFalsy) {
+      codeBlock.Add("local moduleRetVal = {}", caller);
+      codeBlock.Add(
+          "if moduleRetVal and (type(moduleRetVal) ~= 'table' or #moduleRetVal > 0) then");
+      codeBlock.Indent(1);
+      codeBlock.Add("retVal[module.name] = moduleRetVal");
+      codeBlock.Indent(-1);
+      codeBlock.Add("end", caller);
+    } else {
+      codeBlock.Add("retVal[module.name] = {}", caller);
+    }
   } else {
     codeBlock.Add("{}", caller);
   }

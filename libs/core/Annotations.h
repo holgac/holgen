@@ -257,12 +257,16 @@ public:
   /**
    * Marks the function below as a custom function implemented in lua
    * and callable from cpp and lua. table attribute determines the global lua table
-   * used to store and reference the function
+   * used to store and reference the function.
+   *
+   * trimFalsy: Publishers normally return a {subscriberName: data} table for a function that
+   * returns data. This attribute ensures that an entry is inserted only if data is not falsy.
    */
   inline static const std::string LuaFunc = "luaFunc";
   inline static const std::string LuaFunc_SourceTable = "sourceTable";
   inline static const std::string LuaFunc_Static = "static";
   inline static const std::string LuaFunc_Nullable = "nullable";
+  inline static const std::string LuaFunc_TrimFalsy = "trimFalsy";
 
   /**
    * luadata related annotations.

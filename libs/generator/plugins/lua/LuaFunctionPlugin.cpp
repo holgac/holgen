@@ -48,7 +48,8 @@ void LuaFunctionPlugin::ProcessLuaPublisher(Class &cls) const {
     arg.mType.mName = "string";
   }
   ProcessLuaFunction(cls, func, true);
-  cls.GetMethod(St::LuaPublisher_UnregisterSubscriberByName, Constness::NotConst)->mFunction = nullptr;
+  cls.GetMethod(St::LuaPublisher_UnregisterSubscriberByName, Constness::NotConst)->mFunction =
+      nullptr;
 }
 
 void LuaFunctionPlugin::GenerateTableSetter(Class &cls) const {
@@ -332,8 +333,10 @@ void LuaFunctionPlugin::GenerateFunction(Class &cls, const FunctionDefinition &f
   GenerateFunctionPushArgs(method, functionDefinition);
 
   bool returnsVal = method.mReturnType.mName != "void";
+  bool pushesVal =
+      method.mFunction && method.mFunction->mReturnType.mType.mName == St::Lua_CustomData;
   method.mBody.Add("lua_call(luaState, {}, {});", functionDefinition.mArguments.size() + !isStatic,
-                   returnsVal ? 1 : 0);
+                   (returnsVal || pushesVal) ? 1 : 0);
 
   if (returnsVal) {
     std::string returnValue = "result";
