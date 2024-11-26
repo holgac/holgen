@@ -80,7 +80,27 @@ void LuaSourceGenerator::GenerateEnum(CodeBlock &codeBlock, const Class &cls) co
 
 void LuaSourceGenerator::GenerateClassDefinition(CodeBlock &codeBlock, const Class &cls) const {
   auto luaClassName = mNamingConvention.LuaMetatableName(cls.mName);
-  codeBlock.Add("---@class {}", luaClassName);
+  std::stringstream inheritedClasses;
+  bool isFirst = true;
+  if (cls.mStruct) {
+    for (auto &baseStructName: cls.mStruct->mMixins) {
+      auto baseStruct = mTranslatedProject.mProject.GetStruct(baseStructName);
+      if (!baseStruct || baseStruct->mIsMixin)
+        continue;
+      if (isFirst)
+        isFirst = false;
+      else
+        inheritedClasses << ", ";
+      inheritedClasses << baseStructName;
+    }
+  }
+
+  if (isFirst) {
+    codeBlock.Add("---@class {}", luaClassName);
+  } else {
+    codeBlock.Add("---@class {}: {}", luaClassName, inheritedClasses.str());
+  }
+
   GenerateFields(codeBlock, cls);
   codeBlock.Add("{} = {{}}", luaClassName);
 }

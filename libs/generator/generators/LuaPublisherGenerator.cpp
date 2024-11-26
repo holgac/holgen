@@ -60,7 +60,7 @@ void LuaPublisherGenerator::Generate(GeneratedContent &out, const Class &cls) co
 }
 
 void LuaPublisherGenerator::GenerateModulesMap(CodeBlock &codeBlock, const Class &cls) const {
-  codeBlock.Add("---@type table[string, {}]", cls.mStruct->mMixins[0]);
+  codeBlock.Add("---@type [string, {}]", cls.mStruct->mMixins[0]);
   codeBlock.Add("{} = {{}},", St::LuaPublisher_ModulesField);
 }
 
@@ -89,9 +89,9 @@ void LuaPublisherGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cl
   bool trimFalsy =
       method.mFunction->GetMatchingAnnotation(Annotations::LuaFunc, Annotations::LuaFunc_TrimFalsy);
   if (hasRetVal) {
-    codeBlock.Add("---@type table[string, {}]",
-                  calledMethod->mReturnType.mName != "void" ? calledMethod->mReturnType.mName
-                                                            : "table[any]");
+    codeBlock.Add("---@type [string, {}]",
+                  calledMethod->mReturnType.mName != "void" ? ToLuaType(calledMethod->mReturnType)
+                                                            : "[any]");
     codeBlock.Add("local retVal = {{}}");
   }
   codeBlock.Add("for _, module in pairs({}.{}) do", cls.mName,
@@ -133,7 +133,11 @@ void LuaPublisherGenerator::GenerateRegisterSubscriberMethod(CodeBlock &codeBloc
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("RegisterSubscriber = function(subscriber)");
   codeBlock.Indent(1);
+  codeBlock.Add("if subscriber.name and subscriber.name ~= '' then");
+  codeBlock.Indent(1);
   codeBlock.Add("{}.{}[subscriber.name] = subscriber", cls.mName, St::LuaPublisher_ModulesField);
+  codeBlock.Indent(-1);
+  codeBlock.Add("end");
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
       continue;
@@ -176,12 +180,12 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBl
 void LuaPublisherGenerator::GenerateUnregisterSubscriberByNameMethod(CodeBlock &codeBlock,
                                                                      const Class &cls) const {
   codeBlock.Add("---@param subscriberName string");
-  codeBlock.Add("{} = function(subscriber)", St::LuaPublisher_UnregisterSubscriberByName);
+  codeBlock.Add("{} = function(subscriberName)", St::LuaPublisher_UnregisterSubscriberByName);
   codeBlock.Indent(1);
 
-  codeBlock.Add("if {}[subscriber.name] then", St::LuaPublisher_ModulesField);
+  codeBlock.Add("if {}[subscriberName] then", St::LuaPublisher_ModulesField);
   codeBlock.Indent(1);
-  codeBlock.Add("{}.UnregisterSubscriber({}[subscriber.name])", cls.mName,
+  codeBlock.Add("{}.UnregisterSubscriber({}[subscriberName])", cls.mName,
                 St::LuaPublisher_ModulesField);
   codeBlock.Indent(-1);
   codeBlock.Add("end");
@@ -191,24 +195,47 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberByNameMethod(CodeBlock &
 }
 
 void LuaPublisherGenerator::GenerateReloadSubscriber(CodeBlock &codeBlock, const Class &cls) const {
-  codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
-  codeBlock.Add("ReloadSubscriber = function(subscriber)");
+  codeBlock.Add("---@param subscriberClass {}", cls.mStruct->mMixins.front());
+  codeBlock.Add("---@return {}", cls.mStruct->mMixins.front());
+  codeBlock.Add("ReloadSubscriber = function(subscriberClass)");
   codeBlock.Indent(1);
 
-  codeBlock.Add("if {}.{}[subscriber.name] then", cls.mName, St::LuaPublisher_ModulesField);
-  codeBlock.Indent(1);
-  codeBlock.Add("{0}.UnregisterSubscriber({0}.{1}[subscriber.name])", cls.mName,
+  codeBlock.Add("local oldInstance = {}.{}[subscriberClass.name]", cls.mName,
                 St::LuaPublisher_ModulesField);
+  codeBlock.Add("if oldInstance then", cls.mName, St::LuaPublisher_ModulesField);
+  codeBlock.Indent(1);
+  codeBlock.Add("{0}.UnregisterSubscriber(oldInstance)", cls.mName, St::LuaPublisher_ModulesField);
   codeBlock.Indent(-1);
+  std::stringstream luadataArgs;
+  bool isFirst = true;
+  for (auto &field: cls.mFields) {
+    if (!field.mField || field.mField->mType.mName != St::Lua_CustomData)
+      continue;
+    if (isFirst)
+      isFirst = false;
+    else
+      luadataArgs << ", ";
+    luadataArgs << std::format("{0} = table.deepcopy(subscriberClass.{0})", field.mField->mName);
+  }
+  auto luadataArgsStr = luadataArgs.str();
+  if (!luadataArgsStr.empty()) {
+    codeBlock.Add("else");
+    codeBlock.Indent(1);
+    codeBlock.Add("oldInstance = {{{}}}", luadataArgsStr);
+    codeBlock.Indent(-1);
+  }
   codeBlock.Add("end");
+  codeBlock.Add("local newInstance = subscriberClass:new(oldInstance)", cls.mName,
+                St::LuaPublisher_ModulesField);
 
-  codeBlock.Add("{}.RegisterSubscriber(subscriber)", cls.mName);
+  codeBlock.Add("{}.RegisterSubscriber(newInstance)", cls.mName);
+  codeBlock.Add("return newInstance");
   codeBlock.Indent(-1);
   codeBlock.Add("end,");
 }
 
 void LuaPublisherGenerator::GenerateSubscribeToEvent(CodeBlock &codeBlock, const Class &cls) const {
-  codeBlock.Add("---@param eventTable table[{}]", cls.mStruct->mMixins.front());
+  codeBlock.Add("---@param eventTable [{}]", cls.mStruct->mMixins.front());
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("SubscribeToEvent = function(eventTable, subscriber)");
   codeBlock.Indent(1);
@@ -222,7 +249,7 @@ void LuaPublisherGenerator::GenerateSubscribeToEvent(CodeBlock &codeBlock, const
 
 void LuaPublisherGenerator::GenerateUnsubscribeFromEvent(CodeBlock &codeBlock,
                                                          const Class &cls) const {
-  codeBlock.Add("---@param eventTable table[{}]", cls.mStruct->mMixins.front());
+  codeBlock.Add("---@param eventTable [{}]", cls.mStruct->mMixins.front());
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
   codeBlock.Add("---@return boolean", cls.mStruct->mMixins.front());
   codeBlock.Add("UnsubscribeFromEvent = function(eventTable, subscriber)");
@@ -260,6 +287,7 @@ bool LuaPublisherGenerator::ShouldProcess(const Class &cls) const {
 bool LuaPublisherGenerator::ShouldProcess(const ClassMethod &method) const {
   if (!LuaGeneratorBase::ShouldProcess(method))
     return false;
-  return method.mFunction;
+  return method.mFunction &&
+      !method.mFunction->GetMatchingAnnotation(Annotations::No, Annotations::No_Publisher);
 }
 } // namespace holgen

@@ -42,6 +42,7 @@ public:
   inline static const std::string No_Script = "script";
   inline static const std::string No_Lua = "lua";
   inline static const std::string No_Json = "json";
+  inline static const std::string No_Publisher = "publisher";
 
 
   /**
