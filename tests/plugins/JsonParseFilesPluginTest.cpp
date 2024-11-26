@@ -199,7 +199,11 @@ if (it != filesByName.end()) {
       InnerStruct2 elem;
       auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
       HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-      AddInnerStruct2(std::move(elem));
+      auto elemPtr = AddInnerStruct2(std::move(elem));
+      if (elemPtr == nullptr) {
+        auto existingElem = GetInnerStruct2FromName(elem.GetName());
+        JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+      }
     }
   }
 }

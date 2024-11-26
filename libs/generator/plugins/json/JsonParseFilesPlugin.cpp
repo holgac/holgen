@@ -95,11 +95,53 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
                      mLuaStateArgument); // if (!doc.IsArray())
     method.mBody.Add(
         R"(HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {{}}", filePath.string());)");
-    if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName))
+    if (TypeInfo::Get().CppPrimitives.contains(field.mType.mName)) {
       method.mBody.Add("{}(elem);", Naming().ContainerElemAdderNameInCpp(fieldDefinition));
-    else
+    } else if (!field.mField->GetAnnotation(Annotations::Index)) {
       method.mBody.Add("{}(std::move(elem));",
                        Naming().ContainerElemAdderNameInCpp(fieldDefinition));
+    } else {
+      method.mBody.Add("auto elemPtr = {}(std::move(elem));",
+                       Naming().ContainerElemAdderNameInCpp(fieldDefinition));
+      method.mBody.Add("if (elemPtr == nullptr) {{");
+      method.mBody.Indent(1);
+      bool isFirstIndex = true;
+      bool isSecondIndex = true;
+      std::stringstream conditions;
+      std::string firstIndexField;
+      std::string firstIndexFieldGetter;
+      for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
+        if (isFirstIndex) {
+          firstIndexField = annotation.GetAttribute(Annotations::Index_On)->mValue.mName;
+          firstIndexFieldGetter = Naming().FieldGetterNameInCpp(firstIndexField);
+          method.mBody.Add("auto existingElem = {}(elem.{}());",
+                           Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation),
+                           firstIndexFieldGetter);
+          isFirstIndex = false;
+          continue;
+        }
+        if (isSecondIndex)
+          isSecondIndex = false;
+        else
+          conditions << " || ";
+        conditions << std::format(
+            "existingElem != {}(elem.{})",
+            Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation),
+            Naming().FieldGetterNameInCpp(
+                annotation.GetAttribute(Annotations::Index_On)->mValue.mName));
+      }
+      if (!isSecondIndex) {
+        method.mBody.Add("HOLGEN_WARN_AND_CONTINUE_IF({}, \"Invalid {} element ({}={{}}) matching "
+                         "multiple indices cannot be parsed!\", elem.{}());",
+                         conditions.str(), field.mType.mName, firstIndexField,
+                         firstIndexFieldGetter);
+      }
+      method.mBody.Add("{}::{}(*existingElem, jsonElem, converter{});", St::JsonHelper,
+                       St::JsonHelper_Parse,
+                       mLuaStateArgument); // if (!doc.IsArray())
+      method.mBody.Indent(-1);
+      method.mBody.Add("}}");
+    }
     method.mBody.Indent(-1);
     method.mBody.Add("}}"); // for (jsonElem: doc.GetArray())
 

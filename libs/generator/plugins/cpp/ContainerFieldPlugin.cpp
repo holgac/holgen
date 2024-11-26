@@ -143,6 +143,7 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
   } else {
     CodeBlock validators;
     CodeBlock indexInserters;
+    bool isFirst = true;
     for (const auto &annotation: field.mField->GetAnnotations(Annotations::Index)) {
       auto indexOn = annotation.GetAttribute(Annotations::Index_On);
       auto &fieldIndexedOn = *underlyingClass->GetFieldFromDefinitionName(indexOn->mValue.mName);
@@ -150,8 +151,11 @@ void ContainerFieldPlugin::GenerateAddElem(Class &cls, const ClassField &field, 
       auto getterMethodName = Naming().FieldGetterNameInCpp(*fieldIndexedOn.mField);
       validators.Add("if ({}.contains(elem.{}())) {{", indexFieldName, getterMethodName);
       validators.Indent(1);
-      validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists", elem.{}());)",
-                     underlyingClass->mName, indexOn->mValue.mName, getterMethodName);
+      if (isFirst)
+        isFirst = false;
+      else
+        validators.Add(R"(HOLGEN_WARN("{} with {}={{}} already exists", elem.{}());)",
+                       underlyingClass->mName, indexOn->mValue.mName, getterMethodName);
       validators.Add("return nullptr;");
       validators.Indent(-1);
       validators.Add("}}");
