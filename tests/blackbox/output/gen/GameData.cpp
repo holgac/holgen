@@ -65,7 +65,6 @@ Boot *GameData::GetBootFromName(const std::string &key) {
 
 Boot *GameData::AddBoot(Boot &&elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mBoots.size();
@@ -78,7 +77,6 @@ Boot *GameData::AddBoot(Boot &&elem) {
 
 Boot *GameData::AddBoot(Boot &elem) {
   if (mBootsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Boot with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mBoots.size();
@@ -135,7 +133,6 @@ Armor *GameData::GetArmorFromAlternativeName(const std::string &key) {
 
 Armor *GameData::AddArmor(Armor &&elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
     return nullptr;
   }
   if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
@@ -153,7 +150,6 @@ Armor *GameData::AddArmor(Armor &&elem) {
 
 Armor *GameData::AddArmor(Armor &elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
     return nullptr;
   }
   if (mArmorsAlternativeNameIndex.contains(elem.GetAlternativeName())) {
@@ -201,7 +197,6 @@ Character *GameData::GetCharacterFromName(const std::string &key) {
 
 Character *GameData::AddCharacter(Character &&elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Character with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mCharacters.size();
@@ -214,7 +209,6 @@ Character *GameData::AddCharacter(Character &&elem) {
 
 Character *GameData::AddCharacter(Character &elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Character with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mCharacters.size();
@@ -313,7 +307,12 @@ bool GameData::ParseFiles(const std::filesystem::path &rootPath, const std::stri
         Armor elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddArmor(std::move(elem));
+        auto elemPtr = AddArmor(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetArmorFromName(elem.GetName());
+          HOLGEN_WARN_AND_CONTINUE_IF(existingElem != GetArmorFromAlternativeName(elem.GetAlternativeName()), "Invalid std::vector element (name={}) matching multiple indices cannot be parsed!", elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }
@@ -329,7 +328,11 @@ bool GameData::ParseFiles(const std::filesystem::path &rootPath, const std::stri
         Boot elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddBoot(std::move(elem));
+        auto elemPtr = AddBoot(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetBootFromName(elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }
@@ -345,7 +348,11 @@ bool GameData::ParseFiles(const std::filesystem::path &rootPath, const std::stri
         Character elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddCharacter(std::move(elem));
+        auto elemPtr = AddCharacter(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetCharacterFromName(elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }

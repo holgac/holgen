@@ -15,6 +15,7 @@ set(gen_sources
     gen/Race.cpp
     gen/RaceId.cpp
     gen/TestBitmapStruct.cpp
+    gen/TestCompositeIdCompositeId.cpp
     gen/TestContainerEnum.cpp
     gen/TestContainerInnerStructNoId.cpp
     gen/TestContainerInnerStructWithId.cpp
@@ -60,6 +61,7 @@ set(gen_sources
     gen/TestVariantStructSharedType.cpp
     gen/Weapon.cpp
     gen/TestBitmap.cpp
+    gen/TestCompositeIdObjectType.cpp
     gen/TestContainerSkill.cpp
     gen/TestEnum.cpp
     gen/TestEnumDefaultValue.cpp

@@ -72,7 +72,6 @@ TestContainerInnerStructWithId *TestContainerVector::GetInnerStructWithIdFromNam
 
 TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId &&elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mInnerStructsWithId.size();
@@ -85,7 +84,6 @@ TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestCo
 
 TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId &elem) {
   if (mInnerStructsWithIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructWithId with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mInnerStructsWithId.size();
@@ -128,7 +126,6 @@ TestContainerInnerStructNoId *TestContainerVector::GetInnerStructNoIdFromName(co
 
 TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId &&elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mInnerStructsNoId.size();
@@ -138,7 +135,6 @@ TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(TestContai
 
 TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId &elem) {
   if (mInnerStructsNoIdNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestContainerInnerStructNoId with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mInnerStructsNoId.size();

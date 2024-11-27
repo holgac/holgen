@@ -7,6 +7,7 @@
 #include "Character.h"
 #include "Country.h"
 #include "DamageMultiplier.h"
+#include "FilesystemHelper.h"
 #include "GameData.h"
 #include "Human.h"
 #include "HumanManager.h"
@@ -17,6 +18,8 @@
 #include "RaceId.h"
 #include "TestBitmap.h"
 #include "TestBitmapStruct.h"
+#include "TestCompositeIdCompositeId.h"
+#include "TestCompositeIdObjectType.h"
 #include "TestContainerEnum.h"
 #include "TestContainerInnerStructNoId.h"
 #include "TestContainerInnerStructWithId.h"
@@ -152,7 +155,7 @@ bool LuaHelper::Read(std::function<void(lua_State *)> &data, lua_State *luaState
   return true;
 }
 
-void LuaHelper::CreateMetatables(lua_State *luaState) {
+void LuaHelper::Setup(lua_State *luaState, const std::filesystem::path &genDir) {
   Armor::CreateLuaMetatable(luaState);
   Boot::CreateLuaMetatable(luaState);
   Calculator::CreateLuaMetatable(luaState);
@@ -168,6 +171,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   Race::CreateLuaMetatable(luaState);
   RaceId::CreateLuaMetatable(luaState);
   TestBitmapStruct::CreateLuaMetatable(luaState);
+  TestCompositeIdCompositeId::CreateLuaMetatable(luaState);
   TestContainerEnum::CreateLuaMetatable(luaState);
   TestContainerInnerStructNoId::CreateLuaMetatable(luaState);
   TestContainerInnerStructWithId::CreateLuaMetatable(luaState);
@@ -213,6 +217,7 @@ void LuaHelper::CreateMetatables(lua_State *luaState) {
   TestVariantStructSharedType::CreateLuaMetatable(luaState);
   Weapon::CreateLuaMetatable(luaState);
   TestBitmap::PushEnumToLua(luaState);
+  TestCompositeIdObjectType::PushEnumToLua(luaState);
   TestContainerSkill::PushEnumToLua(luaState);
   TestEnum::PushEnumToLua(luaState);
   TestEnumDefaultValue::PushEnumToLua(luaState);

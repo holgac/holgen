@@ -17,10 +17,8 @@ const std::string &TestLuaFuncTableWithSourceTable::GetTable() const {
   return mTable;
 }
 
-void TestLuaFuncTableWithSourceTable::SetField(lua_State *luaState,
-                                               const TestLuaFuncTableContainer &container) const {
+void TestLuaFuncTableWithSourceTable::SetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const {
   HOLGEN_WARN_AND_RETURN_IF(mTable.empty(), void(), "Calling unset SetField function from table");
-  int top = lua_gettop(luaState);
   lua_getglobal(luaState, "Scripts");
   lua_pushstring(luaState, mTable.c_str());
   lua_gettable(luaState, -2);
@@ -36,22 +34,14 @@ void TestLuaFuncTableWithSourceTable::SetField(lua_State *luaState,
     lua_pop(luaState, 1);
     return void();
   }
-  top = lua_gettop(luaState);
   lua_copy(luaState, -1, -3);
-  top = lua_gettop(luaState);
   lua_pop(luaState, 2);
-  top = lua_gettop(luaState);
   LuaHelper::Push<false>(*this, luaState);
   LuaHelper::Push<false>(container, luaState);
-  top = lua_gettop(luaState);
   lua_call(luaState, 2, 0);
-  top = lua_gettop(luaState);
-  (void)top;
 }
 
-int32_t
-    TestLuaFuncTableWithSourceTable::GetField(lua_State *luaState,
-                                              const TestLuaFuncTableContainer &container) const {
+int32_t TestLuaFuncTableWithSourceTable::GetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const {
   HOLGEN_WARN_AND_RETURN_IF(mTable.empty(), {}, "Calling unset GetField function from table");
   lua_getglobal(luaState, "Scripts");
   lua_pushstring(luaState, mTable.c_str());
@@ -80,35 +70,31 @@ int32_t
 }
 
 bool TestLuaFuncTableWithSourceTable::operator==(const TestLuaFuncTableWithSourceTable &rhs) const {
-  return !(mTable != rhs.mTable);
+  return !(
+      mTable != rhs.mTable
+  );
 }
 
-bool TestLuaFuncTableWithSourceTable::ParseJson(const rapidjson::Value &json,
-                                                const Converter &converter, lua_State *luaState) {
+bool TestLuaFuncTableWithSourceTable::ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState) {
   if (json.IsObject()) {
     for (const auto &data: json.GetObject()) {
       const auto &name = data.name.GetString();
       if (0 == strcmp("table", name)) {
         auto res = JsonHelper::Parse(mTable, data.value, converter, luaState);
-        HOLGEN_WARN_AND_RETURN_IF(
-            !res, false, "Could not json-parse TestLuaFuncTableWithSourceTable.mTable field");
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableWithSourceTable.mTable field");
       } else {
-        HOLGEN_WARN("Unexpected entry in json when parsing TestLuaFuncTableWithSourceTable: {}",
-                    name);
+        HOLGEN_WARN("Unexpected entry in json when parsing TestLuaFuncTableWithSourceTable: {}", name);
       }
     }
   } else if (json.IsArray()) {
     auto it = json.Begin();
     {
-      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false,
-                                "Exhausted elements when parsing TestLuaFuncTableWithSourceTable!");
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestLuaFuncTableWithSourceTable!");
       auto res = JsonHelper::Parse(mTable, (*it), converter, luaState);
-      HOLGEN_WARN_AND_RETURN_IF(
-          !res, false, "Could not json-parse TestLuaFuncTableWithSourceTable.mTable field");
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestLuaFuncTableWithSourceTable.mTable field");
       ++it;
     }
-    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false,
-                              "Too many elements when parsing TestLuaFuncTableWithSourceTable!");
+    HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestLuaFuncTableWithSourceTable!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestLuaFuncTableWithSourceTable.");
     return false;
@@ -116,8 +102,7 @@ bool TestLuaFuncTableWithSourceTable::ParseJson(const rapidjson::Value &json,
   return true;
 }
 
-rapidjson::Value TestLuaFuncTableWithSourceTable::DumpJson(rapidjson::Document &doc,
-                                                           lua_State *luaState) const {
+rapidjson::Value TestLuaFuncTableWithSourceTable::DumpJson(rapidjson::Document &doc, lua_State *luaState) const {
   rapidjson::Value val(rapidjson::kObjectType);
   val.AddMember("table", JsonHelper::Dump(mTable, doc, luaState), doc.GetAllocator());
   return val;
@@ -126,7 +111,7 @@ rapidjson::Value TestLuaFuncTableWithSourceTable::DumpJson(rapidjson::Document &
 void TestLuaFuncTableWithSourceTable::PushToLua(lua_State *luaState) const {
   lua_newtable(luaState);
   lua_pushstring(luaState, "p");
-  lua_pushlightuserdata(luaState, (void *)this);
+  lua_pushlightuserdata(luaState, (void *) this);
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "c");
   lua_pushlightuserdata(luaState, &CLASS_NAME);
@@ -144,28 +129,24 @@ void TestLuaFuncTableWithSourceTable::PushGlobalToLua(lua_State *luaState, const
   lua_setglobal(luaState, name);
 }
 
-TestLuaFuncTableWithSourceTable *
-    TestLuaFuncTableWithSourceTable::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
+TestLuaFuncTableWithSourceTable *TestLuaFuncTableWithSourceTable::ReadProxyFromLua(lua_State *luaState, int32_t idx) {
   lua_pushstring(luaState, "c");
   lua_gettable(luaState, idx - 1);
   if (!lua_isuserdata(luaState, -1)) {
     HOLGEN_WARN("Proxy object does not contain the correct metadata!");
     return nullptr;
   }
-  auto className = *static_cast<const char **>(lua_touserdata(luaState, -1));
+  auto className = *static_cast<const char**>(lua_touserdata(luaState, -1));
   lua_pop(luaState, 1);
-  HOLGEN_WARN_AND_RETURN_IF(className != CLASS_NAME, nullptr,
-                            "Received {} instance when expecting TestLuaFuncTableWithSourceTable",
-                            className);
+  HOLGEN_WARN_AND_RETURN_IF(className != CLASS_NAME, nullptr, "Received {} instance when expecting TestLuaFuncTableWithSourceTable", className);
   lua_pushstring(luaState, "p");
   lua_gettable(luaState, idx - 1);
-  auto ptr = (TestLuaFuncTableWithSourceTable *)lua_touserdata(luaState, -1);
+  auto ptr = (TestLuaFuncTableWithSourceTable *) lua_touserdata(luaState, -1);
   lua_pop(luaState, 1);
   return ptr;
 }
 
-TestLuaFuncTableWithSourceTable
-    TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
+TestLuaFuncTableWithSourceTable TestLuaFuncTableWithSourceTable::ReadMirrorFromLua(lua_State *luaState, int32_t idx) {
   return TestLuaFuncTableWithSourceTable{};
 }
 
@@ -186,9 +167,7 @@ void TestLuaFuncTableWithSourceTable::CreateLuaMetatable(lua_State *luaState) {
 
 int TestLuaFuncTableWithSourceTable::SetFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaFuncTableWithSourceTable::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(
-      !instance, 0,
-      "Calling TestLuaFuncTableWithSourceTable.SetField method with an invalid lua proxy object!");
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaFuncTableWithSourceTable.SetField method with an invalid lua proxy object!");
   TestLuaFuncTableContainer arg0Mirror;
   TestLuaFuncTableContainer *arg0;
   if (lua_getmetatable(luaState, -1)) {
@@ -204,9 +183,7 @@ int TestLuaFuncTableWithSourceTable::SetFieldCallerFromLua(lua_State *luaState) 
 
 int TestLuaFuncTableWithSourceTable::GetFieldCallerFromLua(lua_State *luaState) {
   auto instance = TestLuaFuncTableWithSourceTable::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(
-      !instance, 0,
-      "Calling TestLuaFuncTableWithSourceTable.GetField method with an invalid lua proxy object!");
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaFuncTableWithSourceTable.GetField method with an invalid lua proxy object!");
   TestLuaFuncTableContainer arg0Mirror;
   TestLuaFuncTableContainer *arg0;
   if (lua_getmetatable(luaState, -1)) {
@@ -236,4 +213,4 @@ int TestLuaFuncTableWithSourceTable::IndexMetaMethod(lua_State *luaState) {
   }
   return 1;
 }
-} // namespace holgen_blackbox_test
+}

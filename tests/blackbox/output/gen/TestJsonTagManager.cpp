@@ -41,7 +41,6 @@ TestJsonTag *TestJsonTagManager::GetTagFromName(const std::string &key) {
 
 TestJsonTag *TestJsonTagManager::AddTag(TestJsonTag &&elem) {
   if (mTagsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestJsonTag with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mTags.size();
@@ -54,7 +53,6 @@ TestJsonTag *TestJsonTagManager::AddTag(TestJsonTag &&elem) {
 
 TestJsonTag *TestJsonTagManager::AddTag(TestJsonTag &elem) {
   if (mTagsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("TestJsonTag with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mTags.size();
@@ -134,7 +132,11 @@ bool TestJsonTagManager::ParseFiles(const std::filesystem::path &rootPath, const
         TestJsonTag elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddTag(std::move(elem));
+        auto elemPtr = AddTag(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetTagFromName(elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }

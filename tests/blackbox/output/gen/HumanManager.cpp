@@ -42,7 +42,6 @@ Human *HumanManager::GetHumanFromName(const std::string &key) {
 
 Human *HumanManager::AddHuman(Human &&elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Human with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mHumansNextId;
@@ -58,7 +57,6 @@ Human *HumanManager::AddHuman(Human &&elem) {
 
 Human *HumanManager::AddHuman(Human &elem) {
   if (mHumansNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Human with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mHumansNextId;
@@ -154,7 +152,11 @@ bool HumanManager::ParseFiles(const std::filesystem::path &rootPath, const std::
         Human elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddHuman(std::move(elem));
+        auto elemPtr = AddHuman(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetHumanFromName(elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }
