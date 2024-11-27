@@ -14,22 +14,22 @@ namespace holgen_blackbox_test {
 }
 namespace holgen_blackbox_test {
 // Defined in tests/blackbox/schemas/testcompositeid.hsc
-class TestCompositeIdHuman {
+class TestCompositeIdDog {
 public:
-  TestCompositeIdHuman() = default;
-  TestCompositeIdHuman(const TestCompositeIdHuman &rhs) = default;
-  TestCompositeIdHuman(TestCompositeIdHuman &&rhs) noexcept = default;
-  ~TestCompositeIdHuman() = default;
+  TestCompositeIdDog() = default;
+  TestCompositeIdDog(const TestCompositeIdDog &rhs) = default;
+  TestCompositeIdDog(TestCompositeIdDog &&rhs) noexcept = default;
+  ~TestCompositeIdDog() = default;
   int32_t GetId() const;
   int16_t GetVersion() const;
-  const std::string &GetName() const;
-  std::string &GetName();
+  const std::string &GetBreed() const;
+  std::string &GetBreed();
   void SetId(int32_t val);
   void SetVersion(int16_t val);
-  void SetName(const std::string &val);
+  void SetBreed(const std::string &val);
   TestCompositeIdCompositeId GetCompositeId() const;
   bool IsValid() const;
-  bool operator==(const TestCompositeIdHuman &rhs) const;
+  bool operator==(const TestCompositeIdDog &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
   rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
   void PushToLua(lua_State *luaState) const;
@@ -39,21 +39,21 @@ public:
    * This only works with negative indices
    * Reads proxy object (a table with a metatable and an embedded pointer or an index)
    */
-  static TestCompositeIdHuman *ReadProxyFromLua(lua_State *luaState, int32_t idx);
+  static TestCompositeIdDog *ReadProxyFromLua(lua_State *luaState, int32_t idx);
   /*
    * This only works with negative indices
    * Reads a mirror object (a table with entries that mirror the c++ data structure)
    */
-  static TestCompositeIdHuman ReadMirrorFromLua(lua_State *luaState, int32_t idx);
+  static TestCompositeIdDog ReadMirrorFromLua(lua_State *luaState, int32_t idx);
   static void CreateLuaMetatable(lua_State *luaState);
-  TestCompositeIdHuman &operator=(const TestCompositeIdHuman &rhs) = default;
-  TestCompositeIdHuman &operator=(TestCompositeIdHuman &&rhs) noexcept = default;
-  inline static const char *CLASS_NAME = "TestCompositeIdHuman";
+  TestCompositeIdDog &operator=(const TestCompositeIdDog &rhs) = default;
+  TestCompositeIdDog &operator=(TestCompositeIdDog &&rhs) noexcept = default;
+  inline static const char *CLASS_NAME = "TestCompositeIdDog";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   int32_t mId;
   int16_t mVersion;
-  std::string mName;
+  std::string mBreed;
 };
 }

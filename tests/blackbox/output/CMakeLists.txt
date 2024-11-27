@@ -15,7 +15,10 @@ set(gen_sources
     gen/Race.cpp
     gen/RaceId.cpp
     gen/TestBitmapStruct.cpp
+    gen/TestCompositeIdCat.cpp
     gen/TestCompositeIdCompositeId.cpp
+    gen/TestCompositeIdContainer.cpp
+    gen/TestCompositeIdDog.cpp
     gen/TestCompositeIdHuman.cpp
     gen/TestContainerEnum.cpp
     gen/TestContainerInnerStructNoId.cpp

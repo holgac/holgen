@@ -1,6 +1,7 @@
 #include "CompositeIdStructPlugin.h"
 
-#include <generator/utils/CompositeIdHelper.h>
+#include "core/St.h"
+#include "generator/utils/CompositeIdHelper.h"
 
 namespace holgen {
 void CompositeIdStructPlugin::Run() {
@@ -20,36 +21,60 @@ bool CompositeIdStructPlugin::ShouldProcess(const Class &cls) const {
 void CompositeIdStructPlugin::Process(Class &cls) const {
   ValidateStruct(cls);
   AddIdGetterMethod(cls);
+  AddIsValidMethod(cls);
 }
 
 void CompositeIdStructPlugin::ValidateStruct(const Class &cls) const {
   auto compositeIdAnnotation = cls.mStruct->GetAnnotation(Annotations::CompositeId);
   auto typeAttribute = compositeIdAnnotation->GetAttribute(Annotations::CompositeId_Type);
   auto entryAttribute = compositeIdAnnotation->GetAttribute(Annotations::CompositeId_Entry);
-  THROW_IF(!typeAttribute || !entryAttribute, "{} ({}) has incomplete  composite id annotation!",
+  THROW_IF(!typeAttribute || !entryAttribute, "{} ({}) has incomplete composite id annotation!",
            cls.mName, cls.mStruct->mDefinitionSource);
-  auto idType = mProject.GetClass(typeAttribute->mValue.mName);
-  auto getterAttribute = idType->mStruct->GetMatchingAttribute(Annotations::CompositeIdType,
-                                                               Annotations::CompositeIdType_Getter);
+  auto idCls = mProject.GetClass(typeAttribute->mValue.mName);
+  THROW_IF(!idCls, "{} ({}) does not have a matching id struct!", cls.mName,
+           cls.mStruct->mDefinitionSource);
+  auto getterAttribute = idCls->mStruct->GetMatchingAttribute(Annotations::CompositeIdType,
+                                                              Annotations::CompositeIdType_Getter);
   THROW_IF(!getterAttribute, "{} ({}) has incomplete composite id annotation!", cls.mName,
            cls.mStruct->mDefinitionSource);
+  auto idField = CompositeIdHelper::GetObjectIdField(cls);
+  auto versionField = CompositeIdHelper::GetObjectVersionField(cls);
+  THROW_IF(!idField || !versionField, "{} ({}) does not have the required id and version fields!",
+           cls.mName, cls.mStruct->mDefinitionSource);
+  THROW_IF(!TypeInfo::Get().SignedIntegralTypes.contains(idField->mType.mName),
+           "{} ({}) has a signed id field {} ({}) which is not a signed integral type!", cls.mName,
+           cls.mStruct->mDefinitionSource, idField->mField->mName,
+           idField->mField->mDefinitionSource);
 }
 
 void CompositeIdStructPlugin::AddIdGetterMethod(Class &cls) const {
   auto compositeIdAnnotation = cls.mStruct->GetAnnotation(Annotations::CompositeId);
   auto typeAttribute = compositeIdAnnotation->GetAttribute(Annotations::CompositeId_Type);
   auto entryAttribute = compositeIdAnnotation->GetAttribute(Annotations::CompositeId_Entry);
-  auto idType = mProject.GetClass(typeAttribute->mValue.mName);
-  auto method = ClassMethod{
-      idType->mStruct
+  auto idCls = mProject.GetClass(typeAttribute->mValue.mName);
+  auto methodName =
+      idCls->mStruct
           ->GetMatchingAttribute(Annotations::CompositeIdType, Annotations::CompositeIdType_Getter)
-          ->mValue.mName,
-      Type{idType->mName}};
-  auto idTypeTypeField = CompositeIdHelper::GetIdTypeField(*idType);
+          ->mValue.mName;
+  if (cls.GetMethod(methodName, Constness::Const))
+    return;
+  auto method = ClassMethod{methodName, Type{idCls->mName}};
+  auto idTypeTypeField = CompositeIdHelper::GetIdTypeField(*idCls);
   auto versionField = CompositeIdHelper::GetObjectVersionField(cls);
   auto idField = CompositeIdHelper::GetObjectIdField(cls);
-  method.mBody.Add("return {}({}::{}, {}, {});", idType->mName, idTypeTypeField->mType.mName,
+  method.mBody.Add("return {}({}::{}, {}, {});", idCls->mName, idTypeTypeField->mType.mName,
                    entryAttribute->mValue.mName, idField->mName, versionField->mName);
+  Validate().NewMethod(cls, method);
+  cls.mMethods.push_back(std::move(method));
+}
+
+void CompositeIdStructPlugin::AddIsValidMethod(Class &cls) const {
+  if (cls.GetMethod(St::CompositeId_IsValid, Constness::Const))
+    return;
+
+  auto method = ClassMethod{St::CompositeId_IsValid, Type{"bool"}};
+  auto idField = CompositeIdHelper::GetObjectIdField(cls);
+  method.mBody.Add("return {} >= 0;", idField->mName);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
 }

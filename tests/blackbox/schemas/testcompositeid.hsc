@@ -23,4 +23,27 @@ mixin TestCompositeIdObject {
 
 @compositeId(type=TestCompositeIdCompositeId, entry=Human)
 struct TestCompositeIdHuman : TestCompositeIdObject {
+    string name;
+}
+
+@compositeId(type=TestCompositeIdCompositeId, entry=Cat)
+struct TestCompositeIdCat : TestCompositeIdObject {
+    string name;
+    string breed;
+}
+
+@compositeId(type=TestCompositeIdCompositeId, entry=Dog)
+struct TestCompositeIdDog : TestCompositeIdObject {
+    string breed;
+}
+
+struct TestCompositeIdContainer {
+    @container(elemName=human)
+    @index(on=name)
+    deque<TestCompositeIdHuman> humans;
+    //    @container(elemName=cat)
+    //    @index(on=name)
+    //    deque<TestCompositeIdCat> cats;
+    //    @container(elemName=dog)
+    //    deque<TestCompositeIdDog> dogs;
 }

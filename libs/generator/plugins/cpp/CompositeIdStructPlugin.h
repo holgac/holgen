@@ -12,6 +12,7 @@ private:
   void Process(Class& cls) const;
   void ValidateStruct(const Class& cls) const;
   void AddIdGetterMethod(Class& cls) const;
+  void AddIsValidMethod(Class& cls) const;
 };
 
 }

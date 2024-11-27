@@ -16,6 +16,14 @@ int16_t TestCompositeIdHuman::GetVersion() const {
   return mVersion;
 }
 
+const std::string &TestCompositeIdHuman::GetName() const {
+  return mName;
+}
+
+std::string &TestCompositeIdHuman::GetName() {
+  return mName;
+}
+
 void TestCompositeIdHuman::SetId(int32_t val) {
   mId = val;
 }
@@ -24,14 +32,23 @@ void TestCompositeIdHuman::SetVersion(int16_t val) {
   mVersion = val;
 }
 
+void TestCompositeIdHuman::SetName(const std::string &val) {
+  mName = val;
+}
+
 TestCompositeIdCompositeId TestCompositeIdHuman::GetCompositeId() const {
   return TestCompositeIdCompositeId(TestCompositeIdObjectType::Human, mId, mVersion);
+}
+
+bool TestCompositeIdHuman::IsValid() const {
+  return mId >= 0;
 }
 
 bool TestCompositeIdHuman::operator==(const TestCompositeIdHuman &rhs) const {
   return !(
       mId != rhs.mId ||
-      mVersion != rhs.mVersion
+      mVersion != rhs.mVersion ||
+      mName != rhs.mName
   );
 }
 
@@ -45,6 +62,9 @@ bool TestCompositeIdHuman::ParseJson(const rapidjson::Value &json, const Convert
       } else if (0 == strcmp("version", name)) {
         auto res = JsonHelper::Parse(mVersion, data.value, converter, luaState);
         HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestCompositeIdHuman.version field");
+      } else if (0 == strcmp("name", name)) {
+        auto res = JsonHelper::Parse(mName, data.value, converter, luaState);
+        HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestCompositeIdHuman.name field");
       } else {
         HOLGEN_WARN("Unexpected entry in json when parsing TestCompositeIdHuman: {}", name);
       }
@@ -63,6 +83,12 @@ bool TestCompositeIdHuman::ParseJson(const rapidjson::Value &json, const Convert
       HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestCompositeIdHuman.version field");
       ++it;
     }
+    {
+      HOLGEN_WARN_AND_RETURN_IF(it == json.End(), false, "Exhausted elements when parsing TestCompositeIdHuman!");
+      auto res = JsonHelper::Parse(mName, (*it), converter, luaState);
+      HOLGEN_WARN_AND_RETURN_IF(!res, false, "Could not json-parse TestCompositeIdHuman.name field");
+      ++it;
+    }
     HOLGEN_WARN_AND_RETURN_IF(it != json.End(), false, "Too many elements when parsing TestCompositeIdHuman!");
   } else {
     HOLGEN_WARN("Unexpected json type when parsing TestCompositeIdHuman.");
@@ -75,6 +101,7 @@ rapidjson::Value TestCompositeIdHuman::DumpJson(rapidjson::Document &doc, lua_St
   rapidjson::Value val(rapidjson::kObjectType);
   val.AddMember("id", JsonHelper::Dump(mId, doc, luaState), doc.GetAllocator());
   val.AddMember("version", JsonHelper::Dump(mVersion, doc, luaState), doc.GetAllocator());
+  val.AddMember("name", JsonHelper::Dump(mName, doc, luaState), doc.GetAllocator());
   return val;
 }
 
@@ -97,6 +124,9 @@ void TestCompositeIdHuman::PushMirrorToLua(lua_State *luaState) const {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "version");
   LuaHelper::Push<true>(mVersion, luaState);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "name");
+  LuaHelper::Push<true>(mName, luaState);
   lua_settable(luaState, -3);
 }
 
@@ -134,6 +164,9 @@ TestCompositeIdHuman TestCompositeIdHuman::ReadMirrorFromLua(lua_State *luaState
     } else if (0 == strcmp("version", key)) {
       LuaHelper::Read(result.mVersion, luaState, -1);
       lua_pop(luaState, 1);
+    } else if (0 == strcmp("name", key)) {
+      LuaHelper::Read(result.mName, luaState, -1);
+      lua_pop(luaState, 1);
     } else {
       HOLGEN_WARN("Unexpected lua field: TestCompositeIdHuman.{}", key);
       lua_pop(luaState, 1);
@@ -152,6 +185,9 @@ int TestCompositeIdHuman::NewIndexMetaMethod(lua_State *luaState) {
   } else if (0 == strcmp("version", key)) {
     auto res = LuaHelper::Read(instance->mVersion, luaState, -1);
     HOLGEN_WARN_IF(!res, "Assigning TestCompositeIdHuman.version from lua failed!");
+  } else if (0 == strcmp("name", key)) {
+    auto res = LuaHelper::Read(instance->mName, luaState, -1);
+    HOLGEN_WARN_IF(!res, "Assigning TestCompositeIdHuman.name from lua failed!");
   } else {
     HOLGEN_WARN("Unexpected lua field: TestCompositeIdHuman.{}", key);
   }
@@ -179,6 +215,10 @@ int TestCompositeIdHuman::IndexMetaMethod(lua_State *luaState) {
     auto instance = TestCompositeIdHuman::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestCompositeIdHuman.version with an invalid lua proxy object!");
     LuaHelper::Push<false>(instance->mVersion, luaState);
+  } else if (0 == strcmp("name", key)) {
+    auto instance = TestCompositeIdHuman::ReadProxyFromLua(luaState, -2);
+    HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestCompositeIdHuman.name with an invalid lua proxy object!");
+    LuaHelper::Push<false>(instance->mName, luaState);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestCompositeIdHuman.{}", key);
     return 0;
