@@ -55,11 +55,13 @@ Number *Calculator::Subtract(lua_State *luaState, Number &val) const {
     lua_pop(luaState, 1);
     return nullptr;
   }
+  lua_copy(luaState, -1, -2);
+  lua_pop(luaState, 1);
   LuaHelper::Push<false>(*this, luaState);
   LuaHelper::Push<false>(val, luaState);
   lua_call(luaState, 2, 1);
   auto result = Number::ReadProxyFromLua(luaState, -1);
-  lua_pop(luaState, 2);
+  lua_pop(luaState, 1);
   return result;
 }
 

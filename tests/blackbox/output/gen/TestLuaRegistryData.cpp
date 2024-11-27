@@ -59,10 +59,11 @@ void TestLuaRegistryData::Init(lua_State *luaState, const std::function<void(lua
     lua_pop(luaState, 1);
     return void();
   }
+  lua_copy(luaState, -1, -2);
+  lua_pop(luaState, 1);
   LuaHelper::Push<false>(*this, luaState);
   initData(luaState);
   lua_call(luaState, 2, 0);
-  lua_pop(luaState, 1);
 }
 
 int32_t TestLuaRegistryData::Get(lua_State *luaState) const {
@@ -80,11 +81,13 @@ int32_t TestLuaRegistryData::Get(lua_State *luaState) const {
     lua_pop(luaState, 1);
     return {};
   }
+  lua_copy(luaState, -1, -2);
+  lua_pop(luaState, 1);
   LuaHelper::Push<false>(*this, luaState);
   lua_call(luaState, 1, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
-  lua_pop(luaState, 2);
+  lua_pop(luaState, 1);
   return result;
 }
 
@@ -103,10 +106,11 @@ void TestLuaRegistryData::Add(lua_State *luaState, const int32_t val) const {
     lua_pop(luaState, 1);
     return void();
   }
+  lua_copy(luaState, -1, -2);
+  lua_pop(luaState, 1);
   LuaHelper::Push<false>(*this, luaState);
   LuaHelper::Push<false>(val, luaState);
   lua_call(luaState, 2, 0);
-  lua_pop(luaState, 1);
 }
 
 bool TestLuaRegistryData::operator==(const TestLuaRegistryData &rhs) const {

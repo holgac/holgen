@@ -32,9 +32,10 @@ void TestLuaFuncTableStatic::SetField(lua_State *luaState, const TestLuaFuncTabl
     lua_pop(luaState, 1);
     return void();
   }
+  lua_copy(luaState, -1, -2);
+  lua_pop(luaState, 1);
   LuaHelper::Push<false>(container, luaState);
   lua_call(luaState, 1, 0);
-  lua_pop(luaState, 1);
 }
 
 int32_t TestLuaFuncTableStatic::GetField(lua_State *luaState, const TestLuaFuncTableContainer &container) const {
@@ -52,11 +53,13 @@ int32_t TestLuaFuncTableStatic::GetField(lua_State *luaState, const TestLuaFuncT
     lua_pop(luaState, 1);
     return {};
   }
+  lua_copy(luaState, -1, -2);
+  lua_pop(luaState, 1);
   LuaHelper::Push<false>(container, luaState);
   lua_call(luaState, 1, 1);
   int32_t result;
   LuaHelper::Read(result, luaState, -1);
-  lua_pop(luaState, 2);
+  lua_pop(luaState, 1);
   return result;
 }
 
