@@ -2,6 +2,7 @@
 #include "generator/plugins/cpp/ClassFieldPlugin.h"
 #include "generator/plugins/cpp/ClassIdFieldPlugin.h"
 #include "generator/plugins/cpp/ClassPlugin.h"
+#include "generator/plugins/container/ContainerIndexPlugin.h"
 #include "generator/plugins/cpp/ContainerFieldPlugin.h"
 
 class ContainerFieldPluginTest : public TranslatorPluginTest {
@@ -10,6 +11,7 @@ protected:
     ClassPlugin(project, {}).Run();
     ClassIdFieldPlugin(project, {}).Run();
     ClassFieldPlugin(project, {}).Run();
+    ContainerIndexPlugin(project, {}).Run();
     ContainerFieldPlugin(project, {}).Run();
   }
 };

@@ -7,6 +7,7 @@
 #include "generator/plugins/cpp/ClassIdFieldPlugin.h"
 #include "generator/plugins/cpp/ClassPlugin.h"
 #include "generator/plugins/cpp/ContainerFieldPlugin.h"
+#include "generator/plugins/container/ContainerIndexPlugin.h"
 #include "generator/plugins/cpp/CppDestructorPlugin.h"
 #include "generator/plugins/cpp/CppFunctionPlugin.h"
 #include "generator/plugins/cpp/ManagedClassPlugin.h"
@@ -58,6 +59,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<ClassFieldSetterPlugin>();
   AddPlugin<LuaFunctionPlugin>();
   AddPlugin<CppFunctionPlugin>();
+  AddPlugin<ContainerIndexPlugin>();
   AddPlugin<ContainerFieldPlugin>();
   AddPlugin<ManagedClassPlugin>();
   AddPlugin<EnumPlugin>();

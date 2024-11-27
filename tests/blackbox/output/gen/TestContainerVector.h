@@ -37,13 +37,13 @@ public:
   void SetUnsignedContainer(const std::vector<uint32_t> &val);
   const TestContainerInnerStructWithId *GetInnerStructWithIdFromName(const std::string &key) const;
   TestContainerInnerStructWithId *GetInnerStructWithIdFromName(const std::string &key);
+  const TestContainerInnerStructNoId *GetInnerStructNoIdFromName(const std::string &key) const;
+  TestContainerInnerStructNoId *GetInnerStructNoIdFromName(const std::string &key);
   TestContainerInnerStructWithId *AddInnerStructWithId(TestContainerInnerStructWithId &&elem);
   TestContainerInnerStructWithId *AddInnerStructWithId(TestContainerInnerStructWithId &elem);
   const TestContainerInnerStructWithId *GetInnerStructWithId(uint32_t idx) const;
   TestContainerInnerStructWithId *GetInnerStructWithId(uint32_t idx);
   size_t GetInnerStructWithIdCount() const;
-  const TestContainerInnerStructNoId *GetInnerStructNoIdFromName(const std::string &key) const;
-  TestContainerInnerStructNoId *GetInnerStructNoIdFromName(const std::string &key);
   TestContainerInnerStructNoId *AddInnerStructNoId(TestContainerInnerStructNoId &&elem);
   TestContainerInnerStructNoId *AddInnerStructNoId(const TestContainerInnerStructNoId &elem);
   const TestContainerInnerStructNoId *GetInnerStructNoId(size_t idx) const;
@@ -84,10 +84,10 @@ public:
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState);
+  static int GetInnerStructNoIdFromNameCallerFromLua(lua_State *luaState);
   static int AddInnerStructWithIdCallerFromLua(lua_State *luaState);
   static int GetInnerStructWithIdCallerFromLua(lua_State *luaState);
   static int GetInnerStructWithIdCountCallerFromLua(lua_State *luaState);
-  static int GetInnerStructNoIdFromNameCallerFromLua(lua_State *luaState);
   static int AddInnerStructNoIdCallerFromLua(lua_State *luaState);
   static int GetInnerStructNoIdCallerFromLua(lua_State *luaState);
   static int DeleteInnerStructNoIdCallerFromLua(lua_State *luaState);

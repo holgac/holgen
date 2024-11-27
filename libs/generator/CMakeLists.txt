@@ -71,6 +71,8 @@ set(gen_plugins
     plugins/cpp/CWrappersPlugin.cpp
     plugins/cpp/CompositeIdTypePlugin.cpp
     plugins/cpp/CompositeIdStructPlugin.cpp
+    plugins/container/ContainerPluginBase.cpp
+    plugins/container/ContainerIndexPlugin.cpp
 )
 
 set(gen_generators

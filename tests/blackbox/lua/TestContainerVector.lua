@@ -11,6 +11,10 @@ TestContainerVector = {}
 ---@return TestContainerInnerStructWithId
 function TestContainerVector:GetInnerStructWithIdFromName(key) end
 
+---@param key string
+---@return TestContainerInnerStructNoId
+function TestContainerVector:GetInnerStructNoIdFromName(key) end
+
 ---@param elem TestContainerInnerStructWithId
 ---@return TestContainerInnerStructWithId
 function TestContainerVector:AddInnerStructWithId(elem) end
@@ -21,10 +25,6 @@ function TestContainerVector:GetInnerStructWithId(idx) end
 
 ---@return number
 function TestContainerVector:GetInnerStructWithIdCount() end
-
----@param key string
----@return TestContainerInnerStructNoId
-function TestContainerVector:GetInnerStructNoIdFromName(key) end
 
 ---@param elem TestContainerInnerStructNoId
 ---@return TestContainerInnerStructNoId
