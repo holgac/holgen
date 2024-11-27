@@ -10,10 +10,6 @@ public:
 
 private:
   void ProcessField(Class &cls, ClassField &field);
-  void GenerateIndexGetter(Class &generatedClass, const ClassField &field,
-                           const AnnotationDefinition &annotationDefinition);
-  void GenerateNextIndexField(Class &cls, const ClassField &field);
-  void GenerateAddElem(Class &cls, const ClassField &field, bool useMoveRef);
   void GenerateHasElem(Class &cls, const ClassField &field);
   void GenerateGetElem(Class &cls, const ClassField &field);
   void GenerateGetCount(Class &cls, const ClassField &field);

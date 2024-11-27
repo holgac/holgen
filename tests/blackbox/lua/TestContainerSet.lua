@@ -9,6 +9,10 @@ TestContainerSet = {}
 ---@return string
 function TestContainerSet:AddStringElem(elem) end
 
+---@param elem number
+---@return number
+function TestContainerSet:AddUnsignedElem(elem) end
+
 ---@param elem string
 ---@return boolean
 function TestContainerSet:HasStringElem(elem) end
@@ -18,10 +22,6 @@ function TestContainerSet:DeleteStringElem(elem) end
 
 ---@return number
 function TestContainerSet:GetStringElemCount() end
-
----@param elem number
----@return number
-function TestContainerSet:AddUnsignedElem(elem) end
 
 ---@param elem number
 ---@return boolean

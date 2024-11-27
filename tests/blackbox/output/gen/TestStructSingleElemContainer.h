@@ -29,12 +29,12 @@ public:
   void SetSingleElemStructsWithId(const std::vector<TestStructSingleElemWithId> &val);
   TestStructSingleElem *AddSingleElemStruct(TestStructSingleElem &&elem);
   TestStructSingleElem *AddSingleElemStruct(const TestStructSingleElem &elem);
+  TestStructSingleElemWithId *AddSingleElemStructWithId(TestStructSingleElemWithId &&elem);
+  TestStructSingleElemWithId *AddSingleElemStructWithId(TestStructSingleElemWithId &elem);
   const TestStructSingleElem *GetSingleElemStruct(size_t idx) const;
   TestStructSingleElem *GetSingleElemStruct(size_t idx);
   void DeleteSingleElemStruct(size_t idx);
   size_t GetSingleElemStructCount() const;
-  TestStructSingleElemWithId *AddSingleElemStructWithId(TestStructSingleElemWithId &&elem);
-  TestStructSingleElemWithId *AddSingleElemStructWithId(TestStructSingleElemWithId &elem);
   const TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx) const;
   TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx);
   size_t GetSingleElemStructWithIdCount() const;
@@ -61,10 +61,10 @@ public:
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int AddSingleElemStructCallerFromLua(lua_State *luaState);
+  static int AddSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructCallerFromLua(lua_State *luaState);
   static int DeleteSingleElemStructCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructCountCallerFromLua(lua_State *luaState);
-  static int AddSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructWithIdCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

@@ -73,6 +73,7 @@ set(gen_plugins
     plugins/cpp/CompositeIdStructPlugin.cpp
     plugins/container/ContainerPluginBase.cpp
     plugins/container/ContainerIndexPlugin.cpp
+    plugins/container/ContainerAddElemPlugin.cpp
 )
 
 set(gen_generators

@@ -19,16 +19,24 @@ function TestContainerVector:GetInnerStructNoIdFromName(key) end
 ---@return TestContainerInnerStructWithId
 function TestContainerVector:AddInnerStructWithId(elem) end
 
+---@param elem TestContainerInnerStructNoId
+---@return TestContainerInnerStructNoId
+function TestContainerVector:AddInnerStructNoId(elem) end
+
+---@param elem string
+---@return string
+function TestContainerVector:AddStringElem(elem) end
+
+---@param elem number
+---@return number
+function TestContainerVector:AddUnsignedElem(elem) end
+
 ---@param idx number
 ---@return TestContainerInnerStructWithId
 function TestContainerVector:GetInnerStructWithId(idx) end
 
 ---@return number
 function TestContainerVector:GetInnerStructWithIdCount() end
-
----@param elem TestContainerInnerStructNoId
----@return TestContainerInnerStructNoId
-function TestContainerVector:AddInnerStructNoId(elem) end
 
 ---@param idx number
 ---@return TestContainerInnerStructNoId
@@ -40,10 +48,6 @@ function TestContainerVector:DeleteInnerStructNoId(idx) end
 ---@return number
 function TestContainerVector:GetInnerStructNoIdCount() end
 
----@param elem string
----@return string
-function TestContainerVector:AddStringElem(elem) end
-
 ---@param idx number
 ---@return string
 function TestContainerVector:GetStringElem(idx) end
@@ -53,10 +57,6 @@ function TestContainerVector:DeleteStringElem(idx) end
 
 ---@return number
 function TestContainerVector:GetStringElemCount() end
-
----@param elem number
----@return number
-function TestContainerVector:AddUnsignedElem(elem) end
 
 ---@param idx number
 ---@return number

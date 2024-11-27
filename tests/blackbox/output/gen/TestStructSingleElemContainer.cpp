@@ -40,6 +40,22 @@ TestStructSingleElem *TestStructSingleElemContainer::AddSingleElemStruct(const T
   return &(mSingleElemStructs.emplace_back(elem));
 }
 
+TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &&elem) {
+  auto newId = mSingleElemStructsWithId.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
+  elem.SetId(newId);
+  return &(mSingleElemStructsWithId.emplace_back(std::forward<TestStructSingleElemWithId>(elem)));
+}
+
+TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &elem) {
+  auto newId = mSingleElemStructsWithId.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
+  elem.SetId(newId);
+  return &(mSingleElemStructsWithId.emplace_back(elem));
+}
+
 const TestStructSingleElem *TestStructSingleElemContainer::GetSingleElemStruct(size_t idx) const {
   if (idx >= mSingleElemStructs.size())
     return nullptr;
@@ -61,22 +77,6 @@ void TestStructSingleElemContainer::DeleteSingleElemStruct(size_t idx) {
 
 size_t TestStructSingleElemContainer::GetSingleElemStructCount() const {
   return mSingleElemStructs.size();
-}
-
-TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &&elem) {
-  auto newId = mSingleElemStructsWithId.size();
-  auto idInElem = elem.GetId();
-  HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  return &(mSingleElemStructsWithId.emplace_back(std::forward<TestStructSingleElemWithId>(elem)));
-}
-
-TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &elem) {
-  auto newId = mSingleElemStructsWithId.size();
-  auto idInElem = elem.GetId();
-  HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  return &(mSingleElemStructsWithId.emplace_back(elem));
 }
 
 const TestStructSingleElemWithId *TestStructSingleElemContainer::GetSingleElemStructWithId(uint32_t idx) const {
@@ -253,6 +253,15 @@ int TestStructSingleElemContainer::AddSingleElemStructCallerFromLua(lua_State *l
   return 1;
 }
 
+int TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.AddSingleElemStructWithId method with an invalid lua proxy object!");
+  auto arg0 = TestStructSingleElemWithId::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddSingleElemStructWithId(*arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
 int TestStructSingleElemContainer::GetSingleElemStructCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStruct method with an invalid lua proxy object!");
@@ -277,15 +286,6 @@ int TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua(lua_Sta
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructCount method with an invalid lua proxy object!");
   auto result = instance->GetSingleElemStructCount();
   LuaHelper::Push<true>(result, luaState);
-  return 1;
-}
-
-int TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua(lua_State *luaState) {
-  auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.AddSingleElemStructWithId method with an invalid lua proxy object!");
-  auto arg0 = TestStructSingleElemWithId::ReadProxyFromLua(luaState, -1);
-  auto result = instance->AddSingleElemStructWithId(*arg0);
-  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -319,14 +319,14 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
     LuaHelper::Push<false>(instance->mSingleElemStructsWithId, luaState);
   } else if (0 == strcmp("AddSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::AddSingleElemStructCallerFromLua);
+  } else if (0 == strcmp("AddSingleElemStructWithId", key)) {
+    lua_pushcfunction(luaState, TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructCallerFromLua);
   } else if (0 == strcmp("DeleteSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::DeleteSingleElemStructCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStructCount", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua);
-  } else if (0 == strcmp("AddSingleElemStructWithId", key)) {
-    lua_pushcfunction(luaState, TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStructWithId", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStructWithIdCount", key)) {

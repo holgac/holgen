@@ -28,10 +28,10 @@ public:
   void SetUnsignedContainer(const std::set<uint32_t> &val);
   const std::string *AddStringElem(std::string &&elem);
   const std::string *AddStringElem(const std::string &elem);
+  const uint32_t *AddUnsignedElem(uint32_t elem);
   bool HasStringElem(const std::string &elem) const;
   void DeleteStringElem(std::string elem);
   size_t GetStringElemCount() const;
-  const uint32_t *AddUnsignedElem(uint32_t elem);
   bool HasUnsignedElem(uint32_t elem) const;
   void DeleteUnsignedElem(uint32_t elem);
   size_t GetUnsignedElemCount() const;
@@ -58,10 +58,10 @@ public:
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int AddStringElemCallerFromLua(lua_State *luaState);
+  static int AddUnsignedElemCallerFromLua(lua_State *luaState);
   static int HasStringElemCallerFromLua(lua_State *luaState);
   static int DeleteStringElemCallerFromLua(lua_State *luaState);
   static int GetStringElemCountCallerFromLua(lua_State *luaState);
-  static int AddUnsignedElemCallerFromLua(lua_State *luaState);
   static int HasUnsignedElemCallerFromLua(lua_State *luaState);
   static int DeleteUnsignedElemCallerFromLua(lua_State *luaState);
   static int GetUnsignedElemCountCallerFromLua(lua_State *luaState);

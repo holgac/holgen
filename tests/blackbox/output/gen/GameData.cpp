@@ -129,22 +129,6 @@ Boot *GameData::AddBoot(Boot &elem) {
   return &(mBoots.emplace_back(elem));
 }
 
-const Boot *GameData::GetBoot(uint32_t idx) const {
-  if (idx >= mBoots.size())
-    return nullptr;
-  return &mBoots[idx];
-}
-
-Boot *GameData::GetBoot(uint32_t idx) {
-  if (idx >= mBoots.size())
-    return nullptr;
-  return &mBoots[idx];
-}
-
-size_t GameData::GetBootCount() const {
-  return mBoots.size();
-}
-
 Armor *GameData::AddArmor(Armor &&elem) {
   if (mArmorsNameIndex.contains(elem.GetName())) {
     return nullptr;
@@ -179,22 +163,6 @@ Armor *GameData::AddArmor(Armor &elem) {
   return &(mArmors.emplace_back(elem));
 }
 
-const Armor *GameData::GetArmor(uint32_t idx) const {
-  if (idx >= mArmors.size())
-    return nullptr;
-  return &mArmors[idx];
-}
-
-Armor *GameData::GetArmor(uint32_t idx) {
-  if (idx >= mArmors.size())
-    return nullptr;
-  return &mArmors[idx];
-}
-
-size_t GameData::GetArmorCount() const {
-  return mArmors.size();
-}
-
 Character *GameData::AddCharacter(Character &&elem) {
   if (mCharactersNameIndex.contains(elem.GetName())) {
     return nullptr;
@@ -217,6 +185,38 @@ Character *GameData::AddCharacter(Character &elem) {
   elem.SetId(newId);
   mCharactersNameIndex.emplace(elem.GetName(), newId);
   return &(mCharacters.emplace_back(elem));
+}
+
+const Boot *GameData::GetBoot(uint32_t idx) const {
+  if (idx >= mBoots.size())
+    return nullptr;
+  return &mBoots[idx];
+}
+
+Boot *GameData::GetBoot(uint32_t idx) {
+  if (idx >= mBoots.size())
+    return nullptr;
+  return &mBoots[idx];
+}
+
+size_t GameData::GetBootCount() const {
+  return mBoots.size();
+}
+
+const Armor *GameData::GetArmor(uint32_t idx) const {
+  if (idx >= mArmors.size())
+    return nullptr;
+  return &mArmors[idx];
+}
+
+Armor *GameData::GetArmor(uint32_t idx) {
+  if (idx >= mArmors.size())
+    return nullptr;
+  return &mArmors[idx];
+}
+
+size_t GameData::GetArmorCount() const {
+  return mArmors.size();
 }
 
 const Character *GameData::GetCharacter(uint32_t idx) const {
@@ -520,6 +520,24 @@ int GameData::AddBootCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int GameData::AddArmorCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddArmor method with an invalid lua proxy object!");
+  auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddArmor(*arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
+int GameData::AddCharacterCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddCharacter method with an invalid lua proxy object!");
+  auto arg0 = Character::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddCharacter(*arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
 int GameData::GetBootCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetBoot method with an invalid lua proxy object!");
@@ -538,15 +556,6 @@ int GameData::GetBootCountCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
-int GameData::AddArmorCallerFromLua(lua_State *luaState) {
-  auto instance = GameData::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddArmor method with an invalid lua proxy object!");
-  auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
-  auto result = instance->AddArmor(*arg0);
-  LuaHelper::Push<false>(result, luaState);
-  return 1;
-}
-
 int GameData::GetArmorCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetArmor method with an invalid lua proxy object!");
@@ -562,15 +571,6 @@ int GameData::GetArmorCountCallerFromLua(lua_State *luaState) {
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetArmorCount method with an invalid lua proxy object!");
   auto result = instance->GetArmorCount();
   LuaHelper::Push<true>(result, luaState);
-  return 1;
-}
-
-int GameData::AddCharacterCallerFromLua(lua_State *luaState) {
-  auto instance = GameData::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.AddCharacter method with an invalid lua proxy object!");
-  auto arg0 = Character::ReadProxyFromLua(luaState, -1);
-  auto result = instance->AddCharacter(*arg0);
-  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -616,18 +616,18 @@ int GameData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, GameData::GetCharacterFromNameCallerFromLua);
   } else if (0 == strcmp("AddBoot", key)) {
     lua_pushcfunction(luaState, GameData::AddBootCallerFromLua);
+  } else if (0 == strcmp("AddArmor", key)) {
+    lua_pushcfunction(luaState, GameData::AddArmorCallerFromLua);
+  } else if (0 == strcmp("AddCharacter", key)) {
+    lua_pushcfunction(luaState, GameData::AddCharacterCallerFromLua);
   } else if (0 == strcmp("GetBoot", key)) {
     lua_pushcfunction(luaState, GameData::GetBootCallerFromLua);
   } else if (0 == strcmp("GetBootCount", key)) {
     lua_pushcfunction(luaState, GameData::GetBootCountCallerFromLua);
-  } else if (0 == strcmp("AddArmor", key)) {
-    lua_pushcfunction(luaState, GameData::AddArmorCallerFromLua);
   } else if (0 == strcmp("GetArmor", key)) {
     lua_pushcfunction(luaState, GameData::GetArmorCallerFromLua);
   } else if (0 == strcmp("GetArmorCount", key)) {
     lua_pushcfunction(luaState, GameData::GetArmorCountCallerFromLua);
-  } else if (0 == strcmp("AddCharacter", key)) {
-    lua_pushcfunction(luaState, GameData::AddCharacterCallerFromLua);
   } else if (0 == strcmp("GetCharacter", key)) {
     lua_pushcfunction(luaState, GameData::GetCharacterCallerFromLua);
   } else if (0 == strcmp("GetCharacterCount", key)) {

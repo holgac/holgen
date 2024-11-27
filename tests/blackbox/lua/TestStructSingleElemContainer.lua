@@ -9,6 +9,10 @@ TestStructSingleElemContainer = {}
 ---@return TestStructSingleElem
 function TestStructSingleElemContainer:AddSingleElemStruct(elem) end
 
+---@param elem TestStructSingleElemWithId
+---@return TestStructSingleElemWithId
+function TestStructSingleElemContainer:AddSingleElemStructWithId(elem) end
+
 ---@param idx number
 ---@return TestStructSingleElem
 function TestStructSingleElemContainer:GetSingleElemStruct(idx) end
@@ -18,10 +22,6 @@ function TestStructSingleElemContainer:DeleteSingleElemStruct(idx) end
 
 ---@return number
 function TestStructSingleElemContainer:GetSingleElemStructCount() end
-
----@param elem TestStructSingleElemWithId
----@return TestStructSingleElemWithId
-function TestStructSingleElemContainer:AddSingleElemStructWithId(elem) end
 
 ---@param idx number
 ---@return TestStructSingleElemWithId

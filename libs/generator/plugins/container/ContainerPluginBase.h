@@ -6,6 +6,6 @@ namespace holgen {
 class ContainerPluginBase : public TranslatorPlugin {
 public:
   using TranslatorPlugin::TranslatorPlugin;
-  [[nodiscard]] bool ShouldProcess(const ClassField& field) const;
+  [[nodiscard]] virtual bool ShouldProcess(const ClassField& field) const;
 };
 } // namespace holgen
