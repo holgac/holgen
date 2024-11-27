@@ -19,6 +19,7 @@
 #include "TestBitmap.h"
 #include "TestBitmapStruct.h"
 #include "TestCompositeIdCompositeId.h"
+#include "TestCompositeIdHuman.h"
 #include "TestCompositeIdObjectType.h"
 #include "TestContainerEnum.h"
 #include "TestContainerInnerStructNoId.h"
@@ -172,6 +173,7 @@ void LuaHelper::Setup(lua_State *luaState, const std::filesystem::path &genDir) 
   RaceId::CreateLuaMetatable(luaState);
   TestBitmapStruct::CreateLuaMetatable(luaState);
   TestCompositeIdCompositeId::CreateLuaMetatable(luaState);
+  TestCompositeIdHuman::CreateLuaMetatable(luaState);
   TestContainerEnum::CreateLuaMetatable(luaState);
   TestContainerInnerStructNoId::CreateLuaMetatable(luaState);
   TestContainerInnerStructWithId::CreateLuaMetatable(luaState);

@@ -470,6 +470,7 @@ public:
    *  s16 version;
    *
    *  @compositeId(id)
+   *  @id
    *  s32 id;
    * }
    *

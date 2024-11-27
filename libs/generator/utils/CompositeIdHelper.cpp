@@ -3,24 +3,48 @@
 #include <core/Annotations.h>
 
 namespace holgen {
-const ClassField *CompositeIdHelper::GetTypeField(const Class &cls) {
-  return GetFieldWithAttribute(cls, Annotations::CompositeIdType_Type, true);
+const ClassField *CompositeIdHelper::GetObjectTypeField(const Class &cls) {
+  return GetObjectFieldWithAttribute(cls, Annotations::CompositeId_Type, true);
 }
 
-const ClassField *CompositeIdHelper::GetIdField(const Class &cls) {
-  return GetFieldWithAttribute(cls, Annotations::CompositeIdType_Id, true);
+const ClassField *CompositeIdHelper::GetObjectIdField(const Class &cls) {
+  return GetObjectFieldWithAttribute(cls, Annotations::CompositeId_Id, true);
 }
 
-const ClassField *CompositeIdHelper::GetVersionField(const Class &cls) {
-  return GetFieldWithAttribute(cls, Annotations::CompositeIdType_Version, true);
+const ClassField *CompositeIdHelper::GetObjectVersionField(const Class &cls) {
+  return GetObjectFieldWithAttribute(cls, Annotations::CompositeId_Version, true);
+}
+
+const ClassField *CompositeIdHelper::GetIdTypeField(const Class &cls) {
+  return GetIdFieldWithAttribute(cls, Annotations::CompositeIdType_Type, true);
+}
+
+const ClassField *CompositeIdHelper::GetIdIdField(const Class &cls) {
+  return GetIdFieldWithAttribute(cls, Annotations::CompositeIdType_Id, true);
+}
+
+const ClassField *CompositeIdHelper::GetIdVersionField(const Class &cls) {
+  return GetIdFieldWithAttribute(cls, Annotations::CompositeIdType_Version, true);
+}
+
+const ClassField *CompositeIdHelper::GetIdFieldWithAttribute(const Class &cls,
+                                                             const std::string &attribute,
+                                                             const bool throwOnFailure) {
+  return GetFieldWithAttribute(cls, Annotations::CompositeIdType, attribute, throwOnFailure);
+}
+
+const ClassField *CompositeIdHelper::GetObjectFieldWithAttribute(const Class &cls,
+                                                                 const std::string &attribute,
+                                                                 const bool throwOnFailure) {
+  return GetFieldWithAttribute(cls, Annotations::CompositeId, attribute, throwOnFailure);
 }
 
 const ClassField *CompositeIdHelper::GetFieldWithAttribute(const Class &cls,
+                                                           const std::string &annotation,
                                                            const std::string &attribute,
                                                            const bool throwOnFailure) {
   for (auto &field: cls.mFields) {
-    if (field.mField &&
-        field.mField->GetMatchingAnnotation(Annotations::CompositeIdType, attribute))
+    if (field.mField && field.mField->GetMatchingAnnotation(annotation, attribute))
       return &field;
   }
   THROW_IF(throwOnFailure, "{} ({}) is a composite id type without {}!", cls.mName,

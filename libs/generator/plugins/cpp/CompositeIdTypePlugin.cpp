@@ -30,9 +30,9 @@ void CompositeIdTypePlugin::AddConstructor(Class &cls) const {
     return;
   auto ctor = ClassConstructor{};
   std::vector<const ClassField *> fields;
-  auto typeField = CompositeIdHelper::GetTypeField(cls);
-  auto idField = CompositeIdHelper::GetIdField(cls);
-  auto versionField = CompositeIdHelper::GetVersionField(cls);
+  auto typeField = CompositeIdHelper::GetIdTypeField(cls);
+  auto idField = CompositeIdHelper::GetIdIdField(cls);
+  auto versionField = CompositeIdHelper::GetIdVersionField(cls);
   ctor.mArguments.emplace_back(typeField->mField->mName, typeField->mType);
   ctor.mArguments.emplace_back(idField->mField->mName, idField->mType);
   ctor.mArguments.emplace_back(versionField->mField->mName, versionField->mType);
@@ -49,7 +49,7 @@ void CompositeIdTypePlugin::AddIsValidMethod(Class &cls) const {
   if (existingFunc)
     return;
   auto method = ClassMethod{St::CompositeId_IsValid, Type{"bool"}};
-  auto typeField = CompositeIdHelper::GetTypeField(cls);
+  auto typeField = CompositeIdHelper::GetIdTypeField(cls);
   method.mBody.Add("return {} != {}::Invalid;", typeField->mName, typeField->mType.mName);
   Validate().NewMethod(cls, method);
   cls.mMethods.push_back(std::move(method));
@@ -62,9 +62,9 @@ void CompositeIdTypePlugin::AddLessThanOperator(Class &cls) const {
   auto method = ClassMethod{"operator<", Type{"bool"}};
   method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
   std::vector<const ClassField *> fields;
-  fields.push_back(CompositeIdHelper::GetTypeField(cls));
-  fields.push_back(CompositeIdHelper::GetIdField(cls));
-  fields.push_back(CompositeIdHelper::GetVersionField(cls));
+  fields.push_back(CompositeIdHelper::GetIdTypeField(cls));
+  fields.push_back(CompositeIdHelper::GetIdIdField(cls));
+  fields.push_back(CompositeIdHelper::GetIdVersionField(cls));
   for (auto &field: fields) {
     method.mBody.Add("if ({0} != rhs.{0})", field->mName);
     method.mBody.Indent(1);
