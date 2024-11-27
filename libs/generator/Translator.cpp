@@ -13,6 +13,7 @@
 #include "generator/plugins/cpp/ClassCopyMoveDestroyPlugin.h"
 #include "generator/plugins/cpp/ClassMetadataPlugin.h"
 #include "generator/plugins/cpp/CWrappersPlugin.h"
+#include "generator/plugins/cpp/CompositeIdTypePlugin.h"
 #include "generator/plugins/enum/EnumPlugin.h"
 #include "generator/plugins/enum/BitmapPlugin.h"
 #include "generator/plugins/enum/BitmapFieldPlugin.h"
@@ -62,6 +63,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<BitmapPlugin>();
   AddPlugin<BitmapFieldPlugin>();
   AddPlugin<DeferredDeleterPlugin>();
+  AddPlugin<CompositeIdTypePlugin>();
   AddPlugin<CWrappersPlugin>();
   AddPlugin<DotNetModulePlugin>();
   AddPlugin<DotNetModuleFunctionsPlugin>();

@@ -436,11 +436,55 @@ public:
    * struct YouCanOnlyMoveThis {
    *    BigData field;
    * }
+   *
    */
   inline static const std::string Struct = "struct";
   inline static const std::string Struct_NonCopyable = "nonCopyable";
   inline static const std::string Struct_NoDefaultConstructor = "noDefaultConstructor";
   inline static const std::string Struct_NoDefaultAssignment = "noDefaultAssignment";
+
+  /*
+   * Objects with composite ID are tracked by a type, version and ID tuple.
+   *
+   * enum ObjectType {
+   *  Object1Type;
+   * }
+   *
+   * The field order is important!
+   *
+   * @compositeIdType(getter=GetFullyQualifiedId)
+   * struct FullyQualifiedId {
+   *  @compositeIdType(type)
+   *  ObjectType type;
+   *
+   *  @compositeIdType(version)
+   *  s16 version;
+   *
+   *  @compositeIdType(id)
+   *  s32 id;
+   * }
+   *
+   * @compositeId(type=FullyQualifiedId, entry=Object1Type)
+   * struct Object1 {
+   *  @compositeId(version)
+   *  s16 version;
+   *
+   *  @compositeId(id)
+   *  s32 id;
+   * }
+   *
+   * It generates a GetFullyQualifiedId that returns a FullyQualifiedId with type Object1Type.
+   */
+  inline static const std::string CompositeId = "compositeId";
+  inline static const std::string CompositeId_Type = "type";
+  inline static const std::string CompositeId_Entry = "entry";
+  inline static const std::string CompositeId_Id = "id";
+  inline static const std::string CompositeId_Version = "version";
+  inline static const std::string CompositeIdType = "compositeIdType";
+  inline static const std::string CompositeIdType_Getter = "getter";
+  inline static const std::string CompositeIdType_Id = "id";
+  inline static const std::string CompositeIdType_Version = "version";
+  inline static const std::string CompositeIdType_Type = "type";
 
 
   /**

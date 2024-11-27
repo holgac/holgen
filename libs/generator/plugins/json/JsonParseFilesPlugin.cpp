@@ -125,7 +125,7 @@ void JsonParseFilesPlugin::GenerateParseFiles(Class &cls) {
         else
           conditions << " || ";
         conditions << std::format(
-            "existingElem != {}(elem.{})",
+            "existingElem != {}(elem.{}())",
             Naming().ContainerIndexGetterNameInCpp(*field.mField, annotation),
             Naming().FieldGetterNameInCpp(
                 annotation.GetAttribute(Annotations::Index_On)->mValue.mName));

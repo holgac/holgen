@@ -69,6 +69,8 @@ set(gen_plugins
     plugins/cpp/ClassCopyMoveDestroyPlugin.cpp
     plugins/cpp/ClassMetadataPlugin.cpp
     plugins/cpp/CWrappersPlugin.cpp
+    plugins/cpp/CompositeIdTypePlugin.cpp
+    plugins/cpp/CompositeIdTypePlugin.h
 )
 
 set(gen_generators
@@ -94,6 +96,8 @@ set(gen_utils
     utils/HeaderContainer.cpp
     utils/NamingConvention.cpp
     utils/StringSwitcher.cpp
+    utils/CompositeIdHelper.cpp
+    utils/CompositeIdHelper.h
 )
 
 add_library(generator

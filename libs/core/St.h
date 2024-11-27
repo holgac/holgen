@@ -69,6 +69,9 @@ public:
   // TODO: move Ref here
   inline static const std::string UserDefinedSectionBegin = "HOLGEN_USER_DEFINED_BEGIN:";
   inline static const std::string UserDefinedSectionEnd = "HOLGEN_USER_DEFINED_END:";
+
+  inline static const std::string CompositeId_IsValid = "IsValid";
+
 #if defined(HOLGEN_WINDOWS)
   inline static const std::string Newline = "\n";
 #else
