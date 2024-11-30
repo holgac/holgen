@@ -29,11 +29,11 @@ public:
   const std::string *AddStringElem(std::string &&elem);
   const std::string *AddStringElem(const std::string &elem);
   const uint32_t *AddUnsignedElem(uint32_t elem);
-  bool HasStringElem(const std::string &elem) const;
   void DeleteStringElem(std::string elem);
+  void DeleteUnsignedElem(uint32_t elem);
+  bool HasStringElem(const std::string &elem) const;
   size_t GetStringElemCount() const;
   bool HasUnsignedElem(uint32_t elem) const;
-  void DeleteUnsignedElem(uint32_t elem);
   size_t GetUnsignedElemCount() const;
   bool operator==(const TestContainerSet &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -59,11 +59,11 @@ private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int AddStringElemCallerFromLua(lua_State *luaState);
   static int AddUnsignedElemCallerFromLua(lua_State *luaState);
-  static int HasStringElemCallerFromLua(lua_State *luaState);
   static int DeleteStringElemCallerFromLua(lua_State *luaState);
+  static int DeleteUnsignedElemCallerFromLua(lua_State *luaState);
+  static int HasStringElemCallerFromLua(lua_State *luaState);
   static int GetStringElemCountCallerFromLua(lua_State *luaState);
   static int HasUnsignedElemCallerFromLua(lua_State *luaState);
-  static int DeleteUnsignedElemCallerFromLua(lua_State *luaState);
   static int GetUnsignedElemCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::set<std::string> mStringContainer;

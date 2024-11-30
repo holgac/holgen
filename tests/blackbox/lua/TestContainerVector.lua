@@ -47,23 +47,23 @@ function TestContainerVector:GetStringElem(idx) end
 ---@return number
 function TestContainerVector:GetUnsignedElem(idx) end
 
----@return number
-function TestContainerVector:GetInnerStructWithIdCount() end
-
 ---@param idx number
 function TestContainerVector:DeleteInnerStructNoId(idx) end
-
----@return number
-function TestContainerVector:GetInnerStructNoIdCount() end
 
 ---@param idx number
 function TestContainerVector:DeleteStringElem(idx) end
 
----@return number
-function TestContainerVector:GetStringElemCount() end
-
 ---@param idx number
 function TestContainerVector:DeleteUnsignedElem(idx) end
+
+---@return number
+function TestContainerVector:GetInnerStructWithIdCount() end
+
+---@return number
+function TestContainerVector:GetInnerStructNoIdCount() end
+
+---@return number
+function TestContainerVector:GetStringElemCount() end
 
 ---@return number
 function TestContainerVector:GetUnsignedElemCount() end

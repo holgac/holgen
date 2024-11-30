@@ -17,11 +17,11 @@ function HumanManager:AddHuman(elem) end
 function HumanManager:GetHuman(idx) end
 
 ---@param key number
----@return boolean
-function HumanManager:HasHuman(key) end
+function HumanManager:DeleteHuman(key) end
 
 ---@param key number
-function HumanManager:DeleteHuman(key) end
+---@return boolean
+function HumanManager:HasHuman(key) end
 
 ---@return number
 function HumanManager:GetHumanCount() end

@@ -10,6 +10,7 @@
 #include "generator/plugins/container/ContainerIndexPlugin.h"
 #include "generator/plugins/container/ContainerAddElemPlugin.h"
 #include "generator/plugins/container/ContainerGetElemPlugin.h"
+#include "generator/plugins/container/ContainerDeleteElemPlugin.h"
 #include "generator/plugins/cpp/CppDestructorPlugin.h"
 #include "generator/plugins/cpp/CppFunctionPlugin.h"
 #include "generator/plugins/cpp/ManagedClassPlugin.h"
@@ -64,6 +65,7 @@ Translator::Translator(const TranslatorSettings &translatorSettings) :
   AddPlugin<ContainerIndexPlugin>();
   AddPlugin<ContainerAddElemPlugin>();
   AddPlugin<ContainerGetElemPlugin>();
+  AddPlugin<ContainerDeleteElemPlugin>();
   AddPlugin<ContainerFieldPlugin>();
   AddPlugin<ManagedClassPlugin>();
   AddPlugin<EnumPlugin>();

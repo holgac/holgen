@@ -78,14 +78,14 @@ TestContainerInnerStructWithId *TestContainerMap::GetInnerStructWithId(uint32_t 
   return &it->second;
 }
 
-bool TestContainerMap::HasInnerStructWithId(uint32_t key) const {
-  return mInnerStructsWithId.contains(key);
-}
-
 void TestContainerMap::DeleteInnerStructWithId(uint32_t key) {
   auto ptr = GetInnerStructWithId(key);
   mInnerStructsWithIdNameIndex.erase(ptr->GetName());
   mInnerStructsWithId.erase(key);
+}
+
+bool TestContainerMap::HasInnerStructWithId(uint32_t key) const {
+  return mInnerStructsWithId.contains(key);
 }
 
 size_t TestContainerMap::GetInnerStructWithIdCount() const {
@@ -244,6 +244,15 @@ int TestContainerMap::GetInnerStructWithIdCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int TestContainerMap::DeleteInnerStructWithIdCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.DeleteInnerStructWithId method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteInnerStructWithId(arg0);
+  return 0;
+}
+
 int TestContainerMap::HasInnerStructWithIdCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.HasInnerStructWithId method with an invalid lua proxy object!");
@@ -252,15 +261,6 @@ int TestContainerMap::HasInnerStructWithIdCallerFromLua(lua_State *luaState) {
   auto result = instance->HasInnerStructWithId(arg0);
   LuaHelper::Push<true>(result, luaState);
   return 1;
-}
-
-int TestContainerMap::DeleteInnerStructWithIdCallerFromLua(lua_State *luaState) {
-  auto instance = TestContainerMap::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerMap.DeleteInnerStructWithId method with an invalid lua proxy object!");
-  uint32_t arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  instance->DeleteInnerStructWithId(arg0);
-  return 0;
 }
 
 int TestContainerMap::GetInnerStructWithIdCountCallerFromLua(lua_State *luaState) {
@@ -283,10 +283,10 @@ int TestContainerMap::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestContainerMap::AddInnerStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetInnerStructWithId", key)) {
     lua_pushcfunction(luaState, TestContainerMap::GetInnerStructWithIdCallerFromLua);
-  } else if (0 == strcmp("HasInnerStructWithId", key)) {
-    lua_pushcfunction(luaState, TestContainerMap::HasInnerStructWithIdCallerFromLua);
   } else if (0 == strcmp("DeleteInnerStructWithId", key)) {
     lua_pushcfunction(luaState, TestContainerMap::DeleteInnerStructWithIdCallerFromLua);
+  } else if (0 == strcmp("HasInnerStructWithId", key)) {
+    lua_pushcfunction(luaState, TestContainerMap::HasInnerStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetInnerStructWithIdCount", key)) {
     lua_pushcfunction(luaState, TestContainerMap::GetInnerStructWithIdCountCallerFromLua);
   } else {

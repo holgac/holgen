@@ -5,6 +5,7 @@
 #include "generator/plugins/container/ContainerIndexPlugin.h"
 #include "generator/plugins/container/ContainerAddElemPlugin.h"
 #include "generator/plugins/container/ContainerGetElemPlugin.h"
+#include "generator/plugins/container/ContainerDeleteElemPlugin.h"
 #include "generator/plugins/container/ContainerFieldPlugin.h"
 
 class ContainerFieldPluginTest : public TranslatorPluginTest {
@@ -16,6 +17,7 @@ protected:
     ContainerIndexPlugin(project, {}).Run();
     ContainerAddElemPlugin(project, {}).Run();
     ContainerGetElemPlugin(project, {}).Run();
+    ContainerDeleteElemPlugin(project, {}).Run();
     ContainerFieldPlugin(project, {}).Run();
   }
 };
@@ -539,32 +541,12 @@ struct TestData {
     method.mArguments.emplace_back("idx", Type{"size_t"});
     method.mExposeToCSharp = true;
     helpers::ExpectEqual(*cls->GetMethod("DeleteInnerStruct", Constness::NotConst), method, R"R(
-if (idx != mInnerStructs.size() - 1) {
+if (size_t(idx) != mInnerStructs.size() - 1) {
   mInnerStructs[idx] = std::move(mInnerStructs.back());
 }
 mInnerStructs.pop_back();
     )R");
   }
-}
-
-TEST_F(ContainerFieldPluginTest, VectorDeleteElemWithId) {
-  auto project = Parse(R"R(
-struct InnerStruct {
-  @id
-  u32 id;
-}
-struct TestData {
-  @container(elemName=innerStruct)
-  vector<InnerStruct> innerStructs;
-}
-  )R");
-  Run(project);
-  auto cls = project.GetClass("TestData");
-  ASSERT_NE(cls, nullptr);
-  EXPECT_EQ(cls->mFields.size(), 1);
-
-  EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::Const), nullptr);
-  EXPECT_EQ(cls->GetMethod("DeleteInnerStruct", Constness::NotConst), nullptr);
 }
 
 TEST_F(ContainerFieldPluginTest, VectorDeleteElemNoIdWithIndex) {
@@ -595,7 +577,7 @@ struct TestData {
 auto ptr = GetInnerStruct(idx);
 mInnerStructsUuidIndex.erase(ptr->GetUuid());
 mInnerStructsGuidIndex.erase(ptr->GetGuid());
-if (idx != mInnerStructs.size() - 1) {
+if (size_t(idx) != mInnerStructs.size() - 1) {
   mInnerStructsUuidIndex.at(mInnerStructs.back().GetUuid()) = idx;
   mInnerStructsGuidIndex.at(mInnerStructs.back().GetGuid()) = idx;
   mInnerStructs[idx] = std::move(mInnerStructs.back());

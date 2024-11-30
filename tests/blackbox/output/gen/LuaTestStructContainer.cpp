@@ -49,7 +49,7 @@ uint32_t *LuaTestStructContainer::GetTestVectorElem(size_t idx) {
 }
 
 void LuaTestStructContainer::DeleteTestVectorElem(size_t idx) {
-  if (idx != mTestVector.size() - 1) {
+  if (size_t(idx) != mTestVector.size() - 1) {
     mTestVector[idx] = std::move(mTestVector.back());
   }
   mTestVector.pop_back();

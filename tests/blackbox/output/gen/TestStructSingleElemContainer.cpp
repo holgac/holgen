@@ -81,7 +81,7 @@ TestStructSingleElemWithId *TestStructSingleElemContainer::GetSingleElemStructWi
 }
 
 void TestStructSingleElemContainer::DeleteSingleElemStruct(size_t idx) {
-  if (idx != mSingleElemStructs.size() - 1) {
+  if (size_t(idx) != mSingleElemStructs.size() - 1) {
     mSingleElemStructs[idx] = std::move(mSingleElemStructs.back());
   }
   mSingleElemStructs.pop_back();

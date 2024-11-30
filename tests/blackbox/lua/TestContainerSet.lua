@@ -14,11 +14,14 @@ function TestContainerSet:AddStringElem(elem) end
 function TestContainerSet:AddUnsignedElem(elem) end
 
 ---@param elem string
----@return boolean
-function TestContainerSet:HasStringElem(elem) end
+function TestContainerSet:DeleteStringElem(elem) end
+
+---@param elem number
+function TestContainerSet:DeleteUnsignedElem(elem) end
 
 ---@param elem string
-function TestContainerSet:DeleteStringElem(elem) end
+---@return boolean
+function TestContainerSet:HasStringElem(elem) end
 
 ---@return number
 function TestContainerSet:GetStringElemCount() end
@@ -26,9 +29,6 @@ function TestContainerSet:GetStringElemCount() end
 ---@param elem number
 ---@return boolean
 function TestContainerSet:HasUnsignedElem(elem) end
-
----@param elem number
-function TestContainerSet:DeleteUnsignedElem(elem) end
 
 ---@return number
 function TestContainerSet:GetUnsignedElemCount() end

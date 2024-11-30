@@ -17,11 +17,11 @@ function TestContainerMap:AddInnerStructWithId(elem) end
 function TestContainerMap:GetInnerStructWithId(idx) end
 
 ---@param key number
----@return boolean
-function TestContainerMap:HasInnerStructWithId(key) end
+function TestContainerMap:DeleteInnerStructWithId(key) end
 
 ---@param key number
-function TestContainerMap:DeleteInnerStructWithId(key) end
+---@return boolean
+function TestContainerMap:HasInnerStructWithId(key) end
 
 ---@return number
 function TestContainerMap:GetInnerStructWithIdCount() end

@@ -74,6 +74,7 @@ set(gen_plugins
     plugins/container/ContainerIndexPlugin.cpp
     plugins/container/ContainerAddElemPlugin.cpp
     plugins/container/ContainerGetElemPlugin.cpp
+    plugins/container/ContainerDeleteElemPlugin.cpp
     plugins/container/ContainerFieldPlugin.cpp
 )
 

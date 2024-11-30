@@ -30,8 +30,8 @@ public:
   TestContainerInnerStructWithId *AddInnerStructWithId(TestContainerInnerStructWithId &elem);
   const TestContainerInnerStructWithId *GetInnerStructWithId(uint32_t idx) const;
   TestContainerInnerStructWithId *GetInnerStructWithId(uint32_t idx);
-  bool HasInnerStructWithId(uint32_t key) const;
   void DeleteInnerStructWithId(uint32_t key);
+  bool HasInnerStructWithId(uint32_t key) const;
   size_t GetInnerStructWithIdCount() const;
   bool operator==(const TestContainerMap &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -58,8 +58,8 @@ private:
   static int GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState);
   static int AddInnerStructWithIdCallerFromLua(lua_State *luaState);
   static int GetInnerStructWithIdCallerFromLua(lua_State *luaState);
-  static int HasInnerStructWithIdCallerFromLua(lua_State *luaState);
   static int DeleteInnerStructWithIdCallerFromLua(lua_State *luaState);
+  static int HasInnerStructWithIdCallerFromLua(lua_State *luaState);
   static int GetInnerStructWithIdCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::map<uint32_t, TestContainerInnerStructWithId> mInnerStructsWithId;

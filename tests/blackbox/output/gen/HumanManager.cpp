@@ -84,14 +84,14 @@ Human *HumanManager::GetHuman(uint32_t idx) {
   return &it->second;
 }
 
-bool HumanManager::HasHuman(uint32_t key) const {
-  return mHumans.contains(key);
-}
-
 void HumanManager::DeleteHuman(uint32_t key) {
   auto ptr = GetHuman(key);
   mHumansNameIndex.erase(ptr->GetName());
   mHumans.erase(key);
+}
+
+bool HumanManager::HasHuman(uint32_t key) const {
+  return mHumans.contains(key);
 }
 
 size_t HumanManager::GetHumanCount() const {
@@ -284,6 +284,15 @@ int HumanManager::GetHumanCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int HumanManager::DeleteHumanCallerFromLua(lua_State *luaState) {
+  auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling HumanManager.DeleteHuman method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteHuman(arg0);
+  return 0;
+}
+
 int HumanManager::HasHumanCallerFromLua(lua_State *luaState) {
   auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling HumanManager.HasHuman method with an invalid lua proxy object!");
@@ -292,15 +301,6 @@ int HumanManager::HasHumanCallerFromLua(lua_State *luaState) {
   auto result = instance->HasHuman(arg0);
   LuaHelper::Push<true>(result, luaState);
   return 1;
-}
-
-int HumanManager::DeleteHumanCallerFromLua(lua_State *luaState) {
-  auto instance = HumanManager::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling HumanManager.DeleteHuman method with an invalid lua proxy object!");
-  uint32_t arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  instance->DeleteHuman(arg0);
-  return 0;
 }
 
 int HumanManager::GetHumanCountCallerFromLua(lua_State *luaState) {
@@ -323,10 +323,10 @@ int HumanManager::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, HumanManager::AddHumanCallerFromLua);
   } else if (0 == strcmp("GetHuman", key)) {
     lua_pushcfunction(luaState, HumanManager::GetHumanCallerFromLua);
-  } else if (0 == strcmp("HasHuman", key)) {
-    lua_pushcfunction(luaState, HumanManager::HasHumanCallerFromLua);
   } else if (0 == strcmp("DeleteHuman", key)) {
     lua_pushcfunction(luaState, HumanManager::DeleteHumanCallerFromLua);
+  } else if (0 == strcmp("HasHuman", key)) {
+    lua_pushcfunction(luaState, HumanManager::HasHumanCallerFromLua);
   } else if (0 == strcmp("GetHumanCount", key)) {
     lua_pushcfunction(luaState, HumanManager::GetHumanCountCallerFromLua);
   } else {

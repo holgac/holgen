@@ -174,6 +174,7 @@ void ContainerAddElemPlugin::GenerateAddElemMethodBody(const Class &cls,
   } else if (compositeIdField) {
     method.mBody.Add("if ({}{}) {{", field.mName, St::CompositeId_DeletedCountSuffix);
     method.mBody.Indent(1);
+
     method.mBody.Add("--{}{};", field.mName, St::CompositeId_DeletedCountSuffix);
     method.mBody.Add("auto newId = {}{};", field.mName, St::CompositeId_NextDeletedIndexSuffix);
     method.mBody.Add(std::move(idAssigner));
@@ -183,10 +184,16 @@ void ContainerAddElemPlugin::GenerateAddElemMethodBody(const Class &cls,
                      Naming().FieldGetterNameInCpp(*compositeIdField->mField));
     method.mBody.Add("{}[newId] = {};", field.mName, elemToInsert);
     method.mBody.Add("return &{}[newId];", field.mName);
+
     method.mBody.Indent(-1);
     method.mBody.Add("}} else {{");
     method.mBody.Indent(1);
+
+    method.mBody.Add("auto newId = {}.size();", field.mName);
+    method.mBody.Add(std::move(idAssigner));
+    method.mBody.Add(std::move(indexInserters));
     method.mBody.Add("return &{}.emplace_back({});", field.mName, elemToInsert);
+
     method.mBody.Indent(-1);
     method.mBody.Add("}}");
   } else if (!indexInserters.mContents.empty() || underlyingIdField) {

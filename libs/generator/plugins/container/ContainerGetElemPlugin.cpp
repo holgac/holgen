@@ -1,5 +1,4 @@
 #include "ContainerGetElemPlugin.h"
-
 #include "generator/utils/CompositeIdHelper.h"
 #include "core/St.h"
 

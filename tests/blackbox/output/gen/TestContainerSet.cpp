@@ -50,12 +50,16 @@ const uint32_t *TestContainerSet::AddUnsignedElem(uint32_t elem) {
   return &(*it);
 }
 
-bool TestContainerSet::HasStringElem(const std::string &elem) const {
-  return mStringContainer.contains(elem);
-}
-
 void TestContainerSet::DeleteStringElem(std::string elem) {
   mStringContainer.erase(elem);
+}
+
+void TestContainerSet::DeleteUnsignedElem(uint32_t elem) {
+  mUnsignedContainer.erase(elem);
+}
+
+bool TestContainerSet::HasStringElem(const std::string &elem) const {
+  return mStringContainer.contains(elem);
 }
 
 size_t TestContainerSet::GetStringElemCount() const {
@@ -64,10 +68,6 @@ size_t TestContainerSet::GetStringElemCount() const {
 
 bool TestContainerSet::HasUnsignedElem(uint32_t elem) const {
   return mUnsignedContainer.contains(elem);
-}
-
-void TestContainerSet::DeleteUnsignedElem(uint32_t elem) {
-  mUnsignedContainer.erase(elem);
 }
 
 size_t TestContainerSet::GetUnsignedElemCount() const {
@@ -235,6 +235,24 @@ int TestContainerSet::AddUnsignedElemCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int TestContainerSet::DeleteStringElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerSet.DeleteStringElem method with an invalid lua proxy object!");
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteStringElem(arg0);
+  return 0;
+}
+
+int TestContainerSet::DeleteUnsignedElemCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerSet.DeleteUnsignedElem method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteUnsignedElem(arg0);
+  return 0;
+}
+
 int TestContainerSet::HasStringElemCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerSet.HasStringElem method with an invalid lua proxy object!");
@@ -243,15 +261,6 @@ int TestContainerSet::HasStringElemCallerFromLua(lua_State *luaState) {
   auto result = instance->HasStringElem(arg0);
   LuaHelper::Push<true>(result, luaState);
   return 1;
-}
-
-int TestContainerSet::DeleteStringElemCallerFromLua(lua_State *luaState) {
-  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerSet.DeleteStringElem method with an invalid lua proxy object!");
-  std::string arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  instance->DeleteStringElem(arg0);
-  return 0;
 }
 
 int TestContainerSet::GetStringElemCountCallerFromLua(lua_State *luaState) {
@@ -270,15 +279,6 @@ int TestContainerSet::HasUnsignedElemCallerFromLua(lua_State *luaState) {
   auto result = instance->HasUnsignedElem(arg0);
   LuaHelper::Push<true>(result, luaState);
   return 1;
-}
-
-int TestContainerSet::DeleteUnsignedElemCallerFromLua(lua_State *luaState) {
-  auto instance = TestContainerSet::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerSet.DeleteUnsignedElem method with an invalid lua proxy object!");
-  uint32_t arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  instance->DeleteUnsignedElem(arg0);
-  return 0;
 }
 
 int TestContainerSet::GetUnsignedElemCountCallerFromLua(lua_State *luaState) {
@@ -303,16 +303,16 @@ int TestContainerSet::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestContainerSet::AddStringElemCallerFromLua);
   } else if (0 == strcmp("AddUnsignedElem", key)) {
     lua_pushcfunction(luaState, TestContainerSet::AddUnsignedElemCallerFromLua);
-  } else if (0 == strcmp("HasStringElem", key)) {
-    lua_pushcfunction(luaState, TestContainerSet::HasStringElemCallerFromLua);
   } else if (0 == strcmp("DeleteStringElem", key)) {
     lua_pushcfunction(luaState, TestContainerSet::DeleteStringElemCallerFromLua);
+  } else if (0 == strcmp("DeleteUnsignedElem", key)) {
+    lua_pushcfunction(luaState, TestContainerSet::DeleteUnsignedElemCallerFromLua);
+  } else if (0 == strcmp("HasStringElem", key)) {
+    lua_pushcfunction(luaState, TestContainerSet::HasStringElemCallerFromLua);
   } else if (0 == strcmp("GetStringElemCount", key)) {
     lua_pushcfunction(luaState, TestContainerSet::GetStringElemCountCallerFromLua);
   } else if (0 == strcmp("HasUnsignedElem", key)) {
     lua_pushcfunction(luaState, TestContainerSet::HasUnsignedElemCallerFromLua);
-  } else if (0 == strcmp("DeleteUnsignedElem", key)) {
-    lua_pushcfunction(luaState, TestContainerSet::DeleteUnsignedElemCallerFromLua);
   } else if (0 == strcmp("GetUnsignedElemCount", key)) {
     lua_pushcfunction(luaState, TestContainerSet::GetUnsignedElemCountCallerFromLua);
   } else {

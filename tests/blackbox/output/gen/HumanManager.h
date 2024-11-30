@@ -32,8 +32,8 @@ public:
   Human *AddHuman(Human &elem);
   const Human *GetHuman(uint32_t idx) const;
   Human *GetHuman(uint32_t idx);
-  bool HasHuman(uint32_t key) const;
   void DeleteHuman(uint32_t key);
+  bool HasHuman(uint32_t key) const;
   size_t GetHumanCount() const;
   bool operator==(const HumanManager &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -62,8 +62,8 @@ private:
   static int GetHumanFromNameCallerFromLua(lua_State *luaState);
   static int AddHumanCallerFromLua(lua_State *luaState);
   static int GetHumanCallerFromLua(lua_State *luaState);
-  static int HasHumanCallerFromLua(lua_State *luaState);
   static int DeleteHumanCallerFromLua(lua_State *luaState);
+  static int HasHumanCallerFromLua(lua_State *luaState);
   static int GetHumanCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::unordered_map<uint32_t, Human> mHumans;

@@ -50,6 +50,11 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &&
     mHumans[newId] = std::move(elem);
     return &mHumans[newId];
   } else {
+    auto newId = mHumans.size();
+
+
+
+
     return &mHumans.emplace_back(std::move(elem));
   }
 }
@@ -69,6 +74,11 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &e
     mHumans[newId] = elem;
     return &mHumans[newId];
   } else {
+    auto newId = mHumans.size();
+
+
+
+
     return &mHumans.emplace_back(elem);
   }
 }
@@ -108,11 +118,10 @@ TestCompositeIdHuman *TestCompositeIdContainer::GetHuman(const TestCompositeIdCo
 void TestCompositeIdContainer::DeleteHuman(int32_t idx) {
   auto ptr = GetHumanByRawIdx(idx);
   mHumansNameIndex.erase(ptr->GetName());
-  if (size_t(uint32_t(idx)) != mHumans.size() - 1) {
-    mHumansNameIndex.at(mHumans.back().GetName()) = idx;
-    mHumans[size_t(uint32_t(idx))] = std::move(mHumans.back());
-  }
-  mHumans.pop_back();
+  ptr->SetVersion(ptr->GetVersion() + 1);
+  ptr->SetId(-1 - mHumansNextDeletedIndex);
+  ++mHumansNextDeletedIndex;
+  mHumansNextDeletedIndex = ptr->GetId();
 }
 
 size_t TestCompositeIdContainer::GetHumanCount() const {
