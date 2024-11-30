@@ -57,15 +57,27 @@ TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWi
 }
 
 const TestStructSingleElem *TestStructSingleElemContainer::GetSingleElemStruct(size_t idx) const {
-  if (idx >= mSingleElemStructs.size())
+  if (size_t(idx) >= mSingleElemStructs.size())
     return nullptr;
   return &mSingleElemStructs[idx];
 }
 
 TestStructSingleElem *TestStructSingleElemContainer::GetSingleElemStruct(size_t idx) {
-  if (idx >= mSingleElemStructs.size())
+  if (size_t(idx) >= mSingleElemStructs.size())
     return nullptr;
   return &mSingleElemStructs[idx];
+}
+
+const TestStructSingleElemWithId *TestStructSingleElemContainer::GetSingleElemStructWithId(uint32_t idx) const {
+  if (size_t(idx) >= mSingleElemStructsWithId.size())
+    return nullptr;
+  return &mSingleElemStructsWithId[idx];
+}
+
+TestStructSingleElemWithId *TestStructSingleElemContainer::GetSingleElemStructWithId(uint32_t idx) {
+  if (size_t(idx) >= mSingleElemStructsWithId.size())
+    return nullptr;
+  return &mSingleElemStructsWithId[idx];
 }
 
 void TestStructSingleElemContainer::DeleteSingleElemStruct(size_t idx) {
@@ -77,18 +89,6 @@ void TestStructSingleElemContainer::DeleteSingleElemStruct(size_t idx) {
 
 size_t TestStructSingleElemContainer::GetSingleElemStructCount() const {
   return mSingleElemStructs.size();
-}
-
-const TestStructSingleElemWithId *TestStructSingleElemContainer::GetSingleElemStructWithId(uint32_t idx) const {
-  if (idx >= mSingleElemStructsWithId.size())
-    return nullptr;
-  return &mSingleElemStructsWithId[idx];
-}
-
-TestStructSingleElemWithId *TestStructSingleElemContainer::GetSingleElemStructWithId(uint32_t idx) {
-  if (idx >= mSingleElemStructsWithId.size())
-    return nullptr;
-  return &mSingleElemStructsWithId[idx];
 }
 
 size_t TestStructSingleElemContainer::GetSingleElemStructWithIdCount() const {
@@ -272,6 +272,16 @@ int TestStructSingleElemContainer::GetSingleElemStructCallerFromLua(lua_State *l
   return 1;
 }
 
+int TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructWithId method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetSingleElemStructWithId(arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
 int TestStructSingleElemContainer::DeleteSingleElemStructCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.DeleteSingleElemStruct method with an invalid lua proxy object!");
@@ -286,16 +296,6 @@ int TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua(lua_Sta
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructCount method with an invalid lua proxy object!");
   auto result = instance->GetSingleElemStructCount();
   LuaHelper::Push<true>(result, luaState);
-  return 1;
-}
-
-int TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua(lua_State *luaState) {
-  auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructWithId method with an invalid lua proxy object!");
-  uint32_t arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  auto result = instance->GetSingleElemStructWithId(arg0);
-  LuaHelper::Push<false>(result, luaState);
   return 1;
 }
 
@@ -323,12 +323,12 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::AddSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructCallerFromLua);
+  } else if (0 == strcmp("GetSingleElemStructWithId", key)) {
+    lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("DeleteSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::DeleteSingleElemStructCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStructCount", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua);
-  } else if (0 == strcmp("GetSingleElemStructWithId", key)) {
-    lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStructWithIdCount", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructWithIdCountCallerFromLua);
   } else {

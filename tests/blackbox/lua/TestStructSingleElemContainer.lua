@@ -18,14 +18,14 @@ function TestStructSingleElemContainer:AddSingleElemStructWithId(elem) end
 function TestStructSingleElemContainer:GetSingleElemStruct(idx) end
 
 ---@param idx number
+---@return TestStructSingleElemWithId
+function TestStructSingleElemContainer:GetSingleElemStructWithId(idx) end
+
+---@param idx number
 function TestStructSingleElemContainer:DeleteSingleElemStruct(idx) end
 
 ---@return number
 function TestStructSingleElemContainer:GetSingleElemStructCount() end
-
----@param idx number
----@return TestStructSingleElemWithId
-function TestStructSingleElemContainer:GetSingleElemStructWithId(idx) end
 
 ---@return number
 function TestStructSingleElemContainer:GetSingleElemStructWithIdCount() end

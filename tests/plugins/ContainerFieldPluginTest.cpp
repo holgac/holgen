@@ -4,6 +4,7 @@
 #include "generator/plugins/cpp/ClassPlugin.h"
 #include "generator/plugins/container/ContainerIndexPlugin.h"
 #include "generator/plugins/container/ContainerAddElemPlugin.h"
+#include "generator/plugins/container/ContainerGetElemPlugin.h"
 #include "generator/plugins/container/ContainerFieldPlugin.h"
 
 class ContainerFieldPluginTest : public TranslatorPluginTest {
@@ -14,6 +15,7 @@ protected:
     ClassFieldPlugin(project, {}).Run();
     ContainerIndexPlugin(project, {}).Run();
     ContainerAddElemPlugin(project, {}).Run();
+    ContainerGetElemPlugin(project, {}).Run();
     ContainerFieldPlugin(project, {}).Run();
   }
 };
@@ -412,7 +414,7 @@ struct TestData {
     method.mArguments.emplace_back("idx", Type{"size_t"});
     method.mExposeToCSharp = true;
     const char *body = R"R(
-if (idx >= mInnerStructs.size())
+if (size_t(idx) >= mInnerStructs.size())
   return nullptr;
 return &mInnerStructs[idx];
 )R";
@@ -449,9 +451,9 @@ struct TestData {
     method.mArguments.emplace_back("idx", Type{"int32_t"});
     method.mExposeToCSharp = true;
     const char *body = R"R(
-if (size_t(uint32_t(idx)) >= mInnerStructs.size())
+if (size_t(idx) >= mInnerStructs.size())
   return nullptr;
-return &mInnerStructs[size_t(uint32_t(idx))];
+return &mInnerStructs[idx];
     )R";
     helpers::ExpectEqual(*cls->GetMethod("GetInnerStruct", Constness::Const), method, body);
     method.mReturnType.mConstness = Constness::NotConst;

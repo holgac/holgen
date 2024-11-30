@@ -6,6 +6,7 @@
 #include "Converter.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "TestContainerSkill.h"
 
 namespace holgen_blackbox_test {
 const std::array<uint8_t, 4> &TestContainerEnum::GetSkills() const {
@@ -20,11 +21,11 @@ void TestContainerEnum::SetSkills(const std::array<uint8_t, 4> &val) {
   mSkills = val;
 }
 
-const uint8_t &TestContainerEnum::GetSkill(TestContainerSkill idx) const {
+const uint8_t &TestContainerEnum::GetSkill(const TestContainerSkill &idx) const {
   return mSkills[idx.GetValue()];
 }
 
-uint8_t &TestContainerEnum::GetSkill(TestContainerSkill idx) {
+uint8_t &TestContainerEnum::GetSkill(const TestContainerSkill &idx) {
   return mSkills[idx.GetValue()];
 }
 

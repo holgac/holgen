@@ -35,12 +35,20 @@ function TestContainerVector:AddUnsignedElem(elem) end
 ---@return TestContainerInnerStructWithId
 function TestContainerVector:GetInnerStructWithId(idx) end
 
----@return number
-function TestContainerVector:GetInnerStructWithIdCount() end
-
 ---@param idx number
 ---@return TestContainerInnerStructNoId
 function TestContainerVector:GetInnerStructNoId(idx) end
+
+---@param idx number
+---@return string
+function TestContainerVector:GetStringElem(idx) end
+
+---@param idx number
+---@return number
+function TestContainerVector:GetUnsignedElem(idx) end
+
+---@return number
+function TestContainerVector:GetInnerStructWithIdCount() end
 
 ---@param idx number
 function TestContainerVector:DeleteInnerStructNoId(idx) end
@@ -49,18 +57,10 @@ function TestContainerVector:DeleteInnerStructNoId(idx) end
 function TestContainerVector:GetInnerStructNoIdCount() end
 
 ---@param idx number
----@return string
-function TestContainerVector:GetStringElem(idx) end
-
----@param idx number
 function TestContainerVector:DeleteStringElem(idx) end
 
 ---@return number
 function TestContainerVector:GetStringElemCount() end
-
----@param idx number
----@return number
-function TestContainerVector:GetUnsignedElem(idx) end
 
 ---@param idx number
 function TestContainerVector:DeleteUnsignedElem(idx) end

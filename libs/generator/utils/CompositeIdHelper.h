@@ -10,6 +10,7 @@ public:
   static const ClassField* GetIdTypeField(const Class& cls);
   static const ClassField* GetIdIdField(const Class& cls);
   static const ClassField* GetIdVersionField(const Class& cls);
+  static const Class* GetCompositeIdType(const TranslatedProject& project, const Class& cls);
 private:
   static const ClassField* GetIdFieldWithAttribute(const Class& cls, const std::string& attribute, bool throwOnFailure);
   static const ClassField* GetObjectFieldWithAttribute(const Class& cls, const std::string& attribute, bool throwOnFailure);

@@ -38,19 +38,19 @@ function GameData:AddCharacter(elem) end
 ---@return Boot
 function GameData:GetBoot(idx) end
 
----@return number
-function GameData:GetBootCount() end
-
 ---@param idx number
 ---@return Armor
 function GameData:GetArmor(idx) end
 
----@return number
-function GameData:GetArmorCount() end
-
 ---@param idx number
 ---@return Character
 function GameData:GetCharacter(idx) end
+
+---@return number
+function GameData:GetBootCount() end
+
+---@return number
+function GameData:GetArmorCount() end
 
 ---@return number
 function GameData:GetCharacterCount() end

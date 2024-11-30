@@ -13,6 +13,7 @@
 struct lua_State;
 namespace holgen_blackbox_test {
   class Converter;
+  class TestCompositeIdCompositeId;
 }
 namespace holgen_blackbox_test {
 // Defined in tests/blackbox/schemas/testcompositeid.hsc
@@ -29,8 +30,10 @@ public:
   TestCompositeIdHuman *GetHumanFromName(const std::string &key);
   TestCompositeIdHuman *AddHuman(TestCompositeIdHuman &&elem);
   TestCompositeIdHuman *AddHuman(TestCompositeIdHuman &elem);
-  const TestCompositeIdHuman *GetHuman(int32_t idx) const;
-  TestCompositeIdHuman *GetHuman(int32_t idx);
+  const TestCompositeIdHuman *GetHumanByRawIdx(int32_t idx) const;
+  TestCompositeIdHuman *GetHumanByRawIdx(int32_t idx);
+  const TestCompositeIdHuman *GetHuman(const TestCompositeIdCompositeId &id) const;
+  TestCompositeIdHuman *GetHuman(const TestCompositeIdCompositeId &id);
   void DeleteHuman(int32_t idx);
   size_t GetHumanCount() const;
   bool operator==(const TestCompositeIdContainer &rhs) const;
@@ -57,6 +60,7 @@ private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int GetHumanFromNameCallerFromLua(lua_State *luaState);
   static int AddHumanCallerFromLua(lua_State *luaState);
+  static int GetHumanByRawIdxCallerFromLua(lua_State *luaState);
   static int GetHumanCallerFromLua(lua_State *luaState);
   static int DeleteHumanCallerFromLua(lua_State *luaState);
   static int GetHumanCountCallerFromLua(lua_State *luaState);

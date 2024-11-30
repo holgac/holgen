@@ -33,10 +33,10 @@ public:
   TestStructSingleElemWithId *AddSingleElemStructWithId(TestStructSingleElemWithId &elem);
   const TestStructSingleElem *GetSingleElemStruct(size_t idx) const;
   TestStructSingleElem *GetSingleElemStruct(size_t idx);
-  void DeleteSingleElemStruct(size_t idx);
-  size_t GetSingleElemStructCount() const;
   const TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx) const;
   TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx);
+  void DeleteSingleElemStruct(size_t idx);
+  size_t GetSingleElemStructCount() const;
   size_t GetSingleElemStructWithIdCount() const;
   bool operator==(const TestStructSingleElemContainer &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -63,9 +63,9 @@ private:
   static int AddSingleElemStructCallerFromLua(lua_State *luaState);
   static int AddSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructCallerFromLua(lua_State *luaState);
+  static int GetSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int DeleteSingleElemStructCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructCountCallerFromLua(lua_State *luaState);
-  static int GetSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructWithIdCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestStructSingleElem> mSingleElemStructs;

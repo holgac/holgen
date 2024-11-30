@@ -20,6 +20,7 @@ public:
   static std::string Replace(const std::string &source, const std::string &from,
                              const std::string &to);
   static std::string StripNamespace(const std::string &str);
+  inline static const std::string IdType = "IdType";
   inline static const std::string EnumConcept = "EnumConcept";
   inline static const std::string Singleton = "Singleton";
   inline static const std::string GlobalPointer = "GlobalPointer";
@@ -73,6 +74,7 @@ public:
   inline static const std::string CompositeId_IsValid = "IsValid";
   inline static const std::string CompositeId_DeletedCountSuffix = "DeletedCount";
   inline static const std::string CompositeId_NextDeletedIndexSuffix = "NextDeletedIndex";
+  inline static const std::string CompositeId_RawGetterSuffix = "ByRawIdx";
   inline static const std::string Container_NextIdSuffix = "NextId";
 
 #if defined(HOLGEN_WINDOWS)

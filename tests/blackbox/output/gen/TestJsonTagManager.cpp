@@ -64,13 +64,13 @@ TestJsonTag *TestJsonTagManager::AddTag(TestJsonTag &elem) {
 }
 
 const TestJsonTag *TestJsonTagManager::GetTag(uint64_t idx) const {
-  if (idx >= mTags.size())
+  if (size_t(idx) >= mTags.size())
     return nullptr;
   return &mTags[idx];
 }
 
 TestJsonTag *TestJsonTagManager::GetTag(uint64_t idx) {
-  if (idx >= mTags.size())
+  if (size_t(idx) >= mTags.size())
     return nullptr;
   return &mTags[idx];
 }

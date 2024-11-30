@@ -14,7 +14,11 @@ function TestCompositeIdContainer:AddHuman(elem) end
 
 ---@param idx number
 ---@return TestCompositeIdHuman
-function TestCompositeIdContainer:GetHuman(idx) end
+function TestCompositeIdContainer:GetHumanByRawIdx(idx) end
+
+---@param id TestCompositeIdCompositeId
+---@return TestCompositeIdHuman
+function TestCompositeIdContainer:GetHuman(id) end
 
 ---@param idx number
 function TestCompositeIdContainer:DeleteHuman(idx) end

@@ -37,13 +37,13 @@ uint32_t *LuaTestStructContainer::AddTestVectorElem(uint32_t elem) {
 }
 
 const uint32_t *LuaTestStructContainer::GetTestVectorElem(size_t idx) const {
-  if (idx >= mTestVector.size())
+  if (size_t(idx) >= mTestVector.size())
     return nullptr;
   return &mTestVector[idx];
 }
 
 uint32_t *LuaTestStructContainer::GetTestVectorElem(size_t idx) {
-  if (idx >= mTestVector.size())
+  if (size_t(idx) >= mTestVector.size())
     return nullptr;
   return &mTestVector[idx];
 }

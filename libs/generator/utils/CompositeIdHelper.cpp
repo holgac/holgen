@@ -1,6 +1,7 @@
 #include "CompositeIdHelper.h"
 
-#include <core/Annotations.h>
+#include "core/Annotations.h"
+#include "generator/TranslatedProject.h"
 
 namespace holgen {
 const ClassField *CompositeIdHelper::GetObjectTypeField(const Class &cls) {
@@ -25,6 +26,16 @@ const ClassField *CompositeIdHelper::GetIdIdField(const Class &cls) {
 
 const ClassField *CompositeIdHelper::GetIdVersionField(const Class &cls) {
   return GetIdFieldWithAttribute(cls, Annotations::CompositeIdType_Version, true);
+}
+
+const Class *CompositeIdHelper::GetCompositeIdType(const TranslatedProject &project,
+                                                   const Class &cls) {
+  if (!cls.mStruct)
+    return nullptr;
+  auto attribute = cls.mStruct->GetMatchingAttribute(Annotations::CompositeId, Annotations::CompositeId_Type);
+  if (!attribute)
+    return nullptr;
+  return project.GetClass(attribute->mValue.mName);
 }
 
 const ClassField *CompositeIdHelper::GetIdFieldWithAttribute(const Class &cls,

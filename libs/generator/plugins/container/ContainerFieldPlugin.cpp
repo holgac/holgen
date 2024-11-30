@@ -1,6 +1,7 @@
 #include "ContainerFieldPlugin.h"
 #include "core/Annotations.h"
 #include "core/St.h"
+#include "generator/utils/CompositeIdHelper.h"
 
 namespace holgen {
 // TODO: if the class has at least one const container, implement locking
@@ -24,8 +25,6 @@ void ContainerFieldPlugin::ProcessField(Class &cls, ClassField &field) {
       underlyingClass->mStruct->GetAnnotation(Annotations::CompositeId))
     ProcessFieldWithCompositeId(cls, field);
 
-  // TODO: support getters for arrays, useful especially enum based arrays
-  GenerateGetElem(cls, field);
   if (CanImplementHasElem(cls, field))
     GenerateHasElem(cls, field);
   if (CanImplementDeleteElem(cls, field))
@@ -47,89 +46,6 @@ void ContainerFieldPlugin::ProcessFieldWithCompositeId(Class &cls, const ClassFi
   deletedIndexField.mDefaultValue = "-1";
   Validate().NewField(cls, deletedIndexField);
   cls.mFields.push_back(std::move(deletedIndexField));
-}
-
-void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) {
-  if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
-                                         Annotations::MethodOption_None))
-    return;
-
-  auto underlyingType = &field.mType.mTemplateParameters.back();
-  bool fixedSize = TypeInfo::Get().CppFixedSizeContainers.contains(field.mType.mName);
-  auto fixedSizeEnumArray = mProject.mProject.GetEnum(field.mField->mType.mArraySize);
-  if (fixedSize) {
-    underlyingType = &field.mType.mTemplateParameters.front();
-  }
-
-  bool isPointer = underlyingType->mType == PassByType::Pointer;
-  auto underlyingClass = mProject.GetClass(underlyingType->mName);
-  const ClassField *underlyingIdField = nullptr;
-  if (underlyingClass && underlyingClass->mStruct)
-    underlyingIdField = underlyingClass->GetIdField();
-  if (TypeInfo::Get().CppSets.contains(field.mType.mName))
-    return;
-  bool isKeyedContainer = TypeInfo::Get().CppKeyedContainers.contains(field.mType.mName);
-  for (int i = 0; i < 2; ++i) {
-    auto constness = i == 0 ? Constness::Const : Constness::NotConst;
-    auto method = ClassMethod{Naming().ContainerElemGetterNameInCpp(*field.mField), *underlyingType,
-                              Visibility::Public, constness};
-    method.mReturnType.mType = PassByType::Pointer;
-    method.mReturnType.mConstness = constness;
-    std::string idxExpression = "idx";
-    if (underlyingIdField) {
-      method.mArguments.emplace_back("idx",
-                                     Type{mProject, underlyingIdField->mField->mDefinitionSource,
-                                          underlyingIdField->mField->mType});
-      if (TypeInfo::Get().SignedIntegralTypes.contains(underlyingIdField->mType.mName)) {
-        // double cast to avoid sign extension; zero padding should be slightly faster
-        idxExpression = std::format("size_t({}(idx))",
-                                    TypeInfo::Get().GetUnsigned(underlyingIdField->mType.mName));
-      }
-    } else if (fixedSizeEnumArray) {
-      method.mArguments.emplace_back("idx", Type{fixedSizeEnumArray->mName});
-      method.mReturnType.mType = PassByType::Reference;
-    } else {
-      method.mArguments.emplace_back("idx", Type{"size_t"});
-    }
-
-    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
-                                           Annotations::MethodOption_Private)) {
-      method.mVisibility = Visibility::Private;
-    } else if (field.mField->GetMatchingAttribute(Annotations::Container,
-                                                  Annotations::Container_Get,
-                                                  Annotations::MethodOption_Protected)) {
-      method.mVisibility = Visibility::Protected;
-    } else if (i == 0) {
-      method.mExposeToCSharp = true;
-      method.mExposeToLua = true;
-    }
-    if (field.mField->GetMatchingAttribute(Annotations::Container, Annotations::Container_Get,
-                                           Annotations::MethodOption_Custom)) {
-      method.mUserDefined = true;
-    } else if (fixedSizeEnumArray) {
-      method.mBody.Add("return {}[{}.GetValue()];", field.mName, idxExpression);
-    } else {
-      // TODO: @container(unsafe) attribute that avoids bounds checks, can return ref instead of ptr
-      if (isKeyedContainer) {
-        method.mBody.Add("auto it = {}.find(idx);", field.mName);
-        method.mBody.Add("if (it == {}.end())", field.mName);
-      } else {
-        method.mBody.Add("if ({} >= {}.size())", idxExpression, field.mName);
-      }
-      method.mBody.Indent(1);
-      method.mBody.Line() << "return nullptr;";
-      method.mBody.Indent(-1);
-      if (isKeyedContainer) {
-        method.mBody.Add("return &it->second;");
-      } else if (isPointer) {
-        method.mBody.Add("return {}[{}];", field.mName, idxExpression);
-      } else {
-        method.mBody.Add("return &{}[{}];", field.mName, idxExpression);
-      }
-    }
-    Validate().NewMethod(cls, method);
-    cls.mMethods.push_back(std::move(method));
-  }
 }
 
 void ContainerFieldPlugin::GenerateGetCount(Class &cls, const ClassField &field) {
@@ -215,8 +131,15 @@ void ContainerFieldPlugin::GenerateDeleteElem(Class &cls, const ClassField &fiel
     }
 
     if (!indexDeleters.mContents.empty()) {
-      method.mBody.Add("auto ptr = {}({});", Naming().ContainerElemGetterNameInCpp(*field.mField),
-                       method.mArguments.back().mName);
+      auto compositeIdType = CompositeIdHelper::GetCompositeIdType(mProject, *underlyingClass);
+      if (compositeIdType)
+        method.mBody.Add("auto ptr = {}({});",
+                         Naming().ContainerElemGetterNameInCpp(*field.mField) +
+                             St::CompositeId_RawGetterSuffix,
+                         method.mArguments.back().mName);
+      else
+        method.mBody.Add("auto ptr = {}({});", Naming().ContainerElemGetterNameInCpp(*field.mField),
+                         method.mArguments.back().mName);
       method.mBody.Add(std::move(indexDeleters));
     }
 

@@ -51,12 +51,12 @@ public:
   Character *AddCharacter(Character &elem);
   const Boot *GetBoot(uint32_t idx) const;
   Boot *GetBoot(uint32_t idx);
-  size_t GetBootCount() const;
   const Armor *GetArmor(uint32_t idx) const;
   Armor *GetArmor(uint32_t idx);
-  size_t GetArmorCount() const;
   const Character *GetCharacter(uint32_t idx) const;
   Character *GetCharacter(uint32_t idx);
+  size_t GetBootCount() const;
+  size_t GetArmorCount() const;
   size_t GetCharacterCount() const;
   bool operator==(const GameData &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -90,10 +90,10 @@ private:
   static int AddArmorCallerFromLua(lua_State *luaState);
   static int AddCharacterCallerFromLua(lua_State *luaState);
   static int GetBootCallerFromLua(lua_State *luaState);
-  static int GetBootCountCallerFromLua(lua_State *luaState);
   static int GetArmorCallerFromLua(lua_State *luaState);
-  static int GetArmorCountCallerFromLua(lua_State *luaState);
   static int GetCharacterCallerFromLua(lua_State *luaState);
+  static int GetBootCountCallerFromLua(lua_State *luaState);
+  static int GetArmorCountCallerFromLua(lua_State *luaState);
   static int GetCharacterCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<Boot> mBoots;

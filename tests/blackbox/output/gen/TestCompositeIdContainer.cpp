@@ -6,6 +6,7 @@
 #include "Converter.h"
 #include "JsonHelper.h"
 #include "LuaHelper.h"
+#include "TestCompositeIdCompositeId.h"
 
 namespace holgen_blackbox_test {
 const std::deque<TestCompositeIdHuman> &TestCompositeIdContainer::GetHumans() const {
@@ -72,20 +73,40 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &e
   }
 }
 
-const TestCompositeIdHuman *TestCompositeIdContainer::GetHuman(int32_t idx) const {
-  if (size_t(uint32_t(idx)) >= mHumans.size())
+const TestCompositeIdHuman *TestCompositeIdContainer::GetHumanByRawIdx(int32_t idx) const {
+  if (size_t(idx) >= mHumans.size())
     return nullptr;
-  return &mHumans[size_t(uint32_t(idx))];
+  return &mHumans[idx];
 }
 
-TestCompositeIdHuman *TestCompositeIdContainer::GetHuman(int32_t idx) {
-  if (size_t(uint32_t(idx)) >= mHumans.size())
+TestCompositeIdHuman *TestCompositeIdContainer::GetHumanByRawIdx(int32_t idx) {
+  if (size_t(idx) >= mHumans.size())
     return nullptr;
-  return &mHumans[size_t(uint32_t(idx))];
+  return &mHumans[idx];
+}
+
+const TestCompositeIdHuman *TestCompositeIdContainer::GetHuman(const TestCompositeIdCompositeId &id) const {
+  if (size_t(id.GetId()) >= mHumans.size())
+    return nullptr;
+  auto& elem = mHumans[id.GetId()];
+  if (elem.GetVersion() != id.GetVersion()) {
+    return nullptr;
+  }
+  return &elem;
+}
+
+TestCompositeIdHuman *TestCompositeIdContainer::GetHuman(const TestCompositeIdCompositeId &id) {
+  if (size_t(id.GetId()) >= mHumans.size())
+    return nullptr;
+  auto& elem = mHumans[id.GetId()];
+  if (elem.GetVersion() != id.GetVersion()) {
+    return nullptr;
+  }
+  return &elem;
 }
 
 void TestCompositeIdContainer::DeleteHuman(int32_t idx) {
-  auto ptr = GetHuman(idx);
+  auto ptr = GetHumanByRawIdx(idx);
   mHumansNameIndex.erase(ptr->GetName());
   if (size_t(uint32_t(idx)) != mHumans.size() - 1) {
     mHumansNameIndex.at(mHumans.back().GetName()) = idx;
@@ -241,12 +262,29 @@ int TestCompositeIdContainer::AddHumanCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int TestCompositeIdContainer::GetHumanByRawIdxCallerFromLua(lua_State *luaState) {
+  auto instance = TestCompositeIdContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestCompositeIdContainer.GetHumanByRawIdx method with an invalid lua proxy object!");
+  int32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetHumanByRawIdx(arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
 int TestCompositeIdContainer::GetHumanCallerFromLua(lua_State *luaState) {
   auto instance = TestCompositeIdContainer::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestCompositeIdContainer.GetHuman method with an invalid lua proxy object!");
-  int32_t arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  auto result = instance->GetHuman(arg0);
+  TestCompositeIdCompositeId arg0Mirror;
+  TestCompositeIdCompositeId *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestCompositeIdCompositeId::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestCompositeIdCompositeId::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->GetHuman(*arg0);
   LuaHelper::Push<false>(result, luaState);
   return 1;
 }
@@ -278,6 +316,8 @@ int TestCompositeIdContainer::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestCompositeIdContainer::GetHumanFromNameCallerFromLua);
   } else if (0 == strcmp("AddHuman", key)) {
     lua_pushcfunction(luaState, TestCompositeIdContainer::AddHumanCallerFromLua);
+  } else if (0 == strcmp("GetHumanByRawIdx", key)) {
+    lua_pushcfunction(luaState, TestCompositeIdContainer::GetHumanByRawIdxCallerFromLua);
   } else if (0 == strcmp("GetHuman", key)) {
     lua_pushcfunction(luaState, TestCompositeIdContainer::GetHumanCallerFromLua);
   } else if (0 == strcmp("DeleteHuman", key)) {

@@ -6,11 +6,11 @@
 #include <cstdint>
 #include <lua.hpp>
 #include <rapidjson/fwd.h>
-#include "TestContainerSkill.h"
 
 struct lua_State;
 namespace holgen_blackbox_test {
   class Converter;
+  class TestContainerSkill;
 }
 namespace holgen_blackbox_test {
 // Defined in tests/blackbox/schemas/testcontainer.hsc
@@ -23,8 +23,8 @@ public:
   const std::array<uint8_t, 4> &GetSkills() const;
   std::array<uint8_t, 4> &GetSkills();
   void SetSkills(const std::array<uint8_t, 4> &val);
-  const uint8_t &GetSkill(TestContainerSkill idx) const;
-  uint8_t &GetSkill(TestContainerSkill idx);
+  const uint8_t &GetSkill(const TestContainerSkill &idx) const;
+  uint8_t &GetSkill(const TestContainerSkill &idx);
   void SetSkill(const TestContainerSkill &idx, uint8_t val);
   size_t GetSkillCount() const;
   bool operator==(const TestContainerEnum &rhs) const;
