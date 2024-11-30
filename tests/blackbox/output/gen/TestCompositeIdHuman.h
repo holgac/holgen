@@ -16,6 +16,7 @@ namespace holgen_blackbox_test {
 // Defined in tests/blackbox/schemas/testcompositeid.hsc
 class TestCompositeIdHuman {
 public:
+  using IdType=int32_t;
   TestCompositeIdHuman() = default;
   TestCompositeIdHuman(const TestCompositeIdHuman &rhs) = default;
   TestCompositeIdHuman(TestCompositeIdHuman &&rhs) noexcept = default;
@@ -52,7 +53,7 @@ public:
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
-  int32_t mId;
+  int32_t mId = -1;
   int16_t mVersion;
   std::string mName;
 };

@@ -93,7 +93,7 @@ TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestCo
   HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
-  return &(mInnerStructsWithId.emplace_back(std::forward<TestContainerInnerStructWithId>(elem)));
+  return &mInnerStructsWithId.emplace_back(std::move(elem));
 }
 
 TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId &elem) {
@@ -105,7 +105,7 @@ TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestCo
   HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
-  return &(mInnerStructsWithId.emplace_back(elem));
+  return &mInnerStructsWithId.emplace_back(elem);
 }
 
 TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId &&elem) {
@@ -114,7 +114,7 @@ TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(TestContai
   }
   auto newId = mInnerStructsNoId.size();
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
-  return &(mInnerStructsNoId.emplace_back(std::forward<TestContainerInnerStructNoId>(elem)));
+  return &mInnerStructsNoId.emplace_back(std::move(elem));
 }
 
 TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId &elem) {
@@ -123,19 +123,19 @@ TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(const Test
   }
   auto newId = mInnerStructsNoId.size();
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
-  return &(mInnerStructsNoId.emplace_back(elem));
+  return &mInnerStructsNoId.emplace_back(elem);
 }
 
 std::string *TestContainerVector::AddStringElem(std::string &&elem) {
-  return &(mStringContainer.emplace_back(std::forward<std::string>(elem)));
+  return &mStringContainer.emplace_back(std::move(elem));
 }
 
 std::string *TestContainerVector::AddStringElem(const std::string &elem) {
-  return &(mStringContainer.emplace_back(elem));
+  return &mStringContainer.emplace_back(elem);
 }
 
 uint32_t *TestContainerVector::AddUnsignedElem(uint32_t elem) {
-  return &(mUnsignedContainer.emplace_back(elem));
+  return &mUnsignedContainer.emplace_back(elem);
 }
 
 const TestContainerInnerStructWithId *TestContainerVector::GetInnerStructWithId(uint32_t idx) const {

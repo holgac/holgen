@@ -6,7 +6,7 @@
 #include "generator/plugins/cpp/ClassFieldVariantPlugin.h"
 #include "generator/plugins/cpp/ClassIdFieldPlugin.h"
 #include "generator/plugins/cpp/ClassPlugin.h"
-#include "generator/plugins/cpp/ContainerFieldPlugin.h"
+#include "generator/plugins/container/ContainerFieldPlugin.h"
 #include "generator/plugins/container/ContainerIndexPlugin.h"
 #include "generator/plugins/container/ContainerAddElemPlugin.h"
 #include "generator/plugins/cpp/CppDestructorPlugin.h"

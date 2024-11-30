@@ -7,8 +7,8 @@ const ClassField *CompositeIdHelper::GetObjectTypeField(const Class &cls) {
   return GetObjectFieldWithAttribute(cls, Annotations::CompositeId_Type, true);
 }
 
-const ClassField *CompositeIdHelper::GetObjectIdField(const Class &cls) {
-  return GetObjectFieldWithAttribute(cls, Annotations::CompositeId_Id, true);
+const ClassField *CompositeIdHelper::GetObjectIdField(const Class &cls, const bool throwOnFailure) {
+  return GetObjectFieldWithAttribute(cls, Annotations::CompositeId_Id, throwOnFailure);
 }
 
 const ClassField *CompositeIdHelper::GetObjectVersionField(const Class &cls) {

@@ -50,7 +50,7 @@ Human *HumanManager::AddHuman(Human &&elem) {
   HOLGEN_FAIL_IF(idInElem != Human::IdType(-1) && idInElem != Human::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   mHumansNameIndex.emplace(elem.GetName(), newId);
-  auto[it, res] = mHumans.emplace(newId, std::forward<Human>(elem));
+  auto[it, res] = mHumans.emplace(newId, std::move(elem));
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
   return &(it->second);
 }

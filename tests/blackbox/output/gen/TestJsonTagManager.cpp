@@ -48,7 +48,7 @@ TestJsonTag *TestJsonTagManager::AddTag(TestJsonTag &&elem) {
   HOLGEN_FAIL_IF(idInElem != TestJsonTag::IdType(-1) && idInElem != TestJsonTag::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   mTagsNameIndex.emplace(elem.GetName(), newId);
-  return &(mTags.emplace_back(std::forward<TestJsonTag>(elem)));
+  return &mTags.emplace_back(std::move(elem));
 }
 
 TestJsonTag *TestJsonTagManager::AddTag(TestJsonTag &elem) {
@@ -60,7 +60,7 @@ TestJsonTag *TestJsonTagManager::AddTag(TestJsonTag &elem) {
   HOLGEN_FAIL_IF(idInElem != TestJsonTag::IdType(-1) && idInElem != TestJsonTag::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   mTagsNameIndex.emplace(elem.GetName(), newId);
-  return &(mTags.emplace_back(elem));
+  return &mTags.emplace_back(elem);
 }
 
 const TestJsonTag *TestJsonTagManager::GetTag(uint64_t idx) const {

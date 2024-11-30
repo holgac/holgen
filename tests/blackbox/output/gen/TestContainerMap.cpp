@@ -44,7 +44,7 @@ TestContainerInnerStructWithId *TestContainerMap::AddInnerStructWithId(TestConta
   HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
-  auto[it, res] = mInnerStructsWithId.emplace(newId, std::forward<TestContainerInnerStructWithId>(elem));
+  auto[it, res] = mInnerStructsWithId.emplace(newId, std::move(elem));
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
   return &(it->second);
 }

@@ -59,7 +59,6 @@ set(gen_plugins
     plugins/cpp/ClassFieldPlugin.cpp
     plugins/cpp/ClassFieldGetterPlugin.cpp
     plugins/cpp/ClassFieldSetterPlugin.cpp
-    plugins/cpp/ContainerFieldPlugin.cpp
     plugins/cpp/ClassPlugin.cpp
     plugins/cpp/ManagedClassPlugin.cpp
     plugins/cpp/CppFunctionPlugin.cpp
@@ -74,6 +73,7 @@ set(gen_plugins
     plugins/container/ContainerPluginBase.cpp
     plugins/container/ContainerIndexPlugin.cpp
     plugins/container/ContainerAddElemPlugin.cpp
+    plugins/container/ContainerFieldPlugin.cpp
 )
 
 set(gen_generators

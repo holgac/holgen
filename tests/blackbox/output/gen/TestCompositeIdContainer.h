@@ -28,10 +28,10 @@ public:
   const TestCompositeIdHuman *GetHumanFromName(const std::string &key) const;
   TestCompositeIdHuman *GetHumanFromName(const std::string &key);
   TestCompositeIdHuman *AddHuman(TestCompositeIdHuman &&elem);
-  TestCompositeIdHuman *AddHuman(const TestCompositeIdHuman &elem);
-  const TestCompositeIdHuman *GetHuman(size_t idx) const;
-  TestCompositeIdHuman *GetHuman(size_t idx);
-  void DeleteHuman(size_t idx);
+  TestCompositeIdHuman *AddHuman(TestCompositeIdHuman &elem);
+  const TestCompositeIdHuman *GetHuman(int32_t idx) const;
+  TestCompositeIdHuman *GetHuman(int32_t idx);
+  void DeleteHuman(int32_t idx);
   size_t GetHumanCount() const;
   bool operator==(const TestCompositeIdContainer &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -62,6 +62,8 @@ private:
   static int GetHumanCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::deque<TestCompositeIdHuman> mHumans;
-  std::map<std::string, size_t> mHumansNameIndex;
+  std::map<std::string, int32_t> mHumansNameIndex;
+  uint32_t mHumansDeletedCount = 0;
+  int32_t mHumansNextDeletedIndex = -1;
 };
 }

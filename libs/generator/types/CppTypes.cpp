@@ -180,6 +180,15 @@ ClassField *Class::GetFieldFromDefinitionName(const std::string &name) {
   return nullptr;
 }
 
+const ClassField *Class::GetFieldFromDefinitionName(const std::string &name) const {
+  for (auto &field: mFields) {
+    if (field.mField && field.mField->mName == name) {
+      return &field;
+    }
+  }
+  return nullptr;
+}
+
 const ClassField *Class::GetIdField() const {
   for (auto &field: mFields) {
     if (field.mField && field.mField->GetAnnotation(Annotations::Id))

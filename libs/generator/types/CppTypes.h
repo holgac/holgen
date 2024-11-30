@@ -203,6 +203,7 @@ struct Class {
   std::list<Macro> mHeaderMacros;
   [[nodiscard]] ClassField *GetField(const std::string &name);
   [[nodiscard]] ClassField *GetFieldFromDefinitionName(const std::string &name);
+  [[nodiscard]] const ClassField *GetFieldFromDefinitionName(const std::string &name) const;
   [[nodiscard]] const ClassField *GetField(const std::string &name) const;
   [[nodiscard]] const ClassField *GetIdField() const;
   [[nodiscard]] ClassMethod *GetMethod(const std::string &name, Constness constness);

@@ -33,20 +33,20 @@ void TestContainerSet::SetUnsignedContainer(const std::set<uint32_t> &val) {
 }
 
 const std::string *TestContainerSet::AddStringElem(std::string &&elem) {
-  auto[it, res] = mStringContainer.emplace(std::forward<std::string>(elem));
-  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to stringContainer");
+  auto[it, res] = mStringContainer.emplace(std::move(elem));
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to TestContainerSet.stringContainer!");
   return &(*it);
 }
 
 const std::string *TestContainerSet::AddStringElem(const std::string &elem) {
   auto[it, res] = mStringContainer.emplace(elem);
-  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to stringContainer");
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to TestContainerSet.stringContainer!");
   return &(*it);
 }
 
 const uint32_t *TestContainerSet::AddUnsignedElem(uint32_t elem) {
   auto[it, res] = mUnsignedContainer.emplace(elem);
-  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to unsignedContainer");
+  HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Attempting to insert duplicate element to TestContainerSet.unsignedContainer!");
   return &(*it);
 }
 

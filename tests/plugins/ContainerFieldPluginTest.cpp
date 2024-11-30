@@ -4,7 +4,7 @@
 #include "generator/plugins/cpp/ClassPlugin.h"
 #include "generator/plugins/container/ContainerIndexPlugin.h"
 #include "generator/plugins/container/ContainerAddElemPlugin.h"
-#include "generator/plugins/cpp/ContainerFieldPlugin.h"
+#include "generator/plugins/container/ContainerFieldPlugin.h"
 
 class ContainerFieldPluginTest : public TranslatorPluginTest {
 protected:
@@ -214,7 +214,7 @@ struct TestData {
                               Visibility::Public, Constness::NotConst};
     method.mArguments.emplace_back("elem", Type{"InnerStruct", PassByType::MoveReference});
     helpers::ExpectEqual(*cls->GetMethod("AddInnerStruct", Constness::NotConst), method, R"R(
-return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
+return &mInnerStructs.emplace_back(std::move(elem));
     )R");
   }
 }
@@ -246,7 +246,7 @@ if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
 }
 auto newId = mInnerStructs.size();
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
-return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
+return &mInnerStructs.emplace_back(std::move(elem));
     )R");
   }
 }
@@ -278,7 +278,7 @@ auto newId = mInnerStructs.size();
 auto idInElem = elem.GetId();
 HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
 elem.SetId(newId);
-return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
+return &mInnerStructs.emplace_back(std::move(elem));
     )R");
   }
 }
@@ -322,7 +322,7 @@ HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::I
 elem.SetId(newId);
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 mInnerStructsGuidIndex.emplace(elem.GetGuid(), newId);
-return &(mInnerStructs.emplace_back(std::forward<InnerStruct>(elem)));
+return &mInnerStructs.emplace_back(std::move(elem));
     )R");
   }
 }
@@ -382,7 +382,7 @@ auto idInElem = elem.GetId();
 HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
 elem.SetId(newId);
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
-auto[it, res] = mInnerStructs.emplace(newId, std::forward<InnerStruct>(elem));
+auto[it, res] = mInnerStructs.emplace(newId, std::move(elem));
 HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestData.innerStructs modified externally?");
 return &(it->second);
     )R");

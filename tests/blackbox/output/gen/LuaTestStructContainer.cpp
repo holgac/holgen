@@ -33,7 +33,7 @@ void LuaTestStructContainer::SetTestMap(const std::map<std::string, uint32_t> &v
 }
 
 uint32_t *LuaTestStructContainer::AddTestVectorElem(uint32_t elem) {
-  return &(mTestVector.emplace_back(elem));
+  return &mTestVector.emplace_back(elem);
 }
 
 const uint32_t *LuaTestStructContainer::GetTestVectorElem(size_t idx) const {

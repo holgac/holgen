@@ -19,6 +19,11 @@ void ContainerFieldPlugin::Run() {
 void ContainerFieldPlugin::ProcessField(Class &cls, ClassField &field) {
   auto container = field.mField->GetAnnotation(Annotations::Container);
   Validate().ContainerAnnotation(cls, field, *container);
+  auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
+  if (underlyingClass && underlyingClass->mStruct &&
+      underlyingClass->mStruct->GetAnnotation(Annotations::CompositeId))
+    ProcessFieldWithCompositeId(cls, field);
+
   // TODO: support getters for arrays, useful especially enum based arrays
   GenerateGetElem(cls, field);
   if (CanImplementHasElem(cls, field))
@@ -28,6 +33,20 @@ void ContainerFieldPlugin::ProcessField(Class &cls, ClassField &field) {
   if (CanImplementSetElem(cls, field))
     GenerateSetElem(cls, field);
   GenerateGetCount(cls, field);
+}
+
+void ContainerFieldPlugin::ProcessFieldWithCompositeId(Class &cls, const ClassField &field) const {
+  auto deletedCountField =
+      ClassField{field.mName + St::CompositeId_DeletedCountSuffix, Type{"uint32_t"}};
+  deletedCountField.mDefaultValue = "0";
+  Validate().NewField(cls, deletedCountField);
+  cls.mFields.push_back(std::move(deletedCountField));
+
+  auto deletedIndexField =
+      ClassField{field.mName + St::CompositeId_NextDeletedIndexSuffix, Type{"int32_t"}};
+  deletedIndexField.mDefaultValue = "-1";
+  Validate().NewField(cls, deletedIndexField);
+  cls.mFields.push_back(std::move(deletedIndexField));
 }
 
 void ContainerFieldPlugin::GenerateGetElem(Class &cls, const ClassField &field) {

@@ -5,7 +5,7 @@ namespace holgen {
 class CompositeIdHelper {
 public:
   static const ClassField* GetObjectTypeField(const Class& cls);
-  static const ClassField* GetObjectIdField(const Class& cls);
+  static const ClassField* GetObjectIdField(const Class& cls, bool throwOnFailure = true);
   static const ClassField* GetObjectVersionField(const Class& cls);
   static const ClassField* GetIdTypeField(const Class& cls);
   static const ClassField* GetIdIdField(const Class& cls);

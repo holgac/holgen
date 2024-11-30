@@ -16,6 +16,7 @@ struct TestCompositeIdCompositeId {
 
 mixin TestCompositeIdObject {
     @compositeId(id)
+    @id
     s32 id;
     @compositeId(version)
     s16 version;

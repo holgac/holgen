@@ -33,11 +33,11 @@ void TestStructSingleElemContainer::SetSingleElemStructsWithId(const std::vector
 }
 
 TestStructSingleElem *TestStructSingleElemContainer::AddSingleElemStruct(TestStructSingleElem &&elem) {
-  return &(mSingleElemStructs.emplace_back(std::forward<TestStructSingleElem>(elem)));
+  return &mSingleElemStructs.emplace_back(std::move(elem));
 }
 
 TestStructSingleElem *TestStructSingleElemContainer::AddSingleElemStruct(const TestStructSingleElem &elem) {
-  return &(mSingleElemStructs.emplace_back(elem));
+  return &mSingleElemStructs.emplace_back(elem);
 }
 
 TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &&elem) {
@@ -45,7 +45,7 @@ TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWi
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
-  return &(mSingleElemStructsWithId.emplace_back(std::forward<TestStructSingleElemWithId>(elem)));
+  return &mSingleElemStructsWithId.emplace_back(std::move(elem));
 }
 
 TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &elem) {
@@ -53,7 +53,7 @@ TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWi
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
   elem.SetId(newId);
-  return &(mSingleElemStructsWithId.emplace_back(elem));
+  return &mSingleElemStructsWithId.emplace_back(elem);
 }
 
 const TestStructSingleElem *TestStructSingleElemContainer::GetSingleElemStruct(size_t idx) const {
