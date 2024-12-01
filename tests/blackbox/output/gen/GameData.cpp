@@ -112,9 +112,10 @@ Boot *GameData::AddBoot(Boot &&elem) {
   auto newId = mBoots.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Boot::IdType(-1) && idInElem != Boot::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mBootsNameIndex.emplace(elem.GetName(), newId);
-  return &mBoots.emplace_back(std::move(elem));
+  auto &newElem = mBoots.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 Boot *GameData::AddBoot(Boot &elem) {
@@ -124,9 +125,10 @@ Boot *GameData::AddBoot(Boot &elem) {
   auto newId = mBoots.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Boot::IdType(-1) && idInElem != Boot::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mBootsNameIndex.emplace(elem.GetName(), newId);
-  return &mBoots.emplace_back(elem);
+  auto &newElem = mBoots.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 Armor *GameData::AddArmor(Armor &&elem) {
@@ -140,10 +142,11 @@ Armor *GameData::AddArmor(Armor &&elem) {
   auto newId = mArmors.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
-  return &mArmors.emplace_back(std::move(elem));
+  auto &newElem = mArmors.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 Armor *GameData::AddArmor(Armor &elem) {
@@ -157,10 +160,11 @@ Armor *GameData::AddArmor(Armor &elem) {
   auto newId = mArmors.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mArmorsNameIndex.emplace(elem.GetName(), newId);
   mArmorsAlternativeNameIndex.emplace(elem.GetAlternativeName(), newId);
-  return &mArmors.emplace_back(elem);
+  auto &newElem = mArmors.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 Character *GameData::AddCharacter(Character &&elem) {
@@ -170,9 +174,10 @@ Character *GameData::AddCharacter(Character &&elem) {
   auto newId = mCharacters.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mCharactersNameIndex.emplace(elem.GetName(), newId);
-  return &mCharacters.emplace_back(std::move(elem));
+  auto &newElem = mCharacters.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 Character *GameData::AddCharacter(Character &elem) {
@@ -182,9 +187,10 @@ Character *GameData::AddCharacter(Character &elem) {
   auto newId = mCharacters.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mCharactersNameIndex.emplace(elem.GetName(), newId);
-  return &mCharacters.emplace_back(elem);
+  auto &newElem = mCharacters.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 const Boot *GameData::GetBoot(uint32_t idx) const {

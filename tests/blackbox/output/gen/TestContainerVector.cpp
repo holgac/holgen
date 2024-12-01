@@ -91,9 +91,10 @@ TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestCo
   auto newId = mInnerStructsWithId.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
-  return &mInnerStructsWithId.emplace_back(std::move(elem));
+  auto &newElem = mInnerStructsWithId.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestContainerInnerStructWithId &elem) {
@@ -103,9 +104,10 @@ TestContainerInnerStructWithId *TestContainerVector::AddInnerStructWithId(TestCo
   auto newId = mInnerStructsWithId.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
-  return &mInnerStructsWithId.emplace_back(elem);
+  auto &newElem = mInnerStructsWithId.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(TestContainerInnerStructNoId &&elem) {
@@ -114,7 +116,8 @@ TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(TestContai
   }
   auto newId = mInnerStructsNoId.size();
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
-  return &mInnerStructsNoId.emplace_back(std::move(elem));
+  auto &newElem = mInnerStructsNoId.emplace_back(std::move(elem));
+  return &newElem;
 }
 
 TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(const TestContainerInnerStructNoId &elem) {
@@ -123,7 +126,8 @@ TestContainerInnerStructNoId *TestContainerVector::AddInnerStructNoId(const Test
   }
   auto newId = mInnerStructsNoId.size();
   mInnerStructsNoIdNameIndex.emplace(elem.GetName(), newId);
-  return &mInnerStructsNoId.emplace_back(elem);
+  auto &newElem = mInnerStructsNoId.emplace_back(elem);
+  return &newElem;
 }
 
 std::string *TestContainerVector::AddStringElem(std::string &&elem) {

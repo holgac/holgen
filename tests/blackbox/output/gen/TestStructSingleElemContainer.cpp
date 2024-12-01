@@ -44,16 +44,18 @@ TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWi
   auto newId = mSingleElemStructsWithId.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  return &mSingleElemStructsWithId.emplace_back(std::move(elem));
+  auto &newElem = mSingleElemStructsWithId.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 TestStructSingleElemWithId *TestStructSingleElemContainer::AddSingleElemStructWithId(TestStructSingleElemWithId &elem) {
   auto newId = mSingleElemStructsWithId.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestStructSingleElemWithId::IdType(-1) && idInElem != TestStructSingleElemWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  return &mSingleElemStructsWithId.emplace_back(elem);
+  auto &newElem = mSingleElemStructsWithId.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 const TestStructSingleElem *TestStructSingleElemContainer::GetSingleElemStruct(size_t idx) const {

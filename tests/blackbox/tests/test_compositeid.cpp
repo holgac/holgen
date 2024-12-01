@@ -82,10 +82,10 @@ TEST(CompositeIdTest, RecreateOne) {
   auto newHuman = AddHumans(c, 1, 10).front();
   EXPECT_EQ(c.GetHumanCount(), 10);
   EXPECT_TRUE(newHuman->GetId() == 2 || newHuman->GetId() == 5);
-  auto notNewHumanId = 7 - newHuman->GetId();
+  auto deletedId = 7 - newHuman->GetId();
 
   for (size_t i = 0; i < 10; ++i) {
-    bool expectValid = i != notNewHumanId;
+    bool expectValid = i != deletedId;
     auto expectVersion = i == 2 || i == 5 ? 1 : 0;
     EXPECT_EQ(c.GetHumanByRawIdx(i)->IsValid(), expectValid);
     EXPECT_EQ(c.GetHumanByRawIdx(i)->GetVersion(), expectVersion);

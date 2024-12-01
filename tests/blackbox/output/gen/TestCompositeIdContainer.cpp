@@ -44,18 +44,21 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &&
     mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
-    elem.SetId(newId);
     mHumansNameIndex.emplace(elem.GetName(), newId);
-    elem.SetVersion(mHumans[newId].GetVersion());
+    auto version = mHumans[newId].GetVersion();;
     mHumans[newId] = std::move(elem);
-    return &mHumans[newId];
+    auto &newElem = mHumans[newId];
+    newElem.SetVersion(version);
+    newElem.SetId(newId);
+    return &newElem;
   } else {
     auto newId = mHumans.size();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
-    elem.SetId(newId);
     mHumansNameIndex.emplace(elem.GetName(), newId);
-    return &mHumans.emplace_back(std::move(elem));
+    auto &newElem = mHumans.emplace_back(std::move(elem));
+    newElem.SetId(newId);
+    return &newElem;
   }
 }
 
@@ -68,18 +71,21 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &e
     mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
-    elem.SetId(newId);
     mHumansNameIndex.emplace(elem.GetName(), newId);
-    elem.SetVersion(mHumans[newId].GetVersion());
+    auto version = mHumans[newId].GetVersion();;
     mHumans[newId] = elem;
-    return &mHumans[newId];
+    auto &newElem = mHumans[newId];
+    newElem.SetVersion(version);
+    newElem.SetId(newId);
+    return &newElem;
   } else {
     auto newId = mHumans.size();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
-    elem.SetId(newId);
     mHumansNameIndex.emplace(elem.GetName(), newId);
-    return &mHumans.emplace_back(elem);
+    auto &newElem = mHumans.emplace_back(elem);
+    newElem.SetId(newId);
+    return &newElem;
   }
 }
 

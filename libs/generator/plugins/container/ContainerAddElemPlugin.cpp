@@ -142,11 +142,11 @@ void ContainerAddElemPlugin::GenerateAddElemMethodBody(const Class &cls,
 
   CodeBlock indexInserters;
   CodeBlock indexValidators;
-  CodeBlock idAssigner;
+  CodeBlock idValidator;
   if (underlyingClass)
     GenerateIndexInserterAndValidators(*underlyingClass, field, indexInserters, indexValidators);
   if (underlyingIdField)
-    GenerateIdAssigner(idAssigner, field, *underlyingIdField);
+    GenerateIdValidator(idValidator, field, *underlyingIdField);
 
   method.mBody.Add(std::move(indexValidators));
 
@@ -157,13 +157,17 @@ void ContainerAddElemPlugin::GenerateAddElemMethodBody(const Class &cls,
     // it's wasteful to use structs with composite id inside keyed containers, but no need to fail.
     method.mBody.Add("auto newId = {}NextId;", field.mName);
     method.mBody.Add("++{}NextId;", field.mName);
-    method.mBody.Add(std::move(idAssigner));
+    method.mBody.Add(std::move(idValidator));
     method.mBody.Add(std::move(indexInserters));
     method.mBody.Add("auto[it, res] = {}.emplace(newId, {});", field.mName, elemToInsert);
     method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Corrupt internal ID counter - "
                      "was {}.{} modified externally?\");",
                      cls.mName, field.mField->mName);
-    method.mBody.Add("return &(it->second);", field.mName);
+    method.mBody.Add("auto& newElem = it->second;");
+    if (underlyingIdField)
+      method.mBody.Add("newElem.{}(newId);",
+                       Naming().FieldSetterNameInCpp(underlyingIdField->mField->mName));
+    method.mBody.Add("return &newElem;", field.mName);
   } else if (TypeInfo::Get().CppSets.contains(field.mType.mName)) {
     method.mBody.Add("auto[it, res] = {}.emplace({});", field.mName, elemToInsert);
     method.mBody.Add("HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, \"Attempting to insert duplicate "
@@ -179,38 +183,49 @@ void ContainerAddElemPlugin::GenerateAddElemMethodBody(const Class &cls,
     method.mBody.Add("{}{} = -1 - {}[newId].{}();", field.mName,
                      St::CompositeId_NextDeletedIndexSuffix, field.mName,
                      Naming().FieldGetterNameInCpp(*compositeIdField->mField));
-    method.mBody.Add(idAssigner);
+    method.mBody.Add(idValidator);
     method.mBody.Add(indexInserters);
     auto objectVersionField = CompositeIdHelper::GetObjectVersionField(*underlyingClass);
-    method.mBody.Add("elem.{}({}[newId].{}());",
-                     Naming().FieldSetterNameInCpp(objectVersionField->mField->mName), field.mName,
+    method.mBody.Add("auto version = {}[newId].{}();;", field.mName,
                      Naming().FieldGetterNameInCpp(objectVersionField->mField->mName));
     method.mBody.Add("{}[newId] = {};", field.mName, elemToInsert);
-    method.mBody.Add("return &{}[newId];", field.mName);
+    method.mBody.Add("auto &newElem = {}[newId];", field.mName);
+    method.mBody.Add("newElem.{}(version);",
+                     Naming().FieldSetterNameInCpp(objectVersionField->mField->mName));
+    method.mBody.Add("newElem.{}(newId);",
+                     Naming().FieldSetterNameInCpp(compositeIdField->mField->mName));
+    method.mBody.Add("return &newElem;");
 
     method.mBody.Indent(-1);
     method.mBody.Add("}} else {{");
     method.mBody.Indent(1);
 
     method.mBody.Add("auto newId = {}.size();", field.mName);
-    method.mBody.Add(std::move(idAssigner));
+    method.mBody.Add(std::move(idValidator));
     method.mBody.Add(std::move(indexInserters));
-    method.mBody.Add("return &{}.emplace_back({});", field.mName, elemToInsert);
+    method.mBody.Add("auto &newElem = {}.emplace_back({});", field.mName, elemToInsert);
+    method.mBody.Add("newElem.{}(newId);",
+                     Naming().FieldSetterNameInCpp(compositeIdField->mField->mName));
+    method.mBody.Add("return &newElem;");
 
     method.mBody.Indent(-1);
     method.mBody.Add("}}");
   } else if (!indexInserters.mContents.empty() || underlyingIdField) {
     method.mBody.Add("auto newId = {}.size();", field.mName);
-    method.mBody.Add(std::move(idAssigner));
+    method.mBody.Add(std::move(idValidator));
     method.mBody.Add(std::move(indexInserters));
-    method.mBody.Add("return &{}.emplace_back({});", field.mName, elemToInsert);
+    method.mBody.Add("auto &newElem = {}.emplace_back({});", field.mName, elemToInsert);
+    if (underlyingIdField)
+      method.mBody.Add("newElem.{}(newId);",
+                       Naming().FieldSetterNameInCpp(underlyingIdField->mField->mName));
+    method.mBody.Add("return &newElem;");
   } else {
     method.mBody.Add("return &{}.emplace_back({});", field.mName, elemToInsert);
   }
 }
 
-void ContainerAddElemPlugin::GenerateIdAssigner(CodeBlock &codeBlock, const ClassField &field,
-                                                const ClassField &underlyingIdField) const {
+void ContainerAddElemPlugin::GenerateIdValidator(CodeBlock &codeBlock, const ClassField &field,
+                                                 const ClassField &underlyingIdField) const {
   auto &underlyingType = field.mType.mTemplateParameters.back();
   codeBlock.Add("auto idInElem = elem.{}();",
                 Naming().FieldGetterNameInCpp(*underlyingIdField.mField));
@@ -218,6 +233,5 @@ void ContainerAddElemPlugin::GenerateIdAssigner(CodeBlock &codeBlock, const Clas
       "HOLGEN_FAIL_IF(idInElem != {0}::IdType(-1) && idInElem != {0}::IdType(newId), \"Objects "
       "not loaded in the right order!\");",
       underlyingType.mName);
-  codeBlock.Add("elem.{}(newId);", Naming().FieldSetterNameInCpp(*underlyingIdField.mField));
 }
 } // namespace holgen

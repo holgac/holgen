@@ -48,11 +48,12 @@ Human *HumanManager::AddHuman(Human &&elem) {
   ++mHumansNextId;
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Human::IdType(-1) && idInElem != Human::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mHumansNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mHumans.emplace(newId, std::move(elem));
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
-  return &(it->second);
+  auto& newElem = it->second;
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 Human *HumanManager::AddHuman(Human &elem) {
@@ -63,11 +64,12 @@ Human *HumanManager::AddHuman(Human &elem) {
   ++mHumansNextId;
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Human::IdType(-1) && idInElem != Human::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mHumansNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mHumans.emplace(newId, elem);
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was HumanManager.humans modified externally?");
-  return &(it->second);
+  auto& newElem = it->second;
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 const Human *HumanManager::GetHuman(uint32_t idx) const {

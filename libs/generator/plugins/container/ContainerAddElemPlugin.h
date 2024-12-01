@@ -18,7 +18,7 @@ private:
   void GenerateAddElemMethodBody(const Class &cls, const Class *underlyingClass,
                                  ClassMethod &method, const ClassField &field, bool useMoveRef)const;
 
-  void GenerateIdAssigner(CodeBlock &codeBlock, const ClassField &field,
+  void GenerateIdValidator(CodeBlock &codeBlock, const ClassField &field,
                                    const ClassField &underlyingIdField) const;
 };
 } // namespace holgen

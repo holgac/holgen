@@ -42,11 +42,12 @@ TestContainerInnerStructWithId *TestContainerMap::AddInnerStructWithId(TestConta
   ++mInnerStructsWithIdNextId;
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mInnerStructsWithId.emplace(newId, std::move(elem));
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
-  return &(it->second);
+  auto& newElem = it->second;
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 TestContainerInnerStructWithId *TestContainerMap::AddInnerStructWithId(TestContainerInnerStructWithId &elem) {
@@ -57,11 +58,12 @@ TestContainerInnerStructWithId *TestContainerMap::AddInnerStructWithId(TestConta
   ++mInnerStructsWithIdNextId;
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != TestContainerInnerStructWithId::IdType(-1) && idInElem != TestContainerInnerStructWithId::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mInnerStructsWithIdNameIndex.emplace(elem.GetName(), newId);
   auto[it, res] = mInnerStructsWithId.emplace(newId, elem);
   HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestContainerMap.innerStructsWithId modified externally?");
-  return &(it->second);
+  auto& newElem = it->second;
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 const TestContainerInnerStructWithId *TestContainerMap::GetInnerStructWithId(uint32_t idx) const {
