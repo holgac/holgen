@@ -23,13 +23,13 @@ public:
   const Number &GetCurVal() const;
   Number &GetCurVal();
   void SetCurVal(const Number &val);
-  int64_t Add(lua_State *luaState, const int64_t val) const;
+  int64_t Add(lua_State *luaState, int64_t val) const;
   void SetAddLuaFunc(std::string val);
   bool HasAddLuaFunc() const;
   Number *Subtract(lua_State *luaState, Number &val) const;
   void SetSubtractLuaFunc(std::string val);
   bool HasSubtractLuaFunc() const;
-  int64_t SubtractThenMultiply(const int64_t lhs, const int64_t rhs);
+  int64_t SubtractThenMultiply(int64_t lhs, int64_t rhs);
   bool operator==(const Calculator &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
   rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;

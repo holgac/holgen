@@ -26,7 +26,7 @@ public:
   std::string &GetName();
   void SetId(uint64_t val);
   void SetName(const std::string &val);
-  static TestJsonTag Construct(const uint64_t id, const std::string &name);
+  static TestJsonTag Construct(uint64_t id, const std::string &name);
   static TestJsonTag *Get(uint64_t id);
   static TestJsonTag *GetFromName(const std::string &key);
   bool operator==(const TestJsonTag &rhs) const;

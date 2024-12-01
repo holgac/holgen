@@ -23,7 +23,7 @@ public:
   const TestLuaNumber &GetLastValue() const;
   TestLuaNumber &GetLastValue();
   void SetLastValue(const TestLuaNumber &val);
-  int32_t AddPrimitive(lua_State *luaState, const int32_t num) const;
+  int32_t AddPrimitive(lua_State *luaState, int32_t num) const;
   void SetAddPrimitiveLuaFunc(std::string val);
   bool HasAddPrimitiveLuaFunc() const;
   int32_t AddRef(lua_State *luaState, TestLuaNumber &num) const;
@@ -32,13 +32,13 @@ public:
   int32_t AddNullable(lua_State *luaState, const TestLuaNumber *num) const;
   void SetAddNullableLuaFunc(std::string val);
   bool HasAddNullableLuaFunc() const;
-  TestLuaNumber *ReturnNullable(lua_State *luaState, const int32_t num) const;
+  TestLuaNumber *ReturnNullable(lua_State *luaState, int32_t num) const;
   void SetReturnNullableLuaFunc(std::string val);
   bool HasReturnNullableLuaFunc() const;
-  TestLuaNumber &ReturnRef(lua_State *luaState, const int32_t num) const;
+  TestLuaNumber &ReturnRef(lua_State *luaState, int32_t num) const;
   void SetReturnRefLuaFunc(std::string val);
   bool HasReturnRefLuaFunc() const;
-  TestLuaNumber ReturnNew(lua_State *luaState, const int32_t num) const;
+  TestLuaNumber ReturnNew(lua_State *luaState, int32_t num) const;
   void SetReturnNewLuaFunc(std::string val);
   bool HasReturnNewLuaFunc() const;
   bool operator==(const TestLuaCalculator &rhs) const;

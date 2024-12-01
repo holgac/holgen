@@ -26,8 +26,8 @@ public:
   void SetX(float val);
   void SetY(float val);
   void SetZ(float val);
-  static TestStructConstructor Construct1(const float val);
-  static TestStructConstructor Construct3(const float x, const float y, const float z);
+  static TestStructConstructor Construct1(float val);
+  static TestStructConstructor Construct3(float x, float y, float z);
   bool operator==(const TestStructConstructor &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
   rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;

@@ -20,7 +20,7 @@ public:
   ~TestLuaStaticCppFunction() = default;
   uint32_t GetData() const;
   void SetData(uint32_t val);
-  static TestLuaStaticCppFunction Factory(const uint32_t data);
+  static TestLuaStaticCppFunction Factory(uint32_t data);
   bool operator==(const TestLuaStaticCppFunction &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
   rapidjson::Value DumpJson(rapidjson::Document &doc, lua_State *luaState) const;
