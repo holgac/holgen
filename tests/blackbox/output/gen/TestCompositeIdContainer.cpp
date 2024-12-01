@@ -41,10 +41,10 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &&
   }
   if (mHumansNextDeletedIndex > 0) {
     auto newId = mHumansNextDeletedIndex - 1;
-    mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
     mHumansNameIndex.emplace(elem.GetName(), newId);
+    mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto version = mHumans[newId].GetVersion();;
     mHumans[newId] = std::move(elem);
     auto &newElem = mHumans[newId];
@@ -68,10 +68,10 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &e
   }
   if (mHumansNextDeletedIndex > 0) {
     auto newId = mHumansNextDeletedIndex - 1;
-    mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
     mHumansNameIndex.emplace(elem.GetName(), newId);
+    mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto version = mHumans[newId].GetVersion();;
     mHumans[newId] = elem;
     auto &newElem = mHumans[newId];
