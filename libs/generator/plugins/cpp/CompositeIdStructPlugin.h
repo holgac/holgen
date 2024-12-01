@@ -10,6 +10,7 @@ public:
 private:
   [[nodiscard]] bool ShouldProcess(const Class& cls) const;
   void Process(Class& cls) const;
+  void ProcessFields(Class& cls) const;
   void ValidateStruct(const Class& cls) const;
   void AddIdGetterMethod(Class& cls) const;
   void AddIsValidMethod(Class& cls) const;

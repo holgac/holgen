@@ -36,6 +36,7 @@ public:
   const TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx) const;
   TestStructSingleElemWithId *GetSingleElemStructWithId(uint32_t idx);
   void DeleteSingleElemStruct(size_t idx);
+  void DeleteSingleElemStructWithId(uint32_t idx);
   size_t GetSingleElemStructCount() const;
   size_t GetSingleElemStructWithIdCount() const;
   bool operator==(const TestStructSingleElemContainer &rhs) const;
@@ -65,6 +66,7 @@ private:
   static int GetSingleElemStructCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int DeleteSingleElemStructCallerFromLua(lua_State *luaState);
+  static int DeleteSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructCountCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructWithIdCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

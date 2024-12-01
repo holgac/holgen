@@ -21,7 +21,7 @@ function TestCompositeIdContainer:GetHumanByRawIdx(idx) end
 function TestCompositeIdContainer:GetHuman(id) end
 
 ---@param idx number
-function TestCompositeIdContainer:DeleteHuman(idx) end
+function TestCompositeIdContainer:DeleteHumanByRawIdx(idx) end
 
 ---@return number
 function TestCompositeIdContainer:GetHumanCount() end

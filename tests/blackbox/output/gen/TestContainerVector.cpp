@@ -186,6 +186,16 @@ uint32_t *TestContainerVector::GetUnsignedElem(size_t idx) {
   return &mUnsignedContainer[idx];
 }
 
+void TestContainerVector::DeleteInnerStructWithId(uint32_t idx) {
+  auto ptr = GetInnerStructWithId(idx);
+  mInnerStructsWithIdNameIndex.erase(ptr->GetName());
+  if (size_t(idx) != mInnerStructsWithId.size() - 1) {
+    mInnerStructsWithIdNameIndex.at(mInnerStructsWithId.back().GetName()) = idx;
+    mInnerStructsWithId[idx] = std::move(mInnerStructsWithId.back());
+  }
+  mInnerStructsWithId.pop_back();
+}
+
 void TestContainerVector::DeleteInnerStructNoId(size_t idx) {
   auto ptr = GetInnerStructNoId(idx);
   mInnerStructsNoIdNameIndex.erase(ptr->GetName());
@@ -515,6 +525,15 @@ int TestContainerVector::GetUnsignedElemCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int TestContainerVector::DeleteInnerStructWithIdCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerVector.DeleteInnerStructWithId method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteInnerStructWithId(arg0);
+  return 0;
+}
+
 int TestContainerVector::DeleteInnerStructNoIdCallerFromLua(lua_State *luaState) {
   auto instance = TestContainerVector::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerVector.DeleteInnerStructNoId method with an invalid lua proxy object!");
@@ -612,6 +631,8 @@ int TestContainerVector::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestContainerVector::GetStringElemCallerFromLua);
   } else if (0 == strcmp("GetUnsignedElem", key)) {
     lua_pushcfunction(luaState, TestContainerVector::GetUnsignedElemCallerFromLua);
+  } else if (0 == strcmp("DeleteInnerStructWithId", key)) {
+    lua_pushcfunction(luaState, TestContainerVector::DeleteInnerStructWithIdCallerFromLua);
   } else if (0 == strcmp("DeleteInnerStructNoId", key)) {
     lua_pushcfunction(luaState, TestContainerVector::DeleteInnerStructNoIdCallerFromLua);
   } else if (0 == strcmp("DeleteStringElem", key)) {

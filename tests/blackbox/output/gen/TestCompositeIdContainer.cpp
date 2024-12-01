@@ -39,22 +39,22 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &&
   if (mHumansNameIndex.contains(elem.GetName())) {
     return nullptr;
   }
-  if (mHumansDeletedCount) {
-    --mHumansDeletedCount;
-    auto newId = mHumansNextDeletedIndex;
+  if (mHumansNextDeletedIndex > 0) {
+    auto newId = mHumansNextDeletedIndex - 1;
+    mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
     elem.SetId(newId);
     mHumansNameIndex.emplace(elem.GetName(), newId);
-    mHumansNextDeletedIndex = 1 - int32_t(mHumans[newId].GetId());
+    elem.SetVersion(mHumans[newId].GetVersion());
     mHumans[newId] = std::move(elem);
     return &mHumans[newId];
   } else {
     auto newId = mHumans.size();
-
-
-
-
+    auto idInElem = elem.GetId();
+    HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
+    elem.SetId(newId);
+    mHumansNameIndex.emplace(elem.GetName(), newId);
     return &mHumans.emplace_back(std::move(elem));
   }
 }
@@ -63,22 +63,22 @@ TestCompositeIdHuman *TestCompositeIdContainer::AddHuman(TestCompositeIdHuman &e
   if (mHumansNameIndex.contains(elem.GetName())) {
     return nullptr;
   }
-  if (mHumansDeletedCount) {
-    --mHumansDeletedCount;
-    auto newId = mHumansNextDeletedIndex;
+  if (mHumansNextDeletedIndex > 0) {
+    auto newId = mHumansNextDeletedIndex - 1;
+    mHumansNextDeletedIndex = -1 - mHumans[newId].GetId();
     auto idInElem = elem.GetId();
     HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
     elem.SetId(newId);
     mHumansNameIndex.emplace(elem.GetName(), newId);
-    mHumansNextDeletedIndex = 1 - int32_t(mHumans[newId].GetId());
+    elem.SetVersion(mHumans[newId].GetVersion());
     mHumans[newId] = elem;
     return &mHumans[newId];
   } else {
     auto newId = mHumans.size();
-
-
-
-
+    auto idInElem = elem.GetId();
+    HOLGEN_FAIL_IF(idInElem != TestCompositeIdHuman::IdType(-1) && idInElem != TestCompositeIdHuman::IdType(newId), "Objects not loaded in the right order!");
+    elem.SetId(newId);
+    mHumansNameIndex.emplace(elem.GetName(), newId);
     return &mHumans.emplace_back(elem);
   }
 }
@@ -99,7 +99,7 @@ const TestCompositeIdHuman *TestCompositeIdContainer::GetHuman(const TestComposi
   if (size_t(id.GetId()) >= mHumans.size())
     return nullptr;
   auto& elem = mHumans[id.GetId()];
-  if (elem.GetVersion() != id.GetVersion()) {
+  if (elem.GetVersion() != id.GetVersion() || !elem.IsValid()) {
     return nullptr;
   }
   return &elem;
@@ -109,19 +109,25 @@ TestCompositeIdHuman *TestCompositeIdContainer::GetHuman(const TestCompositeIdCo
   if (size_t(id.GetId()) >= mHumans.size())
     return nullptr;
   auto& elem = mHumans[id.GetId()];
-  if (elem.GetVersion() != id.GetVersion()) {
+  if (elem.GetVersion() != id.GetVersion() || !elem.IsValid()) {
     return nullptr;
   }
   return &elem;
 }
 
-void TestCompositeIdContainer::DeleteHuman(int32_t idx) {
+void TestCompositeIdContainer::DeleteHumanByRawIdx(int32_t idx) {
   auto ptr = GetHumanByRawIdx(idx);
   mHumansNameIndex.erase(ptr->GetName());
   ptr->SetVersion(ptr->GetVersion() + 1);
-  ptr->SetId(-1 - mHumansNextDeletedIndex);
-  ++mHumansNextDeletedIndex;
-  mHumansNextDeletedIndex = ptr->GetId();
+  auto newId = -1 - mHumansNextDeletedIndex;
+  mHumansNextDeletedIndex = ptr->GetId() + 1;
+  ptr->SetId(newId);
+}
+
+void TestCompositeIdContainer::DeleteHuman(const TestCompositeIdCompositeId &id) {
+  HOLGEN_WARN_AND_RETURN_IF(size_t(id.GetId()) >= mHumans.size(), void(), "Out of bounds index when deleting TestCompositeIdContainer.TestCompositeIdHuman");
+  HOLGEN_WARN_AND_RETURN_IF(mHumans[id.GetId()].GetVersion() != id.GetVersion(), void(), "version mismatch when deleting TestCompositeIdContainer.TestCompositeIdHuman");
+  DeleteHumanByRawIdx(id.GetId());
 }
 
 size_t TestCompositeIdContainer::GetHumanCount() const {
@@ -298,12 +304,12 @@ int TestCompositeIdContainer::GetHumanCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
-int TestCompositeIdContainer::DeleteHumanCallerFromLua(lua_State *luaState) {
+int TestCompositeIdContainer::DeleteHumanByRawIdxCallerFromLua(lua_State *luaState) {
   auto instance = TestCompositeIdContainer::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestCompositeIdContainer.DeleteHuman method with an invalid lua proxy object!");
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestCompositeIdContainer.DeleteHumanByRawIdx method with an invalid lua proxy object!");
   int32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
-  instance->DeleteHuman(arg0);
+  instance->DeleteHumanByRawIdx(arg0);
   return 0;
 }
 
@@ -329,8 +335,8 @@ int TestCompositeIdContainer::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestCompositeIdContainer::GetHumanByRawIdxCallerFromLua);
   } else if (0 == strcmp("GetHuman", key)) {
     lua_pushcfunction(luaState, TestCompositeIdContainer::GetHumanCallerFromLua);
-  } else if (0 == strcmp("DeleteHuman", key)) {
-    lua_pushcfunction(luaState, TestCompositeIdContainer::DeleteHumanCallerFromLua);
+  } else if (0 == strcmp("DeleteHumanByRawIdx", key)) {
+    lua_pushcfunction(luaState, TestCompositeIdContainer::DeleteHumanByRawIdxCallerFromLua);
   } else if (0 == strcmp("GetHumanCount", key)) {
     lua_pushcfunction(luaState, TestCompositeIdContainer::GetHumanCountCallerFromLua);
   } else {

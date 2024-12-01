@@ -20,8 +20,15 @@ bool CompositeIdStructPlugin::ShouldProcess(const Class &cls) const {
 
 void CompositeIdStructPlugin::Process(Class &cls) const {
   ValidateStruct(cls);
+  ProcessFields(cls);
   AddIdGetterMethod(cls);
   AddIsValidMethod(cls);
+}
+
+void CompositeIdStructPlugin::ProcessFields(Class &cls) const {
+  auto versionField = CompositeIdHelper::GetObjectVersionField(cls);
+  if (!versionField->mDefaultValue.has_value())
+    cls.GetField(versionField->mName)->mDefaultValue = "0";
 }
 
 void CompositeIdStructPlugin::ValidateStruct(const Class &cls) const {

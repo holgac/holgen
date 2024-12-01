@@ -87,6 +87,13 @@ void TestStructSingleElemContainer::DeleteSingleElemStruct(size_t idx) {
   mSingleElemStructs.pop_back();
 }
 
+void TestStructSingleElemContainer::DeleteSingleElemStructWithId(uint32_t idx) {
+  if (size_t(idx) != mSingleElemStructsWithId.size() - 1) {
+    mSingleElemStructsWithId[idx] = std::move(mSingleElemStructsWithId.back());
+  }
+  mSingleElemStructsWithId.pop_back();
+}
+
 size_t TestStructSingleElemContainer::GetSingleElemStructCount() const {
   return mSingleElemStructs.size();
 }
@@ -291,6 +298,15 @@ int TestStructSingleElemContainer::DeleteSingleElemStructCallerFromLua(lua_State
   return 0;
 }
 
+int TestStructSingleElemContainer::DeleteSingleElemStructWithIdCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.DeleteSingleElemStructWithId method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteSingleElemStructWithId(arg0);
+  return 0;
+}
+
 int TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua(lua_State *luaState) {
   auto instance = TestStructSingleElemContainer::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSingleElemContainer.GetSingleElemStructCount method with an invalid lua proxy object!");
@@ -327,6 +343,8 @@ int TestStructSingleElemContainer::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("DeleteSingleElemStruct", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::DeleteSingleElemStructCallerFromLua);
+  } else if (0 == strcmp("DeleteSingleElemStructWithId", key)) {
+    lua_pushcfunction(luaState, TestStructSingleElemContainer::DeleteSingleElemStructWithIdCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStructCount", key)) {
     lua_pushcfunction(luaState, TestStructSingleElemContainer::GetSingleElemStructCountCallerFromLua);
   } else if (0 == strcmp("GetSingleElemStructWithIdCount", key)) {

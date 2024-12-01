@@ -75,6 +75,16 @@ TestJsonTag *TestJsonTagManager::GetTag(uint64_t idx) {
   return &mTags[idx];
 }
 
+void TestJsonTagManager::DeleteTag(uint64_t idx) {
+  auto ptr = GetTag(idx);
+  mTagsNameIndex.erase(ptr->GetName());
+  if (size_t(idx) != mTags.size() - 1) {
+    mTagsNameIndex.at(mTags.back().GetName()) = idx;
+    mTags[idx] = std::move(mTags.back());
+  }
+  mTags.pop_back();
+}
+
 size_t TestJsonTagManager::GetTagCount() const {
   return mTags.size();
 }
@@ -274,6 +284,15 @@ int TestJsonTagManager::GetTagCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int TestJsonTagManager::DeleteTagCallerFromLua(lua_State *luaState) {
+  auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonTagManager.DeleteTag method with an invalid lua proxy object!");
+  uint64_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteTag(arg0);
+  return 0;
+}
+
 int TestJsonTagManager::GetTagCountCallerFromLua(lua_State *luaState) {
   auto instance = TestJsonTagManager::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonTagManager.GetTagCount method with an invalid lua proxy object!");
@@ -296,6 +315,8 @@ int TestJsonTagManager::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, TestJsonTagManager::AddTagCallerFromLua);
   } else if (0 == strcmp("GetTag", key)) {
     lua_pushcfunction(luaState, TestJsonTagManager::GetTagCallerFromLua);
+  } else if (0 == strcmp("DeleteTag", key)) {
+    lua_pushcfunction(luaState, TestJsonTagManager::DeleteTagCallerFromLua);
   } else if (0 == strcmp("GetTagCount", key)) {
     lua_pushcfunction(luaState, TestJsonTagManager::GetTagCountCallerFromLua);
   } else {

@@ -24,6 +24,9 @@ function TestStructSingleElemContainer:GetSingleElemStructWithId(idx) end
 ---@param idx number
 function TestStructSingleElemContainer:DeleteSingleElemStruct(idx) end
 
+---@param idx number
+function TestStructSingleElemContainer:DeleteSingleElemStructWithId(idx) end
+
 ---@return number
 function TestStructSingleElemContainer:GetSingleElemStructCount() end
 

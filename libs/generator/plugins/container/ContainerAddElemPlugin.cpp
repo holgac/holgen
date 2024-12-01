@@ -172,16 +172,19 @@ void ContainerAddElemPlugin::GenerateAddElemMethodBody(const Class &cls,
     method.mBody.Add("return &(*it);", field.mName);
     method.mReturnType.mConstness = Constness::Const;
   } else if (compositeIdField) {
-    method.mBody.Add("if ({}{}) {{", field.mName, St::CompositeId_DeletedCountSuffix);
+    method.mBody.Add("if ({}{} > 0) {{", field.mName, St::CompositeId_NextDeletedIndexSuffix);
     method.mBody.Indent(1);
 
-    method.mBody.Add("--{}{};", field.mName, St::CompositeId_DeletedCountSuffix);
-    method.mBody.Add("auto newId = {}{};", field.mName, St::CompositeId_NextDeletedIndexSuffix);
-    method.mBody.Add(std::move(idAssigner));
-    method.mBody.Add(std::move(indexInserters));
-    method.mBody.Add("{}{} = 1 - int32_t({}[newId].{}());", field.mName,
+    method.mBody.Add("auto newId = {}{} - 1;", field.mName, St::CompositeId_NextDeletedIndexSuffix);
+    method.mBody.Add("{}{} = -1 - {}[newId].{}();", field.mName,
                      St::CompositeId_NextDeletedIndexSuffix, field.mName,
                      Naming().FieldGetterNameInCpp(*compositeIdField->mField));
+    method.mBody.Add(idAssigner);
+    method.mBody.Add(indexInserters);
+    auto objectVersionField = CompositeIdHelper::GetObjectVersionField(*underlyingClass);
+    method.mBody.Add("elem.{}({}[newId].{}());",
+                     Naming().FieldSetterNameInCpp(objectVersionField->mField->mName), field.mName,
+                     Naming().FieldGetterNameInCpp(objectVersionField->mField->mName));
     method.mBody.Add("{}[newId] = {};", field.mName, elemToInsert);
     method.mBody.Add("return &{}[newId];", field.mName);
 

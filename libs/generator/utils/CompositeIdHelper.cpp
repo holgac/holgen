@@ -32,7 +32,8 @@ const Class *CompositeIdHelper::GetCompositeIdType(const TranslatedProject &proj
                                                    const Class &cls) {
   if (!cls.mStruct)
     return nullptr;
-  auto attribute = cls.mStruct->GetMatchingAttribute(Annotations::CompositeId, Annotations::CompositeId_Type);
+  auto attribute =
+      cls.mStruct->GetMatchingAttribute(Annotations::CompositeId, Annotations::CompositeId_Type);
   if (!attribute)
     return nullptr;
   return project.GetClass(attribute->mValue.mName);
@@ -59,7 +60,7 @@ const ClassField *CompositeIdHelper::GetFieldWithAttribute(const Class &cls,
       return &field;
   }
   THROW_IF(throwOnFailure, "{} ({}) is a composite id type without {}!", cls.mName,
-           cls.mStruct->mDefinitionSource, attribute);
+           cls.mStruct ? cls.mStruct->mDefinitionSource : DefinitionSource{"INTERNAL"}, attribute);
   return nullptr;
 }
 } // namespace holgen

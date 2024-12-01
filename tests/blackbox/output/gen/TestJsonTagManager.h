@@ -33,6 +33,7 @@ public:
   TestJsonTag *AddTag(TestJsonTag &elem);
   const TestJsonTag *GetTag(uint64_t idx) const;
   TestJsonTag *GetTag(uint64_t idx);
+  void DeleteTag(uint64_t idx);
   size_t GetTagCount() const;
   bool operator==(const TestJsonTagManager &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -62,6 +63,7 @@ private:
   static int GetTagFromNameCallerFromLua(lua_State *luaState);
   static int AddTagCallerFromLua(lua_State *luaState);
   static int GetTagCallerFromLua(lua_State *luaState);
+  static int DeleteTagCallerFromLua(lua_State *luaState);
   static int GetTagCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::vector<TestJsonTag> mTags;

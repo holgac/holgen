@@ -54,6 +54,7 @@ public:
   std::string *GetStringElem(size_t idx);
   const uint32_t *GetUnsignedElem(size_t idx) const;
   uint32_t *GetUnsignedElem(size_t idx);
+  void DeleteInnerStructWithId(uint32_t idx);
   void DeleteInnerStructNoId(size_t idx);
   void DeleteStringElem(size_t idx);
   void DeleteUnsignedElem(size_t idx);
@@ -93,6 +94,7 @@ private:
   static int GetInnerStructNoIdCallerFromLua(lua_State *luaState);
   static int GetStringElemCallerFromLua(lua_State *luaState);
   static int GetUnsignedElemCallerFromLua(lua_State *luaState);
+  static int DeleteInnerStructWithIdCallerFromLua(lua_State *luaState);
   static int DeleteInnerStructNoIdCallerFromLua(lua_State *luaState);
   static int DeleteStringElemCallerFromLua(lua_State *luaState);
   static int DeleteUnsignedElemCallerFromLua(lua_State *luaState);

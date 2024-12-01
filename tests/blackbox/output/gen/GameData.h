@@ -55,6 +55,9 @@ public:
   Armor *GetArmor(uint32_t idx);
   const Character *GetCharacter(uint32_t idx) const;
   Character *GetCharacter(uint32_t idx);
+  void DeleteBoot(uint32_t idx);
+  void DeleteArmor(uint32_t idx);
+  void DeleteCharacter(uint32_t idx);
   size_t GetBootCount() const;
   size_t GetArmorCount() const;
   size_t GetCharacterCount() const;
@@ -92,6 +95,9 @@ private:
   static int GetBootCallerFromLua(lua_State *luaState);
   static int GetArmorCallerFromLua(lua_State *luaState);
   static int GetCharacterCallerFromLua(lua_State *luaState);
+  static int DeleteBootCallerFromLua(lua_State *luaState);
+  static int DeleteArmorCallerFromLua(lua_State *luaState);
+  static int DeleteCharacterCallerFromLua(lua_State *luaState);
   static int GetBootCountCallerFromLua(lua_State *luaState);
   static int GetArmorCountCallerFromLua(lua_State *luaState);
   static int GetCharacterCountCallerFromLua(lua_State *luaState);

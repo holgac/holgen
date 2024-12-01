@@ -22,8 +22,9 @@ void ContainerFieldPlugin::ProcessField(Class &cls, ClassField &field) {
   Validate().ContainerAnnotation(cls, field, *container);
   auto underlyingClass = mProject.GetClass(field.mType.mTemplateParameters.back().mName);
   if (underlyingClass && underlyingClass->mStruct &&
-      underlyingClass->mStruct->GetAnnotation(Annotations::CompositeId))
+      underlyingClass->mStruct->GetAnnotation(Annotations::CompositeId)) {
     ProcessFieldWithCompositeId(cls, field);
+  }
 
   if (CanImplementHasElem(cls, field))
     GenerateHasElem(cls, field);
@@ -39,9 +40,10 @@ void ContainerFieldPlugin::ProcessFieldWithCompositeId(Class &cls, const ClassFi
   Validate().NewField(cls, deletedCountField);
   cls.mFields.push_back(std::move(deletedCountField));
 
+  // This is 1 based index, 0 means there are no deleted items left
   auto deletedIndexField =
       ClassField{field.mName + St::CompositeId_NextDeletedIndexSuffix, Type{"int32_t"}};
-  deletedIndexField.mDefaultValue = "-1";
+  deletedIndexField.mDefaultValue = "0";
   Validate().NewField(cls, deletedIndexField);
   cls.mFields.push_back(std::move(deletedIndexField));
 }

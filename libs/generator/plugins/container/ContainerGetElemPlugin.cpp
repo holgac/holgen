@@ -47,11 +47,11 @@ void ContainerGetElemPlugin::GenerateGetElemMethods(Class &cls, const ClassField
   if (compositeIdField) {
     GenerateGetElemByIdxForContainer(cls, field,
                                      Naming().ContainerElemGetterNameInCpp(*field.mField) +
-                                         St::CompositeId_RawGetterSuffix,
+                                         St::CompositeId_RawIdxSuffix,
                                      Type{underlyingIdField->mType}, Constness::Const);
     GenerateGetElemByIdxForContainer(cls, field,
                                      Naming().ContainerElemGetterNameInCpp(*field.mField) +
-                                         St::CompositeId_RawGetterSuffix,
+                                         St::CompositeId_RawIdxSuffix,
                                      Type{underlyingIdField->mType}, Constness::NotConst);
     GenerateGetElemByCompositeIdForContainer(
         cls, field, Naming().ContainerElemGetterNameInCpp(*field.mField), Constness::Const);
@@ -111,11 +111,12 @@ void ContainerGetElemPlugin::GenerateGetElemBodyForCompositeId(
   GenerateBoundsCheckForIndexedContainer(codeBlock, field, idxExpression);
   codeBlock.Add("auto& elem = {}[{}];", field.mName, idxExpression);
   auto compositeIdType = CompositeIdHelper::GetCompositeIdType(mProject, *underlyingClass);
-  codeBlock.Add("if (elem.{}() != id.{}()) {{",
+  codeBlock.Add("if (elem.{}() != id.{}() || !elem.{}()) {{",
                 Naming().FieldGetterNameInCpp(
                     CompositeIdHelper::GetObjectVersionField(*underlyingClass)->mField->mName),
                 Naming().FieldGetterNameInCpp(
-                    CompositeIdHelper::GetIdVersionField(*compositeIdType)->mField->mName));
+                    CompositeIdHelper::GetIdVersionField(*compositeIdType)->mField->mName),
+                St::CompositeId_IsValid);
   codeBlock.Indent(1);
   codeBlock.Add("return nullptr;");
   codeBlock.Indent(-1);

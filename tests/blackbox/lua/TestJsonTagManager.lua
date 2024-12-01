@@ -20,5 +20,8 @@ function TestJsonTagManager:AddTag(elem) end
 ---@return TestJsonTag
 function TestJsonTagManager:GetTag(idx) end
 
+---@param idx number
+function TestJsonTagManager:DeleteTag(idx) end
+
 ---@return number
 function TestJsonTagManager:GetTagCount() end

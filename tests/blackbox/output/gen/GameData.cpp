@@ -223,6 +223,38 @@ Character *GameData::GetCharacter(uint32_t idx) {
   return &mCharacters[idx];
 }
 
+void GameData::DeleteBoot(uint32_t idx) {
+  auto ptr = GetBoot(idx);
+  mBootsNameIndex.erase(ptr->GetName());
+  if (size_t(idx) != mBoots.size() - 1) {
+    mBootsNameIndex.at(mBoots.back().GetName()) = idx;
+    mBoots[idx] = std::move(mBoots.back());
+  }
+  mBoots.pop_back();
+}
+
+void GameData::DeleteArmor(uint32_t idx) {
+  auto ptr = GetArmor(idx);
+  mArmorsNameIndex.erase(ptr->GetName());
+  mArmorsAlternativeNameIndex.erase(ptr->GetAlternativeName());
+  if (size_t(idx) != mArmors.size() - 1) {
+    mArmorsNameIndex.at(mArmors.back().GetName()) = idx;
+    mArmorsAlternativeNameIndex.at(mArmors.back().GetAlternativeName()) = idx;
+    mArmors[idx] = std::move(mArmors.back());
+  }
+  mArmors.pop_back();
+}
+
+void GameData::DeleteCharacter(uint32_t idx) {
+  auto ptr = GetCharacter(idx);
+  mCharactersNameIndex.erase(ptr->GetName());
+  if (size_t(idx) != mCharacters.size() - 1) {
+    mCharactersNameIndex.at(mCharacters.back().GetName()) = idx;
+    mCharacters[idx] = std::move(mCharacters.back());
+  }
+  mCharacters.pop_back();
+}
+
 size_t GameData::GetBootCount() const {
   return mBoots.size();
 }
@@ -568,6 +600,33 @@ int GameData::GetCharacterCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int GameData::DeleteBootCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.DeleteBoot method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteBoot(arg0);
+  return 0;
+}
+
+int GameData::DeleteArmorCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.DeleteArmor method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteArmor(arg0);
+  return 0;
+}
+
+int GameData::DeleteCharacterCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.DeleteCharacter method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteCharacter(arg0);
+  return 0;
+}
+
 int GameData::GetBootCountCallerFromLua(lua_State *luaState) {
   auto instance = GameData::ReadProxyFromLua(luaState, -1);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.GetBootCount method with an invalid lua proxy object!");
@@ -626,6 +685,12 @@ int GameData::IndexMetaMethod(lua_State *luaState) {
     lua_pushcfunction(luaState, GameData::GetArmorCallerFromLua);
   } else if (0 == strcmp("GetCharacter", key)) {
     lua_pushcfunction(luaState, GameData::GetCharacterCallerFromLua);
+  } else if (0 == strcmp("DeleteBoot", key)) {
+    lua_pushcfunction(luaState, GameData::DeleteBootCallerFromLua);
+  } else if (0 == strcmp("DeleteArmor", key)) {
+    lua_pushcfunction(luaState, GameData::DeleteArmorCallerFromLua);
+  } else if (0 == strcmp("DeleteCharacter", key)) {
+    lua_pushcfunction(luaState, GameData::DeleteCharacterCallerFromLua);
   } else if (0 == strcmp("GetBootCount", key)) {
     lua_pushcfunction(luaState, GameData::GetBootCountCallerFromLua);
   } else if (0 == strcmp("GetArmorCount", key)) {

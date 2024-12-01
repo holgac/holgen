@@ -48,6 +48,9 @@ function TestContainerVector:GetStringElem(idx) end
 function TestContainerVector:GetUnsignedElem(idx) end
 
 ---@param idx number
+function TestContainerVector:DeleteInnerStructWithId(idx) end
+
+---@param idx number
 function TestContainerVector:DeleteInnerStructNoId(idx) end
 
 ---@param idx number

@@ -34,7 +34,8 @@ public:
   TestCompositeIdHuman *GetHumanByRawIdx(int32_t idx);
   const TestCompositeIdHuman *GetHuman(const TestCompositeIdCompositeId &id) const;
   TestCompositeIdHuman *GetHuman(const TestCompositeIdCompositeId &id);
-  void DeleteHuman(int32_t idx);
+  void DeleteHumanByRawIdx(int32_t idx);
+  void DeleteHuman(const TestCompositeIdCompositeId &id);
   size_t GetHumanCount() const;
   bool operator==(const TestCompositeIdContainer &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -62,12 +63,12 @@ private:
   static int AddHumanCallerFromLua(lua_State *luaState);
   static int GetHumanByRawIdxCallerFromLua(lua_State *luaState);
   static int GetHumanCallerFromLua(lua_State *luaState);
-  static int DeleteHumanCallerFromLua(lua_State *luaState);
+  static int DeleteHumanByRawIdxCallerFromLua(lua_State *luaState);
   static int GetHumanCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::deque<TestCompositeIdHuman> mHumans;
   std::map<std::string, int32_t> mHumansNameIndex;
   uint32_t mHumansDeletedCount = 0;
-  int32_t mHumansNextDeletedIndex = -1;
+  int32_t mHumansNextDeletedIndex = 0;
 };
 }

@@ -54,7 +54,7 @@ private:
   static int NewIndexMetaMethod(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   int32_t mId = -1;
-  int16_t mVersion;
+  int16_t mVersion = 0;
   std::string mBreed;
 };
 }

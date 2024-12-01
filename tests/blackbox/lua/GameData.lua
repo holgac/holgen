@@ -46,6 +46,15 @@ function GameData:GetArmor(idx) end
 ---@return Character
 function GameData:GetCharacter(idx) end
 
+---@param idx number
+function GameData:DeleteBoot(idx) end
+
+---@param idx number
+function GameData:DeleteArmor(idx) end
+
+---@param idx number
+function GameData:DeleteCharacter(idx) end
+
 ---@return number
 function GameData:GetBootCount() end
 
