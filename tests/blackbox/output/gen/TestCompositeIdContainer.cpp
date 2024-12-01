@@ -138,7 +138,6 @@ bool TestCompositeIdContainer::operator==(const TestCompositeIdContainer &rhs) c
   return !(
       mHumans != rhs.mHumans ||
       mHumansNameIndex != rhs.mHumansNameIndex ||
-      mHumansDeletedCount != rhs.mHumansDeletedCount ||
       mHumansNextDeletedIndex != rhs.mHumansNextDeletedIndex
   );
 }

@@ -34,12 +34,6 @@ void ContainerFieldPlugin::ProcessField(Class &cls, ClassField &field) {
 }
 
 void ContainerFieldPlugin::ProcessFieldWithCompositeId(Class &cls, const ClassField &field) const {
-  auto deletedCountField =
-      ClassField{field.mName + St::CompositeId_DeletedCountSuffix, Type{"uint32_t"}};
-  deletedCountField.mDefaultValue = "0";
-  Validate().NewField(cls, deletedCountField);
-  cls.mFields.push_back(std::move(deletedCountField));
-
   // This is 1 based index, 0 means there are no deleted items left
   auto deletedIndexField =
       ClassField{field.mName + St::CompositeId_NextDeletedIndexSuffix, Type{"int32_t"}};

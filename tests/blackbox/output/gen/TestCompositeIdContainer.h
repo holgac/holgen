@@ -68,7 +68,6 @@ private:
   static int IndexMetaMethod(lua_State *luaState);
   std::deque<TestCompositeIdHuman> mHumans;
   std::map<std::string, int32_t> mHumansNameIndex;
-  uint32_t mHumansDeletedCount = 0;
   int32_t mHumansNextDeletedIndex = 0;
 };
 }

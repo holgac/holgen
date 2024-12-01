@@ -103,7 +103,7 @@ TEST(CompositeIdTest, RecreateMany) {
   AddHumans(c, 10);
   c.DeleteHuman(TestCompositeIdCompositeId(TestCompositeIdObjectType::Human, 2, 0));
   c.DeleteHuman(TestCompositeIdCompositeId(TestCompositeIdObjectType::Human, 5, 0));
-  auto newHuman = AddHumans(c, 10, 10).front();
+  AddHumans(c, 10, 10);
   EXPECT_EQ(c.GetHumanCount(), 18);
   for (size_t i = 0; i < 18; ++i) {
     bool expectValid = true;
