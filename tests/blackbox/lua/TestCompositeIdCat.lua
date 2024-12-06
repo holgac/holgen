@@ -6,3 +6,9 @@
 ---@field name string
 ---@field breed string
 TestCompositeIdCat = {}
+
+---@return TestCompositeIdCompositeId
+function TestCompositeIdCat:GetCompositeId() end
+
+---@return boolean
+function TestCompositeIdCat:IsValid() end

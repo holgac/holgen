@@ -5,3 +5,9 @@
 ---@field version number
 ---@field breed string
 TestCompositeIdDog = {}
+
+---@return TestCompositeIdCompositeId
+function TestCompositeIdDog:GetCompositeId() end
+
+---@return boolean
+function TestCompositeIdDog:IsValid() end

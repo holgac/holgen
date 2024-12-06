@@ -52,6 +52,8 @@ public:
   inline static const char *CLASS_NAME = "TestCompositeIdHuman";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int GetCompositeIdCallerFromLua(lua_State *luaState);
+  static int IsValidCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   int32_t mId = -1;
   int16_t mVersion = 0;

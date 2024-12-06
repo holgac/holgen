@@ -66,6 +66,7 @@ void CompositeIdStructPlugin::AddIdGetterMethod(Class &cls) const {
   if (cls.GetMethod(methodName, Constness::Const))
     return;
   auto method = ClassMethod{methodName, Type{idCls->mName}};
+  method.mExposeToLua = true;
   auto idTypeTypeField = CompositeIdHelper::GetIdTypeField(*idCls);
   auto versionField = CompositeIdHelper::GetObjectVersionField(cls);
   auto idField = CompositeIdHelper::GetObjectIdField(cls);
@@ -80,6 +81,7 @@ void CompositeIdStructPlugin::AddIsValidMethod(Class &cls) const {
     return;
 
   auto method = ClassMethod{St::CompositeId_IsValid, Type{"bool"}};
+  method.mExposeToLua = true;
   auto idField = CompositeIdHelper::GetObjectIdField(cls);
   method.mBody.Add("return {} >= 0;", idField->mName);
   Validate().NewMethod(cls, method);

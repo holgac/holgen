@@ -205,6 +205,22 @@ void TestCompositeIdHuman::CreateLuaMetatable(lua_State *luaState) {
   lua_setglobal(luaState, "TestCompositeIdHuman");
 }
 
+int TestCompositeIdHuman::GetCompositeIdCallerFromLua(lua_State *luaState) {
+  auto instance = TestCompositeIdHuman::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestCompositeIdHuman.GetCompositeId method with an invalid lua proxy object!");
+  auto result = instance->GetCompositeId();
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
+int TestCompositeIdHuman::IsValidCallerFromLua(lua_State *luaState) {
+  auto instance = TestCompositeIdHuman::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestCompositeIdHuman.IsValid method with an invalid lua proxy object!");
+  auto result = instance->IsValid();
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 int TestCompositeIdHuman::IndexMetaMethod(lua_State *luaState) {
   const char *key = lua_tostring(luaState, -1);
   if (0 == strcmp("id", key)) {
@@ -219,6 +235,10 @@ int TestCompositeIdHuman::IndexMetaMethod(lua_State *luaState) {
     auto instance = TestCompositeIdHuman::ReadProxyFromLua(luaState, -2);
     HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Requesting for TestCompositeIdHuman.name with an invalid lua proxy object!");
     LuaHelper::Push<false>(instance->mName, luaState);
+  } else if (0 == strcmp("GetCompositeId", key)) {
+    lua_pushcfunction(luaState, TestCompositeIdHuman::GetCompositeIdCallerFromLua);
+  } else if (0 == strcmp("IsValid", key)) {
+    lua_pushcfunction(luaState, TestCompositeIdHuman::IsValidCallerFromLua);
   } else {
     HOLGEN_WARN("Unexpected lua field: TestCompositeIdHuman.{}", key);
     return 0;
