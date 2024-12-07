@@ -215,7 +215,7 @@ public:
   void SetInstruments(const std::vector<std::string> &val);
   void SetPrices(const std::map<std::string, double> &val);
   // Callback when a new trade is executed
-  void OnNewTrade(const std::string &instrument, const double price);
+  void OnNewTrade(const std::string &instrument, double price);
   bool operator==(const Market &rhs) const;
   Market &operator=(const Market &rhs) = default;
   Market &operator=(Market &&rhs) noexcept = default;

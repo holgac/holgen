@@ -250,7 +250,8 @@ if (mInnerStructsUuidIndex.contains(elem.GetUuid())) {
 }
 auto newId = mInnerStructs.size();
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
-return &mInnerStructs.emplace_back(std::move(elem));
+auto &newElem = mInnerStructs.emplace_back(std::move(elem));
+return &newElem;
     )R");
   }
 }
@@ -281,8 +282,9 @@ struct TestData {
 auto newId = mInnerStructs.size();
 auto idInElem = elem.GetId();
 HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
-elem.SetId(newId);
-return &mInnerStructs.emplace_back(std::move(elem));
+auto &newElem = mInnerStructs.emplace_back(std::move(elem));
+newElem.SetId(newId);
+return &newElem;
     )R");
   }
 }
@@ -323,10 +325,11 @@ if (mInnerStructsGuidIndex.contains(elem.GetGuid())) {
 auto newId = mInnerStructs.size();
 auto idInElem = elem.GetId();
 HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
-elem.SetId(newId);
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 mInnerStructsGuidIndex.emplace(elem.GetGuid(), newId);
-return &mInnerStructs.emplace_back(std::move(elem));
+auto &newElem = mInnerStructs.emplace_back(std::move(elem));
+newElem.SetId(newId);
+return &newElem;
     )R");
   }
 }
@@ -384,11 +387,12 @@ auto newId = mInnerStructsNextId;
 ++mInnerStructsNextId;
 auto idInElem = elem.GetId();
 HOLGEN_FAIL_IF(idInElem != InnerStruct::IdType(-1) && idInElem != InnerStruct::IdType(newId), "Objects not loaded in the right order!");
-elem.SetId(newId);
 mInnerStructsUuidIndex.emplace(elem.GetUuid(), newId);
 auto[it, res] = mInnerStructs.emplace(newId, std::move(elem));
 HOLGEN_WARN_AND_RETURN_IF(!res, nullptr, "Corrupt internal ID counter - was TestData.innerStructs modified externally?");
-return &(it->second);
+auto& newElem = it->second;
+newElem.SetId(newId);
+return &newElem;
     )R");
   }
 }
