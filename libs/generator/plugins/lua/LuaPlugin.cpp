@@ -392,6 +392,15 @@ void LuaPlugin::GenerateCreateLuaMetatable(Class &cls) {
   method.mBody.Add("lua_pushstring(luaState, \"__newindex\");");
   method.mBody.Add("lua_pushcfunction(luaState, {}::NewIndexMetaMethod);", cls.mName);
   method.mBody.Add("lua_settable(luaState, -3);");
+
+  if (auto equalsOperator = cls.GetMethod("operator==", Constness::Const)) {
+    method.mBody.Add("lua_pushstring(luaState, \"__eq\");");
+    auto methodCallerName = Naming().LuaMethodCaller(St::Lua_EqualsOperator);
+    method.mBody.Add("lua_pushcfunction(luaState, {}::{});", cls.mName, methodCallerName);
+    method.mBody.Add("lua_settable(luaState, -3);");
+    GenerateMethodCaller(cls, *equalsOperator, methodCallerName);
+  }
+
   for (auto &clsMethod: cls.mMethods) {
     if (!clsMethod.mExposeToLua || clsMethod.mStaticness != Staticness::Static) {
       continue;

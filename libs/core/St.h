@@ -53,6 +53,7 @@ public:
   inline static const std::string Lua_CustomData = "luadata";
   inline static const std::string Lua_Initialize = "InitializeLua";
   inline static const std::string Lua_Uninitialize = "UninitializeLua";
+  inline static const std::string Lua_EqualsOperator = "EqualsOperator";
   inline static const std::string LuaTable_TableFieldInIndexMethod = "TABLE";
   inline static const std::string LuaPublisher_ModulesField = "Modules";
   inline static const std::string LuaPublisher_UnregisterSubscriberByName =

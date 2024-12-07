@@ -10,6 +10,8 @@ void ClassEqualsOperatorPlugin::Run() {
 }
 
 void ClassEqualsOperatorPlugin::ProcessClass(Class &cls) {
+  if (cls.GetMethod("operator==", Constness::Const))
+    return;
   auto method = ClassMethod{"operator==", Type{"bool"}, Visibility::Public, Constness::Const};
   method.mArguments.emplace_back("rhs", Type{cls.mName, PassByType::Reference, Constness::Const});
   auto variantData = cls.GetVariantData();

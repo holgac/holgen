@@ -166,14 +166,18 @@ std::string NamingConvention::LuaMetatableName(const Class &cls) const {
 }
 
 std::string NamingConvention::LuaMethodCaller(const ClassMethod &method) const {
-  std::string methodSuffix;
   if (method.mFunction &&
       method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OverloadSuffix)) {
-    methodSuffix =
+    auto methodSuffix =
         method.mFunction->GetMatchingAttribute(Annotations::Func, Annotations::Func_OverloadSuffix)
             ->mValue.mName;
+    return LuaMethodCaller(method.mName + methodSuffix);
   }
-  return method.mName + methodSuffix + "CallerFromLua";
+  return LuaMethodCaller(method.mName);
+}
+
+std::string NamingConvention::LuaMethodCaller(const std::string &methodName) const {
+  return methodName + "CallerFromLua";
 }
 
 std::string

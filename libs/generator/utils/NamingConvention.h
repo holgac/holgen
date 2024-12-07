@@ -52,6 +52,7 @@ public:
   virtual std::string LuaMetatableName(const std::string &name) const;
   virtual std::string LuaMetatableName(const Class &cls) const;
   virtual std::string LuaMethodCaller(const ClassMethod &method) const;
+  virtual std::string LuaMethodCaller(const std::string &methodName) const;
   virtual std::string LuaPublisherCallbacksTableName(const std::string &functionName) const;
   virtual std::string CSharpMethodName(const ClassMethod &method) const;
   virtual std::string CSharpMethodDelegateName(const Class &cls, const ClassMethod &method) const;
