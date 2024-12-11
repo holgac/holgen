@@ -27,6 +27,7 @@ set(gen_sources
     gen/TestContainerSet.cpp
     gen/TestContainerVector.cpp
     gen/TestEnumStruct.cpp
+    gen/TestEventListener.cpp
     gen/TestJsonStructContainer.cpp
     gen/TestJsonStructMapWithConverters.cpp
     gen/TestJsonStructWithSingleTag.cpp
@@ -41,6 +42,7 @@ set(gen_sources
     gen/TestLuaNumber.cpp
     gen/TestLuaRegistryData.cpp
     gen/TestLuaStaticCppFunction.cpp
+    gen/TestStaticEventPublisher.cpp
     gen/TestStruct.cpp
     gen/TestStructArray.cpp
     gen/TestStructArrayCustomData1.cpp

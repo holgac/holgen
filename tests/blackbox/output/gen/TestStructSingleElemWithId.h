@@ -47,6 +47,7 @@ public:
   inline static const char *CLASS_NAME = "TestStructSingleElemWithId";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mId = -1;
   std::string mName;

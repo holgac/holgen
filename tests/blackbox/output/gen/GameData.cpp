@@ -498,6 +498,23 @@ int GameData::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int GameData::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = GameData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling GameData.operator== method with an invalid lua proxy object!");
+  GameData arg0Mirror;
+  GameData *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = GameData::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = GameData::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void GameData::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -505,6 +522,9 @@ void GameData::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, GameData::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, GameData::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "GameData");
 }

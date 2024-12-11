@@ -162,6 +162,23 @@ int TestVariantStructCat::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestVariantStructCat::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestVariantStructCat::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestVariantStructCat.operator== method with an invalid lua proxy object!");
+  TestVariantStructCat arg0Mirror;
+  TestVariantStructCat *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestVariantStructCat::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestVariantStructCat::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestVariantStructCat::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -169,6 +186,9 @@ void TestVariantStructCat::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestVariantStructCat::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestVariantStructCat::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestVariantStructCat");
 }

@@ -50,6 +50,7 @@ public:
   inline static const char *CLASS_NAME = "Person";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mRace;
   uint32_t mCurrentCountry;

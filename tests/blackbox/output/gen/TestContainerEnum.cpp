@@ -147,6 +147,23 @@ int TestContainerEnum::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestContainerEnum::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestContainerEnum::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestContainerEnum.operator== method with an invalid lua proxy object!");
+  TestContainerEnum arg0Mirror;
+  TestContainerEnum *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestContainerEnum::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestContainerEnum::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestContainerEnum::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -154,6 +171,9 @@ void TestContainerEnum::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestContainerEnum::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestContainerEnum::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestContainerEnum");
 }

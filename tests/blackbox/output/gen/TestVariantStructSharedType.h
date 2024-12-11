@@ -56,6 +56,7 @@ public:
   inline static const char *CLASS_NAME = "TestVariantStructSharedType";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int ResetBeingTypeCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   TestVariantStructType mBeingType;

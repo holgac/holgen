@@ -59,6 +59,15 @@ int TestStructVirtualMethods::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestStructVirtualMethods::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructVirtualMethods::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructVirtualMethods.operator== method with an invalid lua proxy object!");
+  auto arg0 = TestStructVirtualMethods::ReadProxyFromLua(luaState, -1);
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestStructVirtualMethods::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -66,6 +75,9 @@ void TestStructVirtualMethods::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructVirtualMethods::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestStructVirtualMethods::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructVirtualMethods");
 }

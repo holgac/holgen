@@ -342,6 +342,23 @@ int TestLuaCalculator::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestLuaCalculator::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaCalculator::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaCalculator.operator== method with an invalid lua proxy object!");
+  TestLuaCalculator arg0Mirror;
+  TestLuaCalculator *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestLuaCalculator::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestLuaCalculator::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestLuaCalculator::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -349,6 +366,9 @@ void TestLuaCalculator::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestLuaCalculator::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestLuaCalculator::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestLuaCalculator");
 }

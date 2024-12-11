@@ -25,6 +25,6 @@ set(translator_plugin_sources
     plugins/ClassEqualsOperatorPluginTest.cpp
     plugins/ClassFieldVariantPluginTest.cpp
 )
-add_executable(holgen_tests ${sources} ${translator_plugin_sources})
-add_dependencies(holgen_tests gtest gtest_main generator parser tokenizer core)
-target_link_libraries(holgen_tests gtest gtest_main generator parser tokenizer core)
+add_executable(tests ${sources} ${translator_plugin_sources})
+add_dependencies(tests gtest gtest_main generator parser tokenizer core)
+target_link_libraries(tests gtest gtest_main generator parser tokenizer core)

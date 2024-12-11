@@ -119,6 +119,15 @@ int TestStructSmartPointers::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestStructSmartPointers::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructSmartPointers::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructSmartPointers.operator== method with an invalid lua proxy object!");
+  auto arg0 = TestStructSmartPointers::ReadProxyFromLua(luaState, -1);
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestStructSmartPointers::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -126,6 +135,9 @@ void TestStructSmartPointers::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructSmartPointers::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestStructSmartPointers::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructSmartPointers");
 }

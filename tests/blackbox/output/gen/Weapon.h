@@ -54,6 +54,7 @@ public:
   inline static const char *CLASS_NAME = "Weapon";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetAverageDamageCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mDamageMin;

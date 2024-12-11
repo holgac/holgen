@@ -48,6 +48,7 @@ public:
   inline static const char *CLASS_NAME = "TestStructPairFields";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::pair<int32_t, std::string> mIntStringPair;
   std::vector<std::pair<std::string, int32_t>> mPairVector;

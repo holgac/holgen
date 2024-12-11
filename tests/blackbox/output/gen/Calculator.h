@@ -52,6 +52,7 @@ public:
   inline static const char *CLASS_NAME = "Calculator";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int AddCallerFromLua(lua_State *luaState);
   static int SubtractCallerFromLua(lua_State *luaState);
   static int SubtractThenMultiplyCallerFromLua(lua_State *luaState);

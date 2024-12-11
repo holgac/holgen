@@ -36,6 +36,7 @@ public:
   inline static const char *CLASS_NAME = "TestStructVirtualMethods";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int VirtualFuncCallerFromLua(lua_State *luaState);
   static int PureVirtualFuncCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

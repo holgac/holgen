@@ -59,6 +59,7 @@ public:
   inline static const char *CLASS_NAME = "TestVariantStructDifferentTypes";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int ResetBeing1TypeCallerFromLua(lua_State *luaState);
   static int ResetBeing2TypeCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

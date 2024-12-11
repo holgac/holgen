@@ -49,6 +49,7 @@ public:
   inline static const char *CLASS_NAME = "TestContainerEnum";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetSkillCallerFromLua(lua_State *luaState);
   static int GetSkillCountCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

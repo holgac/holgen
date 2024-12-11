@@ -49,6 +49,7 @@ public:
   inline static const char *CLASS_NAME = "TestStructSmartPointers";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::shared_ptr<TestStructVirtualMethods> mSharedPtr;
   std::vector<std::shared_ptr<TestStructVirtualMethods>> mSharedPtrs;

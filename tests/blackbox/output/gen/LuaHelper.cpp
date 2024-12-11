@@ -35,6 +35,7 @@
 #include "TestEnumDefaultValue.h"
 #include "TestEnumProperty.h"
 #include "TestEnumStruct.h"
+#include "TestEventListener.h"
 #include "TestJsonEnum.h"
 #include "TestJsonStructContainer.h"
 #include "TestJsonStructMapWithConverters.h"
@@ -187,6 +188,7 @@ void LuaHelper::Setup(lua_State *luaState, const std::filesystem::path &genDir) 
   TestContainerSet::CreateLuaMetatable(luaState);
   TestContainerVector::CreateLuaMetatable(luaState);
   TestEnumStruct::CreateLuaMetatable(luaState);
+  TestEventListener::CreateLuaMetatable(luaState);
   TestJsonStructContainer::CreateLuaMetatable(luaState);
   TestJsonStructMapWithConverters::CreateLuaMetatable(luaState);
   TestJsonStructWithSingleTag::CreateLuaMetatable(luaState);
@@ -233,6 +235,7 @@ void LuaHelper::Setup(lua_State *luaState, const std::filesystem::path &genDir) 
   TestJsonEnum::PushEnumToLua(luaState);
   TestStructArrayType::PushEnumToLua(luaState);
   TestVariantStructType::PushEnumToLua(luaState);
+  luaL_dofile(luaState, (genDir / "TestStaticEventPublisher.lua").string().c_str());
   lua_newtable(luaState);
   lua_setglobal(luaState, "Ops");
   lua_newtable(luaState);

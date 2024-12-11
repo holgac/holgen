@@ -46,6 +46,7 @@ public:
   inline static const char *CLASS_NAME = "TestStructArrayCustomData1";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   uint32_t mF1 = 43;
   float mF2 = 44;

@@ -51,6 +51,7 @@ public:
   inline static const char *CLASS_NAME = "TestJsonStructMapWithConverters";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   std::map<std::string, uint32_t> mTestMapConvertElem;
   std::map<uint32_t, std::string> mTestMapConvertKey;

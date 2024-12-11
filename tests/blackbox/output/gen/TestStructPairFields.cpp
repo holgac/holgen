@@ -162,6 +162,23 @@ int TestStructPairFields::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestStructPairFields::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructPairFields::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructPairFields.operator== method with an invalid lua proxy object!");
+  TestStructPairFields arg0Mirror;
+  TestStructPairFields *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestStructPairFields::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestStructPairFields::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestStructPairFields::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -169,6 +186,9 @@ void TestStructPairFields::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructPairFields::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestStructPairFields::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructPairFields");
 }

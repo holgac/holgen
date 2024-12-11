@@ -45,6 +45,7 @@ public:
   inline static const char *CLASS_NAME = "TestLuaRegistryData";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int InitCallerFromLua(lua_State *luaState);
   static int GetCallerFromLua(lua_State *luaState);
   static int AddCallerFromLua(lua_State *luaState);

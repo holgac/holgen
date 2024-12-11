@@ -199,6 +199,15 @@ int TestLuaRegistryData::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestLuaRegistryData::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestLuaRegistryData::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestLuaRegistryData.operator== method with an invalid lua proxy object!");
+  auto arg0 = TestLuaRegistryData::ReadProxyFromLua(luaState, -1);
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -206,6 +215,9 @@ void TestLuaRegistryData::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestLuaRegistryData::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestLuaRegistryData::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestLuaRegistryData");
 }

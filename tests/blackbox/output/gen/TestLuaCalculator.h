@@ -63,6 +63,7 @@ public:
   inline static const char *CLASS_NAME = "TestLuaCalculator";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int AddPrimitiveCallerFromLua(lua_State *luaState);
   static int AddRefCallerFromLua(lua_State *luaState);
   static int AddNullableCallerFromLua(lua_State *luaState);

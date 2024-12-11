@@ -61,6 +61,7 @@ public:
   inline static const char *CLASS_NAME = "TestStructSingleElemContainer";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int AddSingleElemStructCallerFromLua(lua_State *luaState);
   static int AddSingleElemStructWithIdCallerFromLua(lua_State *luaState);
   static int GetSingleElemStructCallerFromLua(lua_State *luaState);

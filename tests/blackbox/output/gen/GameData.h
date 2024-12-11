@@ -85,6 +85,7 @@ public:
   inline static const char *CLASS_NAME = "GameData";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetBootFromNameCallerFromLua(lua_State *luaState);
   static int GetArmorFromNameCallerFromLua(lua_State *luaState);
   static int GetArmorFromAlternativeNameCallerFromLua(lua_State *luaState);

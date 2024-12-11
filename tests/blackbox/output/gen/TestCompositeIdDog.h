@@ -52,6 +52,7 @@ public:
   inline static const char *CLASS_NAME = "TestCompositeIdDog";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetCompositeIdCallerFromLua(lua_State *luaState);
   static int IsValidCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);

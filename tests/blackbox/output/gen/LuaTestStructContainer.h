@@ -54,6 +54,7 @@ public:
   inline static const char *CLASS_NAME = "LuaTestStructContainer";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int AddTestVectorElemCallerFromLua(lua_State *luaState);
   static int GetTestVectorElemCallerFromLua(lua_State *luaState);
   static int DeleteTestVectorElemCallerFromLua(lua_State *luaState);

@@ -48,6 +48,7 @@ public:
   inline static const char *CLASS_NAME = "TestBitmapStruct";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int HasBitmapFieldCallerFromLua(lua_State *luaState);
   static int AddBitmapFieldCallerFromLua(lua_State *luaState);
   static int RemoveBitmapFieldCallerFromLua(lua_State *luaState);

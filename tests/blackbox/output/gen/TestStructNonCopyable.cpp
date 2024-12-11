@@ -134,6 +134,23 @@ int TestStructNonCopyable::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestStructNonCopyable::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructNonCopyable::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructNonCopyable.operator== method with an invalid lua proxy object!");
+  TestStructNonCopyable arg0Mirror;
+  TestStructNonCopyable *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestStructNonCopyable::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestStructNonCopyable::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestStructNonCopyable::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -141,6 +158,9 @@ void TestStructNonCopyable::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructNonCopyable::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestStructNonCopyable::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructNonCopyable");
 }

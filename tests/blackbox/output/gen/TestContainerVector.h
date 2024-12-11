@@ -84,6 +84,7 @@ public:
   inline static const char *CLASS_NAME = "TestContainerVector";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetInnerStructWithIdFromNameCallerFromLua(lua_State *luaState);
   static int GetInnerStructNoIdFromNameCallerFromLua(lua_State *luaState);
   static int AddInnerStructWithIdCallerFromLua(lua_State *luaState);

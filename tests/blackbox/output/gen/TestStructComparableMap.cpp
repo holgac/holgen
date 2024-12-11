@@ -130,6 +130,23 @@ int TestStructComparableMap::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestStructComparableMap::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestStructComparableMap::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestStructComparableMap.operator== method with an invalid lua proxy object!");
+  TestStructComparableMap arg0Mirror;
+  TestStructComparableMap *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestStructComparableMap::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestStructComparableMap::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestStructComparableMap::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -137,6 +154,9 @@ void TestStructComparableMap::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestStructComparableMap::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestStructComparableMap::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestStructComparableMap");
 }

@@ -194,6 +194,23 @@ int TestJsonStructContainer::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int TestJsonStructContainer::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = TestJsonStructContainer::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling TestJsonStructContainer.operator== method with an invalid lua proxy object!");
+  TestJsonStructContainer arg0Mirror;
+  TestJsonStructContainer *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = TestJsonStructContainer::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = TestJsonStructContainer::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void TestJsonStructContainer::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -201,6 +218,9 @@ void TestJsonStructContainer::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, TestJsonStructContainer::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, TestJsonStructContainer::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "TestJsonStructContainer");
 }

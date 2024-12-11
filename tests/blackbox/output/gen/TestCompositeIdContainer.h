@@ -59,6 +59,7 @@ public:
   inline static const char *CLASS_NAME = "TestCompositeIdContainer";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetHumanFromNameCallerFromLua(lua_State *luaState);
   static int AddHumanCallerFromLua(lua_State *luaState);
   static int GetHumanByRawIdxCallerFromLua(lua_State *luaState);

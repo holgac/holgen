@@ -59,6 +59,7 @@ public:
   inline static const char *CLASS_NAME = "TestJsonTagManager";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetOrInsertCallerFromLua(lua_State *luaState);
   static int GetTagFromNameCallerFromLua(lua_State *luaState);
   static int AddTagCallerFromLua(lua_State *luaState);
