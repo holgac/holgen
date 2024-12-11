@@ -11,6 +11,10 @@ public:
 private:
   [[nodiscard]] bool IsLuaPublisher(const Class &cls) const;
   void ProcessLuaPublisher(Class &cls) const;
+  void GeneratePublisherRegisterSubscriber(Class& cls) const;
+  void GeneratePublisherUnregisterSubscriber(Class& cls) const;
+  void GeneratePublisherUnregisterSubscriberByName(Class& cls) const;
+  void GeneratePublisherClearSubscribers(Class& cls) const;
   void GenerateTableSetter(Class &cls) const;
   void GenerateTableGetter(Class &cls) const;
   void ProcessStructDefinition(Class &cls, const StructDefinition &structDefinition,

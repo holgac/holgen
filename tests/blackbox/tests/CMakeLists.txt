@@ -12,6 +12,7 @@ add_executable(blackbox_tests
         test_json.cpp
         test_variant.cpp
         test_bitmap.cpp
+        test_eventpublisher.cpp
 )
 add_dependencies(blackbox_tests gtest gtest_main gmock holgen_blackbox_test_lib lua_lib)
 target_link_libraries(blackbox_tests gtest gtest_main gmock holgen_blackbox_test_lib lua_lib)

@@ -15,6 +15,9 @@ void LuaPublisherGenerator::Run(std::vector<GeneratedContent> &contents) const {
     THROW_IF(!listenerClass || !listenerClass->mStruct,
              "Publisher {} ({}) inherits from {} which is not a valid listener!", cls.mName,
              cls.mStruct->mDefinitionSource, cls.mStruct->mMixins.front());
+    THROW_IF(!listenerClass->GetField(mNamingConvention.FieldNameInCpp("name")),
+             "Publisher {} ({}) inherits from {} which does not have a name field!", cls.mName,
+             cls.mStruct->mDefinitionSource, cls.mStruct->mMixins.front());
     Generate(contents.emplace_back(), cls);
   }
 }
@@ -46,6 +49,10 @@ void LuaPublisherGenerator::Generate(GeneratedContent &out, const Class &cls) co
   GenerateRegisterSubscriberMethod(codeBlock, cls);
   codeBlock.Add("");
   GenerateUnregisterSubscriberMethod(codeBlock, cls);
+  codeBlock.Add("");
+  GenerateUnregisterSubscriberByNameMethod(codeBlock, cls);
+  codeBlock.Add("");
+  GenerateClearSubscribers(codeBlock, cls);
   codeBlock.Add("");
   GenerateReloadSubscriber(codeBlock, cls);
   codeBlock.Add("");
@@ -131,7 +138,7 @@ void LuaPublisherGenerator::GenerateMethod(CodeBlock &codeBlock, const Class &cl
 void LuaPublisherGenerator::GenerateRegisterSubscriberMethod(CodeBlock &codeBlock,
                                                              const Class &cls) const {
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
-  codeBlock.Add("RegisterSubscriber = function(subscriber)");
+  codeBlock.Add("{} = function(subscriber)", St::LuaPublisher_RegisterSubscriber);
   codeBlock.Indent(1);
   codeBlock.Add("if subscriber.name and subscriber.name ~= '' then");
   codeBlock.Indent(1);
@@ -156,7 +163,7 @@ void LuaPublisherGenerator::GenerateRegisterSubscriberMethod(CodeBlock &codeBloc
 void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBlock,
                                                                const Class &cls) const {
   codeBlock.Add("---@param subscriber {}", cls.mStruct->mMixins.front());
-  codeBlock.Add("UnregisterSubscriber = function(subscriber)");
+  codeBlock.Add("{} = function(subscriber)", St::LuaPublisher_UnregisterSubscriber);
   codeBlock.Indent(1);
   codeBlock.Add("if subscriber.name and subscriber.name ~= '' then");
   codeBlock.Indent(1);
@@ -166,8 +173,6 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberMethod(CodeBlock &codeBl
   for (auto &method: cls.mMethods) {
     if (!ShouldProcess(method))
       continue;
-    auto tableName =
-        cls.mName + "." + mNamingConvention.LuaPublisherCallbacksTableName(method.mName);
     codeBlock.Add("if subscriber.{} then", method.mName);
     codeBlock.Indent(1);
 
@@ -189,11 +194,26 @@ void LuaPublisherGenerator::GenerateUnregisterSubscriberByNameMethod(CodeBlock &
 
   codeBlock.Add("if {}[subscriberName] then", St::LuaPublisher_ModulesField);
   codeBlock.Indent(1);
-  codeBlock.Add("{}.UnregisterSubscriber({}[subscriberName])", cls.mName,
+  codeBlock.Add("{}.{}({}[subscriberName])", cls.mName, St::LuaPublisher_UnregisterSubscriber,
                 St::LuaPublisher_ModulesField);
   codeBlock.Indent(-1);
   codeBlock.Add("end");
 
+  codeBlock.Indent(-1);
+  codeBlock.Add("end,");
+}
+
+void LuaPublisherGenerator::GenerateClearSubscribers(CodeBlock &codeBlock, const Class &cls) const {
+  codeBlock.Add("{} = function(subscriberClass)", St::LuaPublisher_ClearSubscribers);
+  codeBlock.Indent(1);
+  codeBlock.Add("{}.{} = {{}}", cls.mName, St::LuaPublisher_ModulesField);
+  for (auto &method: cls.mMethods) {
+    if (!ShouldProcess(method))
+      continue;
+    auto tableName =
+        cls.mName + "." + mNamingConvention.LuaPublisherCallbacksTableName(method.mName);
+    codeBlock.Add("{} = {{}}", tableName);
+  }
   codeBlock.Indent(-1);
   codeBlock.Add("end,");
 }

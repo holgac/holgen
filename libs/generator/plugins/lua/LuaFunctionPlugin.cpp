@@ -16,8 +16,7 @@ void LuaFunctionPlugin::Run() {
     bool isFuncTable = false;
     if (cls.mStruct->GetAnnotation(Annotations::LuaFuncTable)) {
       isFuncTable = true;
-      if (!cls.mStruct->GetMatchingAnnotation(Annotations::LuaFuncTable,
-                                              Annotations::LuaFuncTable_Publisher)) {
+      if (!IsLuaPublisher(cls)) {
         auto field =
             ClassField{Naming().FieldNameInCpp(St::LuaTable_TableField), Type{"std::string"}};
         Validate().NewField(cls, field);
@@ -39,17 +38,58 @@ bool LuaFunctionPlugin::IsLuaPublisher(const Class &cls) const {
 }
 
 void LuaFunctionPlugin::ProcessLuaPublisher(Class &cls) const {
+  GeneratePublisherRegisterSubscriber(cls);
+  GeneratePublisherUnregisterSubscriber(cls);
+  GeneratePublisherUnregisterSubscriberByName(cls);
+  GeneratePublisherClearSubscribers(cls);
+}
+
+void LuaFunctionPlugin::GeneratePublisherRegisterSubscriber(Class &cls) const {
+  FunctionDefinition func;
+  func.mName = St::LuaPublisher_RegisterSubscriber;
+  func.mReturnType.mType.mName = "void";
+  {
+    auto &arg = func.mArguments.emplace_back();
+    arg.mName = "subscriber";
+    arg.mType.mName = "luadata";
+  }
+  ProcessLuaFunction(cls, func, true);
+  cls.GetMethod(St::LuaPublisher_RegisterSubscriber, Constness::NotConst)->mFunction = nullptr;
+}
+
+void LuaFunctionPlugin::GeneratePublisherUnregisterSubscriber(Class &cls) const {
+  FunctionDefinition func;
+  func.mName = St::LuaPublisher_UnregisterSubscriber;
+  func.mReturnType.mType.mName = "void";
+  {
+    auto &arg = func.mArguments.emplace_back();
+    arg.mName = "subscriber";
+    arg.mType.mName = "luadata";
+  }
+  ProcessLuaFunction(cls, func, true);
+  cls.GetMethod(St::LuaPublisher_UnregisterSubscriber, Constness::NotConst)->mFunction = nullptr;
+}
+
+void LuaFunctionPlugin::GeneratePublisherUnregisterSubscriberByName(Class &cls) const {
   FunctionDefinition func;
   func.mName = St::LuaPublisher_UnregisterSubscriberByName;
   func.mReturnType.mType.mName = "void";
   {
     auto &arg = func.mArguments.emplace_back();
-    arg.mName = "subscriber";
+    arg.mName = "subscriberName";
     arg.mType.mName = "string";
   }
   ProcessLuaFunction(cls, func, true);
   cls.GetMethod(St::LuaPublisher_UnregisterSubscriberByName, Constness::NotConst)->mFunction =
       nullptr;
+}
+
+void LuaFunctionPlugin::GeneratePublisherClearSubscribers(Class &cls) const {
+  FunctionDefinition func;
+  func.mName = St::LuaPublisher_ClearSubscribers;
+  func.mReturnType.mType.mName = "void";
+  ProcessLuaFunction(cls, func, true);
+  cls.GetMethod(St::LuaPublisher_ClearSubscribers, Constness::NotConst)->mFunction = nullptr;
 }
 
 void LuaFunctionPlugin::GenerateTableSetter(Class &cls) const {

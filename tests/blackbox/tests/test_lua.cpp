@@ -272,7 +272,7 @@ SetTo40AndGetTriple = {}
 SetTo40AndGetTriple.SetField = function(funcTable, container) container.field = 40 end
 SetTo40AndGetTriple.GetField = function(funcTable, container) return container.field * 3 end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaFuncTableContainer c;
   c.GetScript1().SetTable("SetTo30AndGetDouble");
@@ -296,7 +296,7 @@ SetTo40AndGetTriple = {}
 SetTo40AndGetTriple.SetField = function(funcTable, container) container.field = 40 end
 SetTo40AndGetTriple.GetField = function(funcTable, container) return container.field * 3 end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaFuncTableContainer c;
   c.GetScript1().SetTable("SetTo30AndGetDouble");
@@ -324,7 +324,7 @@ SetTo40AndGetTriple = {}
 SetTo40AndGetTriple.SetField = function(container) container.field = 40 end
 SetTo40AndGetTriple.GetField = function(container) return container.field * 3 end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaFuncTableContainer c;
   c.GetStaticScript1().SetTable("SetTo30AndGetDouble");
@@ -348,7 +348,7 @@ Scripts.SetTo40AndGetTriple = {}
 Scripts.SetTo40AndGetTriple.SetField = function(funcTable, container) container.field = 40 end
 Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return container.field * 3 end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaFuncTableContainer c;
   c.GetScriptWithSourceTable1().SetTable("SetTo30AndGetDouble");
@@ -373,7 +373,7 @@ Scripts.SetTo40AndGetTriple = {}
 Scripts.SetTo40AndGetTriple.SetField = function(funcTable, container) container.field = 40 end
 Scripts.SetTo40AndGetTriple.GetField = function(funcTable, container) return container.field * 3 end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaFuncTableContainer c;
   const char *json =
@@ -394,7 +394,7 @@ TEST_F(LuaTest, FuncArgModifiersPrimitive) {
   const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue.value end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaCalculator calc;
   calc.PushGlobalToLua(mState, "C");
@@ -411,7 +411,7 @@ TEST_F(LuaTest, FuncArgModifiersRef) {
   const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.value; return calc.lastValue.value end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaCalculator calc;
   calc.PushGlobalToLua(mState, "C");
@@ -433,7 +433,7 @@ TEST_F(LuaTest, FuncArgModifiersNullable) {
   const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num.value; return calc.lastValue.value end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaCalculator calc;
   calc.PushGlobalToLua(mState, "C");
@@ -455,7 +455,7 @@ TEST_F(LuaTest, FuncReturnModifiersNullable) {
   const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaCalculator calc;
   calc.PushGlobalToLua(mState, "C");
@@ -474,7 +474,7 @@ TEST_F(LuaTest, FuncReturnModifiersRef) {
   const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return calc.lastValue end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaCalculator calc;
   calc.PushGlobalToLua(mState, "C");
@@ -493,7 +493,7 @@ TEST_F(LuaTest, FuncReturnModifiersNew) {
   const char *script = R"R(
 Func = function(calc, num) calc.lastValue.value = calc.lastValue.value + num; return {value=calc.lastValue.value} end
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaCalculator calc;
   calc.PushGlobalToLua(mState, "C");
@@ -522,7 +522,7 @@ Tester = {
   end
 }
 )R";
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, script);
   TestLuaRegistryData tlrd;
   tlrd.InitializeLua(mState);
@@ -546,7 +546,7 @@ Tester = {
 }
 
 TEST_F(LuaTest, StaticFunction) {
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   EXPECT_EQ(TestLuaStaticCppFunction::Factory(15).GetData(), 15);
   luaL_dostring(mState, "return TestLuaStaticCppFunction.Factory(32).data");
   LuaTestHelper::ExpectStack(mState, {"32"});
@@ -558,7 +558,7 @@ TEST_F(LuaTest, ParsingPairFields) {
   data.SetIntStringPair(std::make_pair(5, std::string("hello")));
   data.GetPairVector().emplace_back(std::string("hello"), 5);
   data.GetPairVector().emplace_back(std::string("howareyou"), 9);
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   data.PushGlobalToLua(mState, "data");
   luaL_dostring(mState, "return data.intStringPair");
   LuaTestHelper::ExpectStack(mState, {"{1:hello,0:5}"});
@@ -572,7 +572,7 @@ TEST_F(LuaTest, ParsingPairFields) {
 }
 
 TEST_F(LuaTest, Constructor) {
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   luaL_dostring(mState, "return TestStructConstructor.Construct3(1,2,3).y");
   LuaTestHelper::ExpectStack(mState, {"2"});
   lua_pop(mState, 1);
@@ -588,7 +588,7 @@ struct TestStructVirtualMethodsDerived : public TestStructVirtualMethods {
 };
 
 TEST_F(LuaTest, Virtuals) {
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   TestStructVirtualMethodsDerived data;
   EXPECT_EQ(data.VirtualFunc(), 42);
   EXPECT_EQ(data.PureVirtualFunc(), 1);
@@ -604,7 +604,7 @@ TEST_F(LuaTest, Virtuals) {
 }
 
 TEST_F(LuaTest, UniquePtr) {
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   TestStructSmartPointers smartPointers;
   smartPointers.SetUniquePtr(std::make_unique<TestStructVirtualMethodsDerived>());
   smartPointers.PushGlobalToLua(mState, "data");
@@ -620,7 +620,7 @@ TEST_F(LuaTest, UniquePtr) {
 }
 
 TEST_F(LuaTest, SharedPtr) {
-  LuaHelper::Setup(mState, "");
+  LuaHelper::Setup(mState, "lua");
   TestStructSmartPointers smartPointers;
   smartPointers.SetSharedPtr(std::make_unique<TestStructVirtualMethodsDerived>());
   smartPointers.PushGlobalToLua(mState, "data");
