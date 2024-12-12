@@ -16,7 +16,7 @@ void example4() {
   }
   DataManager manager;
   LuaContext ctx(LuaContext::Create);
-  LuaHelper::CreateMetatables(ctx);
+  LuaHelper::Setup(ctx, "4/lua_gen");
   // load everything recursively
   manager.ParseFiles("data/4", "", {}, ctx);
   // set the singleton

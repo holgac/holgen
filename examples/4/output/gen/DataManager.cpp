@@ -73,58 +73,6 @@ Character *DataManager::GetCharacterFromName(const std::string &key) {
   return &mCharacters[it->second];
 }
 
-Character *DataManager::AddCharacter(Character &&elem) {
-  if (mCharactersNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Character with name={} already exists", elem.GetName());
-    return nullptr;
-  }
-  auto newId = mCharacters.size();
-  auto idInElem = elem.GetId();
-  HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  mCharactersNameIndex.emplace(elem.GetName(), newId);
-  return &(mCharacters.emplace_back(std::forward<Character>(elem)));
-}
-
-Character *DataManager::AddCharacter(Character &elem) {
-  if (mCharactersNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Character with name={} already exists", elem.GetName());
-    return nullptr;
-  }
-  auto newId = mCharacters.size();
-  auto idInElem = elem.GetId();
-  HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  mCharactersNameIndex.emplace(elem.GetName(), newId);
-  return &(mCharacters.emplace_back(elem));
-}
-
-const Character *DataManager::GetCharacter(uint32_t idx) const {
-  if (idx >= mCharacters.size())
-    return nullptr;
-  return &mCharacters[idx];
-}
-
-Character *DataManager::GetCharacter(uint32_t idx) {
-  if (idx >= mCharacters.size())
-    return nullptr;
-  return &mCharacters[idx];
-}
-
-void DataManager::DeleteCharacter(uint32_t idx) {
-  auto ptr = GetCharacter(idx);
-  mCharactersNameIndex.erase(ptr->GetName());
-  if (idx != mCharacters.size() - 1) {
-    mCharactersNameIndex.at(mCharacters.back().GetName()) = idx;
-    mCharacters[idx] = std::move(mCharacters.back());
-  }
-  mCharacters.pop_back();
-}
-
-size_t DataManager::GetCharacterCount() const {
-  return mCharacters.size();
-}
-
 const Armor *DataManager::GetArmorFromName(const std::string &key) const {
   auto it = mArmorsNameIndex.find(key);
   if (it == mArmorsNameIndex.end())
@@ -137,58 +85,6 @@ Armor *DataManager::GetArmorFromName(const std::string &key) {
   if (it == mArmorsNameIndex.end())
     return nullptr;
   return &mArmors[it->second];
-}
-
-Armor *DataManager::AddArmor(Armor &&elem) {
-  if (mArmorsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
-    return nullptr;
-  }
-  auto newId = mArmors.size();
-  auto idInElem = elem.GetId();
-  HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  mArmorsNameIndex.emplace(elem.GetName(), newId);
-  return &(mArmors.emplace_back(std::forward<Armor>(elem)));
-}
-
-Armor *DataManager::AddArmor(Armor &elem) {
-  if (mArmorsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Armor with name={} already exists", elem.GetName());
-    return nullptr;
-  }
-  auto newId = mArmors.size();
-  auto idInElem = elem.GetId();
-  HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
-  mArmorsNameIndex.emplace(elem.GetName(), newId);
-  return &(mArmors.emplace_back(elem));
-}
-
-const Armor *DataManager::GetArmor(uint32_t idx) const {
-  if (idx >= mArmors.size())
-    return nullptr;
-  return &mArmors[idx];
-}
-
-Armor *DataManager::GetArmor(uint32_t idx) {
-  if (idx >= mArmors.size())
-    return nullptr;
-  return &mArmors[idx];
-}
-
-void DataManager::DeleteArmor(uint32_t idx) {
-  auto ptr = GetArmor(idx);
-  mArmorsNameIndex.erase(ptr->GetName());
-  if (idx != mArmors.size() - 1) {
-    mArmorsNameIndex.at(mArmors.back().GetName()) = idx;
-    mArmors[idx] = std::move(mArmors.back());
-  }
-  mArmors.pop_back();
-}
-
-size_t DataManager::GetArmorCount() const {
-  return mArmors.size();
 }
 
 const Weapon *DataManager::GetWeaponFromName(const std::string &key) const {
@@ -205,52 +101,156 @@ Weapon *DataManager::GetWeaponFromName(const std::string &key) {
   return &mWeapons[it->second];
 }
 
+Character *DataManager::AddCharacter(Character &&elem) {
+  if (mCharactersNameIndex.contains(elem.GetName())) {
+    return nullptr;
+  }
+  auto newId = mCharacters.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
+  mCharactersNameIndex.emplace(elem.GetName(), newId);
+  auto &newElem = mCharacters.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
+}
+
+Character *DataManager::AddCharacter(Character &elem) {
+  if (mCharactersNameIndex.contains(elem.GetName())) {
+    return nullptr;
+  }
+  auto newId = mCharacters.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Character::IdType(-1) && idInElem != Character::IdType(newId), "Objects not loaded in the right order!");
+  mCharactersNameIndex.emplace(elem.GetName(), newId);
+  auto &newElem = mCharacters.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
+}
+
+Armor *DataManager::AddArmor(Armor &&elem) {
+  if (mArmorsNameIndex.contains(elem.GetName())) {
+    return nullptr;
+  }
+  auto newId = mArmors.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
+  mArmorsNameIndex.emplace(elem.GetName(), newId);
+  auto &newElem = mArmors.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
+}
+
+Armor *DataManager::AddArmor(Armor &elem) {
+  if (mArmorsNameIndex.contains(elem.GetName())) {
+    return nullptr;
+  }
+  auto newId = mArmors.size();
+  auto idInElem = elem.GetId();
+  HOLGEN_FAIL_IF(idInElem != Armor::IdType(-1) && idInElem != Armor::IdType(newId), "Objects not loaded in the right order!");
+  mArmorsNameIndex.emplace(elem.GetName(), newId);
+  auto &newElem = mArmors.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
+}
+
 Weapon *DataManager::AddWeapon(Weapon &&elem) {
   if (mWeaponsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Weapon with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mWeapons.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Weapon::IdType(-1) && idInElem != Weapon::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mWeaponsNameIndex.emplace(elem.GetName(), newId);
-  return &(mWeapons.emplace_back(std::forward<Weapon>(elem)));
+  auto &newElem = mWeapons.emplace_back(std::move(elem));
+  newElem.SetId(newId);
+  return &newElem;
 }
 
 Weapon *DataManager::AddWeapon(Weapon &elem) {
   if (mWeaponsNameIndex.contains(elem.GetName())) {
-    HOLGEN_WARN("Weapon with name={} already exists", elem.GetName());
     return nullptr;
   }
   auto newId = mWeapons.size();
   auto idInElem = elem.GetId();
   HOLGEN_FAIL_IF(idInElem != Weapon::IdType(-1) && idInElem != Weapon::IdType(newId), "Objects not loaded in the right order!");
-  elem.SetId(newId);
   mWeaponsNameIndex.emplace(elem.GetName(), newId);
-  return &(mWeapons.emplace_back(elem));
+  auto &newElem = mWeapons.emplace_back(elem);
+  newElem.SetId(newId);
+  return &newElem;
+}
+
+const Character *DataManager::GetCharacter(uint32_t idx) const {
+  if (size_t(idx) >= mCharacters.size())
+    return nullptr;
+  return &mCharacters[idx];
+}
+
+Character *DataManager::GetCharacter(uint32_t idx) {
+  if (size_t(idx) >= mCharacters.size())
+    return nullptr;
+  return &mCharacters[idx];
+}
+
+const Armor *DataManager::GetArmor(uint32_t idx) const {
+  if (size_t(idx) >= mArmors.size())
+    return nullptr;
+  return &mArmors[idx];
+}
+
+Armor *DataManager::GetArmor(uint32_t idx) {
+  if (size_t(idx) >= mArmors.size())
+    return nullptr;
+  return &mArmors[idx];
 }
 
 const Weapon *DataManager::GetWeapon(uint32_t idx) const {
-  if (idx >= mWeapons.size())
+  if (size_t(idx) >= mWeapons.size())
     return nullptr;
   return &mWeapons[idx];
 }
 
 Weapon *DataManager::GetWeapon(uint32_t idx) {
-  if (idx >= mWeapons.size())
+  if (size_t(idx) >= mWeapons.size())
     return nullptr;
   return &mWeapons[idx];
+}
+
+void DataManager::DeleteCharacter(uint32_t idx) {
+  auto ptr = GetCharacter(idx);
+  mCharactersNameIndex.erase(ptr->GetName());
+  if (size_t(idx) != mCharacters.size() - 1) {
+    mCharactersNameIndex.at(mCharacters.back().GetName()) = idx;
+    mCharacters[idx] = std::move(mCharacters.back());
+  }
+  mCharacters.pop_back();
+}
+
+void DataManager::DeleteArmor(uint32_t idx) {
+  auto ptr = GetArmor(idx);
+  mArmorsNameIndex.erase(ptr->GetName());
+  if (size_t(idx) != mArmors.size() - 1) {
+    mArmorsNameIndex.at(mArmors.back().GetName()) = idx;
+    mArmors[idx] = std::move(mArmors.back());
+  }
+  mArmors.pop_back();
 }
 
 void DataManager::DeleteWeapon(uint32_t idx) {
   auto ptr = GetWeapon(idx);
   mWeaponsNameIndex.erase(ptr->GetName());
-  if (idx != mWeapons.size() - 1) {
+  if (size_t(idx) != mWeapons.size() - 1) {
     mWeaponsNameIndex.at(mWeapons.back().GetName()) = idx;
     mWeapons[idx] = std::move(mWeapons.back());
   }
   mWeapons.pop_back();
+}
+
+size_t DataManager::GetCharacterCount() const {
+  return mCharacters.size();
+}
+
+size_t DataManager::GetArmorCount() const {
+  return mArmors.size();
 }
 
 size_t DataManager::GetWeaponCount() const {
@@ -328,7 +328,11 @@ bool DataManager::ParseFiles(const std::filesystem::path &rootPath, const std::s
         Armor elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddArmor(std::move(elem));
+        auto elemPtr = AddArmor(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetArmorFromName(elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }
@@ -344,7 +348,11 @@ bool DataManager::ParseFiles(const std::filesystem::path &rootPath, const std::s
         Weapon elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddWeapon(std::move(elem));
+        auto elemPtr = AddWeapon(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetWeaponFromName(elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }
@@ -360,7 +368,11 @@ bool DataManager::ParseFiles(const std::filesystem::path &rootPath, const std::s
         Character elem;
         auto res = JsonHelper::Parse(elem, jsonElem, converter, luaState);
         HOLGEN_WARN_AND_CONTINUE_IF(!res, "Invalid entry in json file {}", filePath.string());
-        AddCharacter(std::move(elem));
+        auto elemPtr = AddCharacter(std::move(elem));
+        if (elemPtr == nullptr) {
+          auto existingElem = GetCharacterFromName(elem.GetName());
+          JsonHelper::Parse(*existingElem, jsonElem, converter, luaState);
+        }
       }
     }
   }
@@ -468,6 +480,23 @@ int DataManager::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int DataManager::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.operator== method with an invalid lua proxy object!");
+  DataManager arg0Mirror;
+  DataManager *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = DataManager::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = DataManager::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void DataManager::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -475,6 +504,9 @@ void DataManager::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, DataManager::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, DataManager::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "DataManager");
 }
@@ -489,11 +521,49 @@ int DataManager::GetCharacterFromNameCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int DataManager::GetArmorFromNameCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmorFromName method with an invalid lua proxy object!");
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetArmorFromName(arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
+int DataManager::GetWeaponFromNameCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetWeaponFromName method with an invalid lua proxy object!");
+  std::string arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  auto result = instance->GetWeaponFromName(arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
 int DataManager::AddCharacterCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddCharacter method with an invalid lua proxy object!");
   auto arg0 = Character::ReadProxyFromLua(luaState, -1);
   auto result = instance->AddCharacter(*arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
+int DataManager::AddArmorCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddArmor method with an invalid lua proxy object!");
+  auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddArmor(*arg0);
+  LuaHelper::Push<false>(result, luaState);
+  return 1;
+}
+
+int DataManager::AddWeaponCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddWeapon method with an invalid lua proxy object!");
+  auto arg0 = Weapon::ReadProxyFromLua(luaState, -1);
+  auto result = instance->AddWeapon(*arg0);
   LuaHelper::Push<false>(result, luaState);
   return 1;
 }
@@ -508,84 +578,12 @@ int DataManager::GetCharacterCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
-int DataManager::DeleteCharacterCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteCharacter method with an invalid lua proxy object!");
-  uint32_t arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  instance->DeleteCharacter(arg0);
-  return 0;
-}
-
-int DataManager::GetCharacterCountCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetCharacterCount method with an invalid lua proxy object!");
-  auto result = instance->GetCharacterCount();
-  LuaHelper::Push<true>(result, luaState);
-  return 1;
-}
-
-int DataManager::GetArmorFromNameCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmorFromName method with an invalid lua proxy object!");
-  std::string arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  auto result = instance->GetArmorFromName(arg0);
-  LuaHelper::Push<false>(result, luaState);
-  return 1;
-}
-
-int DataManager::AddArmorCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddArmor method with an invalid lua proxy object!");
-  auto arg0 = Armor::ReadProxyFromLua(luaState, -1);
-  auto result = instance->AddArmor(*arg0);
-  LuaHelper::Push<false>(result, luaState);
-  return 1;
-}
-
 int DataManager::GetArmorCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmor method with an invalid lua proxy object!");
   uint32_t arg0;
   LuaHelper::Read(arg0, luaState, -1);
   auto result = instance->GetArmor(arg0);
-  LuaHelper::Push<false>(result, luaState);
-  return 1;
-}
-
-int DataManager::DeleteArmorCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteArmor method with an invalid lua proxy object!");
-  uint32_t arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  instance->DeleteArmor(arg0);
-  return 0;
-}
-
-int DataManager::GetArmorCountCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -1);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmorCount method with an invalid lua proxy object!");
-  auto result = instance->GetArmorCount();
-  LuaHelper::Push<true>(result, luaState);
-  return 1;
-}
-
-int DataManager::GetWeaponFromNameCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetWeaponFromName method with an invalid lua proxy object!");
-  std::string arg0;
-  LuaHelper::Read(arg0, luaState, -1);
-  auto result = instance->GetWeaponFromName(arg0);
-  LuaHelper::Push<false>(result, luaState);
-  return 1;
-}
-
-int DataManager::AddWeaponCallerFromLua(lua_State *luaState) {
-  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
-  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.AddWeapon method with an invalid lua proxy object!");
-  auto arg0 = Weapon::ReadProxyFromLua(luaState, -1);
-  auto result = instance->AddWeapon(*arg0);
   LuaHelper::Push<false>(result, luaState);
   return 1;
 }
@@ -600,6 +598,24 @@ int DataManager::GetWeaponCallerFromLua(lua_State *luaState) {
   return 1;
 }
 
+int DataManager::DeleteCharacterCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteCharacter method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteCharacter(arg0);
+  return 0;
+}
+
+int DataManager::DeleteArmorCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteArmor method with an invalid lua proxy object!");
+  uint32_t arg0;
+  LuaHelper::Read(arg0, luaState, -1);
+  instance->DeleteArmor(arg0);
+  return 0;
+}
+
 int DataManager::DeleteWeaponCallerFromLua(lua_State *luaState) {
   auto instance = DataManager::ReadProxyFromLua(luaState, -2);
   HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.DeleteWeapon method with an invalid lua proxy object!");
@@ -607,6 +623,22 @@ int DataManager::DeleteWeaponCallerFromLua(lua_State *luaState) {
   LuaHelper::Read(arg0, luaState, -1);
   instance->DeleteWeapon(arg0);
   return 0;
+}
+
+int DataManager::GetCharacterCountCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetCharacterCount method with an invalid lua proxy object!");
+  auto result = instance->GetCharacterCount();
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
+int DataManager::GetArmorCountCallerFromLua(lua_State *luaState) {
+  auto instance = DataManager::ReadProxyFromLua(luaState, -1);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling DataManager.GetArmorCount method with an invalid lua proxy object!");
+  auto result = instance->GetArmorCount();
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
 }
 
 int DataManager::GetWeaponCountCallerFromLua(lua_State *luaState) {
@@ -633,32 +665,32 @@ int DataManager::IndexMetaMethod(lua_State *luaState) {
     LuaHelper::Push<false>(instance->mWeapons, luaState);
   } else if (0 == strcmp("GetCharacterFromName", key)) {
     lua_pushcfunction(luaState, DataManager::GetCharacterFromNameCallerFromLua);
-  } else if (0 == strcmp("AddCharacter", key)) {
-    lua_pushcfunction(luaState, DataManager::AddCharacterCallerFromLua);
-  } else if (0 == strcmp("GetCharacter", key)) {
-    lua_pushcfunction(luaState, DataManager::GetCharacterCallerFromLua);
-  } else if (0 == strcmp("DeleteCharacter", key)) {
-    lua_pushcfunction(luaState, DataManager::DeleteCharacterCallerFromLua);
-  } else if (0 == strcmp("GetCharacterCount", key)) {
-    lua_pushcfunction(luaState, DataManager::GetCharacterCountCallerFromLua);
   } else if (0 == strcmp("GetArmorFromName", key)) {
     lua_pushcfunction(luaState, DataManager::GetArmorFromNameCallerFromLua);
-  } else if (0 == strcmp("AddArmor", key)) {
-    lua_pushcfunction(luaState, DataManager::AddArmorCallerFromLua);
-  } else if (0 == strcmp("GetArmor", key)) {
-    lua_pushcfunction(luaState, DataManager::GetArmorCallerFromLua);
-  } else if (0 == strcmp("DeleteArmor", key)) {
-    lua_pushcfunction(luaState, DataManager::DeleteArmorCallerFromLua);
-  } else if (0 == strcmp("GetArmorCount", key)) {
-    lua_pushcfunction(luaState, DataManager::GetArmorCountCallerFromLua);
   } else if (0 == strcmp("GetWeaponFromName", key)) {
     lua_pushcfunction(luaState, DataManager::GetWeaponFromNameCallerFromLua);
+  } else if (0 == strcmp("AddCharacter", key)) {
+    lua_pushcfunction(luaState, DataManager::AddCharacterCallerFromLua);
+  } else if (0 == strcmp("AddArmor", key)) {
+    lua_pushcfunction(luaState, DataManager::AddArmorCallerFromLua);
   } else if (0 == strcmp("AddWeapon", key)) {
     lua_pushcfunction(luaState, DataManager::AddWeaponCallerFromLua);
+  } else if (0 == strcmp("GetCharacter", key)) {
+    lua_pushcfunction(luaState, DataManager::GetCharacterCallerFromLua);
+  } else if (0 == strcmp("GetArmor", key)) {
+    lua_pushcfunction(luaState, DataManager::GetArmorCallerFromLua);
   } else if (0 == strcmp("GetWeapon", key)) {
     lua_pushcfunction(luaState, DataManager::GetWeaponCallerFromLua);
+  } else if (0 == strcmp("DeleteCharacter", key)) {
+    lua_pushcfunction(luaState, DataManager::DeleteCharacterCallerFromLua);
+  } else if (0 == strcmp("DeleteArmor", key)) {
+    lua_pushcfunction(luaState, DataManager::DeleteArmorCallerFromLua);
   } else if (0 == strcmp("DeleteWeapon", key)) {
     lua_pushcfunction(luaState, DataManager::DeleteWeaponCallerFromLua);
+  } else if (0 == strcmp("GetCharacterCount", key)) {
+    lua_pushcfunction(luaState, DataManager::GetCharacterCountCallerFromLua);
+  } else if (0 == strcmp("GetArmorCount", key)) {
+    lua_pushcfunction(luaState, DataManager::GetArmorCountCallerFromLua);
   } else if (0 == strcmp("GetWeaponCount", key)) {
     lua_pushcfunction(luaState, DataManager::GetWeaponCountCallerFromLua);
   } else {

@@ -44,8 +44,9 @@ void example1() {
 
   // And let's test things from lua! I'll use a basic context class I created
   LuaContext ctx(LuaContext::Create);
-  // Before using Lua bindings, you need to create the required data like so:
-  LuaHelper::CreateMetatables(ctx);
+  // Before using Lua bindings, you need to create the required data like below.
+  // The second argument is where the lua files are exported.
+  LuaHelper::Setup(ctx, "1/lua_gen");
   c1.PushGlobalToLua(ctx, "urist");
   c2.PushGlobalToLua(ctx, "frodo");
   std::cout << ctx.ExecuteReturn("urist.name") << " and " << ctx.ExecuteReturn("frodo.name") <<

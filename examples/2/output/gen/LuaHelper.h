@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <deque>
+#include <filesystem>
 #include <functional>
 #include <list>
 #include <map>
@@ -305,6 +306,6 @@ public:
     lua_pop(luaState, 1);
     return true;
   }
-  static void CreateMetatables(lua_State *luaState);
+  static void Setup(lua_State *luaState, const std::filesystem::path &genDir);
 };
 }

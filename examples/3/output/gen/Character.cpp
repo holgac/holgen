@@ -222,6 +222,23 @@ int Character::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int Character::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = Character::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling Character.operator== method with an invalid lua proxy object!");
+  Character arg0Mirror;
+  Character *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = Character::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = Character::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void Character::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -229,6 +246,9 @@ void Character::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, Character::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, Character::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "Character");
 }

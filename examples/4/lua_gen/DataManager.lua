@@ -10,52 +10,52 @@ DataManager = {}
 ---@return Character
 function DataManager:GetCharacterFromName(key) end
 
----@param elem Character
----@return Character
-function DataManager:AddCharacter(elem) end
-
----@param idx number
----@return Character
-function DataManager:GetCharacter(idx) end
-
----@param idx number
-function DataManager:DeleteCharacter(idx) end
-
----@return number
-function DataManager:GetCharacterCount() end
-
 ---@param key string
 ---@return Armor
 function DataManager:GetArmorFromName(key) end
 
----@param elem Armor
----@return Armor
-function DataManager:AddArmor(elem) end
-
----@param idx number
----@return Armor
-function DataManager:GetArmor(idx) end
-
----@param idx number
-function DataManager:DeleteArmor(idx) end
-
----@return number
-function DataManager:GetArmorCount() end
-
 ---@param key string
 ---@return Weapon
 function DataManager:GetWeaponFromName(key) end
+
+---@param elem Character
+---@return Character
+function DataManager:AddCharacter(elem) end
+
+---@param elem Armor
+---@return Armor
+function DataManager:AddArmor(elem) end
 
 ---@param elem Weapon
 ---@return Weapon
 function DataManager:AddWeapon(elem) end
 
 ---@param idx number
+---@return Character
+function DataManager:GetCharacter(idx) end
+
+---@param idx number
+---@return Armor
+function DataManager:GetArmor(idx) end
+
+---@param idx number
 ---@return Weapon
 function DataManager:GetWeapon(idx) end
 
 ---@param idx number
+function DataManager:DeleteCharacter(idx) end
+
+---@param idx number
+function DataManager:DeleteArmor(idx) end
+
+---@param idx number
 function DataManager:DeleteWeapon(idx) end
+
+---@return number
+function DataManager:GetCharacterCount() end
+
+---@return number
+function DataManager:GetArmorCount() end
 
 ---@return number
 function DataManager:GetWeaponCount() end

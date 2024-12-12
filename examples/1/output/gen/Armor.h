@@ -44,6 +44,7 @@ public:
   inline static const char *CLASS_NAME = "Armor";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int IndexMetaMethod(lua_State *luaState);
   // This is the ID of the object. Data managers can assign these, check out the relevant tutorial
   uint32_t mId = -1;

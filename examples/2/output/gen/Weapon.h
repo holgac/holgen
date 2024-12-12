@@ -27,7 +27,7 @@ public:
   void SetGetAverageDamageLuaFunc(std::string val);
   bool HasGetAverageDamageLuaFunc() const;
   void Initialize();
-  void SetDamage(const uint8_t min, const uint8_t max);
+  void SetDamage(uint8_t min, uint8_t max);
   uint8_t GetDamage();
   bool operator==(const Weapon &rhs) const;
   bool ParseJson(const rapidjson::Value &json, const Converter &converter, lua_State *luaState);
@@ -51,6 +51,7 @@ public:
   inline static const char *CLASS_NAME = "Weapon";
 private:
   static int NewIndexMetaMethod(lua_State *luaState);
+  static int EqualsOperatorCallerFromLua(lua_State *luaState);
   static int GetAverageDamageCallerFromLua(lua_State *luaState);
   static int InitializeCallerFromLua(lua_State *luaState);
   static int GetDamageCallerFromLua(lua_State *luaState);

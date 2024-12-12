@@ -248,6 +248,23 @@ int WeaponInInventory::NewIndexMetaMethod(lua_State *luaState) {
   return 0;
 }
 
+int WeaponInInventory::EqualsOperatorCallerFromLua(lua_State *luaState) {
+  auto instance = WeaponInInventory::ReadProxyFromLua(luaState, -2);
+  HOLGEN_WARN_AND_RETURN_IF(!instance, 0, "Calling WeaponInInventory.operator== method with an invalid lua proxy object!");
+  WeaponInInventory arg0Mirror;
+  WeaponInInventory *arg0;
+  if (lua_getmetatable(luaState, -1)) {
+    lua_pop(luaState, 1);
+    arg0 = WeaponInInventory::ReadProxyFromLua(luaState, -1);
+  } else {
+    arg0Mirror = WeaponInInventory::ReadMirrorFromLua(luaState, -1);
+    arg0 = &arg0Mirror;
+  }
+  auto result = instance->operator==(*arg0);
+  LuaHelper::Push<true>(result, luaState);
+  return 1;
+}
+
 void WeaponInInventory::CreateLuaMetatable(lua_State *luaState) {
   lua_newtable(luaState);
   lua_pushstring(luaState, "__index");
@@ -255,6 +272,9 @@ void WeaponInInventory::CreateLuaMetatable(lua_State *luaState) {
   lua_settable(luaState, -3);
   lua_pushstring(luaState, "__newindex");
   lua_pushcfunction(luaState, WeaponInInventory::NewIndexMetaMethod);
+  lua_settable(luaState, -3);
+  lua_pushstring(luaState, "__eq");
+  lua_pushcfunction(luaState, WeaponInInventory::EqualsOperatorCallerFromLua);
   lua_settable(luaState, -3);
   lua_setglobal(luaState, "WeaponInInventory");
 }

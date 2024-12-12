@@ -2,6 +2,7 @@
 #include "LuaHelper.h"
 
 #include "Character.h"
+#include "FilesystemHelper.h"
 #include "Race.h"
 #include "WeaponInInventory.h"
 #include "WeaponType.h"
@@ -91,7 +92,7 @@ bool LuaHelper::Read(std::function<void(lua_State *)> &data, lua_State *luaState
   return true;
 }
 
-void LuaHelper::CreateMetatables(lua_State *luaState) {
+void LuaHelper::Setup(lua_State *luaState, const std::filesystem::path &genDir) {
   Character::CreateLuaMetatable(luaState);
   WeaponInInventory::CreateLuaMetatable(luaState);
   WeaponTypeBow::CreateLuaMetatable(luaState);
