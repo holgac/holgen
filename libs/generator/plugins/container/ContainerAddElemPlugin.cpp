@@ -229,9 +229,16 @@ void ContainerAddElemPlugin::GenerateIdValidator(CodeBlock &codeBlock, const Cla
   auto &underlyingType = field.mType.mTemplateParameters.back();
   codeBlock.Add("auto idInElem = elem.{}();",
                 Naming().FieldGetterNameInCpp(*underlyingIdField.mField));
-  codeBlock.Add(
-      "HOLGEN_FAIL_IF(idInElem != {0}::IdType(-1) && idInElem != {0}::IdType(newId), \"Objects "
-      "not loaded in the right order!\");",
-      underlyingType.mName);
+  std::string extraConditions;
+  if (auto underlyingClass = mProject.GetClass(underlyingType.mName)) {
+    if (CompositeIdHelper::GetObjectIdField(*underlyingClass, false))
+      extraConditions = "idInElem >= 0 && ";
+  }
+  if (extraConditions.empty()) {
+    extraConditions = std::format("idInElem != {}::IdType(-1) && ", underlyingType.mName);
+  }
+  codeBlock.Add("HOLGEN_FAIL_IF({}idInElem != {}::IdType(newId), "
+                "\"Objects not loaded in the right order!\");",
+                extraConditions, underlyingType.mName);
 }
 } // namespace holgen
