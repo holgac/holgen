@@ -27,7 +27,6 @@ void example2() {
   rapidjson::Document doc;
   doc.Parse(data);
   Character c1;
-  //
   LuaContext ctx(LuaContext::Create);
   LuaHelper::Setup(ctx, "2/lua_gen");
   // Let's create the damage getter function that we referenced in json

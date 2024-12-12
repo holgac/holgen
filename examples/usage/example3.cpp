@@ -74,9 +74,6 @@ void example3() {
 
   LuaContext ctx(LuaContext::Create);
   LuaHelper::Setup(ctx, "3/lua_gen");
-  // Let's create the damage getter function that we referenced in json
-  ctx.Execute(
-      "AverageDamageGetter = function(weapon) return (weapon.damageMin + weapon.damageMax) / 2 end");
   c1.ParseJson(doc, {}, ctx);
   c1.PushGlobalToLua(ctx, "frodo");
 

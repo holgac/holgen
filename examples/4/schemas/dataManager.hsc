@@ -51,6 +51,7 @@ struct DataManager {
     // We want an extra index by name so that we can reference it easily. The annotation below creates a GetCharacterFromName method
     // under our DataManager.
     @index(on=name)
+    // Characters reference armors and weapons by ID. for consistency, they should be loaded after.
     @loadAfter(armors, weapons)
     deque<Character> characters;
 
